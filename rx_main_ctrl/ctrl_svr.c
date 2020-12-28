@@ -607,13 +607,12 @@ void ctrl_tick(void)
 					stat[head].cylinderPressureSet = fluid_get_cylinderPresSet(inkSupply);
 					stat[head].fluidErr            = fluid_get_error(inkSupply);
 					stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
-                    if (RX_Config.inkSupplyCnt % 2 == 0 && RX_StepperStatus.robot_used)
-                    {
-                        stat[head].act_pos_y = -1 * RX_StepperStatus.posY[i / Colors_Per_Stepper];
-                    }
-                    else if (RX_StepperStatus.robot_used)
-                    {
-                        stat[head].act_pos_y = -1 * RX_StepperStatus.posY[(i + Colors_Per_Stepper/2) / Colors_Per_Stepper];
+                    if (RX_StepperStatus.robot_used)
+                    {             
+                        if (RX_Config.inkSupplyCnt % 2 == 0)
+                            stat[head].act_pos_y = -1 * RX_StepperStatus.posY[i / Colors_Per_Stepper];
+                        else 
+                            stat[head].act_pos_y = -1 * RX_StepperStatus.posY[(i + Colors_Per_Stepper/2) / Colors_Per_Stepper];
                     }
 				}
 				sok_send_2(&_HeadCtrl[i].socket, CMD_HEAD_STAT, sizeof(stat), stat);
@@ -662,7 +661,7 @@ static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
-				if (screenOnPrinter && RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				if (screenOnPrinter && RX_HBStatus[headNo].head[n].eeprom_density.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_density.voltage;
 				else if (RX_Config.headFpVoltage[no]) msg.fpVoltage = RX_Config.headFpVoltage[no];
 				else												msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
 
@@ -670,7 +669,9 @@ static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
                 Error(LOG, 0, "Head %s: FirepulseVoltage=%d%% (mvt=%d, fuji=%d)",
 					RX_Config.headBoard[headNo].head[n].name,
 					msg.fpVoltage,
-					RX_HBStatus[headNo].head[n].eeprom_mvt.voltage, 
+					screenOnPrinter,
+					RX_Config.headFpVoltage[no],
+					RX_HBStatus[headNo].head[n].eeprom_density.voltage, 
 					RX_HBStatus[headNo].head[n].eeprom.voltage);
 				*/
 
@@ -1091,16 +1092,9 @@ void ctrl_send_head_cfg(void)
 }
 
 //--- ctrl_set_density_values ------------------------------------------
-void ctrl_set_density_values(SDensityValuesMsg *pmsg)
+void ctrl_set_density(SDensityMsg *pmsg)
 {
-	Error(LOG, 0, "ctrl_set_density_values head=%d", pmsg->head);
-	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
-}
-
-//--- ctrl_set_disalbled_jets ------------------------------------------
-void ctrl_set_disalbled_jets(SDisabledJetsMsg *pmsg)
-{
-	Error(LOG, 0, "SDisabledJetsMsg head=%d", pmsg->head);
+	Error(LOG, 0, "ctrl_set_density head=%d", pmsg->head);
 	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
 }
 
@@ -1291,18 +1285,18 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
         robposition.head = robposition.head % MAX_HEADS_BOARD;
         if (!blocked && robposition.head >= 0)
         {
-            robposition.angle += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.rob_angle;
-            robposition.dist += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.rob_dist;
+            robposition.angle += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.robot.angle;
+            robposition.dist += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.robot.dist;
             sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (blocked && blocked_Axis == AXE_DIST && robposition.head >= 0)
         {
-            robposition.angle = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.rob_angle;
+            robposition.angle = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.robot.angle;
             sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (blocked && blocked_Axis == AXE_ANGLE)
         {
-            robposition.dist = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.rob_dist;
+            robposition.dist = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.robot.dist;
             sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (robposition.head == -1)
@@ -1347,9 +1341,9 @@ int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
     if (robposition->headNo == -1)
         return RX_Config.stepper.robot[stepperNo].screwturns[printbarNo];
     else if (robposition->axis == AXE_ANGLE)
-        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.rob_angle;
+        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.robot.angle;
     else if (robposition->axis == AXE_DIST)
-        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.rob_dist;
+        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.robot.dist;
     else
         return -1;
 }

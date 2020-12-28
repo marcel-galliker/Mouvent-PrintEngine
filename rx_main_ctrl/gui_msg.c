@@ -78,9 +78,8 @@ static void _do_del_file		(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 
 static void _do_get_print_env	(RX_SOCKET socket);
 static void _do_get_ink_def		(RX_SOCKET socket);
-static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg);
-static void _do_set_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg);
-static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg);
+static void _do_get_density		(RX_SOCKET socket, SDensityMsg *pmsg);
+static void _do_set_density		(RX_SOCKET socket, SDensityMsg *pmsg);
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
@@ -98,7 +97,6 @@ static void _do_get_stepper_cfg	(RX_SOCKET socket);
 static void _do_set_stepper_cfg (RX_SOCKET socket, SStepperCfg *pmsg);
 static void _do_cmd_stepper_test(RX_SOCKET socket, SStepperMotorTest *pmsg);
 
-static void _do_get_density_values(RX_SOCKET socket, SValue *pmsg);
 static void _do_start_printing	(RX_SOCKET socket);
 static void _do_stop_printing	(RX_SOCKET socket);
 static void _do_abort_printing	(RX_SOCKET socket);
@@ -169,10 +167,8 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 			
 		case CMD_GET_INK_DEF:		_do_get_ink_def(socket);										break;
 
-        case CMD_GET_DENSITY_VAL:	_do_get_density_val(socket, (SDensityValuesMsg*)pmsg);			break;
-		case CMD_SET_DENSITY_VAL:	_do_set_density_val(socket, (SDensityValuesMsg*)pmsg);			break;
-        case CMD_GET_DISABLED_JETS:	_do_get_disalbled_jets(socket, (SDisabledJetsMsg*)pmsg);		break;
-        case CMD_SET_DISABLED_JETS:	ctrl_set_disalbled_jets((SDisabledJetsMsg*)pmsg);				break;
+        case CMD_GET_DENSITY:		_do_get_density(socket, (SDensityMsg*)pmsg);						break;
+		case CMD_SET_DENSITY:		_do_set_density(socket, (SDensityMsg*)pmsg);						break;
 
         case CMD_HEAD_ADJUST:		step_adjust_heads(socket, (SHeadAdjustmentMsg*)pmsg);				break;
 
@@ -858,11 +854,11 @@ static void _do_get_ink_def(RX_SOCKET socket)
 }
 
 
-//--- _do_get_density_val -------------------------------------------------
-static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
+//--- _do_get_density -------------------------------------------------
+static void _do_get_density(RX_SOCKET socket, SDensityMsg *pmsg)
 {
-    SDensityValuesMsg reply;
-	reply.hdr.msgId  = REP_GET_DENSITY_VAL;
+    SDensityMsg reply;
+	reply.hdr.msgId  = REP_GET_DENSITY;
 	reply.hdr.msgLen = sizeof(reply);
 	reply.head		 = pmsg->head;
 	
@@ -870,7 +866,8 @@ static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
 
 	int color = pmsg->head / RX_Config.headsPerColor;
 	int head  = pmsg->head % RX_Config.headsPerColor;
-	memset(reply.value, 0, sizeof(reply.value));
+	{
+		memset(reply.data.densityValue, 0, sizeof(reply.data.densityValue));
 	HANDLE file = setup_create();
 	if (setup_load(file, PATH_USER "newdensity.cfg")==REPLY_OK)
 	{
@@ -880,9 +877,8 @@ static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
 			{   
 				if (setup_chapter(file, "Head", head, READ)==REPLY_OK) 
 				{
-					setup_uchar    (file, "voltage", READ, &reply.voltage, 0);
-				//	setup_int16_arr(file, "value",    READ, reply.value,	SIZEOF(reply.value),	0);	
-					setup_int16_arr(file, "density",  READ, reply.value,	SIZEOF(reply.value),	0);					
+						setup_uchar    (file, "voltage", READ, &reply.data.voltage, 0);
+						setup_int16_arr(file, "density",  READ, reply.data.densityValue,	SIZEOF(reply.data.densityValue),	0);					
 					setup_chapter(file, "..", -1, READ);
 				}
 				setup_chapter(file, "..", -1, READ);
@@ -891,33 +887,9 @@ static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
    		}
 	}
 	setup_destroy(file);
-
-	sok_send(&socket, &reply);
-}
-
-//--- _do_set_density_val -------------------------------------------------
-static void _do_set_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
-{
-	SRxConfig cfg;
-	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
-	memcpy(&RX_HBStatus[pmsg->head/MAX_HEADS_BOARD].head[pmsg->head%MAX_HEADS_BOARD].eeprom_mvt.densityValue, pmsg->value, sizeof(pmsg->value));
-	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
-	ctrl_set_density_values((SDensityValuesMsg*)pmsg);	
-}
-
-//--- _do_get_disalbled_jets -------------------------------------------------
-static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
-{
-    SDisabledJetsMsg reply;
-	reply.hdr.msgId  = REP_GET_DISABLED_JETS;
-	reply.hdr.msgLen = sizeof(reply);
-	reply.head	     = pmsg->head;
-	
-	if (RX_Config.headsPerColor==0) return;
-
-	int color = pmsg->head / RX_Config.headsPerColor;
-	int head  = pmsg->head % RX_Config.headsPerColor;
-	memset(reply.disabledJets, -1, sizeof(reply.disabledJets));
+	}
+	{
+		memset(reply.data.disabledJets, -1, sizeof(reply.data.disabledJets));
 	HANDLE file = setup_create();
 	if (setup_load(file, PATH_USER "newbadjets.cfg")==REPLY_OK)
 	{
@@ -927,7 +899,7 @@ static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
 			{   
 				if (setup_chapter(file, "Head", head, READ)==REPLY_OK) 
 				{
-					setup_int16_arr(file, "compensate",  READ, reply.disabledJets,	SIZEOF(reply.disabledJets),	-1);					
+						setup_int16_arr(file, "compensate",  READ, reply.data.disabledJets,	SIZEOF(reply.data.disabledJets),	-1);					
 					setup_chapter(file, "..", -1, READ);
 				}
 				setup_chapter(file, "..", -1, READ);
@@ -936,8 +908,18 @@ static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
    		}
 	}
 	setup_destroy(file);
-
+	}
 	sok_send(&socket, &reply);
+}
+
+//--- _do_set_density -------------------------------------------------
+static void _do_set_density	  (RX_SOCKET socket, SDensityMsg *pmsg)
+{
+	static SRxConfig cfg;
+	setup_config(PATH_USER FILENAME_CFG, &cfg, READ);
+	memcpy(&RX_HBStatus[pmsg->head/MAX_HEADS_BOARD].head[pmsg->head%MAX_HEADS_BOARD].eeprom_density, &pmsg->data, sizeof(SHeadEEpromDensity));
+	setup_config(PATH_USER FILENAME_CFG, &cfg, WRITE);
+	ctrl_set_density(pmsg);
 }
 
 //--- _do_head_fluidCtrlMode ---

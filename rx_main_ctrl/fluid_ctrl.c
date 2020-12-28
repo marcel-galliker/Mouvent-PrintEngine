@@ -783,7 +783,7 @@ static void _control(int fluidNo)
                                                     ctrl_tick();
                                                     fluid_tick();
                                                 }
-                                                step_empty_waste();
+                                                step_empty_waste(0);
                                             }
                     
 											break;
@@ -794,7 +794,7 @@ static void _control(int fluidNo)
 												else													_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
-                                            if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
+                                            if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
 
                                             if (lbrob)
                                             {
@@ -847,7 +847,7 @@ static void _control(int fluidNo)
 												{
 	                                                _send_ctrlMode(-1, ctrl_print, TRUE);
 													_PurgeCtrlMode = ctrl_undef;
-													if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
+													if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
                                                 }											
                                             }
                                             else if (_LeakTest)
@@ -1040,7 +1040,7 @@ static void _control_flush(void)
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
 								
-								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste();
+								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(_fluid_get_flush_time(_start_ctrlMode - ctrl_flush_night));
 
 								if (_txrob)
 								{

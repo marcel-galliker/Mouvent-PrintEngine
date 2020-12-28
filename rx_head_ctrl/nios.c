@@ -563,29 +563,6 @@ int  nios_is_firepulse_on(void)
 	return FALSE;				
 }
 
-//--- nios_set_user_eeprom ------------------------------------
-static void _nios_set_user_eeprom(int no)
-{
-	if (_NiosStat==NULL) return;
-
-	if (sizeof(RX_HBStatus[0].head[no].eeprom_mvt)!=EEPROM_DATA_SIZE) Error(ERR_ABORT, 0, "SIZE MISMATCH");
-	if (sizeof(_NiosStat->user_eeprom[no])!=EEPROM_DATA_SIZE) Error(ERR_ABORT, 0, "SIZE MISMATCH");
-
-	//--- initialize status memory -----------------------
-	if (_NiosStat->eeprom_valid & (1<<no))
-	{
-		if (memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && !memempty(&_NiosStat->user_eeprom[no], sizeof(_NiosStat->user_eeprom[no])))
-			memcpy(&RX_HBStatus[0].head[no].eeprom_mvt, _NiosStat->user_eeprom[no], sizeof(SHeadEEpromMvt));
-
-		//--- save if changed and not NULL ------------------
-		if (!memempty(&RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)) && memcmp(_NiosStat->user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt)))
-		{
-			memcpy(_NiosMem->cfg.user_eeprom[no], &RX_HBStatus[0].head[no].eeprom_mvt, sizeof(SHeadEEpromMvt));
-			_NiosMem->cfg.cmd.cmd |= (WRITE_USER_EEPROM<<no);
-		}
-	}
-}
-
 //--- nios_main --------------------------------
 int  nios_main(int ticks, int menu)
 {	
@@ -595,18 +572,16 @@ int  nios_main(int ticks, int menu)
 	
 	if (_NiosLoaded)
 	{
-		if (_NiosMem && _NiosStat) cond_main(ticks, menu);
-
+		if (_NiosMem && _NiosStat) 
+		{
+			cond_main(ticks, menu);
+            eeprom_main(ticks, menu);
+		}
 		tse_check_errors(ticks, menu);
 		if (menu)
 		{
 			_nios_copy_status();			
 			nios_check_errors(ticks);		
-
-			for(int head=0; head<SIZEOF(FpgaCfg.head); head++)
-			{
-				_nios_set_user_eeprom(head);
-			}
 		}
 	}
 	return REPLY_OK;
@@ -617,10 +592,11 @@ static void _nios_copy_status(void)
 {
 	memcpy(&RX_NiosStat, _NiosStat, sizeof(RX_NiosStat));
 	RX_HBStatus->flow = RX_NiosStat.cooler_pressure;
-	for (int cond=0; cond < MAX_HEADS_BOARD; cond++)
+	for (int head=0; head < MAX_HEADS_BOARD; head++)
 	{
-		RX_HBStatus->head[cond].tempHead = RX_NiosStat.head_temp[cond];
-		if (_NiosStat->eeprom_valid & (1<<cond)) eeprom_init_data(cond, RX_NiosStat.head_eeprom[cond], &RX_HBStatus->head[cond].eeprom);
+		RX_HBStatus->head[head].tempHead = RX_NiosStat.head_temp[head];
+		if (RX_HBStatus->head[head].eeprom.serialNo==0 || RX_HBStatus->head[head].eeprom.serialNo==INVALID_VALUE) 
+			eeprom_init_data(head, RX_NiosStat.eeprom_fuji[head], &RX_HBStatus->head[head].eeprom);
 	}
 }
 

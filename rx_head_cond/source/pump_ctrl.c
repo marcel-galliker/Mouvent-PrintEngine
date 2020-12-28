@@ -806,7 +806,7 @@ void pump_tick_10ms(void)
 						break;
 		
 		case ctrl_fill_step4:
-    case ctrl_fill_step5:  
+        case ctrl_fill_step5:  
 						temp_ctrl_on(FALSE);
 						_set_valve(VALVE_INK);
 						_pump_pid(TRUE);

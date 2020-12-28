@@ -124,11 +124,11 @@ static void _do_250ms_timer(void)
 	pRX_Status->head_temp[2] = pRX_Config->cond[2].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC7_DATA) & 0x3ff);
 	pRX_Status->head_temp[3] = pRX_Config->cond[3].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA) & 0x3ff);
 
-	// Head Thermistor: NCP03XH103F25RL R0=10k 1% @ T0=25°C
-	// B-Constant 25- 50°C 						[K] = 3380+-0.7%
-	// B-Constant (Reference value) 25- 80°C 	[K] = 3428
-	// B-Constant (Reference value) 25- 85°C 	[K] = 3434
-	// B-Constant (Reference value) 25-100°C 	[K] = 3455
+	// Head Thermistor: NCP03XH103F25RL R0=10k 1% @ T0=25ï¿½C
+	// B-Constant 25- 50ï¿½C 						[K] = 3380+-0.7%
+	// B-Constant (Reference value) 25- 80ï¿½C 	[K] = 3428
+	// B-Constant (Reference value) 25- 85ï¿½C 	[K] = 3434
+	// B-Constant (Reference value) 25-100ï¿½C 	[K] = 3455
 	// ADC Update all 16us
 
 	UINT32 val=IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA)&0x3ff;
@@ -146,12 +146,39 @@ static void _do_250ms_timer(void)
 	//--- user eeprom ----------------------------------------
 	{
 		int head;
-		for (head=0; head<SIZEOF(pRX_Config->user_eeprom); head++)
+		for (head=0; head<MAX_HEADS_BOARD; head++)
 		{
-			if (pRX_Config->cmd.cmd & (WRITE_USER_EEPROM<<head))
+			//--- read fuji -----------------------
+			if (pRX_Status->eeprom_fuji_readCnt[head]!=pRX_Config->eeprom_fuji_readCnt[head])
 			{
-				head_eeprom_change_user_data(head, pRX_Status->user_eeprom[head], pRX_Config->user_eeprom[head], sizeof(pRX_Config->user_eeprom[head]), 0);
-				pRX_Config->cmd.cmd &= ~(WRITE_USER_EEPROM<<head);
+				head_eeprom_read(head, pRX_Status->eeprom_fuji[head], sizeof(pRX_Status->eeprom_fuji[head]));
+				pRX_Status->eeprom_fuji_readCnt[head]=pRX_Config->eeprom_fuji_readCnt[head];
+			}
+
+			//--- read mvt -----------------------
+			if (pRX_Status->eeprom_mvt_readCnt[head]!=pRX_Config->eeprom_mvt_readCnt[head])
+			{
+				head_eeprom_read_user_data(head, EEPROM_MVT_ADDR, (alt_u8*)&pRX_Status->eeprom_mvt[head], sizeof(pRX_Status->eeprom_mvt[head]));
+				pRX_Status->eeprom_mvt_readCnt[head]=pRX_Config->eeprom_mvt_readCnt[head];
+			}
+			//--- write mvt -----------------------
+			if (pRX_Config->eeprom_mvt_writeCnt[head]!=pRX_Status->eeprom_mvt_writeCnt[head])
+			{
+				if (head_eeprom_change_user_data(head, EEPROM_MVT_ADDR, (alt_u8*)&pRX_Status->eeprom_mvt[head], (alt_u8*)&pRX_Config->eeprom_mvt[head], sizeof(pRX_Config->eeprom_mvt[head]))==REPLY_OK)
+					pRX_Status->eeprom_mvt_writeCnt[head]=pRX_Config->eeprom_mvt_writeCnt[head];
+			}
+
+			//--- read density -----------------------
+			if (pRX_Status->eeprom_density_readCnt[head]!=pRX_Config->eeprom_density_readCnt[head])
+			{
+				head_eeprom_read_user_data(head, EEPROM_DENSITY_ADDR, (alt_u8*)&pRX_Status->eeprom_density[head], sizeof(pRX_Status->eeprom_density[head]));
+				pRX_Status->eeprom_density_readCnt[head]=pRX_Config->eeprom_density_readCnt[head];
+			}
+			//--- write density -----------------------
+			if (pRX_Config->eeprom_density_writeCnt[head]!=pRX_Status->eeprom_density_writeCnt[head])
+			{
+				pRX_Status->eeprom_density_writeRes[head]=head_eeprom_change_user_data(head, EEPROM_DENSITY_ADDR, (alt_u8*)&pRX_Status->eeprom_density[head], (alt_u8*)&pRX_Config->eeprom_density[head], sizeof(pRX_Config->eeprom_density[head]));
+				pRX_Status->eeprom_density_writeCnt[head]=pRX_Config->eeprom_density_writeCnt[head];
 			}
 		}
 	}

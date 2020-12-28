@@ -20,6 +20,7 @@
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "args.h"
+#include "EEprom.h"
 #include "tcp_ip.h"
 #include "fpga.h"
 #include "fpga_simu.h"
@@ -79,8 +80,6 @@ static int _do_inkdef			(RX_SOCKET socket, SInkDefMsg	    *pmsg);
 static int _do_print_abort		(RX_SOCKET socket);
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd	*pmsg);
 static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar		*ppar);
-static int _do_disabled_jets	(RX_SOCKET socket, SDisabledJetsMsg  *pmsg);
-static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg);
 static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg);
 
 //--- ctrl_init --------------------------------------------------------------------
@@ -235,9 +234,8 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);		break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);		break;
 	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);		break;
-    case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*)pmsg);		break;
-    case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);		break;
-    case CMD_SET_ROB_POS:			_do_rob_pos			(socket, (SRobPositionMsg*)pmsg);			break;
+    case CMD_SET_DENSITY:			eeprom_set_density	((SDensityMsg*)pmsg);					break;
+    case CMD_SET_ROB_POS:			_do_rob_pos		    (socket, (SRobPositionMsg*) pmsg);		break;
 	default:		Error(LOG, 0, "Unknown Command 0x%04x", phdr->msgId);
 					reply = REPLY_ERROR;
 					break;
@@ -433,28 +431,10 @@ static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 	cond_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time, ppar->act_pos_y, ppar->delay_time);
 	return REPLY_OK;
 }
-
-//--- _do_disabled_jets ----------------------------------------------
-static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
-{
-	cond_set_disabledJets(pmsg->head, pmsg->disabledJets);
-	return REPLY_OK;
-}
-
-//--- _do_density_values ----------------------------------------------
-static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg)
-{
-	rx_sleep(100);
-	cond_set_densityValues(pmsg->head, pmsg->value);
-	cond_set_voltage(pmsg->head, pmsg->voltage);
-	rx_sleep(100);
-	return REPLY_OK;
-}
-
 //--- _do_rob_pos -------------------------------------------------------------
 static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg)
 {
-	cond_set_rob_pos(pmsg->head, pmsg->angle, pmsg->dist);
+	eeprom_set_rob_pos(pmsg->head, pmsg->angle, pmsg->dist);
 	return REPLY_OK;	
 }
 

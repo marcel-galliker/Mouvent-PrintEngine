@@ -96,7 +96,7 @@ namespace RX_DigiPrint.Services
 	    printer_undef,				// 0: not defined
 	    printer_test_table,			// 1:
         printer_test_slide,         // 2:
-        printer_test_slide_only,    // 3: 
+        printer_test_slide_only,    // 3:
         printer_test_table_seon,    // 4:
 
         //--- web printers ------------------------------
@@ -219,6 +219,9 @@ namespace RX_DigiPrint.Services
         ctrl_wash_step4	= 0x164,    // 0x164:
         ctrl_wash_step5	= 0x165,    // 0x165:
         ctrl_wash_step6	= 0x166,    // 0x166:
+
+        ctrl_robi_out       = 0x170,    // 0x170:
+        ctrl_robi_out_step1 = 0x171,    // 0x171:
 
 	    ctrl_fill	    =0x200,	//	0x200:
 	    ctrl_fill_step1,		//	0x201:
@@ -394,13 +397,9 @@ namespace RX_DigiPrint.Services
         public const UInt32  CMD_HEAD_FLUID_CTRL_MODE = 0x01000104;
         public const UInt32  REP_HEAD_FLUID_CTRL_MODE = 0x02000104;
         
-        public const UInt32  CMD_GET_DISABLED_JETS  = 0x01000105;
-        public const UInt32  REP_GET_DISABLED_JETS  = 0x02000105;
-        public const UInt32  CMD_SET_DISABLED_JETS  = 0x01000106;
-
-        public const UInt32 CMD_GET_DENSITY_VAL     = 0x01000107;
-        public const UInt32 REP_GET_DENSITY_VAL     = 0x02000107;
-        public const UInt32 CMD_SET_DENSITY_VAL     = 0x01000108;
+        public const UInt32 CMD_GET_DENSITY         = 0x01000107;
+        public const UInt32 REP_GET_DENSITY         = 0x02000107;
+        public const UInt32 CMD_SET_DENSITY         = 0x01000108;
 
         public const UInt32 CMD_SET_ROB_POS         = 0x01000109;
         public const UInt32 CMD_HEAD_ADJUST         = 0x0100010a;
@@ -788,6 +787,7 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
             public string   dots;
 	        public byte	    wakeup;
+            public UInt32   usedColors;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -917,6 +917,8 @@ namespace RX_DigiPrint.Services
             public UInt32		actSpeed;
             public Int64 counterAct;
             public Int64 counterTotal;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =3)]
+            public Int64[] counterLH702;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -961,6 +963,7 @@ namespace RX_DigiPrint.Services
 	        public Int32		adjust_pos;
 	        public Int32		use_printhead_en;
             public Int32        material_thickness;
+            public Int32        headsPerColor;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;
@@ -1127,6 +1130,13 @@ namespace RX_DigiPrint.Services
         public const UInt32 MAX_DISABLED_JETS = 32;
         public const UInt32 MAX_HEADS = 288;
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SRobInfo
+		{
+            public Int16  angle;			
+            public Int16  dist;				
+	        public Byte	  crc;				
+		};
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromMvt
@@ -1134,21 +1144,37 @@ namespace RX_DigiPrint.Services
             public UInt16 clusterNo;
             public UInt16 flowResistance;
             public Byte flowResistanceCRC;
-            private UInt32 dropletsPrinted_old;
-            private Byte dropletsPrintedCRC_old;
+            public UInt32 _dropletsPrinted_old;
+	        public Byte	   _dropletsPrintedCRC_old;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-            public UInt16[] disabledJets;
-            public Byte disabledJetsCRC;
+            public Int16[] _disabledJets;
+	        public Byte	   _disabledJetsCRC;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-            public Int16[] densityValue;
-            public Byte densityValueCRC;
-            public Byte voltage;
-            public Byte voltageCRC;
+            public Int16[] _densityValue;
+	        public Byte	   _densityValueCRC;
+            public Byte    _voltage;
+            public byte    _voltageCRC; 
             public UInt64 dropletsPrinted;
             public Byte dropletsPrintedCRC;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
-            public Byte[] res_6f;
+
+            public SRobInfo robot;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+            public Byte[]   filler;
         };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SHeadEEpromDensity
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+            public Int16[] densityValue;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public Int16[] disabledJets;
+            public Byte voltage;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+            public Byte[] filler;
+
+            public Byte crc;
+        }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadStat
@@ -1192,6 +1218,7 @@ namespace RX_DigiPrint.Services
 
             public SHeadEEpromInfo  eeprom;
         	public SHeadEEpromMvt	eeprom_mvt;
+            public SHeadEEpromDensity	eeprom_density;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1236,28 +1263,11 @@ namespace RX_DigiPrint.Services
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SDensityValues
-        {
-            public Int32 head;
-            public byte voltage;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2 + 10)]
-            public Int16[] value;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SDensityValuesMsg
+        public struct SDensityMsg
         {
             public SMsgHdr hdr;
-            public SDensityValues values;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SDisabledJetsMsg
-        {
-	        public SMsgHdr	hdr;
-	        public int		head;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-	        public UInt16[]	disabledJets;
+            public Int32 head;
+            public SHeadEEpromDensity data;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

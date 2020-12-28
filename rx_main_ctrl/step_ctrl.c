@@ -439,11 +439,11 @@ void step_rob_stop()
 	}
 }
 
-void step_empty_waste(void)
+void step_empty_waste(int time)
 {
     switch (_StepperType)
     {
-    case STEPPER_TX:	steptx_rob_empty_waste(); break;
+    case STEPPER_TX:	steptx_rob_empty_waste(time); break;
     default: break;
     }
 }
@@ -508,6 +508,7 @@ static void _step_set_config(int no)
 	cfg.use_printhead_en   = (RX_Config.printer.type==printer_LH702) && str_start(RX_Hostname, "LH702");
 	cfg.material_thickness = RX_Config.stepper.material_thickness;
 	cfg.boardNo=no;
+    cfg.headsPerColor	   = RX_Config.headsPerColor;
 		
 	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) cfg.printerType = printer_LB702_UV;
 

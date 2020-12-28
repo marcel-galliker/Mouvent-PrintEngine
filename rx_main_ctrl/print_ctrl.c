@@ -184,6 +184,7 @@ int pc_start_printing(void)
 		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
 //		fluid_start_printing();
+		spool_start_printing();
 		pq_start();
 		pc_print_next();
 		gui_send_printer_status(&RX_PrinterStatus);
@@ -319,15 +320,15 @@ static void _send_head_info(void)
 			}
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
-			len += sprintf(&str[len], "Angle=%s ", value_str_screw(pstat->eeprom_mvt.rob_angle));
-			len += sprintf(&str[len], "Stitch=%s", value_str_screw(pstat->eeprom_mvt.rob_dist));
+			len += sprintf(&str[len], "Angle=%s ", value_str_screw(pstat->eeprom_mvt.robot.angle));
+			len += sprintf(&str[len], "Stitch=%s", value_str_screw(pstat->eeprom_mvt.robot.dist));
 			len += sprintf(&str[len], "\n");
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{
-				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);
+				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_density.voltage);
 				for (int i=0; i<MAX_DENSITY_VALUES; i++)
 				{
-					len += sprintf(&str[len], "%d  ", pstat->eeprom_mvt.densityValue[i]);			
+					len += sprintf(&str[len], "%d  ", pstat->eeprom_density.densityValue[i]);			
 				}
 				len += sprintf(&str[len], "\n");
 			}
@@ -401,25 +402,26 @@ static int _get_image_size(UINT32 gap)
 //--- _set_src_size ---------------------------------------------------------------
 static void _set_src_size(SPrintQueueItem *pItem, const char *path)
 {
+	UINT32 usedColors=0;
 	UINT32 width, height;
 	UINT8  bitsPerPixel;
-	int ret;
 
-	ret = flz_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
-	if (ret) ret = tif_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
-	if (ret) 
+	if (flz_get_size(path, 0, 0, &width, &height, &bitsPerPixel)==REPLY_OK) usedColors=flz_get_used_colors(path);
+	else if (tif_get_size(path, 0, 0, &width, &height, &bitsPerPixel)==REPLY_OK) usedColors=tif_get_used_colors(path);
+	else 
 	{
 		UINT32 height, memSize;
 		char p[MAX_PATH];
 		bmp_color_path(path, RX_ColorNameShort(0), p);
-		ret = bmp_get_size(p, (UINT32*) &width, &height, &bitsPerPixel, &memSize);
+		if (bmp_get_size(p, (UINT32*) &width, &height, &bitsPerPixel, &memSize)) usedColors = 1<<0;
 	}
-	if (ret==REPLY_OK)
+	if (usedColors)
 	{
 		pItem->srcWidth  = width *25400/1200;
 		pItem->srcHeight = height*25400/1200;
 		pItem->srcBitsPerPixel = bitsPerPixel;
 	}
+	pItem->usedColors=usedColors;
 }
 
 //--- _local_path  -----------------------------------------------------

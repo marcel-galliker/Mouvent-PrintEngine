@@ -14,11 +14,14 @@
 #include "rx_common.h"
 #include "rx_def.h"
 #include "rx_error.h"
+#include "rx_file.h"
+#include "rx_hash.h"
 #include "rx_sok.h"
 #include "rx_term.h"
 #include "rx_threads.h"
 #include "rx_trace.h"
 #include "args.h"
+#include "ctr.h"
 #include "plc_ctrl.h"
 #include "print_queue.h"
 #include "print_ctrl.h"
@@ -66,6 +69,7 @@ static int		_StopPG;
 static int		_Printing=FALSE;
 static int		_Khz=0;
 static UINT32	_WarnMarkReaderPos;
+static int		_Manipulated=FALSE;
 
 //--- Prototypes --------------------------------------------------------------
 static void _set_network_config(void);
@@ -81,6 +85,14 @@ static void _handle_headheight		(int value);
 static void _handle_encoffset		(int value);
 static void _lh702_send_status		(void);
 static void _plc_set_var			(const char *format, ...);
+static void _ctr_calc_check(time_t time, UCHAR *check);
+
+typedef struct
+{
+	INT64 counter[3];
+	UINT64	macAddr;
+	time_t time;
+} _sctr;
 
 //--- lh702_init -------------------------------------------------
 void lh702_init(void)
@@ -257,15 +269,21 @@ static void _lh702_send_status(void)
 		
 		switch(RX_PrinterStatus.printState)
 		{
-		case ps_printing:	_Status.printState = PS_PRINTING; break;
+		case ps_printing:	if (RX_StepperStatus.info.z_in_print) _Status.printState = PS_PRINTING; 
+							else _Status.printState = PS_STARTING; 
+							break;
 		case ps_stopping:	_Status.printState = PS_PRINTING; break;
 		default:			_Status.printState = PS_OFF;
 		}
+
 		strncpy(_Status.material, RX_Config.material, sizeof(_Status.material));
 		_Status.head_height    = RX_Config.stepper.print_height;
 		_Status.thickness	   = RX_Config.stepper.material_thickness;
 		_Status.encoder_adj	   = RX_Config.printer.offset.incPerMeter[0];
 		_Status.copies_printed = RX_PrinterStatus.printedCnt;
+		_Status.meters_k	   = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_K]/1000;
+		_Status.meters_color   = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_COLOR]/1000;
+		_Status.meters_color_w = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_COLOR_W]/1000;
 		TrPrintfL(TRUE, "SendToLH702: printState=%d, id=%d, copies=%d", _Status.printState, _Status.id, _Status.copies_printed);
 		sok_send(&_Socket, &_Status); 
 	}
@@ -350,7 +368,7 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 									pc_change_job();
 									break;
 		
-        case CMD_GET_STATE:			Error(LOG, 0, "DM5 -> CMD_GET_STATE");		
+        case CMD_GET_STATE:		//	Error(LOG, 0, "DM5 -> CMD_GET_STATE");		
 									_lh702_send_status();
 									break;
 
@@ -458,4 +476,127 @@ static void _handle_headheight(int value)
 static void _handle_encoffset(int value)
 {
 	_plc_set_var("XML_ENC_OFFSET=%d", value);
+}
+
+//--- lh702_ctr_init ------------------------------
+void lh702_ctr_init(void)
+{	
+	if (rx_file_exists(PATH_USER FILENAME_COUNTERS_LH702))
+	{
+		UCHAR	check1[64];
+		UCHAR	check2[64];
+		//--- read file ------------	
+		HANDLE file = setup_create();
+		setup_load(file, PATH_USER FILENAME_COUNTERS_LH702);
+	
+		if (setup_chapter(file, "Counters", -1, READ)==REPLY_OK)
+		{
+			setup_int64 (file, "black",   READ, &RX_PrinterStatus.counterLH702[CTR_LH702_K], 0);
+			setup_int64 (file, "color",	  READ, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR], 0);
+			setup_int64 (file, "color_w", READ, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR_W], 0);
+			setup_str   (file, "check",  READ, check1, sizeof(check1), "");
+		}
+		setup_destroy(file);
+	
+		_ctr_calc_check(rx_file_get_mtime(PATH_USER FILENAME_COUNTERS_LH702), check2);
+	
+		_Manipulated = (strcmp(check1, check2))!=0;
+		if (_Manipulated)
+		{
+			ctr_calc_reset_key(RX_Hostname, check2);
+			if (!strcmp(check1, check2))
+			{
+				_Manipulated = FALSE;
+				RX_PrinterStatus.counterTotal=0;
+			}
+		}
+		if (_Manipulated && !rx_def_is_test(RX_Config.printer.type)) 
+			Error(ERR_CONT, 0, "Counters manipulated");
+	
+		lh702_ctr_save(FALSE, NULL);	
+	}
+}
+
+//--- lh702_ctr_save ----------------------------------------------------------------
+void lh702_ctr_save(int reset, char *machineName)
+{
+	if (RX_Config.printer.type==printer_LH702)
+	{
+		char   name[64];
+		UCHAR  check[64];
+		time_t time=rx_file_get_mtime(PATH_USER FILENAME_COUNTERS_LH702);
+
+		HANDLE file = setup_create();
+		if (reset) 
+		{	
+			RX_PrinterStatus.counterTotal = 0;
+			strncpy(name, machineName, sizeof(name)-1);
+		}
+		else strncpy(name, RX_Hostname, sizeof(name)-1);
+
+		if (setup_chapter(file, "Counters", -1, WRITE)==REPLY_OK)
+		{
+			setup_int64 (file, "black",   WRITE, &RX_PrinterStatus.counterLH702[CTR_LH702_K], 0);
+			setup_int64 (file, "color",	  WRITE, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR], 0);
+			setup_int64 (file, "color_w", WRITE, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR_W], 0);
+
+			if (reset)
+			{
+				time = rx_get_system_sec();
+				ctr_calc_reset_key(name, check);
+			}
+			else if (_Manipulated) 
+			{
+				if (rx_def_is_test(RX_Config.printer.type)) 
+				{
+					strcpy(check, "TEST");
+				}
+				else 
+				{
+					Error(ERR_CONT, 0, "Counters manipulated");
+					strcpy(check, "Manipulated");
+				}
+			}
+			else
+			{
+				time = rx_get_system_sec();
+				_ctr_calc_check(time, check);
+			}
+			setup_str	(file, "check", WRITE, check, sizeof(check), "");
+		}
+
+	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, FALSE);
+		setup_save(file, PATH_USER FILENAME_COUNTERS_LH702);
+		setup_destroy(file);
+	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
+		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS_LH702, time);
+	}
+}
+
+//--- _ctr_calc_check ---------------------------------
+static void _ctr_calc_check(time_t time, UCHAR *check)
+{
+	_sctr ctr;
+	memset(&ctr, 0, sizeof(ctr));
+	sok_get_mac_address("em2", &ctr.macAddr);
+	ctr.time  = time;
+	for (int i=0; i<3; i++) ctr.counter[i] = RX_PrinterStatus.counterLH702[i];
+	rx_hash_mem_str((UCHAR*)&ctr, sizeof(ctr), check);
+}
+
+//--- lh702_ctr_add -----------------------------------------
+void lh702_ctr_add(int mm, UINT32 colors)
+{
+	int color;
+	int ctr=-1;
+	for (color=0; color<32; color++)
+	{
+		if (colors & (1<<color))
+		{
+			if      (str_start(RX_ColorName[min(RX_Color[color].color.colorCode, SIZEOF(RX_ColorName)-1)].name, "Black")) ctr = max(ctr, CTR_LH702_K);
+			else if (str_start(RX_ColorName[min(RX_Color[color].color.colorCode, SIZEOF(RX_ColorName)-1)].name, "White")) ctr = max(ctr, CTR_LH702_COLOR_W);
+			else ctr = max(ctr, CTR_LH702_COLOR);
+		}
+	}
+	if (ctr>=0) RX_PrinterStatus.counterLH702[ctr] += mm;
 }

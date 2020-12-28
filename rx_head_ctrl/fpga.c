@@ -39,6 +39,7 @@
 #include "udp_test.h"
 #include "args.h"
 #include "conditioner.h"
+#include "EEprom.h"
 #include "tse.h"
 #include "putty.h"
 #include "rx_head_ctrl.h"
@@ -698,8 +699,6 @@ static void _fpga_enc_config(int hz)
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= FALSE;
-	//	SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, FALSE);
-	//	nios_set_firepulse_on(FALSE);
 	}
 
 	SET_FLAG(FpgaCfg.encoder->cmd, ENC_SIGNAL_MODE, 0);  // 0: Telegram, 1:no telegram
@@ -2171,7 +2170,7 @@ static void _count_dots(void)
 	{		
 		droplets = Fpga.stat->head_dot_cnt[i];
 		RX_HBStatus[0].head[i].dotCnt += droplets;
-		cond_add_droplets_printed(i, droplets, time);
+		eeprom_add_droplets_printed(i, droplets, time);
 		cond_volume_printed(i, (int)(droplets*(RX_HBStatus[0].head[i].dropVolume*1000000000.0)/diff)); // [�l/s]		
 	}
 	_time = time;

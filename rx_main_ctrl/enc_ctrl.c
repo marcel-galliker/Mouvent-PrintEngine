@@ -545,7 +545,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 							 if (!_FirstPG)
 							 {
 								dist.ignore   = pitem->pageHeight*8/10;
-								if (RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702"))
+								if (arg_simuEncoder || (RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")))
 									dist.window   = pitem->pageHeight/4;	// check only on real machine!
 							 }
 							 sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);

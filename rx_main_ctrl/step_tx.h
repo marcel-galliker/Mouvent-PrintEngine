@@ -54,9 +54,10 @@ void steptx_rob_cap_for_flush(void);
 int steptx_rob_cap_flush_prepared(void);
 
 void steptx_rob_stop(void);
-void steptx_rob_empty_waste(void);
+void steptx_rob_empty_waste(int time);
 void steptx_set_autocapMode(int state);
 
 void steptx_set_robCtrlMode(EnFluidCtrlMode ctrlMode);
 
 EnFluidCtrlMode state_RobotCtrlMode(void);
+int steptx_get_robot_done(void);

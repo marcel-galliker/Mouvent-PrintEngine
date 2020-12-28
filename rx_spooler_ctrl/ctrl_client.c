@@ -87,8 +87,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct so
 
 static int _do_spool_cfg	(RX_SOCKET socket, SSpoolerCfg	  *cfg);
 static int _do_color_cfg	(RX_SOCKET socket, SColorSplitCfg *cfg);
-static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg  *jets);
-static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg);
+static int _do_density		(RX_SOCKET socket, SDensityMsg *pmsg);
 static int _do_load_file	(RX_SOCKET socket, SLoadFileCmd  *msg);
 
 static int _do_print_file	(RX_SOCKET socket, SPrintFileCmd  *msg);
@@ -255,8 +254,7 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct s
 	case CMD_SET_SPOOL_CFG:			_do_spool_cfg		(socket, (SSpoolerCfg*)		pdata);	break;
 	case CMD_HEAD_BOARD_CFG:		hc_head_board_cfg	(socket, (SHeadBoardCfg*)	pdata);	break;
 	case CMD_COLOR_CFG:				_do_color_cfg		(socket, (SColorSplitCfg*)	pdata);	break;
-	case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*) pmsg);	break;
-	case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);	break;
+	case CMD_SET_DENSITY:			_do_density			(socket, (SDensityMsg*)		pmsg);	break;
     case CMD_LOAD_FILE:				_do_load_file		(socket, (SLoadFileCmd*)	pmsg);	break;
 	case CMD_PRINT_FILE:			_MsgGot0++;
 									_PrintFile_Socket = socket;
@@ -359,17 +357,11 @@ static int _do_color_cfg		(RX_SOCKET socket, SColorSplitCfg* cfg)
 	return REPLY_OK;
 }
 
-//--- _do_disabled_jets ---------------------------------------------------------------------
-static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg)
+//--- _do_density ---------------------------------------------------------------------
+static int _do_density(RX_SOCKET socket, SDensityMsg *pmsg)
 {
 	jc_set_disabled_jets(pmsg);
-	return REPLY_OK;
-}
-
-//--- _do_density_values ---------------------------------------------------------------------
-static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg)
-{
-	scr_set_values(pmsg->head, 0, 1000, pmsg->value);
+	scr_set_values(pmsg->head, 0, 1000, pmsg->data.densityValue);
 	return REPLY_OK;
 }
 

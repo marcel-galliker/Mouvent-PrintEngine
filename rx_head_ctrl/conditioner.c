@@ -31,6 +31,7 @@
 #include "rx_trace.h"
 #include "rx_head_ctrl.h"
 #include "args.h"
+#include "EEprom.h"
 #include "fpga.h"
 #include "nios.h"
 #include "version.h"
@@ -43,7 +44,6 @@ static FILE					*_LogFile = NULL;
 static int					_LogTimer;
 static SConditionerCfg_mcu	_CfgBackup[MAX_HEADS_BOARD];
 static EnFluidCtrlMode		_CtrlMode[MAX_HEADS_BOARD];
-
 
 SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
@@ -358,7 +358,6 @@ static void _update_clusterNo(void)
 	int condNo, n;
 	int clusterNo;
 	SHeadEEpromMvt *mvt;
-
 	if (sizeof(SHeadEEpromMvt)!=EEPROM_DATA_SIZE) Error(ERR_CONT, 0, "Head User EEPROM size mismatch (size=0x%x, expected=0x%x)", sizeof(SHeadEEpromMvt), EEPROM_DATA_SIZE);
 
 	memset(_cntr, 0, sizeof(_cntr));
@@ -375,24 +374,6 @@ static void _update_clusterNo(void)
 		}
 		RX_HBStatus->head[condNo].printedDroplets = mvt->dropletsPrinted; 
 		RX_HBStatus[0].head[condNo].dropVolume = 0.0000000000024;
-		
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.densityValueCRC!=rx_crc8(RX_HBStatus[0].head[condNo].eeprom_mvt.densityValue, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.densityValue)))
-		{
-			cond_set_densityValues(condNo, NULL);	
-		}
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.voltageCRC!=rx_crc8(&RX_HBStatus[0].head[condNo].eeprom_mvt.voltage, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.voltage)))
-		{
-			cond_set_voltage(condNo, 0);	
-		}
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJetsCRC!=rx_crc8(RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJets, sizeof(RX_HBStatus[0].head[condNo].eeprom_mvt.disabledJets)))
-		{
-			cond_set_disabledJets(condNo, NULL);		
-		}
-		if (RX_HBStatus[0].head[condNo].eeprom_mvt.rob_CRC!=rx_crc8(&RX_HBStatus[0].head[condNo].eeprom_mvt.rob_angle, 2*sizeof(UINT16)))
-		{
-			RX_HBStatus[0].head[condNo].eeprom_mvt.rob_angle = 0;
-			RX_HBStatus[0].head[condNo].eeprom_mvt.rob_dist = 0;
-		}
 	}
 
 	int cnt=0, idx=0;
@@ -630,34 +611,16 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 
-	SHeadEEpromMvt mem;
-	memcpy(&mem, _NiosStat->user_eeprom[headNo], sizeof(mem));
-	if (mem.flowResistanceCRC==rx_crc8(&mem.flowResistance, sizeof(mem.flowResistance)))
-		_NiosMem->cfg.cond[headNo].flowResistance = mem.flowResistance;
+	SHeadEEpromMvt *mem=&_NiosStat->eeprom_mvt[headNo];
+	if (mem->flowResistanceCRC==rx_crc8(&mem->flowResistance, sizeof(mem->flowResistance)))
+		_NiosMem->cfg.cond[headNo].flowResistance = mem->flowResistance;
 	else	
 		_NiosMem->cfg.cond[headNo].flowResistance = 0;
-	
+
 	if (arg_simu_conditioner) RX_HBStatus[0].head[headNo].ctrlMode = ctrlMode;
 	else if (_NiosMem!=NULL) _NiosMem->cfg.cond[headNo].mode = ctrlMode;		
 
 	_CtrlMode[headNo] = ctrlMode;
-}
-
-//--- cond_trace_user_eeprom -------------------------------------
-void cond_trace_user_eeprom(void)
-{
-	int i;
-	char str[MAX_PATH];
-	int len;
-
-	SHeadEEpromMvt mem[MAX_HEADS_BOARD];
-	for (i=0; i<MAX_HEADS_BOARD; i++)
-		memcpy(&mem[i], _NiosStat->user_eeprom[i], sizeof(mem[i]));
-
-	len=sprintf(str, "--- EEPROM ---    "); for (i=0; i<4; i++) len+=sprintf(&str[len], " ----- %d ----  ", i); TrPrintf(TRUE, str);
-	len=sprintf(str, "clusterNo:        "); for (i=0; i<4; i++) len+=sprintf(&str[len], "%12s   ", mem[i].clusterNo); TrPrintf(TRUE,str);
-	len=sprintf(str, "flowResistance:   "); for (i=0; i<4; i++) len+=sprintf(&str[len], "%12s   ", mem[i].flowResistance); TrPrintf(TRUE,str);
-	len=sprintf(str, "dropletsPrinted:  "); for (i=0; i<4; i++) len+=sprintf(&str[len], "%12s   ", mem[i].dropletsPrinted); TrPrintf(TRUE,str);
 }
 
 //--- cond_ctrlMode2 --------------------------------------------------------------------
@@ -667,7 +630,6 @@ void cond_ctrlMode2(int headNo, EnFluidCtrlMode ctrlMode)
 	if(headNo < MAX_HEADS_BOARD)		  cond_ctrlMode(headNo, ctrlMode);
 	else for(i=0; i<MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrlMode);
 }
-
 
 //--- cond_getCtrlMode --------------------------------------------
 EnFluidCtrlMode cond_getCtrlMode(int headNo)
@@ -690,43 +652,8 @@ void cond_set_flowResistance(int headNo, int value)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 
-	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-	mvt->flowResistance = value;
-	mvt->flowResistanceCRC = rx_crc8(&mvt->flowResistance, sizeof(mvt->flowResistance));
-
 	_NiosMem->cfg.cond[headNo].flowResistance = value;
-}
-
-//--- cond_set_disabledJets --------------------------------------------
-void cond_set_disabledJets(int headNo, INT16 *jets)
-{
-	headNo = headNo % MAX_HEADS_BOARD;
-
-	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-
-	if (jets) memcpy(mvt->disabledJets, jets, sizeof(mvt->disabledJets));
-	else	  memset(mvt->disabledJets, -1,   sizeof(mvt->disabledJets));
-	mvt->disabledJetsCRC = rx_crc8(mvt->disabledJets, sizeof(mvt->disabledJets));
-}
-
-//--- cond_set_densityValues ---------------------------------------------
-void cond_set_densityValues(int headNo, INT16 *values)
-{
-	headNo = headNo % MAX_HEADS_BOARD;
-	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-	if (values==NULL) memset(mvt->densityValue, 0,      sizeof(mvt->densityValue));
-	else              memcpy(mvt->densityValue, values, sizeof(mvt->densityValue));
-	mvt->densityValueCRC = rx_crc8(mvt->densityValue, sizeof(mvt->densityValue));
-}
-
-//--- cond_set_voltage -----------------------------------------------
-void cond_set_voltage(int headNo, UINT8 voltage)
-{
-	headNo = headNo % MAX_HEADS_BOARD;
-
-	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-	mvt->voltage	= voltage;
-	mvt->voltageCRC	= rx_crc8(&mvt->voltage, sizeof(mvt->voltage));
+	eeprom_set_flowResistance(headNo, value);
 }
 
 //--- cond_set_purge_par -----------------------------------------
@@ -737,60 +664,6 @@ void cond_set_purge_par(int headNo, int delay_pos_y, int time, int act_pos_y, in
     _NiosMem->cfg.cond[headNo].purgeDelayPos_y = delay_pos_y;
 	_NiosMem->cfg.cond[headNo].purgeTime  = time;
     _NiosMem->cfg.cond[headNo].purgeDelayTime = delay_time;
-}
-
-//--- cond_add_droplets_printed ---------------------------------------
-void cond_add_droplets_printed(int headNo, UINT32 droplets, int time)
-{
-	static UINT64 _droplets[MAX_HEADS_BOARD];
-	static int    _time[MAX_HEADS_BOARD];
-	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
-
-	_droplets[headNo]+=(UINT64)droplets;
-	
-	if (_time[headNo]==0) _time[headNo]=time;
-	if (time-_time[headNo]>60000)
-	{
-		if (_droplets[headNo]>1000000)
-		{		
-			SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-
-			mvt->dropletsPrinted += _droplets[headNo]/1000000;
-			mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
-			RX_HBStatus->head[headNo].printedDroplets = mvt->dropletsPrinted;
-
-			{
-				double ml=(double)RX_HBStatus->head[headNo].printedDroplets;
-				ml *= 1000000;
-				ml *= RX_HBStatus->head[headNo].dropVolume;
-				RX_HBStatus->head[headNo].printed_ml = (UINT64)ml;
-			}
-
-			_droplets[headNo] = 0;
-		}
-		_time[headNo] = time;
-	}
-}
-
-//--- cond_reset_droplets_printed --------------------------------------------
-void cond_reset_droplets_printed(int headNo)
-{
-	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
-	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-	mvt->dropletsPrinted = 0;
-	mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
-}
-
-//--- cond_set_rob_pos ------------------------------------
-void cond_set_rob_pos(int headNo, int angle, int dist)
-{
-	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
-
-	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
-
-	if (angle>=0) mvt->rob_angle = angle;
-	if (dist>=0)  mvt->rob_dist  = dist;
-	mvt->rob_CRC   = rx_crc8(&mvt->rob_angle, 2*sizeof(mvt->rob_angle));
 }
 
 //--- cond_set_clusterNo --------------------------------
@@ -806,6 +679,7 @@ void cond_set_clusterNo(INT32 clusterNo)
 		}
 		RX_HBStatus[0].head[headNo].eeprom_mvt.clusterNo = clusterNo;
 	}
+	eeprom_set_clusterNo(clusterNo);
 	RX_HBStatus->clusterNo = clusterNo;
 }
 
@@ -850,12 +724,8 @@ void cond_heater_test(int temp)
 //--- toggle_cond_meniscus_check ---------------------------
 void cond_toggle_meniscus_check(void)
 {
-	int i;
-    for (i = 0; i < MAX_HEADS_BOARD; i++)
-    {
+    for (int i = 0; i < MAX_HEADS_BOARD; i++)
         _NiosMem->cfg.cond[i].cmd.disable_meniscus_check = !_NiosMem->cfg.cond[i].cmd.disable_meniscus_check;
-        RX_HBStatus[0].info.meniscus = _NiosMem->cfg.cond[0].cmd.disable_meniscus_check;
-    }
 }
 
 //--- cond_start_log --------------------------------------------------------------
@@ -883,7 +753,7 @@ void cond_start_log(void)
 			fprintf(_LogFile, "EEPROM Head %d:;", i);
 			for (a = 0; a < EEPROM_DATA_SIZE; a++)
 			{
-				fprintf(_LogFile, "%c", _NiosStat->head_eeprom[i][a]);	
+				fprintf(_LogFile, "%c", _NiosStat->eeprom_fuji[i][a]);	
 			}
 			fprintf(_LogFile, "\n");
 		}

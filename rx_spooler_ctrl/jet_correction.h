@@ -19,7 +19,7 @@
 extern INT16 RX_DisabledJets[MAX_COLORS*MAX_HEADS_COLOR][MAX_DISABLED_JETS];
 
 int	 jc_init(void);
-void jc_set_disabled_jets(SDisabledJetsMsg *pmsg);
+void jc_set_disabled_jets(SDensityMsg *pmsg);
 
 int  jc_active(void);
 int	 jc_changed(void);

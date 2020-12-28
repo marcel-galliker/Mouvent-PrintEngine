@@ -307,27 +307,11 @@ int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 			{
 				int head  = color*RX_Config.headsPerColor+no;
 				{
-					SDisabledJetsMsg msg;
-					msg.hdr.msgId  = CMD_SET_DISABLED_JETS;
+					SDensityMsg msg;
+					msg.hdr.msgId  = CMD_SET_DENSITY;
 					msg.hdr.msgLen = sizeof(msg);
 					msg.head  = head;
-					memcpy(msg.disabledJets, RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].eeprom_mvt.disabledJets, sizeof(msg.disabledJets));
-					cnt=spool_send_msg(&msg);
-				}
-				{
-					SDensityValuesMsg msg;
-					msg.hdr.msgId  = CMD_SET_DENSITY_VAL;
-					msg.hdr.msgLen = sizeof(msg);
-					msg.head  = head;
-					memcpy(msg.value, RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].eeprom_mvt.densityValue, sizeof(msg.value));
-					if (FALSE)
-					{
-						char str[128];
-						int len = sprintf(str, "scr_set_values[%d.%d]: ", head/MAX_HEADS_BOARD, head%MAX_HEADS_BOARD);
-						for (int i=0; i<MAX_DENSITY_VALUES; i++) len += sprintf(&str[len], "%d ", msg.value[i]);
-						TrPrintfL(TRUE, str);
-						Error(LOG, 0, str);
-					}
+					memcpy(&msg.data, &RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].eeprom_density, sizeof(SHeadEEpromDensity));
 					cnt=spool_send_msg(&msg);
 				}
 			}

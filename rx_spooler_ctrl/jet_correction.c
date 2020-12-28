@@ -48,17 +48,17 @@ int jc_init(void)
 }
 
 //--- jc_set_disabled_jets -----------------------
-void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
+void jc_set_disabled_jets(SDensityMsg *pmsg)
 {
 	int n, ok;
 	INT16	old[MAX_DISABLED_JETS];
 	for (n=0, ok=FALSE; n<MAX_DISABLED_JETS; n++)
 	{
-		ok=(pmsg->disabledJets[n]!=0);
+		ok=(pmsg->data.disabledJets[n]!=0);
 	}
 
 	memcpy(old, &RX_DisabledJets[pmsg->head], sizeof(old));
-	if (ok) memcpy(&RX_DisabledJets[pmsg->head], pmsg->disabledJets, sizeof(RX_DisabledJets[pmsg->head]));
+	if (ok) memcpy(&RX_DisabledJets[pmsg->head], pmsg->data.disabledJets, sizeof(RX_DisabledJets[pmsg->head]));
 	else    memset(&RX_DisabledJets[pmsg->head], -1, sizeof(RX_DisabledJets[pmsg->head]));
 
 	if (pmsg->head>=0 && pmsg->head<SIZEOF(RX_DisabledJets))
@@ -66,7 +66,7 @@ void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 		for (n=0; n<MAX_DISABLED_JETS; n++)
 		{
 			if (RX_DisabledJets[pmsg->head][n]!=old[n]) _Changed = TRUE;
-			if (pmsg->disabledJets[n]>=0)				_Active  = TRUE;
+			if (pmsg->data.disabledJets[n]>=0)			_Active  = TRUE;
 		}
 	}
 	_First = TRUE;

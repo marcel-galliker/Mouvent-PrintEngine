@@ -94,8 +94,6 @@ void main_rebooting_cond(void) {
 	for (cond = 0; cond < MAX_HEADS_BOARD; cond++)
 	{
 		_Cond[cond].alive = 0xFFFFFFFF;
-
-	//	pRX_Status->cond[cond].info.eeprom_read = FALSE; // EEPROM has nothing to do with conditioner!
 	}
 }
 
@@ -108,14 +106,6 @@ void main_tick_1000ms(void)
 	{
 		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
 		{
-			if ((pRX_Status->eeprom_valid & (1<<condNo))==0)
-			{
-				int ok1 = head_eeprom_read(condNo, pRX_Status->head_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]));
-				int ok2 = head_eeprom_read_user_data(condNo, pRX_Status->user_eeprom[condNo], sizeof(pRX_Status->user_eeprom[condNo]), 0x00);
-				if (ok1 && ok2) pRX_Status->eeprom_valid |=  (1<<condNo);
-				else            pRX_Status->eeprom_valid &= ~(1<<condNo);
-			}
-
 			if (pRX_Status->cond[condNo].info.connected)
 			{
 				if (--_Cond[condNo].timer < 0)
@@ -241,18 +231,6 @@ int main()
 	uart_init();
 
 	trprintf("MAIN STARTED\n");
-
-	/*
-	{
-		int head;
-		for (head = 0; head < MAX_HEADS_BOARD; head++)
-		{
-			head_eeprom_read(head, pRX_Status->head_eeprom[head], sizeof(pRX_Status->user_eeprom[head]));
-			head_eeprom_read_user_data(head, pRX_Status->user_eeprom[head], sizeof(pRX_Status->user_eeprom[head]), 0x00);
-		}
-	}
-	*/
-//	_eeprom_test();
 
 	_StaticErrors = pRX_Status->error.err;
 	pRX_Status->info.nios_ready = TRUE;

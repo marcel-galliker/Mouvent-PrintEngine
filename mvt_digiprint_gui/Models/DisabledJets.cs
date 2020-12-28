@@ -3,9 +3,6 @@ using RX_DigiPrint.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Windows.Input;
-using System.Windows.Navigation;
 
 namespace RX_DigiPrint.Models
 {
@@ -56,7 +53,7 @@ namespace RX_DigiPrint.Models
             return HeadNumber;
         }
 
-        public void SetDisablesJets(UInt16[] disabledJets)
+        public void SetDisablesJets(Int16[] disabledJets)
         {
             var currentList = JetList.ToList();
 
@@ -182,19 +179,16 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        public void Save()
+        public void Save(ref TcpIp.SDensityMsg msg)
         {
             int i;
-            TcpIp.SDisabledJetsMsg msg = new TcpIp.SDisabledJetsMsg();
             msg.head = HeadNumber;
-            msg.disabledJets = new UInt16[TcpIp.MAX_DISABLED_JETS];
-            for (i = 0; i < TcpIp.MAX_DISABLED_JETS; i++) msg.disabledJets[i] = 0xffff;
+            msg.data.disabledJets = new Int16[TcpIp.MAX_DISABLED_JETS];
+            for (i = 0; i < TcpIp.MAX_DISABLED_JETS; i++) msg.data.disabledJets[i] = -1;
             for (i = 0; i < TcpIp.MAX_DISABLED_JETS && i < _JetList.Count(); i++)
             {
-                msg.disabledJets[i] = (UInt16)_JetList[i].JetNumber;
+                msg.data.disabledJets[i] = (Int16)_JetList[i].JetNumber;
             }
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_DISABLED_JETS, ref msg);
-
             Changed = false;
         }
     }

@@ -36,9 +36,9 @@ namespace RX_DigiPrint.Views.AlignmentView.DisabledJets
         {
             var currentList = _DisabledJets.JetList.ToList();
 
-            TcpIp.SDisabledJetsMsg msg = new TcpIp.SDisabledJetsMsg();
+            TcpIp.SDensityMsg msg = new TcpIp.SDensityMsg();
             msg.head = _DisabledJets.GetHeadNumber();
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_GET_DISABLED_JETS, ref msg);
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_GET_DENSITY, ref msg);
         }
 
         static int _Time = Environment.TickCount;
@@ -73,11 +73,5 @@ namespace RX_DigiPrint.Views.AlignmentView.DisabledJets
             int jetNumber = System.Convert.ToInt32(button.Tag);
             _DisabledJets.RemoveJet(jetNumber);
         }
-
-        public void Save_Clicked()
-        {
-            _DisabledJets.Save();
-        }
-
     }
 }

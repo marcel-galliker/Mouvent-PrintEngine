@@ -382,12 +382,10 @@ namespace RX_DigiPrint.Models
 	    }
 
         //--- DensityValue ---------------------------------------------------
-        private Byte? _DensityValuesCRC;
         public Int16[] DensityValue = new Int16[TcpIp.MAX_DENSITY_VALUES];
 
         //--- DensityValue ---------------------------------------------------
-        private Byte? _DisabledJetsCRC;
-        public UInt16[] DisabledJets = new UInt16[TcpIp.MAX_DISABLED_JETS];
+        public Int16[] DisabledJets = new Int16[TcpIp.MAX_DISABLED_JETS];
 
         //--- Property Voltage ---------------------------------------
         private Byte _Voltage;
@@ -424,20 +422,10 @@ namespace RX_DigiPrint.Models
             bool used=false;
             HeadNo  = no;
 
-            if (_DensityValuesCRC == null || _DensityValuesCRC != item.eeprom_mvt.densityValueCRC)
-            {
-                for (int i = 0; i < DensityValue.Length; i++) DensityValue[i] = item.eeprom_mvt.densityValue[i];
-                _DensityValuesCRC = item.eeprom_mvt.densityValueCRC;
-            }
+            for (int i = 0; i < DensityValue.Length; i++) DensityValue[i] = item.eeprom_density.densityValue[i];
+            for (int i = 0; i < DisabledJets.Length; i++) DisabledJets[i] = item.eeprom_density.disabledJets[i];
             
-            if (_DisabledJetsCRC == null || _DisabledJetsCRC != item.eeprom_mvt.disabledJetsCRC)
-            {
-                for (int i = 0; i < DisabledJets.Length; i++) DisabledJets[i] = item.eeprom_mvt.disabledJets[i];
-                _DisabledJetsCRC = item.eeprom_mvt.disabledJetsCRC;
-            }
-
-            Voltage = item.eeprom_mvt.voltage;
-            Drive_Voltage = item.eeprom.voltage;
+            Voltage = item.eeprom_density.voltage;
 
             try
             {

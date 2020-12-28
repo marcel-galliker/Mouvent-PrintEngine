@@ -1,5 +1,11 @@
-22:19:00 **** Build of configuration Nios II for project rx_head_nios ****
-make mem_init_generate 
+09:45:45 **** Incremental Build of configuration Nios II for project rx_head_nios_bsp ****
+make all 
+[BSP build complete]
+09:45:46 **** Incremental Build of configuration Nios II for project rx_head_nios ****
+make all 
+Info: Building ../rx_head_nios_bsp
+F:/Tools/Bin/Altera/15.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../rx_head_nios_bsp
+[BSP build complete]
 Info: Compiling main.c to obj/default/main.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/main.o main.c
 Info: Compiling nios_def_head.c to obj/default/nios_def_head.o
@@ -8,35 +14,25 @@ Info: Compiling power.c to obj/default/power.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/power.o power.c
 Info: Compiling pres.c to obj/default/pres.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/pres.o pres.c
+Info: Compiling rx_ink_common.c to obj/default/rx_ink_common.o
+nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/rx_ink_common.o rx_ink_common.c
+Info: Compiling rx_mem.c to obj/default/rx_mem.o
+nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/rx_mem.o rx_mem.c
 Info: Compiling timer.c to obj/default/timer.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/timer.o timer.c
+Info: Compiling trprintf.c to obj/default/trprintf.o
+nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/trprintf.o trprintf.c
 Info: Compiling uart.c to obj/default/uart.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/uart.o uart.c
 Info: Compiling version.c to obj/default/version.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/version.o version.c
 Info: Compiling watchdog.c to obj/default/watchdog.o
 nios2-elf-gcc -xc -MP -MMD -c -I../rx_head_nios_bsp/HAL/inc -I../rx_head_nios_bsp -I../rx_head_nios_bsp/drivers/inc -I../../../rx_ink_lib  -pipe -D__hal__ -DALT_NO_C_PLUS_PLUS -DALT_NO_CLEAN_EXIT -D'exit(a)=_exit(a)' -DALT_NO_EXIT -DALT_NO_INSTRUCTION_EMULATION -DALT_STACK_CHECK -fstack-limit-register=et -DSMALL_C_LIB -DALT_SINGLE_THREADED -DALTERA_AVALON_JTAG_UART_SMALL -DALTERA_AVALON_UART_SMALL  -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o obj/default/watchdog.o watchdog.c
-Info: Building ../rx_head_nios_bsp
-F:/Tools/Bin/Altera/15.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../rx_head_nios_bsp
-[BSP build complete]
 Info: Linking rx_head_nios.elf
 nios2-elf-g++  -T'../rx_head_nios_bsp/linker.x' -msys-crt0='../rx_head_nios_bsp/obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../rx_head_nios_bsp  -fstack-limit-register=et -msmallc  -Wl,-Map=rx_head_nios.map -DNIOS  -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx  -o rx_head_nios.elf obj/default/AMC7891.o obj/default/adc_thermistor.o obj/default/comm.o obj/default/conditioner_bootloader.o obj/default/cooler.o obj/default/crc_calc.o obj/default/fifo.o obj/default/head_eeprom.o obj/default/i2c.o obj/default/main.o obj/default/nios_def_head.o obj/default/power.o obj/default/pres.o obj/default/rx_ink_common.o obj/default/rx_mem.o obj/default/timer.o obj/default/trprintf.o obj/default/uart.o obj/default/version.o obj/default/watchdog.o -lm 
-nios2-elf-insert rx_head_nios.elf --thread_model hal --cpu_name nios_cpu --qsys true --simulation_enabled false --id 2899645188 --sidp 0x10000 --timestamp 1590570189 --stderr_dev jtag_uart --stdin_dev jtag_uart --stdout_dev jtag_uart --sopc_system_name soc_system --sopcinfo C:/Develop/PrintEngine-Master-1.5/rx_head_nios/software/rx_head_nios_bsp/../../soc_system.sopcinfo
+nios2-elf-insert rx_head_nios.elf --thread_model hal --cpu_name nios_cpu --qsys true --simulation_enabled false --id 2899645188 --sidp 0x10000 --timestamp 1590570189 --stderr_dev jtag_uart --stdin_dev jtag_uart --stdout_dev jtag_uart --sopc_system_name soc_system --sopcinfo C:/Develop/PrintEngine-Master-1.5-WB/rx_head_nios/software/rx_head_nios_bsp/../../soc_system.sopcinfo
 Info: (rx_head_nios.elf) 49 KBytes program size (code + initialized data).
 Info:                    11 KBytes free for stack + heap.
-Post-processing to create mem_init/soc_system_dp_ram_nios_arm.hex...
-elf2hex rx_head_nios.elf 0x00060000 0x00067fff --width=16 --little-endian-mem --create-lanes=0 mem_init/soc_system_dp_ram_nios_arm.hex
-Post-processing to create mem_init/soc_system_onchip_memory_nios_cpu.hex...
-elf2hex rx_head_nios.elf 0x00000000 0x0000ffff --width=32 --little-endian-mem --create-lanes=0 mem_init/soc_system_onchip_memory_nios_cpu.hex
-Post-processing to create mem_init/hdl_sim/soc_system_dp_ram_nios_arm.dat...
-elf2dat --infile=rx_head_nios.elf --outfile=mem_init/hdl_sim/soc_system_dp_ram_nios_arm.dat \
-		--base=0x00060000 --end=0x00067fff --width=16 \
-		--little-endian-mem --create-lanes=0 
-Post-processing to create mem_init/hdl_sim/soc_system_onchip_memory_nios_cpu.dat...
-elf2dat --infile=rx_head_nios.elf --outfile=mem_init/hdl_sim/soc_system_onchip_memory_nios_cpu.dat \
-		--base=0x00000000 --end=0x0000ffff --width=32 \
-		--little-endian-mem --create-lanes=0 
-Post-processing to create mem_init/hdl_sim/soc_system_dp_ram_nios_arm.sym...
-nios2-elf-nm -n rx_head_nios.elf > mem_init/hdl_sim/soc_system_dp_ram_nios_arm.sym
-Post-processing to create mem_init/hdl_sim/soc_system_onchip_memory_nios_cpu.sym...
-nios2-elf-nm -n rx_head_nios.elf > mem_init/hdl_sim/soc_system_onchip_memory_nios_cpu.sym
+Info: Creating rx_head_nios.objdump
+nios2-elf-objdump --disassemble --syms --all-header rx_head_nios.elf >rx_head_nios.objdump
+[rx_head_nios build complete]

@@ -144,7 +144,9 @@ void putty_handle_menu(char *str)
 	{
 		case 'e': _eeprom = ! _eeprom;	break;
 		case 's': _status = !_status;	break;
-		case 'm': _mvteeprom = ! _mvteeprom;	break;
+		case 'm': _mvteeprom = ! _mvteeprom;	
+				  // if (_mvteeprom) eeprom_read(); 
+				  break;
 		case 'n': _nios   = !_nios;		break;
 		case 'c': _cond   = !_cond;		break;
 	}
@@ -175,6 +177,7 @@ static int _droplets(UINT8 level)
 	}
 	return cnt;
 }
+
 //--- putty_display_fpga_status -----------------------------------------------
 void putty_display_fpga_status(void)
 {
@@ -343,21 +346,38 @@ static void _display_mvteeprom(void)
 	};		
 	term_printf("\n");
 
+    term_printf("eeprom_fuji: ");
+    PRINTF(4)("r=%d(%d)   ", 
+			_NiosMem->stat.eeprom_fuji_readCnt[no[i]], _NiosMem->cfg.eeprom_fuji_readCnt[no[i]]);
+	term_printf("\n");
+
+    term_printf("eeprom_mvt: ");
+    PRINTF(4)("r=%d(%d) w=%d(%d)   ", 
+			_NiosMem->stat.eeprom_mvt_readCnt[no[i]], _NiosMem->cfg.eeprom_mvt_readCnt[no[i]],
+			_NiosMem->stat.eeprom_mvt_writeCnt[no[i]], _NiosMem->cfg.eeprom_mvt_writeCnt[no[i]]);
+	term_printf("\n");
+
+    term_printf("eeprom_dens: ");
+    PRINTF(4)("r=%d(%d) w=%d(%d)   ", 
+			_NiosMem->stat.eeprom_density_readCnt[no[i]], _NiosMem->cfg.eeprom_density_readCnt[no[i]],
+			_NiosMem->stat.eeprom_density_writeCnt[no[i]], _NiosMem->cfg.eeprom_density_writeCnt[no[i]]);
+	term_printf("\n");
+
 	term_printf("clusterNo:        "); PRINTF(4)("%12d    ", RX_HBStatus->head[no[i]].eeprom_mvt.clusterNo);		 term_printf("\n");
 	term_printf("flowResistance:   "); PRINTF(4)("%12d    ", RX_HBStatus->head[no[i]].eeprom_mvt.flowResistance); term_printf("\n");
 	term_printf("dropletsPrinted:  "); PRINTF(4)("%12lld    ", RX_HBStatus->head[no[i]].eeprom_mvt.dropletsPrinted);term_printf("\n");
 
-	term_printf("Voltage:         "); PRINTF(4)("          %03d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.voltage);	term_printf("\n");
+	term_printf("Voltage:         "); PRINTF(4)("          %03d   ",	RX_HBStatus->head[no[i]].eeprom_density.voltage);	term_printf("\n");
 	for (n=0; n<MAX_DENSITY_VALUES; n++)
 	{
-		term_printf("Density[%02d]:     ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.densityValue[n]);	term_printf("\n");
+		term_printf("Density[%02d]:     ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_density.densityValue[n]);	term_printf("\n");
 	}
 	for (n=0; n<10; n++)
 	{
-		term_printf("DisabledJet[%d]:  ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_mvt.disabledJets[n]);	term_printf("\n");
+		term_printf("DisabledJet[%d]:  ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_density.disabledJets[n]);	term_printf("\n");
 	}
-	term_printf("Robot-Angle:     "); PRINTF(4)("         -%s  ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.rob_angle));	term_printf("\n");
-	term_printf("Robot-Dist:      "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.rob_dist));	term_printf("\n");
+	term_printf("Robot-Angle:     "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.robot.angle));	term_printf("\n");
+	term_printf("Robot-Dist:      "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.robot.dist));	term_printf("\n");
 }
 
 //--- putty_display_fpga_error --------------------------------------------------
@@ -416,27 +436,6 @@ void putty_display_nios_status(int nios, int status)
 				
 	if (nios_loaded())
 	{
-		RX_HBStatus->flow = RX_NiosStat.cooler_pressure;
-		for (i = 0; i < MAX_HEADS_BOARD; i++)
-		{
-			RX_HBStatus->head[i].tempHead = RX_NiosStat.head_temp[i];
-
-			if (*RX_NiosStat.head_eeprom[i])
-			{
-				eeprom_init_data(i, RX_NiosStat.head_eeprom[i], &RX_HBStatus->head[i].eeprom);
-				/*
-				//--- test user eeprom -----------------------------------------------
-				{
-					static int test=0;
-					//            1234567890123456789012345678901 345678901234567890
-					sprintf(str, "TEST 0 1 2 3 4 5 6 7 8 9 ABCDE-%d%d%d%d-FGHIJKLMNOPQRSTUVWXYZ", test, test, test, test);
-					nios_set_user_eeprom(i, str);
-					test=(test+1)%10;
-				}
-				*/
-			}
-		}
-
 		term_printf("\n--- NIOS Status ----------------- FPGA-QSYS: id=%d time=%d\n", fpga_qsys_id(), fpga_qsys_timestamp());
 		if (!nios) return;
 		

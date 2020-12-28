@@ -200,9 +200,9 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                     
                     for (int i = 0; i < headCnt; i++)
                     {
-                        TcpIp.SDisabledJetsMsg msg = new TcpIp.SDisabledJetsMsg();
+                        TcpIp.SDensityMsg msg = new TcpIp.SDensityMsg();
                         msg.head = i;
-                        RxGlobals.RxInterface.SendMsg(TcpIp.CMD_GET_DISABLED_JETS, ref msg);
+                        RxGlobals.RxInterface.SendMsg(TcpIp.CMD_GET_DENSITY, ref msg);
                     }
                 }
             }

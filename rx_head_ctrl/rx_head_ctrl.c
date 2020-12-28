@@ -21,6 +21,7 @@
 #include "rx_trace.h"
 #include "version.h"
 #include "args.h"
+#include "EEprom.h"
 #include "nios.h"
 #include "conditioner.h"
 #include "fpga.h"
@@ -63,6 +64,7 @@ SNiosStat				RX_NiosStat;
 
 
 static int		_AppRunning;
+static int		_WaveFormLoaded = FALSE;
 
 //--- prototypes ---------------------------------------------------------
 static void _mem_test(void);
@@ -82,6 +84,7 @@ static void _do_waveform(const char *fname)
 	if (setup_ink(path, &inkdef, READ)==REPLY_OK)
 	{
 		for (i=0; i<4; i++) nios_setInk(i, &inkdef, "SML", 100);
+		_WaveFormLoaded = TRUE;
 	}
 	else Error(WARN, 0, "ERROR WaveForm >>%s<< not found or incorrect", path);
 }
@@ -91,27 +94,42 @@ void handle_menu(char *str)
 {
 	int synth=FALSE;
 	static int cnt=0;
+	static int greyLevel=0;
 	int i;
 	int no;
+	int freq;
 	
 	if      (no=str_start(str, "cluster"))		cond_set_clusterNo(atoi(&str[no]));
 	else if (no=str_start(str, "resetinkctr"))	
 	{
 		cond_volume_printed(atoi(&str[no]), 0);
-		cond_reset_droplets_printed(atoi(&str[no]));
+		eeprom_reset_droplets_printed(atoi(&str[no]));
 	}
-	else if (no=str_start(str,"ra"))			cond_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), RX_HBStatus[0].head[str[no]-'0'].eeprom_mvt.rob_dist);
-	else if (no=str_start(str,"rd"))			cond_set_rob_pos(str[no]-'0', RX_HBStatus[0].head[str[no]-'0'].eeprom_mvt.rob_angle, str_to_screw(&str[no+1]));
+	else if (no=str_start(str,"ra"))			eeprom_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0);
+	else if (no=str_start(str,"rd"))			eeprom_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]));
 	else
 	{
 		no = str[1] - '0';
 		switch (str[0])
 		{
 		case '0': cond_resetPumpTime(atoi(&str[1])); break;
-			
-		case 'd': nios_fixed_grey_levels(atoi(&str[1]), 3);	break;
+		case 'd': greyLevel=atoi(&str[1]);
+				  nios_fixed_grey_levels(greyLevel, 3);	break;
 		case 'g': fpga_manual_pg();							break;
-		case 'h': fpga_enc_config(atoi(&str[1]));			break;
+		case 'h':	freq=atoi(&str[1]);
+					if (freq && !_WaveFormLoaded)
+					{						
+					  _do_waveform("test.wfd");
+					  Error(WARN, 0, "SPECIAL HW TEST");
+					  int arg=arg_offline;
+					  arg_offline = TRUE;
+					  fpga_set_config(INVALID_SOCKET);
+					  arg_offline = arg;
+					  nios_fixed_grey_levels(greyLevel, 3);
+					}
+					fpga_enc_config(freq);			
+					break;
+
 		case 'p': udp_test_print(&str[1]);					break;
 	//  case 'p': udp_test_print_tif(&str[1]);				break;
 		/*
@@ -144,6 +162,7 @@ void handle_menu(char *str)
 		// todo remove from final software -> toggle meniscus error check	
 		case 'M': cond_toggle_meniscus_check();				break;
 							
+ //       case 'a':	eeprom_test(str[1]-'0'); break;
 		// Only for DEBUGGING purposes
 		// Parameters for tuning the Conditioner's PID controller
 
