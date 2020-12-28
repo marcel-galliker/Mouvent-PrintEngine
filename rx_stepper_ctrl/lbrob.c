@@ -135,6 +135,7 @@ static void _search_all_screws();
 static int  _calculate_average_y_pos(int screwNr);
 static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg);
 static void _handle_waste_pump(void);
+static void _vacuum_on();
 
 
 //--- lbrob_init --------------------------------------
@@ -146,7 +147,7 @@ void lbrob_init(void)
     memset(&_ParCable_drive_purge, 0, sizeof(SMovePar));
 
     // config for referencing cable pull motor (motor 4)
-    _ParCable_ref.speed = 4000;
+    _ParCable_ref.speed = 1000;
     _ParCable_ref.accel = 4000;
     _ParCable_ref.current_acc = 260.0;
     _ParCable_ref.current_run = 260.0;
@@ -160,7 +161,7 @@ void lbrob_init(void)
     // config for moving normal with cable pull motor (motor 4)
     // This commands that use this config need to start the motor with the
     // special encoder mode
-    _ParCable_drive.speed = 4000;
+    _ParCable_drive.speed = 5000;
     _ParCable_drive.accel = 8000;
     _ParCable_drive.current_acc = 400.0;        // max 420
     _ParCable_drive.current_run = 400.0;        // max 420
@@ -170,7 +171,7 @@ void lbrob_init(void)
     _ParCable_drive.enc_bwd = TRUE;
     _ParCable_drive.encCheck = chk_std;
 
-    _ParCable_drive_slow.speed = 5000;
+    _ParCable_drive_slow.speed = 1000;
     _ParCable_drive_slow.accel = 8000;
     _ParCable_drive_slow.current_acc = 400.0;   // max 420
     _ParCable_drive_slow.current_run = 400.0;   // max 420
@@ -792,14 +793,6 @@ void lbrob_handle_menu(char *str)
     }
 }
 
-//--- _lbrob_move_to_pos_slow ---------------------------------------------------------------
-static void _lbrob_move_to_pos_slow(int cmd, int pos)
-{
-    _CmdRunning = cmd;
-    RX_StepperStatus.robinfo.moving = TRUE;
-    motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, pos);
-}
-
 //--- _lbrob_move_to_pos ---------------------------------------------------------------
 static void _lbrob_move_to_pos(int cmd, int pos)
 {
@@ -808,11 +801,18 @@ static void _lbrob_move_to_pos(int cmd, int pos)
     motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, pos);
 }
 
+//--- _lbrob_move_to_pos_slow ---------------------------------------------------------------
+static void _lbrob_move_to_pos_slow(int cmd, int pos)
+{
+    _CmdRunning = cmd;
+    RX_StepperStatus.robinfo.moving = TRUE;
+	motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, pos);
+}
+
 //--- _lbrob_do_reference ----------------------------------------------------------------------
 static void _lbrob_do_reference()
 {
-    int val = TRUE;
-    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+    _vacuum_on();
     Fpga.par->output &= ~RO_ALL_OUTPUTS;
     _NewCmd = 0;
     RX_StepperStatus.robinfo.moving = TRUE;
@@ -924,11 +924,13 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_ROB_VACUUM:
         val = (*(INT32 *)pdata);
-        if (val)
+        if (val > 0)
         {
-            Fpga.par->output |= RO_WASTE_VAC;
-            Fpga.par->output |= RO_VACUUM_CLEANER;
-            _WastePumpTimer = 0;
+            if (_WastePumpTimer < rx_get_ticks() + (val * 1000) || !_WastePumpTimer || !RX_StepperStatus.info.vacuum_running)
+            {
+                _vacuum_on();
+                _WastePumpTimer = rx_get_ticks() + val*1000;
+            }
         }
         else
         {
@@ -974,8 +976,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                         break;
                     }
                 }
-                val = TRUE;
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+                _vacuum_on();
                 RX_StepperStatus.robinfo.moving = TRUE;
                 _CmdRunning = msgId;
                 if (RX_StepperCfg.wipe_speed)
@@ -1055,15 +1056,13 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         {
         case rob_fct_purge4ever:
         case rob_fct_cap:
-            val = TRUE;
-            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+            _vacuum_on();
             _lbrob_move_to_pos_slow(_CmdRunning, _micron_2_steps(CABLE_CAP_POS));
             break;
 
         case rob_fct_purge_all:
             _lbrob_move_to_pos_slow(_CmdRunning, _micron_2_steps(CABLE_PURGE_POS_BACK));
-            val = TRUE;
-            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+            _vacuum_on();
             break;
 
         case rob_fct_purge_head0:
@@ -1074,8 +1073,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_purge_head5:
         case rob_fct_purge_head6:
         case rob_fct_purge_head7:
-            val = TRUE;
-            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+            _vacuum_on();
             pos = (CABLE_PURGE_POS_BACK + (((int)_RobFunction - (int)rob_fct_purge_head0) * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
             _lbrob_move_to_pos_slow(_CmdRunning, _micron_2_steps(pos));
             break;
@@ -1126,8 +1124,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                 Fpga.par->output |= RO_FLUSH_WIPE;
                 Fpga.par->output |= RO_FLUSH_PUMP;
             case rob_fct_vacuum:
-                val = TRUE;
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+                _vacuum_on();
                 break;
             case rob_fct_wipe:
                 val = FALSE;
@@ -1187,6 +1184,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
     int screwNr, screwSteps, pos, difference;
     static int cmd_Time;
     static int max_Wait_Time = 46000; // ms
+    static int max_Wait_Time_Sledge = 80000; // ms
     static int max_Wait_Time_Screw = 180000;  // ms
     static int correction_value;
     static int wait_time = 0;
@@ -1234,15 +1232,18 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
             RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             RX_StepperStatus.screwerinfo.screwed = FALSE;
-            cmd_Time = rx_get_ticks() + max_Wait_Time;
             if (_check_in_screw_pos(headAdjustment))
+            {
                 _CmdScrewing = 4;
+                cmd_Time = rx_get_ticks() + max_Wait_Time;
+            }
             else
             {
                 pos = headAdjustment.headNo + rob_fct_screw_head0;
                 if (_HeadPos != pos)
                     lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
                 _CmdScrewing++;
+                cmd_Time = rx_get_ticks() + max_Wait_Time_Sledge;
             }
            
             break;
@@ -1295,7 +1296,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
         case 3:
             if (RX_StepperStatus.screwerinfo.x_in_pos)
             {
-                lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
+                 if (!RX_StepperStatus.info.z_in_screw) lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
                 _CmdScrewing++;
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
             }
@@ -1338,14 +1339,14 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
             {
                 _TimeSearchScrew = 0;
-                if (abs(correction_value) >= 5000)
+                if (abs(correction_value) >= 3000)
                 {
                     Error(ERR_CONT, 0, "Screw %d of Head %d of Printhead %d not found", headAdjustment.axis, headAdjustment.headNo, headAdjustment.printbarNo);
                     _CmdScrewing = 0;
                     break;
                 }
                 else if (correction_value >= 0)
-                    correction_value = (correction_value + 1000) * (-1);
+                    correction_value = (correction_value + 500) * (-1);
                 else
                     correction_value *= (-1);
                 _CmdScrewing = 1;
@@ -1411,6 +1412,7 @@ static void _search_all_screws()
 {
     static int correction_value = 0;
     static int cmd_Time;
+    static int max_Wait_Time_Sledge = 80000;    // ms
     static int max_Wait_Time = 40000; // ms
     int test;
     int pos_min;
@@ -1447,7 +1449,7 @@ static void _search_all_screws()
             if (pos != _HeadPos)
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
             _CmdSearchScrews++;
-            cmd_Time = rx_get_ticks() + max_Wait_Time;
+            cmd_Time = rx_get_ticks() + max_Wait_Time_Sledge;
             break;
         case 1:
             if (RX_StepperStatus.robinfo.ref_done && _HeadPos == head_nr + rob_fct_screw_head0)
@@ -1494,7 +1496,7 @@ static void _search_all_screws()
             if (RX_StepperStatus.screwerinfo.x_in_pos)
             {
                 cmd_Time = rx_get_ticks() + max_Wait_Time;
-                lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
+                if (!RX_StepperStatus.info.z_in_screw) lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
                 _CmdSearchScrews++;
             }
             break;
@@ -1731,4 +1733,11 @@ static void _handle_waste_pump(void)
 void lbrob_reset_variables(void)
 {
     _NewCmd = FALSE;
+}
+
+static void _vacuum_on()
+{
+    Fpga.par->output |= RO_WASTE_VAC;
+    Fpga.par->output |= RO_VACUUM_CLEANER;
+    _WastePumpTimer = 0;
 }

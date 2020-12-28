@@ -49,8 +49,8 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 
 #define MIN_CAP_HEIGHT			7500		// um under Ref height
 
-#define DIST_CAP_WASH			6500		// um -> higher than capping hight
-#define DIST_CAP_SCREW			6800		// um -> higher than capping hight
+#define DIST_CAP_WASH			5500		// um -> higher than capping hight
+#define DIST_CAP_SCREW			5600		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
 
@@ -766,7 +766,7 @@ static void _lb702_motor_test(int motorNo, int steps)
     par.stop_mux = 0;
     par.dis_mux_in = 0;
     par.enc_bwd = TRUE;
-    par.encCheck = chk_std;
+    par.encCheck = chk_off;
 
     if (!RX_StepperStatus.cmdRunning)
     {

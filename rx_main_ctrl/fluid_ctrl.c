@@ -989,7 +989,7 @@ static void _control_flush(void)
 {
     int _txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
 	int _lbrob = rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used;
-    static int _start_ctrlMode;
+	static int _startCtrlMode;
     if (_all_fluids_in_fluidCtrlMode(_FluidCtrlMode))
 	{
 	//	TrPrintfL(TRUE, "All Fluids in mode %d", _FluidCtrlMode);
@@ -999,7 +999,7 @@ static void _control_flush(void)
 		case ctrl_flush_night:		
 		case ctrl_flush_weekend:		
 		case ctrl_flush_week:	step_lift_to_top_pos();
-								_start_ctrlMode = _FluidCtrlMode;
+								_startCtrlMode = _FluidCtrlMode;
                                 if (_txrob)
                                 {
                                     steptx_rob_cap_for_flush();
@@ -1033,6 +1033,7 @@ static void _control_flush(void)
 								break;
 
 		case ctrl_flush_step3:	_FluidCtrlMode=ctrl_flush_step4;
+								if (_lbrob) step_empty_waste(_fluid_get_flush_time(_startCtrlMode - ctrl_flush_night));
 								break;
 		
 		case ctrl_flush_step4:	_FluidCtrlMode=ctrl_flush_done;
@@ -1040,6 +1041,7 @@ static void _control_flush(void)
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
 								
+								// if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
 								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(_fluid_get_flush_time(_start_ctrlMode - ctrl_flush_night));
 
 								if (_txrob)
@@ -1590,9 +1592,10 @@ void do_fluid_leak_test(RX_SOCKET socket, SValue *pmsg)
 
 int _fluid_get_flush_time(int flush_cycle)
 {
-    int i;
+	if (flush_cycle >= SIZEOF(RX_Config.inkSupply[0].ink.flushTime) || flush_cycle < 0) return 0;
+
     int time_s = 0;
-    for (i = 0; i < RX_Config.inkSupplyCnt; i++)
+    for (int i = 0; i < RX_Config.inkSupplyCnt; i++)
     {
         if (*RX_Config.inkSupply[i].ink.fileName && RX_Config.inkSupply[i].ink.flushTime[flush_cycle] > time_s)
             time_s = RX_Config.inkSupply[i].ink.flushTime[flush_cycle];

@@ -37,7 +37,6 @@ static void *send_thread(void *par);
 static int32_t set_serial_attributs(int fd, int speed, int parity);
 static void *update_thread(void *par);
 static void update_failed(int fd);
-
 static int _usbPort;
 
 static uint32_t _tStatus;
@@ -188,14 +187,12 @@ void robi_move_Y_relative_steps(INT32 steps)
 //--- robi_move_up -----------------------------------------------------------------------
 void robi_move_up(void)
 {
-    Error(LOG, 0, "Send Up");
     send_command(MOTOR_MOVE_Z_UP, 0, NULL);
 }
 
 //--- robi_move_down ----------------------------------------------------
 void robi_move_down(void)
 {
-    Error(LOG, 0, "Send Down");
     send_command(MOTOR_MOVE_Z_DOWN, 0, NULL);
 }
 

@@ -514,6 +514,23 @@ void steplb_rob_do_reference(void)
 	}
 }
 
+//--- steplb_rob_empty_waste ---------------------------------------
+/*
+ * If time <= 0, then a defined time on the Stepperboard will used for the pump time.
+ * The pump time can't be decreased , if it gets set a time here and it has already
+ * a time left running, it will take the longer time.
+ *
+ * */
+void steplb_rob_empty_waste(int time)
+{
+    for (int i = 0; i < STEPPER_CNT; i++)
+    {
+        if (_step_socket[i] != INVALID_SOCKET)
+            sok_send_2(&_step_socket[i], CMD_ROB_VACUUM, sizeof(time), &time);
+    }
+    
+}
+
 //--- _steplb_rob_do_reference ---------------------------------------------------
 static void _steplb_rob_do_reference(int no)
 {
