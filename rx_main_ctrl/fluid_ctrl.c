@@ -1041,8 +1041,8 @@ static void _control_flush(void)
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
 								
-								// if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
-								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(_fluid_get_flush_time(_start_ctrlMode - ctrl_flush_night));
+							//  if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
+								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(_fluid_get_flush_time(_startCtrlMode - ctrl_flush_night));
 
 								if (_txrob)
 								{
