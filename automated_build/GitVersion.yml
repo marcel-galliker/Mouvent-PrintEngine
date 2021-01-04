@@ -1,0 +1,20 @@
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:BUILD_BUILDID ?? "9999"}'
+assembly-versioning-format: '{Major}.{Minor}.{Patch}.{env:BUILD_BUILDID ?? "9999"}'
+assembly-informational-format: '{Major}.{Minor}.{Patch}.{env:BUILD_BUILDID ?? "9999"}{PreReleaseTagWithDash}'
+mode: ContinuousDeployment # ContinuousDelivery ContinuousDeployment Mainline
+continuous-delivery-fallback-tag: ""
+increment: None
+
+branches:
+  pull-request:
+    tag: alpha
+    increment: None
+  master:
+    tag: beta
+    increment: None
+  release:
+    tag: ''
+    increment: None
+  feature:
+    regex: ^(bugfix|feature)[/-]
+    increment: None

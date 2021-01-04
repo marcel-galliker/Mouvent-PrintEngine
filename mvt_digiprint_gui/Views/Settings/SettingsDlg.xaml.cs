@@ -86,9 +86,8 @@ namespace RX_DigiPrint.Views.Settings
             _Settings = RxGlobals.PrinterProperties.RxClone();
             DataContext = _Settings;
             
-            FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
             DateTime date = GetBuildTime();
-            Version.Text = info.FileVersion;
+            Version.Text = GetVersion();
             Build.Text = GetBuild();
             Date.Text = string.Format("{0} {1} {2}", date.Day, Rx.MonthName[date.Month], date.Year);
             LocalIpAddr.Text = RxGlobals.RxInterface.LocalAddress;
@@ -97,7 +96,7 @@ namespace RX_DigiPrint.Views.Settings
             else HOST_STATIC.IsChecked = true;
         }
 
-        private string GetVersionAttribute(string key)
+        private static string GetVersionAttribute(string key)
         {
             string result;
             if (GetAssemblyAttribute<AssemblyInformationalVersionAttribute>()
@@ -115,25 +114,30 @@ namespace RX_DigiPrint.Views.Settings
 
         private string GetBuild()
         {
-            return GetVersionAttribute("Build");
+            return GetVersionAttribute("Commit");
+        }
+
+        static public string GetVersion()
+        {
+            return GetVersionAttribute("Ver");
         }
 
 
         private DateTime GetBuildTime()
         {
 
-            string str = GetVersionAttribute("BuiltOn");
-            string[] aStr = str.Split('.');
+            string str = GetVersionAttribute("On");
+            string[] aStr = str.Split('-');
             if (3 == aStr.Length)
             {
-                return new DateTime(Int32.Parse(aStr[2]), Int32.Parse(aStr[1]), Int32.Parse(aStr[0]));
+                return new DateTime(Int32.Parse(aStr[0]), Int32.Parse(aStr[1]), Int32.Parse(aStr[2]));
             }
 
             return File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location);
 
         }
 
-        private T GetAssemblyAttribute<T>() where T : Attribute
+        private static T GetAssemblyAttribute<T>() where T : Attribute
         {
             Assembly ass = Assembly.GetExecutingAssembly();
             return (T)ass.GetCustomAttributes(typeof(T), false).FirstOrDefault();

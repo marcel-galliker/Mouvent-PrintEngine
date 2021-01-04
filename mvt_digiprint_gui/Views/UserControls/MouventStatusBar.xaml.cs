@@ -45,8 +45,7 @@ namespace RX_DigiPrint.Views.UserControls
             Counters.Visibility = Visibility.Hidden;
             Speed.Visibility = Counters.Visibility;
 
-            FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-            Version.Text = "V "+info.FileVersion;
+            Version.Text = "V " + Settings.SettingsDlg.GetVersion();
 
             UserType_Init();
         }

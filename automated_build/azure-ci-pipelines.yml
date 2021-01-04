@@ -28,10 +28,15 @@ steps:
   condition: always()
   continueOnError: true
 
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: Write-Host "##vso[task.setvariable variable=semver]$(automated_build\gitversion /config automated_build\GitVersion.yml /showvariable InformationalVersion)"
+    
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: Print Engine'
   inputs:
-    ArtifactName: bin
+    ArtifactName: PrintEngine-$(semver)
     PathtoPublish: 'bin'
     publishLocation: 'Container'
 
@@ -51,4 +56,3 @@ steps:
   inputs:
     pollingTimeoutSec: '300'
   condition:  and(succeeded(), or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
-

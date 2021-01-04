@@ -46,10 +46,7 @@ using System.Windows;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("#VERSION#")]
-[assembly: AssemblyFileVersion("#VERSION#")]
+[assembly: AssemblyVersion("$($ver.AssemblySemVer)")]
+[assembly: AssemblyFileVersion("$($ver.AssemblySemFileVer)")]
 
-//  http://www.radex-net.com/Downloads/RX-Gui/publish.htm
-//  G1EhZ$ETMf
-
-[assembly: AssemblyInformationalVersion("BuiltOn=#DATE#;Build=#COMMIT#")]
+[assembly: AssemblyInformationalVersion("Ver=$($ver.InformationalVersion);Commit=$($ver.BranchName)@$($ver.ShortSha)+$($ver.UncommittedChanges);On=$($ver.CommitDate)")]

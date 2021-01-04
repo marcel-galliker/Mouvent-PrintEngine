@@ -130,7 +130,7 @@
         </GroupBox>
 
         <!-- Version Grid ___________________________________________________________________-->
-        <GroupBox Header="Software" Grid.Row="2" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
+        <GroupBox Header="Software" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>

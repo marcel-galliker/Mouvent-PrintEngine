@@ -33,17 +33,21 @@ static int _ver_minor;
 static int _ver_revision;
 static int _ver_build = -1;
 
+static char _path[256];
+
 
 //--- get_version ---------------------------------
 void get_version()
 {
     char psBuffer[128];
-    FILE *pipe =
-        _popen("git describe --match \"v[0-9]*.[0-9]*\"", "rt");
+	char cmd[256];
+	sprintf(cmd, "%sautomated_build\\gitversion.exe /config %sautomated_build\\GitVersion.yml /showvariable AssemblySemVer", _path, _path);
+
+	FILE *pipe = _popen(cmd, "rt");
 
 	fgets(psBuffer, 128, pipe);
 
-	sscanf(psBuffer, "v%d.%d-%d", &_ver_major, &_ver_minor, &_ver_revision);
+	sscanf(psBuffer, "%d.%d.%d", &_ver_major, &_ver_minor, &_ver_revision);
     char* buildid=getenv("BUILD_BUILDID");
     if (buildid != NULL)
     {
@@ -116,9 +120,18 @@ int update(char *path)
 	return 0;
 }
 
-//--- main ------------------------
+	//--- main ------------------------
 int main(int argc, char* argv[])
 {
+// retreive the path to this exe, as gitversion is in a subfolder
+	strcpy(_path, argv[0]);
+	char* end = strrchr(_path, '\\');
+	if (end)
+		*(end+1) = 0;
+	else
+		_path[0]=0;
+
+
 	if (argc>1) return update(argv[1]);
 }
 
