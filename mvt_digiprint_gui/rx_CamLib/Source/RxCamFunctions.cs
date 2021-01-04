@@ -11,6 +11,7 @@ namespace rx_CamLib
 	{
 		undef,
 		running,
+		ending,
 		done,
 		aborted,
 		error
@@ -22,6 +23,7 @@ namespace rx_CamLib
 		CamFindMark_1,	// vertical lines (WEB)	
 		CamFindMark_2,	// horizontal line (WEB)
 		CamFindMark_3,	// end of line (SCAN)
+		CamMeasureAngle,
 		CamMeasurePosition
 	};
 
@@ -101,7 +103,9 @@ namespace rx_CamLib
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 			//set very small LineAspectLimit for StartLines
 			_Camera.SetLinesHorizontal(horizontal);
-			_Camera.SetLineAspectLimit(1);
+			_Camera.SetLineAspectLimit(3);
+			_Camera.NumExtraErodes=1;
+			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_AllLines);
 			if (horizontal) 
 			{
 				_Camera.SetMinNumStartLines(1);
@@ -139,25 +143,16 @@ namespace rx_CamLib
 			}
 		}
 
-		//--- MeasurePosition --------------------------------
-		public void MeasurePosition(Action<SHeadPosition> measured)
+		//--- MeasureAngle --------------------------------
+		public void MeasureAngle()
 		{
-			if (_Simulation)
-			{
-				new Task(() =>
-				{
-					Task.Delay(1000).Wait();
-					RxBindable.Invoke(()=>
-					{
-						SHeadPosition pos = new SHeadPosition();
-						pos.Angle=100;
-						pos.Stitch=200;
-						pos.Distance=300;
-						measured(pos);
-					});
-				}).Start();
-			}
+			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
+			_Camera.SetLinesHorizontal(false);
+			_Camera.NumExtraErodes=3;
+			_Camera.SetLineAspectLimit(5);
+			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Angle);
+			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
+			_Camera.DoMeasures(10);
 		}
-
 	}
 }

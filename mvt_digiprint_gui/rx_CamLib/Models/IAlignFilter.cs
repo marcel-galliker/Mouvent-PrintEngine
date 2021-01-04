@@ -49,7 +49,17 @@ namespace rx_CamLib.Models
 
             //Overlay-Text
             [PreserveSig]
-            bool SetOverlayTxt(string OverlayTxt, UInt32 OverlayTxtColor);
+            bool SetOverlayTxt(string OverlayTxt);
+            //BlobTextColor
+            [PreserveSig]
+            void SetOverlayTextColor(UInt32 OverlayTextColor);
+            [PreserveSig]
+            UInt32 GetOverlayTextColor();
+            //Font for Overlay Text
+            [PreserveSig]
+            void SetOverlayFont(IntPtr pLogFontStruct);
+            [PreserveSig]
+            void GetOverlayFont(IntPtr pLogFontStruct, out UInt32 LogFontSize);
 
             #endregion
 
@@ -187,6 +197,9 @@ namespace rx_CamLib.Models
             //Minimum number of StartLines
             [PreserveSig]
             void SetMinNumStartLines(UInt32 MinNumStartLines);
+            //Distance between vertical StartLines
+            [PreserveSig]
+            void SetStartLinesDistance(float StartLinesDistance);
 
             //Execute Measures
             [PreserveSig]
@@ -196,7 +209,7 @@ namespace rx_CamLib.Models
             [PreserveSig]
             bool GetMeasureResults(IntPtr pMeasureDataStructArray, out UInt32 ListSize);
 
-        #endregion
+            #endregion
 
             #region Line-Direction
 

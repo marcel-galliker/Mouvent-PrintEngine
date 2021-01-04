@@ -381,6 +381,7 @@ void move(uint8_t moveType, INT32 steps, UINT32 speed, UINT32 acc, UINT32 curren
 	ps_set_current(current);
 	_ps_spi_transfer(SPI_WRITE, moveType, 3, steps);
 	_motorStatus.moving = true;
+	_motorStatus.stopPos = -1;
 }
 
 void reset_pos(void)

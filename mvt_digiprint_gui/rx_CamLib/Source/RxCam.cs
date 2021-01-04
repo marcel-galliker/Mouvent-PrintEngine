@@ -65,7 +65,8 @@ namespace rx_CamLib
             MeasureMode_Angle       = 3,
             MeasureMode_Stitch      = 4,
             MeasureMode_Register    = 5,
-            MeasureMode_StartLinesCont = 6
+            MeasureMode_StartLinesCont = 6,
+            MeasureMode_ColorStitch = 7
         }
 
         public enum ENDisplayMode
@@ -80,17 +81,28 @@ namespace rx_CamLib
             BinarizeMode_Off            = 0,
             BinarizeMode_Manual         = 1,
             BinarizeMode_Auto           = 2,
-            BinarizeMode_ColorAdaptive  = 3,
-            BinarizeMode_RGB            = 4     //Experimental
+            BinarizeMode_ColorAdaptive  = 3,    
+            BinarizeMode_RGB            = 4
         }
+
+        public enum LineLayoutEnum
+        {
+            LineLayout_Undefined = 0,
+            LineLayout_Covering = 1,
+            LineLayout_FromTop = 2,
+            LineLayout_FromBot = 3,
+            LineLayout_FromLeft = 4,
+            LineLayout_FromRight = 5
+        };
 
         public struct CallBackDataStruct
         {
             public ENCamResult CamResult;   //Error or other details
             public float DPosX;             //Center of pattern offset X to center of camera, Angle, Stitch, Register: μm, StartLines: px
             public float DPosY;             //Center of pattern offset Y to center of camera, Angle, Stitch, Register: μm, StartLines: px
-            public float Value_1;           //Angle, Stitch, Register: Correction Value in Rev or μm (Register), StartLines: number of lines
-            public float Value_2;           //Angle, Stitch, Register: 0, StartLines: Lines lyout (Top/Right: 1, Covering: 2, Bottom/Left: 3)  
+            public float Value_1;           //Angle, Stitch, Register: Correction Value in Rev or μm (Register, ColorStitch), StartLines: number of lines
+            public LineLayoutEnum LineLayout;   //Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right/Covering/Bottom/Left)  
+            public bool micron;                 //Measure is in μm
         };
 
         private DsDevice[] DeviceList = null;
@@ -116,8 +128,8 @@ namespace rx_CamLib
         private const int WM_APP = 0x8000;                  //Definitions from Windows.h
         private const int WM_APP_MEDIAEV = WM_APP + 2020;   //Callback from MediaEventEx
         private const int WM_APP_ALIGNEV = WM_APP + 2025;   //Callback from Bieler_ds_Align
-        private const int WM_DEVICECHANGE = 0x0219;
-        private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
+        private const int WM_DEVICECHANGE = 0x0219;             //from winuser.h
+        private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;    //from DBT.H
         private const int DBT_DEVTYP_DEVICEINTERFACE = 0x0005;
         private const int WP_StartLines = 100;
         private const int WP_Angle = 101;
@@ -280,8 +292,15 @@ namespace rx_CamLib
         /// <returns>0: for success or error code</returns>
         public ENCamResult StopCamera()
         {
-            if (CameraRunning) return StopGraph(); 
-            return ENCamResult.OK;
+            if (!CameraRunning) return ENCamResult.Cam_notRunning;
+
+            CallBackDataStruct CallbackData = new CallBackDataStruct();
+            CallbackData.CamResult = StopGraph();
+            if(CallbackData.CamResult != ENCamResult.OK)
+                CamCallBack?.Invoke(ENCamCallBackInfo.GraphNotStoppedCorrectly, CallbackData);
+            else
+                CamCallBack?.Invoke(ENCamCallBackInfo.CameraStopped, CallbackData);
+            return CallbackData.CamResult;
         }
 
         /// <summary>
@@ -400,6 +419,8 @@ namespace rx_CamLib
             return ENCamResult.OK;
         }
 
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -410,6 +431,11 @@ namespace rx_CamLib
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetMeasureMode((UInt32)MeasureMode);
             return ENCamResult.OK;
+        }
+        public ENMeasureMode GetMeasureMode()
+        {
+            if (!CameraRunning) return ENMeasureMode.MeasureMode_Off;
+            return (ENMeasureMode)halignFilter.GetMeasureMode();
         }
 
         /// <summary>
@@ -422,6 +448,11 @@ namespace rx_CamLib
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetDisplayMode((UInt32)DisplayMode);
             return ENCamResult.OK;
+        }
+        public ENDisplayMode GetDisplayMode()
+        {
+            if (!CameraRunning) return ENDisplayMode.Display_Off;
+            return (ENDisplayMode)halignFilter.GetDisplayMode();
         }
 
         /// <summary>
@@ -447,6 +478,11 @@ namespace rx_CamLib
             halignFilter.SetShowOriginalImage(!ShowProcessImage);
             return ENCamResult.OK;
         }
+        public bool GetShowProcessImage()
+        {
+            if (!CameraRunning) return false;
+            return !halignFilter.GetShowOriginalImage();
+        }
 
         /// <summary>
         /// 
@@ -458,6 +494,11 @@ namespace rx_CamLib
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetBinarizeMode((UInt32)BinarizeMode);
             return ENCamResult.OK;
+        }
+        public ENBinarizeMode GetBinarizeMode()
+        {
+            if (!CameraRunning) return ENBinarizeMode.BinarizeMode_Off;
+            return (ENBinarizeMode)halignFilter.GetBinarizeMode();
         }
 
         /// <summary>
@@ -510,7 +551,7 @@ namespace rx_CamLib
         }
 
         /// <summary>
-        /// Sets measurement to "Upside-Down", default = false
+        /// Sets measurement to "Upside-Down", default = false (top of camera is top of image)
         /// </summary>
         /// <param name="UpsideDown"></param>
         /// <returns>0: for success or error code</returns>
@@ -519,6 +560,11 @@ namespace rx_CamLib
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetUpsideDown(UpsideDown);
             return ENCamResult.OK;
+        }
+        public bool GetCameraUpsideDown()
+        {
+            if (!CameraRunning) return false;
+            return halignFilter.GetUpsideDown();
         }
 
         /// <summary>
@@ -532,9 +578,14 @@ namespace rx_CamLib
             halignFilter.SetLinesHorizontal(Horizontal);
             return ENCamResult.OK;
         }
+        public bool GetLinesHorizontal()
+        {
+            if (!CameraRunning) return false;
+            return halignFilter.GetLinesHorizontal();
+        }
 
         /// <summary>
-        /// Checks for white lines on dark background, default = false (vertical)
+        /// Checks for white lines on dark background, default = false (dark lines)
         /// </summary>
         /// <param name="Inverse"></param>
         /// <returns>0: for success or error code</returns>
@@ -543,6 +594,11 @@ namespace rx_CamLib
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetInverse(Inverse);
             return ENCamResult.OK;
+        }
+        public bool GetInverseLines()
+        {
+            if (!CameraRunning) return false;
+            return halignFilter.GetInverse();
         }
 
         /// <summary>
@@ -557,11 +613,255 @@ namespace rx_CamLib
             return ENCamResult.OK;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public UInt32 NumDilateErodes
+        {
+            get
+            {
+                if (!CameraRunning) return 0;
+                return halignFilter.GetNumDilateErodes();
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetNumDilateErodes(value);
+            }
+        }
+
+        public UInt32 NumExtraErodes
+        {
+            get
+            {
+                if (!CameraRunning) return 0;
+                return halignFilter.GetNumExtraErodes();
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetNumExtraErodes(value);
+            }
+        }
+
+        public System.Drawing.Point ErodeSeed
+        {
+            get
+            {
+                System.Drawing.Point Seed = new System.Drawing.Point(0, 0);
+                if (!CameraRunning) return Seed;
+                Seed.X = (int)halignFilter.GetErodeSeedX();
+                Seed.Y = (int)halignFilter.GetErodeSeedY();
+                return Seed;
+            }
+            set
+            {
+                if (CameraRunning)
+                {
+                    halignFilter.SetErodeSeedX((UInt32)value.X);
+                    halignFilter.SetErodeSeedY((UInt32)value.Y);
+                }
+            }
+        }
+
+        public bool ShowBlobOutlines
+        {
+            get
+            {
+                if (!CameraRunning) return false;
+                return halignFilter.GetShowBlobOutlines();
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetShowBlobOutlines(value);
+            }
+        }
+
+        public bool ShowBlobCenters
+        {
+            get
+            {
+                if (!CameraRunning) return false;
+                return halignFilter.GetShowBlobCenters();
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetShowBlobCenters(value);
+            }
+        }
+
+        public System.Drawing.Color CrossColor
+        {
+            get
+            {
+                if (!CameraRunning) return System.Drawing.Color.Transparent;
+                UInt32 Current = halignFilter.GetBlobCrossColor();
+                UInt32 R = Current & 0xff;
+                UInt32 G = (Current & 0xff00) >> 8;
+                UInt32 B = (Current & 0xff0000) >> 16;
+                return System.Drawing.Color.FromArgb((int)R, (int)G, (int)B);
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetBlobCrossColor((UInt32)((value.B << 16) + (value.G << 8) + value.R));
+            }
+        }
+
+        public System.Drawing.Color BlobOutlineColor
+        {
+            get
+            {
+                if (!CameraRunning) return System.Drawing.Color.Transparent;
+                UInt32 Current = halignFilter.GetBlobOutlineColor();
+                UInt32 R = Current & 0xff;
+                UInt32 G = (Current & 0xff00) >> 8;
+                UInt32 B = (Current & 0xff0000) >> 16;
+                return System.Drawing.Color.FromArgb((int)R, (int)G, (int)B);
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetBlobOutlineColor((UInt32)((value.B << 16) + (value.G << 8) + value.R));
+            }
+        }
+
+        public System.Drawing.Color BlobTextColor
+        {
+            get
+            {
+                if (!CameraRunning) return System.Drawing.Color.Transparent;
+                UInt32 Current = halignFilter.GetBlobTextColor();
+                UInt32 R = Current & 0xff;
+                UInt32 G = (Current & 0xff00) >> 8;
+                UInt32 B = (Current & 0xff0000) >> 16;
+                return System.Drawing.Color.FromArgb((int)R, (int)G, (int)B);
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetBlobTextColor((UInt32)((value.B << 16) + (value.G << 8) + value.R));
+            }
+        }
+
+        public LOGFONT BlobTextFont
+        {
+            get
+            {
+                if (!CameraRunning) return null;
+
+                //Get Size
+                UInt32 FontSize = 0;
+                halignFilter.GetBlobFont(IntPtr.Zero, out FontSize);
+                if (FontSize == 0) return null;
+
+                //Allocate memory
+                IntPtr unmanaged_pInFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)));
+                //Get Data from Filter
+                int DataFontSize = (int)FontSize;
+                halignFilter.GetBlobFont(unmanaged_pInFont, out FontSize);
+                if (FontSize != DataFontSize || FontSize == 0)
+                {
+                    Marshal.FreeHGlobal(unmanaged_pInFont);
+                    return null;
+                }
+                LOGFONT Current = (LOGFONT)Marshal.PtrToStructure((IntPtr)unmanaged_pInFont, typeof(LOGFONT));
+                Marshal.FreeHGlobal(unmanaged_pInFont);
+                 
+                return Current;
+            }
+            set
+            {
+                IntPtr unmanaged_pOutFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)));
+                Marshal.StructureToPtr(value, unmanaged_pOutFont, false);
+                halignFilter.SetBlobFont(unmanaged_pOutFont);
+                Marshal.DestroyStructure(unmanaged_pOutFont, typeof(LOGFONT));
+                Marshal.FreeHGlobal(unmanaged_pOutFont);
+            }
+        }
+
+        public System.Drawing.Color OverlayTextColor
+        {
+            get
+            {
+                if (!CameraRunning) return System.Drawing.Color.Transparent;
+                UInt32 Current = halignFilter.GetOverlayTextColor();
+                UInt32 R = Current & 0xff;
+                UInt32 G = (Current & 0xff00) >> 8;
+                UInt32 B = (Current & 0xff0000) >> 16;
+                return System.Drawing.Color.FromArgb((int)R, (int)G, (int)B);
+            }
+            set
+            {
+                if (CameraRunning) halignFilter.SetOverlayTextColor((UInt32)((value.B << 16) + (value.G << 8) + value.R));
+            }
+        }
+
+        public LOGFONT OverlayTextFont
+        {
+            get
+            {
+                if (!CameraRunning) return null;
+
+                //Get Size
+                UInt32 FontSize = 0;
+                halignFilter.GetOverlayFont(IntPtr.Zero, out FontSize);
+                if (FontSize == 0) return null;
+
+                //Allocate memory
+                IntPtr unmanaged_pInFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)));
+                //Get Data from Filter
+                int DataFontSize = (int)FontSize;
+                halignFilter.GetOverlayFont(unmanaged_pInFont, out FontSize);
+                if (FontSize != DataFontSize || FontSize == 0)
+                {
+                    Marshal.FreeHGlobal(unmanaged_pInFont);
+                    return null;
+                }
+                LOGFONT Current = (LOGFONT)Marshal.PtrToStructure((IntPtr)unmanaged_pInFont, typeof(LOGFONT));
+                Marshal.FreeHGlobal(unmanaged_pInFont);
+
+                return Current;
+            }
+            set
+            {
+                IntPtr unmanaged_pOutFont = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LOGFONT)));
+                Marshal.StructureToPtr(value, unmanaged_pOutFont, false);
+                halignFilter.SetOverlayFont(unmanaged_pOutFont);
+                Marshal.DestroyStructure(unmanaged_pOutFont, typeof(LOGFONT));
+                Marshal.FreeHGlobal(unmanaged_pOutFont);
+            }
+        }
+
+        public string OverlayText
+        {
+            set
+            {
+                if(CameraRunning)
+                    halignFilter.SetOverlayTxt(value);
+            }
+        }
+
+        /// <summary>
+        /// Distance between 2 lines in μm, default = 677.333 (32 inkjet pixels)
+        /// </summary>
+        public float StartLineDistance
+        {
+            set
+            {
+                if (CameraRunning) halignFilter.SetStartLinesDistance(value);
+            }
+        }
+
+        //Debug
+        /// <summary>
+        /// Opens a console window with debug information, default = false
+        /// </summary>
+        /// <param name="DebugOn"></param>
         public void SetDebug(bool DebugOn)
         {
             if (CameraRunning) halignFilter.SetDebug(DebugOn);
         }
 
+        /// <summary>
+        /// Displays frame processing time in debug console, default = false
+        /// </summary>
+        /// <param name="FrameTime"></param>
         public void ShowFrameTime(bool FrameTime)
         {
             if (CameraRunning) halignFilter.SetFrameTiming(FrameTime);
@@ -777,7 +1077,7 @@ namespace rx_CamLib
             halignFilter.SetDebug(false);
             halignFilter.SetHostPointer(IntPtr.Zero);
             halignFilter.ShowHistogram(false);
-            halignFilter.SetOverlayTxt("", 0);
+            halignFilter.SetOverlayTxt("");
             halignFilter.SetShowOriginalImage(true);
             halignFilter.SetDisplayMode(0);
             halignFilter.SetMeasureMode(0);
@@ -1351,13 +1651,13 @@ namespace rx_CamLib
 
             //Mean
             float MeanV1 = 0;
-            float MeanV2 = 0;
+            int MeanV2 = 0;
             float MeanDX = 0;
             float MeanDY = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
                 MeanV1 += CorrectionList[i].Value_1;
-                MeanV2 += CorrectionList[i].Value_2;
+                MeanV2 += (int)CorrectionList[i].LineLayout;
                 MeanDX += CorrectionList[i].DPosX;
                 MeanDY += CorrectionList[i].DPosY;
             }
@@ -1374,7 +1674,7 @@ namespace rx_CamLib
             for (int i = 0; i < CorrectionList.Count; i++)
             {
                 VarV1 += Math.Pow(CorrectionList[i].Value_1 - MeanV1, 2);
-                VarV2 += Math.Pow(CorrectionList[i].Value_2 - MeanV2, 2);
+                VarV2 += Math.Pow((int)CorrectionList[i].LineLayout - MeanV2, 2);
                 VarDX += Math.Pow(CorrectionList[i].DPosX - MeanDX, 2);
                 VarDY += Math.Pow(CorrectionList[i].DPosY - MeanDY, 2);
             }
@@ -1395,8 +1695,8 @@ namespace rx_CamLib
             {
                 if (CorrectionList[i].Value_1 <= MeanV1 + VarV1 &&
                     CorrectionList[i].Value_1 >= MeanV1 - VarV1 &&
-                    CorrectionList[i].Value_2 <= MeanV2 + VarV2 &&
-                    CorrectionList[i].Value_2 >= MeanV2 - VarV2 &&
+                    (int)CorrectionList[i].LineLayout <= MeanV2 + VarV2 &&
+                    (int)CorrectionList[i].LineLayout >= MeanV2 - VarV2 &&
                     CorrectionList[i].DPosX <= MeanDX + VarDX &&
                     CorrectionList[i].DPosX >= MeanDX - VarDX &&
                     CorrectionList[i].DPosY <= MeanDY + VarDY &&
@@ -1404,13 +1704,13 @@ namespace rx_CamLib
                 {
                     Counter++;
                     MeasureData.Value_1 += CorrectionList[i].Value_1;
-                    MeasureData.Value_2 += CorrectionList[i].Value_2;
+                    MeasureData.LineLayout += (int)CorrectionList[i].LineLayout;
                     MeasureData.DPosX += CorrectionList[i].DPosX;
                     MeasureData.DPosY += CorrectionList[i].DPosY;
                 }
             }
             MeasureData.Value_1 /= Counter;
-            MeasureData.Value_2 /= Counter;
+            MeasureData.LineLayout = (LineLayoutEnum)((int)MeasureData.LineLayout / Counter);
             MeasureData.DPosX /= Counter;
             MeasureData.DPosY /= Counter;
         }

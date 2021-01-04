@@ -80,7 +80,7 @@ bool C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* Platf
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tFindPlatformDevice: Could not get Platform List: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tFindPlatformDevice: Could not get Platform List: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -90,7 +90,7 @@ bool C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* Platf
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tFindPlatformDevice: No platforms found\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.6f\tFindPlatformDevice: No platforms found\n", (float)m_TimeStamp / 1000000.0f);
 		}
 		return false;
 	}
@@ -238,7 +238,7 @@ cl_context C_rx_AlignFilter::CreateContext(cl_platform_id ClPlatformId, int Plat
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateContext: Could not create Context: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateContext: Could not create Context: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -258,7 +258,7 @@ cl_command_queue C_rx_AlignFilter::CreateCommandQueue(cl_context context, cl_dev
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateCommandQueue: Could not create Command-Queue: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateCommandQueue: Could not create Command-Queue: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -280,7 +280,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 			_itow_s((int)hResult, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tMakeProgram: KernelSource-Resource not found: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tMakeProgram: KernelSource-Resource not found: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -292,7 +292,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tMakeProgram: Module Pointer-Resource not found\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.6f\tMakeProgram: Module Pointer-Resource not found\n", (float)m_TimeStamp / 1000000.0f);
 		}
 		exit(-1);
 	}
@@ -305,7 +305,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 		{
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tMakeProgram: Could not load Kernel Source\n", (float)m_TimeStamp / 1000000.0f);
+			printf("%6.6f\tMakeProgram: Could not load Kernel Source\n", (float)m_TimeStamp / 1000000.0f);
 		}
 		exit(-1);
 	}
@@ -320,7 +320,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tMakeProgram: Could not create Program Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tMakeProgram: Could not create Program Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		exit(-1);
 	}
@@ -335,7 +335,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tMakeProgram: Could not build Program Full-Alignment: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tMakeProgram: Could not build Program Full-Alignment: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 
 		if (m_DebugOn)
@@ -355,7 +355,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 			{
 					m_MeasureTime = std::chrono::steady_clock::now();
 					m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-					printf("%6.66f\tMakeProgram: Folder \"my_documents\" not found\n", (float)m_TimeStamp / 1000000.0f);
+					printf("%6.6f\tMakeProgram: Folder \"my_documents\" not found\n", (float)m_TimeStamp / 1000000.0f);
 			}
 			else
 			{
@@ -390,7 +390,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel FullHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel FullHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -405,7 +405,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -420,7 +420,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -435,7 +435,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -450,7 +450,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -465,7 +465,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -480,7 +480,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -495,7 +495,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ColorBinarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorBinarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -510,7 +510,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -525,7 +525,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ColorThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -540,7 +540,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ColorShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -555,7 +555,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel RGBBlockHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel RGBBlockHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -570,7 +570,7 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel ShowRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ShowRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
@@ -585,12 +585,12 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel JoinRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel JoinRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
 
-	//Create Smoothen Histogram-Kernel
+	//Create Smoothen RGBHistogram-Kernel
 	ClSmoothenRGBHistogramKernel = clCreateKernel(Program, "SmoothenRGBHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
@@ -600,10 +600,26 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.66f\tCreateKernels: Could not create OpenCL Kernel SmoothenRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel SmoothenRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
 		return false;
 	}
+
+	//Create RGBColorize-Kernel
+	ClColorizeRGBKernel = clCreateKernel(Program, "ColorizeRGB", &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel RGBColorize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return false;
+	}
+
 
 	return true;
 }
@@ -847,5 +863,26 @@ int C_rx_AlignFilter::CalcThreshold(UINT* Histogram, UINT* Peak_1_Val, UINT * Pe
 		return 0;
 	}
 
+}
+
+int C_rx_AlignFilter::CalcRGBThreshold(UINT* RGBHistogram, UINT* Peak_1_Val, UINT* Peak_1_Pos, UINT* Peak_2_Val, UINT* Peak_2_Pos, UINT* Threshold)
+{
+	UINT BHistogram[256];
+	UINT GHistogram[256];
+	UINT RHistogram[256];
+
+	//Separate Histograms
+	for (int i = 0; i < 256; i++)
+	{
+		BHistogram[i] = RGBHistogram[i];
+		GHistogram[i] = RGBHistogram[i + 256];
+		RHistogram[i] = RGBHistogram[i + 512];
+	}
+
+	CalcThreshold(BHistogram, &Peak_1_Val[0], &Peak_1_Pos[0], &Peak_2_Val[0], &Peak_2_Pos[0], &Threshold[0]);
+	CalcThreshold(GHistogram, &Peak_1_Val[1], &Peak_1_Pos[1], &Peak_2_Val[1], &Peak_2_Pos[1], &Threshold[1]);
+	CalcThreshold(RHistogram, &Peak_1_Val[2], &Peak_1_Pos[2], &Peak_2_Val[2], &Peak_2_Pos[2], &Threshold[2]);
+
+	return 0;
 }
 

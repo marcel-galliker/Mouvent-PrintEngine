@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using static rx_CamLib.RxCam;
 
 namespace RX_DigiPrint.Models
 {
@@ -53,7 +55,7 @@ namespace RX_DigiPrint.Models
 			{
 				Function = ECamFunction.CamFindMark_2,
 				Name="Find Mark 2",
-				WebMoveDist = -207.0,
+				WebMoveDist = -190.0,
 				ScanPos	    = 50.0,
 			});
 
@@ -81,11 +83,11 @@ namespace RX_DigiPrint.Models
 						{
 							PrintbarNo	= color,
 							HeadNo		= n,
-							Function	= ECamFunction.CamMeasurePosition,
+							Function	= ECamFunction.CamMeasureAngle,
 							Name		= String.Format("Measure {0}-{1}..{2}",  colorName, n+1, n+2),
 						//	WebMoveDist = (n==0)? 20.0 : 0,
 						//	ScanPos	    = pos0+n*headdist,
-							WebMoveDist = (n==0)? 20.0 : 0,
+							WebMoveDist = (n==0)? 5.0 : 0,
 							ScanPos		= 50,
 						};
 						
@@ -118,45 +120,43 @@ namespace RX_DigiPrint.Models
 						if (_Action?.Function==ECamFunction.CamFindMark_1) _OnMarkFound();
 						//	RX_Common.MvtMessageBox.Information("Camera", string.Format("{0} Start-Lines detected", ExtraInfo));
 						break;
+
 					case RxCam.ENCamCallBackInfo.StartLinesContinuous:
 						if (CallBackData.CamResult==RxCam.ENCamResult.OK)
 						{
 							string info=string.Format("# {0}\n", ++_CallbackNo) 
 									   + "StartLinesContinuous\n"
 									   + string.Format("  Center position: X={0}, y={1}\n", CallBackData.DPosX, CallBackData.DPosY)
-									   + string.Format("  Lines detected: {0} ", CallBackData.Value_1);
+									   + string.Format("  Lines detected: {0} ", CallBackData.Value_1)
+									   + string.Format("  Scanner.StopPos: {0} ", RxGlobals.SetupAssist.stopPos);
 
-							if (_Action?.Function==ECamFunction.CamFindMark_1)
+							switch(CallBackData.LineLayout)
 							{
-								switch(CallBackData.Value_2)
-								{
-								case 1:	info += "top"; break;
-								case 2: info += "all"; break;
-								case 3: info += "bottom"; break;
-								}
-							}
-							else
-							{ 
-								switch(CallBackData.Value_2)
-								{
-								case 1:	info += "right"; break;
-								case 2: info += "through"; break;
-								case 3: info += "left"; break;
-								}
+								case LineLayoutEnum.LineLayout_Covering:	info += "all"; break;
+								case LineLayoutEnum.LineLayout_FromTop:		info += "top"; break;
+								case LineLayoutEnum.LineLayout_FromBot:		info += "bottom"; break;
+								case LineLayoutEnum.LineLayout_FromRight:	info += "right"; break;
+								case LineLayoutEnum.LineLayout_FromLeft:	info += "left"; break;
+								default: break;
 							}
 							switch(_Action?.Function)
 							{
-								case ECamFunction.CamFindMark_2:	if (CallBackData.Value_2==2) _OnMarkFound(); 
+								case ECamFunction.CamFindMark_2:	if (!_MarkFound && CallBackData.LineLayout==LineLayoutEnum.LineLayout_Covering)
+																	{
+																		Console.WriteLine("CamFindMark_2: Mark found, dy={0}", CallBackData.DPosY);
+																		_CallbackData = CallBackData;
+																		_OnMarkFound();
+																	}
 																	break;
+
 								case ECamFunction.CamFindMark_3:	info += string.Format("\nMarkFound={0} StopPos={1}", _MarkFound, RxGlobals.SetupAssist.stopPos);
-																	if (CallBackData.Value_2==1)
+																	if (CallBackData.LineLayout==LineLayoutEnum.LineLayout_FromRight)
 																	{		
 																		if (!_MarkFound)
 																		{ 
 																			_MarkFound=true;
 																			RxGlobals.SetupAssist.ScanStop();
 																			_CallbackData = CallBackData;
-																			Console.WriteLine("MARK FOUND: {0}", info);
 																		}
 																	}
 																	break;
@@ -222,7 +222,7 @@ namespace RX_DigiPrint.Models
 				case ECamFunction.CamFindMark_1:		_FindMark_1();		break;
 				case ECamFunction.CamFindMark_2:		_FindMark_2();		break;
 				case ECamFunction.CamFindMark_3:		_FindMark_3();		break;
-				case ECamFunction.CamMeasurePosition:	_Measure();			break;
+				case ECamFunction.CamMeasureAngle:		_MeasureAngle();	break;
 			}
 		}
 
@@ -247,7 +247,7 @@ namespace RX_DigiPrint.Models
 			{
 				_Action.State = ECamFunctionState.done;
 				if (_Debug) CanContinue = true;
-				if (!_Debug || cont)
+				if (!_Debug || cont || _ActionIdx<3)
 				{
 					_Action = null;
 					_ActionIdx++;
@@ -297,6 +297,7 @@ namespace RX_DigiPrint.Models
 		private void _FindMark_1()
 		{
 			RxGlobals.Events.AddItem(new LogItem("Camera: Finding Mark"));
+			Console.WriteLine("_FindMark_1: _MarkFound = false");
 			_MarkFound = false;
 			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 		}
@@ -304,7 +305,10 @@ namespace RX_DigiPrint.Models
 		//--- _FindMark_2 ----------------------------------------------
 		private void _FindMark_2()
 		{
+			_MarkFound=false;
 			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
+			Console.WriteLine("{0}: _FindMark_2, MarkFound={1}", RxGlobals.Timer.Ticks(), _MarkFound);
+			_Time=2;
 			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
 		}
@@ -312,12 +316,8 @@ namespace RX_DigiPrint.Models
 		//--- _FindMark_3 -----------------------
 		private void _FindMark_3()
 		{
-			RxGlobals.Events.AddItem(new LogItem("Camera: Finding Mark 3"));
-			_CamFunctions.Off();
-			_MarkFound=false;
-			_Time=2;
-			_CamFunctions.FindMark(true);
-			RxGlobals.SetupAssist.ScanMoveTo(0, 50);
+			Console.WriteLine("{0}: Action[{1}]: _FindMark_3, ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
+			RxGlobals.SetupAssist.WebMove(-_CallbackData.DPosY/1000);
 		}
 
 		//--- _Camera_CamMarkFound ---------------------------------------
@@ -325,27 +325,25 @@ namespace RX_DigiPrint.Models
 		{
 			if (!_MarkFound)
 			{
-				RxGlobals.Events.AddItem(new LogItem("Camera: MARK FOUND"));
-				Console.WriteLine("{0}: Mark Found", RxGlobals.Timer.Ticks());
-				RxGlobals.SetupAssist.WebStop();
-				RxGlobals.Events.AddItem(new LogItem("Camera: WebStop"));
 				_MarkFound=true;
+				if (_Action.Function== ECamFunction.CamFindMark_1) 
+				{
+					RxGlobals.SetupAssist.WebStop();
+					RxGlobals.Events.AddItem(new LogItem("Camera: WebStop"));
+				}
+				RxGlobals.Events.AddItem(new LogItem("Camera: MARK FOUND"));
+				Console.WriteLine("{0}:  Action[{1}]: Mark Found", RxGlobals.Timer.Ticks(), _ActionIdx);
 			}
 		}
 
-		//--- _Measure ----------------------------------------------
-		private void _Measure()
+		//--- _MeasureAngle ----------------------------------------------
+		private void _MeasureAngle()
 		{
-			if (_SimuMachine)
-			{
-				_CamFunctions.MeasurePosition(_OnPositionMeasured);
-			}
-			else
-			{
-				Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
-				RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
-				RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
-			}
+			RxGlobals.Events.AddItem(new LogItem("_MeasureAngle: stopPos={0}", RxGlobals.SetupAssist.stopPos));
+
+			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
+			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
 		}
 
 		//--- _ScanMoveDone -------------------------------
@@ -359,10 +357,14 @@ namespace RX_DigiPrint.Models
 				RxBindable.Invoke(()=>_CamFunctions.Off());
 				if (_MarkFound)
 				{
-					if (Math.Abs(RxGlobals.SetupAssist.motorPosition-RxGlobals.SetupAssist.stopPos)<0.2) 
+					Console.WriteLine("{0}: CamFindMark_3: _ScanMoveDone motorPos={1}, stopPos={2}", RxGlobals.Timer.Ticks(), RxGlobals.SetupAssist.motorPosition, RxGlobals.SetupAssist.stopPos);
+					if (_Action.State==ECamFunctionState.running)
+					{
+						_Actions[_ActionIdx+1].ScanPos     = RxGlobals.SetupAssist.motorPosition;
+						_Actions[_ActionIdx+1].WebMoveDist = 12.0;
 						ActionDone();
-					else  
-						RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.stopPos-0.1);
+					}
+					else if (_Action.State==ECamFunctionState.ending) ActionDone();				
 				}
 				else
 				{
@@ -373,10 +375,10 @@ namespace RX_DigiPrint.Models
 				}
 				return;
 			}
+			Console.WriteLine("{0}: Action[{1}]: _ScanMoveDone: WebMoveDist={2}, WebMoveDone={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.WebMoveDist, _Action.WebMoveDone);
 			if (_Action.WebMoveDist==0 || _Action.WebMoveDone) _StartCamFunction();
 		}
-
-		//--- _WebMoveDone ---------------------------------
+		
 		private void _WebMoveDone()
 		{
 			Console.WriteLine("{0}: Action[{1}]: _WebMoveDone", RxGlobals.Timer.Ticks(), _ActionIdx);
@@ -396,6 +398,19 @@ namespace RX_DigiPrint.Models
 															_Action.State=ECamFunctionState.error;
 															Abort();
 														}
+														break;
+
+					case ECamFunction.CamFindMark_3:	RxBindable.Invoke(()=>
+															{
+																RxGlobals.Events.AddItem(new LogItem("Camera: Finding Mark 3"));
+																_CamFunctions.Off();
+																Console.WriteLine("_FindMark_3: _MarkFound = false");
+																_MarkFound=false;
+																_Time=2;
+																_CamFunctions.FindMark(true);
+																RxGlobals.SetupAssist.ScanMoveTo(0, 10);
+															}
+														);
 														break;
 
 					default: _StartCamFunction(); break;
@@ -426,15 +441,14 @@ namespace RX_DigiPrint.Models
 							break;
 
 						case ECamFunction.CamFindMark_2:
-						case ECamFunction.CamFindMark_3:
 							_CamFunctions.Off();
 							_MarkFound=false;
 							_Time=2;
 							_CamFunctions.FindMark(true);
 							break;
 
-						case ECamFunction.CamMeasurePosition:
-							_CamFunctions.MeasurePosition(_OnPositionMeasured);
+						case ECamFunction.CamMeasureAngle:
+							RxBindable.Invoke(()=>_CamFunctions.MeasureAngle());
 							break;
 
 						default: 
