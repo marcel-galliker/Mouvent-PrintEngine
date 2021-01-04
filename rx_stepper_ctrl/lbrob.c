@@ -135,6 +135,7 @@ static void _search_all_screws();
 static int  _calculate_average_y_pos(int screwNr);
 static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg);
 static void _handle_waste_pump(void);
+static void _handle_ink_pump_back(void);
 static void _vacuum_on();
 
 
@@ -221,7 +222,8 @@ void lbrob_main(int ticks, int menu)
 
     motor_main(ticks, menu);
     robi_lb702_main(ticks, menu);
-    
+
+    _handle_ink_pump_back();
     _handle_waste_pump();    
 
     RX_StepperStatus.robinfo.moving = (_CmdRunning != 0);
@@ -237,17 +239,6 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.wipe_done = FALSE;
         RX_StepperStatus.robinfo.x_in_purge4ever = FALSE;
         _HeadPos = FALSE;
-    }
-    
-    if (rx_get_ticks() >= _WastePumpTimer && _WastePumpTimer && RX_StepperStatus.info.vacuum_running)
-    {
-        Fpga.par->output &= ~RO_VACUUM_CLEANER;
-        _WastePumpTimer = rx_get_ticks() + WASTE_PUMP_TIME;
-    }
-    else if (rx_get_ticks() >= _WastePumpTimer && _WastePumpTimer && !RX_StepperStatus.info.vacuum_running)
-    {
-        Fpga.par->output &= ~RO_WASTE_VAC;
-        _WastePumpTimer = 0;
     }
 
     if (RX_StepperStatus.info.moving)
@@ -924,18 +915,15 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_ROB_VACUUM:
         val = (*(INT32 *)pdata);
-        if (val > 0)
-        {
-            if (_WastePumpTimer < rx_get_ticks() + (val * 1000) || !_WastePumpTimer || !RX_StepperStatus.info.vacuum_running)
-            {
-                _vacuum_on();
-                _WastePumpTimer = rx_get_ticks() + val*1000;
-            }
-        }
+        if (val <= 0)
+            val = VACUUM_PUMP_TIME;
         else
+            val = val * 1000;
+        
+        if (_WastePumpTimer < rx_get_ticks() + val || !_WastePumpTimer || !RX_StepperStatus.info.vacuum_running)
         {
-            if (!_WastePumpTimer)
-                _WastePumpTimer = rx_get_ticks() + VACUUM_PUMP_TIME;
+            _vacuum_on();
+            _WastePumpTimer = rx_get_ticks() + val;
         }
         break;
 
@@ -1697,6 +1685,21 @@ static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg)
 
 //--- _handle_waste_pump -----------------------------------------
 static void _handle_waste_pump(void)
+{
+    if (rx_get_ticks() >= _WastePumpTimer && _WastePumpTimer && RX_StepperStatus.info.vacuum_running)
+    {
+        Fpga.par->output &= ~RO_VACUUM_CLEANER;
+        _WastePumpTimer = rx_get_ticks() + WASTE_PUMP_TIME;
+    }
+    else if (rx_get_ticks() >= _WastePumpTimer && _WastePumpTimer && !RX_StepperStatus.info.vacuum_running)
+    {
+        Fpga.par->output &= ~RO_WASTE_VAC;
+        _WastePumpTimer = 0;
+    }
+}
+
+//--- _handle_ink_pump_back --------------------------------------------
+static void _handle_ink_pump_back(void)
 {
     int val;
     
