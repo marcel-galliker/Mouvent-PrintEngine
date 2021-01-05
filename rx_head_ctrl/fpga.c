@@ -654,19 +654,26 @@ void fpga_set_pg_offsets(INT32 backwards)
 }
 
 //--- fpga_enc_config ---------------------------------------------------
-void fpga_enc_config(int khz)
+void fpga_enc_config(int hz)
 {
-	_fpga_enc_config(khz);
+    if (!FpgaCfg.encoder->synth.enable && hz)
+    {
+        nios_set_firepulse_on(TRUE);
+        rx_sleep(200);
+        SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
+    }
+    _fpga_enc_config(hz);
+    if (!hz) nios_set_firepulse_on(FALSE);
 }
 
 //--- fpga_enc_enable --------------------------
 void fpga_enc_enable(int enable)
 {
 	if (enable) _fpga_enc_config(0);
-	else SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, FALSE);				
+	else SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, FALSE);
 }
 
-static void _fpga_enc_config(int khz)
+static void _fpga_enc_config(int hz)
 {
 	int i;
 	int enable;
@@ -677,7 +684,7 @@ static void _fpga_enc_config(int khz)
 	FpgaCfg.encoder->dist_pm			=  1951000; // 1 �m
 	FpgaCfg.encoder->shake_interval		= 0;
 
-	if (khz>1)
+	if (hz>99)
 	{
 		FpgaCfg.encoder->synth.value = 0;
 		FpgaCfg.encoder->synth.enable= FALSE;
@@ -701,7 +708,7 @@ static void _fpga_enc_config(int khz)
 		SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, enable);
 		*/
 		
-		FpgaCfg.encoder->synth.value = FPGA_FREQ/(khz*1000);
+		FpgaCfg.encoder->synth.value = FPGA_FREQ/(hz);
 		FpgaCfg.encoder->synth.enable= TRUE;		
 	}
 	else 	
@@ -732,7 +739,7 @@ static void _fpga_enc_config(int khz)
 		_Enc_Pos[i]		=0;
 	}				
 	
-	SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, khz<=0);
+	SET_FLAG(FpgaCfg.encoder->cmd, ENC_ENABLE, hz<=0);
 	 
 	RX_FpgaEncCfg.cmd          = FpgaCfg.encoder->cmd;
 	RX_FpgaEncCfg.synth.enable = FpgaCfg.encoder->synth.enable;

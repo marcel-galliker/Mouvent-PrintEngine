@@ -98,7 +98,7 @@ static void _main_menu(void)
 	term_printf("R: trace registers\n");
 	term_printf("t: TCP/IP Stress Test\n");
 	term_printf("E: Reset pending errors\n");
-	term_printf("h<xxx>: Frequency in KHz\n");
+	term_printf("h<xxx>: Frequency in Hz\n");
 	term_printf("d<x>:   Drop size fixed 0..3\n");
 	if (_status)
 	{
