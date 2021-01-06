@@ -29,9 +29,18 @@
 #define		READ		1
 #define		LAST_BYTE	1
 
+static const int _I2CBase[NIOS_INK_SUPPLY_CNT] =
+{
+	I2C_MASTER_IS1_BASE,
+	I2C_MASTER_IS2_BASE,
+	I2C_MASTER_IS3_BASE,
+	I2C_MASTER_IS4_BASE
+};
+
 //--- statics -----------------------------------
 static int _Active=FALSE;
 
+//--- pvalve_active -----------------------------
 int	pvalve_active(void)
 {
 	return _Active;
@@ -56,7 +65,19 @@ void pvalve_init(void)
 		dac_id += I2C_read(i2c, LAST_BYTE);
 	}
 
-	if(dac_id == 0x2215) _Active=TRUE;
+	if(dac_id == 0x2215)
+	{
+	    int set_gain_reg = 0x0103;
+	    int i;
+		_Active=TRUE;
+	    for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
+	    {
+			I2C_start(_I2CBase[i], ADDR_DAC60502, WRITE);
+			I2C_write(_I2CBase[i], 0x04, !LAST_BYTE);                       // Set Gain
+			I2C_write(_I2CBase[i], (set_gain_reg >> 8),  !LAST_BYTE);       // Gain MSB
+			I2C_write(_I2CBase[i], (set_gain_reg & 0xff), LAST_BYTE);       // Gain LSB
+	    }
+	}
 }
 
 //--- _set_valve --------------------------------------
@@ -64,19 +85,11 @@ static int _set_valve(int nr, int reg, int value)
 {
 	if (!_Active) 		return REPLY_ERROR;
 
-	int i2c;
+	int i2c = _I2CBase[nr];
 	int dac_data = MAX_VAL*100/value;
 
 	if (dac_data<0) 	dac_data=0;
 	if (dac_data>4095)	dac_data=MAX_VAL;
-
-	switch(nr)
-	{
-	case 0:	i2c=I2C_MASTER_IS1_BASE; break;
-	case 1:	i2c=I2C_MASTER_IS2_BASE; break;
-	case 2:	i2c=I2C_MASTER_IS3_BASE; break;
-	case 3:	i2c=I2C_MASTER_IS4_BASE; break;
-	}
 
 	I2C_start(i2c, ADDR_DAC60502, WRITE);
 	I2C_write(i2c, reg, !LAST_BYTE);
