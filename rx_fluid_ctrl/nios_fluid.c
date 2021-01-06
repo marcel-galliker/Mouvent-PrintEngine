@@ -484,9 +484,9 @@ void nios_test_stop(void)
 }
 
 //--- nios_test_air_valve --------------------------------------------
-void nios_test_air_valve(int isNo)
+void nios_test_air_valve(int isNo, int value)
 {
-	if (_set_testmode()) _Cfg->ink_supply[isNo].test_airValve = TRUE;
+	if (_set_testmode()) _Cfg->ink_supply[isNo].test_airValve = value;
 }
 
 //--- nios_test_bleed_line --------------------------------------------
@@ -496,9 +496,9 @@ void nios_test_bleed_line(int isNo)
 }
 
 //--- nios_test_bleed_valve --------------------------------------------------
-void nios_test_bleed_valve(int isNo)
+void nios_test_bleed_valve(int isNo, int value)
 {
-	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = TRUE;
+	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = value;
 }
 	
 //--- nios_test_ink_pump ----------------------------------------------

@@ -64,7 +64,7 @@ typedef struct
 	UINT8	dropletsPrintedCRC;					// 0x6e
 	SRobInfo	robot;
 	UINT8	filler[12];
-} SHeadEEpromMvt;	// size must be <=0x80!!
+} SHeadEEpromMvt;	// size must be 0x80!!
 
 typedef struct // size must be a multiple of 32!
 {
