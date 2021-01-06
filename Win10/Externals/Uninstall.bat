@@ -1,0 +1,1 @@
+wmic product where "description='Mouvent GUI Tools' " uninstall

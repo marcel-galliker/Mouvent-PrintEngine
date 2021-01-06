@@ -25,7 +25,6 @@ public:
 	BOOL OnEraseBkgnd(CDC* pDC);
 	CBitmap m_background;
 
-
 // Implementation
 protected:
 	HICON m_hIcon;
@@ -35,16 +34,25 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnClose();
 	afx_msg void StartGui();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
+private:
+	static void CheckPower();
+	static void BackgroundThread(void *par);	
+
 private:
 	CProgressCtrl m_progress;
-	int			  m_started;
-public:
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-private:
+	bool m_started;
+	bool m_connected;
 	CStatic m_loading;
 	CButton IDB_Local;
+
+	static bool m_BackgroundThreadRunning;
+	static HANDLE m_BackgroundThreadHdl;
+	static DWORD m_BackgroundThreadId;
+
 public:
 	afx_msg void OnBnClicked_StartLocal();
 };

@@ -1,6 +1,10 @@
 // Win10-RunOnce.cpp : Defines the entry point for the console application.
 //
 
+
+// Uninstall Tools manually:
+//wmic product where "description='Mouvent GUI Tools' " uninstall
+
 //--- alternat start method: regedit
 //	[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce]
 //	"Win10-RunOnce"="\"c:\\Program Files (x86)\\Mouvent\\Win10-RunOnce.exe\""
@@ -15,6 +19,24 @@ void _disable_task(char *taskname)
 	char cmd[256];
 	printf("Disable >>%s<<\n", taskname);
 	sprintf(cmd, "schtasks /change /tn \"%s\" /disable", taskname);
+	system(cmd);
+	printf("\n");
+}
+
+//--- _disable_task ---------------------------------------
+void _disable_service(char *servicename)
+{
+	// Windows commands:
+	// list all services:	sc query
+	// get state:			sc query <servicename>	
+	// stop service:		net stop <sercicename>
+	// start service:		net start <sercicename>
+	// change startup type:	sc config <servicename> start=(boot|system|auto|demand|disabled|delayed-auto)
+	char cmd[256];
+	printf("Disable Service >>%s<<\n", servicename);
+	sprintf(cmd, "net stop %s", servicename);
+	system(cmd);
+	sprintf(cmd, "sc config %s start=disabled" , servicename);
 	system(cmd);
 	printf("\n");
 }
@@ -36,7 +58,10 @@ int main(int argc, char* argv[])
 	_disable_task("\\Microsoft\\Windows\\WindowsUpdate\\Automatic App Update");		
 	_disable_task("\\Microsoft\\Windows\\WindowsUpdate\\Scheduled Start");	
 	_disable_task("\\Microsoft\\Windows\\WindowsUpdate\\sih");		
-	_disable_task("\\Microsoft\\Windows\\WindowsUpdate\\sihboot");		
+	_disable_task("\\Microsoft\\Windows\\WindowsUpdate\\sihboot");
+	_disable_task("\\Microsoft\\Windows\\WindowsUpdate\\sihboot");
+
+	_disable_service("WSearch");
 
 	system("powercfg -change -monitor-timeout-ac 0");
 	system("powercfg -change -standby-timeout-ac 0");

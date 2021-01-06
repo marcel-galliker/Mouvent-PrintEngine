@@ -57,6 +57,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_5A70A64504FC4202ADC7C3E0DD56F754"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_7EE083DABE7945C8904ED9C2D58B5D2E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -82,6 +88,12 @@
         "Entry"
         {
         "MsmKey" = "8:_A3CD89F1AD0D470AB200E9640899E85F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C05672FA70B347B68A04E17CC92A90DC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -338,6 +350,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5A70A64504FC4202ADC7C3E0DD56F754"
+            {
+            "SourcePath" = "8:..\\Externals\\vcruntime140.dll"
+            "TargetName" = "8:vcruntime140.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_D02684942B69424297D26E22553AC9B8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8BDF8DF11FEC4F1DBE58FFFA8D3EE84B"
             {
             "SourcePath" = "8:C:\\Windows\\System32\\shutdown.exe"
@@ -382,6 +414,26 @@
             {
             "SourcePath" = "8:..\\Externals\\msvcr120.dll"
             "TargetName" = "8:msvcr120.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_D02684942B69424297D26E22553AC9B8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C05672FA70B347B68A04E17CC92A90DC"
+            {
+            "SourcePath" = "8:..\\Externals\\Uninstall.bat"
+            "TargetName" = "8:Uninstall.bat"
             "Tag" = "8:"
             "Folder" = "8:_D02684942B69424297D26E22553AC9B8"
             "Condition" = "8:"
@@ -516,10 +568,10 @@
         }
         "Product"
         {
-        "Name" = "8:Microsoft Visual Studio"
+        "Name" = "8:Mouvent GUI Tools"
         "ProductName" = "8:Mouvent GUI Tools"
         "ProductCode" = "8:{C9450F6E-406A-4412-882A-0CE71554D4DD}"
-        "PackageCode" = "8:{B1EF1B68-C81D-445A-9D90-82C64A54E434}"
+        "PackageCode" = "8:{0217B0B9-F8E2-483D-B1C1-9EBDFE32F29C}"
         "UpgradeCode" = "8:{378159FA-14F8-4D91-A537-A10471161967}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -532,7 +584,7 @@
         "ARPHELPLINK" = "8:"
         "Title" = "8:Mouvent GUI Tools"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:marcel.galliker@mouvent.com"
+        "ARPCONTACT" = "8:"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:www.mouvent.com"
