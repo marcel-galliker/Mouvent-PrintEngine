@@ -1,4 +1,4 @@
-﻿using RX_Common;
+using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
@@ -218,7 +218,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         private void Purge_Clicked(object sender, RoutedEventArgs e)
         {
             RX_Common.MvtMessageBox.EPurgeResult result =
-                MvtMessageBox.Purge("Purge", !RxGlobals.PrintSystem.IsLb, "Purge " + _InkSupply.InkType.Name + " ?");
+                MvtMessageBox.Purge("Purge", PrintSystemView.PrintSystemView.allowPurgeAll(), "Purge " + _InkSupply.InkType.Name + " ?");
             if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
                 || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
@@ -229,7 +229,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         private void PurgeVacc_Clicked(object sender, RoutedEventArgs e)
         {
             RX_Common.MvtMessageBox.EPurgeResult result =
-               MvtMessageBox.Purge("Purge", !RxGlobals.PrintSystem.IsLb, "Purge and Vacuum " + _InkSupply.InkType.Name + " ?");
+               MvtMessageBox.Purge("Purge", PrintSystemView.PrintSystemView.allowPurgeAll(), "Purge and Vacuum " + _InkSupply.InkType.Name + " ?");
             if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
                 || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {

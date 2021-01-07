@@ -156,5 +156,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
 
         }
+
+        // Indicates if the "All" button should be visible in the Purge dialog.
+        static public bool allowPurgeAll()
+        {
+            return !RxGlobals.PrintSystem.IsLb || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB;
+        }
     }
 }
