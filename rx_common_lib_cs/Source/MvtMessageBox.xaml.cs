@@ -90,11 +90,11 @@ namespace RX_Common
             return ret;
         }
 
-        static public EPurgeResult Purge(string title, string text)
+        static public EPurgeResult Purge(string title, Boolean allowAll, string text)
         {
             MvtMessageBox box = new MvtMessageBox(title, text, MessageBoxImage.Question, false);
             box.Button_Question.Visibility = Visibility.Collapsed;
-            box.Button_PurgeAll.Visibility = Visibility.Visible;
+            box.Button_PurgeAll.Visibility = allowAll ? Visibility.Visible : Visibility.Collapsed;
             box.ShowDialog();
             return box.PurgeResult;
         }
