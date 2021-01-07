@@ -22,7 +22,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'automated_build'
+    PathtoPublish: 'automated_build/log'
     ArtifactName: 'log'
     publishLocation: 'Container'
   condition: always()
