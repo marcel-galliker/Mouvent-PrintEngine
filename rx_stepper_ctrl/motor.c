@@ -268,8 +268,8 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
         
 	case chk_off:
 	default:
-		Fpga.par->cfg[motor].enc_max_diff		= 0xffff;
-		Fpga.par->cfg[motor].enc_max_diff_stop	= 0xffff;								
+		Fpga.par->cfg[motor].enc_max_diff		= 0xfffff;
+		Fpga.par->cfg[motor].enc_max_diff_stop	= 0xfffff;								
 		break;
 	}
 	
