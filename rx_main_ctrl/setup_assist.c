@@ -21,6 +21,7 @@
 #include "setup_assist.h"
 
 #define MOVE_TIEMOUT	10
+#define TRACE_DEVICE	FALSE
 
 //--- statics ---------------------------------------------
 static int			_SaThreadRunning = TRUE;
@@ -70,6 +71,8 @@ static void *_sa_thread(void *lpParameter)
 		{
 			if (sok_open_client(&_SaSocket, SETUP_ASSIST_IP_ADDR, SETUP_ASSIST_PORT, SOCK_STREAM)==REPLY_OK)
 			{
+				UINT32	trace=TRACE_DEVICE;
+				int ret=sok_send_2(&_SaSocket, CMD_TRACE_ENABLE, sizeof(trace), &trace);
 				sok_receiver(NULL, &_SaSocket, _sa_handle_msg, NULL);
 			}
 		}
