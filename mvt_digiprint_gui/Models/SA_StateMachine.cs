@@ -47,22 +47,22 @@ namespace RX_DigiPrint.Models
 			_Actions.Add(new SA_Action()
 			{
 				Function = ECamFunction.CamFindMark_1,
-				Name="Find Mark",
+				Name="Find 3 Vert Lines",
 				ScanPos	= 50.0,
 			});
 
 			_Actions.Add(new SA_Action()
 			{
 				Function = ECamFunction.CamFindMark_2,
-				Name="Find Mark 2",
-				WebMoveDist = -190.0,
+				Name="Find Horiz Line",
+				WebMoveDist = -20.0,
 				ScanPos	    = 50.0,
 			});
 
 			_Actions.Add(new SA_Action()
 			{
 				Function = ECamFunction.CamFindMark_3,
-				Name="Find Mark 3",
+				Name="Find Line End",
 				WebMoveDist = 0,
 				ScanPos	    = 0,
 			});
@@ -332,7 +332,7 @@ namespace RX_DigiPrint.Models
 					RxGlobals.Events.AddItem(new LogItem("Camera: WebStop"));
 				}
 				RxGlobals.Events.AddItem(new LogItem("Camera: MARK FOUND"));
-				Console.WriteLine("{0}:  Action[{1}]: Mark Found", RxGlobals.Timer.Ticks(), _ActionIdx);
+				Console.WriteLine("{0}: Action[{1}]: Mark Found", RxGlobals.Timer.Ticks(), _ActionIdx);
 			}
 		}
 
@@ -472,7 +472,7 @@ namespace RX_DigiPrint.Models
 		{
 			if (_Action!=null)
 			{
-				if (_Action.Function==ECamFunction.CamFindMark_2)
+				if (_Action.Function==ECamFunction.CamFindMark_2 && _Action.WebMoveDone)
 				{
 					Console.WriteLine("Time={0} MarkFound={1}", _Time, _MarkFound);
 					if (_Time>0 && --_Time==0)

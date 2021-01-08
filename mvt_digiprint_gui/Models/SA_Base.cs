@@ -257,7 +257,7 @@ namespace RX_DigiPrint.Models
 		private int _WebMoveCnt=0;
 		private void _checkWebMoveDone()
 		{
-			RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n" + "STA_RELATIVE_MOVE_CNT" + "\n");
+			RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n" + "STA_RELATIVE_MOVE_CNT" +"\n");
 			int old=_WebMoveCnt;
 			_WebMoveCnt=Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_RELATIVE_MOVE_CNT")); 
 						
