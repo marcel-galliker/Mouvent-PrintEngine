@@ -82,6 +82,9 @@ void pvalve_init(void)
 //--- _set_valve --------------------------------------
 static int _set_valve(int isNo, int reg, int value)
 {
+	// TODO: Convert value [0%..100%] to voltage[0..24V] -> Flow[0%..100%]
+	// DOC:	 "201112_Proportional Actuation of WhisperValve 6724_BEL.pdf"
+
 	if (!_Active[isNo]) 		return REPLY_ERROR;
 
 	int i2c = _I2CBase[isNo];
