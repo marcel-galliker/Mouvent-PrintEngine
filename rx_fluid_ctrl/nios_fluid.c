@@ -694,8 +694,8 @@ static void _display_status(void)
 		term_printf("\n");
 		term_printf("inkPump:           ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%4s(%3d%%)  ", value_str(_Stat->ink_supply[i].inkPumpSpeed_measured), _Stat->ink_supply[i].inkPumpSpeed_set); term_printf("\n");
 				
-		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
-		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
+		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
+		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
 		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error); term_printf("\n");
 		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("\n");

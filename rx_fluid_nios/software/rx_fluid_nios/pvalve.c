@@ -38,55 +38,54 @@ static const int _I2CBase[NIOS_INK_SUPPLY_CNT] =
 };
 
 //--- statics -----------------------------------
-static int _Active=FALSE;
+static int _Active[NIOS_INK_SUPPLY_CNT];
 
 //--- pvalve_active -----------------------------
-int	pvalve_active(void)
+int	pvalve_active(int isNo)
 {
-	return _Active;
+	return _Active[isNo];
 }
 
 //--- pvalve_init ------------------------
 void pvalve_init(void)
 {
+	int isNo;
 	int ret;
-	int i2c = I2C_MASTER_IS1_BASE;
-	int dac_id=0;
-
-	ret = I2C_start(i2c, ADDR_DAC60502, WRITE);
-	if (!ret) ret = I2C_write(i2c, 0x01, LAST_BYTE);				// ask for DAC ID
-
-	// _i2c_wait_time();
-
-	ret = I2C_start(i2c, ADDR_DAC60502, READ);
-	if (!ret)
+	int dac_id;
+	for (isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++)
 	{
-		dac_id  = I2C_read(i2c, !LAST_BYTE) << 8;				// read DAC ID
-		dac_id += I2C_read(i2c, LAST_BYTE);
-	}
+		ret = I2C_start(_I2CBase[isNo], ADDR_DAC60502, WRITE);
+		if (!ret) ret = I2C_write(_I2CBase[isNo], 0x01, LAST_BYTE);				// ask for DAC ID
 
-	if(dac_id == 0x2215)
-	{
-	    int set_gain_reg = 0x0103;
-	    int i;
-		_Active=TRUE;
-	    for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
-	    {
-			I2C_start(_I2CBase[i], ADDR_DAC60502, WRITE);
-			I2C_write(_I2CBase[i], 0x04, !LAST_BYTE);                       // Set Gain
-			I2C_write(_I2CBase[i], (set_gain_reg >> 8),  !LAST_BYTE);       // Gain MSB
-			I2C_write(_I2CBase[i], (set_gain_reg & 0xff), LAST_BYTE);       // Gain LSB
-	    }
+		// _i2c_wait_time();
+
+		ret = I2C_start(_I2CBase[isNo], ADDR_DAC60502, READ);
+		dac_id = 0;
+		if (!ret)
+		{
+			dac_id  = I2C_read(_I2CBase[isNo], !LAST_BYTE) << 8;				// read DAC ID
+			dac_id += I2C_read(_I2CBase[isNo], LAST_BYTE);
+		}
+
+		if(dac_id == 0x2215)
+		{
+			int set_gain_reg = 0x0103;
+			_Active[isNo]=TRUE;
+			I2C_start(_I2CBase[isNo], ADDR_DAC60502, WRITE);
+			I2C_write(_I2CBase[isNo], 0x04, !LAST_BYTE);                       // Set Gain
+			I2C_write(_I2CBase[isNo], (set_gain_reg >> 8),  !LAST_BYTE);       // Gain MSB
+			I2C_write(_I2CBase[isNo], (set_gain_reg & 0xff), LAST_BYTE);       // Gain LSB
+		}
 	}
 }
 
 //--- _set_valve --------------------------------------
-static int _set_valve(int nr, int reg, int value)
+static int _set_valve(int isNo, int reg, int value)
 {
-	if (!_Active) 		return REPLY_ERROR;
+	if (!_Active[isNo]) 		return REPLY_ERROR;
 
-	int i2c = _I2CBase[nr];
-	int dac_data = MAX_VAL*100/value;
+	int i2c = _I2CBase[isNo];
+	int dac_data = MAX_VAL*value/100;
 
 	if (dac_data<0) 	dac_data=0;
 	if (dac_data>4095)	dac_data=MAX_VAL;

@@ -15,8 +15,10 @@
 #include "pio.h"
 #include "altera_avalon_pio_regs.h"
 #include "nios_def_fluid.h"
+#include "fpga_def_fluid.h"
 #include "i2c_master.h"
 #include "trprintf.h"
+#include "pvalve.h"
 #include "pres.h"
 
 //--- defines ---------------------------
@@ -45,7 +47,8 @@ typedef void (*set_power_fct)	(int on);
 typedef struct
 {
 	int				i2c;
-	int				pcb;	// sensor on PCB
+	int				isNo;	// number of InkSupply, -1=PSB
+		#define PCB	-1
 	UINT32			resetCnt;
 	INT32			*pPressure;
 	INT32			buf[BUF_SIZE];
@@ -68,7 +71,7 @@ static void _sensor_reset(SSensor *s);
 static void _sensor_read (SSensor *s);
 static int  _is_sensor_25(SSensor *s);
 static int  _pcb_sensor_25(SSensor *s);
-
+static void _is_sensor_power(int isNo, int state);
 
 //--- pres_init -----------------------
 void pres_init(void)
@@ -94,36 +97,36 @@ static void _sensors_init(void)
 
 	_Sensor[IS1_SENSOR].i2c 		= I2C_MASTER_IS1_BASE;
 	_Sensor[IS1_SENSOR].pPressure 	= &pRX_Status->ink_supply[0].IS_Pressure_Actual;
-	_Sensor[IS1_SENSOR].pcb			= FALSE;
+	_Sensor[IS1_SENSOR].isNo		= 0;
 
 	_Sensor[IS2_SENSOR].i2c 		= I2C_MASTER_IS2_BASE;
 	_Sensor[IS2_SENSOR].pPressure 	= &pRX_Status->ink_supply[1].IS_Pressure_Actual;
-	_Sensor[IS1_SENSOR].pcb			= FALSE;
+	_Sensor[IS2_SENSOR].isNo		= 1;
 
 	_Sensor[IS3_SENSOR].i2c 		= I2C_MASTER_IS3_BASE;
 	_Sensor[IS3_SENSOR].pPressure 	= &pRX_Status->ink_supply[2].IS_Pressure_Actual;
-	_Sensor[IS1_SENSOR].pcb			= FALSE;
+	_Sensor[IS3_SENSOR].isNo		= 2;
 
 	_Sensor[IS4_SENSOR].i2c 		= I2C_MASTER_IS4_BASE;
 	_Sensor[IS4_SENSOR].pPressure 	= &pRX_Status->ink_supply[3].IS_Pressure_Actual;
-	_Sensor[IS1_SENSOR].pcb			= FALSE;
+	_Sensor[IS4_SENSOR].isNo		= 3;
 
 	_Sensor[FLUSH_SENSOR].i2c 		= I2C_MASTER_F_BASE;
-	_Sensor[FLUSH_SENSOR].pPressure = &pRX_Status->flush_pressure;
-	_Sensor[FLUSH_SENSOR].pcb		= TRUE;
+    _Sensor[FLUSH_SENSOR].pPressure = &pRX_Status->flush_pressure;
+	_Sensor[FLUSH_SENSOR].isNo		= PCB;
 
 	_Sensor[DEGAS_SENSOR].i2c 		= I2C_MASTER_D_BASE;
-	_Sensor[DEGAS_SENSOR].pPressure = &pRX_Status->degass_pressure;
-	_Sensor[DEGAS_SENSOR].pcb		= TRUE;
+    _Sensor[DEGAS_SENSOR].pPressure = &pRX_Status->degass_pressure;
+	_Sensor[DEGAS_SENSOR].isNo		= PCB;
 
 	_Sensor[AIR_SENSOR].i2c 		= I2C_MASTER_P_BASE;
-	_Sensor[AIR_SENSOR].pPressure 	= &pRX_Status->air_pressure;
-	_Sensor[AIR_SENSOR].pcb			= TRUE;
+    _Sensor[AIR_SENSOR].pPressure 	= &pRX_Status->air_pressure;
+	_Sensor[AIR_SENSOR].isNo		= PCB;
 
-	for (i=0; i<=SENSOR_CNT; i++)
+	for (i=0; i<SENSOR_CNT; i++)
 	{
-		if( _Sensor[i].pcb) _Sensor[i].addr = _pcb_sensor_25(&_Sensor[i]) ? ADDR_SENSOR_2_5_BAR : ADDR_SENSOR_1_0_BAR;
-		if(!_Sensor[i].pcb) _Sensor[i].addr = _is_sensor_25 (&_Sensor[i]) ? ADDR_SENSOR_2_5_BAR : ADDR_SENSOR_1_0_BAR;
+		if( _Sensor[i].isNo==PCB) _Sensor[i].addr = _pcb_sensor_25(&_Sensor[i]) ? ADDR_SENSOR_2_5_BAR : ADDR_SENSOR_1_0_BAR;
+		else                      _Sensor[i].addr = _is_sensor_25 (&_Sensor[i]) ? ADDR_SENSOR_2_5_BAR : ADDR_SENSOR_1_0_BAR;
 
 		if (_Sensor[i].addr == ADDR_SENSOR_2_5_BAR)
 		{
@@ -141,6 +144,19 @@ static void _sensors_init(void)
 	trprintf("Initialized\n");
 }
 
+//--- ink_set_is_sensor_power --------------------------------
+static void _is_sensor_power(int isNo, int state)
+{
+	//IS-Adapter version "g" or later: Pressure sensors powered by "bleed" GPIO
+	if (isNo!=PCB && pvalve_active(isNo))
+	{
+		UINT16 val = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT);
+		if (state) val |=  BLEED_OUT(isNo);
+		else	   val &=  ~BLEED_OUT(isNo);
+		IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
+	}
+}
+
 
 //--- _is_sensor_25 -----------------------------------
 //--- checks whether an 2.5 mbar sensor is present and switch it on ---
@@ -150,17 +166,21 @@ static int _is_sensor_25(SSensor *s)
 	// CTRL/MS-Byte = 00001111 (PD0+PD1= 0, D7-D4 =1) = 0x0f
 	// LS-Byte = 11110000 (D0-D3 =1, other bits = 0)  = 0xf0
 
+	if (pvalve_active(s->isNo)) return TRUE;
+
 	// Dummy read
 	ret = I2C_start(s->i2c, ADDR_DAC, READ);
+	if (ret) return FALSE;
 	ret = I2C_read(s->i2c, LAST_BYTE);
 
+	/*
+	//--- used for bump feedback?
 	ret = I2C_start(s->i2c, ADDR_DAC, WRITE);
 	if (!ret) ret = I2C_write(s->i2c, 0x0f, !LAST_BYTE);	// write MS-Byte
 	if (!ret) ret = I2C_write(s->i2c, 0xf0, LAST_BYTE);		// write LS-Byte
 	if (!ret) return TRUE;
-
-	ret = I2C_write(s->i2c, 0x00, LAST_BYTE);		// write Stop
-	return FALSE;
+	 */
+	return TRUE;
 }
 
 //--- _pcb_sensor_25 -----------------------
@@ -191,6 +211,7 @@ static void _sensor_read(SSensor *s)
 		{
 			_sensor_reset(s);
 		//	s->set_power(TRUE);
+			_is_sensor_power(s->isNo, TRUE);
 			s->power=TRUE;
 			return;	// check next value already ok?
 		}
@@ -200,7 +221,9 @@ static void _sensor_read(SSensor *s)
 	{
 		int ret=I2C_start(s->i2c, s->addr, 1);
 		pressure = (I2C_read(s->i2c, FALSE) << 8) | I2C_read(s->i2c, TRUE);
-		trprintf("ret=%d pressure=%d\n", ret, pressure);
+		if (s->addr==ADDR_SENSOR_1_0_BAR) trprintf("sensor[%d]: 1.0 ret=%d pressure=%d power_timer=%d\n", s-_Sensor, ret, pressure, s->power_timer);
+		else							  trprintf("sensor[%d]: 2.5 ret=%d pressure=%d power_timer=%d\n", s-_Sensor, ret, pressure, s->power_timer);
+
 		if (s->power_timer>0)
 		{
 			s->power_timer--;
@@ -209,15 +232,18 @@ static void _sensor_read(SSensor *s)
 		if(pressure == 0xffff || pressure == 0)				// pressure sensor error, reset
 		{
 			// s->set_power(FALSE);						// DS1_3V3 OFF
+			_is_sensor_power(s->isNo, FALSE);
 			s->power=FALSE;
 			s->power_timer = 20;
 			s->power_cnt++;
 			(s->resetCnt)++;
+			trprintf("sensor[%d]: Error-power_cnt=%d\n", s-_Sensor, s->power_cnt);
 			if (s->power_cnt>3)
 			{
 				*s->pPressure=INVALID_VALUE;
 				s->error = TRUE;
-				if (s->pcb) _PowerState = 0;
+				if (s->isNo==PCB)
+					_PowerState = 0;
 			}
 		}
 		else
@@ -269,19 +295,23 @@ void pres_tick_10ms(void)
 {
 	int i;
 
+	trprintf("_PowerState=%d\n", _PowerState);
 	switch(_PowerState)
 	{
 	case 0: // disable 24V ----------------------------
 			IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE,	SENSOR_POWER_ENABLE);
 			for (i=0; i<SENSOR_CNT; i++)
 			{
-				if (_Sensor[i].pcb) _sensor_reset(&_Sensor[i]);
+				if (_Sensor[i].isNo==PCB) _sensor_reset(&_Sensor[i]);
+				else _is_sensor_power(_Sensor[i].isNo, FALSE);
 			}
 			_PowerState++;
 			break;
 
 	case 1: // enable 24V ---------------------------------------
 			IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,	SENSOR_POWER_ENABLE);
+			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
+				_is_sensor_power(i, TRUE);
 			_PowerState++;
 			break;
 

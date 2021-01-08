@@ -107,7 +107,6 @@ static SInkSupply 		_InkSupply[NIOS_INK_SUPPLY_CNT];
 static int	_LungVacc = 0;
 // static int	_PurgeNo;
 static int  _PressureTimer;
-static int	_ValveOut;
 static int	_FlushPump=0;
 static int	_AirPressureTime=0;
 
@@ -223,7 +222,6 @@ void ink_init(void)
 		pRX_Status->ink_supply[isNo].cylinderPresSet = INVALID_VALUE; // 150;
 	}
 //	_PurgeNo	   = -1;
-	_ValveOut      = 0;
 }
 
 //--- ink_error_reset ----------------------------------------------------
@@ -494,12 +492,6 @@ void ink_tick_10ms(void)
 					}
 					else
 					{
-						/*
-						if (pRX_Config->ink_supply[isNo].test_airValve) 	_set_air_valve(isNo, !pRX_Status->ink_supply[isNo].airValve);
-						if (pRX_Config->ink_supply[isNo].test_bleedValve)	_set_bleed_valve(isNo, !pRX_Status->ink_supply[isNo].bleedValve);
-						pRX_Config->ink_supply[isNo].test_airValve		= FALSE;
-						pRX_Config->ink_supply[isNo].test_bleedValve 	= FALSE;
-						*/
 						_set_air_valve  (isNo, pRX_Config->ink_supply[isNo].test_airValve);
 						_set_bleed_valve(isNo, pRX_Config->ink_supply[isNo].test_bleedValve);
 						_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres, PUMP_CTRL_MODE_NO_AIR_VALVE);		// ink-pump
@@ -1366,9 +1358,6 @@ void ink_tick_10ms(void)
 	{
 		_set_air_pump(FALSE);
 	}
-
-	// Update the IS Solenoids
-	IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, _ValveOut);
 }
 
 //--- ink_tick_1000ms ------------------------------------------------------
@@ -1562,28 +1551,34 @@ static int _degass_ctrl(void)
 void _set_air_valve(int isNo, int state)
 {
 	if (isNo == 0 && _LeakTest && state == TRUE) return;
+	if (!pvalve_active(isNo) && state) state=PV_OPEN;
 	if (state != pRX_Status->ink_supply[isNo].airValve)
 	{
-		pRX_Status->ink_supply[isNo].airValve = state;
 		if (pvalve_set_air(isNo, state))
 		{
-			if (state) _ValveOut |= AIR_CUSSION_OUT(isNo);
-			else	   _ValveOut &= ~AIR_CUSSION_OUT(isNo);
+			UINT16 val = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT);
+			if (state) val |= AIR_CUSSION_OUT(isNo);
+			else	   val &= ~AIR_CUSSION_OUT(isNo);
+			IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
 		}
+		pRX_Status->ink_supply[isNo].airValve = state;
 	}
 }
 
 //--- _set_bleed -----------------------------------------
 void _set_bleed_valve(int isNo, int state)
 {
+	if (!pvalve_active(isNo) && state) state=PV_OPEN;
 	if (state!=pRX_Status->ink_supply[isNo].bleedValve)
 	{
-		pRX_Status->ink_supply[isNo].bleedValve = state;
 		if (pvalve_set_bleed(isNo, state))
 		{
-			if (state) 	_ValveOut |=  BLEED_OUT(isNo);
-			else		_ValveOut &= ~BLEED_OUT(isNo);
+			UINT16 val = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT);
+			if (state) 	val |=  BLEED_OUT(isNo);
+			else		val &= ~BLEED_OUT(isNo);
+			IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
 		}
+		pRX_Status->ink_supply[isNo].bleedValve = state;
 	}
 }
 

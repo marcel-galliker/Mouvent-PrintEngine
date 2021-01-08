@@ -16,9 +16,9 @@
 
 void pvalve_init(void);
 
-int	pvalve_active(void);
+int	pvalve_active(int isNo);
 
-int pvalve_set_air(int nr, int value);	// return 0==OK
-int pvalve_set_bleed(int nr, int value);// return 0==OK
+int pvalve_set_air(int isNo, int value);	// return 0==OK
+int pvalve_set_bleed(int isNo, int value);// return 0==OK
 
 #endif /* PVALVE_H_ */
