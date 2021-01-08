@@ -1,4 +1,5 @@
 bin\
+bin\version.json
 bin\encoder
 bin\encoder\rx_encoder_ctrl
 bin\encoder\rx_encoder_rbf

@@ -1,3 +1,5 @@
 Appium-Python-Client==0.52
 pytest==5.4.2
-Pillow==7.1.2
+Pillow>=7.1.2
+GitPython==3.1.12
+python-docx==0.8.10

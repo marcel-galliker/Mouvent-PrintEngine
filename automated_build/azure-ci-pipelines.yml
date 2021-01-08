@@ -28,15 +28,12 @@ steps:
   condition: always()
   continueOnError: true
 
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: Write-Host "##vso[task.setvariable variable=semver]$(automated_build\gitversion /config automated_build\GitVersion.yml /showvariable InformationalVersion)"
+- script: automated_build\gitversion /config automated_build\GitVersion.yml /output file /outputfile bin\version.json
     
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: Print Engine'
   inputs:
-    ArtifactName: PrintEngine-$(semver)
+    ArtifactName: bin
     PathtoPublish: 'bin'
     publishLocation: 'Container'
 
