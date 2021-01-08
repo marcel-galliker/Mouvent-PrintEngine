@@ -157,30 +157,11 @@ static void _is_sensor_power(int isNo, int state)
 	}
 }
 
-
 //--- _is_sensor_25 -----------------------------------
 //--- checks whether an 2.5 mbar sensor is present and switch it on ---
 static int _is_sensor_25(SSensor *s)
 {
-	int ret;
-	// CTRL/MS-Byte = 00001111 (PD0+PD1= 0, D7-D4 =1) = 0x0f
-	// LS-Byte = 11110000 (D0-D3 =1, other bits = 0)  = 0xf0
-
-	if (pvalve_active(s->isNo)) return TRUE;
-
-	// Dummy read
-	ret = I2C_start(s->i2c, ADDR_DAC, READ);
-	if (ret) return FALSE;
-	ret = I2C_read(s->i2c, LAST_BYTE);
-
-	/*
-	//--- used for bump feedback?
-	ret = I2C_start(s->i2c, ADDR_DAC, WRITE);
-	if (!ret) ret = I2C_write(s->i2c, 0x0f, !LAST_BYTE);	// write MS-Byte
-	if (!ret) ret = I2C_write(s->i2c, 0xf0, LAST_BYTE);		// write LS-Byte
-	if (!ret) return TRUE;
-	 */
-	return TRUE;
+	return pvalve_active(s->isNo);
 }
 
 //--- _pcb_sensor_25 -----------------------
