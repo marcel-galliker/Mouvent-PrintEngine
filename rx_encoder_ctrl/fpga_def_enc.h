@@ -57,7 +57,7 @@ typedef struct
 {
 	UINT32	position;		// 0x0000[Bit 0..19]: // strokes // 20 Bit counter! in strokes
 	UINT32	speed;			// 0x0004: // strokes/s // speed* 50000000/2^31 // speed*23/1000 = stokes per sec
-	UINT32	res_8;			// 0x0008:
+	UINT32	fp_en;			// 0x0008:
 	UINT32	res_c;			// 0x000c:
 	UINT32	PG_cnt;			// 0x0010[Bit 0..9]: 10 bit counter!
 	UINT32	mark_edge_warn;	// 0x0014 mark edge detected during ignore window

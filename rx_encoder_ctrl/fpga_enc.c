@@ -328,7 +328,15 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		test_do(ticks);
 		if (_Init) _fpga_poslog();
 	}
-		
+    
+    if (_Init && (RX_EncoderCfg.printerType == printer_TX801 || RX_EncoderCfg.printerType == printer_TX802))
+    {
+        if ((int)Fpga->stat.encOut[0].fp_en == 0) FpgaQSys->out &= ~(1 << 1);
+        else FpgaQSys->out |= (1 << 1);
+        if ((int)Fpga->stat.encOut[7].fp_en == 0) FpgaQSys->out &= ~(1 << 2);
+        else FpgaQSys->out |= (1 << 2);
+    }
+    
 	if (_Init) Fpga->cfg.general.watchdog_cnt  = WATCHDOG_CNT;
 	if (menu)
 	{
@@ -401,7 +409,8 @@ static void _fpga_poslog(void)
 		sprintf(name, PATH_TEMP "Encoder_Positions.csv");
 		_poslog_file = fopen(name, "w");
 		fprintf(_poslog_file, "time(ms)");
-		for (i = 0; i < 4; i++) fprintf(_poslog_file, ";position enc %d", i);
+        for (i = 0; i < 4; i++) fprintf(_poslog_file, ";position enc %d", i);
+        for (i = 0; i < 4; i++) fprintf(_poslog_file, ";DigIn %d", i);
 		fprintf(_poslog_file, "\n");
 		_poslog_timer = rx_get_ticks();
 		_poslog_cnt++;
@@ -412,6 +421,7 @@ static void _fpga_poslog(void)
 	
 	fprintf(_poslog_file, "%d", time);
 	for (i = 0; i < 4; i++) fprintf(_poslog_file, ";%d", (int)Fpga->stat.encIn[i].position);
+	for (i = 0; i < 4; i++) fprintf(_poslog_file, ";%d", (int)(FpgaQSys->in &(1<<i)));
 	fprintf(_poslog_file, "\n");
 }
 
