@@ -53,8 +53,10 @@
 #define WASTE_PUMP_TIME         30000       // ms
 
 // Digital Inputs
-#define CABLE_PULL_REF 2
-#define CAPPING_ENDSTOP 3
+#define CABLE_PULL_REF          2
+#define CAPPING_ENDSTOP         3
+#define DI_INK_PUMP_REED_LEFT   4
+#define DI_INK_PUMP_REED_RIGHT  5
 
 // Digital Outputs
 #define RO_ALL_OUTPUTS          0x02F       // All used outputs -> o0, o1, o2, o3, o5
@@ -137,6 +139,7 @@ static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg);
 static void _handle_waste_pump(void);
 static void _handle_ink_pump_back(void);
 static void _vacuum_on();
+static void _vacuum_off();
 
 
 //--- lbrob_init --------------------------------------
@@ -212,7 +215,6 @@ void lbrob_main(int ticks, int menu)
     int motor;
     int pos, val;
 
-    static ERobotFunctions new_RobFunction = 0;
     RX_StepperStatus.posY[0] = _steps_2_micron(motor_get_step(MOTOR_X_0));
     RX_StepperStatus.posY[1] = _steps_2_micron(motor_get_step(MOTOR_X_0)) - CABLE_PURGE_POS_BACK;
     SStepperStat oldSatus;
@@ -256,7 +258,7 @@ void lbrob_main(int ticks, int menu)
 
     if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
     {
-        val = FALSE;
+        val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         RX_StepperStatus.robinfo.moving = FALSE;
 
@@ -430,8 +432,8 @@ void lbrob_main(int ticks, int menu)
             case rob_fct_vacuum:
             case rob_fct_wash:
             case rob_fct_wipe:
-                new_RobFunction = rob_fct_move;
                 _Old_RobFunction = _RobFunction;
+                _RobFunction = rob_fct_move;
                 _CmdRunning = FALSE;
                 _CmdRunning_old = FALSE;
                 if (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage)
@@ -441,7 +443,7 @@ void lbrob_main(int ticks, int menu)
                     robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
                 }
                 else
-                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &new_RobFunction);
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_RobFunction);
                 break;
 
             case rob_fct_move:
@@ -481,7 +483,7 @@ void lbrob_main(int ticks, int menu)
                 RX_StepperStatus.robinfo.ref_done = FALSE;
                 break;
             }
-            if (!_CmdRunning_Lift && !(RX_StepperStatus.info.z_in_wash && (_Old_RobFunction == rob_fct_wash || _Old_RobFunction == rob_fct_wipe)))
+            if (!_CmdRunning_Lift && !(RX_StepperStatus.info.z_in_wash && (_Old_RobFunction == rob_fct_wash || _Old_RobFunction == rob_fct_wipe)) && _RobFunction != rob_fct_move)
                 _Old_RobFunction = _RobFunction;
         }
         else if (_CmdRunning == CMD_ROB_REFERENCE && _CmdRunning_old)
@@ -611,6 +613,7 @@ void lbrob_display_status(void)
         term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
         term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);
         term_printf("Wipe done: \t\t %d\n", RX_StepperStatus.robinfo.wipe_done);
+        term_printf("Waste Pump Speed: %d\n", _Par_WastePump.speed);
         term_printf("\n");
     }
     else
@@ -639,6 +642,9 @@ void lbrob_menu(int help)
         term_printf("t<screw_nr>: Turn <screw_nr> n/6 Turn (n can be choosen by command \"T\")\n");
         term_printf("T<n>: Make <n>/6 turns with the command t\n");
         term_printf("d<n>: Wipe all (n = l: left; n = r : right; n = b: both\n");
+        term_printf("b<n>: Set Speed of Waste pump to <n>Hz\n");
+        term_printf("e: Change Inkpump_error_left state, actual %d\n", RX_StepperStatus.inkinfo.ink_pump_error_left);
+        term_printf("h: Change Inkpump_error_right state, actual %d\n", RX_StepperStatus.inkinfo.ink_pump_error_right);
         term_flush();
     }
     else
@@ -781,6 +787,16 @@ void lbrob_handle_menu(char *str)
             wipeside = wipe_all;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WIPE, &wipeside);
         break;
+    case 'b':
+        val = atoi(&str[1]);
+        _Par_WastePump.speed = val;
+        break;
+    case 'e':
+        RX_StepperStatus.inkinfo.ink_pump_error_left = !RX_StepperStatus.inkinfo.ink_pump_error_left;
+        break;
+    case 'h':
+        RX_StepperStatus.inkinfo.ink_pump_error_right = !RX_StepperStatus.inkinfo.ink_pump_error_right;
+        break;
     }
 }
 
@@ -835,9 +851,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
         RX_StepperStatus.robinfo.ref_done = FALSE;
-        int val = FALSE;
+        int val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
+        Error(LOG, 0, "Rob Stop");
         break;
 
     case CMD_ROB_REFERENCE:
@@ -883,11 +900,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ROB_EMPTY_WASTE:
         strcpy(_CmdName, "CMD_ROB_EMPTY_WASTE");
         val = (*(INT32 *)pdata);
-        int state = FALSE;
         if (val == 0)
         {
             Fpga.par->output &= ~RO_INK_PUMP_BOTH;
-            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
+            _vacuum_off();
         }
         else if (val == 1)
         {
@@ -896,7 +912,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         else if (val == 2)
         {
             Fpga.par->output &= ~RO_INK_PUMP_LEFT;
-            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
+            _vacuum_off();
         }
         else if (val == 3)
         {
@@ -905,7 +921,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         else if (val == 4)
         {
             Fpga.par->output &= ~RO_INK_PUMP_RIGHT;
-            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &state);
+            _vacuum_off();
         }
         else if (val == 5)
         {
@@ -992,11 +1008,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _set_Screwer_Cfg(*(SRobotOffsets *)pdata);
         break;
 
-    case CMD_ERROR_RESET:
-        strcpy(_CmdName, "CMD_ERROR_RESET");
-        fpga_stepper_error_reset();
-        break;
-
     default:
         lb702_handle_ctrl_msg(socket, msgId, pdata);
         break;
@@ -1011,7 +1022,13 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
     if (!_CmdRunning)
     {
         _RobFunction = fct;
-        
+        if ((_RobFunction == rob_fct_vacuum || _RobFunction == rob_fct_wash || _RobFunction == rob_fct_wipe) && wash_pos)
+        {
+            _Old_RobFunction = _RobFunction;
+            _RobFunction = rob_fct_move;
+            RX_StepperStatus.robinfo.purge_ready = FALSE;
+        }
+
         if (!RX_StepperStatus.screwerinfo.z_in_down)
         {
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
@@ -1115,9 +1132,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
                 _vacuum_on();
                 break;
             case rob_fct_wipe:
-                val = FALSE;
-                Fpga.par->output &= ~RO_VACUUM_CLEANER;
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
+                _vacuum_off();
                 if (RX_StepperStatus.screwerinfo.wipe_left_up)
                     Fpga.par->output |= RO_FLUSH_WIPE_LEFT;
                 else if (RX_StepperStatus.screwerinfo.wipe_right_up)
@@ -1699,22 +1714,37 @@ static void _handle_waste_pump(void)
 }
 
 //--- _handle_ink_pump_back --------------------------------------------
+#define TIMER_INK_PUMP_CHECK    1000
 static void _handle_ink_pump_back(void)
 {
     int val;
-    
+    static int _timer_left = 0;
+    static int _timer_right = 0;
+
     if ((RX_StepperStatus.robinfo.moving) && (Fpga.par->output & RO_INK_PUMP_LEFT || Fpga.par->output & RO_INK_PUMP_RIGHT))
     {
         val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_EMPTY_WASTE, &val);
     }
     
-    
     if (Fpga.par->output & RO_INK_PUMP_LEFT && motor_move_done(MOTOR_WASTE_PUMP_LEFT))
     {
         motor_reset(MOTOR_WASTE_PUMP_LEFT);
         motor_move_by_step(MOTOR_WASTE_PUMP_LEFT, &_Par_WastePump, 600000000);
         motors_start(1 << MOTOR_WASTE_PUMP_LEFT, FALSE);
+        _timer_left = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+    }
+    else if (Fpga.par->output & RO_INK_PUMP_LEFT)
+    {
+        if (fpga_input(DI_INK_PUMP_REED_LEFT))
+        {
+            _timer_left = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+        }
+        else if (rx_get_ticks() > _timer_left && !fpga_input(DI_INK_PUMP_REED_LEFT))
+        {
+            Error(ERR_CONT, 0, "Ink Pump left not running");
+            RX_StepperStatus.inkinfo.ink_pump_error_left = TRUE;
+        }
     }
     else if (!(Fpga.par->output & RO_INK_PUMP_LEFT))
     {
@@ -1726,6 +1756,19 @@ static void _handle_ink_pump_back(void)
         motor_reset(MOTOR_WASTE_PUMP_RIGHT);
         motor_move_by_step(MOTOR_WASTE_PUMP_RIGHT, &_Par_WastePump, 600000000);
         motors_start(1 << MOTOR_WASTE_PUMP_RIGHT, FALSE);
+        _timer_right = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+    }
+    else if (Fpga.par->output & RO_INK_PUMP_RIGHT)
+    {
+        if (fpga_input(DI_INK_PUMP_REED_RIGHT))
+        {
+            _timer_right = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+        }
+        else if (rx_get_ticks() > _timer_right && !fpga_input(DI_INK_PUMP_REED_RIGHT))
+        {
+            Error(ERR_CONT, 0, "Ink Pump right not running");
+            RX_StepperStatus.inkinfo.ink_pump_error_right = TRUE;
+        }
     }
     else if (!(Fpga.par->output & RO_INK_PUMP_RIGHT))
     {
@@ -1743,4 +1786,9 @@ static void _vacuum_on()
     Fpga.par->output |= RO_WASTE_VAC;
     Fpga.par->output |= RO_VACUUM_CLEANER;
     _WastePumpTimer = 0;
+}
+
+static void _vacuum_off()
+{
+    if (_WastePumpTimer) _WastePumpTimer = rx_get_ticks();
 }

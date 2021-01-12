@@ -50,7 +50,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define MIN_CAP_HEIGHT			7500		// um under Ref height
 
 #define DIST_CAP_WASH			5500		// um -> higher than capping hight
-#define DIST_CAP_SCREW			5600		// um -> higher than capping hight
+#define DIST_CAP_SCREW			4000		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
 
@@ -730,6 +730,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 									motor_errors_reset();
+                                    RX_StepperStatus.inkinfo.ink_pump_error_left = FALSE;
+                                    RX_StepperStatus.inkinfo.ink_pump_error_right = FALSE;
 									_ErrorFlags = 0;
 									break;
 	

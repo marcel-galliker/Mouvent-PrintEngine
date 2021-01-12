@@ -141,8 +141,8 @@ void rx_def_init();
 #define SCREW_X_LEFT		-19200		// -17700	// um
 #define SCREW_X_RIGHT		73800		// 75300	// um       // SCREW_X_LEFT + 93000
 
-#define SCREW_Y_FRONT		53500 // um
-#define SCREW_Y_BACK		37100  // um       // SCREW_Y_FRONT - 16400
+#define SCREW_Y_FRONT		51300 // um
+#define SCREW_Y_BACK		34900  // um       // SCREW_Y_FRONT - 16400
 
 //--- simple value ----------------------------------------------	
 typedef struct SValue
@@ -1427,8 +1427,8 @@ typedef struct EInkPumpInfo
     UINT32 flush_valve_1 : 1;        //	0x00002000
     UINT32 flush_valve_2 : 1;        //	0x00004000
     UINT32 flush_valve_3 : 1;        //	0x00008000
-    UINT32 info_16 : 1;              //	0x00010000
-    UINT32 info_17 : 1;              //	0x00020000
+    UINT32 ink_pump_error_left : 1;  //	0x00010000
+    UINT32 ink_pump_error_right : 1; //	0x00020000
     UINT32 info_18 : 1;				 //	0x00040000
     UINT32 info_19 : 1;				 //	0x00080000
     UINT32 info_20 : 1;				 //	0x00100000

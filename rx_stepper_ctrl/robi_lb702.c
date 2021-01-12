@@ -27,7 +27,7 @@
 #define TIME_BEFORE_TURN_SCREWER    2600    // us
 #define SCREW_MOVEMENT_CHECK_TIME   1100    // us
 
-#define MIN_Y_POS                   33000
+#define MIN_Y_POS                   31000
 
 #define MAX_VARIANCE                100     // um
 
@@ -148,6 +148,8 @@ void robi_lb702_main(int ticks, int menu)
                 {
                     Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                     RX_StepperStatus.screwerinfo.ref_done = FALSE;
+                    lb702_reset_variables();
+                    lbrob_reset_variables();
                 }
                 else
                 {
@@ -156,8 +158,18 @@ void robi_lb702_main(int ticks, int menu)
             }
             else
             {
-                if (!robi_connected()) Error(ERR_CONT, 0, "Connection lost during reference");
-                if (!robi_in_ref()) Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
+                if (!robi_connected())
+                {
+                    Error(ERR_CONT, 0, "Connection lost during reference");
+                    lb702_reset_variables();
+                    lbrob_reset_variables();
+                }
+                if (!robi_in_ref())
+                {
+                    Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
+                    lb702_reset_variables();
+                    lbrob_reset_variables();
+                }
                 _CmdRunning = 0;
                 _NewCmd = 0;
                 _Value = 0;
@@ -487,13 +499,22 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         robi_stop();
         break;
     case CMD_ROBI_REFERENCE:
-            _CmdRunning = msgId;
-            RX_StepperStatus.screwerinfo.moving = TRUE;
-            _set_moving_variables();
-            robi_reference();
+        if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
+        {
+            Error(ERR_CONT, 0, "Basket lift is not in position to reference Robi");
             break;
+        }
+        _CmdRunning = msgId;
+        RX_StepperStatus.screwerinfo.moving = TRUE;
+        _set_moving_variables();
+        robi_reference();
         break;
     case CMD_ROBI_MOVE_X:
+        if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
+        {
+            Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in x-Axis");
+            break;
+        }
         if (!_CmdRunning)
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
@@ -529,6 +550,11 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         
 
     case CMD_ROBI_MOVE_Y:
+        if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
+        {
+            Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in y-Axis");
+            break;
+        }
         if (!_CmdRunning)
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
@@ -632,6 +658,11 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_X:
+        if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
+        {
+            Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in x-Axis");
+            break;
+        }
         if (!_CmdRunning || _CmdRunning == CMD_ROBI_WIPE_LEFT || _CmdRunning == CMD_ROBI_WIPE_RIGHT)
         {
             pos = *((INT32 *)pdata);
@@ -667,6 +698,11 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_Y:
+        if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
+        {
+            Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in y-Axis");
+            break;
+        }
         if (!_CmdRunning || (_CmdRunning == CMD_ROBI_MOVE_Z_UP && !RX_StepperStatus.screwerinfo.z_in_down))
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
@@ -700,7 +736,11 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_GARAGE:
-
+        if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
+        {
+            Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in Garage");
+            break;
+        }
         if (!_CmdRunning)
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
