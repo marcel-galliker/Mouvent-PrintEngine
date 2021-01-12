@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RX_DigiPrint.Models
@@ -192,6 +193,25 @@ namespace RX_DigiPrint.Models
 		public void WebMove(double? dist=null)
 		{
 			_checkWebMoveDone();
+			/*
+			int time=0;
+			do
+			{
+				RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n"
+                + "STA_MACHINE_STATE" + "\n");
+
+				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
+				if (state==EnPlcState.plc_pause) break;
+				if (++time>100) 
+				{
+					Console.WriteLine("WebMove Timeout");
+					return;
+				}
+				Console.WriteLine("WebMove wait, state={0}, time={1}", state, time);
+				Thread.Sleep(100);
+			}
+			while(true);
+			*/
 
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
@@ -212,13 +232,32 @@ namespace RX_DigiPrint.Models
 		{
 			Console.WriteLine("{0}: WEB STOP", RxGlobals.Timer.Ticks());
 			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_WEB_STOP);
+			/*
+			int time=0;
+			do
+			{
+				RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n"
+                + "STA_MACHINE_STATE" + "\n");
+
+				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
+				if (state!=EnPlcState.plc_run) break;
+				if (++time>100) 
+				{
+					Console.WriteLine("WebStop Timeout");
+					return;
+				}
+				Console.WriteLine("WebStop wait, state={0}, time={1}", state, time);
+				Thread.Sleep(100);
+			}
+			while(true);
+			*/
 		}
 		
 		//--- _checkWebMoveDone -----------------------------------------------
 		private int _WebMoveCnt=0;
 		private void _checkWebMoveDone()
 		{
-			RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n" + "STA_RELATIVE_MOVE_CNT" + "\n");
+			RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n" + "STA_RELATIVE_MOVE_CNT" +"\n");
 			int old=_WebMoveCnt;
 			_WebMoveCnt=Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_RELATIVE_MOVE_CNT")); 
 						

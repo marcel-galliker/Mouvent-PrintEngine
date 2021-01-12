@@ -45,6 +45,15 @@ interface IFrx_AlignFilter : public IUnknown
 public:
 	#pragma region Enums & Structs
 
+	enum BinarizeModeEnum
+	{
+		BinarizeMode_Off = 0,
+		BinarizeMode_Manual = 1,
+		BinarizeMode_Auto = 2,
+		BinarizeMode_ColorAdaptive = 3,
+		BinarizeMode_RGB = 4
+	};
+
 	enum MeasureModeEnum	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register
 	{
 		MeasureMode_Off = 0,
@@ -54,6 +63,7 @@ public:
 		MeasureMode_Stitch = 4,
 		MeasureMode_Register = 5,
 		MeasureMode_StartLinesCont = 6,
+		MeasureMode_ColorStitch = 7
 	};
 
 	enum DisplayModeEnum
@@ -63,13 +73,24 @@ public:
 		Display_Correction = 2
 	};
 
+	enum LineLayoutEnum
+	{
+		LineLayout_Undefined = 0,
+		LineLayout_Covering = 1,
+		LineLayout_FromTop = 2,
+		LineLayout_FromBot = 3,
+		LineLayout_FromLeft = 4,
+		LineLayout_FromRight = 5
+	};
+
 	struct MeasureDataStruct
 	{
 		int ErrorCode;
-		float DPosX;		//Center of pattern offset X to center of camera
-		float DPosY;		//Center of pattern offset Y to center of camera
-		float Value_1;       //Angle, Stitch, Register: Correction Value in Rev or μm (Register), StartLines: number of lines
-		float Value_2;       //Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right: 1, Covering: 2, Bottom/Left: 3)  
+		float DPosX;			//Center of pattern offset X to center of camera
+		float DPosY;			//Center of pattern offset Y to center of camera
+		float Value_1;			//Angle, Stitch, Register: Correction Value in Rev or μm (Register), StartLines: number of lines
+		LineLayoutEnum LineLayout;	//Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right/Covering/Bottom/Left)
+		BOOL micron;				//Measure is in μm
 	};
 
 #pragma endregion
@@ -96,7 +117,15 @@ public:
 	STDMETHOD_(BOOL, GetShowOriginalImage)(THIS) PURE;
 
 	//Overlay-Text
-	STDMETHOD_(BOOL, SetOverlayTxt)(THIS_ const wchar_t* OverlayTxt, UINT32 OverlayTxtColor) PURE;
+	STDMETHOD_(BOOL, SetOverlayTxt)(THIS_ const wchar_t* OverlayTxt) PURE;
+
+	//BlobTextColor
+	STDMETHOD(SetOverlayTextColor)(THIS_ COLORREF BlobTextColor) PURE;
+	STDMETHOD_(COLORREF, GetOverlayTextColor)(THIS) PURE;
+
+	//Font for Blob Values
+	STDMETHOD(SetOverlayFont)(THIS_ void* pLogFontStruct) PURE;
+	STDMETHOD(GetOverlayFont)(THIS_ void* pLogFontStruct, UINT32* LogFontSize) PURE;
 
 	#pragma endregion
 
@@ -140,14 +169,14 @@ public:
 	STDMETHOD_(COLORREF, GetCrossColor)(THIS) PURE;
 
 	//BlobOutlineColor
-	STDMETHOD(SetBlobOutlineColor)(THIS_ UINT32 BlobOutlineColor) PURE;
-	STDMETHOD_(UINT32, GetBlobOutlineColor)(THIS) PURE;
+	STDMETHOD(SetBlobOutlineColor)(THIS_ COLORREF BlobOutlineColor) PURE;
+	STDMETHOD_(COLORREF, GetBlobOutlineColor)(THIS) PURE;
 	//BlobCrossColor
-	STDMETHOD(SetBlobCrossColor)(THIS_ UINT32 BlobCrossColor) PURE;
-	STDMETHOD_(UINT32, GetBlobCrossColor)(THIS) PURE;
+	STDMETHOD(SetBlobCrossColor)(THIS_ COLORREF BlobCrossColor) PURE;
+	STDMETHOD_(COLORREF, GetBlobCrossColor)(THIS) PURE;
 	//BlobTextColor
-	STDMETHOD(SetBlobTextColor)(THIS_ UINT32 BlobTextColor) PURE;
-	STDMETHOD_(UINT32, GetBlobTextColor)(THIS) PURE;
+	STDMETHOD(SetBlobTextColor)(THIS_ COLORREF BlobTextColor) PURE;
+	STDMETHOD_(COLORREF, GetBlobTextColor)(THIS) PURE;
 
 	//BlobAspectLimit
 	STDMETHOD(SetBlobAspectLimit)(THIS_ UINT32 BlobAspectLimit) PURE;
@@ -192,6 +221,8 @@ public:
 
 	//Minimum number of StartLines
     STDMETHOD(SetMinNumStartLines)(THIS_ UINT32 MinNumStartLines) PURE;
+	//Distance between vertical StartLines
+	STDMETHOD(SetStartLinesDistance)(THIS_ float StartLinesDistance) PURE;
 
 	//Execute Measures
 	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures) PURE;
@@ -397,7 +428,11 @@ public:
 	STDMETHODIMP_(BOOL) TakeSnapShot(const wchar_t* SnapDirectory, const wchar_t* SnapFileName);
 	STDMETHODIMP SetShowOriginalImage(BOOL ShowOriginalImage);
 	STDMETHODIMP_(BOOL) GetShowOriginalImage();
-	STDMETHODIMP_(BOOL) SetOverlayTxt(const wchar_t* OverlayTxt, UINT32 OverlayTxtColor);
+	STDMETHODIMP_(BOOL) SetOverlayTxt(const wchar_t* OverlayTxt);
+	STDMETHODIMP SetOverlayTextColor(COLORREF BlobTextColor);
+	STDMETHOD_(COLORREF) GetOverlayTextColor();
+	STDMETHODIMP SetOverlayFont(void* pLogFontStruct);
+	STDMETHODIMP GetOverlayFont(void* pLogFontStruct, UINT32* LogFontSize);
 
 	#pragma endregion
 
@@ -435,14 +470,14 @@ public:
 	STDMETHODIMP_(COLORREF) GetCrossColor();
 
 	//BlobOutlineColor
-	STDMETHODIMP SetBlobOutlineColor(UINT32 BlobOutlineColor);
-	STDMETHODIMP_(UINT32) GetBlobOutlineColor();
+	STDMETHODIMP SetBlobOutlineColor(COLORREF BlobOutlineColor);
+	STDMETHODIMP_(COLORREF) GetBlobOutlineColor();
 	//BlobCrossColor
-	STDMETHODIMP SetBlobCrossColor(UINT32 BlobCrossColor);
-	STDMETHODIMP_(UINT32) GetBlobCrossColor();
+	STDMETHODIMP SetBlobCrossColor(COLORREF BlobCrossColor);
+	STDMETHODIMP_(COLORREF) GetBlobCrossColor();
 	//BlobTextColor
-	STDMETHODIMP SetBlobTextColor(UINT32 BlobTextColor);
-	STDMETHODIMP_(UINT32) GetBlobTextColor();
+	STDMETHODIMP SetBlobTextColor(COLORREF BlobTextColor);
+	STDMETHODIMP_(COLORREF) GetBlobTextColor();
 
 	//BlobAspectLimit
 	STDMETHODIMP SetBlobAspectLimit(UINT32 BlobAspectLimit);
@@ -486,6 +521,8 @@ public:
 
 	//Minimum number of StartLines
     STDMETHODIMP SetMinNumStartLines(UINT32 MinNumStartLines);
+	//Distance between vertical StartLines
+	STDMETHODIMP SetStartLinesDistance(float StartLinesDistance);
 
 	//Execute Measures
 	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures);
@@ -528,10 +565,9 @@ private:
 	cl_program Program = NULL;
 
 	//Binarize
-	UINT m_BinarizeMode = 0;	//0: off, 1: manual, 2: Auto, 3: Adaptive, 4: RGB
-	UINT m_PresetBinarizeMode = 0;
+	BinarizeModeEnum m_BinarizeMode = BinarizeMode_Off;	//0: off, 1: manual, 2: Auto, 3: Adaptive, 4: RGB
+	BinarizeModeEnum m_PresetBinarizeMode = BinarizeMode_Off;
 	UINT Histogram[256];
-	UINT RGBHistogram[3 * 256];
 	UINT m_Threshold = 127;
 	UINT m_PresetThreshold = 127;
 	BOOL m_ShowHistogram = false;
@@ -548,6 +584,15 @@ private:
 	uchar* ThresholdArray = NULL;
 	UINT* HistogramArray = NULL;
 	uchar* ThresholdLine = NULL;
+
+	//RGB Histogram
+	UINT RGBHistogram[3 * 256];
+	UINT m_RGBThreshold[3];
+	UINT m_RGBFinalThreshold = 170;
+	UINT m_RGBPeak_1_Val[3] = { 0, 0, 0 };
+	UINT m_RGBPeak_2_Val[3] = { 0, 0, 0 };
+	UINT m_RGBPeak_1_Pos[3] = { 0, 0, 0 };
+	UINT m_RGBPeak_2_Pos[3] = { 0, 0, 0 };
 
 	//Dilate/Erode
 	UINT m_DilateErodes = 3;			//Dilate-Erode Iterations
@@ -590,15 +635,15 @@ private:
 	UINT m_PresetBlobAreaDivisor = 70;
 	UINT m_BlobAspectLimit = 5;
 	UINT m_PresetBlobAspectLimit = 5;
-	COLORREF m_BlobColor = RGB(127, 127, 127);
-	COLORREF m_PresetBlobColor = RGB(127, 127, 127);
+	COLORREF m_BlobColor = RGB(192, 192, 192);
+	COLORREF m_PresetBlobColor = RGB(192, 192, 192);
 	COLORREF m_CrossColor = RGB(255, 255, 255);
 	COLORREF m_PresetCrossColor = RGB(255, 255, 255);
-	COLORREF m_TextColor = RGB(0, 255, 0);
-	COLORREF m_PresetTextColor = RGB(0, 255, 0);
 
-	HFONT m_TextFont = NULL;
-	long m_FontHeight = 0;
+	COLORREF m_BlobTextColor = RGB(0, 255, 0);
+	COLORREF m_PresetBlobTextColor = RGB(0, 255, 0);
+	HFONT m_BlobTextFont = NULL;
+	long m_BlobFontHeight = 0;
 
 	MeasureModeEnum m_MeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;	//0: Off, 1: All Lines, 2: StartLines, 3:Angle, 4: Stitch, 5: Register, 6: StartLinesCont
 	MeasureModeEnum m_PresetMeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;
@@ -614,7 +659,7 @@ private:
 	BOOL m_DataListforHostReady = false;
 	BOOL m_measureDone = false;
 
-
+	float m_FindLine_umPpx = 1;
 
 	const int m_MaxBlobAngle = 20;
 	const int m_MaxNumBlobs = 50;
@@ -664,6 +709,9 @@ private:
 	//Register
 	float m_RegisterOuterDistance = 1143;
 	float m_RegisterTargetDistance = 571.5;
+	//FindLines
+	float m_FindLine_Distance = (float)677.333333333333;
+	float m_PresetFindLine_Distance = (float)677.333333333333;
 
 	//TextBitmap
 	bool OverlayBitmapReady = FALSE;
@@ -693,7 +741,11 @@ private:
 	//Overlay
 	wchar_t m_OverlayTxt[MAX_PATH] = L"";
 	BOOL m_OverlayTxtReady = false;
-	UINT32 m_OverlayTxtColor = 0x00000000;
+	COLORREF m_OverlayTextColor = RGB(0, 255, 0);
+	COLORREF m_PresetOverlayTextColor = RGB(0, 255, 0);
+	HFONT m_OverlayTextFont = NULL;
+	long m_OverlayFontHeight = 0;
+
 
 
 	//Prototypes
@@ -722,6 +774,7 @@ private:
 	cl_kernel ClShowRGBHistogramKernel = NULL;
 	cl_kernel ClJoinRGBHistogramKernel = NULL;
 	cl_kernel ClSmoothenRGBHistogramKernel = NULL;
+	cl_kernel ClColorizeRGBKernel = NULL;
 
 	//Change Settings and Modes
 	HRESULT ChangeModes();
@@ -735,11 +788,14 @@ private:
 	//Multi Color Histogram
 	HRESULT GetColorHistogram(IMediaSample* pSampleIn, BOOL Vertical);
 	HRESULT ShowColorHistogram(IMediaSample* pSampleIn, UINT* Histogram, BOOL Vertical);
-	HRESULT C_rx_AlignFilter::BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSample* pSampleOut);
+	HRESULT BinarizeMultiColor(IMediaSample* pSampleIn, IMediaSample* pSampleOut);
 
 	//RGB Histogram
 	HRESULT GetRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHistogram);
 	HRESULT ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHistogram);
+	HRESULT ColorizeRGB(IMediaSample* pSampleIn, UINT* RGBHistogram, IMediaSample* pSampleOut, bool FixInverse = true);
+	int CalcRGBThreshold(UINT* RGBHistogram, UINT* Peak_1_Val, UINT* Peak_1_Pos, UINT* Peak_2_Val, UINT* Peak_2_Pos, UINT* Threshold);
+
 
 	//Dilate/Erode
 	HRESULT Erode(IMediaSample* pSampleIn, BOOL Vertical);
@@ -753,7 +809,7 @@ private:
 	HRESULT CalculateDistances(BOOL Vertical, Mat SourceMat);
 	HRESULT FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Continuous = false);
 	HRESULT MeasureAngle(BOOL Vertical, BOOL UpsideDown);
-	HRESULT MeasureStitch(BOOL Vertical, BOOL UpsideDown);
+	HRESULT MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InRevolutions);
 	HRESULT MeasureRegister(BOOL Vertical, BOOL UpsideDown);
 
 	//Display

@@ -358,7 +358,6 @@ namespace RX_DigiPrint.Services
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SPrinterCfgMsg"));
         }
-
         
         //--- handle_printer_stat -----------------------------------------
         private void handle_printer_stat(Byte[] buf)

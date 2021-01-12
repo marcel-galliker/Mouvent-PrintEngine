@@ -127,12 +127,12 @@ namespace RX_DigiPrint.Views.UserControls
                 CMD_JOG_BWD.IsBusy = (val != null) && val.Equals("TRUE");
             }
 
-            int state = Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
+            EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
             if (_WebInStartTimer>0)
 			{
-                if (--_WebInStartTimer==0 && state==3) WebIn_Clicked(CMD_WEBIN, null);
+                if (--_WebInStartTimer==0 && state==EnPlcState.plc_stop) WebIn_Clicked(CMD_WEBIN, null);
 			}
-            else if (state==3) CMD_WEBIN.IsChecked=false;
+            else if (state==EnPlcState.plc_stop ) CMD_WEBIN.IsChecked=false;
         }
 
         //--- Clean_Clicked -------------------------------------------------

@@ -193,9 +193,10 @@ C_rx_AlignFilter::C_rx_AlignFilter(TCHAR *pName, LPUNKNOWN pUnk, HRESULT *phr) :
 	_tcsncpy_s(lf.lfFaceName, LF_FACESIZE, _T("Lucida Console"), 15);
 	lf.lfPitchAndFamily = 0x31;
 	lf.lfWeight = 0x190;
-	m_TextFont = CreateFontIndirect(&lf);
-	m_FontHeight = lf.lfHeight;
-
+	m_BlobTextFont = CreateFontIndirect(&lf);
+	m_BlobFontHeight = lf.lfHeight;
+	m_OverlayTextFont = CreateFontIndirect(&lf);
+	m_OverlayFontHeight = lf.lfHeight;
 }
 
 // Destructor
@@ -475,7 +476,8 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	m_DisplayMode = m_PresetDisplayMode;
 
 	m_BinarizeMode = m_PresetBinarizeMode;
-	if (m_BinarizeMode == 1) m_Threshold = m_PresetThreshold;
+	if (m_BinarizeMode == BinarizeMode_Manual) m_Threshold = m_PresetThreshold;
+	if (m_BinarizeMode == BinarizeMode_RGB) m_Threshold = m_RGBFinalThreshold;
 
 	m_ShowOriginal = m_PresetShowOriginal;
 	m_ShowHistogram = m_PresetShowHistogram;
@@ -497,14 +499,21 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	m_UpsideDown = m_PresetUpsideDown;
 
 	m_MinNumStartLines = m_PresetMinNumStartLines;
+	if (m_FindLine_Distance != m_PresetFindLine_Distance)
+	{
+		m_FindLine_Distance != m_PresetFindLine_Distance;
+		m_FindLine_umPpx = 1;
+	}
 
 	m_CrossColorBlob = m_PresetCrossColorBlob;
 	m_BlobColor = m_PresetBlobColor;
 	m_CrossColor = m_PresetCrossColor;
-	m_TextColor = m_PresetTextColor;
+	m_BlobTextColor = m_PresetBlobTextColor;
 	m_OverlayBlobs = m_PresetOverlayBlobs;
 	m_OverlayCenters = m_PresetOverlayCenters;
 	m_OverlayValues = m_PresetOverlayValues;
+	m_OverlayTextColor = m_PresetOverlayTextColor;
+
 
 	//Start Measure
 	if (m_StartMeasure)
@@ -894,7 +903,7 @@ HRESULT C_rx_AlignFilter::GetHistogram(IMediaSample* pSampleIn, UINT* Histogram,
 
 	#pragma endregion
 
-	if (BinarizationMode > 1)
+	if (BinarizationMode > 1)	//Not in Manual
 	{
 		UINT NewThreshold = m_Threshold;
 		int CalcResult = CalcThreshold(Histogram, &m_Peak_1_Val, &m_Peak_1_Pos, &m_Peak_2_Val, &m_Peak_2_Pos, &NewThreshold);
@@ -1241,7 +1250,7 @@ HRESULT C_rx_AlignFilter::Binarize(IMediaSample* pSampleIn, IMediaSample* pSampl
 	#pragma endregion
 
 
-	if (m_BinarizeMode > 0)
+	if (m_BinarizeMode != BinarizeMode_Off)
 	{
 		//Set Arguments
 		cl_Error = clSetKernelArg(ClBinarizeKernel, 0, sizeof(cl_mem), &ClSourceImageBuffer);
@@ -2623,6 +2632,28 @@ HRESULT C_rx_AlignFilter::GetRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHist
 
 #pragma endregion
 
+
+	UINT NewRGBThreshold[3] = { m_RGBThreshold[0], m_RGBThreshold[1], m_RGBThreshold[2] };
+
+	int CalcResult = CalcRGBThreshold(RGBHistogram, m_RGBPeak_1_Val, m_RGBPeak_1_Pos, m_RGBPeak_2_Val, m_RGBPeak_2_Pos, NewRGBThreshold);
+
+	m_RGBThreshold[0] = (m_RGBThreshold[0] + NewRGBThreshold[0]) / 2;
+	if (m_RGBThreshold[0] <= 0) m_RGBThreshold[0] = 127;
+
+	m_RGBThreshold[1] = (m_RGBThreshold[1] + NewRGBThreshold[1]) / 2;
+	if (m_RGBThreshold[1] <= 0) m_RGBThreshold[1] = 127;
+
+	m_RGBThreshold[2] = (m_RGBThreshold[2] + NewRGBThreshold[2]) / 2;
+	if (m_RGBThreshold[2] <= 0) m_RGBThreshold[2] = 127;
+
+	//if (m_DebugOn)
+	//{
+	//	m_MeasureTime = std::chrono::steady_clock::now();
+	//	m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+	//	printf("%6.6f\tGetRGBHistogram: Thresholds B:%u, G:%u, R:%u \n", (float)m_TimeStamp / 1000000.0f, m_RGBThreshold[0], m_RGBThreshold[1], m_RGBThreshold[2]);
+	//}
+
+
 	return NOERROR;
 }
 
@@ -2636,7 +2667,7 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 	//OpenCl Return Value
 	cl_int cl_Error;
 
-#pragma region create CL Buffers
+	#pragma region create CL Buffers
 
 	//Input Image Pointer for OpenCL
 	BYTE* pInBuffer;
@@ -2683,7 +2714,82 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		exit(-1);
 	}
 
-#pragma endregion
+	//Peak_2_Val Buffer
+	cl_mem ClPeak_1_ValBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 3, (void*)&m_Peak_1_Val, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create  OpenCL Peak_1_Val Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Peak_2_Pos Buffer
+	cl_mem ClPeak_1_PosBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 3, (void*)&m_Peak_1_Pos, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create  OpenCL Peak_1_Pos Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Peak_2_Val Buffer
+	cl_mem ClPeak_2_ValBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 3, (void*)&m_Peak_2_Val, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create  OpenCL Peak_2_Val Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Peak_2_Pos Buffer
+	cl_mem ClPeak_2_PosBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 3, (void*)&m_Peak_2_Pos, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create  OpenCL Peak_2_Pos Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//RGB Threshold Buffer
+	cl_mem ClRGBThresholdBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 3, (void*)&m_RGBThreshold, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create  OpenCL RGBThreshold Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	#pragma endregion
 
 	//Max Peak in Histogram
 	UINT MaxHistoVal = *max_element(&RGBHistogram[0], &RGBHistogram[256 * 3]);
@@ -2692,7 +2798,7 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 	UINT LineHeight = m_ImageHeight / 150;
 	UINT LineWidth = m_ImageWidth / 150;
 
-#pragma region run kernel
+	#pragma region run kernel
 
 	//Set Arguments
 	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 0, sizeof(cl_mem), &ClSourceImageBuffer);
@@ -2734,7 +2840,7 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		}
 		exit(-1);
 	}
-	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 3, sizeof(cl_uint), (cl_uint*)&m_Peak_1_Val);
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 3, sizeof(cl_mem), &ClPeak_1_ValBuffer);
 	if (cl_Error != CL_SUCCESS)
 	{
 		if (m_DebugOn)
@@ -2747,7 +2853,7 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		}
 		exit(-1);
 	}
-	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 4, sizeof(cl_uint), (cl_uint*)&m_Peak_1_Pos);
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 4, sizeof(cl_mem), &ClPeak_1_PosBuffer);
 	if (cl_Error != CL_SUCCESS)
 	{
 		if (m_DebugOn)
@@ -2760,7 +2866,7 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		}
 		exit(-1);
 	}
-	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 5, sizeof(cl_uint), (cl_uint*)&m_Peak_2_Val);
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 5, sizeof(cl_mem), &ClPeak_2_ValBuffer);
 	if (cl_Error != CL_SUCCESS)
 	{
 		if (m_DebugOn)
@@ -2773,7 +2879,7 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		}
 		exit(-1);
 	}
-	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 6, sizeof(cl_uint), (cl_uint*)&m_Peak_2_Pos);
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 6, sizeof(cl_mem), &ClPeak_2_PosBuffer);
 	if (cl_Error != CL_SUCCESS)
 	{
 		if (m_DebugOn)
@@ -2786,7 +2892,7 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		}
 		exit(-1);
 	}
-	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 7, sizeof(cl_uint), (cl_uint*)&m_Threshold);
+	cl_Error = clSetKernelArg(ClShowRGBHistogramKernel, 7, sizeof(cl_mem), &ClRGBThresholdBuffer);
 	if (cl_Error != CL_SUCCESS)
 	{
 		if (m_DebugOn)
@@ -2882,9 +2988,9 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		exit(-1);
 	}
 
-#pragma endregion
+	#pragma endregion
 
-#pragma region Retrieve Buffers
+	#pragma region Retrieve Buffers
 
 	//Retrieve Buffers
 	cl_Error = clEnqueueReadBuffer(queue, ClSourceImageBuffer, CL_TRUE, 0, pSampleIn->GetActualDataLength(), (void*)pInBuffer, 0, NULL, NULL);
@@ -2901,17 +3007,237 @@ HRESULT C_rx_AlignFilter::ShowRGBHistogram(IMediaSample* pSampleIn, UINT* RGBHis
 		exit(-1);
 	}
 
-#pragma endregion
+	#pragma endregion
 
-#pragma region Cleanup CL
+	#pragma region Cleanup CL
 
 	//Cleanup
 	cl_Error = clReleaseMemObject(ClSourceImageBuffer);
 	cl_Error = clReleaseMemObject(ClHistogramBuffer);
+	cl_Error = clReleaseMemObject(ClPeak_1_ValBuffer);
+	cl_Error = clReleaseMemObject(ClPeak_1_PosBuffer);
+	cl_Error = clReleaseMemObject(ClPeak_2_ValBuffer);
+	cl_Error = clReleaseMemObject(ClPeak_2_PosBuffer);
+	cl_Error = clReleaseMemObject(ClRGBThresholdBuffer);
 
-#pragma endregion
+	#pragma endregion
 
 	return NOERROR;
+}
+
+HRESULT C_rx_AlignFilter::ColorizeRGB(IMediaSample* pSampleIn, UINT* RGBThreshold, IMediaSample* pSampleOut, bool FixInverse)
+{
+	//Binarize each color channel
+
+	CheckPointer(pSampleIn, E_POINTER);
+	CheckPointer(pSampleOut, E_POINTER);
+	HRESULT hr = NOERROR;
+
+	//OpenCl Return Value
+	cl_int cl_Error;
+
+	#pragma region create CL Buffers
+
+	//Input Image Pointer for OpenCL
+	BYTE* pInBuffer;
+	hr = pSampleIn->GetPointer(&pInBuffer);
+	if (FAILED(hr))
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s(hr, MsgMsg, 10, 16);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Get Pointer InBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return E_POINTER;
+	}
+	//Input Image Buffer for OpenCL
+	cl_mem ClSourceImageBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, pSampleIn->GetActualDataLength(), (void*)pInBuffer, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not create OpenCL Input Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//Output Image Pointer for OpenCL
+	BYTE* pOutBuffer;
+	hr = pSampleOut->GetPointer(&pOutBuffer);
+	if (FAILED(hr))
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s(hr, MsgMsg, 10, 16);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Get Pointer OutBuffer Error: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		return E_POINTER;
+	}
+	//Output Image Buffer for OpenCL
+	cl_mem ClDestImageBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, pSampleOut->GetActualDataLength(), (void*)pOutBuffer, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not create OpenCL Output Image Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	//RGBThreshold Buffer
+	cl_mem ClRGBThresholdBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * 3, (void*)RGBThreshold, &cl_Error);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tGetHistogram: Could not create  OpenCL RGBThreshold Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	#pragma endregion
+
+	#pragma region ColorizeRGB
+
+	//Set Arguments
+	cl_Error = clSetKernelArg(ClColorizeRGBKernel, 0, sizeof(cl_mem), &ClSourceImageBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not set Argument 0 of OpenCL Kernel ColorizeRGB: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClColorizeRGBKernel, 1, sizeof(cl_mem), &ClDestImageBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not set Argument 1 of OpenCL Kernel ColorizeRGB: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clSetKernelArg(ClColorizeRGBKernel, 2, sizeof(cl_mem), &ClRGBThresholdBuffer);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not set Argument 2 of OpenCL Kernel ColorizeRGB: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	cl_uint InverseIt = 0;
+	if (m_InverseImage || FixInverse)
+	{
+		InverseIt = 1;
+	}
+	cl_Error = clSetKernelArg(ClColorizeRGBKernel, 3, sizeof(cl_uint), (cl_uint*)&InverseIt);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not set Argument 3 of OpenCL Kernel ColorizeRGB: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+
+	//Run the Kernel
+	size_t GlobalWorkSize2[] = { (size_t)((size_t)m_ImageWidth * (size_t)m_ImageHeight), (size_t)1 };
+	cl_Error = clEnqueueNDRangeKernel(queue, ClColorizeRGBKernel, 1, NULL, GlobalWorkSize2, NULL, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not run OpenCL Kernel ColorizeRGB: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+	cl_Error = clFinish(queue);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not finish OpenCL Kernel ColorizeRGB: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	#pragma endregion
+
+	#pragma region Retrieve Buffers
+
+	//Retrieve Buffers
+	cl_Error = clEnqueueReadBuffer(queue, ClDestImageBuffer, CL_TRUE, 0, pSampleOut->GetActualDataLength(), (void*)pOutBuffer, 0, NULL, NULL);
+	if (cl_Error != CL_SUCCESS)
+	{
+		if (m_DebugOn)
+		{
+			TCHAR MsgMsg[10];
+			_itow_s((int)cl_Error, MsgMsg, 10, 10);
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tBinarize: Could not read OpenCL RGBColorized Buffer: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+		}
+		exit(-1);
+	}
+
+	#pragma endregion
+
+	#pragma region Cleanup CL
+
+	//Cleanup Buffers
+	cl_Error = clReleaseMemObject(ClSourceImageBuffer);
+	cl_Error = clReleaseMemObject(ClDestImageBuffer);
+	cl_Error = clReleaseMemObject(ClRGBThresholdBuffer);
+
+	#pragma endregion
+
+	return hr;
 }
 
 
@@ -3335,7 +3661,12 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	//Check for minimum number of valid lines
     if(NumBlobsvalid < (int)m_MinNumStartLines) return NOERROR;
 
-	if (NumBlobsvalid > 1) AvgDist /= (float)NumBlobsvalid - 1;
+	//Distance between lines / measured camera-pixels = μm per camera-pixel
+	if (NumBlobsvalid > 1)
+	{
+		AvgDist /= (float)NumBlobsvalid - 1;
+		m_FindLine_umPpx = m_FindLine_Distance / AvgDist;
+	}
 	AvgCenterX /= (float)NumBlobsvalid;
 	AvgCenterY /= (float)NumBlobsvalid;
 	AvgLengthX /= (float)NumBlobsvalid;
@@ -3346,11 +3677,11 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	//Line Layout and Position inside Window
 	if (Vertical)
 	{
-		MeasureData.DPosX = AvgCenterX - (m_ImageWidth / 2);
+		MeasureData.DPosX = (AvgCenterX - (m_ImageWidth / 2)) * m_FindLine_umPpx;
 		if (AvgLengthY > (float)m_ImageHeight * 0.95)
 		{
 			//Covering whole image
-			MeasureData.Value_2 = 2;
+			MeasureData.LineLayout = LineLayoutEnum::LineLayout_Covering;
 			MeasureData.DPosY = 0;
 		}
 		else
@@ -3358,24 +3689,24 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 			if (AvgCenterY < (float)m_ImageHeight * 0.5)
 			{
 				//Entering from bottom
-				MeasureData.DPosY = (AvgCenterY + (AvgLengthY / 2)) - ((float)m_ImageHeight / 2);
-				MeasureData.Value_2 = UpsideDown ? 1 : 3;
+				MeasureData.DPosY = ((AvgCenterY + (AvgLengthY / 2)) - ((float)m_ImageHeight / 2)) * m_FindLine_umPpx;
+				MeasureData.LineLayout = UpsideDown ? LineLayoutEnum::LineLayout_FromTop : LineLayoutEnum::LineLayout_FromBot;
 			}
 			else
 			{
 				//Entering from top
-				MeasureData.DPosY = (AvgCenterY - (AvgLengthY / 2)) - ((float)m_ImageHeight / 2);
-				MeasureData.Value_2 = UpsideDown ? 3 : 1;
+				MeasureData.DPosY = ((AvgCenterY - (AvgLengthY / 2)) - ((float)m_ImageHeight / 2)) * m_FindLine_umPpx;
+				MeasureData.LineLayout = UpsideDown ? LineLayoutEnum::LineLayout_FromBot : LineLayoutEnum::LineLayout_FromTop;
 			}
 		}
 	}
 	else	//Horizontal
 	{
-		MeasureData.DPosY = AvgCenterY - (m_ImageHeight / 2);
+		MeasureData.DPosY = (AvgCenterY - (m_ImageHeight / 2)) * m_FindLine_umPpx;
 		if (AvgLengthX > (float)m_ImageWidth * 0.95)
 		{
 			//Covering whole image
-			MeasureData.Value_2 = 2;
+			MeasureData.LineLayout = LineLayoutEnum::LineLayout_Covering;
 			MeasureData.DPosX = 0;
 		}
 		else
@@ -3383,14 +3714,14 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 			if (AvgCenterX < (float)m_ImageWidth * 0.5)
 			{
 				//Entering from left
-				MeasureData.DPosX =  (AvgCenterX + (AvgLengthX / 2)) - ((float)m_ImageWidth / 2);
-				MeasureData.Value_2 = UpsideDown ? 1 : 3;
+				MeasureData.DPosX =  ((AvgCenterX + (AvgLengthX / 2)) - ((float)m_ImageWidth / 2)) * m_FindLine_umPpx;
+				MeasureData.LineLayout = UpsideDown ? LineLayoutEnum::LineLayout_FromRight : LineLayoutEnum::LineLayout_FromLeft;
 			}
 			else
 			{
 				//Entering from right
-				MeasureData.DPosX = (AvgCenterX - (AvgLengthX / 2)) - ((float)m_ImageWidth / 2);
-				MeasureData.Value_2 = UpsideDown ? 3 : 1;
+				MeasureData.DPosX = ((AvgCenterX - (AvgLengthX / 2)) - ((float)m_ImageWidth / 2)) * m_FindLine_umPpx;
+				MeasureData.LineLayout = UpsideDown ? LineLayoutEnum::LineLayout_FromLeft : LineLayoutEnum::LineLayout_FromRight;
 			}
 		}
 	}
@@ -3400,6 +3731,7 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 		MeasureData.DPosY *= -1;
 	}
 
+	MeasureData.micron = (m_FindLine_umPpx != 1);
 	MeasureData.Value_1 = NumBlobsvalid;
 	MeasureData.ErrorCode = 0;
 	m_vMeasureDataList.clear();
@@ -3478,9 +3810,10 @@ HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical, BOOL UpsideDown)
 	{
 		MeasureDataStruct MeasureData;
 		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].AngleCorrection;
-		MeasureData.Value_2 = 0;
+		MeasureData.LineLayout = LineLayoutEnum::LineLayout_Undefined;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
+		MeasureData.micron = false;
 		MeasureData.ErrorCode = 0;
 		m_vMeasureDataList.push_back(MeasureData);
 
@@ -3501,7 +3834,7 @@ HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical, BOOL UpsideDown)
 	return NOERROR;
 }
 
-HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown)
+HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InRevolutions)
 {
 	//Stitch from FullAlignment (3 lines, 27px/54px)
 
@@ -3556,15 +3889,20 @@ HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown)
 	{
 		StitchDeviationAvg = (StitchDeviationBot - StitchDeviationTop) / 2;
 	}
-	m_vQualifyList[BlobNums[0]].StitchCorr = StitchDeviationAvg / m_StitchMicronsPerRev;
+
+	if (InRevolutions)
+		m_vQualifyList[BlobNums[0]].StitchCorr = StitchDeviationAvg / m_StitchMicronsPerRev;
+	else
+		m_vQualifyList[BlobNums[0]].StitchCorr = StitchDeviationAvg;
 
 	if (m_MeasureRunning)
 	{
 		MeasureDataStruct MeasureData;
 		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].StitchCorr;
-		MeasureData.Value_2 = 0;
+		MeasureData.LineLayout = LineLayoutEnum::LineLayout_Undefined;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
+		MeasureData.micron = !InRevolutions;
 		MeasureData.ErrorCode = 0;
 		m_vMeasureDataList.push_back(MeasureData);
 
@@ -3647,9 +3985,10 @@ HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
 	{
 		MeasureDataStruct MeasureData;
 		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].RegisterCorr;
-		MeasureData.Value_2 = 0;
+		MeasureData.LineLayout = LineLayoutEnum::LineLayout_Undefined;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
+		MeasureData.micron = true;
 		MeasureData.ErrorCode = 0;
 		m_vMeasureDataList.push_back(MeasureData);
 
@@ -3823,8 +4162,8 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 	HGDIOBJ TmpObj = SelectObject(MemDC, TextBitmap);
 
 	//SetTextColor
-	HFONT OldFont = (HFONT)SelectObject(MemDC, m_TextFont);
-	SetTextColor(MemDC, m_TextColor);
+	HFONT OldFont = (HFONT)SelectObject(MemDC, m_BlobTextFont);
+	SetTextColor(MemDC, m_BlobTextColor);
 
 	//Copy Buffer
 	long BufferLen = pSampleIn->GetActualDataLength();
@@ -3882,7 +4221,7 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 			txtRect.left = txtRect.right;
 
 			//If Text is outside image, put it to center
-			if ((txtRect.right == 0) | (txtRect.bottom == 0))
+			if ((txtRect.right == 0) || (txtRect.bottom == 0))
 			{
 				txtRect.bottom = m_ImageHeight / 2;
 				txtRect.top = txtRect.bottom;
@@ -3908,6 +4247,9 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 			case MeasureMode_Stitch:
 				swprintf_s(Text, 69, TEXT("Stitch %.1f Rev"), m_vQualifyList[BlobNums[0]].StitchCorr);
 				break;
+			case MeasureMode_ColorStitch:
+				swprintf_s(Text, 69, TEXT("Stitch %.3f mm"), (m_vQualifyList[BlobNums[0]].StitchCorr / 1000));
+				break;
 			case MeasureMode_Register:
 				swprintf_s(Text, 69, TEXT("Register %.3f mm"), (m_vQualifyList[BlobNums[0]].RegisterCorr / 1000));
 				break;
@@ -3926,6 +4268,9 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 	{
 		if (m_OverlayTxtReady)
 		{
+			//SetOverlay Color and Font
+			HFONT OldFont = (HFONT)SelectObject(MemDC, m_OverlayTextFont);
+			SetTextColor(MemDC, m_OverlayTextColor);
 			SIZE s;
 			GetTextExtentPoint32(MemDC, m_OverlayTxt, (int)wcslen(m_OverlayTxt), &s);
 			RECT txtRect;
@@ -3933,7 +4278,6 @@ HRESULT C_rx_AlignFilter::OverlayValues(IMediaSample* pSampleIn, BOOL Vertical)
 			txtRect.top = m_ImageHeight - (s.cy) - 10;
 			txtRect.right = m_ImageWidth;
 			txtRect.left = 10;
-			SetTextColor(MemDC, m_OverlayTxtColor);
 			DrawText(MemDC, m_OverlayTxt, -1, &txtRect, DT_NOCLIP/* | DT_LEFT | DT_BOTTOM | DT_SINGLELINE*/);
 		}
 		LeaveCriticalSection(&m_OvTextLock);
@@ -4343,7 +4687,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 	BOOL Vertical = !m_prx_AlignFilter->m_LinesHorizontal;
 
 	//Histogram
-	if (m_prx_AlignFilter->m_BinarizeMode != 0 || m_prx_AlignFilter->m_ShowHistogram)
+	if (m_prx_AlignFilter->m_BinarizeMode != C_rx_AlignFilter::BinarizeMode_Off || m_prx_AlignFilter->m_ShowHistogram)
 	{
 		if (m_prx_AlignFilter->ImageCounter++ >= m_prx_AlignFilter->HistoRepeat || m_prx_AlignFilter->m_MeasureMode == 2)
 		{
@@ -4351,14 +4695,14 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 			m_prx_AlignFilter->ImageCounter = 0;
 			switch (m_prx_AlignFilter->m_BinarizeMode) //0: off, 1: manual, 2: Auto, 3:Adaptive
 			{
-			case 1:	//manual
-			case 2:	//auto
+			case C_rx_AlignFilter::BinarizeMode_Manual:	//manual
+			case C_rx_AlignFilter::BinarizeMode_Auto:	//auto
 				m_prx_AlignFilter->GetHistogram(pSampleIn, m_prx_AlignFilter->Histogram, m_prx_AlignFilter->m_BinarizeMode);
 				break;
-			case 3:	//adaptive
+			case C_rx_AlignFilter::BinarizeMode_ColorAdaptive:	//adaptive
 				m_prx_AlignFilter->GetColorHistogram(pSampleIn, Vertical);
 				break;
-			case 4:	//RGB
+			case C_rx_AlignFilter::BinarizeMode_RGB:	//RGB
 				m_prx_AlignFilter->GetRGBHistogram(pSampleIn, m_prx_AlignFilter->RGBHistogram);
 				break;
 			}
@@ -4463,15 +4807,16 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 
 	switch (m_prx_AlignFilter->m_BinarizeMode)
 	{
-	case 1:	//Manual
-	case 2:	//Auto
+	case C_rx_AlignFilter::BinarizeMode_Manual:	//Manual
+	case C_rx_AlignFilter::BinarizeMode_Auto:	//Auto
 		m_prx_AlignFilter->Binarize(pSampleIn, pOutSample);
 		break;
-	case 3:	//Adaptive
+	case C_rx_AlignFilter::BinarizeMode_ColorAdaptive:	//Adaptive
 		m_prx_AlignFilter->BinarizeMultiColor(pSampleIn, pOutSample);
 		break;
-	case 4:	//RGB
-
+	case C_rx_AlignFilter::BinarizeMode_RGB:	//RGB
+		m_prx_AlignFilter->ColorizeRGB(pSampleIn, m_prx_AlignFilter->m_RGBThreshold, pOutSample);
+		m_prx_AlignFilter->Binarize(pOutSample, pOutSample);
 		break;
 	}
 
@@ -4502,7 +4847,11 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		break;
 
 	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Stitch:
-		m_prx_AlignFilter->MeasureStitch(Vertical, m_prx_AlignFilter->m_UpsideDown);
+		m_prx_AlignFilter->MeasureStitch(Vertical, m_prx_AlignFilter->m_UpsideDown, true);
+		break;
+
+	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_ColorStitch:
+		m_prx_AlignFilter->MeasureStitch(Vertical, m_prx_AlignFilter->m_UpsideDown, false);
 		break;
 
 	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Register:
@@ -4530,14 +4879,14 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 	{
 		switch (m_prx_AlignFilter->m_BinarizeMode)
 		{
-		case 1:
-		case 2:
+		case C_rx_AlignFilter::BinarizeMode_Manual:
+		case C_rx_AlignFilter::BinarizeMode_Auto:
 			m_prx_AlignFilter->ShowHistogram(pSampleIn, m_prx_AlignFilter->Histogram);
 			break;
-		case 3:
+		case C_rx_AlignFilter::BinarizeMode_ColorAdaptive:
 			m_prx_AlignFilter->ShowColorHistogram(pSampleIn, m_prx_AlignFilter->HistogramArray, Vertical);
 			break;
-		case 4:
+		case C_rx_AlignFilter::BinarizeMode_RGB:
 			m_prx_AlignFilter->ShowRGBHistogram(pSampleIn, m_prx_AlignFilter->RGBHistogram);
 			break;
 		}
@@ -5183,7 +5532,7 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowOriginalImage()
 }
 
 //Overlay-Text
-STDMETHODIMP_(BOOL) C_rx_AlignFilter::SetOverlayTxt(const wchar_t* OverlayTxt, UINT32 OverlayTxtColor)
+STDMETHODIMP_(BOOL) C_rx_AlignFilter::SetOverlayTxt(const wchar_t* OverlayTxt)
 {
 	int TryCount = 20;
 	bool Done = false;
@@ -5206,7 +5555,6 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::SetOverlayTxt(const wchar_t* OverlayTxt, U
 			m_OverlayTxtReady = false;
 			if (OverlayTxt != NULL)
 			{
-				m_OverlayTxtColor = OverlayTxtColor;
 				wcscpy_s(m_OverlayTxt, MAX_PATH, OverlayTxt);
 				m_OverlayTxtReady = true;
 			}
@@ -5225,6 +5573,65 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::SetOverlayTxt(const wchar_t* OverlayTxt, U
 	return true;
 }
 
+//Overlay-Text Color
+STDMETHODIMP C_rx_AlignFilter::SetOverlayTextColor(COLORREF OverlayTextColor)
+{
+	m_PresetOverlayTextColor = OverlayTextColor;
+
+	return NOERROR;
+}
+STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetOverlayTextColor()
+{
+	return m_OverlayTextColor;
+}
+
+//Font for Overlay Text
+STDMETHODIMP C_rx_AlignFilter::SetOverlayFont(void* pLogFontStruct)
+{
+	CAutoLock cAutolock(m_pLock);
+
+	LOGFONT lf;
+	memcpy(&lf, pLogFontStruct, sizeof(LOGFONT));
+
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tSetFont:\n", (float)m_TimeStamp / 1000000.0f);
+		printf("\t\tHeight: %d\n", lf.lfHeight);
+		printf("\t\tFaceName: %ls\n", lf.lfFaceName);
+		printf("\t\tCharSet: %d\n", lf.lfCharSet);
+		printf("\t\tItalic: %d\n", lf.lfItalic);
+		printf("\t\tWeight: %d\n", lf.lfWeight);
+		printf("\t\tOrientation: %d\n", lf.lfOrientation);
+	}
+
+	m_OverlayTextFont = CreateFontIndirect(&lf);
+	m_OverlayFontHeight = lf.lfHeight;
+	lf.lfHeight = (long)(lf.lfHeight * 1.5);
+
+	SetDirty(TRUE);
+	return NOERROR;
+}
+STDMETHODIMP C_rx_AlignFilter::GetOverlayFont(void* pLogFontStruct, UINT32* LogFontSize)
+{
+	//retrun Structure Size
+	if (pLogFontStruct == NULL)
+	{
+		*LogFontSize = sizeof(LOGFONT);
+	}
+	//return Structure Data
+	else
+	{
+		LOGFONT lf;
+		GetObject(m_OverlayTextFont, sizeof(LOGFONT), &lf);
+		memcpy(pLogFontStruct, &lf, sizeof(LOGFONT));
+	}
+
+	return NOERROR;
+}
+
+
 #pragma endregion
 
 #pragma region Binarize
@@ -5232,7 +5639,7 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::SetOverlayTxt(const wchar_t* OverlayTxt, U
 //Binarization
 STDMETHODIMP C_rx_AlignFilter::SetBinarizeMode(UINT BinarizeMode)
 {
-	m_PresetBinarizeMode = BinarizeMode;
+	m_PresetBinarizeMode = C_rx_AlignFilter::BinarizeModeEnum(BinarizeMode);
 
 	if (m_DebugOn)
 	{
@@ -5367,37 +5774,37 @@ STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetCrossColor()
 }
 
 //BlobOutlineColor
-STDMETHODIMP C_rx_AlignFilter::SetBlobOutlineColor(UINT32 BlobOutlineColor)
+STDMETHODIMP C_rx_AlignFilter::SetBlobOutlineColor(COLORREF BlobOutlineColor)
 {
 	m_PresetBlobColor = BlobOutlineColor;
 
 	return NOERROR;
 }
-STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobOutlineColor()
+STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetBlobOutlineColor()
 {
 	return m_BlobColor;
 }
 //BlobCrossColor
-STDMETHODIMP C_rx_AlignFilter::SetBlobCrossColor(UINT32 BlobCrossColor)
+STDMETHODIMP C_rx_AlignFilter::SetBlobCrossColor(COLORREF BlobCrossColor)
 {
 	m_PresetCrossColor = BlobCrossColor;
 
 	return NOERROR;
 }
-STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobCrossColor()
+STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetBlobCrossColor()
 {
 	return m_CrossColor;
 }
 //BlobTextColor
-STDMETHODIMP C_rx_AlignFilter::SetBlobTextColor(UINT32 BlobTextColor)
+STDMETHODIMP C_rx_AlignFilter::SetBlobTextColor(COLORREF BlobTextColor)
 {
-	m_PresetTextColor = BlobTextColor;
+	m_PresetBlobTextColor = BlobTextColor;
 
 	return NOERROR;
 }
-STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobTextColor()
+STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetBlobTextColor()
 {
-	return m_TextColor;
+	return m_BlobTextColor;
 }
 
 //BlobAspectLimit
@@ -5477,8 +5884,8 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobFont(void* pLogFontStruct)
 		printf("\t\tOrientation: %d\n", lf.lfOrientation);
 	}
 
-	m_TextFont = CreateFontIndirect(&lf);
-	m_FontHeight = lf.lfHeight;
+	m_BlobTextFont = CreateFontIndirect(&lf);
+	m_BlobFontHeight = lf.lfHeight;
 	lf.lfHeight = (long)(lf.lfHeight * 1.5);
 
 	SetDirty(TRUE);
@@ -5486,8 +5893,6 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobFont(void* pLogFontStruct)
 }
 STDMETHODIMP C_rx_AlignFilter::GetBlobFont(void* pLogFontStruct, UINT32* LogFontSize)
 {
-//	CAutoLock cAutolock(m_pLock);
-
 	//retrun Structure Size
 	if (pLogFontStruct == NULL)
 	{
@@ -5497,7 +5902,7 @@ STDMETHODIMP C_rx_AlignFilter::GetBlobFont(void* pLogFontStruct, UINT32* LogFont
 	else
 	{
 		LOGFONT lf;
-		GetObject(m_TextFont, sizeof(LOGFONT), &lf);
+		GetObject(m_BlobTextFont, sizeof(LOGFONT), &lf);
 		memcpy(pLogFontStruct, &lf, sizeof(LOGFONT));
 	}
 
@@ -5600,6 +6005,21 @@ STDMETHODIMP C_rx_AlignFilter::SetMinNumStartLines(UINT32 MinNumStartLines)
 	}
 
     return NOERROR;
+}
+//Distance between vertical StartLines
+STDMETHODIMP C_rx_AlignFilter::SetStartLinesDistance(float FindLine_Distance)
+{
+	m_PresetFindLine_Distance = FindLine_Distance;
+
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tSet StartLinesDistance: %1.6f\n", (float)m_TimeStamp / 1000000.0f, m_PresetFindLine_Distance);
+	}
+
+	return NOERROR;
+
 }
 
 //Execute Measures

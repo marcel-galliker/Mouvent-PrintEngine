@@ -856,8 +856,9 @@ __kernel void SmoothenRGBHistogram ( __global uint HistoIn[], __global uint Hist
 
 __kernel void ShowRGBHistogram ( __global uchar4 ImageIn[], __global uint HistoList[],
 								uint MaxVal,
-								int Peak_1_Val, int Peak_1_Pos, int Peak_2_Val, int Peak_2_Pos,
-								int Threshold, int Width, int Height, 
+								__constant uint Peak_1_Val[], __constant uint Peak_1_Pos[],
+								__constant uint Peak_2_Val[], __constant uint Peak_2_Pos[],
+								__constant uint Threshold[], int Width, int Height, 
 								uint LineHeight, uint LineWidth)
 {
 	//Should be run for each of the 256 bins of Histogram
@@ -894,8 +895,47 @@ __kernel void ShowRGBHistogram ( __global uchar4 ImageIn[], __global uint HistoL
 	__private uchar4 NewPixelR = (uchar4)(0, 0, 0, 0);
 	__private uchar4 OverlayPixelR = (uchar4)(0, 0, 127, 0);
 
-	//Marker for Positions with Threshold and Peak lines
-	__private int DrawLine = 0;
+	//Draw Threshold Lines
+	if(Pos == Threshold[0] || Pos == Threshold[1] || Pos == Threshold[2])
+	{
+		__private int j = 0;
+		while(j < Height)
+		{
+			if(Pos == Threshold[0] && j < Height)
+			{
+				for(__private uint k = 0; k < LineWidth; k++)
+				{
+					int PixelPos = HistoXPos + (j * Width) + k;
+					PixelB = ImageIn[PixelPos];
+					NewPixelB = (PixelB / (uchar4)(2,2,2,1)) + OverlayPixelB;
+					ImageIn[PixelPos] = NewPixelB;
+				}
+				j++;
+			}
+			if(Pos == Threshold[1] && j < Height)
+			{
+				for(__private uint k = 0; k < LineWidth; k++)
+				{
+					int PixelPos = HistoXPos + (j * Width) + k;
+					PixelG = ImageIn[PixelPos];
+					NewPixelG = (PixelG / (uchar4)(2,2,2,1)) + OverlayPixelG;
+					ImageIn[PixelPos] = NewPixelG;
+				}
+				j++;
+			}
+			if(Pos == Threshold[2] && j < Height)
+			{
+				for(__private uint k = 0; k < LineWidth; k++)
+				{
+					int PixelPos = HistoXPos + (j * Width) + k;
+					PixelR = ImageIn[PixelPos];
+					NewPixelR = (PixelR / (uchar4)(2,2,2,1)) + OverlayPixelR;
+					ImageIn[PixelPos] = NewPixelR;
+				}
+				j++;
+			}
+		}
+	}
 
 	//Draw Pixels
 	for(__private uint i = 0; i < XFactor; i++)
@@ -925,3 +965,41 @@ __kernel void ShowRGBHistogram ( __global uchar4 ImageIn[], __global uint HistoL
 
 //**************************************************************************************************************************************************************************************
 //**************************************************************************************************************************************************************************************
+
+__kernel void ColorizeRGB ( __global uchar4 imagein[],  __global uchar4 imageout[], 
+								   __constant uint RGBThreshold[], 
+								   const uint InverseImage)
+{
+	//Should be run for every Pixel
+
+	//Get Pixel at Position
+	const int Pos = get_global_id(0);
+	const uchar4 Pixel = imagein[Pos];
+
+	if(InverseImage == 0)
+	{
+		if((uint)Pixel.s0 > RGBThreshold[0]){ imageout[Pos].s0 = 0; }
+		else{ imageout[Pos].s0 = 255; }
+
+		if((uint)Pixel.s1 > RGBThreshold[1]){ imageout[Pos].s1 = 0; }
+		else{ imageout[Pos].s1 = 255; }
+
+		if((uint)Pixel.s2 > RGBThreshold[2]){ imageout[Pos].s2 = 0; }
+		else{ imageout[Pos].s2 = 255; }
+	}
+	else
+	{
+		if((uint)Pixel.s0 > RGBThreshold[0]){ imageout[Pos].s0 = 255; }
+		else{ imageout[Pos].s0 = 0; }
+
+		if((uint)Pixel.s1 > RGBThreshold[1]){ imageout[Pos].s1 = 255; }
+		else{ imageout[Pos].s1 = 0; }
+
+		if((uint)Pixel.s2 > RGBThreshold[2]){ imageout[Pos].s2 = 255; }
+		else{ imageout[Pos].s2 = 0; }
+	}
+}
+
+//**************************************************************************************************************************************************************************************
+//**************************************************************************************************************************************************************************************
+
