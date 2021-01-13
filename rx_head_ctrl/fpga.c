@@ -593,6 +593,7 @@ int  fpga_set_config(RX_SOCKET socket)
 	}
 	if (Fpga.stat->info.clearing_udp_flags) 
 	{
+		fpga_trace_registers("Clearing-flags-timeout", TRUE);
 		_Reload_FPGA=TRUE;
 		return Error(ERR_ABORT, 0, "Timeout while clearing Used Block Flags");
 	}
@@ -1113,6 +1114,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		idx = (idx+1) % IMAGE_LIST_SIZE;
 		if (idx==Fpga.data->imgOutIdx[head][1]) 
 		{
+			fpga_trace_registers("Image-Buffer-Overflow", TRUE);
 			return Error(ERR_ABORT, 0, "fpga_image: Image Buffer Overflow. imgInIdx[%d]=%d imgOutIdx[%d]=%d\n", head, Fpga.print->imgInIdx[head], head, Fpga.data->imgOutIdx[head][1]);			
 		}
 		else
