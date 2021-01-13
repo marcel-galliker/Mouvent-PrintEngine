@@ -55,27 +55,6 @@ typedef struct
 	double	endPos;
 } SPlcPar;
 
-typedef enum
-{
-	plc_undef,		//	00
-    plc_error,		//	01
-    plc_bootup,		//	02
-    plc_stop,		//	03
-    plc_prepare,	//	04
-    plc_pause,		//	05
-    plc_run,		//	06
-    plc_setup,		//	07
-    plc_warmup,		//	08
-    plc_webin,		//	09
-    plc_washing,	//	10
-    plc_cleaning,	//	11
-    plc_glue,		//	12
-    plc_referencing,//	13
-    plc_service,	//	14
-	plc_webout,		//  15
-	plc_maintenance	//  16
-} EnPlcState;
-
 static char* _PlcModeOfState[] =
 {
 	"", // plc_undef,		//	00
@@ -1786,6 +1765,12 @@ int	 plc_in_wipe_pos(void)
 		return (state==scan_wipe || state==scan_capping);
 	}
 	return TRUE;
+}
+
+//--- plc_get_state -------------------------------------
+EnPlcState plc_get_state(void)
+{
+	return _PlcState;
 }
 
 //--- plc_thread ---------------------------------------------

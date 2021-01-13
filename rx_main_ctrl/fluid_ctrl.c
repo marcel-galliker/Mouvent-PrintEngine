@@ -29,6 +29,7 @@
 #include "datalogic.h"
 #include "plc_ctrl.h"
 #include "print_ctrl.h"
+#include "machine_ctrl.h"
 #include "fluid_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
@@ -706,6 +707,10 @@ static void _control(int fluidNo)
 												else if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_vacc)
 													step_rob_to_wipe_pos(rob_fct_vacuum_all);
 											}
+											else if (!plc_in_purge_pos() && !RX_PrinterStatus.scanner_off)
+											{
+												plc_to_purge_pos();
+											}
 											break;
 
 				case ctrl_purge_step3:		_send_ctrlMode(no, ctrl_purge_step4, TRUE);
@@ -983,6 +988,11 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
         _PurgeFluidNo = no;
         _InitDone = 0;
     }
+
+	if (ctrlMode >= ctrl_flush_night && ctrlMode <= ctrl_empty_step5 && ctrlMode != ctrl_cap)
+	{
+		machine_set_capping_timer(TRUE);
+	}
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;

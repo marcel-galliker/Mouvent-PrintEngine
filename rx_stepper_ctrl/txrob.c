@@ -728,7 +728,7 @@ void txrob_main(int ticks, int menu)
 					break;
 
 				case rob_fct_wash:	// Wash
-					Fpga.par->output |= PUMP_FLUSH_WET; // Flush Wet ON
+					//Fpga.par->output |= PUMP_FLUSH_WET; // Flush Wet ON
 					break;
 	
 				case rob_fct_vacuum:	// Vacuum
@@ -1147,6 +1147,7 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			
 			if (pos == 3 && (_RobFunction == rob_fct_wash || _RobFunction == rob_fct_wipe))
 			{
+				if (_RobFunction == rob_fct_wash) Fpga.par->output |= PUMP_FLUSH_WET;
 				pos = POS_SHIFT[pos];
 				_ParShiftWet.speed = _SpeedShift;
 				motors_move_to_step(MOTOR_SHIFT_BITS, &_ParShiftWet, pos);
