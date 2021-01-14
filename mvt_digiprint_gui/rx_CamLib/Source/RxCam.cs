@@ -54,7 +54,8 @@ namespace rx_CamLib
             VMR_ReconnectionFailed      = -4,
             CouldNotBuildGraph          = -5,
             GraphNotStoppedCorrectly    = -6,
-            NoDataFromFilter            = -7
+            NoDataFromFilter            = -7,
+            MeasureTimeout              = -8
         }
 
         public enum ENMeasureMode
@@ -136,6 +137,7 @@ namespace rx_CamLib
         private const int WP_Stitch = 102;
         private const int WP_Register = 103;
         private const int WP_StartLinesCont = 104;
+        private const int WP_MeasureTimeout = 105;
 
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -430,6 +432,10 @@ namespace rx_CamLib
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetMeasureMode((UInt32)MeasureMode);
+			while(MeasureMode!=(ENMeasureMode)halignFilter.GetMeasureMode())
+			{
+                Thread.Sleep(10);
+			};
             return ENCamResult.OK;
         }
         public ENMeasureMode GetMeasureMode()
@@ -539,14 +545,15 @@ namespace rx_CamLib
         /// Executes the desired number of measurements, returns result and center position of pattern through CameraCallBack 
         /// </summary>
         /// <param name="NumMeasures">number of measurements to be taken</param>
+        /// <param name="Timeout">number of camera frames without valis measurement before measurement stops with timeout</param>
         /// <returns>0: for success or error code</returns>
-        public ENCamResult DoMeasures(UInt32 NumMeasures)
+        public ENCamResult DoMeasures(UInt32 NumMeasures, UInt32 Timeout)
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             ENMeasureMode CurrentMode = (ENMeasureMode)halignFilter.GetMeasureMode();
             if (CurrentMode == ENMeasureMode.MeasureMode_Off || 
                 CurrentMode == ENMeasureMode.MeasureMode_StartLines) return ENCamResult.Filter_NoMeasurePossible;
-            if (halignFilter.DoMeasures(NumMeasures)) return ENCamResult.OK;
+            if (halignFilter.DoMeasures(NumMeasures, Timeout)) return ENCamResult.OK;
             else return ENCamResult.Filter_NoMeasurePossible;
         }
 
@@ -1022,6 +1029,11 @@ namespace rx_CamLib
                             Result = GetMeasureData(out CallBackData);
                             CallBackData.CamResult = Result;
                             CamCallBack?.Invoke(ENCamCallBackInfo.RegisterCorr, CallBackData);
+                            break;
+                        case WP_MeasureTimeout:
+                            CallBackData = new CallBackDataStruct();
+                            CallBackData.CamResult = new ENCamResult();
+                            CamCallBack?.Invoke(ENCamCallBackInfo.MeasureTimeout, CallBackData);
                             break;
                     }
                     break;
@@ -1709,10 +1721,13 @@ namespace rx_CamLib
                     MeasureData.DPosY += CorrectionList[i].DPosY;
                 }
             }
-            MeasureData.Value_1 /= Counter;
-            MeasureData.LineLayout = (LineLayoutEnum)((int)MeasureData.LineLayout / Counter);
-            MeasureData.DPosX /= Counter;
-            MeasureData.DPosY /= Counter;
+            if (Counter>0)
+			{
+                MeasureData.Value_1 /= Counter;
+                MeasureData.LineLayout = (LineLayoutEnum)((int)MeasureData.LineLayout / Counter);
+                MeasureData.DPosX /= Counter;
+                MeasureData.DPosY /= Counter;
+			}
         }
 
         private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e)

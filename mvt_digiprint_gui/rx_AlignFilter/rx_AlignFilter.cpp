@@ -514,7 +514,6 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	m_OverlayValues = m_PresetOverlayValues;
 	m_OverlayTextColor = m_PresetOverlayTextColor;
 
-
 	//Start Measure
 	if (m_StartMeasure)
 	{
@@ -3452,7 +3451,7 @@ HRESULT C_rx_AlignFilter::BlobQualifyer(IMediaSample* pSampleIn, BOOL Vertical, 
 		{
 			//Rectify Angle and Dimensions
 			if ((Vertical & (m_vAngularRect[BlobNo].size.width > m_vAngularRect[BlobNo].size.height)) |
-				((!Vertical) & (m_vAngularRect[BlobNo].size.width < m_vAngularRect[BlobNo].size.height)))
+				(!Vertical & (m_vAngularRect[BlobNo].size.width < m_vAngularRect[BlobNo].size.height)))
 			{
 				//Angle
 				QualifyerBlob.Angle = m_vAngularRect[BlobNo].angle + 90;
@@ -3483,7 +3482,7 @@ HRESULT C_rx_AlignFilter::BlobQualifyer(IMediaSample* pSampleIn, BOOL Vertical, 
 			{
 				//Minimum Aspect Ratio
 				if ((Vertical & ((QualifyerBlob.Height / QualifyerBlob.Width) < m_BlobAspectLimit)) |
-					((!Vertical) & ((QualifyerBlob.Width / QualifyerBlob.Height) < m_BlobAspectLimit)))
+					(!Vertical & ((QualifyerBlob.Width / QualifyerBlob.Height) < m_BlobAspectLimit)))
 				{
 					//not oblong enough
 					QualifyerBlob.Valid = 0;
@@ -3759,6 +3758,8 @@ HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical, BOOL UpsideDown)
 		{
 			m_vQualifyList[BlobNo].Display = 0;
 		}
+		//Frame without valid measure
+		if (m_MeasureRunning&& m_Timeout > 0) m_TimeoutCounter++;
 		return NOERROR;
 	}
 
@@ -3829,6 +3830,8 @@ HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical, BOOL UpsideDown)
 			m_MeasureRunning = false;
 			m_measureDone = true;
 		}
+
+		m_TimeoutCounter = 0;
 	}
 
 	return NOERROR;
@@ -3850,6 +3853,8 @@ HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InR
 		{
 			m_vQualifyList[BlobNo].Display = 0;
 		}
+		//Frame without valid measure
+		if (m_MeasureRunning && m_Timeout > 0) m_TimeoutCounter++;
 		return NOERROR;
 	}
 
@@ -3918,6 +3923,8 @@ HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InR
 			m_MeasureRunning = false;
 			m_measureDone = true;
 		}
+
+		m_TimeoutCounter = 0;
 	}
 	return NOERROR;
 }
@@ -3938,6 +3945,8 @@ HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
 		{
 			m_vQualifyList[BlobNo].Display = 0;
 		}
+		//Frame without valid measure
+		if (m_MeasureRunning && m_Timeout > 0) m_TimeoutCounter++;
 		return NOERROR;
 	}
 
@@ -4004,6 +4013,8 @@ HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
 			m_MeasureRunning = false;
 			m_measureDone = true;
 		}
+
+		m_TimeoutCounter = 0;
 	}
 
 	return NOERROR;
@@ -4980,6 +4991,23 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 				break;
 			}
 		}
+	}
+
+	//Measure Timeout
+	if (m_prx_AlignFilter->m_MeasureRunning && m_prx_AlignFilter->m_Timeout > 0 && 
+		m_prx_AlignFilter->m_TimeoutCounter >= m_prx_AlignFilter->m_Timeout)
+	{
+		if (m_prx_AlignFilter->m_DebugOn)
+		{
+			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+			printf("%6.6f\tMeasurement TimeOut\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		}
+
+		m_prx_AlignFilter->m_MeasureRunning = FALSE;
+		m_prx_AlignFilter->m_Timeout = 0;
+		m_prx_AlignFilter->m_TimeoutCounter = 0;
+		if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_MeasureTimeout, (LPARAM)0);
 	}
 
     //Cleanup
@@ -6023,7 +6051,7 @@ STDMETHODIMP C_rx_AlignFilter::SetStartLinesDistance(float FindLine_Distance)
 }
 
 //Execute Measures
-STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures)
+STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 Timeout)
 {
 	CAutoLock cAutolock(m_pLock);
 
@@ -6052,6 +6080,8 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures)
 	m_DataListforHostReady = false;
 	m_vMeasureDataList.clear();
 	m_NumMeasures = NumMeasures;
+	m_Timeout = Timeout;
+	m_TimeoutCounter = 0;
 	m_StartMeasure = true;
 
 	SetDirty(TRUE);

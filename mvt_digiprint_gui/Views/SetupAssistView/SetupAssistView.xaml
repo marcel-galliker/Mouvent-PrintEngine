@@ -7,7 +7,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.SetupAssistView" 
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="1000">
+             d:DesignHeight="450" d:DesignWidth="1500">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource Mouvent.Layout.TopToolBarHeight}}"/>
@@ -189,8 +189,8 @@
                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Kind="CogOutline" Foreground="DarkGray"/>
             </common:MvtButton>
 
-            <local:SA_ActionsView x:Name="SetupActions" Grid.Column="1" Margin="5,0"/>
             <local:SA_CamSettings x:Name="CamSettings" Grid.Column="1" Margin="5,0"/>
+            <local:SA_ActionsView x:Name="SetupActions" Grid.Column="1" Margin="5,0"/>
         </Grid>
     </Grid>
 </UserControl>

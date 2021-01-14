@@ -47,9 +47,17 @@
                         <ig:TextColumn HeaderText="Action" Key="Name" Width="200"/>
                         
                         <!-- Result _____________________________________________________________________________-->
-                        <ig:TemplateColumn HeaderText="Result" Key="Measured" Width="200">
+                        <ig:TemplateColumn HeaderText="Result" Key="Measured" Width="500">
                             <ig:TemplateColumn.ItemTemplate>
                                 <DataTemplate>
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Grid.Column="0" Kind="MathCompass" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding Angle, StringFormat={}{0:0.0}}" Margin="5,0"/>
+                                            <TextBlock Text="{Binding AngleStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <!--
                                     <Grid Visibility="{Binding Measured, Converter={StaticResource Visible_Converter}}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="20"/>
@@ -60,12 +68,13 @@
                                             <ColumnDefinition Width="50"/>
                                         </Grid.ColumnDefinitions>
                                         <iconPacks:PackIconMaterial Grid.Column="0" Kind="MathCompass" Foreground="Gray"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Measured.Angle}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Angle, Converter={StaticResource ToString_Converter}}"/>
                                         <iconPacks:PackIconMaterial Grid.Column="2" Kind="ArrowCollapseVertical" Foreground="Gray"/>
                                         <TextBlock Grid.Column="3" Text="{Binding Measured.Stitch}"/>
                                         <iconPacks:PackIconMaterial Grid.Column="4" Kind="ArrowCollapseRight" Foreground="Gray"/>
                                         <TextBlock Grid.Column="5" Text="{Binding Measured.Distance}"/>
                                     </Grid>
+                                    -->
                                 </DataTemplate>
                             </ig:TemplateColumn.ItemTemplate>
                         </ig:TemplateColumn>

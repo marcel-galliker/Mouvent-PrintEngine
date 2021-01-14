@@ -55,6 +55,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		private void Trigger_Clicked(object sender,RoutedEventArgs e)
 		{
 			// RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_OUT_TRIGGER);
+			CamSettings.Hide();
 			SetupActions.Test();
 		}
 

@@ -82,12 +82,75 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _State,value); }
 		}
 
-		//--- Property Measured ---------------------------------------
-		private SHeadPosition _Measured;
-		public SHeadPosition Measured
+		public int MeasureCnt;
+		private List<double> _Angles=new List<double>();
+		//--- AngleMeasured ---
+		public void AngleMeasured(double value)
 		{
-			get { return _Measured; }
-			set { SetProperty(ref _Measured,value); }
+			_Angles.Add(value);
+			if (value.Equals(double.NaN)) 
+				AngleStr += string.Format(" ---");
+			else                   
+				AngleStr += string.Format(" {0:0.0}", value);
+			if (_Angles.Count()>3)
+			{
+				int cnt=0;
+				string str1="", str2="";
+				double avg=0;
+				double min=1000;
+				double max=-1000;
+				foreach(double a in _Angles) 
+				{ 
+					if (!a.Equals(double.NaN))
+					{
+						if (a<min) min=a;
+						if (a>max) max=a;
+						avg+=a;
+						str1 += string.Format("{0:0.0}  ", a);
+						cnt++;
+					}
+				}
+				if (cnt<3) return;
+				cnt-=2;
+				avg = (avg-min-max)/cnt;
+				
+				double diff=0;
+				foreach(double a in _Angles) diff+=(a-avg)*(a-avg);
+				diff /= cnt;
+				diff = Math.Sqrt(diff);
+
+				min=avg-diff;
+				max=avg+diff;
+				double avg2=0;
+				cnt=0;
+				foreach(double a in _Angles)
+				{
+					if (!a.Equals(double.NaN) && a>=min && a<=max) { cnt++; avg2+=a; str2 += string.Format("{0:0.0}  ", a);}
+				}
+				if (cnt<3) return;
+
+				Angle=avg2/cnt;
+				Console.WriteLine("ANGLE CORRECTION: all {0}", str1);
+				Console.WriteLine("ANGLE CORRECTION: ok  {0}", str2);
+				Console.WriteLine("ANGLE CORRECTION: Corr={0:0.000} avg={1:0.000}, diff={2:0.000}, avg2={3:0.000}, cnt={4}", Angle, avg, diff, avg2, cnt);
+			}
 		}
+
+		//--- Property Angle ---------------------------------------
+		private string _AngleStr="";
+		public string AngleStr
+		{
+			get { return _AngleStr; }
+			set { SetProperty(ref _AngleStr,value); }
+		}
+
+		//--- Property Angle ---------------------------------------
+		private double _Angle;
+		public double Angle
+		{
+			get { return _Angle; }
+			set { SetProperty(ref _Angle,value); }
+		}
+
 	}
 }

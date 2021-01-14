@@ -203,7 +203,7 @@ namespace rx_CamLib.Models
 
             //Execute Measures
             [PreserveSig]
-            bool DoMeasures(UInt32 NumMeasures);
+            bool DoMeasures(UInt32 NumMeasures, UInt32 Timeout);
 
             //Read Correction List
             [PreserveSig]

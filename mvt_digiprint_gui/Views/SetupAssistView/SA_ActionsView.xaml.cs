@@ -3,6 +3,7 @@ using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -38,7 +39,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 
 		public void Test()
 		{
-			RxGlobals.SA_StateMachine.Test();
+			List<SA_Action> actions=RxGlobals.SA_StateMachine.Test();
+			if (Actions.ItemsSource==null)
+			{
+				Actions.ItemsSource=actions;
+			}
 		}
 	}
 
@@ -87,4 +92,23 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			return null;
         }
 	}
+
+	public class AngleStr_Converter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+			List<float> list = parameter as List<float>;
+            if (list!=null)
+            {
+				return list.Count.ToString();
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }
