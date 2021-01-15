@@ -421,7 +421,7 @@ int GetUserID(wchar_t *username, wchar_t *id)
 			ret = RegGetValue(HKEY_USERS, keyname, L"AppData", RRF_RT_REG_SZ, NULL, path, &len);
 			if (ret==ERROR_SUCCESS)
 			{
-				printf("user: >>%s<< path=>>%s<<\n", userID, path);
+				wprintf(L"user: >>%s<< path=>>%s<<\n", userID, path);
 				if (_wcsnicmp(path, start, wcslen(start))==0)
 				{
 					wcscpy(id, userID);
