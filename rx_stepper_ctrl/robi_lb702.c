@@ -127,7 +127,7 @@ void robi_lb702_main(int ticks, int menu)
     else if (!_CmdRunning)
         _CmdStarted = FALSE;
 
-    if (_CmdRunning && robi_move_done() && _CmdStarted)
+    if (_CmdRunning && robi_move_done() && (_CmdStarted || robi_not_started()))
     {
         int loc_new_cmd, loc_new_value;
         int val;
@@ -495,6 +495,8 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _Search_Screw_Time = 0;
         _Loose_Screw_Time = 0;
         RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
+        RX_StepperStatus.screwerinfo.ref_done = FALSE;
+        _NewCmd = FALSE;
         lb702_reset_variables();
         robi_stop();
         break;

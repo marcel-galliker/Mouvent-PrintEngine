@@ -511,9 +511,9 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
 		_NewCmd = cmd;
 	}
-    else if ((((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) ||
-                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || cmd == CMD_LIFT_SCREW || cmd == CMD_LIFT_REFERENCE) && 
-                 !RX_StepperStatus.screwerinfo.moving)
+    else if (((((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) ||
+                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || cmd == CMD_LIFT_SCREW) && 
+                 !RX_StepperStatus.screwerinfo.moving) || cmd == CMD_LIFT_REFERENCE)
 	{
 		Error(LOG, 0, "Move Command %08x", cmd);
         RX_StepperStatus.info.moving = TRUE;
@@ -593,7 +593,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
                                         if ((!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.robot_used)
                                         {
-                                            if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
+                                            if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE || !RX_StepperStatus.info.ref_done)
                                             {
                                                 _Cmd_New = msgId;
 												_PrintPos_New[MOTOR_Z_BACK]  = val0;

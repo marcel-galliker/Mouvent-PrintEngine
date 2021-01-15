@@ -20,3 +20,4 @@ void robi_move_up(void);
 void robi_move_down(void);
 int robi_screwer_stalled(void);
 int robi_move_done(void);
+int robi_not_started(void);

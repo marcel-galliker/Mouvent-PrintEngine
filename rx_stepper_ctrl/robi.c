@@ -53,6 +53,7 @@ static uint32_t _syncMessageId;
 static uint32_t _MsgsSent;
 
 static int _ScrewerStalled = FALSE;
+static int _RobiNotStarted = FALSE;
 
 volatile static SUsbTxMsg _txFifo[ROBI_FIFO_SIZE];
 volatile static int32_t _txFifoInIndex;
@@ -236,6 +237,14 @@ int robi_screwer_stalled(void)
     return tmp;
 }
 
+//--- robi_not_started -----------------------------------------
+int robi_not_started(void)
+{
+    int tmp = _RobiNotStarted;
+    _RobiNotStarted = FALSE;
+    return tmp;
+}
+
 //--- robi_move_done ----------------------------------------------------------------------
 int robi_move_done(void)
 {
@@ -320,6 +329,9 @@ static void* receive_thread(void *par)
 
                         if (rxMessage.error)
                         {
+                            if (rxMessage.error >= MOTOR_CANT_MOVE_X && rxMessage.error <= MOTOR_CANT_REF)
+                                _RobiNotStarted = TRUE;
+                            
                             if (rxMessage.length)
                             {
                                 if (rxMessage.error == MOTOR_STALLED && RX_RobiStatus.motors[MOTOR_SCREW].isStalled && strcmp(msg, rxMessage.data))
