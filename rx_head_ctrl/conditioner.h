@@ -42,7 +42,7 @@ void cond_heater_test	(int temp);
 void cond_toggle_meniscus_check(void);
 void cond_set_clusterNo(INT32 no);
 void cond_set_flowResistance(int headNo, int value);
-void cond_set_purge_par(int headNo, int delay_pos_y, int time, int act_pos_y, int delay_time);
+void cond_set_purge_par (int headNo, int delay_pos_y, int time, int act_pos_y, int delay_time);
 void cond_set_config	(int headNo, SConditionerCfg *cfg);
 void cond_setInk		(int headNo, SInkDefinition *pink);
 void cond_volume_printed(int headNo, int volume);

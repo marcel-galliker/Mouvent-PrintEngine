@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace rx_CamLib
@@ -24,7 +25,8 @@ namespace rx_CamLib
 		CamFindMark_2,	// horizontal line (WEB)
 		CamFindMark_3,	// end of line (SCAN)
 		CamMeasureAngle,
-		CamMeasurePosition
+		CamMeasureStitch,
+		CamMeasureDist,
 	};
 
 	public class SMarkPosition : RxBindable
@@ -150,9 +152,19 @@ namespace rx_CamLib
 			_Camera.SetLinesHorizontal(false);
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
-			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Angle);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(10);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 10);
+		}
+
+		//--- MeasureStitch --------------------------------
+		public void MeasureStitch()
+		{
+			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
+			_Camera.SetLinesHorizontal(false);
+			_Camera.NumExtraErodes=3;
+			_Camera.SetLineAspectLimit(5);
+			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 10);
 		}
 	}
 }

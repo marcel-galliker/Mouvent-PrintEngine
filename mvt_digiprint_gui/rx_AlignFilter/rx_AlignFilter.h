@@ -225,7 +225,7 @@ public:
 	STDMETHOD(SetStartLinesDistance)(THIS_ float StartLinesDistance) PURE;
 
 	//Execute Measures
-	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures) PURE;
+	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures, UINT32 Timeout) PURE;
 
 	//GetMeasure Results
 	STDMETHOD_(BOOL, GetMeasureResults)(THIS_ void* pMeasureDataStructArray, UINT32* ListSize) PURE;
@@ -525,7 +525,7 @@ public:
 	STDMETHODIMP SetStartLinesDistance(float StartLinesDistance);
 
 	//Execute Measures
-	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures);
+	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures, UINT32 Timeout);
 
 	//GetMeasure Results
 	STDMETHODIMP_(BOOL) GetMeasureResults(void* pMeasureDataStructArray, UINT32* ListSize);
@@ -658,6 +658,8 @@ private:
 	UINT32 m_DataListSize = 0;
 	BOOL m_DataListforHostReady = false;
 	BOOL m_measureDone = false;
+	UINT32 m_Timeout = 0;
+	UINT32 m_TimeoutCounter = 0;
 
 	float m_FindLine_umPpx = 1;
 
@@ -673,6 +675,7 @@ private:
 	#define WP_Stitch 102
 	#define WP_Register 103
 	#define WP_StartLinesCont 104
+	#define WP_MeasureTimeout 105
 
 	//Line Direction
 	BOOL m_LinesHorizontal = false;
