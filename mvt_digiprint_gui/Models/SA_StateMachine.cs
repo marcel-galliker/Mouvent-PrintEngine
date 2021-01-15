@@ -119,21 +119,21 @@ namespace RX_DigiPrint.Models
 				if (CallBackInfo==RxCam.ENCamCallBackInfo.AngleCorr)
 				{
 					Console.WriteLine("Angle: corr[{0}]={1}, DPosX={2}", _Action.MeasureCnt, CallBackData.Value_1, CallBackData.DPosX);
-					_Action.AngleMeasured(CallBackData.Value_1);
+					_Action.Measured(CallBackData.Value_1);
 				}
 				else if (CallBackInfo==RxCam.ENCamCallBackInfo.MeasureTimeout)
 				{
 					Console.WriteLine("Angle: corr[{0}]={1}, DPosX={2}", _Action.MeasureCnt, "---", CallBackData.DPosX);
-					_Action.AngleMeasured(double.NaN);
+					_Action.Measured(double.NaN);
 				}
 
-				if (++_Action.MeasureCnt < 15)
+				if (_Action.MeasureCnt < 15)
 				{
 					RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.motorPosition+_AngleDist + CallBackData.DPosX/1000);
 				}
 				else 
 				{
-					if (_Action.MeasureCnt==15) _OnAngleMeasured();
+					_OnAngleMeasured();
 				}
 				return;
 			}
@@ -144,22 +144,22 @@ namespace RX_DigiPrint.Models
 				if (CallBackInfo==RxCam.ENCamCallBackInfo.StitchCorr)
 				{
 					Console.WriteLine("Stitch: corr[{0}]={1}, DPosX={2}", _Action.MeasureCnt, CallBackData.Value_1, CallBackData.DPosX);
-					_Action.AngleMeasured(CallBackData.Value_1);
+					_Action.Measured(CallBackData.Value_1);
 				}
 				else if (CallBackInfo==RxCam.ENCamCallBackInfo.MeasureTimeout)
 				{
 					Console.WriteLine("Stitch: corr[{0}]={1}, DPosX={2}", _Action.MeasureCnt, "---", CallBackData.DPosX);
-					_Action.AngleMeasured(double.NaN);
+					_Action.Measured(double.NaN);
 				}
 
-				if (++_Action.MeasureCnt < 15)
+				if (_Action.MeasureCnt < 15)
 				{
 					RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.motorPosition + CallBackData.DPosX/1000);
 					RxGlobals.SetupAssist.WebMove(_StitchWebDist);
 				}
 				else 
 				{
-					if (_Action.MeasureCnt==15) _OnStitchMeasured();
+					_OnStitchMeasured();
 				}
 				return;
 			}
@@ -455,7 +455,7 @@ namespace RX_DigiPrint.Models
 		//--- _OnAngleMeasured -----------------------------
 		private void _OnAngleMeasured()
 		{
-			RxGlobals.Events.AddItem(new LogItem("Camera: Send Angle Correction {0} to head{1}", _Action.Angle, _Action.HeadNo));
+			RxGlobals.Events.AddItem(new LogItem("Camera: Send Angle Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
 
 			_ActionIdx=3;
 			if (_ActionIdx+1<_Actions.Count && _Actions[_ActionIdx+1].Function==ECamFunction.CamMeasureAngle && _Actions[_ActionIdx+1].HeadNo>0)
@@ -473,7 +473,8 @@ namespace RX_DigiPrint.Models
 		//--- _OnStitchMeasured -----------------------------
 		private void _OnStitchMeasured()
 		{
-			RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Angle, _Action.HeadNo));
+			RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
+			_Action.SendCorrection();
 			/*
 			_ActionIdx=3;
 			if (_ActionIdx+1<_Actions.Count && _Actions[_ActionIdx+1].Function==ECamFunction.CamMeasureAngle && _Actions[_ActionIdx+1].HeadNo>0)

@@ -25,7 +25,8 @@ namespace rx_CamLib
 		CamFindMark_2,	// horizontal line (WEB)
 		CamFindMark_3,	// end of line (SCAN)
 		CamMeasureAngle,
-		CamMeasureStitch
+		CamMeasureStitch,
+		CamMeasureDist,
 	};
 
 	public class SMarkPosition : RxBindable
@@ -151,10 +152,8 @@ namespace rx_CamLib
 			_Camera.SetLinesHorizontal(false);
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
-			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Angle);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.SetLineAspectLimit(5);
-			_Camera.DoMeasures(10, 10);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 10);
 		}
 
 		//--- MeasureStitch --------------------------------
@@ -164,10 +163,8 @@ namespace rx_CamLib
 			_Camera.SetLinesHorizontal(false);
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
-			_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Stitch);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.SetLineAspectLimit(5);
-			_Camera.DoMeasures(10, 10);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 10);
 		}
 	}
 }

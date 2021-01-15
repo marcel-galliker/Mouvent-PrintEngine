@@ -547,10 +547,19 @@ namespace rx_CamLib
         /// <param name="NumMeasures">number of measurements to be taken</param>
         /// <param name="Timeout">number of camera frames without valis measurement before measurement stops with timeout</param>
         /// <returns>0: for success or error code</returns>
-        public ENCamResult DoMeasures(UInt32 NumMeasures, UInt32 Timeout)
+        public ENCamResult DoMeasures(ENMeasureMode MeasureMode, UInt32 NumMeasures, UInt32 Timeout)
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             ENMeasureMode CurrentMode = (ENMeasureMode)halignFilter.GetMeasureMode();
+            if (CurrentMode!=MeasureMode)
+			{
+                halignFilter.SetMeasureMode((UInt32)MeasureMode);
+			    while(CurrentMode!=MeasureMode) 
+                {
+                    Thread.Sleep(10);
+                    CurrentMode = (ENMeasureMode)halignFilter.GetMeasureMode();
+                }
+			}
             if (CurrentMode == ENMeasureMode.MeasureMode_Off || 
                 CurrentMode == ENMeasureMode.MeasureMode_StartLines) return ENCamResult.Filter_NoMeasurePossible;
             if (halignFilter.DoMeasures(NumMeasures, Timeout)) return ENCamResult.OK;
