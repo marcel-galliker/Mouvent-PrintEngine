@@ -44,7 +44,7 @@ static int _MotorsSimulation = 0;
 
 //--- prototypes --------------------------------------------
 static void _lb701_motor_z_test(int steps);
-static void _lb701_motor_test  (int motor, int steps);
+static void _lb701_motor_test  (int motor, int steps, int encoder_enabled);
 static void _lb701_do_reference(void);
 static void _lb701_move_to_pos(int cmd, int pos);
 static int  _micron_2_steps(int micron);
@@ -184,7 +184,8 @@ int lb701_menu(void)
 	term_printf("p: move to print\n");
 	term_printf("z: move by <steps>\n");
 	term_printf("o<n>: toggle output <n>\n");
-	term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
+	term_printf("m<n><steps>: move Motor<n> by <steps> without encoder\n");
+	term_printf("n<n><steps>: move Motor<n> by <steps> with encoder\n");	
 	term_printf("x: exit\n");
 	term_printf(">");
 	term_flush();
@@ -203,7 +204,8 @@ int lb701_menu(void)
 		case 'u': lb701_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,		NULL); break;
 		case 'o': fpga_output_toggle(atoi(&str[1]));break;
 		case 'z': _lb701_motor_z_test(atoi(&str[1]));break;
-		case 'm': _lb701_motor_test(str[1]-'0', atoi(&str[2]));break;			
+		case 'm': _lb701_motor_test(str[1]-'0', atoi(&str[2]),0);break;
+		case 'n': _lb701_motor_test(str[1]-'0', atoi(&str[2]),1);break;			
 		case 'x': return FALSE;
 		}
 	}
@@ -317,7 +319,7 @@ void _lb701_motor_z_test(int steps)
 }
 
 //--- _lb701_motor_test ---------------------------------
-static void _lb701_motor_test(int motorNo, int steps)
+static void _lb701_motor_test(int motorNo, int steps, int encoder_enabled)
 {
 	int motors = 1<<motorNo;
 	SMovePar par;
@@ -330,12 +332,15 @@ static void _lb701_motor_test(int motorNo, int steps)
 	par.current_run	= 250.0;
 	par.stop_mux	= 0;
 	par.dis_mux_in	= 0;
-	par.encCheck	= chk_off;
+	if (encoder_enabled) par.encCheck	= chk_std;
+    else par.encCheck	= chk_off;
 	
 	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 	
 	motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
-	motors_move_by_step(motors, &par, steps, FALSE);			
+	if (encoder_enabled)
+        motors_move_by_step(motors, &par, steps, TRUE);
+    else motors_move_by_step(motors, &par, steps, FALSE);			
 }
 

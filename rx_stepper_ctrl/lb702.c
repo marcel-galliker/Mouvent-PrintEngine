@@ -69,7 +69,7 @@ static UINT32	_ErrorFlags=0;
 
 //--- prototypes --------------------------------------------
 static void _lb702_motor_z_test(int steps);
-static void _lb702_motor_test  (int motor, int steps);
+static void _lb702_motor_test  (int motor, int steps, int encoder_enabled);
 static void _lb702_do_reference(void);
 static void _lb702_move_to_pos(int cmd, int pos0, int pos1);
 static int  _micron_2_steps(int micron);
@@ -253,7 +253,7 @@ void lb702_main(int ticks, int menu)
 		{
 			if (motors_error(MOTOR_Z_BITS, &motor))
 			{
-				Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked", _CmdName, _MotorName[motor]);			
+				Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked or encoder error", _CmdName, _MotorName[motor]);			
 				RX_StepperStatus.info.ref_done = FALSE;							
 				RX_StepperStatus.cmdRunning = FALSE;
 			}
@@ -283,7 +283,7 @@ void lb702_main(int ticks, int menu)
         }
 		else if (motors_error(MOTOR_Z_BITS, &motor))
 		{
-			Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked", _CmdName, _MotorName[motor]);			
+			Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked or encoder error", _CmdName, _MotorName[motor]);			
 			RX_StepperStatus.info.ref_done = FALSE;							
 			RX_StepperStatus.cmdRunning = FALSE;
 		}
@@ -367,7 +367,8 @@ static void _lb702_handle_menu(char *str)
 		case 'p': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,	&pos); break;
 		case 'u': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,		NULL); break;
 		case 'z': _lb702_motor_z_test(atoi(&str[1]));break;
-		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
+		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]),0);break;
+		case 'n': _lb702_motor_test(str[1]-'0', atoi(&str[2]),1);break;
 		}
 	}			
 }
@@ -398,7 +399,8 @@ int lb702_menu(void)
 			term_printf("u: move to UP position\n");
 			term_printf("p: move to print\n");
 			term_printf("z: move by <steps>\n");
-			term_printf("m<n><steps>: move Motor<n> by <steps>\n");	
+			term_printf("m<n><steps>: move Motor<n> by <steps> - Without encoder\n");
+			term_printf("n<n><steps>: move Motor<n> by <steps> - With encoder\n");	
 			term_printf("x: exit\n");	
 		}
 		else
@@ -636,7 +638,7 @@ void _lb702_motor_z_test(int steps)
 }
 
 //--- _lb702_motor_test ---------------------------------
-static void _lb702_motor_test(int motorNo, int steps)
+static void _lb702_motor_test(int motorNo, int steps, int encoder_enabled)
 {
 	int motors = 1<<motorNo;
 	SMovePar par;
@@ -646,10 +648,11 @@ static void _lb702_motor_test(int motorNo, int steps)
 	par.accel		= 32000;
 	par.current_acc	= 400.0;
 	par.current_run	= 400.0;
-	par.stop_mux	= 0;
+	par.stop_mux = 0;
 	par.dis_mux_in	= 0;
 	par.enc_bwd		= TRUE;
-	par.encCheck	= chk_std;
+    if (encoder_enabled) par.encCheck	= chk_std;
+    else par.encCheck	= chk_off;	
 	
 	if (!RX_StepperStatus.cmdRunning)
 	{
@@ -657,7 +660,9 @@ static void _lb702_motor_test(int motorNo, int steps)
 		RX_StepperStatus.info.moving = TRUE;
 	
 		motors_config(motors, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
-		motors_move_by_step(motors, &par, steps, FALSE);			
+        if (encoder_enabled)
+            motors_move_by_step(motors, &par, steps, TRUE);
+        else motors_move_by_step(motors, &par, steps, FALSE);
 	}
 		
 }
