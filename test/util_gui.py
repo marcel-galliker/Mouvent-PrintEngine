@@ -69,8 +69,7 @@ class PrinterTests(unittest.TestCase):
         self.read_configuration()
 
         # start ctrl in simulation
-        # note that the debug version of rx_main should be compile with SUBNET="127.168.200."
-        self.main_ctrl = subprocess.Popen([r"_out\Debug_x64\rx_main_ctrl.exe", "-simuplc", "-simuencoder","-simuchiller"],
+        self.main_ctrl = subprocess.Popen([r"bin\win\rx_main_ctrl.exe", "-debug", "-localsubnet", "-simuplc", "-simuencoder","-simuchiller"],
                                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(1) # wait before starting spooler the the main is started
         self.spool_ctrl = subprocess.Popen([r"bin\win\rx_spooler_ctrl.exe"], stdout=subprocess.DEVNULL,

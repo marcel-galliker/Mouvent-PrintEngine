@@ -6,7 +6,7 @@ import subprocess, os, sys, asyncio, shutil
 # global returncode
 returncode = 0 # = except if changed by a failed bat
 # list of build categories
-builds = [ "test", "keil", "lx", "nios", "soc", "x64"]
+builds = [ "keil", "lx", "nios", "soc", "x64"]
 
 # path of the build batch
 path = os.path.dirname(os.path.realpath(__file__))
@@ -51,9 +51,6 @@ async def run(build):
 # maximum number of build in //
 MAXBUILD = 3
 async def main():
-    # reinstall packages
-    subprocess.run(["cmd", "/c", builder, "dotnet"])
-
     # remove log
     log = os.path.join(path, "log")
     if os.path.exists(log):

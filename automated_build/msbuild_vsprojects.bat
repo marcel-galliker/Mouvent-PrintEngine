@@ -14,13 +14,6 @@ if exist %VCVARS_PATH% (
 	goto EOF
 )
 
-REM Special case to restore dotnet package
-if "%1"=="dotnet" (
-	dotnet restore
-	SET RETURNCODE=0
-	goto :EOF
-)
-
 REM cmd /c "bash -c 'sudo ssh-restart.sh'"
 REM call "C:\utils\start-ssh.bat"
 
@@ -120,32 +113,16 @@ REM ----------------------------------------------------------------------------
 	call :BUILD_PROJECT rx_head_cond, vcxproj
 	goto :EOF
 
-REM Build a special debug rx_main_ctrl for test (local IP)
-:LIB_TEST
-	set BUILD=TEST
-	set FLAGS=/m /property:Configuration=Debug /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
-	call :BUILD_PROJECT rx_common_lib, vcxproj
-	call :BUILD_PROJECT rx_tif_lib, vcxproj
-	call :BUILD_PROJECT rx_pecore_lib, vcxproj
-	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
-	call :BUILD_PROJECT rx_rip_lib, vcxproj
-	goto :EOF
-
-:BIN_TEST
-	set BUILD=TEST
-	set FLAGS=/m /p:DefineConstants="RX_CTRL_SUBNET=\"127.168.200.\"" /property:Configuration=Debug /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
-	call :BUILD_PROJECT rx_main_ctrl, vcxproj
-	goto :EOF
-
-
 :LIB_X64
 	set BUILD=64
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_common_lib, vcxproj
+	set TARGETS=/t:restore /t:Build
 	call :BUILD_PROJECT rx_common_lib_cs, csproj
+	call :BUILD_PROJECT ScanCheckParser, sln
+	set TARGETS=/t:Build
 	call :BUILD_PROJECT rx_tif_lib, vcxproj
 	call :BUILD_PROJECT rx_pecore_lib, vcxproj
-	call :BUILD_PROJECT ScanCheckParser, sln
 	call :BUILD_PROJECT TinyXML, vcxproj, Externals\
 	REM rx_rip_lib must be built after TinyXML
 	call :BUILD_PROJECT rx_rip_lib, vcxproj
@@ -157,7 +134,9 @@ REM Build a special debug rx_main_ctrl for test (local IP)
 	set FLAGS=/m /property:Configuration=Release /property:Platform=x64 /property:SolutionDir=%BATCH_PATH%..\
 	call :BUILD_PROJECT rx_spooler_ctrl, vcxproj
 	call :BUILD_PROJECT rx_main_ctrl, vcxproj
+	set TARGETS=/t:restore /t:Build
 	call :BUILD_PROJECT mvt_digiprint_gui, sln
+	set TARGETS=/t:Build
 	call :BUILD_PROJECT Win10-Install, vcxproj, Win10\
 	call :BUILD_PROJECT Win10-Startup, vcxproj, Win10\
 	goto :EOF

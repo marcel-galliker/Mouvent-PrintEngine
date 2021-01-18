@@ -22,26 +22,24 @@
 #define MAX_MESSAGE_SIZE	9000 // (8*1024) // jumbo blocks
 #define TCPIP_HEADER_SIZE	  66
 
-#ifndef RX_CTRL_SUBNET // allow to redefine local subnet during compilation
-#define RX_CTRL_SUBNET		"192.168.200."
-#endif // !RX_CTRL_SUBNET
+#define DRX_CTRL_SUBNET		"192.168.200."
+char RX_CTRL_SUBNET[16]; // global variables to be able to replace when starting
+char RX_CTRL_BROADCAST[16]; // RX_CTRL_SUBNET "255"
 
-#define RX_CTRL_MAIN RX_CTRL_SUBNET "1"
-#define RX_CTRL_PLC			RX_CTRL_SUBNET "3"
+#define RX_CTRL_MAIN DRX_CTRL_SUBNET "1"
+#define RX_CTRL_PLC			3
 #define RX_CTRL_ENC_0		4				// 6..8
 #define RX_CTRL_FLUID_0		6				// 6..8
 #define RX_CTRL_STEPPER_0	9				// 9..10
-#define RX_CTRL_STEPPER_HD	RX_CTRL_SUBNET "9"
-#define RX_CTRL_STEPPER_CLN	RX_CTRL_SUBNET "10"
-#define RX_CTRL_IQ500		RX_CTRL_SUBNET "240"
-#define RX_CTRL_POWERSUPPLY	RX_CTRL_SUBNET "241"
-#define RX_CTRL_SWITCH_MAIN RX_CTRL_SUBNET "250"
-#define RX_CTRL_SWITCH_BAR0 RX_CTRL_SUBNET "251"
+#define RX_CTRL_STEPPER_HD	9
+#define RX_CTRL_STEPPER_CLN	10
+#define RX_CTRL_IQ500		240
+#define RX_CTRL_POWERSUPPLY	241
+#define RX_CTRL_SWITCH_MAIN 250
+#define RX_CTRL_SWITCH_BAR0 251
 #define RX_CTRL_HEAD_0		11
-// #define RX_CTRL_DATA		RX_CTRL_SUBNET "200"
-#define RX_CTRL_SPOOL		RX_CTRL_SUBNET "200" //+no: 201..
-
-#define RX_CTRL_BROADCAST	RX_CTRL_SUBNET "255"
+// #define RX_CTRL_DATA		DRX_CTRL_SUBNET "200"
+#define RX_CTRL_SPOOL		DRX_CTRL_SUBNET "200" //+no: 201..
 
 //--- TCP ports -------------------------------------------------
 #define PORT_GUI				7000

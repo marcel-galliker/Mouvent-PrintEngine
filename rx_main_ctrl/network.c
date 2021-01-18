@@ -388,7 +388,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 					sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_FLUID_0+no); 
 					break;
 
-	case dev_plc:	sprintf(ipAddr, RX_CTRL_PLC); 
+	case dev_plc:	sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_PLC); 
 					break;
 
 	case dev_stepper:	if (rx_def_is_lb(RX_Config.printer.type))
@@ -411,8 +411,8 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 					if (no<=0 || no>=255)	sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200); 
 					else					sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200+no); 
 					break;
-    case dev_iq500:
-        sprintf(ipAddr, "%s", RX_CTRL_IQ500);
+	case dev_iq500:
+		sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_IQ500);
 					break;
 	default:		return REPLY_ERROR;
 	}
