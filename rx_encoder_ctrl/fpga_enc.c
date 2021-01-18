@@ -55,6 +55,11 @@ static int _ALL=FALSE;	// show all registers
 
 #define WATCHDOG_CNT	0x7fffffff
 
+#define DIG_OUT_0 0x0001
+#define DIG_OUT_1 0x0002
+#define DIG_OUT_2 0x0004
+#define DIG_OUT_3 0x0008
+
 #define UV_ISOLATOR_OUT	0x0001		
 #define UV_POWER_OUT	0x0002	// Power-Bits= 0x04
 #define UV_SHUTTER_OUT	0x0004
@@ -328,15 +333,15 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		test_do(ticks);
 		if (_Init) _fpga_poslog();
 	}
-    
-    if (_Init && (RX_EncoderCfg.printerType == printer_TX801 || RX_EncoderCfg.printerType == printer_TX802))
-    {
-        if ((int)Fpga->stat.encOut[0].fp_en == 0) FpgaQSys->out &= ~(1 << 1);
-        else FpgaQSys->out |= (1 << 1);
-        if ((int)Fpga->stat.encOut[7].fp_en == 0) FpgaQSys->out &= ~(1 << 2);
-        else FpgaQSys->out |= (1 << 2);
-    }
-    
+	
+	if (_Init && rx_def_is_tx(RX_EncoderCfg.printerType))
+	{
+		if (Fpga->stat.encOut[0].fp_en == 0) FpgaQSys->out &= ~DIG_OUT_1;
+		else FpgaQSys->out |= DIG_OUT_1;
+		if (Fpga->stat.encOut[7].fp_en == 0) FpgaQSys->out &= ~DIG_OUT_2;
+		else FpgaQSys->out |= DIG_OUT_2;
+	}
+	
 	if (_Init) Fpga->cfg.general.watchdog_cnt  = WATCHDOG_CNT;
 	if (menu)
 	{
@@ -409,8 +414,8 @@ static void _fpga_poslog(void)
 		sprintf(name, PATH_TEMP "Encoder_Positions.csv");
 		_poslog_file = fopen(name, "w");
 		fprintf(_poslog_file, "time(ms)");
-        for (i = 0; i < 4; i++) fprintf(_poslog_file, ";position enc %d", i);
-        for (i = 0; i < 4; i++) fprintf(_poslog_file, ";DigIn %d", i);
+		for (i = 0; i < 4; i++) fprintf(_poslog_file, ";position enc %d", i);
+		for (i = 0; i < 4; i++) fprintf(_poslog_file, ";DigIn %d", i);
 		fprintf(_poslog_file, "\n");
 		_poslog_timer = rx_get_ticks();
 		_poslog_cnt++;
@@ -632,7 +637,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 		Fpga->cfg.encIn[inNo].enable			= _Enabled[inNo] =TRUE;
 	}
 	if(RX_EncoderCfg.printerType == printer_test_table) _uv_init();
-	else FpgaQSys->out = ENC_READY_OUT;
+	else FpgaQSys->out |= ENC_READY_OUT;
 	
 //	_scan_check_init();
 	Fpga->cfg.general.reset_errors = TRUE;
