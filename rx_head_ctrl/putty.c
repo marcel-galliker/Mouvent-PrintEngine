@@ -103,13 +103,17 @@ static void _main_menu(void)
 	if (_status)
 	{
 		term_printf("o: cond. OFF mode\n");
-		term_printf("r: cond. Print mode\n");		
+		term_printf("r: cond. Print mode\n");	
 //		term_printf("n: cond. Watchdog Test\n");
 		term_printf("q: start log\n");
 		term_printf("i: heater [C] (<=50)\n");	
 
 		term_printf("z<x>:   Calibrate pressure sensor\n");
     	term_printf("u<x>:   Delete user calibrated offset\n");
+	}
+	if (_cond)
+	{
+		term_printf("P<n>: Set pump to 40%\n");		
 	}
 	if (_mvteeprom)
 	{

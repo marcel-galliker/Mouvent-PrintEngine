@@ -300,7 +300,7 @@ void pump_tick_10ms(void)
 		case ctrl_undef:
 		case ctrl_error:
 						temp_ctrl_on(FALSE);
-						turn_off_pump();		
+						turn_off_pump();
 						RX_Status.logCnt = 0;
 						_pump_ticks = 0;
 						if (RX_Status.mode > ctrl_off) ctr_save();
@@ -369,11 +369,18 @@ void pump_tick_10ms(void)
 						_set_valve(VALVE_INK);
                         max_pressure = MBAR_500;
 						_ShutdownPrint = 1;
-        
+       
 						_pump_pid(TRUE);
 						
 						RX_Status.mode = RX_Config.mode; 		
                         break;
+						
+		case ctrl_test: _set_valve(VALVE_INK);
+						max_pressure = MBAR_500;
+						_set_pump_speed(_PumpPID.val_max*40/100);
+						RX_Status.mode = RX_Config.mode; 
+						break;
+						
         //--- CALIBRATION --------------------------------------------
 	/*	case ctrl_cal_start:	// Initialize variables
 						
