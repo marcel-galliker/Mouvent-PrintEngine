@@ -104,7 +104,7 @@ int main()
 
 	// _DEBUG must only be enabled when downloading through hardware debugger.
 	// Otherwise modes (PRINT, OFF, ..) do not work correctly
-	tr_debug();
+//	tr_debug();
 
 	arm_ptr	= (SNiosFluidMemory *) ONCHIP_MEMORY_NIOS_ARM_BASE;
 	pRX_Status = &arm_ptr->stat;
