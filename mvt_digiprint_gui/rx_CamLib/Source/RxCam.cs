@@ -55,7 +55,8 @@ namespace rx_CamLib
             CouldNotBuildGraph          = -5,
             GraphNotStoppedCorrectly    = -6,
             NoDataFromFilter            = -7,
-            MeasureTimeout              = -8
+            MeasureTimeout              = -8,
+            StartLinesTimeout           = -9
         }
 
         public enum ENMeasureMode
@@ -138,6 +139,7 @@ namespace rx_CamLib
         private const int WP_Register = 103;
         private const int WP_StartLinesCont = 104;
         private const int WP_MeasureTimeout = 105;
+        private const int WP_StartLinesTimeout = 106;
 
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -432,10 +434,6 @@ namespace rx_CamLib
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
             halignFilter.SetMeasureMode((UInt32)MeasureMode);
-			while(MeasureMode!=(ENMeasureMode)halignFilter.GetMeasureMode())
-			{
-                Thread.Sleep(10);
-			};
             return ENCamResult.OK;
         }
         public ENMeasureMode GetMeasureMode()
@@ -550,18 +548,15 @@ namespace rx_CamLib
         public ENCamResult DoMeasures(ENMeasureMode MeasureMode, UInt32 NumMeasures, UInt32 Timeout)
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
-            ENMeasureMode CurrentMode = (ENMeasureMode)halignFilter.GetMeasureMode();
-            if (CurrentMode!=MeasureMode)
-			{
-                halignFilter.SetMeasureMode((UInt32)MeasureMode);
-			    while(CurrentMode!=MeasureMode) 
-                {
-                    Thread.Sleep(10);
-                    CurrentMode = (ENMeasureMode)halignFilter.GetMeasureMode();
-                }
-			}
-            if (CurrentMode == ENMeasureMode.MeasureMode_Off || 
-                CurrentMode == ENMeasureMode.MeasureMode_StartLines) return ENCamResult.Filter_NoMeasurePossible;
+
+            Console.WriteLine("DoMeasures: ActMode={0}, newMode={1}", (ENMeasureMode)halignFilter.GetMeasureMode(), MeasureMode);
+            halignFilter.SetMeasureMode((UInt32)MeasureMode);
+            
+            if (MeasureMode == ENMeasureMode.MeasureMode_Off ||
+                MeasureMode == ENMeasureMode.MeasureMode_StartLines ||
+                MeasureMode == ENMeasureMode.MeasureMode_StartLinesCont) 
+                return ENCamResult.Filter_NoMeasurePossible;
+
             if (halignFilter.DoMeasures(NumMeasures, Timeout)) return ENCamResult.OK;
             else return ENCamResult.Filter_NoMeasurePossible;
         }
@@ -620,7 +615,7 @@ namespace rx_CamLib
         /// <summary>
         /// set the minimum number of lines to be detected as Start-Lines
         /// </summary>
-        /// <param name="MinNumStartLines"></param>
+        /// <param name="MinNumStartLines">Minimum number of lines</param>
         /// <returns></returns>
         public ENCamResult SetMinNumStartLines(UInt32 MinNumStartLines)
         {
@@ -864,6 +859,17 @@ namespace rx_CamLib
             }
         }
 
+        /// <summary>
+        /// Timeout in camera frames for finding Start-Lines, default: 0 = Timeout disabled
+        /// </summary>
+        public UInt32 StartLineTimeout
+        {
+            set
+            {
+                if (CameraRunning) halignFilter.SetStartLinesTimeout(value);
+            }
+        }
+
         //Debug
         /// <summary>
         /// Opens a console window with debug information, default = false
@@ -1043,6 +1049,11 @@ namespace rx_CamLib
                             CallBackData = new CallBackDataStruct();
                             CallBackData.CamResult = new ENCamResult();
                             CamCallBack?.Invoke(ENCamCallBackInfo.MeasureTimeout, CallBackData);
+                            break;
+                        case WP_StartLinesTimeout:
+                            CallBackData = new CallBackDataStruct();
+                            CallBackData.CamResult = new ENCamResult();
+                            CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesTimeout, CallBackData);
                             break;
                     }
                     break;
@@ -1663,6 +1674,8 @@ namespace rx_CamLib
             }
             Marshal.FreeHGlobal(unmanaged_pInList);
 
+            if(MeasureDataList.Count == 0) return ENCamResult.Filter_NoData;
+
             return ENCamResult.OK;
         }
 
@@ -1706,7 +1719,7 @@ namespace rx_CamLib
 
             //StdDev
             VarV1 = Math.Sqrt(VarV1);
-            VarV2 = Math.Sqrt(VarV1);
+            VarV2 = Math.Sqrt(VarV2);
             VarDX = Math.Sqrt(VarDX);
             VarDY = Math.Sqrt(VarDY);
 

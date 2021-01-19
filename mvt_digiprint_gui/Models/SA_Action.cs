@@ -173,8 +173,8 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- Property Correction ---------------------------------------
-		private double _Correction;
-		public double Correction
+		private double? _Correction;
+		public double? Correction
 		{
 			get { return _Correction; }
 			set { SetProperty(ref _Correction,value); }

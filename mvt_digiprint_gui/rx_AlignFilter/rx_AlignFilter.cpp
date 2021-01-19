@@ -1,4 +1,5 @@
 ﻿#pragma once
+#pragma once
 
 #define _USE_MATH_DEFINES
 
@@ -501,7 +502,7 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	m_MinNumStartLines = m_PresetMinNumStartLines;
 	if (m_FindLine_Distance != m_PresetFindLine_Distance)
 	{
-		m_FindLine_Distance != m_PresetFindLine_Distance;
+		m_FindLine_Distance = m_PresetFindLine_Distance;
 		m_FindLine_umPpx = 1;
 	}
 
@@ -3633,7 +3634,10 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	//Wait for host to pick data
 	if(m_DataListforHostReady) return NOERROR;
 
-    //Average/Center of detected Lines
+	//Count Timeout
+	if (m_StartLinesTimeout > 0) m_StartLinesTimeoutCounter++;
+
+	//Average/Center of detected Lines
     int NumBlobsvalid = 0;
     float AvgLengthX = 0;
 	float AvgLengthY = 0;
@@ -3731,7 +3735,7 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	}
 
 	MeasureData.micron = (m_FindLine_umPpx != 1);
-	MeasureData.Value_1 = NumBlobsvalid;
+	MeasureData.Value_1 = (float)NumBlobsvalid;
 	MeasureData.ErrorCode = 0;
 	m_vMeasureDataList.clear();
 	m_vMeasureDataList.push_back(MeasureData);
@@ -5010,6 +5014,25 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_MeasureTimeout, (LPARAM)0);
 	}
 
+	//StartLines Timeout
+	if (m_prx_AlignFilter->m_MeasureMode == IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLines &&
+		m_prx_AlignFilter->m_StartLinesTimeout > 0 &&
+		m_prx_AlignFilter->m_StartLinesTimeoutCounter >= m_prx_AlignFilter->m_StartLinesTimeout)
+	{
+		if (m_prx_AlignFilter->m_DebugOn)
+		{
+			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+			printf("%6.6f\tStartLines TimeOut\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		}
+
+		m_prx_AlignFilter->m_MeasureMode = IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Off;
+		m_prx_AlignFilter->m_MeasureRunning = FALSE;
+		m_prx_AlignFilter->m_StartLinesTimeout = 0;
+		m_prx_AlignFilter->m_StartLinesTimeoutCounter = 0;
+		if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLinesTimeout, (LPARAM)0);
+	}
+
     //Cleanup
 	pOutSample->Release();
 	pSampleIn->Release();
@@ -5556,7 +5579,7 @@ STDMETHODIMP C_rx_AlignFilter::SetShowOriginalImage(BOOL ShowOriginalImage)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowOriginalImage()
 {
-	return m_ShowOriginal;
+	return m_PresetShowOriginal;
 }
 
 //Overlay-Text
@@ -5610,7 +5633,7 @@ STDMETHODIMP C_rx_AlignFilter::SetOverlayTextColor(COLORREF OverlayTextColor)
 }
 STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetOverlayTextColor()
 {
-	return m_OverlayTextColor;
+	return m_PresetOverlayTextColor;
 }
 
 //Font for Overlay Text
@@ -5681,7 +5704,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBinarizeMode(UINT BinarizeMode)
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetBinarizeMode()
 {
 	CAutoLock cAutolock(m_pLock);
-	return m_BinarizeMode;
+	return m_PresetBinarizeMode;
 }
 //Threshold
 STDMETHODIMP C_rx_AlignFilter::SetThreshold(UINT Threshold)
@@ -5700,7 +5723,7 @@ STDMETHODIMP C_rx_AlignFilter::SetThreshold(UINT Threshold)
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetThreshold()
 {
 	CAutoLock cAutolock(m_pLock);
-	return m_Threshold;
+	return m_PresetThreshold;
 }
 //Show Histogram
 STDMETHODIMP C_rx_AlignFilter::ShowHistogram(BOOL ShowHistogram)
@@ -5730,7 +5753,7 @@ STDMETHODIMP C_rx_AlignFilter::SetNumDilateErodes(UINT DilateErodes)
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetNumDilateErodes()
 {
-	return m_DilateErodes;
+	return m_PresetDilateErodes;
 }
 //Num Extra-Erodes
 STDMETHODIMP C_rx_AlignFilter::SetNumExtraErodes(UINT ExtraErodes)
@@ -5748,7 +5771,7 @@ STDMETHODIMP C_rx_AlignFilter::SetNumExtraErodes(UINT ExtraErodes)
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetNumExtraErodes()
 {
-	return m_ExtraErodes;
+	return m_PresetExtraErodes;
 }
 //Erode Seed
 STDMETHODIMP C_rx_AlignFilter::SetErodeSeedX(UINT ErodeSeedX)
@@ -5779,17 +5802,18 @@ STDMETHODIMP C_rx_AlignFilter::SetErodeSeedY(UINT ErodeSeedY)
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetErodeSeedX()
 {
-	return m_ErodeSeedX;
+	return m_PresetErodeSeedX;
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetErodeSeedY()
 {
-	return m_ErodeSeedY;
+	return m_PresetErodeSeedY;
 }
 
 #pragma endregion
 
 #pragma region Blob
 
+//Cross Color
 STDMETHODIMP C_rx_AlignFilter::SetCrossColor(COLORREF CrossColorBlob)
 {
 	m_PresetCrossColorBlob = CrossColorBlob;
@@ -5798,7 +5822,7 @@ STDMETHODIMP C_rx_AlignFilter::SetCrossColor(COLORREF CrossColorBlob)
 }
 STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetCrossColor()
 {
-	return m_CrossColorBlob;
+	return m_PresetCrossColorBlob;
 }
 
 //BlobOutlineColor
@@ -5810,7 +5834,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobOutlineColor(COLORREF BlobOutlineColor)
 }
 STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetBlobOutlineColor()
 {
-	return m_BlobColor;
+	return m_PresetBlobColor;
 }
 //BlobCrossColor
 STDMETHODIMP C_rx_AlignFilter::SetBlobCrossColor(COLORREF BlobCrossColor)
@@ -5821,7 +5845,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobCrossColor(COLORREF BlobCrossColor)
 }
 STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetBlobCrossColor()
 {
-	return m_CrossColor;
+	return m_PresetCrossColor;
 }
 //BlobTextColor
 STDMETHODIMP C_rx_AlignFilter::SetBlobTextColor(COLORREF BlobTextColor)
@@ -5832,7 +5856,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobTextColor(COLORREF BlobTextColor)
 }
 STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetBlobTextColor()
 {
-	return m_BlobTextColor;
+	return m_PresetBlobTextColor;
 }
 
 //BlobAspectLimit
@@ -5844,7 +5868,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobAspectLimit(UINT32 BlobAspectLimit)
 }
 STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobAspectLimit()
 {
-	return m_BlobAspectLimit;
+	return m_PresetBlobAspectLimit;
 }
 //BlobAreaDivisor
 STDMETHODIMP C_rx_AlignFilter::SetBlobAreaDivisor(UINT32 BlobAreaDivisor)
@@ -5855,7 +5879,7 @@ STDMETHODIMP C_rx_AlignFilter::SetBlobAreaDivisor(UINT32 BlobAreaDivisor)
 }
 STDMETHODIMP_(UINT32) C_rx_AlignFilter::GetBlobAreaDivisor()
 {
-	return m_BlobAreaDivisor;
+	return m_PresetBlobAreaDivisor;
 }
 
 //ShowBlobOutlines
@@ -5867,7 +5891,7 @@ STDMETHODIMP C_rx_AlignFilter::SetShowBlobOutlines(BOOL ShowBlobOutlines)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowBlobOutlines()
 {
-	return m_OverlayBlobs;
+	return m_PresetOverlayBlobs;
 }
 //ShowBlobCenters
 STDMETHODIMP C_rx_AlignFilter::SetShowBlobCenters(BOOL ShowBlobCenters)
@@ -5878,7 +5902,7 @@ STDMETHODIMP C_rx_AlignFilter::SetShowBlobCenters(BOOL ShowBlobCenters)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowBlobCenters()
 {
-	return m_OverlayCenters;
+	return m_PresetOverlayCenters;
 }
 //ShowBlobValues
 STDMETHODIMP C_rx_AlignFilter::SetShowBlobValues(BOOL ShowBlobValues)
@@ -5889,7 +5913,7 @@ STDMETHODIMP C_rx_AlignFilter::SetShowBlobValues(BOOL ShowBlobValues)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetShowBlobValues()
 {
-	return m_OverlayValues;
+	return m_PresetOverlayValues;
 }
 //Font for Blob Values
 STDMETHODIMP C_rx_AlignFilter::SetBlobFont(void* pLogFontStruct)
@@ -5979,7 +6003,7 @@ STDMETHODIMP C_rx_AlignFilter::SetInverse(BOOL InverseImage)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetInverse()
 {
-	return m_InverseImage;
+	return m_PresetInverseImage;
 }
 
 //MeasureMode
@@ -5998,7 +6022,7 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasureMode(C_rx_AlignFilter::MeasureModeEnum 
 }
 STDMETHODIMP_(C_rx_AlignFilter::MeasureModeEnum) C_rx_AlignFilter::GetMeasureMode()
 {
-	return m_MeasureMode;
+	return m_PresetMeasureMode;
 }
 
 //DisplayMode
@@ -6017,7 +6041,7 @@ STDMETHODIMP C_rx_AlignFilter::SetDisplayMode(C_rx_AlignFilter::DisplayModeEnum 
 }
 STDMETHODIMP_(C_rx_AlignFilter::DisplayModeEnum) C_rx_AlignFilter::GetDisplayMode()
 {
-	return m_DisplayMode;
+	return m_PresetDisplayMode;
 }
 
 //Minimum number of StartLines
@@ -6049,23 +6073,38 @@ STDMETHODIMP C_rx_AlignFilter::SetStartLinesDistance(float FindLine_Distance)
 	return NOERROR;
 
 }
+//Timeout for StartLines
+STDMETHODIMP C_rx_AlignFilter::SetStartLinesTimeout(UINT32 StartLinesTimeout)
+{
+	m_StartLinesTimeout = StartLinesTimeout;
+	m_StartLinesTimeoutCounter = 0;
+
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tSet StartLinesTimeout: %1.6f\n", (float)m_TimeStamp / 1000000.0f, m_StartLinesTimeout);
+	}
+
+	return NOERROR;
+}
 
 //Execute Measures
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 Timeout)
 {
 	CAutoLock cAutolock(m_pLock);
 
-	if (m_MeasureMode == MeasureModeEnum::MeasureMode_Off ||
-		m_MeasureMode == MeasureModeEnum::MeasureMode_AllLines ||
-		m_MeasureMode == MeasureModeEnum::MeasureMode_StartLines ||
+	if (m_PresetMeasureMode == MeasureModeEnum::MeasureMode_Off ||
+		m_PresetMeasureMode == MeasureModeEnum::MeasureMode_AllLines ||
+		m_PresetMeasureMode == MeasureModeEnum::MeasureMode_StartLines ||
 		m_MeasureRunning)
 	{
-		if (m_DebugOn)
-		{
-			m_MeasureTime = std::chrono::steady_clock::now();
-			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tDoMeasures but MeasureMode: %d, MeasureRunning: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureMode, m_MeasureRunning);
-		}
+		char err[100];
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		sprintf(err, "%6.6f\tDoMeasures but MeasureMode: %d, MeasureRunning: %d", (float)m_TimeStamp / 1000000.0f, m_MeasureMode, m_MeasureRunning);
+		if (m_DebugOn) printf("%s\n", err);
+
 		return false;
 	}
 
@@ -6171,7 +6210,7 @@ STDMETHODIMP C_rx_AlignFilter::SetLinesHorizontal(BOOL LinesHorizontal)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetLinesHorizontal()
 {
-	return m_LinesHorizontal;
+	return m_PresetLinesHorizontal;
 }
 
 //Line Direction
@@ -6190,7 +6229,7 @@ STDMETHODIMP C_rx_AlignFilter::SetUpsideDown(BOOL UpsideDown)
 }
 STDMETHODIMP_(BOOL) C_rx_AlignFilter::GetUpsideDown()
 {
-	return m_UpsideDown;
+	return m_PresetUpsideDown;
 }
 
 #pragma endregion

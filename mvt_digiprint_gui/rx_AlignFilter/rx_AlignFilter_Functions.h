@@ -274,14 +274,14 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 	HRSRC hResult = FindResource(hMySelf, MAKEINTRESOURCE(KernelSourceID), _T("OPENCL"));
 	if (hResult == NULL)
 	{
-		if (m_DebugOn)
-		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)hResult, MsgMsg, 10, 10);
-			m_MeasureTime = std::chrono::steady_clock::now();
-			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tMakeProgram: KernelSource-Resource not found: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
-		}
+//		if (m_DebugOn)
+//		{
+//			TCHAR MsgMsg[10];
+//			_itow_s((int)hResult, MsgMsg, 10, 10);
+//			m_MeasureTime = std::chrono::steady_clock::now();
+//			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+//			printf("%6.6f\tMakeProgram: KernelSource-Resource not found: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
+//		}
 		exit(-1);
 	}
 
