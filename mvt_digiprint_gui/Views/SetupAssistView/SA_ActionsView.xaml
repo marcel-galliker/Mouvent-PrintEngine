@@ -53,7 +53,7 @@
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconMaterial Grid.Column="0" Kind="{Binding IconKind}" Foreground="Gray"/>
-                                            <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0"/>
+                                            <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0" MinWidth="30"/>
                                             <TextBlock Text="{Binding ValueStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/>
                                         </StackPanel>
                                     </Grid>

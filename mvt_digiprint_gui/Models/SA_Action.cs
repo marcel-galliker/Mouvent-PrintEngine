@@ -69,6 +69,14 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _WebMoveDone,value); }
 		}
 
+		//--- Property CamWorking ---------------------------------------
+		private bool _CamWorking=false;
+		public bool CamWorking
+		{
+			get { return _CamWorking; }
+			set { SetProperty(ref _CamWorking,value); }
+		}
+
 		//--- Property Function ---------------------------------------
 		private ECamFunction _Function=ECamFunction.CamNoFunction;
 		public ECamFunction Function
@@ -78,7 +86,7 @@ namespace RX_DigiPrint.Models
 					SetProperty(ref _Function,value);
 					switch(value)
 					{ 
-					case ECamFunction.CamMeasureAngle:	IconKind=PackIconMaterialKind.MathCompass; break;
+					case ECamFunction.CamMeasureAngle:	IconKind=PackIconMaterialKind.AngleAcute; break;
 					case ECamFunction.CamMeasureStitch: IconKind=PackIconMaterialKind.ArrowCollapseVertical; break;
 					case ECamFunction.CamMeasureDist:	IconKind=PackIconMaterialKind.ArrowCollapseRight; break;
 					default: break;
@@ -158,9 +166,9 @@ namespace RX_DigiPrint.Models
 				if (cnt<3) return;
 
 				Correction = avg2/cnt;
-				Console.WriteLine("ANGLE CORRECTION: all {0}", str1);
-				Console.WriteLine("ANGLE CORRECTION: ok  {0}", str2);
-				Console.WriteLine("ANGLE CORRECTION: Corr={0:0.000} avg={1:0.000}, diff={2:0.000}, avg2={3:0.000}, cnt={4}", Correction, avg, diff, avg2, cnt);
+			//	Console.WriteLine("ANGLE CORRECTION: all {0}", str1);
+			//	Console.WriteLine("ANGLE CORRECTION: ok  {0}", str2);
+			//	Console.WriteLine("ANGLE CORRECTION: Corr={0:0.000} avg={1:0.000}, diff={2:0.000}, avg2={3:0.000}, cnt={4}", Correction, avg, diff, avg2, cnt);
 			}
 		}
 

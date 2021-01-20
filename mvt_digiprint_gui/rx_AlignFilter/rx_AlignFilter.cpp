@@ -465,11 +465,48 @@ STDMETHODIMP C_rx_AlignFilter::GetClassID(CLSID* pClsid)
 }
 
 
+//CallbackDebug
+void C_rx_AlignFilter::CallbackDebug(const char* MessageFormat, ...)
+{
+	if (m_HostHwnd == NULL || !m_CallbackDebug)
+	{
+		return;
+	}
+
+	char msg[255];
+	va_list args;
+	va_start(args, MessageFormat);
+	vsnprintf(msg, sizeof(msg), MessageFormat, args);
+	va_end(args);
+
+	COPYDATASTRUCT CopyData;
+	CopyData.dwData = WP_CallBackDebug;
+	CopyData.cbData = (DWORD)strlen(msg);
+	CopyData.lpData = msg;
+
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tCallbackDebug: cbData: %d, lpData: %s\n", (float)m_TimeStamp / 1000000.0f, CopyData.cbData, (char*)CopyData.lpData);
+	}
+
+	SendMessage(m_HostHwnd, WM_COPYDATA, (WPARAM)(HWND)hMySelf, (LPARAM)(LPVOID)&CopyData);
+}
+
 //Change Settings and Modes
 HRESULT C_rx_AlignFilter::ChangeModes()
 {
 	if (m_MeasureMode != m_PresetMeasureMode)
 	{
+		if (m_DebugOn)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tSet Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetMeasureMode);
+		}
+		CallbackDebug("Set Measure Mode: %d", m_PresetMeasureMode);
+
 		m_MeasureRunning = false;
 		m_measureDone = false;
 		m_MeasureMode = m_PresetMeasureMode;
@@ -518,6 +555,14 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	//Start Measure
 	if (m_StartMeasure)
 	{
+		if (m_DebugOn)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tMeasure running\n", (float)m_TimeStamp / 1000000.0f);
+		}
+		CallbackDebug("Measure running");
+
 		m_MeasureRunning = true;
 	}
 	m_StartMeasure = false;
@@ -3741,7 +3786,18 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	m_vMeasureDataList.push_back(MeasureData);
 	m_MeasureRunning = false;
 	m_measureDone = true;
-	if(!Continuous) m_PresetMeasureMode = MeasureModeEnum::MeasureMode_Off;
+	if (!Continuous && m_PresetMeasureMode == MeasureModeEnum::MeasureMode_StartLines)
+	{
+		m_PresetMeasureMode = MeasureModeEnum::MeasureMode_Off;
+
+		if (m_DebugOn)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tLines found, preset Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetMeasureMode);
+		}
+		CallbackDebug("Lines found, preset Measure Mode: %d", m_PresetMeasureMode);
+	}
 
     return NOERROR;
 }
@@ -5477,6 +5533,23 @@ STDMETHODIMP C_rx_AlignFilter::SetDebug(BOOL DebugOn)
     return NOERROR;
 }
 
+//Callback debug
+STDMETHODIMP C_rx_AlignFilter::SetCallbackDebug(BOOL CallbackDebugOn)
+{
+	m_CallbackDebug = CallbackDebugOn;
+
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tSet CallbackDebug: %d\n", (float)m_TimeStamp / 1000000.0f, m_CallbackDebug);
+	}
+
+	CallbackDebug("Set Callback-Debug %d", m_CallbackDebug);
+
+	return  NOERROR;
+}
+
 //Display Frame Timimg
 STDMETHODIMP C_rx_AlignFilter::SetFrameTiming(BOOL DspFrameTime)
 {
@@ -5699,6 +5772,8 @@ STDMETHODIMP C_rx_AlignFilter::SetBinarizeMode(UINT BinarizeMode)
 		printf("%6.6f\tSet Binarize: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetBinarizeMode);
 	}
 
+	CallbackDebug("SetBinarizeMode %d", m_PresetBinarizeMode);
+
 	return NOERROR;
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetBinarizeMode()
@@ -5749,6 +5824,8 @@ STDMETHODIMP C_rx_AlignFilter::SetNumDilateErodes(UINT DilateErodes)
 		printf("%6.6f\tSet Num Dilate-Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetDilateErodes);
 	}
 
+	CallbackDebug("SetNumDilateErodes %d", m_PresetDilateErodes);
+
 	return NOERROR;
 }
 STDMETHODIMP_(UINT) C_rx_AlignFilter::GetNumDilateErodes()
@@ -5766,6 +5843,8 @@ STDMETHODIMP C_rx_AlignFilter::SetNumExtraErodes(UINT ExtraErodes)
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 		printf("%6.6f\tSet Num Extra Erodes: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetExtraErodes);
 	}
+
+	CallbackDebug("SetNumExtraErodes %d", m_PresetExtraErodes);
 
 	return NOERROR;
 }
@@ -5863,6 +5942,8 @@ STDMETHODIMP_(COLORREF) C_rx_AlignFilter::GetBlobTextColor()
 STDMETHODIMP C_rx_AlignFilter::SetBlobAspectLimit(UINT32 BlobAspectLimit)
 {
 	m_PresetBlobAspectLimit = BlobAspectLimit;
+
+	CallbackDebug("SetBlobAspectLimit %d", m_PresetBlobAspectLimit);
 
 	return NOERROR;
 }
@@ -5998,6 +6079,7 @@ STDMETHODIMP C_rx_AlignFilter::SetInverse(BOOL InverseImage)
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 		printf("%6.6f\tInverse Image: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetInverseImage);
 	}
+	CallbackDebug("SetInverse %d", m_PresetInverseImage);
 
 	return NOERROR;
 }
@@ -6015,8 +6097,11 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasureMode(C_rx_AlignFilter::MeasureModeEnum 
 	{
 		m_MeasureTime = std::chrono::steady_clock::now();
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		printf("%6.6f\tSet Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetMeasureMode);
+
+		printf("%6.6f\tPreset Measure Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetMeasureMode);
 	}
+
+	CallbackDebug("Preset Measure Mode %d", m_PresetMeasureMode);
 
 	return NOERROR;
 }
@@ -6036,6 +6121,7 @@ STDMETHODIMP C_rx_AlignFilter::SetDisplayMode(C_rx_AlignFilter::DisplayModeEnum 
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 		printf("%6.6f\tSet Display Mode: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetDisplayMode);
 	}
+	CallbackDebug("SetDisplayMode %d", m_PresetDisplayMode);
 
 	return NOERROR;
 }
@@ -6055,6 +6141,7 @@ STDMETHODIMP C_rx_AlignFilter::SetMinNumStartLines(UINT32 MinNumStartLines)
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 		printf("%6.6f\tSet MinNumStartLines: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetMinNumStartLines);
 	}
+	CallbackDebug("SetMinNumStartLines %d", m_PresetMinNumStartLines);
 
     return NOERROR;
 }
@@ -6105,6 +6192,8 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 Time
 		sprintf(err, "%6.6f\tDoMeasures but MeasureMode: %d, MeasureRunning: %d", (float)m_TimeStamp / 1000000.0f, m_MeasureMode, m_MeasureRunning);
 		if (m_DebugOn) printf("%s\n", err);
 
+		CallbackDebug("DoMeasures but MeasureMode: %d, MeasureRunning: %d", m_MeasureMode, m_MeasureRunning);
+
 		return false;
 	}
 
@@ -6114,6 +6203,7 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 Time
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 		printf("%6.6f\tDoMeasures: %d\n", (float)m_TimeStamp / 1000000.0f, NumMeasures);
 	}
+	CallbackDebug("DoMeasures: %d", NumMeasures);
 
 	m_measureDone = false;
 	m_DataListforHostReady = false;
@@ -6205,6 +6295,7 @@ STDMETHODIMP C_rx_AlignFilter::SetLinesHorizontal(BOOL LinesHorizontal)
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 		printf("%6.6f\tSet Lines Horizontal: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetLinesHorizontal);
 	}
+	CallbackDebug("SetLinesHorizontal: %d", LinesHorizontal);
 
 	return NOERROR;
 }
@@ -6224,6 +6315,7 @@ STDMETHODIMP C_rx_AlignFilter::SetUpsideDown(BOOL UpsideDown)
 		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 		printf("%6.6f\tSet Lines UpsideDown: %d\n", (float)m_TimeStamp / 1000000.0f, m_PresetUpsideDown);
 	}
+	CallbackDebug("SetUpsideDown: %d", UpsideDown);
 
 	return NOERROR;
 }

@@ -34,6 +34,9 @@ namespace rx_CamLib.Models
             //Debug On
             [PreserveSig]
             void SetDebug(bool DebugOn);
+            //Callback debug
+            [PreserveSig]
+            void SetCallbackDebug(bool CallbackDebug);
             //Display Frame Timing
             [PreserveSig]
             void SetFrameTiming(bool DspFrameTime);

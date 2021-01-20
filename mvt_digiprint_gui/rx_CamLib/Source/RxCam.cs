@@ -40,6 +40,7 @@ namespace rx_CamLib
 
         public enum ENCamCallBackInfo
         {
+            DebugCallBack               =  8,
             StartLinesContinuous        =  7,
             RegisterCorr                =  6,
             StitchCorr                  =  5,
@@ -105,6 +106,7 @@ namespace rx_CamLib
             public float Value_1;           //Angle, Stitch, Register: Correction Value in Rev or μm (Register, ColorStitch), StartLines: number of lines
             public LineLayoutEnum LineLayout;   //Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right/Covering/Bottom/Left)  
             public bool micron;                 //Measure is in μm
+            public string Info;             // Debug Info etc.
         };
 
         private DsDevice[] DeviceList = null;
@@ -130,7 +132,8 @@ namespace rx_CamLib
         private const int WM_APP = 0x8000;                  //Definitions from Windows.h
         private const int WM_APP_MEDIAEV = WM_APP + 2020;   //Callback from MediaEventEx
         private const int WM_APP_ALIGNEV = WM_APP + 2025;   //Callback from Bieler_ds_Align
-        private const int WM_DEVICECHANGE = 0x0219;             //from winuser.h
+        private const int WM_DEVICECHANGE = 0x0219;         //from winuser.h
+        private const int WM_COPYDATA = 0x004A;             //from winuser.h
         private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;    //from DBT.H
         private const int DBT_DEVTYP_DEVICEINTERFACE = 0x0005;
         private const int WP_StartLines = 100;
@@ -880,6 +883,17 @@ namespace rx_CamLib
             if (CameraRunning) halignFilter.SetDebug(DebugOn);
         }
 
+        //Callback Debug
+        /// <summary>
+        /// Enables debug callback-messages, default = false
+        /// </summary>
+        /// <param name="CallbackDebug"></param>
+        public void SetCallbackDebug(bool CallbackDebug)
+        {
+            if (CameraRunning) halignFilter.SetCallbackDebug(CallbackDebug);
+        }
+
+
         /// <summary>
         /// Displays frame processing time in debug console, default = false
         /// </summary>
@@ -893,6 +907,13 @@ namespace rx_CamLib
 
 
         #region Internal
+
+        public struct COPYDATASTRUCT
+        {
+            public IntPtr dwData;
+            public int cbData;
+            public IntPtr lpData;
+        }
 
         private void GetWinMessage(ref Message Msg)
         {
@@ -1056,6 +1077,20 @@ namespace rx_CamLib
                             CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesTimeout, CallBackData);
                             break;
                     }
+                    break;
+                }
+
+                case WM_COPYDATA:
+                {
+                    COPYDATASTRUCT CopyData = new COPYDATASTRUCT();
+                    CopyData = (COPYDATASTRUCT)Marshal.PtrToStructure(Msg.LParam, typeof(COPYDATASTRUCT));
+                    byte[] data = new byte[CopyData.cbData];
+                    Marshal.Copy(CopyData.lpData, data, 0, CopyData.cbData);
+                    Encoding UnicodeStr = Encoding.ASCII;
+                    char[] InfoString = UnicodeStr.GetChars(data);
+                    CallBackDataStruct CallBackData = new CallBackDataStruct();
+                    CallBackData.Info = new string(InfoString);
+                    CamCallBack?.Invoke(ENCamCallBackInfo.DebugCallBack, CallBackData);
                     break;
                 }
             }

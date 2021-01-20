@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static rx_CamLib.RxCam;
 
 namespace rx_CamLib
 {
@@ -48,33 +49,6 @@ namespace rx_CamLib
 		}
 	};
 
-	public class SHeadPosition : RxBindable
-	{
-		//--- Property angle ---------------------------------------
-		private int _Angle;
-		public int Angle
-		{
-			get { return _Angle; }
-			set { SetProperty(ref _Angle,value); }
-		}
-
-		//--- Property Stitch ---------------------------------------
-		private int _Stitch;
-		public int Stitch
-		{
-			get { return _Stitch; }
-			set { SetProperty(ref _Stitch,value); }
-		}
-
-		//--- Property Distance ---------------------------------------
-		private int _Distance;
-		public int Distance
-		{
-			get { return _Distance; }
-			set { SetProperty(ref _Distance,value); }
-		}
-	};
-
 	public class RxCamFunctions : RxBindable
 	{
 		private RxCam _Camera;
@@ -83,9 +57,10 @@ namespace rx_CamLib
 			_Camera = cam;
 			Console.WriteLine ("create RxCamFunctions");
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
-		}
+		}		
 
 		//--- Property Simulation ---------------------------------------
+		public event CameraCallBack SimuCallback = null;
 		private bool _Simulation=false;
 		public bool Simulation
 		{
@@ -113,43 +88,43 @@ namespace rx_CamLib
 				_Camera.StartLineTimeout = 5;    //e.g. app. 1min @ 30fps
 				_Camera.SetMinNumStartLines(1);
 				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLinesCont);
+				if (SimuCallback!=null)
+				{	
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					CallbackData.DPosX=0;
+					CallbackData.DPosY=0;
+					CallbackData.Value_1 = (float)1.2;
+					CallbackData.LineLayout = LineLayoutEnum.LineLayout_Covering;
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesContinuous, CallbackData);
+				}
 			}
 			else            
 			{
 				_Camera.StartLineTimeout = 1800;    //e.g. app. 1min @ 30fps
 				_Camera.SetMinNumStartLines(3);
 				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
+				if (SimuCallback!=null)
+				{	
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesDetected, CallbackData);
+				}
 			}
-            if (_Simulation)
-            {
-                new Task(() =>
-                {
-                    Task.Delay(5000).Wait();
-                  //  RxBindable.Invoke(() => markFound());	Callback!
-                }).Start();
-            }
         }
-
-		//--- MeasureMark --------------------------------
-		public void MeasureMark(Action<SMarkPosition> measured)
-		{
-			if (_Simulation)
-			{
-				new Task(() =>
-				{
-					Task.Delay(1000).Wait();
-					RxBindable.Invoke(()=>
-					{
-						SMarkPosition pos = new SMarkPosition() {Web=100, Scanner=200 };
-						measured(pos);
-					});
-				}).Start();
-			}
-		}
 
 		//--- MeasureAngle --------------------------------
 		public void MeasureAngle()
 		{
+			if (SimuCallback!=null)
+			{	
+				new Task(() =>
+				{
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					CallbackData.Value_1 = (float)1.2;
+					Thread.Sleep(100);
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.AngleCorr, CallbackData);
+				}).Start();
+				return;
+			}
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 			_Camera.SetLinesHorizontal(false);
 			_Camera.NumExtraErodes=3;
@@ -161,6 +136,18 @@ namespace rx_CamLib
 		//--- MeasureStitch --------------------------------
 		public void MeasureStitch()
 		{
+			if (SimuCallback!=null)
+			{	
+				new Task(() =>
+				{
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					CallbackData.Value_1 = (float)1.2;
+					Thread.Sleep(100);
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StitchCorr, CallbackData);
+				}).Start();
+				return;
+			}
+
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 			_Camera.SetLinesHorizontal(false);
 			_Camera.NumExtraErodes=3;

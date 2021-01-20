@@ -93,6 +93,7 @@ public:
 		BOOL micron;				//Measure is in μm
 	};
 
+
 #pragma endregion
 
 	#pragma region General
@@ -107,6 +108,8 @@ public:
 	STDMETHOD(GetDeviceName)(THIS_ LPCWSTR DeviceName) PURE;
 	//Debug On
 	STDMETHOD(SetDebug)(THIS_ BOOL DebugOn) PURE;
+	//Callback debug
+	STDMETHOD(SetCallbackDebug)(THIS_ BOOL CallbackDebug) PURE;
 	//Display Frame Timing
 	STDMETHOD(SetFrameTiming)(THIS_ BOOL DspFrameTime) PURE;
 	//Take SnapShot and Save to
@@ -426,6 +429,7 @@ public:
 	STDMETHODIMP SetHostPointer(HWND PropHwnd);
 	STDMETHODIMP GetDeviceName(LPCWSTR DeviceName);
 	STDMETHODIMP SetDebug(BOOL DebugOn);
+	STDMETHODIMP SetCallbackDebug(BOOL CallbackDebug);
 	STDMETHODIMP SetFrameTiming(BOOL DspFrameTime);
 	STDMETHODIMP_(BOOL) TakeSnapShot(const wchar_t* SnapDirectory, const wchar_t* SnapFileName);
 	STDMETHODIMP SetShowOriginalImage(BOOL ShowOriginalImage);
@@ -681,6 +685,7 @@ private:
 	#define WP_StartLinesCont 104
 	#define WP_MeasureTimeout 105
 	#define WP_StartLinesTimeout 106
+	#define WP_CallBackDebug 107
 
 	//Line Direction
 	BOOL m_LinesHorizontal = false;
@@ -696,6 +701,7 @@ private:
 	FILE* pStdIn;
 	FILE* pStdOut;
 	FILE* pStdErr;
+	BOOL m_CallbackDebug = false;
 
 	bool m_InverseImage = false;
 	bool m_PresetInverseImage = false;
@@ -785,6 +791,9 @@ private:
 	cl_kernel ClJoinRGBHistogramKernel = NULL;
 	cl_kernel ClSmoothenRGBHistogramKernel = NULL;
 	cl_kernel ClColorizeRGBKernel = NULL;
+
+	//Callback Debug
+	void C_rx_AlignFilter::CallbackDebug(const char* format, ...);
 
 	//Change Settings and Modes
 	HRESULT ChangeModes();
