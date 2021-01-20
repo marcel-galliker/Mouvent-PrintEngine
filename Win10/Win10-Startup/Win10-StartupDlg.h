@@ -34,11 +34,12 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg void OnClose();
-	afx_msg void StartGui();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-private:
+public:
+	afx_msg void StartGui();
 	CProgressCtrl m_progress;
+	int			  m_connected;
 	int			  m_started;
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);

@@ -200,6 +200,9 @@ namespace rx_CamLib.Models
             //Distance between vertical StartLines
             [PreserveSig]
             void SetStartLinesDistance(float StartLinesDistance);
+            //Timeout for StartLines
+            [PreserveSig]
+            void SetStartLinesTimeout (UInt32 StartLinesTimeout);
 
             //Execute Measures
             [PreserveSig]

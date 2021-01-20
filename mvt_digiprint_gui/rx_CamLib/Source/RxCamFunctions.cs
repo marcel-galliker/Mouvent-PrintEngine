@@ -110,11 +110,13 @@ namespace rx_CamLib
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_AllLines);
 			if (horizontal) 
 			{
+				_Camera.StartLineTimeout = 5;    //e.g. app. 1min @ 30fps
 				_Camera.SetMinNumStartLines(1);
 				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLinesCont);
 			}
 			else            
 			{
+				_Camera.StartLineTimeout = 1800;    //e.g. app. 1min @ 30fps
 				_Camera.SetMinNumStartLines(3);
 				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
 			}
@@ -153,7 +155,7 @@ namespace rx_CamLib
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 10);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 20);
 		}
 
 		//--- MeasureStitch --------------------------------
@@ -164,7 +166,7 @@ namespace rx_CamLib
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 10);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 20);
 		}
 	}
 }

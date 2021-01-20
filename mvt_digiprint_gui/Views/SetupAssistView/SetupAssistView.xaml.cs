@@ -29,7 +29,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 		//	StartButton.IsEnabled = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power);
 			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-			StartButton.IsEnabled = state==EnPlcState.plc_stop;
+			StartButton.IsEnabled = (state==EnPlcState.plc_stop || state==EnPlcState.plc_error);
 		}
 
 		//--- Settings_Clicked -------------------------------------------

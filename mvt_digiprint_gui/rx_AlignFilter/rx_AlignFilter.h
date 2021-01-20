@@ -223,6 +223,8 @@ public:
     STDMETHOD(SetMinNumStartLines)(THIS_ UINT32 MinNumStartLines) PURE;
 	//Distance between vertical StartLines
 	STDMETHOD(SetStartLinesDistance)(THIS_ float StartLinesDistance) PURE;
+	//Timeout for StartLines
+	STDMETHOD(SetStartLinesTimeout)(THIS_ UINT32 StartLinesTimeout) PURE;
 
 	//Execute Measures
 	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures, UINT32 Timeout) PURE;
@@ -430,7 +432,7 @@ public:
 	STDMETHODIMP_(BOOL) GetShowOriginalImage();
 	STDMETHODIMP_(BOOL) SetOverlayTxt(const wchar_t* OverlayTxt);
 	STDMETHODIMP SetOverlayTextColor(COLORREF BlobTextColor);
-	STDMETHOD_(COLORREF) GetOverlayTextColor();
+	STDMETHODIMP_(COLORREF) GetOverlayTextColor();
 	STDMETHODIMP SetOverlayFont(void* pLogFontStruct);
 	STDMETHODIMP GetOverlayFont(void* pLogFontStruct, UINT32* LogFontSize);
 
@@ -523,6 +525,8 @@ public:
     STDMETHODIMP SetMinNumStartLines(UINT32 MinNumStartLines);
 	//Distance between vertical StartLines
 	STDMETHODIMP SetStartLinesDistance(float StartLinesDistance);
+	//Timeout for StartLines
+	STDMETHODIMP SetStartLinesTimeout (UINT32 StartLinesTimeout);
 
 	//Execute Measures
 	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures, UINT32 Timeout);
@@ -676,6 +680,7 @@ private:
 	#define WP_Register 103
 	#define WP_StartLinesCont 104
 	#define WP_MeasureTimeout 105
+	#define WP_StartLinesTimeout 106
 
 	//Line Direction
 	BOOL m_LinesHorizontal = false;
@@ -715,6 +720,8 @@ private:
 	//FindLines
 	float m_FindLine_Distance = (float)677.333333333333;
 	float m_PresetFindLine_Distance = (float)677.333333333333;
+	UINT32 m_StartLinesTimeout = 0;
+	UINT32 m_StartLinesTimeoutCounter = 0;
 
 	//TextBitmap
 	bool OverlayBitmapReady = FALSE;
