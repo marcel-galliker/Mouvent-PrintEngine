@@ -690,6 +690,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             else
             {
                 if ( _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT) _CmdRunning = msgId;
+                _set_moving_variables();
                 RX_StepperStatus.screwerinfo.moving = TRUE;
                 micron = pos - RX_StepperStatus.screw_posX;
                 steps = _micron_2_steps(micron);
