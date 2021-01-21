@@ -160,7 +160,8 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <DefineConstants></DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -364,7 +365,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>$(DefineConstants);WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(DefineConstants);WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions);RX_CTRL_SUBNET="127.168.200."</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>

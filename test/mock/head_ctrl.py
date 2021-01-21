@@ -6,9 +6,42 @@ import asyncio, functools
 import logging
 import struct
 import os
-import xml.etree.ElementTree as ET
+import sys
 
-from message_mgr import Message
+import network
+
+import message_mgr
+Message = message_mgr.Message
+# all messages we can convert and their corresponding C struct from .h file
+message_mgr.msgtypes.update({
+    "CMD_HEAD_STAT": None, # ignore
+    "SET_GET_INK_DEF": None,
+    "CMD_HEAD_FLUID_CTRL_MODE": None,
+
+    "REP_HEAD_STAT":"SHeadBoardStat",
+    "CMD_SET_DENSITY_VAL": "SDensityValuesMsg",
+    "CMD_SET_DISABLED_JETS": "SDisabledJetsMsg",
+    "CMD_PING": "",
+    "REP_PING": "",
+    "CMD_FPGA_IMAGE": "SFpgaImageCmd",
+    "REP_FPGA_IMAGE": "",
+    "REP_HEAD_BOARD_CFG":
+        "UINT32		resetCnt;",
+    "CMD_HEAD_BOARD_CFG": "SHeadBoardCfg",
+    "CMD_GET_BLOCK_USED": "SBlockUsedCmd",
+    "REP_GET_BLOCK_USED": # special variable struct
+    """
+        UINT32		aliveCnt[2];
+        UINT32		blockOutIdx;	// number of the last block used
+        UINT32		blkNo;			// BYTE-index of first used bits
+        UINT8		headNo;
+        UINT8		id;
+        UINT16		blkCnt;				// number of bytes
+        UINT32		used[*];// maximum size
+    """,
+    "EVT_PRINT_DONE": "SPrintDoneMsg",
+    "CMD_PRINT_ABORT": "",
+})
 
 def crc8(data, lenght = 2):
     "crc on array of short int as in rx_crc.c" 
@@ -27,63 +60,6 @@ def crc8(data, lenght = 2):
     return (~crc)&0xFF
 
 
-# only work with hack on IP: -localsubnet
-SUBNET = "127.168.200."
-
-def mac_addr(s):
-    "transform a mac address string to an corresponding int"
-    return int("".join(reversed(s.split("-"))), 16)
-
-rec_blocks = True
-# all connections to close properly at the end
-_transports = []
-
-class UPDBoot:
-    "rx_boot: receive data from main control to init the network"
-    def __init__(self, heads):
-        self.heads = heads
-    def connection_made(self, transport):
-        logging.info('Connection from UDP to boot')
-        self.transport = transport
-        _transports.append(transport)
-
-    def connection_lost(self, exc):
-        logging.error('Connection lost to boot')
-
-    def datagram_received(self, data, addr):
-        "receive the broadcast message for rx_boot"
-        msg = Message(header="i")
-        msg.unpack(data)
-        logging.debug(f'Received message {msg.msgtype} of {len(data)} bytes on boot from addr {addr}')
-        if msg.msgtype == "CMD_BOOT_INFO_REQ" or msg.msgtype == "CMD_BOOT_PING":
-            # both messages respond the same struct
-            reptype = msg.msgtype.replace("CMD", "REP").replace("_REQ","")
-            # respond always for all boards
-            for head in self.heads:
-                no = int(head["DevNo"])
-                msg = Message(reptype, "I")
-                msg.deviceTypeStr = b"Head"
-                msg.serialNo=head["SerialNo"].encode()
-                # note that network.cfg should be well configured (macAddr) to allow registration
-                msg.macAddr = mac_addr(head["MacAddr"])
-                msg.deviceType = 10
-                msg.deviceNo = no
-                msg.ipAddr = head["ipaddress"].encode()
-                msg.connected = 1 if head["ipaddress"] else 0
-                msg.platform = 0
-                msg.rfsPort = 7011
-                msg.ports = (7011,0,0,0,0,0,0,0)
-                self.transport.sendto(msg.pack(), (SUBNET + "1", 7004))
-        elif msg.msgtype == "CMD_BOOT_ADDR_SET": # change the IP
-            # retreive the head from its mac address
-            head = [h for h in self.heads if mac_addr(h["MacAddr"]) ==  msg.macAddr][0]
-            # setup the good ip address
-            head["ipaddress"] = msg.ipAddr.split(b"\0", 1)[0].decode()
-            logging.info(f"CMD_BOOT_ADDR_SET: board {head['DevNo']} change ip: {head['ipaddress']}")
-        else:
-            logging.error(f"Boot message unknown x{msg.msgtype:08x}")
-
-
 class UDPProtocol:
     "fpga: receive UDP data"
     def __init__(self, board):
@@ -93,7 +69,7 @@ class UDPProtocol:
     def connection_made(self, transport):
         logging.info(f'Connection from UDP to board {self.board.no}')
         self.transport = transport
-        _transports.append(transport)
+        network.all_transports.append(transport)
 
     def connection_lost(self, exc):
         logging.error(f'UDP Connection lost to board {self.board.no}')
@@ -112,46 +88,8 @@ class UDPProtocol:
                 logging.info(f"UDP {len(self.board.blocks)} blocks/{self.count} on board {self.board.no}")
 
 
-class NewTCPProtocol:
-    "TCP protocol factory to save board number"
-    def __init__(self, board):
-        self.board = board
-    def __call__(self):
-        return TCPProtocol(self.board)
-
-class TCPProtocol:
+class TCPProtocol(network.AbstractTCPProtocol):
     "rx_head_ctrl: manage messages"
-    def __init__(self, board ):
-        self.board = board
-        self.transport = None
-
-    def connection_made(self, transport):
-        peername = transport.get_extra_info('peername')
-        logging.info(f'Connection from {peername} to board {self.board.no}')
-        if self.transport:
-            raise Exception("already connected")
-        self.transport = transport
-        _transports.append(transport)
-
-
-    def connection_lost(self, exc):
-        logging.error(f'Connection lost to board {self.board.no}')
-
-    def data_received(self, data):
-        "manage data and call the mgt_XXX of the corresponding message"
-        while len(data):
-            msg = Message()        
-            data = msg.unpack(data)
-            logging.debug(f"Receive message {msg.msgtype}")
-            if isinstance(msg.msgtype, str):
-                message_manager = "mgt_"+msg.msgtype
-                if hasattr(self, message_manager):
-                    getattr(self, message_manager)(msg)
-                else:
-                    logging.debug(f'Ignore msg {msg.msgtype} ({msg.lenght} bytes) on TCP for board {self.board.no}')
-            else:
-                logging.error(f'Unknown msg x{msg.msgtype:06x} ({msg.lenght} bytes) on TCP for board {self.board.no}')
-
     def mgt_CMD_PING(self, msg):
         self.transport.write(Message("REP_PING").pack())
 
@@ -172,13 +110,13 @@ class TCPProtocol:
 
     def mgt_CMD_SET_DENSITY_VAL(self, msg):
         logging.info(f"set density on board {self.board.no} head {msg.head % 4}")
-        self.board.density[msg.head % 4] = msg.value
-        self.board.voltage[msg.head % 4] = msg.voltage
+        self.board.config["density"][msg.head % 4] = msg.value
+        self.board.config["voltage"][msg.head % 4] = msg.voltage
         logging.info(f"{msg.voltage}V {msg.value}")
 
     def mgt_CMD_SET_DISABLED_JETS(self, msg):
         logging.info(f"set disabled jets on board {self.board.no} head {msg.head % 4}")
-        self.board.disabled_jets[msg.head % 4] = msg.disabledJets
+        self.board.config["disabled_jets"][msg.head % 4] = msg.disabledJets
         logging.info(f"{msg.disabledJets}")
 
     def mgt_CMD_HEAD_STAT(self, msg):
@@ -189,14 +127,14 @@ class TCPProtocol:
         for i in range(4):
                 msg.head[i]["ctrlMode"] = 0x006 # ctrl_readyToPrint
                 msg.head[i]["clusterNo"] = self.board.no + i + 1
-                if self.board.disabled_jets[i] is not None:
-                    msg.head[i]["disabledJets"] = self.board.disabled_jets[i]
-                    msg.head[i]["disabledJetsCRC"] = crc8(self.board.disabled_jets[i])
-                if self.board.voltage[i] is not None:
-                    msg.head[i]["densityValue"] = self.board.density[i]
-                    msg.head[i]["densityValueCRC"] = crc8(self.board.density[i])
-                    msg.head[i]["voltage"] = self.board.voltage[i]
-                    msg.head[i]["voltageCRC"] = crc8((self.board.voltage[i],),1) # unsigned char
+                if self.board.config["disabled_jets"][i] is not None:
+                    msg.head[i]["disabledJets"] = self.board.config["disabled_jets"][i]
+                    msg.head[i]["disabledJetsCRC"] = crc8(self.board.config["disabled_jets"][i])
+                if self.board.config["voltage"][i] is not None:
+                    msg.head[i]["densityValue"] = self.board.config["density"][i]
+                    msg.head[i]["densityValueCRC"] = crc8(self.board.config["density"][i])
+                    msg.head[i]["voltage"] = self.board.config["voltage"][i]
+                    msg.head[i]["voltageCRC"] = crc8((self.board.config["voltage"][i],),1) # unsigned char
         self.transport.write(msg.pack())
 
     def mgt_CMD_GET_BLOCK_USED(self, msg):
@@ -296,15 +234,13 @@ def save_image(no, blocks, fpga_images, blk_end, blk_No0):
             logging.error(f"{e.__class__.__name__}: {e} while saving '{filename}'")
 
 
-class Board:
+class Board(network.AbstractBoard):
     "board information regarding fpga and state"
-    def __init__(self, no):
-        self.no = no
+    def __init__(self, d):
+        super().__init__(d)
         self.activate = 4 * [False]
         self.reset()
-        self.disabled_jets = 4 * [None]
-        self.density = 4 * [None]
-        self.voltage =  4 * [None]
+        self.config = {"disabled_jets": 4 * [None], "density": 4 * [None], "voltage": 4 * [None]}
 
 
     def add_block(self, no, block):
@@ -347,82 +283,41 @@ class Board:
         self.used = UsedFlags()
         self.pd = 0
 
-# to end the infinite loop
-simulate = True
-async def main(bmp=True):
-    "main program that listen to all UDP/TCP sockets according to network.cfg"
+async def startup(loop, board):
+    "startup board opening UDP port"
     os.makedirs("printed", exist_ok=True)
-    loop = asyncio.get_running_loop()
-    boards = []
-    # start reading network.cfg to know what boards to simulate
-    tree = ET.parse(r'D:\radex\user\network.cfg')
-    root = tree.getroot()
-    heads = [x.attrib for x in root.findall("item") if x.attrib['DevTypeStr'] == 'Head']
-    # set a empty (bad) IP to receive a CMD_BOOT_ADDR_SET
-    for head in heads:
-        head["ipaddress"] = "" 
-
-    tcp_port = 7011
     udp_port = 7012
-
-    # read broadcast boot info
+    udp_ip = network.SUBNET + str(50 + board.no)
     await loop.create_datagram_endpoint(
-            lambda: UPDBoot(heads),
-            local_addr=(SUBNET+"255", 7005))
+        lambda: UDPProtocol(board),
+        local_addr=(udp_ip, udp_port))
 
-    # wait for board to "boot" to ensure we get the good ip
-    while simulate and not all([head["ipaddress"] for head in heads]):
-        await asyncio.sleep(1)
 
-    if simulate:
-        logging.info("all boards booted...")
-
-        # open sockets for UDP/TCP of each board
-        for head in heads:
-            no = int(head["DevNo"])
-            board = Board(no)
-            boards.append(board)
-            tcp_ip = head["ipaddress"]
-
-            _transports.append(await loop.create_server(
-                    NewTCPProtocol(board),
-                    tcp_ip, tcp_port))
-            logging.info(f"start {tcp_ip}:{tcp_port} for board {no}")
-
-            udp_ip = SUBNET + str(50 + no)
-            await loop.create_datagram_endpoint(
-                lambda: UDPProtocol(board),
-                local_addr=(udp_ip, udp_port))
-
-        while simulate:
-            await asyncio.sleep(0.5) # simulate time to print each copy
-            # check the end of the printing
-            for board in boards:
-                if board.fpga_images:
-                    img=board.fpga_images[sorted(board.fpga_images.keys())[0]]
-                    if len(img) == len([x for x in board.activate if x]) and not board.abort:
-                        # if done, save bmp in another thread as it could be a long process
-                        if bmp:
-                            fn = functools.partial(save_image, *(board.no, board.blocks, img, board.blk_end, board.blkNo0))
-                            await loop.run_in_executor(None, fn)
-                        board.print_done(img[0])
+rec_blocks = True
+async def process(loop, boards):
+    "process periodically all head and save image if needed"
+    global rec_blocks
+    await asyncio.sleep(0.5) # simulate time to print each copy
+    # check the end of the printing
+    for board in boards:
+        if board.fpga_images:
+            img=board.fpga_images[sorted(board.fpga_images.keys())[0]]
+            if len(img) == len([x for x in board.activate if x]) and not board.abort:
+                # if done, save bmp in another thread as it could be a long process
+                if rec_blocks:
+                    fn = functools.partial(save_image, *(board.no, board.blocks, img, board.blk_end, board.blkNo0))
+                    await loop.run_in_executor(None, fn)
+                board.print_done(img[0])
     
 
-def run(bmp=True):
-    "run a head ctrl asynchronously by calling main in asyncio loop"
-    global _transports, simulate
-    simulate = True
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(main(bmp))
-    finally:
-        for transport in _transports:
-            transport.close()
-        _transports= []
-        loop.run_until_complete(loop.shutdown_asyncgens())
-        loop.close()
-    
+simulation = None
+def run():
+    "run only head mock in simulation"
+    global simulation
+    simulation = network.Network()
+    simulation.register("Head", sys.modules[__name__])
+    simulation.run()
+
 
 if __name__ == "__main__":
     import argparse
@@ -443,7 +338,7 @@ if __name__ == "__main__":
 
     rec_blocks = args.nobmp
     try:
-        run(args.nobmp)
+        run()
     except KeyboardInterrupt:
         # ignore Ctrl+C silently
         pass

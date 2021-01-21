@@ -15,8 +15,7 @@ from selenium.common.exceptions import NoSuchElementException
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
 
-from head_ctrl_mock import head_ctrl
-
+from mock import head_ctrl
 
 class PrinterTests(unittest.TestCase):
     "Master abstract class for printer tests"
@@ -109,7 +108,7 @@ class PrinterTests(unittest.TestCase):
         if self.driver:
             self.driver.quit()
         # stop the mock
-        head_ctrl.simulate = False
+        head_ctrl.simulation.simulate = False
         if self.head_ctrl:
             self.head_ctrl.join(5.0)
         # and processes

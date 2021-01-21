@@ -37,6 +37,17 @@ steps:
     PathtoPublish: 'bin'
     publishLocation: 'Container'
 
+- script: test\mock_dist.bat
+  displayName: 'Package mock dist'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Mock dist'
+  inputs:
+    ArtifactName: mock
+    PathtoPublish: 'test/dist'
+    publishLocation: 'Container'
+
+
 - script: python -m pytest -c test\pytest.ini --tb=native --junit-xml=TEST-py.xml test
   displayName: 'Run tests'
   

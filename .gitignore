@@ -23,6 +23,7 @@ CodeDB
 .vs
 _out
 _temp
+dist
 obj
 VisualGDBCache
 */org.eclipse.core.resources

@@ -17,7 +17,6 @@ def read_header(header_dir, header):
     # read all lines of the file
     header_file = open(os.path.join(header_dir, header))
     for (n,line) in enumerate(header_file):
-        # 
         define = re.match(r"\s*#define\s+(\w+)\s+(.*)", line)
         if define:
             value = re.sub(r"\s*//.*", "", define.group(2))
@@ -25,7 +24,10 @@ def read_header(header_dir, header):
             value = re.sub(r'(".*"|\w+)\s+((".*"|\w+))',r'\1+\2', value)
             value = re.sub(r'(0x[0-9a-fA-F]+)UL',r'\1', value)
             if value:
-                defines[define.group(1)] = eval(value, defines)
+                try:
+                    defines[define.group(1)] = eval(value, defines)
+                except Exception as e:
+                    logging.debug(f"line {n}:{e}")
         
         if in_struct:
             ends = re.match(r"}\s*(\w+);", line)
@@ -46,51 +48,15 @@ def read_header(header_dir, header):
 
 message_id = {}
 message_name = {}
-# all message we can convert and their corresponding C struct from .h file
-msgtypes = {
-    "CMD_HEAD_STAT": None, # ignore
-    "SET_GET_INK_DEF": None,
-    "CMD_HEAD_FLUID_CTRL_MODE": None,
 
-    "CMD_RFS_START_PROCESS": None,
-    "CMD_RFS_KILL_PROCESS": None,
-    "CMD_RFS_MAKE_DIR" : None,
-    "CMD_ERROR_RESET" : None,
-
-    "CMD_BOOT_PING": "",
-    "CMD_BOOT_INFO_REQ": "",
-    "REP_BOOT_INFO":"SNetworkItem",
-    "REP_BOOT_PING": "", # will be overwritten by REP_BOOT_INFO
-    "CMD_BOOT_ADDR_SET":"SBootAddrSetCmd",
-    "REP_HEAD_STAT":"SHeadBoardStat",
-    "CMD_SET_DENSITY_VAL": "SDensityValuesMsg",
-    "CMD_SET_DISABLED_JETS": "SDisabledJetsMsg",
-    "CMD_PING": "",
-    "REP_PING": "",
-    "CMD_FPGA_IMAGE": "SFpgaImageCmd",
-    "REP_FPGA_IMAGE": "",
-    "REP_HEAD_BOARD_CFG":
-        "UINT32		resetCnt;",
-    "CMD_HEAD_BOARD_CFG": "SHeadBoardCfg",
-    "CMD_GET_BLOCK_USED": "SBlockUsedCmd",
-    "REP_GET_BLOCK_USED": # special variable struct
-    """
-        UINT32		aliveCnt[2];
-        UINT32		blockOutIdx;	// number of the last block used
-        UINT32		blkNo;			// BYTE-index of first used bits
-        UINT8		headNo;
-        UINT8		id;
-        UINT16		blkCnt;				// number of bytes
-        UINT32		used[*];// maximum size
-    """,
-    "EVT_PRINT_DONE": "SPrintDoneMsg",
-    "CMD_PRINT_ABORT": "",
-}
+msgtypes = {}
 
 def cstruct(s):
     "analyse a struct from header to flatenize it and eval define"
     r = ""
     bits = 0
+    # remove union if present in struct (suppose all union with same size)
+    structs[s] = re.sub(r"union\s+{(\s*\w+\s+\w+(?:\[.*\])?;|\s*struct\s*{[^{]+};)+\s*}", r"\1", structs[s])
     for l in structs[s].split("\n"): # for all lines of the struct
         # check if it is a field defintion line (else ignore it)
         field = re.match(r"\s*(\w+)\s+(\w+)(\[.*\]|\s*:\s*(\d+))?;", l)
@@ -111,7 +77,7 @@ def cstruct(s):
                 else:
                     r += newstruct
                     continue
-            if arr: # array should be evaludated (define)
+            if arr: # array should be evaluated (define)
                 if arr.startswith("["):
                     arr = "[%d]" % eval(arr[1:-1], defines)
             else:
@@ -138,6 +104,7 @@ def init(src_path):
     read_header(header_dir, "rx_def.h")
     read_header(header_dir, "fpga_def_head.h")
     read_header(header_dir, "tcp_ip.h")
+    read_header(src_path, "rx_ink_lib/rx_ink_common.h")
     # first retrieve the id of all messages from #define in .h
     for m in msgtypes.keys():
         # convert id to name of the message
@@ -180,7 +147,7 @@ def struct_format(msgtype):
                     sz = int(var.group(5))
                 for _ in range(sz):
                     exformat += stformat
-                names.append((var.group(3), sz, stnames))
+                names.append((var.group(3), sz, stnames, None))
             else:
                 conv = str.lower
                 # the first one the  Unsigned
@@ -199,7 +166,7 @@ def struct_format(msgtype):
                 # the second group is the type of member
                 exformat += conv(cor[var.group(2)])
                 # and the third is the name of the struct member
-                names.append((var.group(3), sz, None))
+                names.append((var.group(3), sz, None, conv(cor[var.group(2)])))
     return (exformat, names)
 
 def names2dict(names, val, d):
@@ -207,7 +174,8 @@ def names2dict(names, val, d):
     note than each element of names :
     (0) the member name
     (1) the number of value (1 for single, >1 for list)
-    (3) a new list of names in case of nested struct"""
+    (2) a new list of names in case of nested struct
+    (3) the type of the arg"""
     pos = 0
     for var in names:
         if var[2]: # sub struct
@@ -218,7 +186,7 @@ def names2dict(names, val, d):
                 pos += names2dict(var[2], val[pos:], nd)
         else:
             if var[1] == 1: # simple
-                d[var[0]] = val[pos]
+                d[var[0]] = val[pos] if var[3] != "s" else val[pos].decode("utf-8", "ignore")
             else: # list
                 d[var[0]] = val[pos:pos+var[1]]
             pos += var[1]
@@ -227,13 +195,16 @@ def names2dict(names, val, d):
 def dict2name(names, d):
     "return a list of values from dict corresponding to names (see names2dict)"
     val = []
-    # all missing data are set to 0
+    # all missing data are set to 0 (warning: does not work for string it should be set to b"")
     for var in names:
         if var[2]: # sub struct
             for i in range(var[1]):               
                 val.extend(dict2name(var[2], d.get(var[0], var[1] * ({},))[i]))
         elif var[1] == 1: # simple
-            val.append(d.get(var[0], 0))
+            v = d.get(var[0], 0 if var[3] != "s" else b"")
+            if type(v) == str:
+                v = v.encode("utf-8") # special case of string that should be serialized
+            val.append(v)
         else: # list
             val.extend(d.get(var[0], var[1] * (0,)))
     return val
@@ -250,6 +221,19 @@ class Message:
         # init the messages data the first time so src_path could be overwritten
         if not message_id:
             init(self.src_path)
+
+    def empty(self):
+        "create an empty message using pack/unpack and return the corrsponding dict without header"
+        self.unpack(self.pack())
+        # copy and modify the dict
+        d = dict(self.__dict__)
+        del d["header"]
+        del d["msgtype"]
+        del d["lenght"]
+        return d
+
+    def data(self, d):
+        self.__dict__.update(d)
 
     def unpack(self, data):
         "create the member of the message from data received"

@@ -3,3 +3,5 @@ pytest==5.4.2
 Pillow>=7.1.2
 GitPython==3.1.12
 python-docx==0.8.10
+aiohttp==3.7.3
+py2exe==0.10.1.0
