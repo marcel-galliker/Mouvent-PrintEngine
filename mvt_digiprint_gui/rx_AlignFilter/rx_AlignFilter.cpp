@@ -3668,7 +3668,7 @@ HRESULT C_rx_AlignFilter::CalculateDistances(BOOL Vertical, Mat SourceMat)
 		}
 		break;
 	}
-	
+
 	return NOERROR;
 }
 
@@ -3677,7 +3677,7 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
     //Check for first occurence of parallel lines
 
 	//Wait for host to pick data
-	if(m_DataListforHostReady) return NOERROR;
+	if (m_DataListforHostReady) return NOERROR;
 
 	//Count Timeout
 	if (m_StartLinesTimeout > 0) m_StartLinesTimeoutCounter++;
@@ -3701,20 +3701,20 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 			AvgLengthX += m_vQualifyList[BlobNo].Width;
 			AvgLengthY += m_vQualifyList[BlobNo].Height;
 			//Distance between lines
-			if(NumBlobsvalid > 0) AvgDist += m_vQualifyList[BlobNo].DistToLast;
+			if (NumBlobsvalid > 0) AvgDist += m_vQualifyList[BlobNo].DistToLast;
 
 			NumBlobsvalid++;
 		}
     }
 	//Check for minimum number of valid lines
-    if(NumBlobsvalid < (int)m_MinNumStartLines) return NOERROR;
+	if (NumBlobsvalid < (int)m_MinNumStartLines) return NOERROR;
 
 	//Distance between lines / measured camera-pixels = μm per camera-pixel
-	if (NumBlobsvalid > 1)
-	{
-		AvgDist /= (float)NumBlobsvalid - 1;
-		m_FindLine_umPpx = m_FindLine_Distance / AvgDist;
-	}
+ //   if (NumBlobsvalid > 1 && NumBlobsvalid >= (int)m_MinNumStartLines)
+	//{
+	//	AvgDist /= (float)NumBlobsvalid - 1;
+	//	m_FindLine_umPpx = m_FindLine_Distance / AvgDist;
+	//}
 	AvgCenterX /= (float)NumBlobsvalid;
 	AvgCenterY /= (float)NumBlobsvalid;
 	AvgLengthX /= (float)NumBlobsvalid;
@@ -3726,10 +3726,13 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	if (Vertical)
 	{
 		MeasureData.DPosX = (AvgCenterX - (m_ImageWidth / 2)) * m_FindLine_umPpx;
+
+		//Vertical Position
 		if (AvgLengthY > (float)m_ImageHeight * 0.95)
 		{
 			//Covering whole image
-			MeasureData.LineLayout = LineLayoutEnum::LineLayout_Covering;
+            MeasureData.LineLayout =
+                LineLayoutEnum::LineLayout_Covering;
 			MeasureData.DPosY = 0;
 		}
 		else
@@ -3738,19 +3741,54 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 			{
 				//Entering from bottom
 				MeasureData.DPosY = ((AvgCenterY + (AvgLengthY / 2)) - ((float)m_ImageHeight / 2)) * m_FindLine_umPpx;
-				MeasureData.LineLayout = UpsideDown ? LineLayoutEnum::LineLayout_FromTop : LineLayoutEnum::LineLayout_FromBot;
+                MeasureData.LineLayout = UpsideDown
+                        ? LineLayoutEnum::LineLayout_FromTop
+                        : LineLayoutEnum::LineLayout_FromBot;
 			}
 			else
 			{
 				//Entering from top
 				MeasureData.DPosY = ((AvgCenterY - (AvgLengthY / 2)) - ((float)m_ImageHeight / 2)) * m_FindLine_umPpx;
-				MeasureData.LineLayout = UpsideDown ? LineLayoutEnum::LineLayout_FromBot : LineLayoutEnum::LineLayout_FromTop;
+                MeasureData.LineLayout = UpsideDown
+                        ? LineLayoutEnum::LineLayout_FromBot
+                        : LineLayoutEnum::LineLayout_FromTop;
 			}
+		}
+
+		//Line attached to border
+        if (NumBlobsvalid == 1)
+        {
+            if ((AvgCenterX + 1) - (AvgLengthX / 2) <= 0)
+            { 
+				// left attached
+                MeasureData.LineAttach = UpsideDown
+                        ? LineAttachEnum::LineAttach_Right
+                        : LineAttachEnum::LineAttach_Left;
+            }
+            else if((AvgCenterX + 1) + (AvgLengthX / 2) >= m_ImageWidth) 
+            {
+                // right attached
+                MeasureData.LineAttach = UpsideDown
+                        ? LineAttachEnum::LineAttach_Left
+                        : LineAttachEnum::LineAttach_Right;
+            }
+            else
+            {
+                // Full line in view
+                MeasureData.LineAttach = LineAttachEnum::LineAttach_None;
+            }
+        }
+        else
+        {
+			//No Horizontal position info
+            MeasureData.LineAttach = LineAttachEnum::LineAttach_Undefined;
 		}
 	}
 	else	//Horizontal
 	{
 		MeasureData.DPosY = (AvgCenterY - (m_ImageHeight / 2)) * m_FindLine_umPpx;
+
+		//Horizontal position
 		if (AvgLengthX > (float)m_ImageWidth * 0.95)
 		{
 			//Covering whole image
@@ -3772,6 +3810,35 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 				MeasureData.LineLayout = UpsideDown ? LineLayoutEnum::LineLayout_FromLeft : LineLayoutEnum::LineLayout_FromRight;
 			}
 		}
+
+		// Line attached to border
+        if (NumBlobsvalid == 1)
+        {
+            if ((AvgCenterY + 1) - (AvgLengthY / 2) <= 0)
+            {
+                // bottom attached
+                MeasureData.LineAttach = UpsideDown
+                                             ? LineAttachEnum::LineAttach_Top
+                                             : LineAttachEnum::LineAttach_Bot;
+            }
+            else if ((AvgCenterY + 1) + (AvgLengthY / 2) >= m_ImageHeight)
+            {
+                // right attached
+                MeasureData.LineAttach = UpsideDown
+                                             ? LineAttachEnum::LineAttach_Bot
+                                             : LineAttachEnum::LineAttach_Top;
+            }
+            else
+            {
+                // Full line in view
+                MeasureData.LineAttach = LineAttachEnum::LineAttach_None;
+            }
+        }
+        else
+        {
+            // No Horizontal position info
+            MeasureData.LineAttach = LineAttachEnum::LineAttach_Undefined;
+        }
 	}
 	if (UpsideDown)
 	{
@@ -3782,6 +3849,7 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	MeasureData.micron = (m_FindLine_umPpx != 1);
 	MeasureData.Value_1 = (float)NumBlobsvalid;
 	MeasureData.ErrorCode = 0;
+    MeasureData.NumMeasures = 1;
 	m_vMeasureDataList.clear();
 	m_vMeasureDataList.push_back(MeasureData);
 	m_MeasureRunning = false;
@@ -3872,6 +3940,7 @@ HRESULT C_rx_AlignFilter::MeasureAngle(BOOL Vertical, BOOL UpsideDown)
 		MeasureDataStruct MeasureData;
 		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].AngleCorrection;
 		MeasureData.LineLayout = LineLayoutEnum::LineLayout_Undefined;
+        MeasureData.LineAttach = LineAttachEnum::LineAttach_Undefined;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
 		MeasureData.micron = false;
@@ -3965,6 +4034,7 @@ HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InR
 		MeasureDataStruct MeasureData;
 		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].StitchCorr;
 		MeasureData.LineLayout = LineLayoutEnum::LineLayout_Undefined;
+        MeasureData.LineAttach = LineAttachEnum::LineAttach_Undefined;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
 		MeasureData.micron = !InRevolutions;
@@ -4055,6 +4125,7 @@ HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
 		MeasureDataStruct MeasureData;
 		MeasureData.Value_1 = m_vQualifyList[BlobNums[0]].RegisterCorr;
 		MeasureData.LineLayout = LineLayoutEnum::LineLayout_Undefined;
+        MeasureData.LineAttach = LineAttachEnum::LineAttach_Undefined;
 		MeasureData.DPosX = DPosX;
 		MeasureData.DPosY = DPosY;
 		MeasureData.micron = true;
@@ -5015,6 +5086,24 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		}
 	}
 
+	//Measure Timeout
+	if (m_prx_AlignFilter->m_MeasureRunning && m_prx_AlignFilter->m_Timeout > 0 && 
+		m_prx_AlignFilter->m_TimeoutCounter >= m_prx_AlignFilter->m_Timeout)
+	{
+		if (m_prx_AlignFilter->m_DebugOn)
+		{
+			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
+			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
+			printf("%6.6f\tMeasurement TimeOut\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
+		}
+
+		m_prx_AlignFilter->m_MeasureRunning = FALSE;
+		m_prx_AlignFilter->m_Timeout = 0;
+		m_prx_AlignFilter->m_TimeoutCounter = 0;
+        m_prx_AlignFilter->m_measureDone = TRUE;
+		//if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_MeasureTimeout, (LPARAM)0);
+	}
+
 	//Prepare Measurement for Host
 	if (m_prx_AlignFilter->m_measureDone)
 	{
@@ -5051,23 +5140,6 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 				break;
 			}
 		}
-	}
-
-	//Measure Timeout
-	if (m_prx_AlignFilter->m_MeasureRunning && m_prx_AlignFilter->m_Timeout > 0 && 
-		m_prx_AlignFilter->m_TimeoutCounter >= m_prx_AlignFilter->m_Timeout)
-	{
-		if (m_prx_AlignFilter->m_DebugOn)
-		{
-			m_prx_AlignFilter->m_MeasureTime = std::chrono::steady_clock::now();
-			m_prx_AlignFilter->m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_prx_AlignFilter->m_MeasureTime - m_prx_AlignFilter->m_DebugStartTime).count();
-			printf("%6.6f\tMeasurement TimeOut\n", (float)m_prx_AlignFilter->m_TimeStamp / 1000000.0f);
-		}
-
-		m_prx_AlignFilter->m_MeasureRunning = FALSE;
-		m_prx_AlignFilter->m_Timeout = 0;
-		m_prx_AlignFilter->m_TimeoutCounter = 0;
-		if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_MeasureTimeout, (LPARAM)0);
 	}
 
 	//StartLines Timeout
@@ -6133,6 +6205,8 @@ STDMETHODIMP_(C_rx_AlignFilter::DisplayModeEnum) C_rx_AlignFilter::GetDisplayMod
 //Minimum number of StartLines
 STDMETHODIMP C_rx_AlignFilter::SetMinNumStartLines(UINT32 MinNumStartLines)
 {
+    if (MinNumStartLines == 0) return E_INVALIDARG;
+
     m_PresetMinNumStartLines = MinNumStartLines;
 
     if (m_DebugOn)
@@ -6186,12 +6260,12 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 Time
 		m_PresetMeasureMode == MeasureModeEnum::MeasureMode_StartLines ||
 		m_MeasureRunning)
 	{
-		char err[100];
-		m_MeasureTime = std::chrono::steady_clock::now();
-		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-		sprintf(err, "%6.6f\tDoMeasures but MeasureMode: %d, MeasureRunning: %d", (float)m_TimeStamp / 1000000.0f, m_MeasureMode, m_MeasureRunning);
-		if (m_DebugOn) printf("%s\n", err);
-
+		if (m_DebugOn)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tDoMeasures but MeasureMode: %d, MeasureRunning: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureMode, m_MeasureRunning);
+		}
 		CallbackDebug("DoMeasures but MeasureMode: %d, MeasureRunning: %d", m_MeasureMode, m_MeasureRunning);
 
 		return false;

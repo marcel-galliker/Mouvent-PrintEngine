@@ -276,7 +276,6 @@
 
 //--- commands for PLC ---------------------
 #define CMD_PLC_0				0x01000300
-#define CMD_PLC_RSEET_ERROR		0x01000301
 
 #define CMD_PLC_GET_INFO		0x01000350
 #define REP_PLC_GET_INFO		0x02000350

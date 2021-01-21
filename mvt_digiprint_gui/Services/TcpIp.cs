@@ -493,7 +493,6 @@ namespace RX_DigiPrint.Services
         public const UInt32 EVT_PRINTER_STAT	    = 0x03000220;
 
         //--- plc cpommands ------------------------------------------
-        public const UInt32 CMD_PLC_RSEET_ERROR     = 0x01000301;
         public const UInt32 CMD_PLC_GET_INFO		= 0x01000350;
         public const UInt32 REP_PLC_GET_INFO		= 0x02000350;
         public const UInt32 CMD_PLC_RESET_ERROR		= 0x01000351;

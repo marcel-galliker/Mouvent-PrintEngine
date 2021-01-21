@@ -98,6 +98,16 @@ namespace rx_CamLib
             LineLayout_FromRight = 5
         };
 
+        public enum LineAttachEnum
+        {
+            LineAttach_Undefined = 0,
+            LineAttach_None = 1,
+            LineAttach_Top = 2,
+            LineAttach_Bot = 3,
+            LineAttach_Left = 4,
+            LineAttach_Right = 5
+        };
+
         public struct CallBackDataStruct
         {
             public ENCamResult CamResult;   //Error or other details
@@ -105,7 +115,10 @@ namespace rx_CamLib
             public float DPosY;             //Center of pattern offset Y to center of camera, Angle, Stitch, Register: μm, StartLines: px
             public float Value_1;           //Angle, Stitch, Register: Correction Value in Rev or μm (Register, ColorStitch), StartLines: number of lines
             public LineLayoutEnum LineLayout;   //Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right/Covering/Bottom/Left)  
+            public LineAttachEnum LineAttach; //Angle, Stitch, Register: 0, StartLines: Line attached to camera limits (Top/Right/None/Bottom/Left)
             public bool micron;                 //Measure is in μm
+            public int NumMeasures;             //Number of successful measure
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
             public string Info;             // Debug Info etc.
         };
 
@@ -552,13 +565,11 @@ namespace rx_CamLib
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
 
-            Console.WriteLine("DoMeasures: ActMode={0}, newMode={1}", (ENMeasureMode)halignFilter.GetMeasureMode(), MeasureMode);
             halignFilter.SetMeasureMode((UInt32)MeasureMode);
             
             if (MeasureMode == ENMeasureMode.MeasureMode_Off ||
                 MeasureMode == ENMeasureMode.MeasureMode_StartLines ||
-                MeasureMode == ENMeasureMode.MeasureMode_StartLinesCont) 
-                return ENCamResult.Filter_NoMeasurePossible;
+                MeasureMode == ENMeasureMode.MeasureMode_StartLinesCont) return ENCamResult.Filter_NoMeasurePossible;
 
             if (halignFilter.DoMeasures(NumMeasures, Timeout)) return ENCamResult.OK;
             else return ENCamResult.Filter_NoMeasurePossible;
@@ -618,11 +629,13 @@ namespace rx_CamLib
         /// <summary>
         /// set the minimum number of lines to be detected as Start-Lines
         /// </summary>
-        /// <param name="MinNumStartLines">Minimum number of lines</param>
-        /// <returns></returns>
+        /// <param name="MinNumStartLines">Minimum number of lines, must be > 0 </param>
+        /// <returns>OK if successful</returns>
         public ENCamResult SetMinNumStartLines(UInt32 MinNumStartLines)
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
+            if (MinNumStartLines == 0) return ENCamResult.Error;
+
             halignFilter.SetMinNumStartLines(MinNumStartLines);
             return ENCamResult.OK;
         }
@@ -1046,6 +1059,20 @@ namespace rx_CamLib
                             CallBackData.CamResult = Result;
                             CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesDetected, CallBackData);
                             break;
+                        case WP_StartLinesTimeout:
+                            CallBackData = new CallBackDataStruct();
+                            CallBackData.CamResult = new ENCamResult();
+                            CallBackData.DPosX = float.NaN;
+                            CallBackData.DPosY = float.NaN;
+                            CallBackData.Value_1 = float.NaN;
+                            CallBackData.NumMeasures = 0;
+                            CallBackData.LineLayout = LineLayoutEnum.LineLayout_Undefined;
+                            CallBackData.LineAttach = LineAttachEnum.LineAttach_Undefined;
+                            CallBackData.CamResult = ENCamResult.Filter_NoData;
+                            CallBackData.Info = ENCamCallBackInfo.StartLinesTimeout.ToString();
+                            CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesDetected, CallBackData);
+                            //CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesTimeout, CallBackData);
+                            break;
                         case WP_StartLinesCont:
                             Result = GetMeasureData(out CallBackData);
                             CallBackData.CamResult = Result;
@@ -1067,14 +1094,10 @@ namespace rx_CamLib
                             CamCallBack?.Invoke(ENCamCallBackInfo.RegisterCorr, CallBackData);
                             break;
                         case WP_MeasureTimeout:
+                            //Sollte nicht mehr eintreten
                             CallBackData = new CallBackDataStruct();
                             CallBackData.CamResult = new ENCamResult();
                             CamCallBack?.Invoke(ENCamCallBackInfo.MeasureTimeout, CallBackData);
-                            break;
-                        case WP_StartLinesTimeout:
-                            CallBackData = new CallBackDataStruct();
-                            CallBackData.CamResult = new ENCamResult();
-                            CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesTimeout, CallBackData);
                             break;
                     }
                     break;
@@ -1652,12 +1675,29 @@ namespace rx_CamLib
             //Raw data list
             List<CallBackDataStruct> CorrectionList;
             ENCamResult DataResult = GetMeasureDataList(out CorrectionList);
-            if (DataResult != ENCamResult.OK) return DataResult;
+            if (DataResult != ENCamResult.OK && DataResult != ENCamResult.Filter_NoData) return DataResult;
 
+            if (CorrectionList.Count == 0 || DataResult == ENCamResult.Filter_NoData)
+            {
+                MeasureData.CamResult = new ENCamResult();
+                MeasureData.DPosX = float.NaN;
+                MeasureData.DPosY = float.NaN;
+                MeasureData.Value_1 = float.NaN;
+                MeasureData.NumMeasures = 0;
+                MeasureData.Info = ENCamCallBackInfo.NoDataFromFilter.ToString();
+                MeasureData.LineLayout = LineLayoutEnum.LineLayout_Undefined;
+                MeasureData.CamResult = ENCamResult.Filter_NoData;
+                MeasureData.Info = ENCamCallBackInfo.MeasureTimeout.ToString();
+            }
+            else
+            {
+                int NumMeasures = CorrectionList.Count;
             //Average within 1 sigma
-            if(CorrectionList.Count > 1)
+                if (CorrectionList.Count > 1)
                 AverageData(CorrectionList, ref MeasureData);
             else MeasureData = CorrectionList[0];
+                MeasureData.NumMeasures = NumMeasures;
+            }
 
             return ENCamResult.OK;
         }
@@ -1720,41 +1760,48 @@ namespace rx_CamLib
 
             //Mean
             float MeanV1 = 0;
-            int MeanV2 = 0;
+            int MeanLineLayout = 0;
+            int MeanLineAttach = 0;
             float MeanDX = 0;
             float MeanDY = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
                 MeanV1 += CorrectionList[i].Value_1;
-                MeanV2 += (int)CorrectionList[i].LineLayout;
+                MeanLineLayout += (int)CorrectionList[i].LineLayout;
+                MeanLineAttach += (int)CorrectionList[i].LineAttach;
                 MeanDX += CorrectionList[i].DPosX;
                 MeanDY += CorrectionList[i].DPosY;
             }
             MeanV1 /= CorrectionList.Count;
-            MeanV2 /= CorrectionList.Count;
+            MeanLineLayout /= CorrectionList.Count;
+            MeanLineAttach /= CorrectionList.Count;
             MeanDX /= CorrectionList.Count;
             MeanDY /= CorrectionList.Count;
 
             //Variance
             double VarV1 = 0;
-            double VarV2 = 0;
+            double VarLineLayout = 0;
+            double VarLineAttach = 0;
             double VarDX = 0;
             double VarDY = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
                 VarV1 += Math.Pow(CorrectionList[i].Value_1 - MeanV1, 2);
-                VarV2 += Math.Pow((int)CorrectionList[i].LineLayout - MeanV2, 2);
+                VarLineLayout += Math.Pow((int)CorrectionList[i].LineLayout - MeanLineLayout, 2);
+                VarLineAttach += Math.Pow((int)CorrectionList[i].LineAttach - MeanLineAttach, 2);
                 VarDX += Math.Pow(CorrectionList[i].DPosX - MeanDX, 2);
                 VarDY += Math.Pow(CorrectionList[i].DPosY - MeanDY, 2);
             }
             VarV1 /= CorrectionList.Count;
-            VarV2 /= CorrectionList.Count;
+            VarLineLayout /= CorrectionList.Count;
+            VarLineAttach /= CorrectionList.Count;
             VarDX /= CorrectionList.Count;
             VarDY /= CorrectionList.Count;
 
             //StdDev
             VarV1 = Math.Sqrt(VarV1);
-            VarV2 = Math.Sqrt(VarV2);
+            VarLineLayout = Math.Sqrt(VarLineLayout);
+            VarLineAttach = Math.Sqrt(VarLineAttach);
             VarDX = Math.Sqrt(VarDX);
             VarDY = Math.Sqrt(VarDY);
 
@@ -1764,8 +1811,10 @@ namespace rx_CamLib
             {
                 if (CorrectionList[i].Value_1 <= MeanV1 + VarV1 &&
                     CorrectionList[i].Value_1 >= MeanV1 - VarV1 &&
-                    (int)CorrectionList[i].LineLayout <= MeanV2 + VarV2 &&
-                    (int)CorrectionList[i].LineLayout >= MeanV2 - VarV2 &&
+                    (int)CorrectionList[i].LineLayout <= MeanLineLayout + VarLineLayout &&
+                    (int)CorrectionList[i].LineLayout >= MeanLineLayout - VarLineLayout &&
+                    (int)CorrectionList[i].LineAttach <= MeanLineAttach + VarLineAttach &&
+                    (int)CorrectionList[i].LineAttach >= MeanLineAttach - VarLineAttach &&
                     CorrectionList[i].DPosX <= MeanDX + VarDX &&
                     CorrectionList[i].DPosX >= MeanDX - VarDX &&
                     CorrectionList[i].DPosY <= MeanDY + VarDY &&
@@ -1774,6 +1823,7 @@ namespace rx_CamLib
                     Counter++;
                     MeasureData.Value_1 += CorrectionList[i].Value_1;
                     MeasureData.LineLayout += (int)CorrectionList[i].LineLayout;
+                    MeasureData.LineAttach += (int)CorrectionList[i].LineAttach;
                     MeasureData.DPosX += CorrectionList[i].DPosX;
                     MeasureData.DPosY += CorrectionList[i].DPosY;
                 }
@@ -1782,6 +1832,7 @@ namespace rx_CamLib
 			{
                 MeasureData.Value_1 /= Counter;
                 MeasureData.LineLayout = (LineLayoutEnum)((int)MeasureData.LineLayout / Counter);
+                MeasureData.LineAttach = (LineAttachEnum)((int)MeasureData.LineAttach / Counter);
                 MeasureData.DPosX /= Counter;
                 MeasureData.DPosY /= Counter;
 			}

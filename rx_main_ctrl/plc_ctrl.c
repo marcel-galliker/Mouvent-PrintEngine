@@ -560,6 +560,7 @@ int  plc_stop_printing(void)
 	_heads_to_print= FALSE;
 	_CanRun		   = FALSE;
 	step_set_vent(FALSE);
+	if (_PlcState!=plc_error) _ResetError=TRUE;
 	if (_SimuPLC)
 	{
 		RX_PrinterStatus.printState = ps_off;
@@ -748,7 +749,6 @@ static int _plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dat
 	switch(cmd)
 	{
 		//---  general commands ------------------------------------------------------------------------
-		case CMD_PLC_RSEET_ERROR:	plc_error_reset();								break;
 		case CMD_PLC_GET_INFO:		_do_plc_get_info(socket);						break;
 		case CMD_PLC_RESET_ERROR:	sys_reset_error();								break;
 		case CMD_PLC_REBOOT:		sys_reboot();									break;				
@@ -1690,6 +1690,7 @@ static void _plc_state_ctrl()
 	{
 		RX_PrinterStatus.actSpeed = 0;
 		_CanRun = FALSE;
+		_ResetError=FALSE;
 		if (RX_PrinterStatus.printState>plc_stop)
 			RX_PrinterStatus.printState = chiller_is_running() ? ps_ready_power : ps_off;
 	}

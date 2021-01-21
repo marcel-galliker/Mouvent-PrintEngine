@@ -75,19 +75,20 @@ namespace rx_CamLib
 		}
 
 		//--- FindMark --------------------------------------------------
-		public void FindMark(bool horizontal)
+		public void FindMark(bool horizontal, int timeout=0)
 		{
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 			//set very small LineAspectLimit for StartLines
 			_Camera.SetLinesHorizontal(horizontal);
 			_Camera.SetLineAspectLimit(3);
 			_Camera.NumExtraErodes=1;
+			_Camera.StartLineTimeout=(uint)timeout;
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_AllLines);
 			if (horizontal) 
 			{
-				_Camera.StartLineTimeout = 5;    //e.g. app. 1min @ 30fps
 				_Camera.SetMinNumStartLines(1);
-				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLinesCont);
+				if (timeout>0) _Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
+				else	       _Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLinesCont);
 				if (SimuCallback!=null)
 				{	
 					CallBackDataStruct CallbackData = new CallBackDataStruct();
@@ -100,7 +101,6 @@ namespace rx_CamLib
 			}
 			else            
 			{
-				_Camera.StartLineTimeout = 1800;    //e.g. app. 1min @ 30fps
 				_Camera.SetMinNumStartLines(3);
 				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
 				if (SimuCallback!=null)
@@ -130,7 +130,7 @@ namespace rx_CamLib
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 20);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 15);
 		}
 
 		//--- MeasureStitch --------------------------------

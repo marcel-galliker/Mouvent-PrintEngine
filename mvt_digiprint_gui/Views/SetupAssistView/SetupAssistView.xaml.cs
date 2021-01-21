@@ -28,7 +28,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		private void PrinterStatusChanged(object sender,PropertyChangedEventArgs e)
 		{
 			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-			StartButton.IsEnabled = (state==EnPlcState.plc_stop || state==EnPlcState.plc_error)|| RxGlobals.SA_StateMachine.SimuMachine;
+		//	StartButton.IsEnabled = (state==EnPlcState.plc_stop || state==EnPlcState.plc_error)|| RxGlobals.SA_StateMachine.SimuMachine;
+			StartButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
 		}
 
 		//--- Settings_Clicked -------------------------------------------

@@ -83,6 +83,16 @@ public:
 		LineLayout_FromRight = 5
 	};
 
+	enum LineAttachEnum
+    {
+        LineAttach_Undefined = 0,
+        LineAttach_None = 1,
+        LineAttach_Top = 2,
+        LineAttach_Bot = 3,
+        LineAttach_Left = 4,
+        LineAttach_Right = 5
+    };
+
 	struct MeasureDataStruct
 	{
 		int ErrorCode;
@@ -90,7 +100,10 @@ public:
 		float DPosY;			//Center of pattern offset Y to center of camera
 		float Value_1;			//Angle, Stitch, Register: Correction Value in Rev or μm (Register), StartLines: number of lines
 		LineLayoutEnum LineLayout;	//Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right/Covering/Bottom/Left)
+        LineAttachEnum LineAttach; //Angle, Stitch, Register: 0, StartLines: Line attached to camera limits (Top/Right/None/Bottom/Left)
 		BOOL micron;				//Measure is in μm
+        int NumMeasures;			//Number of successful measures
+        char Info[256];
 	};
 
 
