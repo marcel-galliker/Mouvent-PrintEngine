@@ -25,8 +25,6 @@
 #include "lb702.h"
 #include "robi_lb702.h"
 
-#define MOTOR_WASTE_PUMP_LEFT   2
-#define MOTOR_WASTE_PUMP_RIGHT  3
 #define MOTOR_X_0               4
 
 #define MOTOR_X_BITS            0x10
@@ -69,9 +67,19 @@
 #define RO_VACUUM_CLEANER       0x010       // o4
 #define RO_FLUSH_PUMP           0x020       // o5
 #define RO_WASTE_VAC            0x040       // o6
-#define RO_INK_PUMP_LEFT        0x080       // o7
-#define RO_INK_PUMP_RIGHT       0x100       // o8
-#define RO_INK_PUMP_BOTH        0x180       // o7 + o8
+#define RO_INK_VALVE_LEFT       0x080       // o7
+#define RO_INK_VALVE_RIGHT      0x100       // o8
+#define RO_INK_VALVE_BOTH       0x180       // o7 + o8
+#define RO_INK_PUMP_LEFT        0x200       // o9
+#define RO_INK_PUMP_RIGHT       0x400       // o 10
+
+// PWM Signals
+#define PWM_INK_PUMP_LEFT       3
+#define PWM_INK_PUMP_RIGHT      4
+
+// Analogue Inputs
+#define AI_INK_PUMP_LEFT        2
+#define AI_INK_PUMP_RIGHT       3
 
 #define MAX_POS_DIFFERENT       4000        // steps
 
@@ -82,6 +90,9 @@
 #define SCREWS_PER_HEAD         2
 
 #define MAX_VAR_SCREW_POS       2000        // um
+
+// Times
+#define FOLLOW_UP_TIME_INK_BACK 20000       // ms
 
 
 // globals
@@ -94,8 +105,6 @@ static SMovePar _ParCable_ref;
 static SMovePar _ParCable_drive;
 static SMovePar _ParCable_drive_slow;
 static SMovePar _ParCable_drive_purge;
-
-static SMovePar _Par_WastePump;
 
 static char     *_MotorName[5] = {"BACK", "FRONT", "NONE", "NON", "SLEDGE"};
 static char     _CmdName[32];
@@ -120,6 +129,13 @@ static int _CapFillTime = 0;
 static int _TimeSearchScrew = 0;
 static int _WastePumpTimer = 0;
 
+static int _PumpValueLeft = 0;
+static int _PumpValueRight = 0;
+static int _PumpTimeLeft = 0;
+static int _PumpTimeRight = 0;
+
+static int _PumpSpeed = 100;
+
 
 //--- prototypes --------------------------------------------
 static void _lbrob_motor_z_test(int steps);
@@ -138,8 +154,11 @@ static int  _calculate_average_y_pos(int screwNr);
 static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg);
 static void _handle_waste_pump(void);
 static void _handle_ink_pump_back(void);
+static void _set_ink_back_pump_left(int voltage);
+static void _set_ink_back_pump_right(int voltage);
 static void _vacuum_on();
 static void _vacuum_off();
+static void _pump_main();
 
 
 //--- lbrob_init --------------------------------------
@@ -197,15 +216,6 @@ void lbrob_init(void)
 
     motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
 
-    _Par_WastePump.speed = 10000;
-    _Par_WastePump.accel = 10000;
-    _Par_WastePump.current_acc = 280;
-    _Par_WastePump.current_run = 280;
-    _Par_WastePump.encCheck = chk_off;
-    
-    motor_config(MOTOR_WASTE_PUMP_LEFT, CURRENT_HOLD, 0, 0, STEPS);
-    motor_config(MOTOR_WASTE_PUMP_RIGHT, CURRENT_HOLD, 0, 0, STEPS);
-
     robi_lb702_init();
 }
 
@@ -214,6 +224,8 @@ void lbrob_main(int ticks, int menu)
 {
     int motor;
     int pos, val;
+    static int time;
+    
 
     RX_StepperStatus.posY[0] = _steps_2_micron(motor_get_step(MOTOR_X_0));
     RX_StepperStatus.posY[1] = _steps_2_micron(motor_get_step(MOTOR_X_0)) - CABLE_PURGE_POS_BACK;
@@ -581,6 +593,8 @@ void lbrob_main(int ticks, int menu)
         _turn_screw(_HeadAdjustment);
     else
         memset(&_HeadAdjustment, 0, sizeof(_HeadAdjustment));
+
+    _pump_main();
 }
 
 //---_micron_2_steps --------------------------------------------------------------
@@ -613,7 +627,6 @@ void lbrob_display_status(void)
         term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
         term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);
         term_printf("Wipe done: \t\t %d\n", RX_StepperStatus.robinfo.wipe_done);
-        term_printf("Waste Pump Speed: %d\n", _Par_WastePump.speed);
         term_printf("\n");
     }
     else
@@ -642,9 +655,7 @@ void lbrob_menu(int help)
         term_printf("t<screw_nr>: Turn <screw_nr> n/6 Turn (n can be choosen by command \"T\")\n");
         term_printf("T<n>: Make <n>/6 turns with the command t\n");
         term_printf("d<n>: Wipe all (n = l: left; n = r : right; n = b: both\n");
-        term_printf("b<n>: Set Speed of Waste pump to <n>Hz\n");
-        term_printf("e: Change Inkpump_error_left state, actual %d\n", RX_StepperStatus.inkinfo.ink_pump_error_left);
-        term_printf("h: Change Inkpump_error_right state, actual %d\n", RX_StepperStatus.inkinfo.ink_pump_error_right);
+        term_printf("b<n>: Set Speed of Waste pump to <n>%, Actual value %d%\n", _PumpSpeed);;
         term_flush();
     }
     else
@@ -789,7 +800,9 @@ void lbrob_handle_menu(char *str)
         break;
     case 'b':
         val = atoi(&str[1]);
-        _Par_WastePump.speed = val;
+        if (val < 0) val = 0;
+        if (val > 100) val = 100;
+        _PumpSpeed = val;
         break;
     case 'e':
         RX_StepperStatus.inkinfo.ink_pump_error_left = !RX_StepperStatus.inkinfo.ink_pump_error_left;
@@ -858,6 +871,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROB_REFERENCE:
+        if (_CmdRunning == CMD_ROB_REFERENCE) break;
         strcpy(_CmdName, "CMD_ROB_REFERENCE");
         if (_CmdRunning)
         {
@@ -902,30 +916,35 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         val = (*(INT32 *)pdata);
         if (val == 0)
         {
-            Fpga.par->output &= ~RO_INK_PUMP_BOTH;
+            if (Fpga.par->output & RO_INK_VALVE_LEFT)
+                _PumpTimeLeft = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
+            if (Fpga.par->output & RO_INK_VALVE_RIGHT)
+                _PumpTimeRight = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
             _vacuum_off();
         }
-        else if (val == 1)
+        else if (val == 1 && !RX_StepperStatus.inkinfo.ink_pump_error_left)
         {
-            Fpga.par->output |= RO_INK_PUMP_LEFT;
+            Fpga.par->output |= RO_INK_VALVE_LEFT;
         }
         else if (val == 2)
         {
-            Fpga.par->output &= ~RO_INK_PUMP_LEFT;
+            if (Fpga.par->output & RO_INK_VALVE_LEFT)
+                _PumpTimeLeft = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
             _vacuum_off();
         }
-        else if (val == 3)
+        else if (val == 3 && !RX_StepperStatus.inkinfo.ink_pump_error_right)
         {
-            Fpga.par->output |= RO_INK_PUMP_RIGHT;
+            Fpga.par->output |= RO_INK_VALVE_RIGHT;
         }
         else if (val == 4)
         {
-            Fpga.par->output &= ~RO_INK_PUMP_RIGHT;
+            if (Fpga.par->output & RO_INK_VALVE_RIGHT)
+                _PumpTimeRight = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
             _vacuum_off();
         }
         else if (val == 5)
         {
-            Fpga.par->output |= RO_INK_PUMP_BOTH;
+            Fpga.par->output |= RO_INK_VALVE_BOTH;
         }
         break;
 
@@ -1720,59 +1739,140 @@ static void _handle_ink_pump_back(void)
     int val;
     static int _timer_left = 0;
     static int _timer_right = 0;
+    static int _lastTime = 0;
+    int _VentSpeed = 3;
 
-    if ((RX_StepperStatus.robinfo.moving) && (Fpga.par->output & RO_INK_PUMP_LEFT || Fpga.par->output & RO_INK_PUMP_RIGHT))
+    if ((_PumpTimeLeft && rx_get_ticks() >= _PumpTimeLeft) || (Fpga.par->output & RO_INK_VALVE_LEFT && RX_StepperStatus.robinfo.moving))
+    {
+        Fpga.par->output &= ~RO_INK_VALVE_LEFT;
+        _PumpTimeLeft = 0;
+    }
+
+    if ((_PumpTimeRight && rx_get_ticks() >= _PumpTimeRight) || (Fpga.par->output & RO_INK_VALVE_RIGHT && RX_StepperStatus.robinfo.moving))
+    {
+        Fpga.par->output &= ~RO_INK_VALVE_RIGHT;
+        _PumpTimeRight = 0;
+    }
+    
+
+    if ((RX_StepperStatus.robinfo.moving) && (Fpga.par->output & RO_INK_VALVE_LEFT || Fpga.par->output & RO_INK_VALVE_RIGHT))
     {
         val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_EMPTY_WASTE, &val);
     }
     
-    if (Fpga.par->output & RO_INK_PUMP_LEFT && motor_move_done(MOTOR_WASTE_PUMP_LEFT))
+    if (Fpga.par->output & RO_INK_VALVE_LEFT)
     {
-        motor_reset(MOTOR_WASTE_PUMP_LEFT);
-        motor_move_by_step(MOTOR_WASTE_PUMP_LEFT, &_Par_WastePump, 600000000);
-        motors_start(1 << MOTOR_WASTE_PUMP_LEFT, FALSE);
-        _timer_left = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+        _set_ink_back_pump_left(_PumpSpeed);
     }
-    else if (Fpga.par->output & RO_INK_PUMP_LEFT)
+    else if (!(Fpga.par->output & RO_INK_VALVE_LEFT))
     {
-        if (fpga_input(DI_INK_PUMP_REED_LEFT))
+        _set_ink_back_pump_left(0);
+    }
+
+    if (Fpga.par->output & RO_INK_VALVE_RIGHT)
         {
-            _timer_left = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+        _set_ink_back_pump_right(_PumpSpeed);
         }
-        else if (rx_get_ticks() > _timer_left && !fpga_input(DI_INK_PUMP_REED_LEFT))
+    else if (!(Fpga.par->output & RO_INK_VALVE_LEFT))
         {
-            Error(ERR_CONT, 0, "Ink Pump left not running");
-            RX_StepperStatus.inkinfo.ink_pump_error_left = TRUE;
+        _set_ink_back_pump_right(0);
         }
     }
-    else if (!(Fpga.par->output & RO_INK_PUMP_LEFT))
+
+static void _set_ink_back_pump_left(int voltage)
     {
-        motors_stop(1 << MOTOR_WASTE_PUMP_LEFT);
+    _PumpValueLeft = voltage;
+    _pump_main();
     }
     
-    if (Fpga.par->output & RO_INK_PUMP_RIGHT && motor_move_done(MOTOR_WASTE_PUMP_RIGHT))
+static void _set_ink_back_pump_right(int voltage)
     {
-        motor_reset(MOTOR_WASTE_PUMP_RIGHT);
-        motor_move_by_step(MOTOR_WASTE_PUMP_RIGHT, &_Par_WastePump, 600000000);
-        motors_start(1 << MOTOR_WASTE_PUMP_RIGHT, FALSE);
-        _timer_right = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+    _PumpValueRight = voltage;
+    _pump_main();
     }
-    else if (Fpga.par->output & RO_INK_PUMP_RIGHT)
+
+//--- _pump_main -------------------------------------------
+static void _pump_main()
     {
-        if (fpga_input(DI_INK_PUMP_REED_RIGHT))
+    static int _lastTime = 0;
+    static int time_left = 0;
+    static int time_right = 0;
+    int time = rx_get_ticks();
+    static int cnt = 0;
+    static int _newValueLeft = 0;
+    static int _oldValueLeft = 0;
+    static int _newValueRight = 0;
+    static int _oldValueRight = 0;
+
+    if (RX_StepperStatus.inkinfo.ink_pump_error_left)   _PumpValueLeft = 0;
+    if (RX_StepperStatus.inkinfo.ink_pump_error_right)  _PumpValueRight = 0;
+
+    if (_PumpValueLeft)
+    {
+        _newValueLeft = Fpga.stat->analog_in[AI_INK_PUMP_LEFT];
+        if (abs(_newValueLeft - _oldValueLeft) >= 50)
         {
-            _timer_right = rx_get_ticks() + TIMER_INK_PUMP_CHECK;
+            time_left = rx_get_ticks();
         }
-        else if (rx_get_ticks() > _timer_right && !fpga_input(DI_INK_PUMP_REED_RIGHT))
+        _oldValueLeft = _newValueLeft;
+        if (rx_get_ticks() >= time_left + 1000)
         {
-            Error(ERR_CONT, 0, "Ink Pump right not running");
+            Error(LOG, 0, "Ink-Pump Left is blocked");
+            RX_StepperStatus.inkinfo.ink_pump_error_left = TRUE;
+            _PumpValueLeft = 0;
+        }
+    }
+    else
+        time_left = rx_get_ticks();
+
+    if (_PumpValueRight)
+    {
+        _newValueRight = Fpga.stat->analog_in[AI_INK_PUMP_RIGHT];
+        if (abs(_newValueRight - _oldValueRight) >= 50)
+        {
+            time_right = rx_get_ticks();
+        }
+        _oldValueRight = _newValueRight;
+        if (rx_get_ticks() >= time_right + 1000)
+        {
+
+            Error(LOG, 0, "Ink-Pump Right is blocked");
             RX_StepperStatus.inkinfo.ink_pump_error_right = TRUE;
+            _PumpValueRight = 0;
         }
     }
-    else if (!(Fpga.par->output & RO_INK_PUMP_RIGHT))
+    else
+        time_right = rx_get_ticks();
+
+
+    if (time - _lastTime > 100)
     {
-        motors_stop(1 << MOTOR_WASTE_PUMP_RIGHT);
+        if (_PumpValueLeft < 1)
+    {
+            Fpga.par->output &= ~RO_INK_PUMP_LEFT;
+            Fpga.par->pwm_output[PWM_INK_PUMP_LEFT] = 0;
+        }
+        else if (_PumpValueLeft < 100)  Fpga.par->pwm_output[3] = (0x10000 * _PumpValueLeft) / 100;
+        else
+        {
+            Fpga.par->pwm_output[PWM_INK_PUMP_LEFT] = 0;
+            Fpga.par->output |= RO_INK_PUMP_LEFT;
+        }
+
+        if (_PumpValueRight < 1)
+        {
+            Fpga.par->output &= ~RO_INK_PUMP_RIGHT;
+            Fpga.par->pwm_output[PWM_INK_PUMP_RIGHT] = 0;
+        }
+        else if (_PumpValueRight < 100)
+            Fpga.par->pwm_output[PWM_INK_PUMP_RIGHT] = (0x10000 * _PumpValueRight) / 100;
+        else                             
+        {
+            Fpga.par->pwm_output[4] = 0;
+            Fpga.par->output |= RO_INK_PUMP_RIGHT;
+        }
+        _lastTime = time;
     }
 }
 
