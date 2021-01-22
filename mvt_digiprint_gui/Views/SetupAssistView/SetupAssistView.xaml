@@ -65,7 +65,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
-                    <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding motorPosition}" IsEnabled="False"/>
+                    <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding ScanPos}" IsEnabled="False"/>
                 
                     <!--
                     <TextBlock  Grid.Row="1" Grid.Column="0" Text="Voltage"/>
@@ -79,23 +79,23 @@
                     -->
                     
                     <TextBlock  Grid.Row="4" Grid.Column="0" Text="Reference Done"/>
-                    <CheckBox   Grid.Row="4" Grid.Column="1" IsChecked="{Binding refDone}" IsEnabled="False" HorizontalAlignment="Center"/>
+                    <CheckBox   Grid.Row="4" Grid.Column="1" IsChecked="{Binding ScanRefDone}" IsEnabled="False" HorizontalAlignment="Center"/>
 
                     <TextBlock  Grid.Row="5" Grid.Column="0" Text="moving"/>
-                    <CheckBox   Grid.Row="5" Grid.Column="1" IsChecked="{Binding moving}" IsEnabled="False" HorizontalAlignment="Center"/>
+                    <CheckBox   Grid.Row="5" Grid.Column="1" IsChecked="{Binding ScanMoving}" IsEnabled="False" HorizontalAlignment="Center"/>
 
                     <TextBlock  Grid.Row="6" Grid.Column="0" Text="Stop Left"/>
-                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
-                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
+                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
+                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
 
                     <TextBlock  Grid.Row="7" Grid.Column="0" Text="Stop Right"/>
-                    <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding InRight,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
-                    <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding InRight,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
+                    <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding ScanInRight,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
+                    <Image Grid.Row="7" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding ScanInRight,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
 
                     <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
                            HorizontalAlignment="Center" 
                            VerticalAlignment="Center" FontWeight="Bold"
-                           Visibility="{Binding Connected, Converter={StaticResource BoolToInVisible_Converter}}">
+                           Visibility="{Binding ScanConnected, Converter={StaticResource BoolToInVisible_Converter}}">
                         <TextBlock.RenderTransform>
                             <RotateTransform Angle="-45"/>
                         </TextBlock.RenderTransform>

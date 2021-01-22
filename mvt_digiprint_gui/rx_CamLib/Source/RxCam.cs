@@ -1675,9 +1675,10 @@ namespace rx_CamLib
             //Raw data list
             List<CallBackDataStruct> CorrectionList;
             ENCamResult DataResult = GetMeasureDataList(out CorrectionList);
-            if (DataResult != ENCamResult.OK && DataResult != ENCamResult.Filter_NoData) return DataResult;
+            if (DataResult != ENCamResult.OK && DataResult != ENCamResult.Filter_NoData && DataResult != ENCamResult.Filter_DataTimeout) return DataResult;
 
-            if (CorrectionList.Count == 0 || DataResult == ENCamResult.Filter_NoData)
+            if (CorrectionList.Count == 0 || DataResult == ENCamResult.Filter_NoData ||
+                (CorrectionList.Count == 1 && CorrectionList[0].NumMeasures == 0))
             {
                 MeasureData.CamResult = new ENCamResult();
                 MeasureData.DPosX = float.NaN;

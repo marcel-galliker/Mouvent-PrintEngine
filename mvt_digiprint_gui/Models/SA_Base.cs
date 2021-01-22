@@ -27,20 +27,20 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _powerStepStatus,value); }
 		}
 
-		//--- Property motorPosition ---------------------------------------
-		private double _motorPosition;
-		public double motorPosition
+		//--- Property ScanPos ---------------------------------------
+		private double _ScanPos;
+		public double ScanPos
 		{
-			get { return _motorPosition; }
-			set { SetProperty(ref _motorPosition, value); }
+			get { return _ScanPos; }
+			set { SetProperty(ref _ScanPos, value); }
 		}
 
-		//--- Property stopPos ---------------------------------------
-		private double _stopPos;
-		public double stopPos
+		//--- Property ScanStopPos ---------------------------------------
+		private double _ScanStopPos;
+		public double ScanStopPos
 		{
-			get { return _stopPos; }
-			set { SetProperty(ref _stopPos,value); }
+			get { return _ScanStopPos; }
+			set { SetProperty(ref _ScanStopPos,value); }
 		}
 
 		//--- Property motorVoltage ---------------------------------------
@@ -65,57 +65,57 @@ namespace RX_DigiPrint.Models
 			get { return _motorHoldCurrent; }
 			set { SetProperty(ref _motorHoldCurrent,value); }
 		}
-		//--- Property refDone ---------------------------------------
-		private bool _refDone;
-		public bool refDone
+		//--- Property ScanRefDone ---------------------------------------
+		private bool _ScanRefDone;
+		public bool ScanRefDone
 		{
-			get { return _refDone; }
-			set { SetProperty(ref _refDone,value); }
+			get { return _ScanRefDone; }
+			set { SetProperty(ref _ScanRefDone,value); }
 		}
 
-		//--- Property moving ---------------------------------------
-		private bool _moving;
-		public bool moving
+		//--- Property ScanMoving ---------------------------------------
+		private bool _ScanMoving;
+		public bool ScanMoving
 		{
-			get { return _moving; }
-			set { SetProperty(ref _moving, value); }				
+			get { return _ScanMoving; }
+			set { SetProperty(ref _ScanMoving, value); }				
 		}
 
 		//--- Property ScanMoveCnt ---------------------------------------
 		private int _ScanMoveCnt;
-		public int scanMoveCnt
+		public int ScanMoveCnt
 		{
 			get { return _ScanMoveCnt; }
 			set 
 			{ 
 				if (SetProperty(ref _ScanMoveCnt,value) )
 				{
-					Console.WriteLine("{0} SCAN MOVE DONE[{1}] motorPosition={2}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, motorPosition);
+					Console.WriteLine("{0} SCAN MOVE DONE[{1}] motorPosition={2}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, ScanPos);
 					_OnScanMoveDone();
 				}
 			}
 		}
 
-		//--- Property InLeft ---------------------------------------
-		private bool _InLeft;
-		public bool InLeft
+		//--- Property ScanInLeft ---------------------------------------
+		private bool _ScanInLeft;
+		public bool ScanInLeft
 		{
-			get { return _InLeft; }
-			set { SetProperty(ref _InLeft,value); }
+			get { return _ScanInLeft; }
+			set { SetProperty(ref _ScanInLeft,value); }
 		}
 
-		//--- Property InRight ---------------------------------------
-		private bool _InRight;
-		public bool InRight
+		//--- Property ScanInRight ---------------------------------------
+		private bool _ScanInRight;
+		public bool ScanInRight
 		{
-			get { return _InRight; }
-			set { SetProperty(ref _InRight,value); }
+			get { return _ScanInRight; }
+			set { SetProperty(ref _ScanInRight,value); }
 		}
 
 		//--- Property Connected ---------------------------------------
 		private int _ConnectedTimer;
 		private bool _Connected=false;
-		public bool Connected
+		public bool ScanConnected
 		{
 			get { return _Connected; }
 			set { 
@@ -125,7 +125,7 @@ namespace RX_DigiPrint.Models
 		}
 		private void _Tick(int no)
 		{
-			if (_ConnectedTimer>0 && --_ConnectedTimer==0) Connected=false;
+			if (_ConnectedTimer>0 && --_ConnectedTimer==0) ScanConnected=false;
 			_checkWebMoveDone();
 		}
 
@@ -133,17 +133,17 @@ namespace RX_DigiPrint.Models
 		public void Update(TcpIp.SSetupAssistStatMsg msg)
 		{
 			powerStepStatus = msg.powerStepStatus;
-			motorPosition	= Math.Round(msg.motorPosition/1000.0, 1);
-			stopPos		    = Math.Round(msg.stopPos/1000.0, 1);
+			ScanPos	= Math.Round(msg.motorPosition/1000.0, 1);
+			ScanStopPos		    = Math.Round(msg.stopPos/1000.0, 1);
 			motorVoltage	= msg.motorVoltage;
 			motorMoveCurrent= msg.motorMoveCurrent;
 			motorHoldCurrent= msg.motorHoldCurrent;
-			scanMoveCnt		= msg.moveCnt;
-			refDone			= msg.refDone!=0;
-			moving			= msg.moving!=0;
-			InLeft			= (msg.inputs&(1<<0))!=0;
-			InRight			= (msg.inputs&(1<<1))!=0;
-			Connected		= true;
+			ScanMoveCnt		= msg.moveCnt;
+			ScanRefDone			= msg.refDone!=0;
+			ScanMoving			= msg.moving!=0;
+			ScanInLeft			= (msg.inputs&(1<<0))!=0;
+			ScanInRight			= (msg.inputs&(1<<1))!=0;
+			ScanConnected		= true;
 			_checkWebMoveDone();
 		}
 
@@ -171,7 +171,7 @@ namespace RX_DigiPrint.Models
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			cmd.steps	= (Int32)(pos*1000.0);
 			cmd.speed   = (UInt32)speed;
-			Console.WriteLine("{0} SCAN MOVE TO [{1}] from {2:N3} to {3:N3}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, motorPosition, pos);
+			Console.WriteLine("{0} SCAN MOVE TO [{1}] from {2:N3} to {3:N3}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, ScanPos, pos);
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
 
