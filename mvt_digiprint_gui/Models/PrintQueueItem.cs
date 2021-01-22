@@ -881,7 +881,7 @@ namespace RX_DigiPrint.Models
                         PageWidth    = SrcWidth;
                         PageHeight   = SrcHeight;
                         SrcBitsPerPixel = (int)info.bitsPerPixel;
-                        ScreenOnPrinter = (info.bitsPerPixel==8);
+                        ScreenOnPrinter = (info.bitsPerPixel>=8);
                         return true;
                     }
                 }

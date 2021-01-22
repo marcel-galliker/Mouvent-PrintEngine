@@ -207,7 +207,7 @@ int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 
 	//	strcpy(pinfo->file_ext, "flz");
 		pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
-		pinfo->screening	 = (pinfo->bitsPerPixel==8);
+		pinfo->screening	 = (pinfo->bitsPerPixel>=8);
 		pinfo->srcWidthPx    = pFlzInfo->widthPx;
 		pinfo->resol.x		 = pFlzInfo->resol.x;
 		pinfo->resol.y		 = pFlzInfo->resol.y;
@@ -316,7 +316,7 @@ int flz_load(SPageId *id, const char *filedir, const char *filename, int printMo
 				pinfo->printMode     = printMode;
 				pinfo->bitsPerPixel	 = pFlzInfo->bitsPerPixel;
 	            int spaceBt = (spacePx * pinfo->bitsPerPixel) / 8;
-	            pinfo->screening = (pinfo->bitsPerPixel == 8);
+	            pinfo->screening = (pinfo->bitsPerPixel >= 8);
 				pinfo->srcWidthPx    = pFlzInfo->widthPx+spacePx;
 				pinfo->lineLen		 = pFlzInfo->lineLen+spaceBt;
 				pinfo->lengthPx		 = pFlzInfo->lengthPx;

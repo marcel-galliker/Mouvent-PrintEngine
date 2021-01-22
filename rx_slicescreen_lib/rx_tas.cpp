@@ -295,6 +295,7 @@ int rx_tas_load(const char * path, STaConfig **pta)
 				BYTE *inptr;
 				inptr = lta->ta = (BYTE*)buffer;
 				outptr = lta->ta16 = (UINT16*)malloc(bufsize * 2);
+				srand(1); // ensure we have the same seed for all plane
 				while (numProcessed < bufsize)
 				{
 					int val = ((int)*inptr * 257) - (rand() % 256) -1 ;

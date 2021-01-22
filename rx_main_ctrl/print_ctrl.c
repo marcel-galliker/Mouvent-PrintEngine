@@ -652,10 +652,10 @@ static int _print_next(void)
 				_set_src_size(&_Item, _FilePathLocal);
 				if (_BitsPerPixel)
 				{
-					if (((_BitsPerPixel<8) && (_Item.srcBitsPerPixel==8))
-					||  ((_BitsPerPixel==8 && (_Item.srcBitsPerPixel<8))))
+					if (((_BitsPerPixel<8) && (_Item.srcBitsPerPixel>=8))
+					||  ((_BitsPerPixel>=8 && (_Item.srcBitsPerPixel<8))))
 					{
-                        Error(ERR_STOP, 0, "%d: %s Could not mix different types of screening in jobs queue", _Item.id.id, _filename(_Item.filepath));
+						Error(ERR_STOP, 0, "%d: %s Could not mix different types of screening in jobs queue", _Item.id.id, _filename(_Item.filepath));
 						pq_stopped(&_Item);
 						gui_send_print_queue(EVT_GET_PRINT_QUEUE, &_Item);
 						memset(&_Item, 0, sizeof(_Item));

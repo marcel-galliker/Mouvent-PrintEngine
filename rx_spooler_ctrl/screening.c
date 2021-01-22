@@ -137,11 +137,11 @@ void scr_end(void)
 //--- scr_malloc ---------------------------------------------
 void scr_malloc(UINT32 lengthPx, UINT8 bitsPerPixel)
 {
-	if (bitsPerPixel==BITS_PER_PIXEL_SEP)
+	if (bitsPerPixel>=BITS_PER_PIXEL_SEP)
 	{
 		int widthPx = RX_Spooler.headWidthPx+RX_Spooler.headOverlapPx;
 	
-		UINT64 sizeSep=(int)data_memsize(PM_SCANNING, widthPx, lengthPx, BITS_PER_PIXEL_SEP);
+		UINT64 sizeSep = (int)data_memsize(PM_SCANNING, widthPx, lengthPx, bitsPerPixel);
 		UINT64 sizeScr=(int)data_memsize(PM_SCANNING, widthPx, lengthPx, BITS_PER_PIXEL_SCR);
 		int c, n;
 		int b, h;

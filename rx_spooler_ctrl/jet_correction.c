@@ -127,7 +127,7 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 
 	_Changed = FALSE;
 
-	if (pBmpInfo->bitsPerPixel==8) return REPLY_OK;	// correction whils screening 
+	if (pBmpInfo->bitsPerPixel>=8) return REPLY_OK;	// correction whils screening 
     if (rx_def_is_tx(RX_Spooler.printerType)) return REPLY_OK;
 
 	if (pBmpInfo->bitsPerPixel<2)
