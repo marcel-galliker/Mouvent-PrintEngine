@@ -170,7 +170,7 @@ namespace RX_DigiPrint.Models
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			cmd.steps	= (Int32)(pos*1000.0);
-			cmd.speed   = (UInt32)speed;
+			cmd.speed   = speed;
 			Console.WriteLine("{0} SCAN MOVE TO [{1}] from {2:N3} to {3:N3}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, ScanPos, pos);
 			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
@@ -190,6 +190,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- WebMove ----------------------------------
+		public const int WebSpeed = 5;	// [m/min]
 		public void WebMove(double? dist=null)
 		{
 			_checkWebMoveDone();
@@ -216,6 +217,7 @@ namespace RX_DigiPrint.Models
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
 			else            cmd.steps	= (Int32)(1000*dist);
+			cmd.speed = WebSpeed;	
 			if (cmd.steps==0)
 			{
 		//		if (_OnWebMoveDone!=null) _OnWebMoveDone();
@@ -270,6 +272,15 @@ namespace RX_DigiPrint.Models
 				}
 			}
 		}
+
+		//--- Property IsRunning ---------------------------------------
+		private bool _IsRunning=false;
+		public bool IsRunning
+		{
+			get { return _IsRunning; }
+			set { SetProperty(ref _IsRunning,value); }
+		}
+
 
 	}
 }

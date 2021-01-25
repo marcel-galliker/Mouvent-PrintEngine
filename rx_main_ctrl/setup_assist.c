@@ -164,7 +164,7 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								sok_send_2(&_SaSocket, CMD_MOTOR_STOP,    0, NULL); 
 								break;
 
-    case CMD_SA_MOVE:			Error(LOG, 0, "Send CMD_MOTOR_MOVE");
+    case CMD_SA_MOVE:			// Error(LOG, 0, "Send CMD_MOTOR_MOVE");
 								{
 									SetupAssist_MoveCmd cmd;
 									cmd.hdr.msgLen = sizeof(cmd);
@@ -188,9 +188,8 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								}
 								break;
 
-    case CMD_SA_WEB_MOVE:		Error(LOG, 0, "Send CMD_SA_WEB_MOVE");
-								SetupAssist_MoveCmd *pcmd = (SetupAssist_MoveCmd*)pmsg;
-								plc_move_web(pcmd->steps);
+    case CMD_SA_WEB_MOVE:		// Error(LOG, 0, "Send CMD_SA_WEB_MOVE");
+								plc_move_web(pmsg->steps, pmsg->speed);
 								break;
 
     case CMD_SA_WEB_STOP:		gui_send_cmd(CMD_SA_WEB_STOP);

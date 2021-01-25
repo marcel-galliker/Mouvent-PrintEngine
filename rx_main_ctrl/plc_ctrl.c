@@ -676,10 +676,10 @@ int	plc_to_cap_pos(void)
 }
 
 //--- plc_move_web ------------------------------------------
-int plc_move_web(int dist)
+int plc_move_web(int dist, int speed)
 {
 	lc_set_value_by_name_FLOAT(UnitID ".PAR_RELATIVE_POS", (float)dist/1000.0);
-	lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED", 5);
+	lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED", speed);
 	_plc_set_command("", "CMD_SET_PARAMETER");
     rx_sleep(200);
     _plc_set_command("CMD_PRODUCTION", "CMD_RUN");

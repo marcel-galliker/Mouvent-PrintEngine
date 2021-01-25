@@ -102,17 +102,29 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		}
 
 		//--- CamCapture_IsVisibleChanged ----------------------------------
+		private bool _CamRunning=false;
 		private void CamCapture_IsVisibleChanged(object sender,DependencyPropertyChangedEventArgs e)
 		{
-			if((bool)e.NewValue) 
+			if((bool)e.NewValue)
 			{
-				new Task(() =>
+				if (!_CamRunning)
 				{
-					Task.Delay(100);
-					RxBindable.Invoke(()=>CamCapture.Start(RxGlobals.Camera));
-				}).Start();
+					_CamRunning=true;
+					new Task(() =>
+					{
+						Task.Delay(100);
+						RxBindable.Invoke(()=>CamCapture.Start(RxGlobals.Camera));
+					}).Start();
+				}
 			}
-			else  CamCapture.Stop();
+			else  
+			{
+				if (!RxGlobals.SA_StateMachine.IsRunning)
+				{
+					CamCapture.Stop();
+					_CamRunning=false;
+				}
+			}
 		}
 	}
 }

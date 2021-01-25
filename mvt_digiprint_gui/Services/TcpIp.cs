@@ -1358,7 +1358,7 @@ namespace RX_DigiPrint.Services
         {
 	        SMsgHdr         header;
 	        public Int32    steps;
-	        public UInt32   speed;
+	        public Int32    speed;
 	        public UInt32   acc;
 	        public UInt32   current;
         };

@@ -36,5 +36,11 @@ namespace RX_Common
             return string.Format("{0:N0}", ticks);
 		}
 
+        static public int GetTicks()
+		{
+            long ticks=(DateTime.Now.Ticks-_Ticks0) / 10000;
+            return (int)ticks;
+		}
+
     }
 }
