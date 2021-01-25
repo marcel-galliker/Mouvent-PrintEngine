@@ -342,7 +342,7 @@ void ink_tick_10ms(void)
 
 				pid_reset(&_InkSupply[isNo].pid_Pump);
 				pid_reset(&_InkSupply[isNo].pid_Setpoint);
-				_set_air_valve(isNo, FALSE);
+				_set_air_valve(isNo, TRUE);
 				_set_bleed_valve(isNo, FALSE);
 				_ShutdownPrint[isNo] = 0;
 
