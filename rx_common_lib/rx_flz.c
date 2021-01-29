@@ -144,7 +144,7 @@ int flz_get_info(const char *path, UINT32 page, SFlzInfo *pflzinfo)
 		}
 
 		file=fopen (filepath, "rb");
-		if (file==NULL) return REPLY_NOT_FOUND;
+		if (file==NULL) continue; // ignore missing color file
 
 		if(fread(pflzinfo,sizeof(SFlzInfo),1,file)==1) ret = REPLY_OK;
 		else										   ret = Error(ERR_CONT, 0, "File %s: error reading flz info", path); 

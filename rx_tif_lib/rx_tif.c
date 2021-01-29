@@ -473,7 +473,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 		{
 			for (i=0; i<threadCnt; i++) 
 			{
-				if (pinfo->buffer[c])
+				if (_ThreadPar[i].buffer)
 				{
 					int start;
 					start = -(INT32)wakeupLen;

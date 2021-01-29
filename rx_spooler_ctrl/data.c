@@ -666,6 +666,10 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 	int loaded=FALSE;
 	char filename[MAX_PATH];
 	char *tiffErr;
+	static EFileType _FileType = ft_undef;
+
+	if (fileType == ft_undef) fileType = _FileType;
+	_FileType = fileType;
 
 	TrPrintfL(TRUE, "data_load id=%d, page=%d, copy=%d, scan=%d, offsetPx=%d, data_load >>%s<<", id->id, id->page, id->copy, id->scan, offsetPx, filepath);
 	TrPrintfL(TRUE, "FirstPage=%d, LastPage=%d", flags & FLAG_SMP_FIRST_PAGE, flags & FLAG_SMP_LAST_PAGE);
@@ -784,7 +788,7 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 								ret = tif_load(id, filepath, filename, printMode, gapPx, _WakeupLen, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, ctrl_send_load_progress);
 								strcpy(_FileTimePath, tif_last_filepath());
 								break;
-                            default: Error(ERR_ABORT, 0, "Filetype not implemented");
+                            default: return Error(ERR_ABORT, 0, "Filetype not implemented");
 							}
 						}
 						strcpy(_FileTimePath, tif_last_filepath());

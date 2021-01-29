@@ -482,6 +482,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		else
 		{
 			data_get_size(path, msg.id.page, &fileType, &msg.gapPx, &widthPx, &lengthPx, &bitsPerPixel, &multiCopy);
+			if (fileType == ft_undef) return Error(ERR_ABORT, 0, "Filetype undefined");
 			TrPrintfL(TRUE, "data_get_size >>%s<<: gapPx=%d, widthPx=%d, lengthPx=%d, bitsPerPixel=%d, multiCopy=%d", path, msg.gapPx, widthPx, lengthPx, bitsPerPixel, multiCopy);
 			if (ret==REPLY_NOT_FOUND) 
 			{
