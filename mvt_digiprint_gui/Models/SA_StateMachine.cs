@@ -63,7 +63,7 @@ namespace RX_DigiPrint.Models
 			{
 				Function = ECamFunction.CamFindMark_1,
 				Name="Find 3 Vert Lines",
-				ScanPos	= 50.0,
+				ScanPos	= 30.0,
 			});
 
 			*/
@@ -73,7 +73,7 @@ namespace RX_DigiPrint.Models
 				Function = ECamFunction.CamFindMark_2,
 				Name="Find Horiz Line",
 			//	WebMoveDist = -20.0,
-				ScanPos	    = 50.0,
+				ScanPos	    = 30.0,
 			});
 
 			_Actions.Add(new SA_Action()
@@ -81,7 +81,7 @@ namespace RX_DigiPrint.Models
 				Function = ECamFunction.CamFindMark_3,
 				Name="Find Line End",
 				WebMoveDist = 0,
-				ScanPos	    = 50.0,
+				ScanPos	    = 30.0,
 			});
 
 			//--- measurmentfunctions -----------------------------
@@ -270,8 +270,8 @@ namespace RX_DigiPrint.Models
 									}
 									else
 									{
-									//	RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
-										RxGlobals.SetupAssist.ScanMoveTo(50);
+										RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+									//	RxGlobals.SetupAssist.ScanMoveTo(30);
 										RxGlobals.SetupAssist.WebMove(_StitchWebDist);
 									}
 								}
@@ -584,7 +584,7 @@ namespace RX_DigiPrint.Models
 						{
 						//	_Actions[_ActionIdx+1].ScanPos     = RxGlobals.SetupAssist.stopPos+_CallbackData.DPosX/1000.0;
 						//	_Actions[_ActionIdx+1].ScanPos     = RxGlobals.SetupAssist.motorPosition-_CallbackData.DPosX/1000.0;
-							_Actions[_ActionIdx+1].ScanPos     = RxGlobals.SetupAssist.ScanPos+0.1;
+							_Actions[_ActionIdx+1].ScanPos     = RxGlobals.SetupAssist.ScanPos;
 							_Actions[_ActionIdx+1].WebMoveDist = 12.0;
 						}
 						Console.WriteLine("Action[{0}].ScanPos={1}", _ActionIdx+1, _Actions[_ActionIdx+1].ScanPos);

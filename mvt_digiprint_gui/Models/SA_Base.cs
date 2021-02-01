@@ -2,6 +2,7 @@
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -217,14 +218,16 @@ namespace RX_DigiPrint.Models
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
 			else            cmd.steps	= (Int32)(1000*dist);
-			cmd.speed = WebSpeed;	
+			cmd.speed = WebSpeed;
 			if (cmd.steps==0)
 			{
 		//		if (_OnWebMoveDone!=null) _OnWebMoveDone();
 			}
 			else
 			{
-				Console.WriteLine("{0}: WEB MOVE {1} dist={2}", RxGlobals.Timer.Ticks(), _WebMoveCnt,  cmd.steps);			
+				string msg=string.Format("WEB MOVE {0} dist={1}", _WebMoveCnt,  cmd.steps);
+				Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
+				RxGlobals.Events.AddItem(new LogItem(msg));
 				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
 			}
 		}
