@@ -5,17 +5,10 @@
   <columns>
    <connections preferredWidth="223" />
    <irq preferredWidth="63" />
-   <name preferredWidth="216" />
-   <export preferredWidth="230" />
   </columns>
  </systemtable>
- <library expandedCategories="Project,Library" />
- <window width="1684" height="1004" x="-2" y="25" />
- <generation
-   block_symbol_file="0"
-   simulation="VHDL"
-   mixed_lang_simulation="0"
-   path="_PROJECT_NAME_"
-   synthesis="VERILOG" />
- <hdlexample language="VERILOG" />
+ <library
+   expandedCategories="Library/Processors and Peripherals,Library/Interface Protocols/PCI Express,Library/Processors and Peripherals/Peripherals,Library,Project,Library/Interface Protocols/PCI Express/QSYS Example Designs,Library/Interface Protocols" />
+ <window width="1684" height="1004" x="-40" y="25" />
+ <generation synthesis="VERILOG" simulation="VHDL" />
 </preferences>
