@@ -534,7 +534,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             else if (RX_StepperStatus.screw_posY < MIN_Y_POS)
             {
-                Error(ERR_CONT, 0, "Screwer to close to garage to move in x axis");
+                Error(ERR_CONT, 0, "Screwer too close to garage to move in x axis");
                 break;
             }
             else
@@ -597,7 +597,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             if (RX_StepperStatus.screw_posY < MIN_Y_POS && _NewCmd != CMD_ROBI_WIPE_LEFT && _NewCmd != CMD_ROBI_WIPE_RIGHT)
             {
-                Error(ERR_CONT, 0, "Screwer to close to garage to move up");
+                Error(ERR_CONT, 0, "Screwer too close to garage to move up");
                 break;
             }
             if (RX_StepperStatus.screwerinfo.z_in_up)
@@ -684,7 +684,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
             else if (RX_StepperStatus.screw_posY < MIN_Y_POS && _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT && pos != 0)
             {
-                Error(ERR_CONT, 0, "Screwer to close to garage to move in x axis");
+                Error(ERR_CONT, 0, "Screwer too close to garage to move in x axis");
                 break;
             }
             else

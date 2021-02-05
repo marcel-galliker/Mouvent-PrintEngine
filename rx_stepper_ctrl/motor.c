@@ -224,7 +224,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 
     if (speed<MIN_SPEED_HZ+500) 
     {
-        if (speed<1000 && microsteps!=MICROSTEPS) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
+        if (speed<1000 && microsteps!=MICROSTEPS && (!RX_StepperStatus.robot_used || motor != 4)) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
         minSpeed = speed-500;    
 	}
     else minSpeed = MIN_SPEED_HZ;
