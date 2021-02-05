@@ -809,7 +809,7 @@ void ink_tick_10ms(void)
 
 						case 4: // Regul IS Pressure with air valve OPENED : OK if P>1000 for 20 seconds - Timeout 1 minute
 							_set_air_valve(isNo, PV_CLOSED);
-							_set_bleed_valve(isNo, PV_CLOSED);
+							_set_bleed_valve(isNo, PV_OPEN);
 
 							if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 700)
 							{
@@ -1238,13 +1238,13 @@ void ink_tick_10ms(void)
 
 			// --- EMPTY -------------------------------------------------
 			case ctrl_empty:
-				_set_bleed_valve(isNo, PV_CLOSED);
+				_set_bleed_valve(isNo, PV_OPEN);
 				_set_air_valve(isNo, PV_CLOSED);
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_empty;
 				break;
 
 			case ctrl_empty_step1:
-				_set_bleed_valve(isNo, PV_CLOSED);
+				_set_bleed_valve(isNo, PV_OPEN);
 				_set_air_valve(isNo, PV_CLOSED);
 				for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
 				{
@@ -1258,7 +1258,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_empty_step2:
-				_set_bleed_valve(isNo, PV_CLOSED);
+				_set_bleed_valve(isNo, PV_OPEN);
 				_set_air_valve(isNo, PV_CLOSED);
 				empty_pressure = 100 * pRX_Config->headsPerColor;
 				if(empty_pressure < 400) empty_pressure = 400;
