@@ -216,6 +216,19 @@ namespace RX_Common
             return ch;
         }
 
+        public static string CalledFrom()
+        {
+            /*
+            StackTrace trace = new StackTrace();
+            int caller = 1;
+            StackFrame frame = trace.GetFrame(caller);
+            string callerName = frame.GetMethod().Name;
+			StackTrace trace = new StackTrace();
+            */
+			return new StackTrace().GetFrame(1).GetMethod().Name;
+		}
+
+
         //--- StartProcess -----------------------------------------------
         public static Process StartProcess(string filepath, string arguments)
         {
