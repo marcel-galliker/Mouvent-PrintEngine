@@ -7,7 +7,7 @@ bin\fluid\rx_fluid_ctrl
 bin\fluid\rx_fluid_nios
 bin\fluid\rx_fluid_rbf
 bin\gui
-bin\gui\rx_rip_lib.dll
+bin\gui\rx_rip_lib_x64.dll
 bin\gui\BitMiracle.LibTiff.NET.dll
 bin\gui\ControlzEx.dll
 bin\gui\Dragablz.dll
@@ -115,7 +115,7 @@ bin\stepper\rx_stepper_ctrl
 bin\stepper\rx_stepper_rbf
 bin\win
 bin\win\rx_main_ctrl.exe
-bin\win\rx_rip_lib.dll
+bin\win\rx_rip_lib_x64.dll
 bin\win\rx_spooler_ctrl.exe
 bin\win\TBarCode11_x64.dll
 bin\win\cudart64_102.dll

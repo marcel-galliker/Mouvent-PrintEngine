@@ -33,7 +33,6 @@
 #define 	PRESSURE_SOFT_PURGE			80
 #define 	PRESSURE_PURGE				160
 #define 	PRESSURE_HARD_PURGE			320
-#define		PRESSURE_LEAK_TEST			800
 #define 	PRESSURE_FLUSH				1000
 #define		PRESSURE_CHECK_BLEED		1000
 
@@ -115,7 +114,6 @@ static int _TestBleedLine_Timer[NIOS_INK_SUPPLY_CNT] = {0};
 static int _OldPumpSpeed[NIOS_INK_SUPPLY_CNT] = {0};
 
 static int _FillPressure=0;
-static int _LeakTest=0;
 
 INT32 _PumpBeforeOFF;
 INT32 _PumpOFFTime;
@@ -337,17 +335,6 @@ void ink_tick_10ms(void)
 				else pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
-			case ctrl_leak_test_step2:
-				if (isNo == 0)
-				{
-					_LeakTest = 0;
-					_set_air_valve(isNo, PV_OPEN);
-				}
-				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
-				break;
-
-		    case ctrl_leak_test:
-		    case ctrl_leak_test_step1:
 			case ctrl_undef:
 			case ctrl_off:
 
@@ -372,16 +359,7 @@ void ink_tick_10ms(void)
 				_InkSupply[isNo].purgeTime=0;
 				_InkSupply[isNo].purgePressure=0;
 				pRX_Status->ink_supply[isNo].flushTime = 0;
-			    if (pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_leak_test || pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_leak_test_step1) 
-                {
-				    if (pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_leak_test && isNo == 0) _LeakTest = 1;
-				    pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
-			    } 
-                else 
-                {
-				    pRX_Status->ink_supply[isNo].ctrl_state = ctrl_off;
-				    if (_LeakTest == 2 && isNo == 0) _LeakTest = 0;
-			    }
+				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_off;
 				break;
 
 			case ctrl_print:
@@ -1174,7 +1152,6 @@ void ink_tick_10ms(void)
 			case ctrl_purge_step2: // build up pressure
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure,PUMP_CTRL_MODE_DEFAULT);
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
-				if (_LeakTest && isNo == 0) _LeakTest = 2;
 				break;
 
 			case ctrl_purge_step3: // build up pressure
@@ -1195,8 +1172,7 @@ void ink_tick_10ms(void)
 				{
 					_InkSupply[isNo].purgePressure = 0;
 					_set_pump_speed(isNo, 0);
-				    if (_LeakTest==2 && isNo==0) _set_air_valve(isNo, PV_CLOSED);
-				    else                         _set_air_valve(isNo, PV_OPEN);
+				    _set_air_valve(isNo, PV_OPEN);
 					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step4;
 				}
 				break;
@@ -1453,10 +1429,6 @@ static void _init_purge(int isNo, int pressure)
 		{
 			_InkSupply[isNo].purgePressure = pRX_Config->ink_supply[isNo].purge_putty_pressure;
 		}
-		else if (_LeakTest && isNo == 0)
-		{
-			_InkSupply[isNo].purgePressure = PRESSURE_LEAK_TEST;
-		}
 		else
 		{
 		    if(_MaxPrintPressure[isNo] > 0)
@@ -1550,7 +1522,6 @@ static int _degass_ctrl(void)
 //--- _set_air_valve -----------------------------------------
 void _set_air_valve(int isNo, int state)
 {
-	if (isNo == 0 && _LeakTest && state == TRUE) return;
 	if (!pvalve_active(isNo) && state) state=PV_OPEN;
 	if (state != pRX_Status->ink_supply[isNo].airValve)
 	{
@@ -1578,7 +1549,7 @@ void _set_bleed_valve(int isNo, int state)
 			else		val &= ~BLEED_OUT(isNo);
 			IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
 		}
-		pRX_Status->ink_supply[isNo].bleedValve = state;
+	pRX_Status->ink_supply[isNo].bleedValve = state;
 	}
 }
 

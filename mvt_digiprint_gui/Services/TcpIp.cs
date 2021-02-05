@@ -240,10 +240,6 @@ namespace RX_DigiPrint.Services
         ctrl_cal_step4,   	    // 0x404:
 	    ctrl_cal_done,       	// 0x405:
 
-        ctrl_leak_test = 0x500, // 0x500:
-        ctrl_leak_test_step1,   // 0x501:
-        ctrl_leak_test_step2,
-
 	    ctrl_test_watchdog = 0x10000,
 	    ctrl_test,				// 0x10001
         ctrl_offset_cal, 	    // 0x10002
@@ -374,6 +370,9 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_GET_DENSITY         = 0x01000107;
         public const UInt32 REP_GET_DENSITY         = 0x02000107;
         public const UInt32 CMD_SET_DENSITY         = 0x01000108;
+
+        public const UInt32 CMD_SET_ROB_POS     = 0x01000109;
+        public const UInt32 CMD_PURGE_CLUSTER   = 0x0100010a;
         
         public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
         public const UInt32 REP_ENCODER_CFG			= 0x02000111;
@@ -400,12 +399,7 @@ namespace RX_DigiPrint.Services
 
         public const UInt32 CMD_FLUID_DEGASSER      = 0x01000127;
 
-        public const UInt32 CMD_FLUID_TTS           = 0x01000128;
-        public const UInt32 REP_FLUID_TTS           = 0x02000128;
-
         public const UInt32 CMD_FLUID_FLUSH         = 0x01000129;
-
-        public const UInt32 CMD_FLUID_LEAK_TEST     = 0x0100012a;
 
         public const UInt32 CMD_GET_STEPPER_CFG		= 0x01000131;
         public const UInt32 REP_GET_STEPPER_CFG		= 0x02000131;
@@ -427,6 +421,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 REP_CHILLER_STAT		= 0x02000152;
 
         public const UInt32 CMD_CHANGE_CLUSTER_NO   = 0x01000161;
+        public const UInt32 CMD_RESET_COND          = 0x01000162;
 
         public const UInt32 CMD_START_PRINTING		= 0x01000201;
         public const UInt32 REP_START_PRINTING		= 0x02000201;
@@ -504,7 +499,9 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_TTS_JOG_FWD         = 0x01000513;
         public const UInt32 CMD_TTS_JOG_BWD         = 0x01000514;
         public const UInt32 CMD_TTS_JOG_STOP        = 0x01000515;
-        
+        public const UInt32 CMD_FLUID_TTS           = 0x01000516;
+        public const UInt32 REP_FLUID_TTS           = 0x02000516;
+
 
         public const UInt32 CMD_TT_END              = 0x010005ff;
 

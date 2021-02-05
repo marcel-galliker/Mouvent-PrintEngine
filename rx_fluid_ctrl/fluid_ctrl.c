@@ -204,9 +204,6 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)pdata);					break;	
 	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;	
     case CMD_FLUID_FLUSH:		 nios_test_flush(*(int*)pdata);								break;
-    case CMD_FLUID_LEAK_TEST:	 no = 0;
-								 nios_test_air_valve(no, 0);
-                                 break;
     default:		
 					{
 						char peer[64];

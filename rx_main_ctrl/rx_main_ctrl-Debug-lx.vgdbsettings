@@ -361,7 +361,7 @@
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
-      <GDBServerPort>1938</GDBServerPort>
+      <GDBServerPort>1939</GDBServerPort>
       <ProgramArguments>-debug +simuplc +simuencoder -simuchiller</ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>

@@ -34,33 +34,33 @@
 #define SCANNER_REF     4
 
 // digital Outputs
-#define RO_VACUUM_MOTOR         0x001;       // output 0
-#define RO_PURGE_TUBE_EMPTY      0x010;       // output 4
-#define RO_JET_TRAY_EMPTY        0x020;       // output 5
-#define RO_JET_TRAY_VALVE        0x040;       // output 6
-#define RO_BREAK_FRONT          0x080;       // output 7
-#define RO_BREAK_BACK           0x100;       // output 8
-#define RO_SCANNER_END_FRONT    0x200;       // output 9
-//#define RO_SCANNER_END_RIGHT    0x400;       // output 10
-#define RO_CLEAR_ERROR          0x400;       // output 10
+#define RO_VACUUM_MOTOR         0x001;      // output 0
+#define RO_PURGE_TUBE_EMPTY     0x010;      // output 4
+#define RO_JET_TRAY_EMPTY       0x020;      // output 5
+#define RO_JET_TRAY_VALVE       0x040;      // output 6
+#define RO_BREAK_FRONT          0x080;      // output 7
+#define RO_BREAK_BACK           0x100;      // output 8
+#define RO_SCANNER_END_FRONT    0x200;      // output 9
+//#define RO_SCANNER_END_RIGHT    0x400;      // output 10
+#define RO_CLEAR_ERROR          0x400;      // output 10
 
-#define TTS_REF_HEIGHT  12800            // um
+#define TTS_REF_HEIGHT          12800       // um
 
-#define STEPS_REV       (200*16)        // microsteps
-#define DIST_REV        5000            // um/rev
+#define STEPS_REV               (200*16)    // microsteps
+#define DIST_REV                5000        // um/rev
 
-#define TTS_PRINT_POS_MIN   1200        // um
+#define TTS_PRINT_POS_MIN       1200        // um
 
-#define POS_UP			11800            // um
-#define POS_CAP         7000            // um
-#define POS_JET_TRAY    -2300            // um
+#define POS_UP			        11800       // um
+#define POS_CAP                 7000        // um
+#define POS_JET_TRAY            -2300       // um
 
-#define CLEAR_ERROR_TIME    1000        // ms
-#define PURGE_PUMP_TIME     10000       // ms
+#define CLEAR_ERROR_TIME        1000        // ms
+#define PURGE_PUMP_TIME         15000       // ms
 
-#define INCS_REV         20000        // cpr
-//#define STEPS_REV       3200
-#define DIST_REV        5000
+#define INCS_REV                20000       // cpr
+//#define STEPS_REV               3200
+#define DIST_REV                5000
 
 static SMovePar _ParRef;
 static SMovePar _ParZ_down;
