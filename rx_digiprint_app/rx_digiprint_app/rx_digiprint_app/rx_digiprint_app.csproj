@@ -288,7 +288,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>copy  $(ProjectDir)..\..\..\rx_digiprint_gui\Services\RxBtDef.cs $(ProjectDir)Services</PreBuildEvent>
+    <PreBuildEvent>copy  $(ProjectDir)..\..\..\mvt_digiprint_gui\Services\RxBtDef.cs $(ProjectDir)Services</PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\..\packages\Xamarin.Forms.2.5.0.121934\build\portable-win+net45+wp80+win81+wpa81\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.2.5.0.121934\build\portable-win+net45+wp80+win81+wpa81\Xamarin.Forms.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

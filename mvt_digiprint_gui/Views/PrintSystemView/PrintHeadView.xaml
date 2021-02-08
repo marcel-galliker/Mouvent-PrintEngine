@@ -64,7 +64,8 @@
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="Print"  Height="40"         Click="Print_Clicked"       Padding="10" x:Name="Button_Print"/>
 
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8" x:Name="CommandLine1"/>
-
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Print Cluster" Click="PrintCluster_Clicked"  Padding="10" x:Name="Button_PrintCluster"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Cluster" Click="PurgeCluster_Clicked"  Padding="10" x:Name="Button_PurgeCluster"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Micro"   Click="PurgeMicro_Clicked"  Padding="10" x:Name="Button_PurgeMicro"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Soft"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge"         Click="Purge_Clicked"       Padding="10"/>

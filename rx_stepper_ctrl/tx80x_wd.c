@@ -26,24 +26,24 @@
 #define STEPS_REV           (200 * 16)      // steps per motor revolution * 16 microsteps
 #define DIST_REV            1000.0          // moving distance per revolution on wrinkle detection motor [µm]
 
-#define MOTOR_WD_FRONT      2               
-#define MOTOR_WD_BACK       3               
+#define MOTOR_WD_BACK        2               
+#define MOTOR_WD_FRONT       3               
 
 #define MOTOR_WD_CNT        2               
 
-#define MOTOR_WD_FRONT_BITS 0x04
-#define MOTOR_WD_BACK_BITS  0x08
+#define MOTOR_WD_BACK_BITS  0x04
+#define MOTOR_WD_FRONT_BITS 0x08
 #define MOTOR_WD_BITS       0x0c
 
 #define CURRENT_HOLD_WD     50.0            // 50 -> 0.5A
 
-#define TX_REF_HEIGHT_WD    10200           // in um
+#define TX_REF_HEIGHT_WD    7500            // in um
 
 #define WD_UNDER_PRINT_HIGH 600             // in um
 
 // Inputs
-#define WD_FRONT_STORED_IN  4
-#define WD_BACK_STORED_IN   5
+#define WD_BACK_STORED_IN   4
+#define WD_FRONT_STORED_IN  5
 #define WRINKLE_DETECTED    6
 
 // Functions
@@ -76,8 +76,8 @@ void tx80x_wd_init(void)
     _ParRef.accel = 32000;
     _ParRef.current_acc = 150;
     _ParRef.current_run = 100;
-    _ParRef.estop_in_bit[0] = (1 << WD_FRONT_STORED_IN);
-    _ParRef.estop_in_bit[1] = (1 << WD_BACK_STORED_IN);
+    _ParRef.estop_in_bit[0] = (1 << WD_BACK_STORED_IN);
+    _ParRef.estop_in_bit[1] = (1 << WD_FRONT_STORED_IN);
     _ParRef.estop_level = 1;
     _ParRef.stop_mux = MOTOR_WD_BITS;
     _ParRef.dis_mux_in = TRUE;
@@ -128,7 +128,7 @@ void tx80x_wd_main(void)
         RX_StepperStatus.robinfo.moving_wd = FALSE;
         if (_CmdRunning == CMD_LIFT_REFERENCE)
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_BACK, ok = TRUE; motor < MOTOR_WD_BACK + MOTOR_WD_CNT; motor++)
             {
                 if ((Fpga.stat->statMot[motor].err_estop & ENC_ESTOP_ENC) && !fpga_input(motor - MOTOR_WD_FRONT + WD_FRONT_STORED_IN))
                 {
@@ -141,7 +141,7 @@ void tx80x_wd_main(void)
         }
         else
         {
-            for (motor = MOTOR_WD_FRONT, ok = TRUE; motor < MOTOR_WD_FRONT + MOTOR_WD_CNT; motor++)
+            for (motor = MOTOR_WD_BACK, ok = TRUE; motor < MOTOR_WD_BACK + MOTOR_WD_CNT; motor++)
             {
                 if (motor_error(motor))
                 {
@@ -308,12 +308,11 @@ int tx80x_wd_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
         if (!_CmdRunning)
         {
-            motors_reset(MOTOR_WD_BITS);
-            RX_StepperStatus.robinfo.ref_done_wd = FALSE;
-            motors_stop(MOTOR_WD_BITS);
-            _CmdRunning = CMD_LIFT_CALIBRATE;
-            RX_StepperStatus.robinfo.moving_wd = TRUE;
-            motors_move_by_step(MOTOR_WD_BITS, &_ParRef, 100000, TRUE);
+            _PrintPos_New = _micron_2_steps(TX_REF_HEIGHT_WD);
+            if (RX_StepperStatus.robinfo.ref_done_wd)
+                _tx80x_wd_move_to_pos(CMD_LIFT_CALIBRATE, _PrintPos_New);
+            else
+                _tx80x_wd_do_reference();
         }
         break;
 
@@ -414,10 +413,10 @@ static char *_motor_name(int no)
         return "Robot Rotation";
     case 1:
         return "Robot Shift";
-    case 2:
-        return "WD Front";
-    case 3:
+    case MOTOR_WD_BACK:
         return "WD Back";
+    case MOTOR_WD_FRONT:
+        return "WD Front";
     default:
         return "";
     }

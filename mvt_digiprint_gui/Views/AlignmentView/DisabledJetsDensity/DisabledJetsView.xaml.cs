@@ -4,6 +4,7 @@ using RX_DigiPrint.Services;
 using System;
 using System.Linq;
 using System.Windows.Controls;
+using static RX_DigiPrint.Services.TcpIp;
 
 namespace RX_DigiPrint.Views.AlignmentView.DisabledJets
 {

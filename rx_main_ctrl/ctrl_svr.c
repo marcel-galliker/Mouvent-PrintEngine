@@ -828,6 +828,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1 && !RX_StepperStatus.robot_used)
 			fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrl_off, TRUE);
 		_SingleHead = headNo;
+        if (ctrlMode == ctrl_off) fluid_purgeCluster(headNo / 4, FALSE);
 	}
 	if (ctrlMode<=ctrl_print) _SingleHead=-1;
 	if (_HeadCtrl[headNo/HEAD_CNT].socket!=INVALID_SOCKET)
@@ -1264,10 +1265,22 @@ void ctrl_reply_stat(RX_SOCKET socket)
 	}
 }
 
+//--- ctrl_set_cluster_no ----------------------------------------------
 void ctrl_set_cluster_no(SValue* pdata)
 {
     if (_HeadCtrl[pdata->no - 1].socket != INVALID_SOCKET)
 		sok_send_2(&_HeadCtrl[pdata->no - 1].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
+}
+
+//--- ctrl_reset_cond ------------------------------
+void ctrl_reset_cond(void)
+{
+    for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
+    {
+        if (_HeadCtrl[i].socket != INVALID_SOCKET)
+            sok_send_2(&_HeadCtrl[i].socket, CMD_RESET_COND, 0, NULL);
+    }
+    
 }
 
 //--- ctrl_set_rob_pos -------------------------------------

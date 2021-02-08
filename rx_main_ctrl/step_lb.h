@@ -46,8 +46,6 @@ int	 steplb_rob_fct_done (int no, ERobotFunctions rob_function);
 void steplb_rob_wipe_start_all(void);
 void steplb_rob_wipe_start(int stepperNo, EWipeSide side);
 
-void steplb_rob_vacuum(int no, int state);
-
 void steplb_rob_do_reference(void);
 void steplb_rob_empty_waste(int time);
 int  steplb_rob_reference_done(void);

@@ -429,7 +429,7 @@ int  step_rob_wipe_done(EnFluidCtrlMode mode)
 	}
 }
 //--- step_rob_stop -----------------------------------------------------
-void step_rob_stop()
+void step_rob_stop(void)
 {
 	switch (_StepperType)
 	{

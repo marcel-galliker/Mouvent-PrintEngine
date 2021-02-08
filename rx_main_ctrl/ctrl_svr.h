@@ -51,6 +51,8 @@ void ctrl_head_alive(int headNo);
 
 void ctrl_set_cluster_no(SValue* pdata);
 
+void ctrl_reset_cond(void);
+
 void ctrl_empty_PurgeBuffer(int fluidNo);
 
 void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis);

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RX_DigiPrint.Models
 {
-    public class DisabledJets : RxBindable
+	public class DisabledJets : RxBindable
     {
         static private ObservableCollection<JetCompensation> _JetList = new ObservableCollection<JetCompensation>();
         public ObservableCollection<JetCompensation> JetList

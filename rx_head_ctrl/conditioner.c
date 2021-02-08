@@ -359,7 +359,7 @@ static void _update_clusterNo(void)
 	int clusterNo;
 	SHeadEEpromMvt *mvt;
 	if (sizeof(SHeadEEpromMvt)!=EEPROM_DATA_SIZE) Error(ERR_CONT, 0, "Head User EEPROM size mismatch (size=0x%x, expected=0x%x)", sizeof(SHeadEEpromMvt), EEPROM_DATA_SIZE);
-
+	
 	memset(_cntr, 0, sizeof(_cntr));
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
@@ -660,7 +660,6 @@ void cond_set_flowResistance(int headNo, int value)
 void cond_set_purge_par(int headNo, int delay_pos_y, int time, int act_pos_y, int delay_time)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
-	
     _NiosMem->cfg.cond[headNo].purgeDelayPos_y = delay_pos_y;
 	_NiosMem->cfg.cond[headNo].purgeTime  = time;
     _NiosMem->cfg.cond[headNo].purgeDelayTime = delay_time;

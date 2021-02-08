@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="DigiPrint.DigiPrint" android:installLocation="preferExternal" android:versionCode="1" android:versionName="Pre Release">
-	<uses-sdk android:minSdkVersion="25" android:targetSdkVersion="26" />
+	<uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29" />
 	<uses-permission android:name="android.permission.BLUETOOTH" />
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 	<uses-permission android:name="android.permission.CAMERA" />

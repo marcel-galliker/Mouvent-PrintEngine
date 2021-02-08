@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="300">
+             d:DesignHeight="450" d:DesignWidth="300">
     
     <Grid x:Name="InkSuplyGrid">
         <Grid.RowDefinitions>
@@ -14,6 +14,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto" x:Name="RowHeight_Heater"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -30,7 +31,7 @@
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Control Mode"/>
         
-        <TextBlock Grid.Row="4" Text="Pressure Lung" />
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Pressure Lung" />
         <TextBlock Grid.Row="4" Grid.Column="1" Text="mbar" />
 
         <TextBlock Grid.Row="5" Grid.Column="0" Text="Temperature InkSupply"/>

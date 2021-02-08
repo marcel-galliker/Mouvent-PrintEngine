@@ -332,7 +332,7 @@ namespace RX_DigiPrint.Services
                 if (RxGlobals.Density != null) RxBindable.Invoke(() => RxGlobals.Density.SetDensityValues(msg.data.voltage, msg.data.densityValue));
                 if (RxGlobals.DisabledJets != null) RxBindable.Invoke(() => RxGlobals.DisabledJets.SetDisablesJets(msg.data.disabledJets));
             }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SDensityValuesMsg"));
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SDensityMsg"));
         }
 
         //--- handle_stepper_stat -----------------------------------------

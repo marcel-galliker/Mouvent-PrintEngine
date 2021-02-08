@@ -263,10 +263,6 @@ typedef enum EnFluidCtrlMode
     ctrl_cal_step3,   		// 0x403:
     ctrl_cal_step4,   		// 0x404:
 	ctrl_cal_done,       	// 0x405:
-    
-    ctrl_leak_test = 0x500,	// 0x500:
-    ctrl_leak_test_step1,
-	ctrl_leak_test_step2,
 
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 				// 0x10001

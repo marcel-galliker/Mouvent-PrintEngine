@@ -216,7 +216,8 @@ namespace DigiPrint.Droid
         public void _Vibrate(int time)
         {
             if (_vibrator==null) _vibrator =  (Vibrator) GetSystemService(Context.VibratorService);
-            _vibrator.Vibrate(time);
+        //    _vibrator.Vibrate(time);
+            _vibrator.Vibrate(VibrationEffect.CreateOneShot(time, VibrationEffect.DefaultAmplitude));
         }   
     }
 }

@@ -239,11 +239,12 @@ typedef struct
 	INT32	heaterTemp;
 	INT32	flushTime;
 	
-	UINT32	bleedValve:1;
-	UINT32  airValve:1;
 	UINT32  heaterOn:1;
 	UINT32	heaterTempReady:1;
-	
+
+	UINT8   airValve;
+	UINT8	bleedValve;
+
 	INT32	fluid_PIDsetpoint_P;
 	INT32	fluid_PIDsetpoint_I;
 	INT32	fluid_PIDpump_P;

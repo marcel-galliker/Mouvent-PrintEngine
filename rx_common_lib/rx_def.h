@@ -289,6 +289,7 @@ typedef struct SPrintQueueItem
 	INT32	copies;
 	INT8	collate;
 	INT8	variable;	// variable data job
+
 	UINT8	state;
 			#define PQ_STATE_UNDEF		0
 			#define PQ_STATE_QUEUED		1

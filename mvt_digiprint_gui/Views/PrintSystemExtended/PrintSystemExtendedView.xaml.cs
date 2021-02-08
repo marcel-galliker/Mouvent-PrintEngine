@@ -15,7 +15,7 @@ using System.Windows.Media;
 
 namespace RX_DigiPrint.Views.PrintSystemExtendedView
 {
-    public enum ETotalStatus
+	public enum ETotalStatus
     {
         STATUS_UNDEF,
         STATUS_OKAY,

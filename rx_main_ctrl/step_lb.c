@@ -480,13 +480,6 @@ int	 steplb_rob_fct_done(int no, ERobotFunctions rob_function)
 	}	
 }
 
-//--- steplb_rob_vacuum ---------------------------------------------
-void steplb_rob_vacuum(int no, int state)
-{
-    if (_step_socket[no] != INVALID_SOCKET)
-        sok_send_2(&_step_socket[no], CMD_ROB_VACUUM, sizeof(state), &state);
-}
-
 //--- steplb_rob_stop_all ------------------------------
 void steplb_rob_stop_all(void)
 {

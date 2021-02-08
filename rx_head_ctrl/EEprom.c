@@ -115,7 +115,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 	}
 
 	memset(pInfo, 0, sizeof(*pInfo));
-	
+    
 	//--- fill info ----------------------------
 	int i, n;
 	if (*pdata->serialNo) pInfo->serialNo = 100*atoi(pdata->serialNo) + atoi(&pdata->serialNo[7]);

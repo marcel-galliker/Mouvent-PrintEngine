@@ -140,7 +140,7 @@ void handle_menu(char *str)
 		*/
 	//	case 't': udp_test_send_block(4, 1);				break;
 	//	case 'T': udp_test_send_block(4, 10000);			break;
-//		case 's': fpga_overheated();						break;
+	//	case 's': fpga_overheated();						break;
 		case 't': ctrl_stress_test();						break;
 		
 	//	case 'u': fpga_display_used_flags();				break;
@@ -148,6 +148,7 @@ void handle_menu(char *str)
 		case 'x': _AppRunning=FALSE;						break;
 			
 		case 'o': cond_ctrlMode(atoi(&str[1]), ctrl_off);		break;
+        case 'P': cond_ctrlMode(atoi(&str[1]), ctrl_test);		break;
 		case 'w': cond_ctrlMode(atoi(&str[1]), ctrl_warmup);	break;
 		case 'R': fpga_trace_registers("registers", FALSE);		break;
 		case 'r': cond_ctrlMode(atoi(&str[1]), ctrl_print);		break;

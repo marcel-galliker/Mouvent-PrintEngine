@@ -7,6 +7,7 @@ bin\fluid\rx_fluid_ctrl
 bin\fluid\rx_fluid_nios
 bin\fluid\rx_fluid_rbf
 bin\gui
+bin\gui\rx_rip_lib_x64.dll
 bin\gui\BitMiracle.LibTiff.NET.dll
 bin\gui\ControlzEx.dll
 bin\gui\DirectShowLib-2005.dll
