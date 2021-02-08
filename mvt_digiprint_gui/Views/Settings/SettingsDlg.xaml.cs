@@ -72,7 +72,18 @@ namespace RX_DigiPrint.Views.Settings
             Save();
             DialogResult = true;
         }
-        
+
+        private void Reload_Clicked(object sender, RoutedEventArgs e)
+        {
+            Init();
+        }
+
+        private void Close_Clicked(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+        }
+
+
         private void User_Click(object sender, RoutedEventArgs e)
         {
             UserAccount userAccount = new UserAccount();
