@@ -299,10 +299,6 @@ void lb702_main(int ticks, int menu)
 			_NewCmd = FALSE;
 			_CmdRunningRobi = FALSE;
 		}
-        if (loc_new_cmd == CMD_LIFT_WASH_POS)
-        {
-            Error(WARN, 0, "CMD_LIFT_WASH_POS is called");
-        }
         if (loc_new_cmd)
 		{
 			switch (loc_new_cmd)
@@ -663,7 +659,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									}
 									break;
 
-	case CMD_LIFT_CAPPING_POS:		TrPrintfL(TRUE, "CMD_LIFT_CAPPING_POS");
+	case CMD_LIFT_CAPPING_POS:		if (RX_StepperStatus.cmdRunning == CMD_LIFT_CAPPING_POS || _Cmd_New == CMD_LIFT_CAPPING_POS) break;
+									TrPrintfL(TRUE, "CMD_LIFT_CAPPING_POS");
 									strcpy(_CmdName, "CMD_LIFT_CAPPING_POS");
 									if		(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  < 10000) Error(ERR_ABORT, 0, "Reference Height back must be > 10mm");
 									else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front < 10000) Error(ERR_ABORT, 0, "Reference Height front must be > 10mm");

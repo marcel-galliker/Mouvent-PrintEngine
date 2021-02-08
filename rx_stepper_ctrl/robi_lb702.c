@@ -6,6 +6,7 @@
 #include "lb702.h"
 #include "lbrob.h"
 #include "robi.h"
+#include "fpga_stepper.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -24,8 +25,11 @@
 
 #define STEPS_PER_REV				51200
 #define DISTANCE_UM_PER_REV			36000   // 36000
-#define TIME_BEFORE_TURN_SCREWER    2600    // us
-#define SCREW_MOVEMENT_CHECK_TIME   1100    // us
+#define TIME_BEFORE_TURN_SCREWER    2600    // ms
+#define SCREW_MOVEMENT_CHECK_TIME   1100    // ms
+
+#define ROBI_SHUTOFF_TIME           500     // ms
+#define ROBI_CONNECTION_TIME        2000    // ms
 
 #define MIN_Y_POS                   31000
 
@@ -35,6 +39,9 @@
 
 #define WIPE_POS_LEFT               -7600   // um
 #define WIPE_POS_RIGHT              4500    // um
+
+// Digital Outputs
+#define RO_ROBI_POWER               0x800   // o11
 
 static int _steps_2_micron(int steps);
 static int _micron_2_steps(int micron);
@@ -51,9 +58,12 @@ static int _CmdRunning = 0;
 static int _NewCmd = 0;
 static int _Value = 0;
 static int _CmdStarted = FALSE;
+static int _TurnDirection = 0;
 
 static int _Search_Screw_Time = 0;
 static int _Loose_Screw_Time = 0;
+
+static int _RobiConnection_Time = 0;
 
 //--- robi_lb702_init -----------------------------------------------------
 void robi_lb702_init(void)
@@ -72,7 +82,20 @@ void robi_lb702_main(int ticks, int menu)
 
     robi_main(ticks, menu);
 
-    RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
+    if (!robi_connected() && _RobiConnection_Time == 0)
+    {
+        _RobiConnection_Time = rx_get_ticks();
+        Fpga.par->output |= RO_ROBI_POWER;
+    }
+    else if (rx_get_ticks() > _RobiConnection_Time + ROBI_SHUTOFF_TIME && _RobiConnection_Time && rx_get_ticks() <= _RobiConnection_Time + ROBI_CONNECTION_TIME)
+    {
+        Fpga.par->output &= ~RO_ROBI_POWER;
+    }
+    else if (rx_get_ticks() > _RobiConnection_Time + ROBI_CONNECTION_TIME && _RobiConnection_Time)
+        _RobiConnection_Time = 0;
+
+
+        RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
     RX_StepperStatus.screwerinfo.z_in_up = RX_RobiStatus.zPos == POS_UP;
 
     if (_CmdRunning)	RX_StepperStatus.screwerinfo.moving = TRUE;
@@ -94,10 +117,16 @@ void robi_lb702_main(int ticks, int menu)
     if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time)
     {
         int val = 0;
-        if (RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT)/2)
-            val = 213333;
-        else
-            val = -213333;
+        if ((RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2 && _TurnDirection < 1) || _TurnDirection == -1)
+		{
+			val = 213333;
+			_TurnDirection = 1;
+		}
+		else
+		{
+			val = -213333;
+			_TurnDirection = -1;
+		}
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
         _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
@@ -109,10 +138,16 @@ void robi_lb702_main(int ticks, int menu)
     if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
-        if (RX_StepperStatus.screwerinfo.screwer_blocked_right || (!RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
-            val = -213333;
-        else
-            val = +213333;
+        if (((RX_StepperStatus.screwerinfo.screwer_blocked_right || (!RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)) && _TurnDirection > -1) || _TurnDirection == 1)
+		{
+			val = -213333;
+			_TurnDirection = -1;
+		}
+		else
+		{
+			val = +213333;
+			_TurnDirection = 1;
+		}
             
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
         _Loose_Screw_Time = 0;
@@ -239,11 +274,17 @@ void robi_lb702_main(int ticks, int menu)
             _CmdRunning = 0;
             break;
 
+        case CMD_ROBI_MOVE_Z_UP:
+            if (RX_StepperStatus.screwerinfo.z_in_up) _TurnDirection = 0;
+            _CmdRunning = 0;
+            break;
+        case CMD_ROBI_MOVE_Z_DOWN:
+            if (RX_StepperStatus.screwerinfo.z_in_down) _TurnDirection = 0;
+            _CmdRunning = 0;
+            break;
+
         case CMD_ROBI_MOVE_Y:
         case CMD_ROBI_MOVE_X:
-        case CMD_ROBI_MOVE_Z_UP:
-        case CMD_ROBI_MOVE_Z_DOWN:
-        
             _CmdRunning = 0;
             break;
         default:

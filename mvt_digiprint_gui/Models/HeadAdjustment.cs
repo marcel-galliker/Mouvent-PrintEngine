@@ -114,8 +114,8 @@ namespace RX_DigiPrint.Models
 
             TcpIp.SHeadAdjustmentMsg msg = new  TcpIp.SHeadAdjustmentMsg();
 
-            msg.printbarNo  = (Int32)(PrintbarNo);
-            msg.headNo      = (Int32)(HeadNo);
+            msg.printbarNo  = (Int32)(PrintbarNo-1);
+            msg.headNo      = (Int32)(HeadNo-1);
             msg.axis        = (Int32)(Axis);
             msg.steps       = (Int32)(((Int32)Steps * 6 + (Steps-(Int32)Steps)*6)+0.5);
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
