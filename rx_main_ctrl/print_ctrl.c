@@ -951,52 +951,59 @@ int pc_sent(SPageId *id)
 
 //--- pc_print_done ------------------------------
 int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
-{	
+{
+	static HANDLE _mutex = NULL;
+	if (_mutex == NULL ) _mutex = rx_mutex_create();
+
 	int n=pmsg->pd%SIZEOF(_PrintDone);
+
+	rx_mutex_lock(_mutex);
 	_PrintDone[n] |= (1<<headNo);
-	
+	BOOL printDone = (_PrintDone[n] == _PrintDoneFlags);
+	rx_mutex_unlock(_mutex);
+
 	TrPrintfL(TRUE, "Head[%d] PRINT-DONE: PD=%d: id=%d, page=%d, scan=%d, copy=%d **** (0x%08x/0x%08x)", headNo, pmsg->pd, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, _PrintDone[n], _PrintDoneFlags);	
-	
-	if (RX_Config.printer.type==printer_cleaf)
+
+	if (RX_Config.printer.type == printer_cleaf)
 	{
 		co_printed();
-		if (!RX_StepperStatus.info.z_in_print) 
+		if (!RX_StepperStatus.info.z_in_print)
 		{
 			if (!ERR_z_in_print) Error(WARN, 0, "Printing while head not in print position");
 			ERR_z_in_print = TRUE;
 		}
 	}
-	
-	if (_PrintDone[n] == _PrintDoneFlags)
+
+	if (printDone)
 	{
 		SPrintQueueItem *pnext;
 		int pageDone, jobDone;
-        static int _LastTime;
-		int ticks=rx_get_ticks();
-        int time;
-        
+		static int _LastTime;
+		int ticks = rx_get_ticks();
+		int time;
+
         if (_PrintDoneNo==0) time=0;
         else time=ticks-_LastTime;
-        _LastTime = ticks;
-        
-		TrPrintf(TRUE, "*** PRINT-DONE #%d *** (id=%d, page=%d, scan=%d, copy=%d) sent=%d, printed=%d, stopping=%d, time=%d", ++_PrintDoneNo, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState==ps_stopping, time);
+		_LastTime = ticks;
+
+		TrPrintf(TRUE, "*** PRINT-DONE #%d *** (id=%d, page=%d, scan=%d, copy=%d) sent=%d, printed=%d, stopping=%d, time=%d", ++_PrintDoneNo, pmsg->id.id, pmsg->id.page, pmsg->id.scan, pmsg->id.copy, RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, RX_PrinterStatus.printState == ps_stopping, time);
 
 		_PrintDone[n] = 0;
- 
+
 		pq_printed(headNo, &pmsg->id, &pageDone, &jobDone, &pnext);
 		TrPrintf(TRUE, "PRINTED pq_printed=%d, pageDone=%d, jobDone=%d, pnext=%d", RX_PrinterStatus.printedCnt, pageDone, jobDone, pnext);
 		if (pageDone || jobDone)
 		{
 			RX_PrinterStatus.printedCnt++;
 
-			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only)
+			if (RX_Config.printer.type == printer_test_slide || RX_Config.printer.type == printer_test_slide_only)
 			{
-				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) pc_abort_printing();
+				if (RX_PrinterStatus.sentCnt == RX_PrinterStatus.printedCnt) pc_abort_printing();
 				return REPLY_OK;
 			}
-			else if (RX_Config.printer.type==printer_test_table)
+			else if (RX_Config.printer.type == printer_test_table)
 			{
-			//	if (arg_simuPLC) pc_abort_printing();
+				//	if (arg_simuPLC) pc_abort_printing();
 
 				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) 
 					pc_abort_printing(); // curing!
@@ -1004,34 +1011,26 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			}
 			else
 			{
-				if (pnext) 
+				if (pnext)
 				{
-//					if (!arg_simuEncoder && _Scanning) machine_set_printpar(pnext);
+					//					if (!arg_simuEncoder && _Scanning) machine_set_printpar(pnext);
 					if (_Scanning) machine_set_printpar(pnext);
-					if(pnext->state < PQ_STATE_TRANSFER)
+					if (pnext->state < PQ_STATE_TRANSFER)
 					{
 						if (rx_def_is_tx(RX_Config.printer.type))
 						{
 							Error(LOG, 0, "file >>%s<< not loaded completely: PAUSE printing", _filename(pnext->filepath));
 							machine_pause_printing(FALSE);
-							_PreloadCnt = 5;								
+							_PreloadCnt = 5;
 						}
 					}
 				}
 			}
-			/*
-			TrPrintfL(TRUE, "pc_print_done=TRUE, stopping=%d, printed=%d, sent=%d", RX_PrinterStatus.printState==ps_stopping, RX_PrinterStatus.printedCnt, RX_PrinterStatus.sentCnt);
-			if (RX_PrinterStatus.printState==ps_stopping && RX_PrinterStatus.printedCnt>=RX_PrinterStatus.sentCnt)
-			{
-				Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
-				enc_stop_printing();
-				pc_stop_printing(FALSE);
-			}
-			*/
-			if (jobDone && pnext==NULL)
+
+			if (jobDone && pnext == NULL)
 			{
 				TrPrintfL(TRUE, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
-			//	Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
+				//	Error(LOG, 0, "pc_print_done: sent=%d, printed=%d, scan=%d, scans=%d: STOP", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printedCnt, _Item.id.scan, _Item.scans);
 				enc_stop_pg("pc_print_done");
 				enc_stop_printing();
 				pc_stop_printing(FALSE);
@@ -1042,10 +1041,10 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 				pl_stop(&item);
 				*/
 			}
-		}		
+		}
 	}
-	
-//	TrPrintfL(TRUE, "pc_print_done: pc_print_next");
+
+	//	TrPrintfL(TRUE, "pc_print_done: pc_print_next");
 	pc_print_next();
 	return REPLY_OK;
 }
