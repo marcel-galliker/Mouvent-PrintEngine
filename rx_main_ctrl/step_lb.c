@@ -809,20 +809,30 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     if (headAdjustment->steps == 0)
     {
         Error(LOG, 0, "Screw of Printbar %d, Head %d and Axis %d moves only %d Steps, which will not be made", 
-              headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
+              headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, headAdjustment->steps);
+        return;
+    }
+    if (headAdjustment->printbarNo < 0 || headAdjustment->printbarNo >= RX_Config.colorCnt)
+    {
+        Error(ERR_CONT, 0, "Printbar %d is not existing", headAdjustment->printbarNo+1);
+        return;
+    }
+    if (headAdjustment->headNo == -1 && headAdjustment->axis >= AXE_ANGLE)
+    {
+        Error(ERR_CONT, 0, "Angle-Screw is not existing at Head-No: %d", headAdjustment->headNo+1);
         return;
     }
     if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
-				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				(current_screwpos - headAdjustment->steps)/6, abs((current_screwpos - headAdjustment->steps)%6));
         return;
     }
     else if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps < 0)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
-				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				abs((int)(current_screwpos - headAdjustment->steps))/6, abs((int)(current_screwpos - headAdjustment->steps))%6);
         return;
     }
@@ -830,14 +840,14 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     if (headAdjustment->axis == AXE_DIST && current_screwpos + headAdjustment->steps > MAX_STEPS_DIST)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
-				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
         return;
     }
     else if (headAdjustment->axis == AXE_DIST && current_screwpos + headAdjustment->steps < 0)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
-				headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, 
+				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos + headAdjustment->steps))%6);
         return;
     }
@@ -863,13 +873,13 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
                      _HeadAdjustmentBuffer[stepperno][i].printbarNo == headAdjustment->printbarNo))
             {
                 if (_HeadAdjustmentBuffer[stepperno][i].steps != 0)
-                    Error(LOG, 0, "Delete Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, _HeadAdjustmentBuffer[stepperno][i].steps);
+                    Error(LOG, 0, "Delete Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, _HeadAdjustmentBuffer[stepperno][i].steps);
                 _HeadAdjustmentBuffer[stepperno][i].axis = headAdjustment->axis;
                 _HeadAdjustmentBuffer[stepperno][i].headNo = headAdjustment->headNo;
                 _HeadAdjustmentBuffer[stepperno][i].printbarNo = headAdjustment->printbarNo;
                 _HeadAdjustmentBuffer[stepperno][i].steps = headAdjustment->steps;
                 _HeadAdjustmentBuffer[stepperno][i].hdr = headAdjustment->hdr;
-                Error(LOG, 0, "Save Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
+                Error(LOG, 0, "Save Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, headAdjustment->steps);
                 i = SIZEOF(_HeadAdjustmentBuffer[stepperno]);
             }
         }

@@ -198,7 +198,7 @@ void lbrob_init(void)
     _ParCable_drive_slow.speed = 1000;
     _ParCable_drive_slow.accel = 8000;
     _ParCable_drive_slow.current_acc = 350.0;   // max 420      --> with 400 it's possible, that the motor turns, but jumps over the belt
-    _ParCable_drive_slow.current_run = 350.0;   // max 420
+    _ParCable_drive_slow.current_run = 350.0;   // max 420      --> with 400 it's possible, that the motor turns, but jumps over the belt
     _ParCable_drive_slow.stop_mux = 0;
     _ParCable_drive_slow.dis_mux_in = 0;
     _ParCable_drive_slow.estop_level = 0;
@@ -207,8 +207,8 @@ void lbrob_init(void)
 
     _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
     _ParCable_drive_purge.accel = 4000;
-    _ParCable_drive_purge.current_acc = 350.0; // max 420
-    _ParCable_drive_purge.current_run = 350.0; // max 420
+    _ParCable_drive_purge.current_acc = 350.0; // max 420       --> with 400 it's possible, that the motor turns, but jumps over the belt
+    _ParCable_drive_purge.current_run = 350.0; // max 420       --> with 400 it's possible, that the motor turns, but jumps over the belt
     _ParCable_drive_purge.stop_mux = 0;
     _ParCable_drive_purge.dis_mux_in = 0;
     _ParCable_drive_purge.estop_level = 0;
@@ -267,7 +267,11 @@ void lbrob_main(int ticks, int menu)
     }
 
     if (!RX_StepperStatus.robinfo.ref_done)
+    {
         RX_StepperStatus.screwerinfo.screws_found = FALSE;
+        _HeadPos = FALSE;
+    }
+    
 
     if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
     {
@@ -1228,7 +1232,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
         }
         else if (headAdjustment.headNo == HEADS_PER_COLOR - 1 && headAdjustment.axis == AXE_DIST)
         {
-            Error(ERR_CONT, 0, "Last Screw of each color is pointless to turn");
+            Error(ERR_CONT, 0, "Last screw of each color is pointless to turn");
             return;
         }
         
@@ -1575,6 +1579,7 @@ static void _search_all_screws()
                     _SearchScrewNr = 0;
                     RX_StepperStatus.screwerinfo.screws_found = TRUE;
                     robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+                    Error(LOG, 0, "All Screws found");
                 }
             }
             else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)

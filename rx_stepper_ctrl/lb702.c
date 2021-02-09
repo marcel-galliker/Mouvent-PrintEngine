@@ -50,7 +50,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define MIN_CAP_HEIGHT			7500		// um under Ref height
 
 #define DIST_CAP_WASH			5300		// um -> higher than capping hight
-#define DIST_CAP_SCREW			5100		// um -> higher than capping hight
+#define DIST_CAP_SCREW			5000		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
 
@@ -511,7 +511,6 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
                  ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || cmd == CMD_LIFT_SCREW) && 
                  !RX_StepperStatus.screwerinfo.moving) || cmd == CMD_LIFT_REFERENCE)
 	{
-		Error(LOG, 0, "Move Command %08x", cmd);
         RX_StepperStatus.info.moving = TRUE;
 		_PrintPos_New[MOTOR_Z_BACK]  = pos0;
 		_PrintPos_New[MOTOR_Z_FRONT] = pos1;

@@ -19,5 +19,7 @@ void robi_turn_screw_right(INT32 ticks);
 void robi_move_up(void);
 void robi_move_down(void);
 int robi_screwer_stalled(void);
-int robi_move_done(void);
 int robi_not_started(void);
+int robi_z_not_reached_up(void);
+int robi_z_not_reached_down(void);
+int robi_move_done(void);

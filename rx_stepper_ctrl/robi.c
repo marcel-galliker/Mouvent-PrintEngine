@@ -54,6 +54,8 @@ static uint32_t _MsgsSent;
 
 static int _ScrewerStalled = FALSE;
 static int _RobiNotStarted = FALSE;
+static int _ZNotReachedUp = FALSE;
+static int _ZNotReachedDown = FALSE;
 
 volatile static SUsbTxMsg _txFifo[ROBI_FIFO_SIZE];
 volatile static int32_t _txFifoInIndex;
@@ -62,6 +64,10 @@ volatile static int32_t _txFifoOutIndex;
 static uint32_t _currentVersion;
 
 static HANDLE _sendLock;
+
+static uint32_t _LOG_Command;
+static uint8_t _LOG_Len;
+
 
 //--- robi_init ----------------------------------------------------------------
 void robi_init(void)
@@ -131,6 +137,10 @@ void robi_main(int ticks, int menu)
 
     if (ticks > (_lastMessageTimestamp + ROBI_CONNECTION_TIMEOUT))
         _isConnected = FALSE;
+
+    if (RX_RobiStatus.zPos == POS_DOWN) _ZNotReachedDown = FALSE;
+    if (RX_RobiStatus.zPos == POS_UP)   _ZNotReachedUp = FALSE;
+    
 }
 
 //--- robi_connected ------------------------------------------------------------------
@@ -245,6 +255,22 @@ int robi_not_started(void)
     return tmp;
 }
 
+//--- robi_z_not_reached_up ---------------------------------------
+int robi_z_not_reached_up(void)
+{
+    int tmp = _ZNotReachedUp;
+    _ZNotReachedUp = FALSE;
+    return tmp;
+}
+
+//--- robi_z_not_reached_down ---------------------------------------
+int robi_z_not_reached_down(void)
+{
+    int tmp = _ZNotReachedDown;
+    _ZNotReachedDown = FALSE;
+    return tmp;
+}
+
 //--- robi_move_done ----------------------------------------------------------------------
 int robi_move_done(void)
 {
@@ -257,6 +283,9 @@ int robi_move_done(void)
 //--- send_command ------------------------------------------------------
 static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 {
+    _LOG_Command = commandCode;
+    _LOG_Len = len;
+    
     SUsbTxMsg *pTxMessage;
     int i;
 
@@ -335,10 +364,19 @@ static void* receive_thread(void *par)
                             if (rxMessage.length)
                             {
                                 if (rxMessage.error == MOTOR_STALLED && RX_RobiStatus.motors[MOTOR_SCREW].isStalled && strcmp(msg, rxMessage.data))
-                                        _ScrewerStalled = TRUE;
-                                
-                                Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
-                                memset(rxMessage.data, 0x00, sizeof(rxMessage.data));
+                                    _ScrewerStalled = TRUE;
+
+                                if (rxMessage.error == MOTOR_TIMEOUTED && RX_RobiStatus.commandRunning[COMMAND0] == MOTOR_MOVE_Z_UP)
+                                    _ZNotReachedUp = TRUE;
+                                else
+                                {
+                                    if (rxMessage.error == MOTOR_TIMEOUTED && RX_RobiStatus.commandRunning[COMMAND0] == MOTOR_MOVE_Z_DOWN)
+                                        _ZNotReachedDown = TRUE;
+                                    Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
+                                    memset(rxMessage.data, 0x00, sizeof(rxMessage.data));
+                                    if (rxMessage.error == COMMUNICATION_INVALID_MESSAGE_LENGTH_ERROR)
+                                        Error(LOG, 0, "Last Command: %d, Len: %d", _LOG_Command, _LOG_Len);
+                                }
                             }
                             else
                             {

@@ -40,6 +40,11 @@
 #define WIPE_POS_LEFT               -7600   // um
 #define WIPE_POS_RIGHT              4500    // um
 
+// Turn Directions
+#define TURN_LEFT                   -1
+#define TURN_0                      0
+#define TURN_RIGHT                  1
+
 // Digital Outputs
 #define RO_ROBI_POWER               0x800   // o11
 
@@ -58,7 +63,7 @@ static int _CmdRunning = 0;
 static int _NewCmd = 0;
 static int _Value = 0;
 static int _CmdStarted = FALSE;
-static int _TurnDirection = 0;
+static int _TurnDirection = TURN_0;
 
 static int _Search_Screw_Time = 0;
 static int _Loose_Screw_Time = 0;
@@ -95,7 +100,7 @@ void robi_lb702_main(int ticks, int menu)
         _RobiConnection_Time = 0;
 
 
-        RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
+    RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
     RX_StepperStatus.screwerinfo.z_in_up = RX_RobiStatus.zPos == POS_UP;
 
     if (_CmdRunning)	RX_StepperStatus.screwerinfo.moving = TRUE;
@@ -117,40 +122,37 @@ void robi_lb702_main(int ticks, int menu)
     if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time)
     {
         int val = 0;
-        if ((RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2 && _TurnDirection < 1) || _TurnDirection == -1)
+        if ((RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2 && _TurnDirection < TURN_RIGHT) || _TurnDirection == TURN_LEFT)
 		{
 			val = 213333;
-			_TurnDirection = 1;
+            _TurnDirection = TURN_RIGHT;
 		}
 		else
 		{
 			val = -213333;
-			_TurnDirection = -1;
+            _TurnDirection = TURN_LEFT;
 		}
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
         _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
 
-    if (RX_StepperStatus.screwerinfo.z_in_down)
-    {
-        _Loose_Screw_Time = 0;
-    }
+    if (RX_StepperStatus.screwerinfo.z_in_down)        _Loose_Screw_Time = 0;
     if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
-        if (((RX_StepperStatus.screwerinfo.screwer_blocked_right || (!RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)) && _TurnDirection > -1) || _TurnDirection == 1)
+        if (((RX_StepperStatus.screwerinfo.screwer_blocked_right || (!RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)) && _TurnDirection > TURN_LEFT) || _TurnDirection == TURN_RIGHT)
 		{
 			val = -213333;
-			_TurnDirection = -1;
+            _TurnDirection = TURN_LEFT;
 		}
 		else
 		{
 			val = +213333;
-			_TurnDirection = 1;
+            _TurnDirection = TURN_RIGHT;
 		}
             
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
-        _Loose_Screw_Time = 0;
+        _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
     }
 
     _check_robi_stalled();
@@ -273,16 +275,21 @@ void robi_lb702_main(int ticks, int menu)
             RX_StepperStatus.screwerinfo.wipe_right_up = TRUE;
             _CmdRunning = 0;
             break;
-
-        case CMD_ROBI_MOVE_Z_UP:
-            if (RX_StepperStatus.screwerinfo.z_in_up) _TurnDirection = 0;
-            _CmdRunning = 0;
-            break;
+            
         case CMD_ROBI_MOVE_Z_DOWN:
-            if (RX_StepperStatus.screwerinfo.z_in_down) _TurnDirection = 0;
+            
+            if (RX_StepperStatus.screwerinfo.z_in_down)
+            {
+                _TurnDirection = TURN_0;
+                if (robi_z_not_reached_up())
+                {
+                    int val = 213333/3;
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
+                }
+            }
             _CmdRunning = 0;
             break;
-
+        case CMD_ROBI_MOVE_Z_UP:
         case CMD_ROBI_MOVE_Y:
         case CMD_ROBI_MOVE_X:
             _CmdRunning = 0;
@@ -383,7 +390,7 @@ void robi_lb702_handle_menu(char *str)
         robi_set_output(num, val);
 		break;
 	case 'R':
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL); break;
+        robi_reference(); break;
 	case 'v':
         val = atoi(&str[1]);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_X, &val); break;
@@ -684,6 +691,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _CmdRunning = msgId;
             ticks = *((INT32 *)pdata);
             robi_turn_screw_left(ticks);
+            _TurnDirection = TURN_LEFT;
             break; 
         }
         break;
@@ -696,6 +704,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _CmdRunning = msgId;
             ticks = *((INT32 *)pdata);
             robi_turn_screw_right(ticks);
+            _TurnDirection = TURN_RIGHT;
             break; 
         }
         break;
