@@ -45,6 +45,12 @@ namespace RX_DigiPrint.Views.SetupAssistView
 				Actions.ItemsSource=actions;
 			}
 		}
+
+		//--- Confirm_Clicked --------------------------------------
+		private void Confirm_Clicked(object sender, RoutedEventArgs e)
+		{
+			RxGlobals.SA_StateMachine.ConfirmPosAndFocus();
+		}
 	}
 
 	//--- StateBusy_Converter ----------------------------------------------------

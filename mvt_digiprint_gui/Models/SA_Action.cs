@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace RX_DigiPrint.Models
 {
@@ -75,6 +77,14 @@ namespace RX_DigiPrint.Models
 		{
 			get { return _CamWorking; }
 			set { SetProperty(ref _CamWorking,value); }
+		}
+
+		//--- Property ConfirmVisibility ---------------------------------------
+		private bool _ConfirmVisibile=false;
+		public bool ConfirmVisibile
+		{
+			get { return _ConfirmVisibile; }
+			set { SetProperty(ref _ConfirmVisibile,value); }
 		}
 
 		//--- Property Function ---------------------------------------
