@@ -137,8 +137,14 @@ void  ctr_set_def(SCounterDef *pCtrDef)
 	memcpy(&_CtrDef, pCtrDef, sizeof(_CtrDef));
 }
 
+//--- ctr_increment_mode --------------------------------------------
+EIncrement ctr_increment_mode()
+{
+	return _CtrDef.increment;
+}
+
 //--- ctr_set_counter ------------------------------------------------
-void  ctr_set_counter		(INT32 recNo)
+void  ctr_set_counter(INT32 recNo)
 {
 	CTR_Counter = recNo;
 }

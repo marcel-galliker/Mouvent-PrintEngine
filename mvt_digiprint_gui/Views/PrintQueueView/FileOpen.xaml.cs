@@ -460,7 +460,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 DirItem item=row.Data as DirItem;
                 if (item!=null && !item.IsDirectory)
                 {
-                    item.PrintButtonVisibility  = Visibility.Visible;
+                    if (!item.Error) item.PrintButtonVisibility  = Visibility.Visible;
                     item.DeleteButtonVisibility = (RxGlobals.User.UserType>=EUserType.usr_supervisor) ? Visibility.Visible : Visibility.Collapsed;
                     DirGrid.ScrollCellIntoView(row.Cells[0]);
                 }

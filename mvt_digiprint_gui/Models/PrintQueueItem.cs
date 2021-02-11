@@ -143,23 +143,21 @@ namespace RX_DigiPrint.Models
         }
         
         //--- load_label --------------------------------
-        public void load_label()
-        { 
-            if (_FilePath==null) return;
-            if (_Label==null) _Label = new Label();
+        public bool load_label()
+        {
+            Variable = false;
+            if (_FilePath == null) return true;
+
+            if (_Label == null) _Label = new Label();
             string[] part = _FilePath.Split('\\');
-            string path = Dir.local_path(_FilePath) + "\\" + part[part.Length-1] + ".rxd";
-            Variable=_Label.Load(path);
-            if (_Variable)
+            string path = Dir.local_path(_FilePath) + "\\" + part[part.Length - 1] + ".rxd";
+            if (File.Exists(path))
             {
-//              RxBindable.Invoke(()=>{PreviewImage = new BitmapImage(new Uri(_Label.Preview));});
-//              if (_Label.Bitmap!=null) RxBindable.Invoke(()=>{PreviewBitmap = _Label.Bitmap;});
-                if (_Label.Bitmap!=null) RxBindable.Invoke(()=>{Preview = _Label.Bitmap as ImageSource;});
-                Copies    = 1;
-                SrcPages  = _Label.Pages;
-                SrcWidth  = _Label.Width;
-                SrcHeight = _Label.Height;
+                if (!_Label.Load(path)) return false;
+                Variable = true;
             }
+
+            return true;
         }
 
         //--- Property Variable ---------------------------------------
@@ -167,11 +165,7 @@ namespace RX_DigiPrint.Models
         public bool Variable
         {
             get { return _Variable; }
-//            set { SetProperty(ref _Variable, value); }
-            set { 
-                    if (SetProperty(ref _Variable, value))
-                        Console.WriteLine("Variable={0}", value);
-                }
+            set { SetProperty(ref _Variable, value); }
         }
         
         //--- SrcPages ----------------------------------------
@@ -733,23 +727,57 @@ namespace RX_DigiPrint.Models
             return value[0].ToInt();
         }
 
+        //--- read_image_properties ------------------------------------
+        public bool read_image_properties(string parFilePath)
+        {
+            string filePath = Dir.local_path(parFilePath);
+
+            if (_FilePath==null) _FilePath=filePath;
+            LoadDefaults();
+
+            // Check if there is a definition file for variable data printing
+            _FilePath = filePath;
+            if (!load_label())
+            {
+                Console.WriteLine("Error loading variable data printing definition file (.rxd)");
+                return false;
+            }
+
+            // Get file properties
+            bool ok = _read_tiff_properties(filePath) ||
+                      _read_bmp_properties(filePath) ||
+                      _read_flz_properties(filePath) ||
+                      _read_pdf_properties(filePath);
+
+            // Use variable data printing information
+            if (Variable)
+            {
+                Copies = 1;
+                SrcPages = _Label.Pages;
+                SrcWidth = _Label.Width;
+                SrcHeight = _Label.Height;
+            }
+
+            return ok;
+        }
+
         //--- _read_tiff_properties ----------------------------------------------
         private bool _read_tiff_properties(string filePath)
         {
-            //--- tif file ---
+            string[] fname = Directory.GetFiles(filePath, "*.tif");
+
             try
             {
-                using (Tiff  tif = Tiff.Open(filePath, "r"))
+                using (Tiff tif = Tiff.Open(fname[0], "r"))
                 {
-
                     int width = _GetField(tif, TiffTag.IMAGEWIDTH);
-                    int res   = _GetField(tif, TiffTag.XRESOLUTION);
+                    int res = _GetField(tif, TiffTag.XRESOLUTION);
 
-                    SrcWidth     = 25.4*_GetField(tif, TiffTag.IMAGEWIDTH) /_GetField(tif, TiffTag.XRESOLUTION);
-                    SrcHeight    = 25.4*_GetField(tif, TiffTag.IMAGELENGTH)/_GetField(tif, TiffTag.YRESOLUTION);
-                    PageWidth    = SrcWidth;
-                    PageHeight   = SrcHeight;
-                    SrcPages     = tif.NumberOfDirectories();
+                    SrcWidth = 25.4 * _GetField(tif, TiffTag.IMAGEWIDTH) / _GetField(tif, TiffTag.XRESOLUTION);
+                    SrcHeight = 25.4 * _GetField(tif, TiffTag.IMAGELENGTH) / _GetField(tif, TiffTag.YRESOLUTION);
+                    PageWidth = SrcWidth;
+                    PageHeight = SrcHeight;
+                    SrcPages = tif.NumberOfDirectories();
                     return true;
                 }
             }
@@ -758,66 +786,7 @@ namespace RX_DigiPrint.Models
                 Console.WriteLine(ex.Message);
                 SrcPages = 1;
             }
-            return false;     
-        }
-
-        //--- read_image_properties ------------------------------------
-        public void read_image_properties(string parFilePath)
-        {
-            string filePath = Dir.local_path(parFilePath);
-
-            if (_FilePath==null) _FilePath=filePath;
-            LoadDefaults();
-
-            //--- tif file ---
-            try
-            {
-                string[] fname = Directory.GetFiles(filePath, "*.tif");
-                if (fname.Length>0 && _read_tiff_properties(fname[0])) return;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            };
-        //    if (_read_tiff_properties(filePath)) return;
-
-            //--- label ----------------------------
-            {
-                _FilePath = filePath;
-                load_label();
-            }
-            if (Variable) 
-            {
-                PageWidth    = SrcWidth;
-                PageHeight   = SrcHeight;
-                return;
-            }
-
-
-            //---bmp file -----------------------------
-            if (_read_bmp_properties(filePath)) return;
-
-            if (_read_flz_properties(filePath)) return;
-
-            //--- pdf file -------------
-            if (File.Exists(filePath+".pdf"))
-            {
-                try
-                {
-                    PdfReader pdfReader = new PdfReader(filePath);
-                    SrcPages      = pdfReader.NumberOfPages;
-                    SrcWidth      = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Width)/72.0  + 0.5);    // 72 DPI!
-                    SrcHeight     = (25.4*Convert.ToUInt32(pdfReader.GetPageSize(1).Height)/72.0 + 0.5);    // 72 DPI!
-                    PageWidth     = SrcWidth;
-                    PageHeight    = SrcHeight;
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    SrcPages = 1;
-                }
-            }
+            return false;
         }
 
         //--- _read_bmp_properties ----------------------------------------------
@@ -889,6 +858,30 @@ namespace RX_DigiPrint.Models
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        //--- _read_pdf_properties ----------------------------------------------
+        private bool _read_pdf_properties(string filePath)
+        {
+            if (File.Exists(filePath + ".pdf"))
+            {
+                try
+                {
+                    PdfReader pdfReader = new PdfReader(filePath);
+                    SrcPages = pdfReader.NumberOfPages;
+                    SrcWidth = (25.4 * Convert.ToUInt32(pdfReader.GetPageSize(1).Width) / 72.0 + 0.5);    // 72 DPI!
+                    SrcHeight = (25.4 * Convert.ToUInt32(pdfReader.GetPageSize(1).Height) / 72.0 + 0.5);    // 72 DPI!
+                    PageWidth = SrcWidth;
+                    PageHeight = SrcHeight;
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    SrcPages = 1;
+                }
             }
             return false;
         }
@@ -1054,7 +1047,7 @@ namespace RX_DigiPrint.Models
             {
                 LengthUnit = EPQLengthUnit.copies;
                 ScanLength = msg.copies;
-                if (msg.start.copy==0 || CopiesPrinted == msg.copiesTotal)  
+                if (msg.start.copy==0 || (CopiesPrinted == msg.copiesTotal && CopiesPrinted != 0) || msg.start.copy > ScanLength)  
                     StartFrom = 1;
                 else                                                        
                     StartFrom = msg.start.copy;
@@ -1155,7 +1148,7 @@ namespace RX_DigiPrint.Models
             msg.item.lengthUnit     = LengthUnit;
             msg.item.copies         = Copies;
             msg.item.testMessage    = TestMessage;
-            if(SrcPages>1)
+            if(SrcPages>1 && !Variable)
             {
                 if (RxGlobals.PrintSystem.IsScanning)
                 {

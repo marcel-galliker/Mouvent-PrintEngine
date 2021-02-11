@@ -30,6 +30,8 @@ typedef struct
 	char					dots[4];
 	SPageId					id;
 	int						offsetWidth;
+	BOOL					sent;
+	BOOL					clearBlockUsed;
 	int						flags;
 	UINT8					virtualPasses;
 	UINT8					virtualPass;
@@ -94,7 +96,8 @@ int  data_free		(UINT64 *pBufSize, BYTE* buffer[MAX_COLORS]);
 int data_load_file	(const char *filepath, SPageId *pid);
 
 int  data_load		(SPageId *id, const char *filepath, EFileType fileType, int offsetPx, int lengthPx, UINT8 multiCopy, int gapPx, int blkNo, int blkCnt, int printMode, int variable, UINT8 virtualPasses, UINT8 virtualPass, int flags, int clearBlockUsed, int same, int smp_bufsize, const char *dots, BYTE* buffer[MAX_COLORS]);
-int  data_same		(SPageId *id, int offsetWidth,  int clrerearBlockUsed);
+void data_rip_same(SPrintListItem *pItem, BYTE *buffer[MAX_COLORS]);
+int data_same(SPageId *id, int offsetWidth, int clrerearBlockUsed, SPrintListItem **pItem, int variable);
 // int  data_reload	(SPageId *id);
 void data_send_id	(SPageId *id);
 int	 data_next_id	(void);

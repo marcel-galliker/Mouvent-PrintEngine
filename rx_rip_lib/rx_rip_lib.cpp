@@ -53,6 +53,7 @@ rx_doc rip_open_xml_local(const char *path, const char *tempPath)
 	char localPath[MAX_PATH];
 	int len, reload;
 	rx_doc pDoc=NULL;
+	TiXmlNode *root;
 
 	//--- set local path ---
 	strcpy(localPath, tempPath);
@@ -67,7 +68,11 @@ rx_doc rip_open_xml_local(const char *path, const char *tempPath)
 	if (pDoc)
 	{
 		TiXmlDocument *doc = (TiXmlDocument*)pDoc;
-		CRX_XmlElement *files = (CRX_XmlElement*)doc->FirstChild("Files");
+
+		root = doc->FirstChild("RXDFile");
+		if (!root) 	root = doc;
+
+		CRX_XmlElement *files = (CRX_XmlElement*)root->FirstChild("Files");
 		if (files!=NULL)
 		{
 			CRX_XmlElement *file;
@@ -104,7 +109,10 @@ rx_doc rip_open_xml_local(const char *path, const char *tempPath)
 		if (pDoc)
 		{
 			TiXmlDocument *doc = (TiXmlDocument*)pDoc;
-			CRX_XmlElement *files = (CRX_XmlElement*)doc->FirstChild("Files");
+			root = doc->FirstChild("RXDFile");
+			if (!root) root = doc;
+
+			CRX_XmlElement *files = (CRX_XmlElement*)root->FirstChild("Files");
 			if (files)
 			{
 				CRX_XmlElement *file, *filesOrg;
@@ -121,7 +129,7 @@ rx_doc rip_open_xml_local(const char *path, const char *tempPath)
 			}
 		}
 	}
-	return pDoc;
+	return (rx_doc) root;
 }
 
 //--- rip_enum_fonts -------------------------------

@@ -407,7 +407,7 @@ void spool_start_printing(void)
 
 //	#ifndef DEBUG
 	//--- check local spooler is running ------------------
-	if (rx_process_running_cnt(FILENAME_SPOOLER_CTRL, NULL)==0)
+	if (rx_process_running_cnt(FILENAME_SPOOLER_CTRL, NULL)==0 && !arg_debug)
 	{
 		_start_spooler_ctrl(0);
 	}
@@ -539,7 +539,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 			if ((p->id==pid->id) && (p->page==pid->page) && (p->scan==pid->scan) && ow==_LoadedFiles[i].offsetWidth) // copy changes! 
 			{
 				msg.flags |= FLAG_SAME;
-				msg.blkNo = _LoadedFiles[i].blkNo;
+				if (!msg.variable) msg.blkNo = _LoadedFiles[i].blkNo;
 				break;				
 			}	
 		}

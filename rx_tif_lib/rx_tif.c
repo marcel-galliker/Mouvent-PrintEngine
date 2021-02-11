@@ -399,34 +399,37 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			ppar = &_ThreadPar[threadCnt];
 			pinfo->colorCode[c]=psplit[c].color.colorCode;
 			pinfo->inkSupplyNo[c] =psplit[c].inkSupplyNo;
+			pinfo->colorCnt++;
+
 			if (*filename)
 			{
 				if (id->page>1) sprintf(filepath, "%s/%s_P%06d_%s.tif", filedir, filename, id->page, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
 				else			sprintf(filepath, "%s/%s_%s.tif", filedir, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));							
 				ppar->file = TIFFOpen (filepath, "r");
 				if (ppar->file) strcpy(_LastFilePath, filepath);
-				else Error(LOG, 0, "%d: %s color %s not found", id->id, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
+				else
+				{
+					Error(LOG, 0, "%d: %s color %s not found", id->id, filename, RX_ColorNameShort(pinfo->inkSupplyNo[c]));
+					pinfo->buffer[c] = NULL;
+					continue;
+				}
 			}
 			else 
 			{
-				Error(ERR_ABORT, 0, "Straeming not implemented yet");
+				return Error(ERR_ABORT, 0, "Straeming not implemented yet");
 			}
 			
 			pinfo->printMode     = printMode;
-			if (ppar->file)
-			{
-				if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
-				if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
-				if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
-				if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
-				if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
-			}
+			if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
+			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
+			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
+			if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
+			if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
 
 			pinfo->srcWidthPx	+= spacePx; 
 			pinfo->lineLen		= lineLen = (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8;
 			pinfo->dataSize		= pinfo->lineLen*pinfo->lengthPx;
-			if (ppar->file) pinfo->buffer[c] = &buffer[c];
-			else			pinfo->buffer[c] = NULL;
+			pinfo->buffer[c] = &buffer[c];
 			height = pinfo->lengthPx;
 			if (psplit[c].lastLine<height) height=psplit[c].lastLine;
 
@@ -436,7 +439,6 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			ppar->y_from   = psplit[c].firstLine;
 			ppar->y_to	   = height;
 			ppar->gap	   = spacePx;
-			pinfo->colorCnt++;
 			
 			threadCnt++;
 		}

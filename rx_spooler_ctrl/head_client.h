@@ -20,7 +20,8 @@ int  hc_in_simu(void);
 int  hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg);
 void hc_start_printing(void);
 void hc_abort_printing(void);
-void hc_send_next(void);
+int hc_send_next(void);
+
 void hc_check(void);
 void hc_stress_test(int board);
 

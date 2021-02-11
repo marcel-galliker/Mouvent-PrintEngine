@@ -60,7 +60,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 MarginUnit.Text = DistUnit.Text = new CUnit("mm").Name;
 
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.SrcHeight);
-                if (item.Variable || item.SrcPages > 1)
+                if (!item.Variable && item.SrcPages > 1)
                 {
                     Length_Settings.Visibility = Visibility.Collapsed;
                     Page_Settings.Visibility = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Visible;
@@ -68,6 +68,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
                 else
                 {
+                    if (item.Variable) LengthUnit.Visibility = Visibility.Collapsed;
                     Length_Settings.Visibility = Visibility.Visible;
                     Page_Settings.Visibility = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Collapsed;
                     item._hasPageSettings = false;

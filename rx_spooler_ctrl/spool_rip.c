@@ -21,6 +21,7 @@
 #include "rx_data.h"
 #include "rx_counter.h"
 #include "bmp.h"
+#include "rx_threads.h"
 // #include "rx_free_type.h"
 #include "data.h"
 #include "ctrl_client.h"
@@ -57,6 +58,8 @@ static int			_Column;
 static BYTE		   	_DataBuf[DATA_BUF_SIZE][MAX_MESSAGE_SIZE];
 static int			_DataBufIn;
 static int			_DataBufOut;
+
+static BOOL _Abort = FALSE;
 
 //--- prototypes -------------------------------------------------
 static void _free_buffer();
@@ -137,12 +140,25 @@ void sr_mnt_path(const char *orgPath, char *mntPath)
 void sr_reset()
 {
 	_DataBufIn = _DataBufOut = 0;
+	_Abort = FALSE;
 	_free_buffer();
+	TrPrintfL(TRUE, "sr_reset");
 }
 
 //--- sr_set_layout_start --------------------------------
 void sr_set_layout_start(RX_SOCKET socket, char *dataPath)
 {
+	for (int i = 0; i < MAX_COLORS; i++)
+	{
+		if (_BufferLabel[i] || _BufferColor[i])
+		{
+			TrPrintfL(1, "sr_set_layout_end: _BufferLabel[%d] WAIT FREE %p, used=%d", i, _BufferLabel[i], rx_mem_cnt(_BufferLabel[i]));
+			while (!_Abort && (rx_mem_cnt(_BufferLabel[i]) || rx_mem_cnt(_BufferColor[i])))
+			{
+				rx_sleep(10);
+			}
+		}
+	}
 	strcpy(_DataPath, dataPath);
 	_DataPtr = (BYTE*)&_Layout;
 }
@@ -153,6 +169,12 @@ void sr_set_layout_blk  (RX_SOCKET socket, SMsgHdr *hdr)
 	int len = hdr->msgLen-sizeof(SMsgHdr);
 	memcpy(_DataPtr, &hdr[1], len);
 	_DataPtr+=len;
+}
+
+//--- sr_abort ------------------------
+void sr_abort(void)
+{
+	_Abort = TRUE;
 }
 
 //--- sr_set_layout_end -----------------------------------
@@ -206,6 +228,17 @@ void sr_get_label_size(int *width, int *length, UCHAR *bitsPerPixel)
 //--- sr_set_filedef_start --------------------------------
 void sr_set_filedef_start(RX_SOCKET socket, SMsgHdr *msg)
 {
+	for (int i = 0; i < MAX_COLORS; i++)
+	{
+		if (_BufferLabel[i] || _BufferColor[i])
+		{
+			TrPrintfL(1, "sr_set_layout_end: _BufferLabel[%d] WAIT FREE %p, used=%d", i, _BufferLabel[i], rx_mem_cnt(_BufferLabel[i]));
+			while (!_Abort && (rx_mem_cnt(_BufferLabel[i]) || rx_mem_cnt(_BufferColor[i])))
+			{
+				rx_sleep(10);
+			}
+		}
+	}
 	_DataPtr = (BYTE*)&_Filedef;
 }
 
@@ -242,17 +275,18 @@ void sr_data_record		(SPrintDataMsg *pmsg)
 static void _free_buffer()
 {
 	int i;
-
 	for (i=0; i<SIZEOF(_BufferLabel); i++) 
 	{
-		rx_mem_unuse(&_BufferLabel[i]); //??
+		rx_mem_use_clear(_BufferLabel[i]);
 		rx_mem_free(&_BufferLabel[i]);
 	}
+	_BufferLabelSize = 0;
 	for (i=0; i<SIZEOF(_BufferColor); i++) 
 	{
-		rx_mem_unuse(&_BufferColor[i]); //??
-		rx_mem_free(&_BufferColor[i]); //??
+		rx_mem_use_clear(_BufferColor[i]);
+		rx_mem_free(&_BufferColor[i]);
 	}
+	_BufferColorSize = 0;
 }
 
 //--- _multiply_image ------------------------------------------------------------------
@@ -275,7 +309,7 @@ static void _multiply_image(SBmpInfo *pinfo, UINT32 width, BYTE *buffer[MAX_COLO
 				for(dst=src, x=1; x<_Layout.columns; x++)
 				{
 					dst += dist;
-					memcpy(dst, src, srclen);						
+					memcpy(dst, src, srclen);
 				}
 			}
 		}
@@ -288,8 +322,8 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 	int ret;
 	int i;
 	EFileType fileType;
-	UINT32 gapPx;
 	int width, length;
+	UINT32 gapPx = 0;
 	UINT8 multiCopy;
 
 	SPageId id;
@@ -312,7 +346,7 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 		ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, pinfo->srcWidthPx - width+8/pinfo->bitsPerPixel, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);
 		_multiply_image(pinfo, width, buffer);
 	}
-	else ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);	
+	else ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);
 	
 	//--- TEST ------------------------------------------------------------------------
 	if (FALSE)
@@ -329,6 +363,18 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 	}
 }
 
+void sr_rip_unused()
+{
+	for (int color = 0; color < MAX_COLORS; color++)
+	{
+		int black = (RX_Color[color].color.colorCode == 0);
+		if (black)
+		{
+			if (_BufferLabel[color]) rx_mem_unuse(&_BufferLabel[color]);
+			if (_BufferColor[color]) rx_mem_unuse(&_BufferColor[color]);
+		}
+	}
+}
 //--- sr_rip_label -----------------------------------------------------------
 int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 {
@@ -348,40 +394,51 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 	memcpy(&bmpLabel, &bmp, sizeof(bmpLabel));
 	memcpy(&bmpColor, &bmp, sizeof(bmpColor));
 	memcpy(pInfo, &_BmpInfoLabel, sizeof(*pInfo));
-	dataOut = _DataBufOut;
+	data = dataOut = _DataBufOut;
+	pInfo->variable = TRUE;
 	for (color=0; color<MAX_COLORS; color++)
 	{
-		pInfo->buffer[color] = &buffer[color];
-		pInfo->inkSupplyNo[color] = RX_Color[color].inkSupplyNo; 
-//		TrPrintfL(1, "use buffer[%d], 0x%08x, size=%d", color, pInfo->buffer[color], pInfo->dataSize);
-		if (buffer[color])
-		{
-			int time1=rx_get_ticks();
-			bmp.buffer		= buffer[color];
-			bmpLabel.buffer = _BufferLabel[color];
-			if (*_Layout.colorLayer) bmpColor.buffer = _BufferColor[color];
-			else bmpColor.buffer = NULL;
-			black = (RX_Color[color].color.colorCode == 0);
-			data = dataOut;
-			for (column=0; column<_Layout.columns; column++)
+		black = (RX_Color[color].color.colorCode == 0);
+		if (black) {
+			pInfo->buffer[color] = &buffer[color];
+			pInfo->inkSupplyNo[color] = RX_Color[color].inkSupplyNo; 
+	//		TrPrintfL(1, "use buffer[%d], 0x%08x, size=%d", color, pInfo->buffer[color], pInfo->dataSize);
+			if (buffer[color])
 			{
-				if (data==_DataBufIn) return Error(ERR_STOP, 0, "Data Buffer underflow");
-				pmsg = (SPrintDataMsg*)&_DataBuf[data];
-				len = pmsg->hdr.msgLen-sizeof(SPrintDataMsg)+1;
-				ctr_set_counter(pmsg->id.page);
-				dat_set_buffer(0, len/2, pmsg->data);
-				rip_data(&_Layout, column*_Layout.columnDist, 0, &bmp, &bmpLabel, &bmpColor, black);		
-				data = (data+1) % DATA_BUF_SIZE;
-			}
-		
-			TrPrintfL(TRUE, "Rip Time[%d]=%dms", color, rx_get_ticks()-time1);
+				int time1=rx_get_ticks();
+				bmp.buffer		= buffer[color];
+				rx_mem_use(_BufferLabel[color]);
+				bmpLabel.buffer = _BufferLabel[color];
+				if (*_Layout.colorLayer) 
+				{
+					bmpColor.buffer = _BufferColor[color];
+					rx_mem_use(_BufferColor[color]);
+				}
+				else bmpColor.buffer = NULL;
+				data = dataOut;
 
-			//--- TEST ------------------------------
-			if (TRUE)
-			{
-				char path[MAX_PATH];
-				sprintf(path, "%s/test/%s_%d[%d]_%s.bmp", PATH_TEMP, "variable", pmsg->id.id, pmsg->id.page, RX_ColorNameShort(RX_Color[color].inkSupplyNo));
-				bmp_write(path, buffer[color], _BmpInfoLabel.bitsPerPixel, _BmpInfoLabel.srcWidthPx, _BmpInfoLabel.lengthPx, _BmpInfoLabel.lineLen, FALSE);
+				for (column = 0; column < _Layout.columns; column++)
+				{
+					if (data==_DataBufIn) return Error(ERR_STOP, 0, "VDP: Data Buffer underflow");
+					pmsg = (SPrintDataMsg*)&_DataBuf[data];
+					len = pmsg->hdr.msgLen-sizeof(SPrintDataMsg)+1;
+					int counter = pmsg->id.copy-1;
+					if (ctr_increment_mode() == INC_perLabel) counter = counter*_Layout.columns+column;
+					ctr_set_counter(counter);
+					dat_set_buffer(0, len/2, pmsg->data);
+					rip_data(&_Layout, column*_Layout.columnDist, 0, &bmp, &bmpLabel, &bmpColor, black);
+					data = (data+1) % DATA_BUF_SIZE;
+				}
+		
+				TrPrintfL(TRUE, "Rip Time[%d]=%dms", color, rx_get_ticks()-time1);
+
+				//--- TEST ------------------------------
+				if (FALSE)
+				{
+					char path[MAX_PATH];
+					sprintf(path, "%s/test/%s_%d[%d]_%s.bmp", PATH_TEMP, "variable", pmsg->id.id, pmsg->id.copy, RX_ColorNameShort(RX_Color[color].inkSupplyNo));
+					bmp_write(path, buffer[color], _BmpInfoLabel.bitsPerPixel, _BmpInfoLabel.srcWidthPx, _BmpInfoLabel.lengthPx, _BmpInfoLabel.lineLen, FALSE);
+				}
 			}
 		}
 	}

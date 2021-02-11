@@ -55,6 +55,7 @@ typedef struct
 	RX_SOCKET		ctrlSocket;
 	HANDLE			mutex;
 
+
 	UINT32			blockUsedSize;
 	UINT32			blockOutIdx;
 	UINT32			*blockUsed;
@@ -197,6 +198,7 @@ int hc_head_board_cfg(RX_SOCKET socket, SHeadBoardCfg* cfg)
 				if (_HBPar[cfg->no]->cfg.dataAddr[i]!=cfg->dataAddr[i]) sok_close(&_HBPar[cfg->no]->dataSocket[i]);
 		}
 	}
+
 	_HBPar[cfg->no]->boardNo     = cfg->no;
 	_HBPar[cfg->no]->blockOutIdx = 0;
 	_HBPar[cfg->no]->pdCnt		 = 0;
@@ -300,7 +302,7 @@ void hc_abort_printing(void)
 }
 
 //--- hc_send_next ---------------------------------------------
-void hc_send_next()
+int hc_send_next()
 {
 	int i, headCnt;
 	int blkNo=0;
@@ -393,12 +395,14 @@ void hc_send_next()
 									_send_image_data(pInfo);
 									break;
 
-				default:			Error(ERR_ABORT, 0, "Headboard[%d].Present=%d, undefined", pInfo->board, _HBPar[pInfo->board]->cfg.present);
-									return;
+				default:			return Error(ERR_ABORT, 0, "Headboard[%d].Present=%d, undefined", pInfo->board, _HBPar[pInfo->board]->cfg.present);
+									
 				}
 			}
 		}		
+		return REPLY_OK;
 	}
+	return REPLY_ERROR;
 }
 
 //--- _save_to_file ---------------------------------
@@ -478,12 +482,12 @@ static int _send_image_data(SBmpSplitInfo *pInfo)
 	}
 	else
 	{
-        {
-		    static int test=0;
-		    SPageId *pid=&pInfo->pListItem->id;
-		    int idx=data_printList_idx(pInfo->pListItem);
+		{
+			static int test=0;
+			SPageId *pid=&pInfo->pListItem->id;
+			int idx=data_printList_idx(pInfo->pListItem);
 		    TrPrintfL(_Trace, "Head[%d.%d]: _send_image_data pl[%d](id=%d, p=%d, c=%d, s=%d) blocks[%d .. %d] ", pInfo->board, pInfo->head, idx, pid->id, pid->page, pid->copy, pid->scan, pInfo->blk0, pInfo->blk0+pInfo->blkCnt);
-        }
+		}
 		pInfo->sendFromBlk	= 0;
 
 		TrPrintfL(_Trace, "Head[%d.%d]: NEW BMP _req_used_flags blkN0=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->blk0, pInfo->blkCnt);
@@ -721,7 +725,6 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 	int dstBlk; 
 	int headMin, headMax;
 	int cnt, sent;
-	int endReached=FALSE;
 	SBmpSplitInfo		*pinfo;
 	SHeadCfg			*phead;
 
@@ -771,10 +774,10 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 			if (_Abort) return REPLY_OK;
 
 			if (dstBlk >= headMax) dstBlk -= phead->blkCnt;
-			if (dstBlk == par->blockOutIdx) 
+			if (dstBlk == par->blockOutIdx && pinfo->blkCnt != 1) 
 			{
-				TrPrintfL(_Trace, "BlockOutIdx reached %d: blk0=%d, blkCnt=%d, cnt=%d\n", par->blockOutIdx, pinfo->blk0, pinfo->blkCnt, cnt);
-				endReached = TRUE;
+				// if the whole buffer is used we should wait FPGA removed the block used flags already when the data is loaded!
+				TrPrintfL(TRUE, "BlockOutIdx reached %d: blk0=%d, blkCnt=%d, cnt=%d\n", par->blockOutIdx, pinfo->blk0, pinfo->blkCnt, cnt);
 				break;
 			}
 
@@ -796,44 +799,8 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 					memcpy(par->msg.blkData, &par->blkData[1], sizeof(par->msg.blkData));
 				}
 				else data_fill_blk(pinfo, i, par->msg.blkData, FALSE);
-				/*
-				if (TRUE)
-				{
-					//--- TEST -----------------------------
-					int no=dstBlk-pinfo->blk0;
-					if      (no<5) memset(par->msg.blkData, 0x00, RX_Spooler.dataBlkSize);
-					else if (no==5) memset(par->msg.blkData, 0xff, RX_Spooler.dataBlkSize);
-					else if (no<10) memset(par->msg.blkData, 0x00, RX_Spooler.dataBlkSize);
-				}
-				*/
-				/*
-				//--- DDR3-TEST ----------------
-				{
-					UINT32 *buf = (UINT32*)par->msg.blkData;
-					int size;
-					for (size=0; size<RX_Spooler.dataBlkSize; size+=4)
-					{
-						*buf++ = 1000000*head+dstBlk;
-					}
-				}
-				*/
-				/*
-				if (head==2)
-				{	//----------- test ---------------------
-					if (dstBlk>SIZEOF(_TestBlockSent[head]))
-					{
-						printf("Overflow\n");
-					}
-					_TestBlockSent[head][dstBlk]++;
-					if (dstBlk==93119)
-					{
-						printf("Block %d send %d times\n", dstBlk, _TestBlockSent[head][dstBlk]);
-					}
-					if (dstBlk>_TestLastBlock) _TestLastBlock=dstBlk;
-				}
-				*/
 
-					sent=send(par->dataSocket[par->udpNo], (char*)&par->msg, sizeof(par->msg.blkNo)+par->cfg.dataBlkSize, 0);
+				sent=send(par->dataSocket[par->udpNo], (char*)&par->msg, sizeof(par->msg.blkNo)+par->cfg.dataBlkSize, 0);
 				if (par->dataSocket[1]!=INVALID_SOCKET) 
 					par->udpNo = 1-par->udpNo;
 
@@ -844,12 +811,11 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 		TrPrintfL(_Trace, "Head[%d.%d]: *** sent %d blocks, cnt=%d, from=%d ***", par->cfg.no, head, cnt, pinfo->blkCnt, pinfo->sendFromBlk);
 
 		if (_Abort) return REPLY_OK;
-		
-//		if (pinfo->sendFromBlk >= pinfo->blkCnt || (RX_Spooler.printerType==printer_LB702_UV && (endReached && (cnt==0 || (pinfo->pListItem->flags&FLAG_SAME)))))
-		if (pinfo->sendFromBlk >= pinfo->blkCnt || pinfo->pListItem->flags&FLAG_SAME || (rx_def_is_lb(RX_Spooler.printerType) && endReached && (cnt==0)))
-		// why: rx_def_is_lb? In TX machines we normally have a wrap around, as the whole buffer is used. The FPGA removed the block used flags already when the data is loaded!
+
+		if (pinfo->sendFromBlk >= pinfo->blkCnt)
 		{
-			SPageId *pid   = &pinfo->pListItem->id;
+
+			SPageId *pid = &pinfo->pListItem->id;
 			SPageId *plast = &par->lastId[head];
 			if (memcmp(plast, pid, sizeof(SPageId)))
 			{
@@ -861,10 +827,7 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 				memcpy(plast, pid, sizeof(SPageId));
 			}
 
-			if (data_sent(pinfo, head))
-			{
-				hc_send_next();
-			}
+			data_sent(pinfo, head);
 			return REPLY_OK;
 		}
 		if(cnt == 0) rx_sleep(10);

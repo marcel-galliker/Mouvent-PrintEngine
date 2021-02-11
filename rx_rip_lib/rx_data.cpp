@@ -221,7 +221,7 @@ int dat_seek (int recNo)
 	if (_FileDef.fileFormat==FF_Fixed) _FilePos = _FileDef.header*charsize+recNo*_FileDef.recLen;
 	else
 	{
-		_FilePos = (_FileDef.header+1)*charsize;
+		_FilePos = _FileDef.header*charsize;
 		while (recNo) 
 		{
 			_file_read_record(&len); // seeking variable record file

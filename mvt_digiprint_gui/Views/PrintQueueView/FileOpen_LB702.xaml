@@ -122,6 +122,8 @@
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Background="#99FFFFFF" >
                                     <TextBlock Text="{Binding Dimension}" />
                                     <iconPacks:PackIconMaterial Kind="Printer" Width="15" VerticalAlignment="Center" Margin="5,0,0,0" Visibility="{Binding ScreenOnPrinter, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    <iconPacks:PackIconMaterial Kind="Checkbook" Width="15" VerticalAlignment="Center" Margin="5,0,0,0" Visibility="{Binding VDP, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    <iconPacks:PackIconMaterial Kind="ExclamationThick" Width="15" VerticalAlignment="Center" Margin="5,0,0,0" Visibility="{Binding Error, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>

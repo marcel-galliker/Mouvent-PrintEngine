@@ -243,7 +243,7 @@ int  label_send_data(SPageId *pid)
 {
 	int len, i, cnt, idlen;
 
-	dat_seek((pid->page-1)*_Layout.columns);
+	dat_seek((pid->copy-1)*_Layout.columns);
 	idlen = sizeof(UINT32);
 	for (i=0; i<_Layout.columns; i++)
 	{

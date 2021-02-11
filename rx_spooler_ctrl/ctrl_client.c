@@ -77,9 +77,10 @@ static UINT64			_BufferSize[BUFFER_CNT];
 static BYTE*			_Buffer[BUFFER_CNT][MAX_COLORS]; // [MAX_HEADS_COLOR];	// buffered in case of same image
 int					_MsgGot, _MsgSent, _MsgGot0;
 int					_MsgId=0;
-
+static HANDLE		_sem_send;
 
 //--- prototypes --------------------------------------------------------------
+static void *_send_thread(void *ppar);
 
 static void *_main_ctrl_thread(void *par);
 static int _handle_main_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
@@ -120,9 +121,12 @@ int ctrl_start(const char *ipAddrMain)
 	rx_mem_init(512*1024*1024);
 	if (!_PrintFile_Sem) _PrintFile_Sem = rx_sem_create();
 
+	if (!_sem_send) _sem_send = rx_sem_create();
+
 	rx_thread_start(_main_ctrl_thread, (void*)ipAddrMain, 0, "_main_ctrl_thread");
 	rx_thread_start(_load_file_thread,  NULL,             0, "_load_file_thread");
 	rx_thread_start(_print_file_thread, NULL,             0, "_print_file_thread");
+	rx_thread_start(_send_thread, NULL, 0, "_send_thread");
 	hc_start();
 
 	return REPLY_OK;
@@ -423,11 +427,13 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	memcpy(&msg, pdata, sizeof(msg)); // local copy as original can be overwritten by the communication task!
 
 	hc_start_printing();
-		
+
 	same = (!strcmp(msg.filename, _LastFilename) &&  msg.id.page==_LastPage && msg.wakeup==_LastWakeup && msg.gapPx==_LastGap);
 //	if (rx_def_is_lb(RX_Spooler.printerType)) same &= msg.offsetWidth==_LastOffsetWidth;
     if (rx_def_is_lb(RX_Spooler.printerType) && msg.printMode==PM_SINGLE_PASS) same = ((msg.flags&FLAG_SAME)!=0) && (msg.offsetWidth==_LastOffsetWidth);
 	if (msg.printMode==PM_SINGLE_PASS && jc_changed()) same=FALSE;
+	
+	if (msg.variable) same = FALSE; // to increment block count on VDP
 
     // check that Buffer is well allocated 
     if (same)
@@ -446,7 +452,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	_LastGap	= msg.gapPx;
 	_LastWakeup = msg.wakeup;
 	_LastOffsetWidth = msg.offsetWidth;
-	
+
 //	Error(LOG, 0, "_do_print_file (id=%d, page=%d, copy=%d) FLAG_SAME=%d, same=%d", msg.id.id, msg.id.page, msg.id.copy, msg.flags&FLAG_SAME, same);
 
 	if (msg.virtualPass>msg.virtualPasses)
@@ -463,7 +469,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	
 //	Error(LOG, 0, "Spooler Copy=%d, Offset=%d", msg.id.copy, msg.offsetWidth);
 	
-	if (!same)
+	if (!same || msg.variable)
 	{
 	//	Error(LOG, 0, "load file >>%s<< id=%d, page=%d, copy=%d", msg.filename, msg.id.id, msg.id.page, msg.id.copy);
 
@@ -477,9 +483,10 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		data_cache(&msg.id, msg.filename, path, RX_Color, SIZEOF(RX_Color));
 		
 		//--- allocate memory ---------------------------------------------------------------------
-		if ( msg.variable)// && !*path)
+		if (msg.variable)// && !*path)
 		{
-			sr_get_label_size(&widthPx, &lengthPx, &bitsPerPixel);
+			sr_get_label_size(& widthPx, &lengthPx, &bitsPerPixel);
+			fileType = ft_tif;
 		}
 		else
 		{
@@ -509,7 +516,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 		if (sok_send(&socket, &reply)==REPLY_OK) _MsgSent++;
 	}
 
-	if (!same)
+	if (!same || msg.variable)
 	{
 		if (msg.printMode==PM_SCAN_MULTI_PAGE) multiCopy=1;
 		if (fileType!=ft_undef)
@@ -540,10 +547,13 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 	{ 
 		SPrintFileMsg	evt;
 		if (msg.flags & FLAG_SMP_LAST_PAGE) _SMP_Flags |= FLAG_SMP_LAST_PAGE;
-		
+				
 		if (msg.flags&FLAG_SAME)
 		{
-			data_same(&msg.id, msg.offsetWidth, msg.clearBlockUsed);				
+			SPrintListItem *pItem;
+			if (data_same(&msg.id, msg.offsetWidth, msg.clearBlockUsed, &pItem, msg.variable) == REPLY_OK && msg.variable) {
+				data_rip_same(pItem, _Buffer[_BufferNo]);
+			}
 		}
 		else
 		{
@@ -577,14 +587,37 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			}
 			_FirstFile = FALSE;
 		}
-		
-		if (_ResetCnt==RX_Spooler.resetCnt || hc_in_simu()) 
-			hc_send_next();			
-			
+					
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 	}
+
+	rx_sem_post(_sem_send);
+
 	return REPLY_OK;
 }
+
+
+static void *_send_thread(void *ppar)
+{
+	while (_ThreadRunning)
+	{
+		if (_ResetCnt == RX_Spooler.resetCnt || hc_in_simu())
+		{
+			if (rx_sem_wait(_sem_send, 500) == REPLY_OK)
+			{
+				if (!_Abort && hc_send_next() == REPLY_ERROR)
+				{
+					rx_sem_post(_sem_send);
+					rx_sleep(10);
+				}
+			}
+		}
+		else
+			rx_sleep(50);
+	}
+	return NULL;
+}
+
 
 //--- _do_start_sending ----------------------------
 static void _do_start_sending(UINT32 resetCnt)
@@ -595,7 +628,6 @@ static void _do_start_sending(UINT32 resetCnt)
 	{
 		_ResetCnt = _StartCnt = resetCnt;
 		if(rx_def_is_tx(RX_Spooler.printerType) && data_next_id()) _StartCnt++;
-		hc_send_next();
 	}
 }
 	

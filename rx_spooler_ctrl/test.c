@@ -82,7 +82,7 @@ static void _loadFiles(char *printEnv, char *fname)
 	UCHAR			bitsPerPixel;
 	UINT8			multiCopy;
 	SBmpInfo		bmpInfo;
-	UINT32			gapPx;
+	UINT32			gapPx = 0;
 
 	total = rx_mem_get_totalMB();
 	free1 = rx_mem_get_freeMB();

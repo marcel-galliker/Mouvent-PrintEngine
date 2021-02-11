@@ -1688,6 +1688,7 @@ typedef struct
 	INT8 multiCopy;
 	INT8 colorCnt;
 	INT8 screening;
+	INT8 variable;
 } SBmpInfo;
 
 //--- global variables -----------------------------

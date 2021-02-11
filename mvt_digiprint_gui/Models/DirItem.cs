@@ -72,7 +72,7 @@ namespace RX_DigiPrint.Models
         {
             get { return _FileName; }
             set 
-            { 
+            {
                 _FileName = value;
                 if (IsDirectory) Dimension=null;
                 else
@@ -80,12 +80,21 @@ namespace RX_DigiPrint.Models
                     try
                     {
                         PrintQueueItem pq = new PrintQueueItem();
-                        pq.read_image_properties(_FileName);
-                        _SrcWidth  = pq.SrcWidth;
-                        _SrcHeight = pq.SrcHeight;
-                        _Dots      = pq.Dots;
-                        _ScreenOnPrinter = pq.ScreenOnPrinter;
-                        _SetDimension();
+                        if (pq.read_image_properties(_FileName))
+                        {
+                            _SrcWidth = pq.SrcWidth;
+                            _SrcHeight = pq.SrcHeight;
+                            _Dots = pq.Dots;
+                            _ScreenOnPrinter = pq.ScreenOnPrinter;
+                            _VDP = pq.Variable;
+                            _SetDimension();
+                        }
+                        else
+                        {
+                            ErrorMsg = "Error loading job " + _FileName;
+                            Console.WriteLine(ErrorMsg);
+                            Dimension = null;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -128,7 +137,7 @@ namespace RX_DigiPrint.Models
                 else if (File.Exists(labeldef))
                 {
                     _FileType = ENFileType.DataFile;
-                    Preview = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\BarcodeFile.ico", UriKind.RelativeOrAbsolute));
+                    Preview = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\BarcodeFile.ico", UriKind.RelativeOrAbsolute));                    
                 }
                 else 
                 {   
@@ -162,6 +171,19 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property Error: True in case of problem loading a job -----
+        private string _ErrorMsg = "";
+        public string ErrorMsg
+        {
+            get { return _ErrorMsg; }
+            set { SetProperty(ref _ErrorMsg, value); }
+        }
+
+        public bool Error
+        {
+            get { return _ErrorMsg.Length != 0; }
+        }
+
         //--- Property Dimension ---------------------------------------
         private string _Dimension = null;
         private double _SrcWidth;
@@ -180,6 +202,14 @@ namespace RX_DigiPrint.Models
 			get { return _ScreenOnPrinter; }
 			set { SetProperty(ref _ScreenOnPrinter,value); }
 		}
+
+        //--- Property ScreenOnPrinter ---------------------------------------
+        private bool _VDP = false;
+        public bool VDP
+        {
+            get { return _VDP; }
+            set { SetProperty(ref _VDP, value); }
+        }
 
         //--- _SetDimension -----------------------
         private void _SetDimension()

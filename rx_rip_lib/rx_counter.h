@@ -45,6 +45,7 @@ EXPORT int  ctr_save_def(void *doc, SCounterDef *pCtrDef);
 
 EXPORT int  ctr_def_is_equal(SCounterDef *pCtrDef1, SCounterDef *pCtrDef2);
 EXPORT void ctr_set_def		(SCounterDef *pCtrDef);
+EXPORT EIncrement ctr_increment_mode();
 EXPORT void ctr_set_counter	(INT32 recNo);
 EXPORT void ctr_inc_counter	(void);
 EXPORT int  ctr_get_counter	(INT32 recNo, char *str);
