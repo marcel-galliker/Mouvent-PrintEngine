@@ -52,13 +52,13 @@
                                 <DataTemplate>
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
-                                            <iconPacks:PackIconMaterial Grid.Column="0" Kind="{Binding IconKind}" Foreground="Gray"/>
+                                            <iconPacks:PackIconMaterial Grid.Column="0" Kind="{Binding IconKind}" Foreground="Gray" Margin="0,-5" Visibility="Collapsed"/>
                                             <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0" MinWidth="30"/>
                                             <TextBlock Text="{Binding ValueStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Visibility="{Binding ConfirmVisibile, Converter={StaticResource BooleanToVisibleConverter}}" Height="20" Margin="0,-10">
+                                        <StackPanel Orientation="Horizontal" Visibility="{Binding ConfirmVisibile, Converter={StaticResource BooleanToVisibleConverter}}">
                                             <TextBlock Text="Position and Focus?" VerticalAlignment="Center"/>
-                                            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Confirm_Clicked">
+                                            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Confirm_Clicked" Margin="0,-20">
                                                 <iconPacks:PackIconMaterial Kind="Check" Foreground="Gray"/>
                                             </common:MvtButton >
                                         </StackPanel>

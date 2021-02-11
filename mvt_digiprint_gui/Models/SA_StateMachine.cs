@@ -4,12 +4,8 @@ using RX_DigiPrint.Converters;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using static rx_CamLib.RxCam;
 
 namespace RX_DigiPrint.Models
@@ -19,7 +15,7 @@ namespace RX_DigiPrint.Models
 		private const bool		 _Debug=true;
 
 		public const bool		 _SimuCamera  = false;
-		public const bool		 _SimuMachine = false;
+		public const bool		 _SimuMachine = true;
 
 		private RxCamFunctions	 _CamFunctions;
 		private List<SA_Action>  _Actions;
