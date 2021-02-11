@@ -52,29 +52,17 @@
                                 <DataTemplate>
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
-                                            <iconPacks:PackIconMaterial Grid.Column="0" Kind="{Binding IconKind}" Foreground="Gray"/>
+                                            <iconPacks:PackIconMaterial Grid.Column="0" Kind="{Binding IconKind}" Foreground="Gray" Margin="0,-5" Visibility="Collapsed"/>
                                             <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0" MinWidth="30"/>
                                             <TextBlock Text="{Binding ValueStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/>
                                         </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Visibility="{Binding ConfirmVisibile, Converter={StaticResource BooleanToVisibleConverter}}">
+                                            <TextBlock Text="Position and Focus?" VerticalAlignment="Center"/>
+                                            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Confirm_Clicked" Margin="0,-20">
+                                                <iconPacks:PackIconMaterial Kind="Check" Foreground="Gray"/>
+                                            </common:MvtButton >
+                                        </StackPanel>
                                     </Grid>
-                                    <!--
-                                    <Grid Visibility="{Binding Measured, Converter={StaticResource Visible_Converter}}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="20"/>
-                                            <ColumnDefinition Width="50"/>
-                                            <ColumnDefinition Width="20"/>
-                                            <ColumnDefinition Width="50"/>
-                                            <ColumnDefinition Width="20"/>
-                                            <ColumnDefinition Width="50"/>
-                                        </Grid.ColumnDefinitions>
-                                        <iconPacks:PackIconMaterial Grid.Column="0" Kind="MathCompass" Foreground="Gray"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Angle, Converter={StaticResource ToString_Converter}}"/>
-                                        <iconPacks:PackIconMaterial Grid.Column="2" Kind="ArrowCollapseVertical" Foreground="Gray"/>
-                                        <TextBlock Grid.Column="3" Text="{Binding Measured.Stitch}"/>
-                                        <iconPacks:PackIconMaterial Grid.Column="4" Kind="ArrowCollapseRight" Foreground="Gray"/>
-                                        <TextBlock Grid.Column="5" Text="{Binding Measured.Distance}"/>
-                                    </Grid>
-                                    -->
                                 </DataTemplate>
                             </ig:TemplateColumn.ItemTemplate>
                         </ig:TemplateColumn>
