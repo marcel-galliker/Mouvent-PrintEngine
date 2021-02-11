@@ -10,38 +10,12 @@
     <GroupBox Style="{StaticResource MvtGroupBox}" Header="Commands">
         <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main">
             <rx_uc:PlcCommand ID="CMD_CLEAR_ERROR"      Label="Clear Error"/>
-            <!-- <rx_uc:PlcCommand ID="CMD_REFERENCE"        Label="Reference"/> -->
 
             <rx_uc:PlcTitle />
                       
             <rx_uc:PlcCommand ID="CMD_WASHING_UNIT_UP"   Label="Washing UP"  IsEnabled="{Binding InWebIn}"/>
             <rx_uc:PlcCommand ID="CMD_SLIDE_TO_PURGE"    Label="PURGE POS" User="usr_service"/>
-            <rx_uc:PlcCommand ID="CMD_SLIDE_TO_WIPE"     Label="WIPE POS"  User="usr_service"/> 
-            
-            <!-- <rx_uc:PlcCommand ID="CMD_RUN"              Label="RUN"                 IsEnabled="{Binding Z_in_print}" User="usr_mouvent"/> -->
-            <!-- <rx_uc:PlcCommand ID="CMD_PAUSE"            Label="PAUSE"               IsEnabled="{Binding Z_in_print}" x:Name="Button_Pause"/>  -->
-            <!-- <rx_uc:PlcCommand ID="CMD_STOP"             Label="STOP"/> -->
-
-            <!--     <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/> -->
-
-            <!-- <rx_uc:PlcCommand ID="CMD_PRODUCTION"       Label="Production"/>    -->
-            <!-- <rx_uc:PlcCommand ID="CMD_SETUP"            Label="Setup"/>         -->
-
-            <!--     <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/> -->
-
-            <!--<rx_uc:PlcCommand ID="CMD_WEBIN"            Label="Web in"/>        -->
-            <!--<rx_uc:PlcCommand ID="CMD_CLEANING"         Label="Head Cleaning"/> -->
-            <!--<rx_uc:PlcCommand ID="CMD_GLUE"             Label="Belt Gluing"/>       -->
-            <!--<rx_uc:PlcCommand ID="CMD_WARMUP"           Label="Belt Warmup"/>       -->
-            <!--<rx_uc:PlcCommand ID="CMD_WASHING"          Label="Belt Washing"/>      -->
-
-            <!--    <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/> -->
-
-            <!--    <rx_uc:PlcCommand ID="CMD_SERVICE"          Label="Service" User="usr_service"/>  -->
-
-         <!--   <rx_uc:PlcTitle Header="Calibration" User="usr_service"/> -->
-
-         <!--   <rx_uc:PlcCommand ID="CMD_TEACHING_WRINKLE_SENSOR"  Label="Wrinkle Sensor" User="usr_service"/> -->
+            <rx_uc:PlcCommand ID="CMD_SLIDE_TO_WIPE"     Label="WIPE POS"  User="usr_service"/>
 
         </rx_uc:PlcParPanel>
     </GroupBox>

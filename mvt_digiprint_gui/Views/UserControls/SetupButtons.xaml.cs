@@ -116,12 +116,6 @@ namespace RX_DigiPrint.Views.UserControls
             }
         }
 
-        //--- Clean_Clicked -------------------------------------------------
-        private void Clean_Clicked(object sender, RoutedEventArgs e)
-        {
-            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_CLEANING");
-        }
-
         //--- Washing_Clicked -------------------------------------------------
         private void Washing_Clicked(object sender, RoutedEventArgs e)
         {

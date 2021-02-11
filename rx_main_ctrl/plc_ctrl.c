@@ -570,7 +570,7 @@ int plc_to_fill_cap_pos(void)
     {
         if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_FILL_CAP");
+		_plc_set_command("", "CMD_SLIDE_TO_FILL_CAP");
     }
 	return REPLY_OK;
 }
@@ -582,7 +582,7 @@ int	plc_to_purge_pos(void)
     {
 		if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_PURGE");
+		_plc_set_command("", "CMD_SLIDE_TO_PURGE");
     }
 	return REPLY_OK;
 }
@@ -594,7 +594,7 @@ int	plc_to_wipe_pos(void)
     {
         if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
+		_plc_set_command("", "CMD_SLIDE_TO_WIPE");
     }
 	return REPLY_OK;
 }
@@ -606,7 +606,7 @@ int	plc_to_cap_pos(void)
 	{
         if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
+		_plc_set_command("", "CMD_SLIDE_TO_WIPE");
 		step_set_vent(FALSE);			
 	}
 	return REPLY_OK;

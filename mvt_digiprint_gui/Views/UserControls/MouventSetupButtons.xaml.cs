@@ -126,12 +126,6 @@ namespace RX_DigiPrint.Views.UserControls
             else if (state==3) CMD_WEBIN.IsChecked=false;
         }
 
-        //--- Clean_Clicked -------------------------------------------------
-        private void Clean_Clicked(object sender, RoutedEventArgs e)
-        {
-            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_CLEANING");
-        }
-
         //--- Washing_Clicked -------------------------------------------------
         private void Washing_Clicked(object sender, RoutedEventArgs e)
         {
