@@ -186,6 +186,12 @@ static int _prepare_config()
 	RX_Spooler.headsPerColor	= RX_Config.headsPerColor;
 	RX_Spooler.barWidthPx		= RX_Spooler.headWidthPx*RX_Spooler.headsPerColor - RX_Spooler.headOverlapPx;
 
+	if (RX_Config.jc_ratio != INVALID_VALUE)
+		RX_Spooler.jc_ratio = 100 + RX_Config.jc_ratio; // overcorrection in percent added to 100%
+	else
+		RX_Spooler.jc_ratio = 100;
+
+
 	if (RX_Config.headsPerColor==0)
 	{
 		Error(ERR_ABORT, 0, "Configuration: Heads Per Color=0");

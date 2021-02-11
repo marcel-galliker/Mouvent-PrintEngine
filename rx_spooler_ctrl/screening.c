@@ -254,17 +254,35 @@ void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUE
 	//--- disabled jets -----------------------------------------------------
 	if (TRUE)
 	{
+		char logStr[MAX_DISABLED_JETS*5+1];
+		logStr[0] = 0;
+		int logLen = 0;
 		int jet;
 		for (int i=0; i<MAX_DISABLED_JETS; i++)
 		{
-			if (jet=RX_DisabledJets[headNo][i])
+			if ((jet=RX_DisabledJets[headNo][i]) >= 0)
 			{
+				logLen += sprintf(&logStr[logLen], "%d ", jet);
 				double d=_ScrMem[board][head].fact[jet];
-				if (jet>0)						_ScrMem[board][head].fact[jet-1] += d/2.0;
+				if (jet>0)						_ScrMem[board][head].fact[jet-1] += RX_Spooler.jc_ratio * d/200.0;
 												_ScrMem[board][head].fact[jet]    = 0.0;
-				if (jet+1<MAX_DENSITY_FACTORS)	_ScrMem[board][head].fact[jet+1] += d/2.0;
+				if (jet+1<MAX_DENSITY_FACTORS)	_ScrMem[board][head].fact[jet+1] += RX_Spooler.jc_ratio * d/200.0;
+
+				// stitching zone
+				if (jet <= 128 && head > 0)
+				{
+					_ScrMem[board][head - 1].fact[2048 + jet - 1] += RX_Spooler.jc_ratio * d / 200.0;
+					if (jet < 127) _ScrMem[board][head - 1 ].fact[2048 + jet + 1] += RX_Spooler.jc_ratio * d / 200.0;
+				}
+				if (jet >= 2047 && head < RX_Spooler.headsPerBoard - 1)
+				{
+					if (jet > 2048) _ScrMem[board][head + 1].fact[jet - 2048 - 1] += RX_Spooler.jc_ratio * d / 200.0;
+					_ScrMem[board][head + 1].fact[jet - 2048 + 1] += RX_Spooler.jc_ratio * d / 200.0;
+				}
 			}
 		}
+		if (logStr[0]) Error(LOG, 0, "Disable Jet board=%d, head=%d, jet=%s", board, head, logStr);
+
 	}
 }
 

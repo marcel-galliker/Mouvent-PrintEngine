@@ -919,6 +919,8 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
 				RX_Config.stepper.material_thickness = (INT32)(0.5+1000*strtod(val, NULL));
 			if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
+			if (!strcmp(name, "XML_JC_RATIO")) RX_Config.jc_ratio = atoi(val);
+
 		}
 		str = end;
 	}
@@ -978,6 +980,7 @@ static void _plc_save_material	(RX_SOCKET socket, char *filename, int cmd, char 
 		if (!strcmp(var, "XML_MATERIAL_THICKNESS")) 
 			RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
 		if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
+		if (!strcmp(var, "XML_JC_RATIO")) RX_Config.jc_ratio = atoi(val);
 	
 		*end++='\n';
 		str = end;
@@ -1117,6 +1120,7 @@ void plc_load_material(char *material)
 				if (!strcmp(name, "XML_MATERIAL_THICKNESS"))	
 					RX_Config.stepper.material_thickness	= (INT32)(0.5+1000*strtod(val, NULL));
 				if (!strcmp(name, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
+				if (!strcmp(name, "XML_JC_RATIO")) RX_Config.jc_ratio = atoi(val);
 			}
 		}
 

@@ -152,6 +152,8 @@ void lh702_save_material	(char *varList)
 		if (!strcmp(var, "XML_HEAD_HEIGHT"))		_Status.head_height = (INT32)(atof(val)*1000);
 		if (!strcmp(var, "XML_MATERIAL_THICKNESS"))	_Status.thickness   = (INT32)(atof(val)*1000);
 		if (!strcmp(var, "XML_ENC_OFFSET"))			_Status.encoder_adj = atoi(val);
+		if (!strcmp(var, "XML_JC_RATIO")) RX_Config.jc_ratio = atoi(val);
+
 		*end++='\n';
 		str = end;
 	}

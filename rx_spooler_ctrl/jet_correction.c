@@ -221,7 +221,6 @@ static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, UCHAR *pCor)
 {
     int jetMax=bytesPerLine*8/bitsPerPixel;
-	int limit=2*_MaxDropSize;
 	if (! pCor) pCor = pBuffer;
 
 	if (jet>0 && jet<jetMax)
@@ -261,25 +260,27 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 			int side=0;		// side: to change left/right
             int org[2];		// original dot size 
             int comp[2];	// compensated dot size
+			int limit = 200 * _MaxDropSize; // take into account the jc ratio in percent
+
 			for (y=fromLine; y<length; y++)
 			{
 				if ((d = _GetPixel(pBuffer, bytesPerLine, jet, y)))
 				{
-					droplets += d;
+					droplets += RX_Spooler.jc_ratio * d; // jc ratio could be more than 100%
 					_SetPixel(pBuffer, bytesPerLine, jet, y, 0);
 					if (droplets>limit) droplets=limit;
 				}
-				if (droplets)
+				if (droplets > 0)
 				{
 					org[0] = comp[0] = _GetPixel(pCor, bytesPerLine, jet-1, y);
 					org[1] = comp[1] = _GetPixel(pCor, bytesPerLine, jet + 1, y);
 					max = 2*_MaxDropSize-org[0]-org[1];
-					while (droplets && max)
+					while (droplets > 0 && max)
 					{
 						if (comp[side] < _MaxDropSize)
 						{
 							comp[side]++;
-							droplets--;
+							droplets -= 100; // ratio in percent
 							max--;
 						}
 						side = 1 - side;

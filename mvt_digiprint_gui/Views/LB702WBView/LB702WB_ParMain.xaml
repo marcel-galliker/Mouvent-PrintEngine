@@ -85,6 +85,7 @@
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
 
                             <rx_uc:PlcTitle Grid.Row="0"   Header="Machine"/>
@@ -93,26 +94,27 @@
                             <rx_uc:PlcParCtrl Grid.Row="3" ID="XML_ENC_OFFSET"                      Label="Encoder Adj"  Unit="inc"     UnitWidth="50" Format="n"/>
                             <rx_uc:PlcParCtrl Grid.Row="4" ID="PAR_WEB_WIDTH"                       Label="Web Width"    Unit="mm"      UnitWidth="50" Format="1"/>
                             <rx_uc:PlcParCtrl Grid.Row="5" ID="PAR_DISTANCE_TO_STOP"                Label="Stop Dist"    Unit="m"       UnitWidth="50" Format="f"/>
+                            <rx_uc:PlcParCtrl Grid.Row="6" ID="XML_JC_RATIO"        Label="Jet Overcorrection" Unit="%"  UnitWidth="50" Format="n"/>
 
-                            <rx_uc:PlcTitle Grid.Row="6" Grid.Column="0" Header="Web tensions"/>
-                            <Grid Grid.Row="7">
+                            <rx_uc:PlcTitle Grid.Row="7" Grid.Column="0" Header="Web tensions"/>
+                            <Grid Grid.Row="8">
                                 <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER1" Label="Unwinder"     Unit="" UnitWidth="50" Type="ImgCombo" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_1"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
-                            <Grid Grid.Row="8">
+                            <Grid Grid.Row="9">
                                 <TextBlock        Text="Nips Tension"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_NIP_TENSION_1"          Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
-                            <Grid Grid.Row="9">
+                            <Grid Grid.Row="10">
                                 <rx_uc:PlcParCtrl x:Name="CB_RotRW"    ID="PAR_WIND_DIRECTION_WINDER2" Label="Rewinder"     Unit="" UnitWidth="50" Type="ImgCombo" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_2"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="1" />
                             </Grid>
-                            <rx_uc:PlcTitle Grid.Row="10" Header="Roll Diameters"/>
-                            <rx_uc:PlcParCtrl Grid.Row="11" ID="PAR_COREDIAMETER_IN"  Label="Unwinder Core" Unit="mm" UnitWidth="50" Format="1"/>
-                            <rx_uc:PlcParCtrl Grid.Row="12" ID="PAR_COREDIAMETER_OUT" Label="Rewinder Core" Unit="mm" UnitWidth="50" Format="1"/>
-                            <rx_uc:PlcParCtrl Grid.Row="13" ID="PAR_MAXDIAMETER_OUT"  Label="Rewinder Max"  Unit="mm" UnitWidth="50" Format="1"/>
-                            <rx_uc:PlcTitle Grid.Row="14" Header="Corona"/>
-                            <Grid Grid.Row="15">
+                            <rx_uc:PlcTitle Grid.Row="11" Header="Roll Diameters"/>
+                            <rx_uc:PlcParCtrl Grid.Row="12" ID="PAR_COREDIAMETER_IN"  Label="Unwinder Core" Unit="mm" UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcParCtrl Grid.Row="13" ID="PAR_COREDIAMETER_OUT" Label="Rewinder Core" Unit="mm" UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcParCtrl Grid.Row="14" ID="PAR_MAXDIAMETER_OUT"  Label="Rewinder Max"  Unit="mm" UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcTitle Grid.Row="15" Header="Corona"/>
+                            <Grid Grid.Row="16">
                                 <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"           Label="Mode/Power"   Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Corona" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"      Label=""  Unit="%" HorizontalAlignment="Right" Width="100" UnitWidth="50" Format="n" />
                             </Grid>

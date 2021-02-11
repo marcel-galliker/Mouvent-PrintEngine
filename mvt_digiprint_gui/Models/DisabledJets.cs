@@ -123,7 +123,7 @@ namespace RX_DigiPrint.Models
 
         private void AddJet(int jetNumber)
         {
-            if(jetNumber <= 0  || jetNumber > 2048 + 128)
+            if(jetNumber < 0  || jetNumber > 2048 + 128 - 1) // jet number from 0 to 20175!
             {
                 MvtMessageBox.Information("", "Invalid jet Nr: " + jetNumber);
                 return;

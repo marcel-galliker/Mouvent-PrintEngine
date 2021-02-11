@@ -589,6 +589,8 @@ typedef struct SSpoolerCfg
 	INT32	headsPerBoard;
 	UINT32	resetCnt;
 
+	INT32	jc_ratio;
+
 	//--- network -----------------------------
 	char	dataRoot[MAX_PATH];	// network path
 
@@ -1622,6 +1624,7 @@ typedef struct SRxConfig
 		INT32			calib[MAX_SCALES];			
 	} scales;
 	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
+	INT16			jc_ratio;
 	INT16 densityValue[HEAD_BOARD_CNT][HEAD_CNT][MAX_DENSITY_VALUES];
 	UCHAR voltage[HEAD_BOARD_CNT][HEAD_CNT];
 	SiQ500Cfg iQ500Cfg;
