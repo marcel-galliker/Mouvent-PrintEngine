@@ -822,6 +822,11 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Angle-Screw is not existing at Head-No: %d", headAdjustment->headNo+1);
         return;
     }
+    if (headAdjustment->headNo == RX_Config.headsPerColor-1 && headAdjustment->axis >= AXE_DIST)
+    {
+        Error(ERR_CONT, 0, "Last screw of each color is pointless to turn");
+        return;
+    }
     if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
