@@ -49,7 +49,14 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (e.PropertyName.Equals("Units"))
             {
-                if (_Unit!=null) TB_Unit.Text = _Unit.Name;
+                if (_Unit != null)
+                {
+                    // change the displayed value as the unit change
+                    if (RxGlobals.Settings.Units == EUnits.metric) _Unit.Convert = true;
+                    UpdateValue(Value);
+                    if (RxGlobals.Settings.Units == EUnits.metric) _Unit.Convert = false;
+                    TB_Unit.Text = _Unit.Name;
+                }
             }
         }
 
@@ -396,7 +403,7 @@ namespace RX_DigiPrint.Views.UserControls
             set
             {
                 if (value == null) return;
-                if (value != _Value)
+                if (value != _Value || _UpdateValue)
                 {
                     if (_ValueInit == null) _ValueInit = _Value;
                     switch (_Type)
@@ -506,41 +513,43 @@ namespace RX_DigiPrint.Views.UserControls
         {
             get
             {
-                if (_Type==ECtrlType.Combo || _Type==ECtrlType.ImgCombo)
+                if (_Type == ECtrlType.Combo || _Type == ECtrlType.ImgCombo)
                 {
-                    return GetVal(ComboCtrl.SelectedItem).ToString(); 
+                    return GetVal(ComboCtrl.SelectedItem).ToString();
                 }
                 else
                 {
                     if (!TextEditCtrl.Text.Equals("####"))
                     {
-                        if (_Format=='b')
+                        if (_Format == 'b')
                         {
                             int i;
-                            UInt32 n=1, val=0;
+                            UInt32 n = 1, val = 0;
                             string text = TextEditCtrl.Text;
-                            for (i=text.Length-1; i>=0; i--)
+                            for (i = text.Length - 1; i >= 0; i--)
                             {
-                                if (text[i]=='1')  {val += n; n*=2;}
-                                else if (text[i]=='0') n*=2;
+                                if (text[i] == '1') { val += n; n *= 2; }
+                                else if (text[i] == '0') n *= 2;
                             }
                             return val.ToString(new CultureInfo("en-US"));
                         }
-                        else 
+                        else
                         {
-                            string val=TextEditCtrl.Text;
+                            string val = TextEditCtrl.Text;
                             if (_Format == 'n' || _Format == 'f' || _Format == '1')
                             {   // remove formatting spaces, commas (very special!)
-                                for (int i=0; i<val.Length; )
+                                for (int i = 0; i < val.Length;)
                                 {
-                                    if ((int)val[i]==160) val=val.Remove(i,1);
-                                    if ((int)val[i]==27) val=val.Remove(i,1);
-                                    if ((val[i]<'0' || val[i]>'9') && val[i]!='-' && val[i]!='.' && val[i]!=',') val=val.Remove(i,1);
+                                    if ((int)val[i] == 160) val = val.Remove(i, 1);
+                                    if ((int)val[i] == 27) val = val.Remove(i, 1);
+                                    if ((val[i] < '0' || val[i] > '9') && val[i] != '-' && val[i] != '.' && val[i] != ',') val = val.Remove(i, 1);
                                     else i++;
                                 }
+                                double nval = Rx.StrToDouble(TextEditCtrl.Text);
+                                if (_Unit != null) nval /= _Unit.Factor;
+                                val = nval.ToString(new CultureInfo("en-US"));
                             }
-                            if (_Unit==null || _Unit.Factor==1.0) return val.Replace(',', '.');
-                            return val.Replace(',', '.');
+                            return val;
                         }
                     }
                 }
@@ -582,53 +591,25 @@ namespace RX_DigiPrint.Views.UserControls
                     if (!_UpdateValue) Changed = (value!=_ComboValueInit);
                 }
             }
-        }        
+        }
 
         //--- Send ------------------------------------------------------
         public void Send(PlcParPanel panel)
         {
-            if (panel==null) panel = (this as Control).Parent as PlcParPanel;
-            string str=null;
-            if (panel!=null)
+            if (panel == null) panel = (this as Control).Parent as PlcParPanel;
+            string str = null;
+            if (panel != null)
             {
-                if (_Type==ECtrlType.Combo || _Type==ECtrlType.ImgCombo) 
-                    str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, SendValue);
-                else
+                string val = SendValue;
+                if (val != null)
                 {
-                    if (!TextEditCtrl.Text.Equals("####"))
-                    {
-                        if (_Format=='b')
-                        {
-                            int i;
-                            UInt32 n=1, val=0;
-                            string text = TextEditCtrl.Text;
-                            for (i=text.Length-1; i>=0; i--)
-                            {
-                                if (text[i]=='1')  {val += n; n*=2;}
-                                else if (text[i]=='0') n*=2;
-                            }
-                            str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val);
-                        }
-                        else 
-                        {
-                            if (_Format=='n' || _Format=='1' || _Format=='f')
-                            {   
-                                double val=Rx.StrToDouble(TextEditCtrl.Text);
-                                if (_Unit!=null) val /= _Unit.Factor;
-                                str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val.ToString(new CultureInfo("en-US")));
-                            }
-                            else str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, TextEditCtrl.Text);
-                        }
-                    }
-                }
-	            if (str!=null) 
-                {
-            //      Console.WriteLine("PlcPar.send>>{0}<<", str);
-                    RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_VAR, str);         
+                    str = string.Format("{0}\n{1}={2}\n", panel.UnitID, ID, val);
+                    //      Console.WriteLine("PlcPar.send>>{0}<<", str);
+                    RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_VAR, str);
                 }
             }
             Changed = false;
-            _ValueInit      = null; // _Value;
+            _ValueInit = null; // _Value;
             _ComboValueInit = null; // _ComboValue;
         }
 

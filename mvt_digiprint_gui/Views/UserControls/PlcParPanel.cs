@@ -288,7 +288,7 @@ namespace RX_DigiPrint.Views.UserControls
                 if (par!=null)
                 {
                     string val= material.Value(par.ID);
-                    par.Value = val;
+                    par.UpdateValue(val);
                     // _Editing = true;
                 }
                 else

@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Services;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -34,10 +35,26 @@ namespace RX_DigiPrint.Models.Enums
         {
             get 
             { 
-                if (RxGlobals.Settings.Units == EUnits.imperial) return _Factor; 
+                if (RxGlobals.Settings.Units == EUnits.imperial) return _Factor;
+                if (_convert) return 1 / _Factor;
                 return 1.0;
             }
         }
+
+        // use when convert from metric to imperial (change the RxGlobals.Settings.Units)
+        private Boolean _convert = false;
+        public Boolean Convert
+        {
+            get
+            {
+                return _convert;
+            }
+            set
+            {
+                _convert = value;
+            }
+        }
+
 
         //--- Property Name ---------------------------------------
         private string _NameMetric;
