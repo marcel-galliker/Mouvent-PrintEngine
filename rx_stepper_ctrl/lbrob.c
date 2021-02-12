@@ -225,8 +225,6 @@ void lbrob_main(int ticks, int menu)
 {
     int motor;
     int pos, val;
-    static int time;
-    
 
     RX_StepperStatus.posY[0] = _steps_2_micron(motor_get_step(MOTOR_X_0));
     RX_StepperStatus.posY[1] = _steps_2_micron(motor_get_step(MOTOR_X_0)) - CABLE_PURGE_POS_BACK;
@@ -275,7 +273,7 @@ void lbrob_main(int ticks, int menu)
 
     if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
     {
-        if (!(_CmdRunning == CMD_ROB_MOVE_POS && _RobFunction >= rob_fct_screw_cluster && _RobFunction <= rob_fct_screw_head7))
+		if (!((_CmdRunning == CMD_ROB_MOVE_POS || _CmdRunning_old == CMD_ROB_MOVE_POS) && _RobFunction >= rob_fct_screw_cluster && _RobFunction <= rob_fct_screw_head7) || !RX_StepperStatus.robinfo.ref_done)
 		{
 			val = 0;
 			lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
@@ -840,20 +838,26 @@ static void _lbrob_move_to_pos_slow(int cmd, int pos)
 //--- _lbrob_do_reference ----------------------------------------------------------------------
 static void _lbrob_do_reference()
 {
-    _vacuum_on();
     Fpga.par->output &= ~RO_ALL_OUTPUTS;
     _NewCmd = 0;
     RX_StepperStatus.robinfo.moving = TRUE;
     _CmdRunning = CMD_ROB_REFERENCE;
     if (!RX_StepperStatus.robinfo.ref_done)
     {
+        _vacuum_on();
         motor_reset(MOTOR_X_0);
         motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
         RX_StepperStatus.robinfo.ref_done = FALSE;
         motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
     }
+	else if (_CmdRunning_old == CMD_ROB_MOVE_POS && _RobFunction >= rob_fct_screw_cluster && _RobFunction <= rob_fct_screw_head7)
+		motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(3000));
     else
+    {
+        _vacuum_on();
         motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, _micron_2_steps(3000));
+    }
+        
 }
 
 //--- lbrob_handle_ctrl_msg -----------------------------------
@@ -876,7 +880,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         int val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
-        Error(LOG, 0, "Rob Stop");
         break;
 
     case CMD_ROB_REFERENCE:
@@ -1184,8 +1187,8 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             pos = (CABLE_SCREW_POS_BACK + (((int)_RobFunction - (int)rob_fct_screw_cluster) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8);
             if (RX_StepperStatus.posY[0] < pos)
             {
+				_CmdRunning_old = msgId;
                 _lbrob_do_reference();
-                _CmdRunning_old = msgId;
                 return;
             }
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(pos));

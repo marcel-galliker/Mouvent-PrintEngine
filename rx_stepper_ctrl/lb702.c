@@ -50,7 +50,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define MIN_CAP_HEIGHT			7500		// um under Ref height
 
 #define DIST_CAP_WASH			5300		// um -> higher than capping hight
-#define DIST_CAP_SCREW			5100		// um -> higher than capping hight
+#define DIST_CAP_SCREW			5400		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
 
@@ -728,7 +728,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									motor_errors_reset();
                                     RX_StepperStatus.inkinfo.ink_pump_error_left = FALSE;
                                     RX_StepperStatus.inkinfo.ink_pump_error_right = FALSE;
-									_ErrorFlags = 0;
+                                    _ErrorFlags = 0;
+                                    if (RX_StepperStatus.robot_used) robi_lb702_handle_ctrl_msg(INVALID_SOCKET, msgId, NULL);
 									break;
 	
 	case CMD_LIFT_VENT:	break;

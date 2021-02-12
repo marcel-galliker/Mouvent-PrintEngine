@@ -204,7 +204,10 @@ int main(int argc, char* argv[])
 		#endif
 	}
 	//--- main procedure ---------------------------
+    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &RX_Config, READ);
 	setup_config(PATH_USER FILENAME_CFG, &RX_Config, READ);
+    
+    
 	
 	ctrl_update_hostname();
 	

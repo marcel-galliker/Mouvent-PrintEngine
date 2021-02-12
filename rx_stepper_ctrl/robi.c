@@ -373,9 +373,10 @@ static void* receive_thread(void *par)
                                     if (rxMessage.error == MOTOR_TIMEOUTED && RX_RobiStatus.commandRunning[COMMAND0] == MOTOR_MOVE_Z_DOWN)
                                         _ZNotReachedDown = TRUE;
                                     Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
-                                    memset(rxMessage.data, 0x00, sizeof(rxMessage.data));
                                     if (rxMessage.error == COMMUNICATION_INVALID_MESSAGE_LENGTH_ERROR)
-                                        Error(LOG, 0, "Last Command: %d, Len: %d", _LOG_Command, _LOG_Len);
+                                        Error(LOG, 0, "Last Command: %x, Len: %d", _LOG_Command, _LOG_Len);
+                                    memset(rxMessage.data, 0x00, sizeof(rxMessage.data));
+                                    
                                 }
                             }
                             else
