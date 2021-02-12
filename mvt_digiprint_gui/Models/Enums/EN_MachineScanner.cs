@@ -28,9 +28,18 @@ namespace RX_DigiPrint.Models.Enums
             }
         }
 
-       IEnumerator IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator)new RxListEnumerator<RxEnum<int>>(_List);
+        }
+
+        public string GetDisplay(int value)
+        {
+            foreach (RxEnum<int> item in _List)
+            {
+                if (item.Value == value) return item.Display;
+            }
+            return null;
         }
 
     }

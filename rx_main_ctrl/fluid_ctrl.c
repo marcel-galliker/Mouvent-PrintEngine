@@ -31,6 +31,7 @@
 #include "print_ctrl.h"
 #include "drive_ctrl.h"
 #include "step_tts.h"
+#include "machine_ctrl.h"
 #include "fluid_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
@@ -639,8 +640,10 @@ static void _control(int fluidNo)
 				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
 				case ctrl_shutdown_done:
 					_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
-					if (_txrob)	fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
-					else		_send_ctrlMode(no, ctrl_off, TRUE);				
+					if (_txrob && _all_fluids_in_3fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef) && RX_PrinterStatus.printState != ps_printing)
+						fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
+					else
+						_send_ctrlMode(no, ctrl_off, TRUE);
 					break;
 
 			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
@@ -717,6 +720,10 @@ static void _control(int fluidNo)
 												else if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_vacc)
 													step_rob_to_wipe_pos(rob_fct_vacuum_all);
 												_send_ctrlMode(no, ctrl_purge_step3, TRUE);												
+											}
+											else if (!plc_in_purge_pos() && !RX_PrinterStatus.scanner_off && rx_def_is_tx(RX_Config.printer.type))
+											{
+												plc_to_purge_pos();
 											}
 											break;
 
@@ -1016,6 +1023,11 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
         _PurgeFluidNo=no;
         _InitDone = 0;
     }
+
+	if (ctrlMode >= ctrl_flush_night && ctrlMode <= ctrl_empty_step5 && ctrlMode != ctrl_cap)
+	{
+		machine_set_capping_timer(TRUE);
+	}
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;

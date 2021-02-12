@@ -46,3 +46,5 @@ int		plc_is_splicing(void);
 double	plc_get_step_dist_mm(void);
 
 int plc_handle_gui_msg(RX_SOCKET socket, void *pmsg, int len);
+
+EnPlcState plc_get_state(void);
