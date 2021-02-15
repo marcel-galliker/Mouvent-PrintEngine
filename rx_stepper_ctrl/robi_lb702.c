@@ -259,6 +259,7 @@ void robi_lb702_main(int ticks, int menu)
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
                 RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
+                RX_StepperStatus.screwerinfo.screw_in_0 = TRUE;
             }
             else if (RX_StepperStatus.screw_posY < (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
@@ -273,6 +274,7 @@ void robi_lb702_main(int ticks, int menu)
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
                 RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
+                RX_StepperStatus.screwerinfo.screw_in_0 = TRUE;
             }
             else if (RX_StepperStatus.screw_posY > (SCREW_Y_BACK + SCREW_Y_FRONT) / 2)
                 RX_StepperStatus.screwerinfo.screw_tight = TRUE;
@@ -349,7 +351,7 @@ void robi_lb702_main(int ticks, int menu)
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, loc_new_cmd, NULL);
                 break;
             default:
-                Error(LOG, 0, "Command %d not implemented.", loc_new_cmd);
+                Error(LOG, 0, "Command %08x not implemented.", loc_new_cmd);
                 break;
             }
         }
@@ -952,6 +954,7 @@ static void _check_Screwer_Movement()
             ticks = 3;
         robi_set_screw_current(TRUE);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
+        _NewCmd = 0;
     }
 }
 
@@ -975,8 +978,10 @@ static void _set_moving_variables(void)
     RX_StepperStatus.screwerinfo.x_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
-    if (_CmdRunning != CMD_ROBI_SCREW_STEPS) RX_StepperStatus.screwerinfo.screw_loosed = FALSE;
     RX_StepperStatus.screwerinfo.screw_tight = FALSE;
     RX_StepperStatus.screwerinfo.wipe_left_up = FALSE;
     RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
+    
+    if (_CmdRunning != CMD_ROBI_SCREW_STEPS) RX_StepperStatus.screwerinfo.screw_loosed = FALSE;
+    if (_CmdRunning != CMD_ROBI_MOVE_Z_DOWN) RX_StepperStatus.screwerinfo.screw_in_0 = FALSE;
 }

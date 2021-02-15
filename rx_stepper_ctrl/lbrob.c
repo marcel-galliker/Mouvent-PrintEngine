@@ -116,9 +116,11 @@ static EWipeSide _WipeSide = wipe_none;
 static ERobotFunctions _RobFunction = 0;
 static ERobotFunctions _Old_RobFunction = 0;
 static SHeadAdjustment _HeadAdjustment = {0, 0, 0, 0};
-static int      _CmdScrewing = 0;
-static int      _CmdSearchScrews = 0;
+static int _CmdScrewing = 0;
+static int _CmdSearchScrews = 0;
+static int _CmdReleaseScrews = 0;
 static int _SearchScrewNr = 0;
+static int _ReleaseScrewNr = 0;
 static int _Turns = 0;
 
 static int _HeadScrewPos = 0;
@@ -151,6 +153,7 @@ static void _rob_wipe(int msgId, EWipeSide side);
 static void _turn_screw(SHeadAdjustment headAdjustment);
 static int  _check_in_screw_pos(SHeadAdjustment headAdjustment);
 static void _search_all_screws();
+static void _set_screws_to_zero();
 static int  _calculate_average_y_pos(int screwNr);
 static void _set_Screwer_Cfg(SRobotOffsets screw_Cfg);
 static void _handle_waste_pump(void);
@@ -565,7 +568,7 @@ void lbrob_main(int ticks, int menu)
 
     static int j = 0;
 
-    if (!_CmdSearchScrews && !_CmdScrewing && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving && 
+    if (!_CmdSearchScrews && !_CmdScrewing && !_CmdReleaseScrews && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving && 
             !RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right)
         RX_StepperStatus.screwerinfo.screwer_ready = TRUE;
     else
@@ -590,15 +593,26 @@ void lbrob_main(int ticks, int menu)
     if (_CmdSearchScrews)
     {
         _CmdScrewing = 0;
+        _CmdReleaseScrews = 0;
         _search_all_screws();
     }
     else
         _SearchScrewNr = 0;
 
+    if (_CmdReleaseScrews)
+    {
+        _CmdScrewing = 0;
+        _set_screws_to_zero();
+    }
+    else
+        _ReleaseScrewNr = 0;
+
     if (_CmdScrewing)
         _turn_screw(_HeadAdjustment);
     else
         memset(&_HeadAdjustment, 0, sizeof(_HeadAdjustment));
+
+    
 
     _pump_main();
 }
@@ -661,7 +675,8 @@ void lbrob_menu(int help)
         term_printf("t<screw_nr>: Turn <screw_nr> n/6 Turn (n can be choosen by command \"T\")\n");
         term_printf("T<n>: Make <n>/6 turns with the command t\n");
         term_printf("d<n>: Wipe all (n = l: left; n = r : right; n = b: both\n");
-        term_printf("b<n>: Set Speed of Waste pump to <n>%, Actual value %d%\n", _PumpSpeed);;
+        term_printf("b<n>: Set Speed of Waste pump to <n>%, Actual value %d%\n", _PumpSpeed);
+        term_printf("z: Move all Screws to end position\n");
         term_flush();
     }
     else
@@ -751,6 +766,9 @@ void lbrob_handle_menu(char *str)
         break;
     case 'f':
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_SEARCH_ALL_SCREWS, NULL);
+        break;
+    case 'z':
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RELEASE_ALL_SCREWS, NULL);
         break;
     case 'a':
         switch (str[1])
@@ -875,6 +893,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
+        _CmdReleaseScrews = 0;
         _ScrewTime = 0;
         RX_StepperStatus.robinfo.ref_done = FALSE;
         int val = 0;
@@ -1033,6 +1052,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_SEARCH_ALL_SCREWS:
         _search_all_screws();
+        break;
+        
+    case CMD_RELEASE_ALL_SCREWS:
+        _set_screws_to_zero();
         break;
 
     case CMD_CFG_SCREW_POS:
@@ -1417,11 +1440,37 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 {
                     RX_StepperStatus.screwclusters[headAdjustment.printbarNo].posX = RX_StepperStatus.screw_posX;
                     RX_StepperStatus.screwclusters[headAdjustment.printbarNo].posY = RX_StepperStatus.screw_posY;
+                    for (i = headAdjustment.headNo + 1; i < HEADS_PER_COLOR; i++)
+                    {
+                        if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posY)
+                            difference = (RX_StepperStatus.screw_posY - RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[headAdjustment.printbarNo].posY);
+                        else
+                            difference = 0;
+                        if (RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_ANGLE].posY)
+                            RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_ANGLE].posY += difference;
+                        if (RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY)
+                            RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY += difference;
+                    }
                 }
                 else
                 {
                     RX_StepperStatus.screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][headAdjustment.axis].posX = RX_StepperStatus.screw_posX;
                     RX_StepperStatus.screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][headAdjustment.axis].posY = RX_StepperStatus.screw_posY;
+                    
+                    if (headAdjustment.axis == AXE_DIST)
+                    {
+                        for (i = headAdjustment.headNo + 1; i < HEADS_PER_COLOR; i++)
+                        {
+                            if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][AXE_DIST].posY)
+                                difference = (RX_StepperStatus.screw_posY - RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[headAdjustment.printbarNo][headAdjustment.headNo][AXE_DIST].posY);
+                            else
+                                difference = 0;
+                            if (RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_ANGLE].posY)
+                                RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_ANGLE].posY += difference;
+                            if (i != (HEADS_PER_COLOR - 1) && RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY)
+                                RX_StepperStatus.screwpositions[headAdjustment.printbarNo][i][AXE_DIST].posY += difference;
+                        }
+                    }
                 }
                 _CmdScrewing++;
                 RX_StepperStatus.screwerinfo.screwed = TRUE;
@@ -1606,43 +1655,212 @@ static void _search_all_screws()
     }
 }
 
-//--- _lbrob_motor_test ---------------------------------
-static void _lbrob_motor_test(int motorNo, int steps)
+//---  _set_screws_to_zero
+static void _set_screws_to_zero(void)
 {
-    if (motorNo <= 1) return;
+    static int correction_value = 0;
+    static int max_Wait_Time = 40000; // ms
+    static int max_Wait_Time_Sledge = 100000; // ms
+    static int max_Wait_Time_Screw = 180000; // ms
+    /*int test;
+    int pos_min;*/
+    int pos;
     
-    int motors = 1 << motorNo;
-    SMovePar par;
-
-    memset(&par, 0, sizeof(SMovePar));
-
-    if (motorNo == 4)
+    if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
-        par.speed = 2000;
-        par.accel = 4000;
-        par.current_acc = 420.0;
-        par.current_run = 420.0;
-        par.enc_bwd = TRUE;
-        par.encCheck = chk_off;
+        if (_ReleaseScrewNr >= HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)
+        {
+            Error(ERR_CONT, 0, "Screw %d does not exist", _ReleaseScrewNr - 1);
+            _CmdReleaseScrews = 0;
+            _ReleaseScrewNr = 0;
+            return;
+        }
 
-        _CmdRunning = 1; // TEST
-        RX_StepperStatus.info.moving = TRUE;
+        int printbar = _ReleaseScrewNr / (HEADS_PER_COLOR * SCREWS_PER_HEAD);
+        int front_screw = (_ReleaseScrewNr + 1) % SCREWS_PER_HEAD;
+        int head_nr = (((_ReleaseScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) / COLORS_PER_STEPPER) - 1;
+        /*int head_Dist = (abs(CABLE_SCREW_POS_FRONT) - abs(CABLE_SCREW_POS_BACK)) / 8;
+        int screw_Dist = 16400; // um*/
 
-        motors_config(motors, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
-        motors_move_by_step(motors, &par, steps, FALSE);
+        if (_CmdReleaseScrews == 0) correction_value = 0;
+        if (_ScrewTime && rx_get_ticks() > _ScrewTime)
+        {
+            Error(ERR_CONT, 0, "Robot stock in zeroing screw step %d at screw %d", _CmdReleaseScrews, _ReleaseScrewNr);
+            _ScrewTime = 0;
+            _CmdReleaseScrews = 0;
+            return;
+        }
+
+        switch (_CmdReleaseScrews)
+        {
+        case 0:
+            pos = head_nr + rob_fct_screw_head0;
+            if (pos != _HeadScrewPos)
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
+            _CmdReleaseScrews++;
+            _ScrewTime = rx_get_ticks() + max_Wait_Time_Sledge;
+            break;
+        case 1:
+            if (RX_StepperStatus.robinfo.ref_done && _HeadScrewPos == head_nr + rob_fct_screw_head0)
+            {
+                if (_ReleaseScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
+                {
+                    if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posY)
+                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_ReleaseScrewNr / (HEADS_PER_COLOR * SCREWS_PER_HEAD)].posY + correction_value;
+                    else
+                        pos = SCREW_Y_FRONT + correction_value;
+                }
+                else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[printbar][head_nr][front_screw].posY)
+                    pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[printbar][head_nr][front_screw].posY + correction_value;
+                else if (front_screw)
+                    pos = SCREW_Y_FRONT + correction_value;
+                else
+                    pos = SCREW_Y_BACK + correction_value;
+                
+                _ScrewTime = rx_get_ticks() + max_Wait_Time;
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
+                _CmdReleaseScrews++;
+            }
+            break;
+        case 2:
+            if (RX_StepperStatus.screwerinfo.y_in_pos)
+            {
+                if (_ReleaseScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
+                {
+                    if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posX)
+                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posX;
+                    else if (printbar == LEFT)
+                        pos = SCREW_X_LEFT;
+                    else
+                        pos = SCREW_X_RIGHT;
+                }
+                else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[printbar][head_nr][front_screw].posX)
+                    pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[printbar][head_nr][front_screw].posX;
+                else if (printbar == LEFT)
+                    pos = SCREW_X_LEFT;
+                else
+                    pos = SCREW_X_RIGHT;
+                _ScrewTime = rx_get_ticks() + max_Wait_Time;
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
+                _CmdReleaseScrews++;
+            }
+            break;
+        case 3:
+            if (RX_StepperStatus.screwerinfo.x_in_pos)
+            {
+                _ScrewTime = rx_get_ticks() + max_Wait_Time;
+                if (!RX_StepperStatus.info.z_in_screw) lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
+                _CmdReleaseScrews++;
+            }
+            break;
+
+        case 4:
+            if (RX_StepperStatus.info.z_in_screw)
+            {
+                _ScrewTime = rx_get_ticks() + max_Wait_Time;
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
+                _CmdReleaseScrews++;
+                _TimeSearchScrew = rx_get_ticks();
+            }
+            break;
+            
+        case 5:
+            if (RX_StepperStatus.screwerinfo.z_in_up)
+            {
+                correction_value = 0;
+                int screwSteps;
+                if (front_screw)
+                {
+                    screwSteps = 6*35;
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                }
+                else
+                {
+                    screwSteps = 6*20;
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                }
+
+                _CmdReleaseScrews++;
+                _ScrewTime = rx_get_ticks() + max_Wait_Time_Screw;
+            }
+            else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
+            {
+                _TimeSearchScrew = 0;
+                if (abs(correction_value) >= 3000)
+                {
+                    Error(ERR_CONT, 0, "Screw %d of Head %d of Printhead %d not found", front_screw, head_nr, printbar);
+                    _CmdScrewing = 0;
+                    break;
+                }
+                else if (correction_value >= 0)
+                    correction_value = (correction_value + 500) * (-1);
+                else
+                    correction_value *= (-1);
+                _CmdReleaseScrews = 1;
+                _ScrewTime = rx_get_ticks() + max_Wait_Time;
+            }
+            
+        case 6:
+            if (RX_StepperStatus.screwerinfo.screw_in_0)
+            {
+                int i, difference;
+                if (_ReleaseScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
+                {
+                    RX_StepperStatus.screwclusters[printbar].posX = RX_StepperStatus.screw_posX;
+                    RX_StepperStatus.screwclusters[printbar].posY = RX_StepperStatus.screw_posY;
+                    
+                    for (i = head_nr + 1; i < HEADS_PER_COLOR; i++)
+                    {
+                        if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posY)
+                            difference = (RX_StepperStatus.screw_posY - RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posY);
+                        else
+                            difference = 0;
+                        if (RX_StepperStatus.screwpositions[printbar][i][AXE_ANGLE].posY)
+                            RX_StepperStatus.screwpositions[printbar][i][AXE_ANGLE].posY += difference;
+                        if (RX_StepperStatus.screwpositions[printbar][i][AXE_DIST].posY)
+                            RX_StepperStatus.screwpositions[printbar][i][AXE_DIST].posY += difference;
+                    }
+                }
+                else
+                {
+                    RX_StepperStatus.screwpositions[printbar][head_nr][front_screw].posX = RX_StepperStatus.screw_posX;
+                    RX_StepperStatus.screwpositions[printbar][head_nr][front_screw].posY = RX_StepperStatus.screw_posY;
+                    
+                    if (front_screw)
+                    {
+                        for (i = head_nr + 1; i < HEADS_PER_COLOR; i++)
+                        {
+                            if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[printbar][head_nr][AXE_DIST].posY)
+                                difference = (RX_StepperStatus.screw_posY - RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions[printbar][head_nr][AXE_DIST].posY);
+                            else
+                                difference = 0;
+                            if (RX_StepperStatus.screwpositions[printbar][i][AXE_ANGLE].posY)
+                                RX_StepperStatus.screwpositions[printbar][i][AXE_ANGLE].posY += difference;
+                            if (i != (HEADS_PER_COLOR - 1) && RX_StepperStatus.screwpositions[printbar][i][AXE_DIST].posY)
+                                RX_StepperStatus.screwpositions[printbar][i][AXE_DIST].posY += difference;
+                        }
+                    }
+                }
+
+                _ScrewTime = 0;
+                _CmdReleaseScrews = 0;
+                _ReleaseScrewNr++;
+                _TimeSearchScrew = 0;
+                correction_value = 0;
+                if (_ReleaseScrewNr < 4 * HEADS_PER_COLOR)
+                {
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RELEASE_ALL_SCREWS, NULL);
+                }
+                else
+                {
+                    _ReleaseScrewNr = 0;
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+                    Error(LOG, 0, "All Screws set to 0");
+                }
+            }
+            break;
+        }
     }
-    else if (motorNo >= 2 && motorNo <= 3)
-    {
-        par.speed = 6000;
-        par.accel = 10000;
-        par.current_acc = 280.0;
-        par.current_run = 280.0;
-        par.encCheck = chk_off;
-
-        motors_config(motors, CURRENT_HOLD, 0, 0, STEPS);
-        motors_move_by_step(motors, &par, steps, FALSE);
-    }
-    
 }
 
 //--- _check_in_screw_pos --------------------------------------
@@ -1902,4 +2120,43 @@ static void _vacuum_on()
 static void _vacuum_off()
 {
     if (_WastePumpTimer) _WastePumpTimer = rx_get_ticks();
+}
+
+//--- _lbrob_motor_test ---------------------------------
+static void _lbrob_motor_test(int motorNo, int steps)
+{
+    if (motorNo <= 1) return;
+
+    int motors = 1 << motorNo;
+    SMovePar par;
+
+    memset(&par, 0, sizeof(SMovePar));
+
+    if (motorNo == 4)
+    {
+        par.speed = 2000;
+        par.accel = 4000;
+        par.current_acc = 420.0;
+        par.current_run = 420.0;
+        par.enc_bwd = TRUE;
+        par.encCheck = chk_off;
+
+        _CmdRunning = 1; // TEST
+        RX_StepperStatus.info.moving = TRUE;
+
+        motors_config(motors, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV,
+                      STEPS);
+        motors_move_by_step(motors, &par, steps, FALSE);
+    }
+    else if (motorNo >= 2 && motorNo <= 3)
+    {
+        par.speed = 6000;
+        par.accel = 10000;
+        par.current_acc = 280.0;
+        par.current_run = 280.0;
+        par.encCheck = chk_off;
+
+        motors_config(motors, CURRENT_HOLD, 0, 0, STEPS);
+        motors_move_by_step(motors, &par, steps, FALSE);
+    }
 }

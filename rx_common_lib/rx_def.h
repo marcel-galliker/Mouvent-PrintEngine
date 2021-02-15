@@ -1522,7 +1522,7 @@ typedef struct EScrewerInfo
     UINT32 screwer_ready : 1;			//  0x00004000
     UINT32 wipe_left_up : 1;			//	0x00008000
     UINT32 wipe_right_up : 1;			//	0x00010000
-    UINT32 r_info_17 : 1;				//	0x00020000
+    UINT32 screw_in_0 : 1;				//	0x00020000
     UINT32 r_info_18 : 1;				//	0x00040000
     UINT32 r_info_19 : 1;				//	0x00080000
     UINT32 r_info_20 : 1;				//	0x00100000
