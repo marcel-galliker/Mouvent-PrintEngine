@@ -1269,13 +1269,6 @@ typedef struct SDriveStat
     INT32	actualpoint;
 } SDriveStat;
 
-typedef enum ERobotVaccumState
-{
-    rob_vacuum_1_to_4,
-    rob_vacuum_5_to_8,
-    rob_vacuum_all,
-} ERobotVacuumState;
-
 typedef struct SScrewPositions
 {
     INT32 posX;
