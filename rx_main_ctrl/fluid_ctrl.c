@@ -646,7 +646,7 @@ static void _control(int fluidNo)
 				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
 				case ctrl_shutdown_done:
 					_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
-					if ((_txrob || lbrob) && _all_fluids_in_3fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef)	
+					if ((_txrob || lbrob) && _all_fluids_in_3fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef))	
 						fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 					else					
 						_send_ctrlMode(no, ctrl_off, TRUE);					
