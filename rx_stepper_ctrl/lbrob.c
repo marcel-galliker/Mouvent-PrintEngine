@@ -121,7 +121,7 @@ static int      _CmdSearchScrews = 0;
 static int _SearchScrewNr = 0;
 static int _Turns = 0;
 
-static int _HeadPos = 0;
+static int _HeadScrewPos = 0;
 
 static int _CmdRunning_old = 0;
 
@@ -251,7 +251,7 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.vacuum_done = FALSE;
         RX_StepperStatus.robinfo.wipe_done = FALSE;
         RX_StepperStatus.robinfo.x_in_purge4ever = FALSE;
-        _HeadPos = FALSE;
+        _HeadScrewPos = FALSE;
     }
 
     if (RX_StepperStatus.info.moving)
@@ -267,7 +267,7 @@ void lbrob_main(int ticks, int menu)
     if (!RX_StepperStatus.robinfo.ref_done)
     {
         RX_StepperStatus.screwerinfo.screws_found = FALSE;
-        _HeadPos = FALSE;
+        _HeadScrewPos = FALSE;
     }
     
 
@@ -444,7 +444,7 @@ void lbrob_main(int ticks, int menu)
             case rob_fct_screw_head5:
             case rob_fct_screw_head6:
             case rob_fct_screw_head7:
-                _HeadPos = _RobFunction;
+                _HeadScrewPos = _RobFunction;
                 _CmdRunning = FALSE;
                 break;
             case rob_fct_vacuum:
@@ -1077,7 +1077,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             }
             return;
         }
-        else if (!RX_StepperStatus.robinfo.ref_done || (_RobFunction == rob_fct_cap && RX_StepperStatus.info.x_in_cap) || 
+        else if (!RX_StepperStatus.robinfo.ref_done || (_RobFunction == rob_fct_cap && (RX_StepperStatus.info.x_in_cap || _HeadScrewPos)) || 
                      (RX_StepperStatus.robinfo.purge_ready && _RobFunction != rob_fct_wash && _RobFunction != rob_fct_vacuum && _RobFunction != rob_fct_wipe) ||
                      (_RobFunction == rob_fct_purge4ever && RX_StepperStatus.info.x_in_cap && !RX_StepperStatus.robinfo.x_in_purge4ever))
         {
@@ -1273,7 +1273,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             else
             {
                 pos = headAdjustment.headNo + rob_fct_screw_head0;
-                if (_HeadPos != pos)
+                if (_HeadScrewPos != pos)
                     lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
                 _CmdScrewing++;
                 _ScrewTime = rx_get_ticks() + max_Wait_Time_Sledge;
@@ -1282,7 +1282,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             break;
 
         case 1:
-            if (RX_StepperStatus.robinfo.ref_done && _HeadPos == headAdjustment.headNo + rob_fct_screw_head0)
+            if (RX_StepperStatus.robinfo.ref_done && _HeadScrewPos == headAdjustment.headNo + rob_fct_screw_head0)
             {
                 if (headAdjustment.headNo == -1)
                 {
@@ -1478,13 +1478,13 @@ static void _search_all_screws()
         {
         case 0:
             pos = head_nr + rob_fct_screw_head0;
-            if (pos != _HeadPos)
+            if (pos != _HeadScrewPos)
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
             _CmdSearchScrews++;
             _ScrewTime = rx_get_ticks() + max_Wait_Time_Sledge;
             break;
         case 1:
-            if (RX_StepperStatus.robinfo.ref_done && _HeadPos == head_nr + rob_fct_screw_head0)
+            if (RX_StepperStatus.robinfo.ref_done && _HeadScrewPos == head_nr + rob_fct_screw_head0)
             {
                 if (_SearchScrewNr == 0)
                     pos = SCREW_Y_FRONT + correction_value;
