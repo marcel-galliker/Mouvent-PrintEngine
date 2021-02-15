@@ -206,6 +206,27 @@ typedef enum EWipeSide
     wipe_all,	// 3
 } EWipeSide;
 
+typedef enum
+{
+	plc_undef,		//	00
+	plc_error,		//	01
+	plc_bootup,		//	02
+	plc_stop,		//	03
+	plc_prepare,	//	04
+	plc_pause,		//	05
+	plc_run,		//	06
+	plc_setup,		//	07
+	plc_warmup,		//	08
+	plc_webin,		//	09
+	plc_washing,	//	10
+	plc_cleaning,	//	11
+	plc_glue,		//	12
+	plc_referencing,//	13
+	plc_service,	//	14
+	plc_webout,		//  15
+	plc_maintenance	//  16
+} EnPlcState;
+
 typedef struct SLogItem
 {
 	UINT8			deviceType;
@@ -1305,6 +1326,13 @@ typedef enum ERobotFunctions
     rob_fct_screw_head7,	// 27: Screw Pos head 7
 } ERobotFunctions;
 
+typedef enum ERobotVaccumState
+{
+	rob_vacuum_1_to_4,
+	rob_vacuum_5_to_8,
+	rob_vacuum_all,
+} ERobotVacuumState;
+	
 //--- Stepper Board --------------------
 typedef struct SStepperCfg
 {

@@ -27,3 +27,4 @@ int		machine_pause_printing(int fromGui);
 int		machine_stop_printing(void);
 int		machine_abort_printing(void);
 int		machine_clean(void);
+void	machine_set_capping_timer(int state);

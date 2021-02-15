@@ -24,6 +24,7 @@
 #include "fluid_ctrl.h"
 #include "step_tts.h"
 #include "drive_ctrl.h"
+#include "machine_ctrl.h"
 
 
 #define CAPPING_TIMEOUT	(20*60*1000)	// ms 
@@ -84,8 +85,8 @@ int		machine_tick(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type) || RX_StepperStatus.robot_used)
 	{
-		if (RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.robinfo.auto_cap) _CappingTimer = 0;  // reset timer if already in cap
-        if (RX_StepperStatus.info.z_in_screw && _CappingTimer) _CappingTimer = rx_get_ticks()+CAPPING_TIMEOUT;
+		if (RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.robinfo.auto_cap) machine_set_capping_timer(FALSE);  // reset timer if already in cap
+        else if (plc_get_state() == plc_error || (RX_StepperStatus.info.z_in_screw && _CappingTimer)) machine_set_capping_timer(TRUE);	// start timer as long as machine is in error state
 
 		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks() && !RX_PrinterStatus.door_open)
 		{
@@ -171,7 +172,7 @@ UINT32	machine_get_scanner_pos(void)
 int		machine_start_printing(void)
 {
 	TrPrintfL(TRUE, "machine_start_printing printState=%d", RX_PrinterStatus.printState);
-	_CappingTimer=0;
+	machine_set_capping_timer(FALSE);
 
 	switch(_MInterface) 
 	{
@@ -187,7 +188,7 @@ int		machine_start_printing(void)
 //--- machine_pause_printing ----------------------
 int		machine_pause_printing(int fromGui)
 {
-	if (_CappingTimer==0) _CappingTimer=rx_get_ticks()+CAPPING_TIMEOUT;
+	machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;
@@ -200,7 +201,7 @@ int		machine_pause_printing(int fromGui)
 //--- machine_stop_printing -----------------------
 int		machine_stop_printing(void)
 {
-	if (_CappingTimer==0) _CappingTimer=rx_get_ticks()+CAPPING_TIMEOUT;
+	machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
 	{
 	case mi_none:	return enc_stop_printing();
@@ -214,7 +215,7 @@ int		machine_stop_printing(void)
 //--- machine_abort_printing -----------------------
 int		machine_abort_printing(void)
 {
-	if (_CappingTimer==0) _CappingTimer=rx_get_ticks()+CAPPING_TIMEOUT;
+	machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
 	{
 	case mi_none:	return enc_abort_printing();
@@ -237,4 +238,13 @@ int		machine_clean(void)
 	case mi_plc:	return plc_clean();
 	}
 	return REPLY_OK;
+}
+
+//--- machine_set_capping_timer -----------------------------------
+void machine_set_capping_timer(int state)
+{
+	if (state == TRUE)
+		_CappingTimer = rx_get_ticks() + CAPPING_TIMEOUT;
+	else
+		_CappingTimer = 0;
 }

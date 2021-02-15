@@ -57,27 +57,6 @@ typedef struct
 	double  distToStop;
 } SPlcPar;
 
-typedef enum
-{
-	plc_undef,		//	00
-    plc_error,		//	01
-    plc_bootup,		//	02
-    plc_stop,		//	03
-    plc_prepare,	//	04
-    plc_pause,		//	05
-    plc_run,		//	06
-    plc_setup,		//	07
-    plc_warmup,		//	08
-    plc_webin,		//	09
-    plc_washing,	//	10
-    plc_cleaning,	//	11
-    plc_glue,		//	12
-    plc_referencing,//	13
-    plc_service,	//	14
-	plc_webout,		//  15
-	plc_maintenance	//  16
-} EnPlcState;
-
 static char* _PlcModeOfState[] =
 {
 	"", // plc_undef,		//	00
@@ -633,7 +612,7 @@ int plc_to_fill_cap_pos(void)
     {
         if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_FILL_CAP");
+		_plc_set_command("", "CMD_SLIDE_TO_FILL_CAP");
     }
 	return REPLY_OK;
 }
@@ -645,7 +624,7 @@ int	plc_to_purge_pos(void)
     {
 		if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_PURGE");
+		_plc_set_command("", "CMD_SLIDE_TO_PURGE");
     }
 	return REPLY_OK;
 }
@@ -657,7 +636,7 @@ int	plc_to_wipe_pos(void)
     {
         if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
+		_plc_set_command("", "CMD_SLIDE_TO_WIPE");
     }
 	return REPLY_OK;
 }
@@ -669,7 +648,7 @@ int	plc_to_cap_pos(void)
 	{
         if (_PlcState==plc_error) plc_error_reset();
 		lc_set_value_by_name_UINT32(UnitID ".STA_HEAD_IS_UP", RX_StepperStatus.info.scannerEnable);	    
-		_plc_set_command("CMD_PRODUCTION", "CMD_SLIDE_TO_WIPE");
+		_plc_set_command("", "CMD_SLIDE_TO_WIPE");
 		step_set_vent(FALSE);			
 	}
 	return REPLY_OK;
@@ -1827,6 +1806,12 @@ int	 plc_in_wipe_pos(void)
 		return (state==scan_wipe || state==scan_capping);
 	}
 	return TRUE;
+}
+
+//--- plc_get_state -------------------------------------
+EnPlcState plc_get_state(void)
+{
+	return _PlcState;
 }
 
 //--- plc_thread ---------------------------------------------

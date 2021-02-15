@@ -31,6 +31,7 @@
 #include "print_ctrl.h"
 #include "drive_ctrl.h"
 #include "step_tts.h"
+#include "machine_ctrl.h"
 #include "fluid_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
@@ -619,7 +620,6 @@ static void _control(int fluidNo)
 	static int	_txrob;
     static int j = 0;
     static UINT32 _flushedNeeded = 0x00;
-
 	int i;
     for (i = 0; i < RX_Config.inkSupplyCnt; i++)
     {
@@ -646,9 +646,12 @@ static void _control(int fluidNo)
 				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
 				case ctrl_shutdown_done:
 					_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
-					if (_txrob || lbrob)	fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
-					else					_send_ctrlMode(no, ctrl_off, TRUE);					
+					if ((_txrob || lbrob) && _all_fluids_in_3fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef)	
+						fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
+					else					
+						_send_ctrlMode(no, ctrl_off, TRUE);					
 					break;	
+
 			//	case ctrl_check_step0:	_send_ctrlMode(no, ctrl_off, TRUE);				break;
 				case ctrl_check_step0:	if (lbrob && even_number_of_colors) steplb_rob_to_fct_pos(no/2, rob_fct_cap);
                                         else if (lbrob && !even_number_of_colors) steplb_rob_to_fct_pos((no+1)/2, rob_fct_cap);
@@ -762,6 +765,10 @@ static void _control(int fluidNo)
 													step_rob_to_wipe_pos(rob_fct_vacuum_all);
 												_send_ctrlMode(no, ctrl_purge_step3, TRUE);												
                                                 j = 0;
+											}
+											else if (!plc_in_purge_pos() && !RX_PrinterStatus.scanner_off && rx_def_is_tx(RX_Config.printer.type))
+											{
+												plc_to_purge_pos();
 											}
 											break;
 
@@ -1179,6 +1186,11 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	{
 		_PurgeFluidNo=no;
 		_InitDone = 0;
+	}
+	
+	if (ctrlMode >= ctrl_flush_night && ctrlMode <= ctrl_empty_step5 && ctrlMode != ctrl_cap)
+	{
+		machine_set_capping_timer(TRUE);
 	}
 
     _FluidCtrlMode = ctrlMode;
