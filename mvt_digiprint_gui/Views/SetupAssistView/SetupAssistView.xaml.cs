@@ -52,9 +52,9 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			int no;
 			for (no=-1; no<RxGlobals.StepperStatus.Length; no++)
 			{
-				StepperGrid.Children.Add(_StepTextBox(no, 0, "Screwing"));
-				StepperGrid.Children.Add(_StepTextBox(no, 1, "Screwed"));
-				StepperGrid.Children.Add(_StepTextBox(no, 2, "ScrewBlocked"));
+				StepperGrid.Children.Add(_StepTextBox(no, 0, "ScrewCnt"));
+				StepperGrid.Children.Add(_StepTextBox(no, 1, "ScrewerReady"));
+				StepperGrid.Children.Add(_StepTextBox(no, 2, "ScrewedOk"));
 			}
 		}
 

@@ -71,8 +71,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
 			return 	((ECamFunctionState)value==ECamFunctionState.printing 
-				  || (ECamFunctionState)value==ECamFunctionState.runningCam
-				  || (ECamFunctionState)value==ECamFunctionState.runningRob);
+				  || (ECamFunctionState)value==ECamFunctionState.runningCam);
 		}
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {

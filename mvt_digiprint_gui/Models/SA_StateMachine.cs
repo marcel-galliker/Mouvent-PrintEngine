@@ -47,34 +47,30 @@ namespace RX_DigiPrint.Models
 
 		private void SA_StateMachine_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
-			int no;
-			for (no=0; no<RxGlobals.StepperStatus.Length; no++)
+			for (int no=0; no<RxGlobals.StepperStatus.Length; no++)
 			{
 				if (sender==RxGlobals.StepperStatus[no])
 				{
+					StepperStatus stepper = RxGlobals.StepperStatus[no];
 					Console.WriteLine("Stepper[{0}].{1}={2}", no, e.PropertyName, sender.GetType().GetProperty(e.PropertyName).GetValue(sender, null));
-					if (e.PropertyName.Equals("Screwed") || e.PropertyName.Equals("ScrewBlocked"))
+					if (e.PropertyName.Equals("ScrewCnt") && _Actions!=null)
 					{
-						if ((bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender, null))
-						{
-							StepperStatus stepper = RxGlobals.StepperStatus[no];
-							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB PropertyChanged screwed={0}, blocked={1} ", stepper.Screwed, stepper.ScrewBlocked)));
-							if (_Actions==null) return;
-							foreach(SA_Action action in _Actions)
-							{	
-								if (action.StepperNo==no && action.State==ECamFunctionState.runningRob)
-								{
-									_RobotRunning[no]=false;
-									RxGlobals.Events.AddItem(new LogItem(string.Format("ROB END Screwed={0}, blocked={1} ", stepper.Screwed, stepper.ScrewBlocked)));
-									if (stepper.Screwed)			action.State = ECamFunctionState.done;
-									else if (stepper.ScrewBlocked)  action.State = ECamFunctionState.error;
-									break;
-								}
+						foreach(SA_Action action in _Actions)
+						{	
+							if (action.StepperNo==no && action.State==ECamFunctionState.runningRob)
+							{
+								_RobotRunning[no]=false;
+								RxGlobals.Events.AddItem(new LogItem(string.Format("ROB END ScrewCnt={0}, ScrewedOk={1} ", stepper.ScrewCnt, stepper.ScrewedOk)));
+								if (stepper.ScrewedOk) action.State = ECamFunctionState.done;
+								else				   action.State = ECamFunctionState.error;
+								break;
 							}
-
-							_NextRobotCmd(no);
 						}
+
+						_NextRobotCmd(no);
 					}
+					if (e.PropertyName.Equals("ScrewerReady") && _Actions!=null && stepper.ScrewerReady)
+						_NextRobotCmd(no);
 					return;
 				}
 			}
@@ -88,24 +84,31 @@ namespace RX_DigiPrint.Models
 
 			StepperStatus stepper = RxGlobals.StepperStatus[stepperNo];
 
+			if (!stepper.ScrewerReady) return;
+
 			foreach(SA_Action action in _Actions)
 			{	
 				if (action.StepperNo==stepperNo && action.State==ECamFunctionState.waitRob)
 				{
 					TcpIp.SHeadAdjustmentMsg msg = new  TcpIp.SHeadAdjustmentMsg();
 
-					_RobotRunning[stepperNo] = true;
-
-					msg.printbarNo  = _Action.PrintbarNo;
-					msg.headNo      = _Action.HeadNo;
+					msg.printbarNo  = action.PrintbarNo;
+					msg.headNo      = action.HeadNo;
 					if      (action.Function==ECamFunction.CamMeasureAngle)  msg.axis = 0;
 					else if (action.Function==ECamFunction.CamMeasureStitch) msg.axis = 1;
 					msg.steps       = (Int32)(action.Correction * 6.0 + 0.5);
-					action.State	= ECamFunctionState.runningRob;
-					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
+					if (msg.steps==0)
+					{
+						action.State	= ECamFunctionState.done;
+					}
+					else
+					{
+						_RobotRunning[stepperNo] = true;
 
-					RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, steps={1}", msg.headNo, msg.steps)));
-
+						action.State	= ECamFunctionState.runningRob;
+						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
+						RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, steps={1}", msg.headNo, msg.steps)));
+					}
 					return;
 				}
 			}
@@ -121,6 +124,8 @@ namespace RX_DigiPrint.Models
 		public List<SA_Action> Start()
 		{
 			int color, n;
+
+			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
@@ -619,7 +624,11 @@ namespace RX_DigiPrint.Models
 			}
 			else
 			{
-				if (_Actions[_ActionIdx-1].Function==ECamFunction.CamConfirmFocus) _StartCamFunction();
+				if (_Actions[_ActionIdx-1].Function==ECamFunction.CamConfirmFocus)
+				{
+					_Action.ScanMoveDone = _Action.WebMoveDone = true;
+					_StartCamFunction();
+				}
 				else
 				{
 					if (_Action.HeadNo==0) RxGlobals.SetupAssist.ScanReference();
@@ -677,7 +686,7 @@ namespace RX_DigiPrint.Models
 			{
 				SA_Action action=_Actions[_StitchIdx+i];
 				action.SendCorrection();
-				action.State = ECamFunctionState.done;
+				action.State = ECamFunctionState.waitRob;
 			}
 			ActionDone();
 		}
