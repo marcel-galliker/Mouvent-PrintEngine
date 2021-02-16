@@ -1631,8 +1631,9 @@ typedef struct SStepperStat
 	
 	INT32		adjustmentProgress;
 	UINT32		alive[2];
+    INT32		screw_count;
 
-	INT32			inputs;
+    INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
     SScrewPositions screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
     SScrewPositions screwclusters[2];  // 1. printbarNo, 2. headNo, 3. axis

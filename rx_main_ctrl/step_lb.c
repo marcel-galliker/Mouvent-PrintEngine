@@ -71,9 +71,7 @@ static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no);
 
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET psocket)
-{
-	int i;
-	
+{	
 	setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);
 	if (no>=0 && no<STEPPER_CNT)
 	{
@@ -82,8 +80,16 @@ void steplb_init(int no, RX_SOCKET psocket)
 	}
 	memset(_Status, 0, sizeof(_Status));
 	// All steppers board variables reset
-	for (i = 0; i < STEPPER_CNT; i++) _StatReadCnt[i] = 0;
+	for (int i = 0; i < STEPPER_CNT; i++) _StatReadCnt[i] = 0;
     RX_StepperStatus.robinfo.auto_cap = TRUE;
+
+    for (int i = 0; i < STEPPER_CNT; i++)
+    {
+        for (int j = 0; j < MAX_HEAD_DIST; j++)
+        {
+            _HeadAdjustmentBuffer[i][j].printbarNo = -1;
+        }
+    }
 }
 
 //--- steplb_handle_gui_msg------------------------------------------------------------------
@@ -805,13 +811,13 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     {
         Error(ERR_CONT, 0, "Invalid current screwposition value");
         return;
-    }
+    }/*
     if (headAdjustment->steps == 0)
     {
         Error(LOG, 0, "Screw of Printbar %d, Head %d and Axis %d moves only %d Steps, which will not be made", 
               headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, headAdjustment->steps);
         return;
-    }
+    }*/
     if (headAdjustment->printbarNo < 0 || headAdjustment->printbarNo >= RX_Config.colorCnt)
     {
         Error(ERR_CONT, 0, "Printbar %d is not existing", headAdjustment->printbarNo+1);
@@ -862,7 +868,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     else
         stepperno = (headAdjustment->printbarNo+1) / 2;
     
-    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].steps && _Status[stepperno].info.z_in_screw))
+    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw))
     {
         _HeadAdjustment[stepperno] = *headAdjustment;
         headAdjustment->printbarNo %= 2;
@@ -874,10 +880,10 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         
         for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperno]); i++)
         {
-            if (_HeadAdjustmentBuffer[stepperno][i].steps == 0 || (_HeadAdjustmentBuffer[stepperno][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperno][i].headNo == headAdjustment->headNo &&
+            if (_HeadAdjustmentBuffer[stepperno][i].printbarNo == -1 || (_HeadAdjustmentBuffer[stepperno][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperno][i].headNo == headAdjustment->headNo &&
                      _HeadAdjustmentBuffer[stepperno][i].printbarNo == headAdjustment->printbarNo))
             {
-                if (_HeadAdjustmentBuffer[stepperno][i].steps != 0)
+                if (_HeadAdjustmentBuffer[stepperno][i].printbarNo != -1)
                     Error(LOG, 0, "Delete Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, _HeadAdjustmentBuffer[stepperno][i].steps);
                 _HeadAdjustmentBuffer[stepperno][i].axis = headAdjustment->axis;
                 _HeadAdjustmentBuffer[stepperno][i].headNo = headAdjustment->headNo;
@@ -940,10 +946,10 @@ static void _check_screwer(void)
     {
         for (j = 1; j < SIZEOF(_HeadAdjustmentBuffer[i]); j++)
         {
-            if (_HeadAdjustmentBuffer[i][j-1].steps == 0 && _HeadAdjustmentBuffer[i][j].steps != 0)
+            if (_HeadAdjustmentBuffer[i][j-1].printbarNo == -1 && _HeadAdjustmentBuffer[i][j].printbarNo != -1)
             {
                 _HeadAdjustmentBuffer[i][j - 1] = _HeadAdjustmentBuffer[i][j];
-                _HeadAdjustmentBuffer[i][j].steps = 0;
+                _HeadAdjustmentBuffer[i][j].printbarNo = -1;
             }
         }
         
@@ -958,7 +964,7 @@ static void _check_screwer(void)
                 _Status[i].info.z_in_screw && _Status[i].info.ref_done && _Status[i].screwerinfo.screwer_ready && _ScrewCommandSend[i] == FALSE)
         {
             headAdjustment = _HeadAdjustmentBuffer[i][0];
-            _HeadAdjustmentBuffer[i][0].steps = 0;
+            _HeadAdjustmentBuffer[i][0].printbarNo = -1;
              steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
             _ScrewCommandSend[i] = TRUE;
         }

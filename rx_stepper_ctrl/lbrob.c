@@ -647,6 +647,7 @@ void lbrob_display_status(void)
         term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
         term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);
         term_printf("Wipe done: \t\t %d\n", RX_StepperStatus.robinfo.wipe_done);
+        term_printf("Scrwe-Count: \t\t %d\n", RX_StepperStatus.screw_count);
         term_printf("\n");
     }
     else
@@ -1047,6 +1048,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_HEAD_ADJUST:
+        RX_StepperStatus.screwerinfo.screwed = FALSE;
         _turn_screw(*(SHeadAdjustment *)pdata);
         break;
 
@@ -1261,6 +1263,15 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
             Error(ERR_CONT, 0, "Last screw of each color is pointless to turn");
             return;
         }
+        else if (headAdjustment.steps == 0)
+        {
+            Error(LOG, 0, "Screw of Printbar %d, Head %d and Axis %d moves only %d Steps, which will not be made", 
+              headAdjustment.printbarNo+1, headAdjustment.headNo+1, headAdjustment.axis, headAdjustment.steps);
+            RX_StepperStatus.screwerinfo.screwed = TRUE;
+            RX_StepperStatus.screw_count++;
+            return;
+            
+        }
         
 
         _HeadAdjustment = headAdjustment;
@@ -1474,6 +1485,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
                 }
                 _CmdScrewing++;
                 RX_StepperStatus.screwerinfo.screwed = TRUE;
+                RX_StepperStatus.screw_count++;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
             }
