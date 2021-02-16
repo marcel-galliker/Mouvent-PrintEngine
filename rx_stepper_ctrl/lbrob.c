@@ -1049,7 +1049,13 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_HEAD_ADJUST:
         RX_StepperStatus.screwerinfo.screwed = FALSE;
+        RX_StepperStatus.screwerinfo.screw_out_of_range = FALSE;
         _turn_screw(*(SHeadAdjustment *)pdata);
+        break;
+
+    case CMD_HEAD_OUT_OF_RANGE:
+        RX_StepperStatus.screwerinfo.screw_out_of_range = TRUE;
+        RX_StepperStatus.screw_count++;
         break;
 
     case CMD_SEARCH_ALL_SCREWS:

@@ -838,6 +838,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				(current_screwpos - headAdjustment->steps)/6, abs((current_screwpos - headAdjustment->steps)%6));
+        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
         return;
     }
     else if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps < 0)
@@ -845,6 +846,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
 				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				abs((int)(current_screwpos - headAdjustment->steps))/6, abs((int)(current_screwpos - headAdjustment->steps))%6);
+        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
         return;
     }
     
@@ -853,6 +855,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
+        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
         return;
     }
     else if (headAdjustment->axis == AXE_DIST && current_screwpos + headAdjustment->steps < 0)
@@ -860,6 +863,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
 				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
 				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos + headAdjustment->steps))%6);
+        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
         return;
     }
 
@@ -960,7 +964,7 @@ static void _check_screwer(void)
         if (_ScrewCommandSend[i] == TRUE && _Status[i].screwerinfo.screwer_ready == FALSE)
             _ScrewCommandSend[i] = FALSE;
         
-        if (_HeadAdjustmentBuffer[i][0].steps && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
+        if (_HeadAdjustmentBuffer[i][0].printbarNo != -1 && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
                 _Status[i].info.z_in_screw && _Status[i].info.ref_done && _Status[i].screwerinfo.screwer_ready && _ScrewCommandSend[i] == FALSE)
         {
             headAdjustment = _HeadAdjustmentBuffer[i][0];

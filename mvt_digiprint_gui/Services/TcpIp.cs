@@ -400,6 +400,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_SET_ROB_POS         = 0x01000109;
         public const UInt32 CMD_HEAD_ADJUST         = 0x0100010a;
         public const UInt32 CMD_PURGE_CLUSTER       = 0x0100010b;
+        public const UInt32 CMD_HEAD_OUT_OF_RANGE   = 0x0100010c;
 
         public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
         public const UInt32 REP_ENCODER_CFG			= 0x02000111;
