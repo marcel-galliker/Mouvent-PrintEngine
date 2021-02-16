@@ -960,7 +960,7 @@ static void _check_screwer(void)
         if (_ScrewCommandSend[i] == TRUE && _Status[i].screwerinfo.screwer_ready == FALSE)
             _ScrewCommandSend[i] = FALSE;
         
-        if (_HeadAdjustmentBuffer[i][0].steps && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
+        if (_HeadAdjustmentBuffer[i][0].printbarNo != -1 && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
                 _Status[i].info.z_in_screw && _Status[i].info.ref_done && _Status[i].screwerinfo.screwer_ready && _ScrewCommandSend[i] == FALSE)
         {
             headAdjustment = _HeadAdjustmentBuffer[i][0];
