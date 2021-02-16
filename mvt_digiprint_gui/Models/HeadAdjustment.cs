@@ -22,8 +22,16 @@ namespace RX_DigiPrint.Models
             Progress = 0;
         }
 
-        //--- Property PrintbarNo ---------------------------------------
-        private double _PrintbarNo = 0;
+		//--- Property StepperNo ---------------------------------------
+		private int _StepperNo;
+		public int StepperNo
+		{
+			get { return _StepperNo; }
+			set { SetProperty(ref _StepperNo,value); }
+		}
+
+		//--- Property PrintbarNo ---------------------------------------
+		private double _PrintbarNo = 0;
         public double PrintbarNo
         {
             get { return _PrintbarNo; }
@@ -82,12 +90,23 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- Property Running ---------------------------------------
-        private bool _Running;
+		//--- Property State ---------------------------------------
+		private string _State;
+		public string State
+		{
+			get { return _State; }
+			set { SetProperty(ref _State,value); }
+		}
+
+		//--- Property Running ---------------------------------------
+		private bool _Running;
         public bool Running
         {
             get { return _Running; }
-            set { SetProperty(ref _Running, value); }
+            set { 
+                    SetProperty(ref _Running, value);
+                    if (_Running) State="Running";
+                }
         }
 
         //--- Property Done ---------------------------------------
@@ -95,7 +114,10 @@ namespace RX_DigiPrint.Models
         public bool Done
         {
             get { return _Done; }
-            set { SetProperty(ref _Done, value); }
+            set { 
+                    SetProperty(ref _Done, value); 
+                    if (_Done) State="Done";
+                }
         }
 
         private bool _ShowHelp;
@@ -121,5 +143,6 @@ namespace RX_DigiPrint.Models
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
         }
 
-    }
+
+	}
 }

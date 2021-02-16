@@ -66,9 +66,34 @@ namespace RX_DigiPrint.Models
             get { return _RobMoving; }
             set { SetProperty(ref _RobMoving, value); }
         }
-        
-        //--- Property PosX ---------------------------------------
-        private Int32 _PosX;
+
+		//--- Property Screwing ---------------------------------------
+		private bool _Screwing;
+		public bool Screwing
+		{
+			get { return _Screwing; }
+			set { SetProperty(ref _Screwing,value); }
+		}
+
+		//--- Property Screwed ---------------------------------------
+		private bool _Screwed;
+		public bool Screwed
+		{
+			get { return _Screwed; }
+			set { SetProperty(ref _Screwed,value); }
+		}
+
+		//--- Property ScrewBlocked ---------------------------------------
+		private bool _ScrewBlocked;
+		public bool ScrewBlocked
+		{
+			get { return _ScrewBlocked; }
+			set { SetProperty(ref _ScrewBlocked,value); }
+		}
+
+
+		//--- Property PosX ---------------------------------------
+		private Int32 _PosX;
         public Int32 PosX
         {
             get { return _PosX; }
@@ -461,6 +486,9 @@ namespace RX_DigiPrint.Models
             RobotRefDone = (msg.robinfo & 0x00000001) != 0;
             Moving    = (msg.info & 0x00000002)!=0;
             RobMoving = (msg.robinfo & 0x00000002) != 0;
+            Screwing  = (msg.screwerinfo & 0x00000002) != 0;
+            Screwed   = (msg.screwerinfo & 0x00000800) != 0;
+            ScrewBlocked   = (msg.screwerinfo & (0x00001000 | 0x00002000) ) != 0;
             UV_On     = (msg.info & 0x00000004)!=0;
             UV_Ready  = (msg.info & 0x00000008)!=0;
             Z_in_ref  = (msg.info & 0x00000010)!=0;

@@ -19,10 +19,43 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			InitializeComponent();
 
-			DataContext = RxGlobals.SetupAssist;
+			DataContext				 = RxGlobals.SetupAssist;
 			BTN_Continue.DataContext = RxGlobals.SA_StateMachine;
+			Robot.DataContext		 = RxGlobals.HeadAdjustment;
+			_StepperGrid_init();
 			RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
 			PrinterStatusChanged(this, null);
+		}
+
+		//--- _StepTextBox ------------------------
+		private TextBox _StepTextBox(int stepper, int row, string property)
+		{
+			TextBox box = new TextBox();
+			Grid.SetColumn(box, stepper+1);
+			Grid.SetRow   (box, row);
+			box.IsReadOnly  = true;
+			if (stepper<0)
+			{
+				box.Text = property;
+			}
+			else
+			{
+				box.DataContext = RxGlobals.StepperStatus[stepper];
+				box.SetBinding(TextBox.TextProperty, property);
+			}
+			return box;
+		}
+
+		//--- _StepperGrid_init ---------------------------------------------
+		private void _StepperGrid_init()
+		{
+			int no;
+			for (no=-1; no<RxGlobals.StepperStatus.Length; no++)
+			{
+				StepperGrid.Children.Add(_StepTextBox(no, 0, "Screwing"));
+				StepperGrid.Children.Add(_StepTextBox(no, 1, "Screwed"));
+				StepperGrid.Children.Add(_StepTextBox(no, 2, "ScrewBlocked"));
+			}
 		}
 
 		private void PrinterStatusChanged(object sender,PropertyChangedEventArgs e)

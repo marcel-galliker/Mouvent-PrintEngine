@@ -46,6 +46,18 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			}
 		}
 
+		//--- MoveLeft_Clicked --------------------------------------
+		private void MoveLeft_Clicked(object sender, RoutedEventArgs e)
+		{
+			RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+0.2);
+		}
+
+		//--- MoveRight_Clicked --------------------------------------
+		private void MoveRight_Clicked(object sender, RoutedEventArgs e)
+		{
+			RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos-0.2);
+		}
+
 		//--- Confirm_Clicked --------------------------------------
 		private void Confirm_Clicked(object sender, RoutedEventArgs e)
 		{
@@ -58,7 +70,9 @@ namespace RX_DigiPrint.Views.SetupAssistView
 	{
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			return 	((ECamFunctionState)value==ECamFunctionState.running);
+			return 	((ECamFunctionState)value==ECamFunctionState.printing 
+				  || (ECamFunctionState)value==ECamFunctionState.runningCam
+				  || (ECamFunctionState)value==ECamFunctionState.runningRob);
 		}
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -73,9 +87,12 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			switch((ECamFunctionState)value)
 			{
-				case ECamFunctionState.done:    return "Check";
-				case ECamFunctionState.aborted: return "Cancel";
-				case ECamFunctionState.error:	return "AlertCircleOutline";
+				case ECamFunctionState.runningCam:	return "VideoOutline";
+				case ECamFunctionState.waitRob:		return "VideoCheckOutline";
+				case ECamFunctionState.runningRob:	return "RobotIndustrial";
+				case ECamFunctionState.done:		return "Check";
+				case ECamFunctionState.aborted:		return "Cancel";
+				case ECamFunctionState.error:		return "AlertCircleOutline";
 				default: return null;
 			}
 		}
