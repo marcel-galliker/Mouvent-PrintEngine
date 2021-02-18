@@ -805,7 +805,7 @@ static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no)
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
 //    SHeadAdjustment msg;
-    int stepperno;
+    int stepperno=0;    // Variable is not set!!!
     int current_screwpos = ctrl_current_screw_pos(headAdjustment);
     if (current_screwpos == -1)
     {
