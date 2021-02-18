@@ -574,7 +574,7 @@ void _update_status(void)
 		pstat->info.bleedValve		= _Stat->ink_supply[i].bleedValve;
 		pstat->info.cusionValve		= _Stat->ink_supply[i].airValve;
 		pstat->info.condTempReady	= condTempReady;
-		pstat->info.heaterTempReady = _Stat->ink_supply[i].heaterTempReady;
+		pstat->info.heaterTempReady = !_HeaterUsed || _Stat->ink_supply[i].heaterTempReady;
 		if (_Cfg->cmd.lung_enabled) pstat->presLung = _Stat->degass_pressure;
 		else						pstat->presLung = INVALID_VALUE;
 		pstat->condPresOut		= _Cfg->ink_supply[i].condPresOut;
