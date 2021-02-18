@@ -420,6 +420,10 @@ static void _steptx_rob_control(void)
 									_RobotCtrlMode = ctrl_wash_step4;
 									step_lift_to_wipe_pos(ctrl_wash);
 								}
+								else if (!plc_in_wipe_pos() && !RX_PrinterStatus.scanner_off)
+								{
+									plc_to_wipe_pos();
+								}
 								break;
 				
 	case ctrl_wash_step4:		if (step_lift_in_wipe_pos(ctrl_wash))

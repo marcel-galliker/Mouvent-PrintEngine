@@ -707,7 +707,8 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1)
 			fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrl_off, TRUE);
 		_SingleHead = headNo;
-	}
+        if (ctrlMode == ctrl_off) fluid_purgeCluster(headNo / 4, FALSE);
+    }
 	if (ctrlMode<=ctrl_print) _SingleHead=-1;
 	if (_HeadCtrl[headNo/HEAD_CNT].socket!=INVALID_SOCKET)
 	{
@@ -720,7 +721,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 
 		if (sendToFluid) fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrlMode, FALSE);
 	}
-}	
+}
 
 //--- ctrl_send_all_heads_fluidCtrlMode ------------------------------------
 void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
@@ -749,7 +750,8 @@ int ctrl_send_purge_par(int fluidNo, int time)
 	
 	if (RX_Config.stepper.wipe_speed) delay =  HEAD_WIDTH / RX_Config.stepper.wipe_speed;
 	else delay=5000;
-	if (time==0) delay=0;
+
+	if (time==0 || _SingleHead != -1) delay=0;	
 
 	timeTotal = 0;
 	par.delay = 0;
@@ -761,7 +763,6 @@ int ctrl_send_purge_par(int fluidNo, int time)
 		{
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
-	//		Error(LOG, 0, "head[%d.%d]: purge_par(no=%d, delay=%d, time=%d)", head/HEAD_CNT, head%HEAD_CNT, par.no, par.delay, par.time);
 			if (par.time+par.delay>timeTotal) timeTotal = par.time+par.delay;
 			par.delay+=delay;
 		}
@@ -1023,9 +1024,20 @@ void ctrl_reply_stat(RX_SOCKET socket)
 	}
 }
 
+//--- ctrl_set_cluster_no ----------------------------------------------
 void ctrl_set_cluster_no(SValue* pdata)
 {
     if (_HeadCtrl[pdata->no - 1].socket != INVALID_SOCKET)
 		sok_send_2(&_HeadCtrl[pdata->no - 1].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
 }
 
+//--- ctrl_reset_cond ------------------------------
+void ctrl_reset_cond(void)
+{
+    for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
+    {
+        if (_HeadCtrl[i].socket != INVALID_SOCKET)
+            sok_send_2(&_HeadCtrl[i].socket, CMD_RESET_COND, 0, NULL);
+    }
+    
+}

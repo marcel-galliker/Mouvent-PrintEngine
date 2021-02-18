@@ -664,8 +664,8 @@
     <Compile Include="Views\PrintSystemView\AdjustmentHelp.xaml.cs">
       <DependentUpon>AdjustmentHelp.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\PrintSystemView\FluidCommands.xaml.cs">
-      <DependentUpon>FluidCommands.xaml</DependentUpon>
+    <Compile Include="Views\PrintSystemView\Conditioner_Reset.xaml.cs">
+      <DependentUpon>Conditioner_Reset.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemView\FluidSettings.xaml.cs">
       <DependentUpon>FluidSettings.xaml</DependentUpon>
@@ -1288,9 +1288,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\PrintSystemView\FluidCommands.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Views\PrintSystemView\Conditioner_Reset.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PrintSystemView\FluidSettings.xaml">
       <Generator>MSBuild:Compile</Generator>

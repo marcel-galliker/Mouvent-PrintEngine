@@ -112,7 +112,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     NotConnected.Foreground = Brushes.Red;
                     break;
             }
-            RowHeight_Side.  Height = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)? GridLength.Auto : new GridLength(0);
+            RowHeight_Side.Height = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)? GridLength.Auto : new GridLength(0);
             RowHeight_Heater.Height =  RxGlobals.PrintSystem.HasHeater?                                  GridLength.Auto : new GridLength(0);
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;

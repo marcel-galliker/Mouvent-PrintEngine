@@ -82,6 +82,7 @@ static void _do_set_density		(RX_SOCKET socket, SDensityMsg *pmsg);
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
+static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue*		pmsg);
 static void _do_scales_tara		  (RX_SOCKET socket, SValue*        pmsg);
 static void _do_scales_calib	  (RX_SOCKET socket, SValue*        pmsg);
 
@@ -181,7 +182,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);						break;
         case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
-        case CMD_FLUID_LEAK_TEST:		do_fluid_leak_test(socket, (SValue*)pdata);						break;
+        case CMD_PURGE_CLUSTER:			_do_fluid_purge_cluster(socket, (SValue*)pdata);				break;
 
         case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)pdata);						break;				
 		case CMD_SCALES_CALIBRATE:	_do_scales_calib(socket, (SValue*)pdata);						break;				
@@ -224,6 +225,9 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_CO_SET_OPERATOR:	co_set_operator((char*)pdata);									break;
 
 		case CMD_CHANGE_CLUSTER_NO: ctrl_set_cluster_no((SValue*) pdata);							break;
+        case CMD_RESET_COND:		ctrl_reset_cond();												break;
+            
+            
 			
 		default: Error(WARN, 0, "Unknown Command 0x%08x", phdr->msgId);
 		}
@@ -921,10 +925,20 @@ static void _do_set_density	  (RX_SOCKET socket, SDensityMsg *pmsg)
 //--- _do_head_fluidCtrlMode ---
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 {
-	if(pmsg->ctrlMode == ctrl_wipe) step_rob_wipe_start(ctrl_wipe);
+    Error(LOG, 0, "Head no %d, ctrlMode %d", pmsg->no, pmsg->ctrlMode);
+    if(pmsg->ctrlMode == ctrl_wipe) step_rob_wipe_start(ctrl_wipe);
 	else if (pmsg->ctrlMode == ctrl_off) ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, FALSE, TRUE);
     else if (pmsg->ctrlMode == ctrl_toggle_meniscus) ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, FALSE, FALSE);
 	else ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, TRUE, TRUE);
+}
+
+//--- _do_fluid_purge_cluster -----------------------------------------
+static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue *pmsg)
+{
+    int clusterNo = pmsg->no / 4;
+    int start_headNo = 4 * clusterNo;
+    if (fluid_purgeCluster(clusterNo, TRUE) == REPLY_OK)
+        ctrl_send_head_fluidCtrlMode(start_headNo, ctrl_purge_hard, TRUE, TRUE);
 }
 
 //--- _do_fluidCtrlMode ---

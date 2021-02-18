@@ -40,9 +40,11 @@ namespace RX_DigiPrint.Views.TexView
 
         //--- _Tick --------------------------
         private EN_MachineStateList _states = new EN_MachineStateList();
+        private EN_MachineScannerPosList _pos = new EN_MachineScannerPosList();
         private void _Tick(int no)
         {
             Visibility visible=Visibility.Visible;
+            bool enable = false;
             try
             {
                 string str = string.Format("{0}\n{1}\n", CfgPanel.UnitID, "STA_MACHINE_STATE");
@@ -50,6 +52,10 @@ namespace RX_DigiPrint.Views.TexView
                 RxGlobals.Plc.RequestVar(str.ToString());
                 string state=_states.GetDisplay(Convert.ToInt32(RxGlobals.Plc.GetVar(CfgPanel.UnitID, "STA_MACHINE_STATE")));
                 if (state.Equals("ERROR")) visible = Visibility.Collapsed;
+
+                str = string.Format("{0}\n{1}\n", CfgPanel.UnitID, "STA_SLIDE_POSITION");
+                string pos = _pos.GetDisplay(Convert.ToInt32(RxGlobals.Plc.GetVar(CfgPanel.UnitID, "STA_SLIDE_POSITION")));
+                if (state.Equals("ERROR") || state.Equals("STOP") || (state.Equals("PAUSE") && (pos.Equals("Purge") || pos.Equals("Capping") || pos.Equals("Wipe")))) enable = true;
             }
             catch (Exception ex)
             {
@@ -57,6 +63,7 @@ namespace RX_DigiPrint.Views.TexView
             }
             HeadRefEnable.Visibility = visible; 
             MagneticBandEnable.Visibility = visible;
+            Scanner_Offset_CMD.IsEnabled = enable;
         }
 
         //--- Save_Clicked ---------------------------------------------

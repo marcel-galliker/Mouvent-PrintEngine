@@ -121,7 +121,8 @@
                                        Foreground="{StaticResource RX.Error}" FontWeight="Bold" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <rxView:FlushCommands x:Name="FlushCommands" Grid.Column="1"/>
                             <rxView:FluidSettings x:Name="FluidSettings" Grid.Column="2"/>
-                            <rxView:FluidCommands x:Name="FluidCommands" Grid.Column="3"/>
+                            <rxView:Conditioner_Reset x:Name="ConditionerReset" Grid.Column="3"/>
+
                         </Grid>
                     </GroupBox>
                 </ScrollViewer>

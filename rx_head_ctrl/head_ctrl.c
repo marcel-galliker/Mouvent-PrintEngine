@@ -156,6 +156,13 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
         data = (SValue *)pdata;
         cond_set_clusterNo(data->value);
         break;
+        
+    case CMD_RESET_COND:
+        cond_resetPumpTime(0);
+        cond_resetPumpTime(1);
+        cond_resetPumpTime(2);
+        cond_resetPumpTime(3);
+        break;
     default:		{
 						// ALL messages that use FPGA Registers
 						int idx = (_MsgBufIn + 1) % MSG_BUF_SIZE;

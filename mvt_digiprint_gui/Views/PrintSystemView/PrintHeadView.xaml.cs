@@ -142,6 +142,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 Button_Print.Visibility  = Button_Off.Visibility = CommandLine1.Visibility = Visibility.Visible;
             else Button_Print.Visibility = Button_Off.Visibility = CommandLine1.Visibility = Visibility.Collapsed;
 
+            Visibility visible = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon ? Visibility.Visible : Visibility.Collapsed;
+
+            Button_PrintCluster.Visibility = visible;
+            Button_PurgeCluster.Visibility = visible;
+
             CmdPopup.Open(CmdButton);
         }
 
@@ -186,5 +191,37 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void Flush_Clicked      (object sender, RoutedEventArgs e) {_command("Flush", EFluidCtrlMode.ctrl_flush_night);   }
         private void Wipe_Clicked       (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_wipe);             }
         private void ToggleMeniscus_Clicked(object sender, RoutedEventArgs e){_command(null, EFluidCtrlMode.ctrl_toggle_meniscus);}
+
+        private void PrintCluster_Clicked(object sender, RoutedEventArgs e)
+        {
+            HeadStat stat = DataContext as HeadStat;
+            if (stat != null)
+            {
+                int cluster = stat.HeadNo/4;
+                TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+
+                for (int i = 0; i < 4; i++)
+                {
+                    msg.no = cluster * 4 + i;
+                    msg.ctrlMode = EFluidCtrlMode.ctrl_print;
+                    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_FLUID_CTRL_MODE, ref msg);
+                }
+                CmdPopup.IsOpen = false;
+            }
+        }
+
+        private void PurgeCluster_Clicked(object sender, RoutedEventArgs e)
+        {
+            HeadStat stat = DataContext as HeadStat;
+            if (stat != null)
+            {
+                TcpIp.SValue msg = new TcpIp.SValue();
+                msg.no = stat.HeadNo;
+                    
+                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_PURGE_CLUSTER, ref msg);
+
+                CmdPopup.IsOpen = false;
+            }
+        }
     }
 }

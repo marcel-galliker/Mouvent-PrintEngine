@@ -207,7 +207,7 @@ void putty_display_fpga_status(void)
 	term_printf("Version: %d.%d.%d.%d                Linux: V%d\n",			RX_FpgaStat.version.major, RX_FpgaStat.version.minor, RX_FpgaStat.version.revision, RX_FpgaStat.version.build, RX_LinuxDeployment);
 	term_printf("Temp:    %d  Overheat.Error: %d  FPGA.cmd=0x%04x\n",		RX_FpgaStat.temp-128, RX_FpgaError.overheat_error, RX_FpgaCmd);
 	freq=_speed_160(RX_FpgaEncCfg.synth.value);
-	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthHz=%d.%03d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, fpga_get_encTelFreq(), RX_FpgaEncCfg.synth.enable, freq/1000, freq%1000);
+	term_printf("Encoder:  linkEnable=%d, telCnt=%u, synthEnable=%d, synthHz=%d'%03d\n", (RX_FpgaEncCfg.cmd & ENC_ENABLE)!=0, fpga_get_encTelFreq(), RX_FpgaEncCfg.synth.enable, freq/1000, freq%1000);
 //		term_printf("info:  0x%08x\n", RX_FpgaStat.info);
 	
 	term_printf("Speed [Hz]:   ");
