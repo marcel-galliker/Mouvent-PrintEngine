@@ -811,13 +811,13 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     {
         Error(ERR_CONT, 0, "Invalid current screwposition value");
         return;
-    }/*
-    if (headAdjustment->steps == 0)
-    {
-        Error(LOG, 0, "Screw of Printbar %d, Head %d and Axis %d moves only %d Steps, which will not be made", 
-              headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, headAdjustment->steps);
-        return;
-    }*/
+    }
+
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+        stepperno = headAdjustment->printbarNo / 2;
+    else
+        stepperno = (headAdjustment->printbarNo + 1) / 2;
+
     if (headAdjustment->printbarNo < 0 || headAdjustment->printbarNo >= RX_Config.colorCnt)
     {
         Error(ERR_CONT, 0, "Printbar %d is not existing", headAdjustment->printbarNo+1);
@@ -866,16 +866,11 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
         return;
     }
-
-    if (RX_Config.inkSupplyCnt % 2 == 0)
-        stepperno = headAdjustment->printbarNo / 2;
-    else
-        stepperno = (headAdjustment->printbarNo+1) / 2;
     
     if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw))
     {
         _HeadAdjustment[stepperno] = *headAdjustment;
-        if (RX_Config.inkSupplyCnt % 2 == 0)
+        if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
             headAdjustment->printbarNo %= 2;
         else
             headAdjustment->printbarNo = (headAdjustment->printbarNo + 1) % 2;
