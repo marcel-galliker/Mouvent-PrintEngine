@@ -28,6 +28,9 @@
     <Filter Include="rx_ink_lib">
       <UniqueIdentifier>{0020ed97-8433-4d7c-a5db-b097896712e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Make files\Source Files">
+      <UniqueIdentifier>{189b8794-89bd-4703-ade6-7aded161282b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="boot_svr.h">
@@ -297,9 +300,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="drive_ctrl.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="setup_assist.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

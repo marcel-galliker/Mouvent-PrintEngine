@@ -58,6 +58,12 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Visibility="{Binding ConfirmVisibile, Converter={StaticResource BooleanToVisibleConverter}}">
                                             <TextBlock Text="Position and Focus?" VerticalAlignment="Center"/>
+                                            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="MoveLeft_Clicked" Margin="0,-20">
+                                                <iconPacks:PackIconMaterial Kind="ArrowLeft" Foreground="Gray"/>
+                                            </common:MvtButton >
+                                            <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="MoveRight_Clicked" Margin="0,-20">
+                                                <iconPacks:PackIconMaterial Kind="ArrowRight" Foreground="Gray"/>
+                                            </common:MvtButton >
                                             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Confirm_Clicked" Margin="0,-20">
                                                 <iconPacks:PackIconMaterial Kind="Check" Foreground="Gray"/>
                                             </common:MvtButton >

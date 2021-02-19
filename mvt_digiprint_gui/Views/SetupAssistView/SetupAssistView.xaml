@@ -44,8 +44,9 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            
+
             <GroupBox Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Status" Style="{StaticResource MvtGroupBox}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -66,7 +67,7 @@
 
                     <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
                     <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding ScanPos}" IsEnabled="False"/>
-                
+
                     <!--
                     <TextBlock  Grid.Row="1" Grid.Column="0" Text="Voltage"/>
                     <TextBox    Grid.Row="1" Grid.Column="1" Text="{Binding motorVoltage}" IsEnabled="False"/>
@@ -77,7 +78,7 @@
                     <TextBlock  Grid.Row="3" Grid.Column="0" Text="Hold Current"/>
                     <TextBox    Grid.Row="3" Grid.Column="1" Text="{Binding motorHoldCurrent}" IsEnabled="False"/>
                     -->
-                    
+
                     <TextBlock  Grid.Row="4" Grid.Column="0" Text="Reference Done"/>
                     <CheckBox   Grid.Row="4" Grid.Column="1" IsChecked="{Binding ScanRefDone}" IsEnabled="False" HorizontalAlignment="Center"/>
 
@@ -150,7 +151,7 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    
+
                     <TextBlock  Grid.Row="0" Grid.Column="0" Text="Dist [mm]"/>
                     <common:MvtNumBox    Grid.Row="0" Grid.Column="1" Text="{Binding WebDist}"/>
 
@@ -167,6 +168,27 @@
                         </common:MvtButton>
 
                     </Grid>
+
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Column="3" x:Name="Robot" HorizontalAlignment="Center" VerticalAlignment="Top" Width="auto" Header="Robot" Style="{StaticResource MvtGroupBox}">
+                <Grid x:Name="StepperGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto" MinWidth="50"/>
+                        <ColumnDefinition Width="auto" MinWidth="50"/>
+                        <ColumnDefinition Width="auto" MinWidth="50"/>
+                        <ColumnDefinition Width="auto" MinWidth="50"/>
+                    </Grid.ColumnDefinitions>
+  
 
                 </Grid>
             </GroupBox>

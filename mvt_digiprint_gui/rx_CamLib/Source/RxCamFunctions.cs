@@ -12,8 +12,11 @@ namespace rx_CamLib
 	public enum ECamFunctionState
 	{
 		undef,
-		running,
-		ending,
+		printing,
+		runningCam,
+		endingCam,
+		waitRob,
+		runningRob,
 		done,
 		aborted,
 		error
@@ -22,13 +25,13 @@ namespace rx_CamLib
 	public enum ECamFunction
 	{
 		CamNoFunction,
+		CamConfirmFocus,	
 		CamFindMark_1,	// vertical lines (WEB)	
 		CamFindMark_2,	// horizontal line (WEB)
 		CamFindMark_3,	// end of line (SCAN)
 		CamMeasureAngle,
 		CamMeasureStitch,
 		CamMeasureDist,
-		CamConfirmFocus,	
 	};
 
 	public class SMarkPosition : RxBindable

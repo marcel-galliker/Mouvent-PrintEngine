@@ -23,6 +23,14 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _Name,value); }
 		}
 
+		//--- Property StepperNo ---------------------------------------
+		private int _StepperNo;
+		public int StepperNo
+		{
+			get { return _StepperNo; }
+			set { SetProperty(ref _StepperNo,value); }
+		}
+
 		//--- Property PrintbarNo ---------------------------------------
 		private int _PrintbarNo;
 		public int PrintbarNo
@@ -119,7 +127,6 @@ namespace RX_DigiPrint.Models
 			get { return _State; }
 			set { SetProperty(ref _State,value); }
 		}
-
 
 		//--- Property MyProperty ---------------------------------------
 		public int MeasureCnt

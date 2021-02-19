@@ -66,9 +66,43 @@ namespace RX_DigiPrint.Models
             get { return _RobMoving; }
             set { SetProperty(ref _RobMoving, value); }
         }
-        
-        //--- Property PosX ---------------------------------------
-        private Int32 _PosX;
+
+		//--- Property ScrewerReady ---------------------------------------
+		private bool _ScrewerReady;
+		public bool ScrewerReady
+		{
+			get { return _ScrewerReady; }
+			set { SetProperty(ref _ScrewerReady,value); }
+		}
+
+		//--- Property Screwing ---------------------------------------
+		private bool _Screwing;
+		public bool Screwing
+		{
+			get { return _Screwing; }
+			set { SetProperty(ref _Screwing,value); }
+		}
+
+		//--- Property ScrewCnt ---------------------------------------
+		private int _ScrewCnt;
+		public int ScrewCnt
+		{
+			get { return _ScrewCnt; }
+			set {
+                    if (SetProperty(ref _ScrewCnt, value)) 
+                        RxGlobals.Events.AddItem(new LogItem(string.Format("ScrewCnt={0}", _ScrewCnt)));
+                }
+		}
+		//--- Property ScrewBlocked ---------------------------------------
+		private bool _ScrewedOk;
+		public bool ScrewedOk
+		{
+			get { return _ScrewedOk; }
+			set { SetProperty(ref _ScrewedOk,value); }
+		}
+
+		//--- Property PosX ---------------------------------------
+		private Int32 _PosX;
         public Int32 PosX
         {
             get { return _PosX; }
@@ -457,10 +491,14 @@ namespace RX_DigiPrint.Models
         //--- Update -----------------------------------
         public void Update(TcpIp.SStepperStat msg)
         {
-            RefDone   = (msg.info & 0x00000001)!=0;
+            RefDone     = (msg.info & 0x00000001)!=0;
             RobotRefDone = (msg.robinfo & 0x00000001) != 0;
-            Moving    = (msg.info & 0x00000002)!=0;
-            RobMoving = (msg.robinfo & 0x00000002) != 0;
+            Moving      = (msg.info & 0x00000002)!=0;
+            RobMoving   = (msg.robinfo & 0x00000002) != 0;
+            ScrewedOk   = (msg.screwerinfo & (0x00001000 | 0x00002000 | 0x00040000))==0;
+            Screwing    = (msg.screwerinfo & 0x00000002) != 0;
+            ScrewerReady= (msg.screwerinfo & 0x00004000) != 0; 
+            ScrewCnt  = msg.screw_count;
             UV_On     = (msg.info & 0x00000004)!=0;
             UV_Ready  = (msg.info & 0x00000008)!=0;
             Z_in_ref  = (msg.info & 0x00000010)!=0;
