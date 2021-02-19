@@ -3,7 +3,8 @@
 
 #include "stdafx.h"
 #include <shlobj.h>
-
+#include <locale>
+#include <codecvt>
 using namespace std;
 
 #include <CL/cl.hpp>
@@ -18,7 +19,100 @@ using namespace cv::ml;
 using namespace cv;
 
 
-void DebugLog(wchar_t* Description, wchar_t* ValueString)
+//Debugs
+void C_rx_AlignFilter::CallbackDebug(const char* MessageFormat, ...)
+{
+	if (m_HostHwnd == NULL || !m_CallbackDebug)
+	{
+		if (m_DebugOn && m_HostHwnd == NULL)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tCallbackDebug called but no HostPointer\n", (float)m_TimeStamp / 1000000.0f);
+		}
+		return;
+	}
+
+	char msg[255];
+	va_list args;
+	va_start(args, MessageFormat);
+	vsnprintf(msg, sizeof(msg), MessageFormat, args);
+	va_end(args);
+
+	COPYDATASTRUCT CopyData;
+	CopyData.dwData = WP_CallBackDebug;
+	CopyData.cbData = (DWORD)strlen(msg);
+	CopyData.lpData = msg;
+
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tCallbackDebug: cbData: %d, lpData: %s\n", (float)m_TimeStamp / 1000000.0f, CopyData.cbData, (char*)CopyData.lpData);
+	}
+
+	if (m_LogToFile) LogToFile("CallbackDebug: cbData: %d, lpData: %s", CopyData.cbData, (char*)CopyData.lpData);
+
+	SendMessage(m_HostHwnd, WM_COPYDATA, (WPARAM)(HWND)hMySelf, (LPARAM)(LPVOID)&CopyData);
+}
+
+void C_rx_AlignFilter::LogToFile(char* MessageFormat, ...)
+{
+	if (DebugLogPath == L"") return;
+
+	char msg[255];
+	va_list args;
+	va_start(args, MessageFormat);
+	vsnprintf(msg, sizeof(msg), MessageFormat, args);
+	va_end(args);
+
+	m_MeasureTime = std::chrono::steady_clock::now();
+	m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+
+	FILE* temp_file;
+	temp_file = _wfopen(DebugLogPath, L"a");
+	fprintf(temp_file, "%6.6f\t%s\n", (float)m_TimeStamp / 1000000.0f, msg);
+	fclose(temp_file);
+}
+
+void C_rx_AlignFilter::LogToFile(wchar_t* MessageFormat, ...)
+{
+	if (DebugLogPath == L"") return;
+
+	wchar_t msg[255];
+	va_list args;
+	va_start(args, MessageFormat);
+	_vsnwprintf(msg, sizeof(msg), MessageFormat, args);
+	va_end(args);
+
+	m_MeasureTime = std::chrono::steady_clock::now();
+	m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+
+	FILE* temp_file;
+	temp_file = _wfopen(DebugLogPath, L"a");
+	fwprintf(temp_file, L"%6.6f\t%ls\n", (float)m_TimeStamp / 1000000.0f, msg);
+	fclose(temp_file);
+}
+
+//Graphics debug
+void C_rx_AlignFilter::DebugLog(const char* MessageFormat, ...)
+{
+	char msg[255];
+	va_list args;
+	va_start(args, MessageFormat);
+	vsnprintf(msg, sizeof(msg), MessageFormat, args);
+	va_end(args);
+
+	m_MeasureTime = std::chrono::steady_clock::now();
+	m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+
+	FILE* temp_file;
+	temp_file = _wfopen(DebugLogPath, L"a");
+	fprintf(temp_file, "%6.6f\tlpData: %s\n", (float)m_TimeStamp / 1000000.0f, msg);
+	fclose(temp_file);
+}
+
+void DebugUserLog(wchar_t* Description, wchar_t* ValueString)
 {
 	wchar_t my_documents[MAX_PATH];
 	if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents) != S_OK)
@@ -34,21 +128,143 @@ void DebugLog(wchar_t* Description, wchar_t* ValueString)
 	}
 }
 
+
 //Sort Blobs
-bool CompareX(const QualifyStruct Qualyfier_1, const QualifyStruct Qualyfier_2)
+BOOL CompareX(const QualifyStruct Qualyfier_1, const QualifyStruct Qualyfier_2)
 {
 	return(Qualyfier_1.PosX > Qualyfier_2.PosX);
 }
 
-bool CompareY(const QualifyStruct Qualyfier_1, const QualifyStruct Qualyfier_2)
+BOOL CompareY(const QualifyStruct Qualyfier_1, const QualifyStruct Qualyfier_2)
 {
 	return(Qualyfier_1.PosY > Qualyfier_2.PosY);
 }
 
 
+//OCR
+BOOL CompareXPos(const OcrResultStruct Qualyfier_1, const OcrResultStruct Qualyfier_2)
+{
+	return(Qualyfier_1.XPos < Qualyfier_2.XPos);
+}
+
+BOOL CompareYPos(const OcrResultStruct Qualyfier_1, const OcrResultStruct Qualyfier_2)
+{
+	return(Qualyfier_1.YPos < Qualyfier_2.YPos);
+}
+
+BOOL CompareXPosReverse(const OcrResultStruct Qualyfier_1, const OcrResultStruct Qualyfier_2)
+{
+	return(Qualyfier_1.XPos > Qualyfier_2.XPos);
+}
+
+BOOL CompareYPosReverse(const OcrResultStruct Qualyfier_1, const OcrResultStruct Qualyfier_2)
+{
+	return(Qualyfier_1.YPos > Qualyfier_2.YPos);
+}
+
+BOOL C_rx_AlignFilter::TrainOCR()
+{
+	std::string OcrLearnedPath = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(LearnedOcrPath);
+	FileStorage fs(OcrLearnedPath, cv::FileStorage::READ);
+
+	Learn_Samples.release();
+	Learn_Responses.release();
+
+	if (fs.isOpened())
+	{
+		fs["Samples"] >> Learn_Samples;
+		fs["Responses"] >> Learn_Responses;
+		fs.release();
+
+		if (Learn_Samples.empty() || Learn_Responses.empty())
+		{
+			if (m_DebugOn)
+			{
+				m_MeasureTime = std::chrono::steady_clock::now();
+				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+				printf("%6.6f\tTrainOCR failed: Learned Samples or Responses empty\n", (float)m_TimeStamp / 1000000.0f);
+			}
+			if (m_LogToFile) LogToFile(L"TrainOCR failed: Learned Samples or Responses empty");
+			CallbackDebug("TrainOCR failed: Learned Samples or Responses empty");
+			return false;
+		}
+
+		KNearOcr = (Ptr<KNearest>)KNearest::create();
+
+		try
+		{
+			if (KNearOcr->train(Learn_Samples, 0, Learn_Responses))
+			{
+				return true;
+			}
+			if (m_DebugOn)
+			{
+				m_MeasureTime = std::chrono::steady_clock::now();
+				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+				printf("%6.6f\tTrainOCR failed (no message)\n", (float)m_TimeStamp / 1000000.0f);
+			}
+			if (m_LogToFile) LogToFile(L"TrainOCR failed (no message)");
+			CallbackDebug("TrainOCR failed (no message)");
+			return false;
+		}
+		catch (Exception exep)
+		{
+			const char* Msg = exep.what();
+			if (m_DebugOn)
+			{
+				m_MeasureTime = std::chrono::steady_clock::now();
+				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+				printf("%6.6f\tTrainOCR failed: %s\n", (float)m_TimeStamp / 1000000.0f, Msg);
+			}
+			if (m_LogToFile) LogToFile("TrainOCR failed: %s", Msg);
+			CallbackDebug("TrainOCR failed: %s", Msg);
+			return false;
+		}
+	}
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tTrainOCR failed: could not open Learned Samples or Responses\n", (float)m_TimeStamp / 1000000.0f);
+	}
+	if (m_LogToFile) LogToFile("TrainOCR failed: could not open Learned Samples or Responses");
+	CallbackDebug("TrainOCR failed: could not open Learned Samples or Responses");
+	return false;
+}
+
+
+void GetCvMousePos(int event, int x, int y, int flags, void* userdata)
+{
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		cv::Point3i* MousePos = (cv::Point3i*)userdata;
+		MousePos->x = x;
+		MousePos->y = y;
+		MousePos->z = 1;
+	}
+	else if (event == EVENT_MOUSEMOVE)
+	{
+		if (flags == EVENT_FLAG_LBUTTON)
+		{
+			cv::Point3i* MousePos = (cv::Point3i*)userdata;
+			MousePos->x = x;
+			MousePos->y = y;
+			MousePos->z = 2;
+		}
+		else if (flags == EVENT_FLAG_RBUTTON)
+		{
+			cv::Point3i* MousePos = (cv::Point3i*)userdata;
+			MousePos->x = x;
+			MousePos->y = y;
+			MousePos->z = 3;
+		}
+	}
+}
+
+
 //OpenCL
 
-bool C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* PlatformNum, cl_device_id* ClDevice, int* DeviceNum, char* DeviceName)
+BOOL C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* PlatformNum, cl_device_id* ClDevice, int* DeviceNum, char* DeviceName)
 {
 	//Find and select Platform and Device
 	cl_int cl_Error;
@@ -74,14 +290,16 @@ bool C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* Platf
 	cl_Error = cl::Platform::get(&PlatformList);	//All available Platforms
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
+
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tFindPlatformDevice: Could not get Platform List: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"FindPlatformDevice: Could not get Platform List: %ls", MsgMsg);
 		return false;
 	}
 	if (PlatformList.size() == 0)
@@ -92,6 +310,7 @@ bool C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* Platf
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tFindPlatformDevice: No platforms found\n", (float)m_TimeStamp / 1000000.0f);
 		}
+		if (m_LogToFile) LogToFile(L"FindPlatformDevice: No platforms found");
 		return false;
 	}
 
@@ -165,7 +384,7 @@ bool C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* Platf
 
 	//Debug Specify Device manually ************************************************************************************************************************************
 	//BestDeviceNum = 1;
-	//DebugLog(TEXT("Best Device manual = "), TEXT("1"));
+	//DebugUserLog(TEXT("Best Device manual = "), TEXT("1"));
 
 	*ClPlatform = Selector[BestDeviceNum].PlatformID;
 	*PlatformNum = Selector[BestDeviceNum].PlatformNum;
@@ -183,39 +402,39 @@ bool C_rx_AlignFilter::FindPlatformDevice(cl_platform_id* ClPlatform, int* Platf
 			wchar_t* device_wString = new wchar_t[1024];
 
 			_itow_s((int)Selector[i].PlatformNum, device_wString, 10, 10);
-			DebugLog(TEXT("\nPlatformNum"), device_wString);
+			DebugUserLog(TEXT("\nPlatformNum"), device_wString);
 
 			_itow_s((int)Selector[i].DeviceNum, device_wString, 10, 10);
-			DebugLog(TEXT("DeviceNum"), device_wString);
+			DebugUserLog(TEXT("DeviceNum"), device_wString);
 
 			MultiByteToWideChar(CP_ACP, 0, (LPCCH)Selector[i].DeviceName, -1, device_wString, 1024);
-			DebugLog(TEXT("CL_DEVICE_NAME"), device_wString);
+			DebugUserLog(TEXT("CL_DEVICE_NAME"), device_wString);
 
 			MultiByteToWideChar(CP_ACP, 0, (LPCCH)Selector[i].DeviceVendor, -1, device_wString, 1024);
-			DebugLog(TEXT("CL_DEVICE_VENDOR"), device_wString);
+			DebugUserLog(TEXT("CL_DEVICE_VENDOR"), device_wString);
 
 			MultiByteToWideChar(CP_ACP, 0, (LPCCH)Selector[i].OpenClVersion, -1, device_wString, 1024);
-			DebugLog(TEXT("OpenClVersion"), device_wString);
+			DebugUserLog(TEXT("OpenClVersion"), device_wString);
 
 			_itow_s((int)Selector[i].MaxFreq, device_wString, 10, 10);
-			DebugLog(TEXT("Device maximum Freq"), device_wString);
+			DebugUserLog(TEXT("Device maximum Freq"), device_wString);
 
 			_itow_s((int)Selector[i].ComputeUnits, device_wString, 10, 10);
-			DebugLog(TEXT("Device ComputeUnits"), device_wString);
+			DebugUserLog(TEXT("Device ComputeUnits"), device_wString);
 
 			_itow_s((int)Selector[i].MaxWGSize, device_wString, 10, 10);
-			DebugLog(TEXT("Device maximum WG Size"), device_wString);
+			DebugUserLog(TEXT("Device maximum WG Size"), device_wString);
 
 			_ltow_s((long)Selector[i].SelectorValue, device_wString, 10, 10);
-			DebugLog(TEXT("Selector Value"), device_wString);
+			DebugUserLog(TEXT("Selector Value"), device_wString);
 
 			delete[] device_wString;
 		}
 
 		wchar_t* device_wString = new wchar_t[1024];
 		MultiByteToWideChar(CP_ACP, 0, (LPCCH)Selector[BestDeviceNum].DeviceName, -1, device_wString, 1024);
-		DebugLog(TEXT("\nBest Device"), device_wString);
-		DebugLog(TEXT("\n"), TEXT("***************************************\n\n"));
+		DebugUserLog(TEXT("\nBest Device"), device_wString);
+		DebugUserLog(TEXT("\n"), TEXT("***************************************\n\n"));
 
 		delete[] device_wString;
 	}
@@ -232,14 +451,15 @@ cl_context C_rx_AlignFilter::CreateContext(cl_platform_id ClPlatformId, int Plat
 	cl_context context = clCreateContext(contextProperties, 1, &ClDeviceId, nullptr, nullptr, &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateContext: Could not create Context: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateContext: Could not create Context: %ls", MsgMsg);
 		exit(-1);
 	}
 	return context;
@@ -252,14 +472,16 @@ cl_command_queue C_rx_AlignFilter::CreateCommandQueue(cl_context context, cl_dev
 	cl_command_queue queue = clCreateCommandQueue(context, ClDeviceId, CL_QUEUE_PROFILING_ENABLE, &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateCommandQueue: Could not create Command-Queue: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateCommandQueue: Could not create Command-Queue: %ls", MsgMsg);
+
 		exit(-1);
 	}
 	return queue;
@@ -274,14 +496,13 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 	HRSRC hResult = FindResource(hMySelf, MAKEINTRESOURCE(KernelSourceID), _T("OPENCL"));
 	if (hResult == NULL)
 	{
-//		if (m_DebugOn)
-//		{
-//			TCHAR MsgMsg[10];
-//			_itow_s((int)hResult, MsgMsg, 10, 10);
-//			m_MeasureTime = std::chrono::steady_clock::now();
-//			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-//			printf("%6.6f\tMakeProgram: KernelSource-Resource not found: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
-//		}
+		if (m_DebugOn)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tMakeProgram: KernelSource-Resource not found\n", (float)m_TimeStamp / 1000000.0f);
+		}
+		if (m_LogToFile) LogToFile(L"MakeProgram: KernelSource-Resource not found");
 		exit(-1);
 	}
 
@@ -294,6 +515,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tMakeProgram: Module Pointer-Resource not found\n", (float)m_TimeStamp / 1000000.0f);
 		}
+		if (m_LogToFile) LogToFile(L"MakeProgram: Module Pointer-Resource not found");
 		exit(-1);
 	}
 	DWORD KernelSize = SizeofResource(hMySelf, hResult);
@@ -307,6 +529,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tMakeProgram: Could not load Kernel Source\n", (float)m_TimeStamp / 1000000.0f);
 		}
+		if (m_LogToFile) LogToFile(L"MakeProgram: Could not load Kernel Source");
 		exit(-1);
 	}
 
@@ -314,14 +537,15 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 	cl_program Program = clCreateProgramWithSource(context, 1, (const char**)&KernelBuffer, NULL, &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tMakeProgram: Could not create Program Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"MakeProgram: Could not create Program Binarize: %ls", MsgMsg);
 		exit(-1);
 	}
 
@@ -329,14 +553,15 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 	cl_Error = clBuildProgram(Program, 1, &DeviceId, NULL/*"-cl-denorms-are-zero"*/, NULL, NULL);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tMakeProgram: Could not build Program Full-Alignment: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"MakeProgram: Could not build Program Full-Alignment: %ls", MsgMsg);
 
 		if (m_DebugOn)
 		{
@@ -356,10 +581,11 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 					m_MeasureTime = std::chrono::steady_clock::now();
 					m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 					printf("%6.6f\tMakeProgram: Folder \"my_documents\" not found\n", (float)m_TimeStamp / 1000000.0f);
+					if (m_LogToFile) LogToFile(L"MakeProgram: Folder \"my_documents\" not found");
 			}
 			else
 			{
-				wcsncat(my_documents, TEXT("\\rx_AlignFilter_Log.txt"), MAX_PATH);
+				wcsncat(my_documents, L"\\rx_AlignFilter_Log.txt", MAX_PATH);
 				std::fstream file(my_documents, std::ios::out | std::ios::binary | std::ios::app);
 				file << "BuildLog Start:" << std::endl;
 				file << log << std::endl;
@@ -375,7 +601,7 @@ cl_program C_rx_AlignFilter::MakeProgram(int KernelSourceID, cl_context context,
 	return Program;
 }
 
-bool C_rx_AlignFilter::CreateKernels(cl_program Program)
+BOOL C_rx_AlignFilter::CreateKernels(cl_program Program)
 {
 	//Create all OpenCl Kernels
 	cl_int cl_Error = 0;
@@ -384,14 +610,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClFullHistogramKernel = clCreateKernel(Program, "HistogramFull", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel FullHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel FullHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -399,14 +626,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClBlockHistogramKernel = clCreateKernel(Program, "HistogramBlock", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel HistogramBlock: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel HistogramBlock: %ls", MsgMsg);
 		return false;
 	}
 
@@ -414,14 +642,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClJoinHistogramKernel = clCreateKernel(Program, "JoinHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel JoinHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel JoinHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -429,14 +658,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClSmoothenHistogramKernel = clCreateKernel(Program, "SmoothenHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel SmoothenHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel SmoothenHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -444,14 +674,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClShowHistogramKernel = clCreateKernel(Program, "ShowHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel ShowHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -459,14 +690,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClBinarizeKernel = clCreateKernel(Program, "Binarize", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel Binarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel Binarize: %ls", MsgMsg);
 		return false;
 	}
 
@@ -474,14 +706,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClColorHistogramKernel = clCreateKernel(Program, "ColorHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel ColorHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -489,14 +722,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClColorBinarizeKernel = clCreateKernel(Program, "ColorBinarize", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorBinarize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel ColorBinarize: %ls", MsgMsg);
 		return false;
 	}
 
@@ -504,14 +738,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClColorThresholdLinesKernel = clCreateKernel(Program, "ColorThresholdLines", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorThresholdLines: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel ColorThresholdLines: %ls", MsgMsg);
 		return false;
 	}
 
@@ -519,14 +754,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClColorThresholdAverageKernel = clCreateKernel(Program, "ColorThresholdAverage", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorThresholdAverage: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel ColorThresholdAverage: %ls", MsgMsg);
 		return false;
 	}
 
@@ -534,14 +770,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClShowColorHistogramKernel = clCreateKernel(Program, "ColorShowHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ColorShowHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel ColorShowHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -549,14 +786,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClRGBBlockHistogramKernel = clCreateKernel(Program, "RGBBlockHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel RGBBlockHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel RGBBlockHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -564,14 +802,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClShowRGBHistogramKernel = clCreateKernel(Program, "ShowRGBHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel ShowRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel ShowRGBHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -579,14 +818,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClJoinRGBHistogramKernel = clCreateKernel(Program, "JoinRGBHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel JoinRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel JoinRGBHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -594,14 +834,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClSmoothenRGBHistogramKernel = clCreateKernel(Program, "SmoothenRGBHistogram", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel SmoothenRGBHistogram: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel SmoothenRGBHistogram: %ls", MsgMsg);
 		return false;
 	}
 
@@ -609,14 +850,15 @@ bool C_rx_AlignFilter::CreateKernels(cl_program Program)
 	ClColorizeRGBKernel = clCreateKernel(Program, "ColorizeRGB", &cl_Error);
 	if (cl_Error != CL_SUCCESS)
 	{
+		TCHAR MsgMsg[10];
+		_itow_s((int)cl_Error, MsgMsg, 10, 10);
 		if (m_DebugOn)
 		{
-			TCHAR MsgMsg[10];
-			_itow_s((int)cl_Error, MsgMsg, 10, 10);
 			m_MeasureTime = std::chrono::steady_clock::now();
 			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
 			printf("%6.6f\tCreateKernels: Could not create OpenCL Kernel RGBColorize: %ls\n", (float)m_TimeStamp / 1000000.0f, MsgMsg);
 		}
+		if (m_LogToFile) LogToFile(L"CreateKernels: Could not create OpenCL Kernel RGBColorize: %ls", MsgMsg);
 		return false;
 	}
 
@@ -742,7 +984,7 @@ int C_rx_AlignFilter::CalcThreshold(UINT* Histogram, UINT* Peak_1_Val, UINT * Pe
 		}
 	}
 	//if last item has a falling slope, it could be a valley
-	if ((SlopeList[255] < 0) & SlopeFalling)
+	if ((SlopeList[255] < 0) && SlopeFalling)
 	{
 		ValleyList[255] = true;
 		NumValleys++;

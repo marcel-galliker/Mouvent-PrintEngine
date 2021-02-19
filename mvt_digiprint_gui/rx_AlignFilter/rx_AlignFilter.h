@@ -43,6 +43,7 @@ interface IFrx_AlignFilter : public IUnknown
 {
 
 public:
+
 	#pragma region Enums & Structs
 
 	enum BinarizeModeEnum
@@ -63,14 +64,16 @@ public:
 		MeasureMode_Stitch = 4,
 		MeasureMode_Register = 5,
 		MeasureMode_StartLinesCont = 6,
-		MeasureMode_ColorStitch = 7
+		MeasureMode_ColorStitch = 7,
+		MeasureMode_OCR = 8,
 	};
 
 	enum DisplayModeEnum
 	{
 		Display_Off = 0,
 		Display_AllLines = 1,
-		Display_Correction = 2
+		Display_Correction = 2,
+		Display_OCR = 3,
 	};
 
 	enum LineLayoutEnum
@@ -103,11 +106,22 @@ public:
         LineAttachEnum LineAttach; //Angle, Stitch, Register: 0, StartLines: Line attached to camera limits (Top/Right/None/Bottom/Left)
 		BOOL micron;				//Measure is in μm
         int NumMeasures;			//Number of successful measures
+		char OcrResult[4];			//OCR result in ascii or empty
         char Info[256];
 	};
 
+	enum OcrLearnCmdEnum
+	{
+		ReadImage = 0,
+		Next = 1,
+		Edit = 2,
+		SaveAs = 3,
+		Quit = 4,
+		DeleteLearnedOCR = 5,
+		ReloadOCR = 6,
+	};
 
-#pragma endregion
+	#pragma endregion
 
 	#pragma region General
 
@@ -123,6 +137,8 @@ public:
 	STDMETHOD(SetDebug)(THIS_ BOOL DebugOn) PURE;
 	//Callback debug
 	STDMETHOD(SetCallbackDebug)(THIS_ BOOL CallbackDebug) PURE;
+	//Debug Log To FIle
+	STDMETHOD(SetDebugLogToFile)(THIS_ BOOL DebugToFile) PURE;
 	//Display Frame Timing
 	STDMETHOD(SetFrameTiming)(THIS_ BOOL DspFrameTime) PURE;
 	//Take SnapShot and Save to
@@ -243,12 +259,12 @@ public:
 	STDMETHOD(SetStartLinesTimeout)(THIS_ UINT32 StartLinesTimeout) PURE;
 
 	//Execute Measures
-	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures, UINT32 Timeout) PURE;
+	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures, UINT32 TO_1st, UINT32 TO_End) PURE;
 
 	//GetMeasure Results
 	STDMETHOD_(BOOL, GetMeasureResults)(THIS_ void* pMeasureDataStructArray, UINT32* ListSize) PURE;
 
-#pragma endregion
+	#pragma endregion
 
 	#pragma region Line-Direction
 
@@ -261,6 +277,17 @@ public:
 	STDMETHOD_(BOOL, GetUpsideDown)(THIS)PURE;
 
 #pragma endregion
+
+	#pragma region OCR
+
+	//Number of OCR Characters
+	STDMETHOD(SetNumOcrChars)(THIS_ UINT32 NumChars) PURE;
+
+	//Learn OCR Characters
+	STDMETHOD(SetLearnOcr)(THIS_ OcrLearnCmdEnum LearnCommand, char OcrChar) PURE;
+
+	#pragma endregion
+
 
 };
 
@@ -290,12 +317,22 @@ public:
 	float AngleCorrection;
 	float StitchCorr;
 	float RegisterCorr;
+	UINT16 OcrResult;
 	UINT16 Deviated = 0;		//0: OK, 1: to left, 2: to right, 3: NotSpecified from ReEval, 4: missing, 5: too thin, 6: too thick, 7: ToNext > 2 Sigma off
 	float Deviation = 0;
 	float DevResolution = 0;
 	UINT16 NextMissing = 0;
 	UINT16 LastMissing = 0;
 };
+
+struct OcrResultStruct
+{
+	UINT16 BlobNo;
+	UINT16 OcrResult;
+	int XPos;
+	int YPos;
+};
+
 
 //Input pin
 class C_rx_AlignFilter_InputPin : public CBaseInputPin
@@ -443,6 +480,7 @@ public:
 	STDMETHODIMP GetDeviceName(LPCWSTR DeviceName);
 	STDMETHODIMP SetDebug(BOOL DebugOn);
 	STDMETHODIMP SetCallbackDebug(BOOL CallbackDebug);
+	STDMETHODIMP SetDebugLogToFile(BOOL DebugToFile);
 	STDMETHODIMP SetFrameTiming(BOOL DspFrameTime);
 	STDMETHODIMP_(BOOL) TakeSnapShot(const wchar_t* SnapDirectory, const wchar_t* SnapFileName);
 	STDMETHODIMP SetShowOriginalImage(BOOL ShowOriginalImage);
@@ -546,7 +584,7 @@ public:
 	STDMETHODIMP SetStartLinesTimeout (UINT32 StartLinesTimeout);
 
 	//Execute Measures
-	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures, UINT32 Timeout);
+	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures, UINT32 TO_1st, UINT32 TO_End);
 
 	//GetMeasure Results
 	STDMETHODIMP_(BOOL) GetMeasureResults(void* pMeasureDataStructArray, UINT32* ListSize);
@@ -563,12 +601,26 @@ public:
 	STDMETHODIMP SetUpsideDown(BOOL UpsideDown);
 	STDMETHODIMP_(BOOL) GetUpsideDown();
 
-#pragma endregion
+	#pragma endregion
+
+	#pragma region OCR
+
+	//Number of OCR Characters
+	STDMETHODIMP SetNumOcrChars(UINT32 NumOcrChars);
+
+	//Learn OCR Characters
+	STDMETHODIMP SetLearnOcr(OcrLearnCmdEnum LearnCommand, char OcrChar);
+
+	#pragma endregion
 
 	#pragma endregion
 
 private:
 	
+	wchar_t AppLocalPath[MAX_PATH];
+	wchar_t AppTempPath[MAX_PATH];
+	wchar_t DebugLogPath[MAX_PATH];
+
 	//Connection
 	HRESULT FrameFinished(void);
 	CMediaType m_mt1;
@@ -578,6 +630,7 @@ private:
 	UINT m_ImageHeight = 0;
 
 	//Host Communication
+	HWND m_PresetHostHwnd = NULL;
 	HWND m_HostHwnd = NULL;
 
 	//OpenCl
@@ -609,7 +662,6 @@ private:
 	//RGB Histogram
 	UINT RGBHistogram[3 * 256];
 	UINT m_RGBThreshold[3];
-	UINT m_RGBFinalThreshold = 170;
 	UINT m_RGBPeak_1_Val[3] = { 0, 0, 0 };
 	UINT m_RGBPeak_2_Val[3] = { 0, 0, 0 };
 	UINT m_RGBPeak_1_Pos[3] = { 0, 0, 0 };
@@ -679,7 +731,8 @@ private:
 	UINT32 m_DataListSize = 0;
 	BOOL m_DataListforHostReady = false;
 	BOOL m_measureDone = false;
-	UINT32 m_Timeout = 0;
+	UINT32 m_Timeout1st = 0;
+	UINT32 m_TimeoutEnd = 0;
 	UINT32 m_TimeoutCounter = 0;
 
 	float m_FindLine_umPpx = 1;
@@ -699,12 +752,16 @@ private:
 	#define WP_MeasureTimeout 105
 	#define WP_StartLinesTimeout 106
 	#define WP_CallBackDebug 107
+	#define WP_ReadOCR 108
+	#define WP_ColorStitch 109
 
 	//Line Direction
 	BOOL m_LinesHorizontal = false;
 	BOOL m_PresetLinesHorizontal = false;
 	BOOL m_UpsideDown = false;
 	BOOL m_PresetUpsideDown = false;
+	BOOL m_InverseImage = false;
+	BOOL m_PresetInverseImage = false;
 
 	//Debug On
 	BOOL m_DebugPrepare = false;
@@ -715,9 +772,8 @@ private:
 	FILE* pStdOut;
 	FILE* pStdErr;
 	BOOL m_CallbackDebug = false;
+	BOOL m_LogToFile = false;
 
-	bool m_InverseImage = false;
-	bool m_PresetInverseImage = false;
 
 	//Pattern parameters
 	//Angle
@@ -743,7 +799,7 @@ private:
 	UINT32 m_StartLinesTimeoutCounter = 0;
 
 	//TextBitmap
-	bool OverlayBitmapReady = FALSE;
+	BOOL OverlayBitmapReady = FALSE;
 	HBITMAP TextBitmap = NULL;
 	BYTE* pText = NULL;
 	HDC MemDC = NULL;
@@ -751,7 +807,7 @@ private:
 	//SnapShot
 	wchar_t* m_SnapDir[MAX_PATH];
 	wchar_t m_SavePathName[MAX_PATH] = L"";
-	bool m_TakeSnapShot = false;
+	BOOL m_TakeSnapShot = false;
 
 	//Timing Display
 	BOOL m_DspTiming = false;
@@ -775,16 +831,50 @@ private:
 	HFONT m_OverlayTextFont = NULL;
 	long m_OverlayFontHeight = 0;
 
+	//OCR
+	vector<OcrResultStruct> OcrList;	//Will hold {BlobNo, OcrValue, X- and Y-Position}
+	BOOL m_OcrTrained = false;
+	BOOL m_OCR_ValueReady = false;
+	char m_OCR_Value[256] = "";
+	UINT16 m_OcrAvgX = 0;
+	UINT16 m_OcrAvgY = 0;
+	Ptr<KNearest> KNearOcr = NULL;
+	UINT32 m_PresetNumOcrChars = 2;
+	UINT32 m_NumOcrChars = 2;
+	wchar_t LearnedOcrPath[MAX_PATH];
+	std::string RoiBmpOcrPath;
+	Mat Learn_Samples;
+	Mat_<int> Learn_Responses;
+	Mat FrozenImage;
+	BOOL m_LearningOCR = false;
+	BOOL m_LearnImageTaken = false;
+	Mat OcrRoi[4];
+	UINT32 m_NumOcrRois = 0;
+	UINT32 m_CurrentOcrBlob = 0;
+	BOOL m_EditOcrImage = false;
+	BOOL m_DestroyOcrImage = false;
+	cv::Point3i MousePos;
+	cv::Point2i LastBase;
+	BOOL ocrwin0open = false;
+	UINT32 m_OcrBgCounter = 0;
+	BOOL m_DeleteLearnedOcr = false;
+	BOOL m_SaveOCRChar = false;
+	BOOL m_ReloadOcr = false;
+	char m_OcrChar = '\0';
 
+	BOOL ocrwin1open = false;
+	BOOL ocrwin2open = false;
+	BOOL ocrwin3open = false;
+	BOOL ocrwin4open = false;
 
 	//Prototypes
 
 	//OpenCl
-	bool FindPlatformDevice(cl_platform_id* ClPlatform, int* PlatformNum, cl_device_id* ClDevice, int* DeviceNum, char* DeviceName);
+	BOOL FindPlatformDevice(cl_platform_id* ClPlatform, int* PlatformNum, cl_device_id* ClDevice, int* DeviceNum, char* DeviceName);
 	cl_context CreateContext(cl_platform_id ClPlatformId, int PlatformNum, cl_device_id ClDeviceId, int DeviceNum);
 	cl_command_queue CreateCommandQueue(cl_context context, cl_device_id ClDeviceId, int DeviceNum);
 	cl_program MakeProgram(int KernelSourceID, cl_context context, cl_device_id DeviceId, int DeviceNum);
-	bool CreateKernels(cl_program Program);
+	BOOL CreateKernels(cl_program Program);
 
 	//OpenCl Kernels
 	cl_kernel ClFullHistogramKernel = NULL;
@@ -805,8 +895,11 @@ private:
 	cl_kernel ClSmoothenRGBHistogramKernel = NULL;
 	cl_kernel ClColorizeRGBKernel = NULL;
 
-	//Callback Debug
-	void C_rx_AlignFilter::CallbackDebug(const char* format, ...);
+	//Debug
+	void CallbackDebug(const char* format, ...);
+	void DebugLog(const char* MessageFormat, ...);
+	void LogToFile(char* MessageFormat, ...);
+	void LogToFile(wchar_t* MessageFormat, ...);
 
 	//Change Settings and Modes
 	HRESULT ChangeModes();
@@ -828,7 +921,6 @@ private:
 	HRESULT ColorizeRGB(IMediaSample* pSampleIn, UINT* RGBHistogram, IMediaSample* pSampleOut, bool FixInverse = true);
 	int CalcRGBThreshold(UINT* RGBHistogram, UINT* Peak_1_Val, UINT* Peak_1_Pos, UINT* Peak_2_Val, UINT* Peak_2_Pos, UINT* Threshold);
 
-
 	//Dilate/Erode
 	HRESULT Erode(IMediaSample* pSampleIn, BOOL Vertical);
 	void 	CalculateErodeSeed();
@@ -843,6 +935,7 @@ private:
 	HRESULT MeasureAngle(BOOL Vertical, BOOL UpsideDown);
 	HRESULT MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InRevolutions);
 	HRESULT MeasureRegister(BOOL Vertical, BOOL UpsideDown);
+	HRESULT ReadOcr(IMediaSample* pSampleIn, BOOL Vertical, BOOL UpsideDown, BOOL Continuous);
 
 	//Display
 	HRESULT OverlayBlobs(IMediaSample* pSampleIn);
@@ -852,6 +945,10 @@ private:
 
 	//SnapShot
 	HRESULT TakeSnapShot(IMediaSample* pSampleIn);
+
+	//ocr
+	BOOL TrainOCR();
+	HRESULT LearnOcr(IMediaSample* pSampleIn, BOOL Vertical, BOOL UpsideDown, UINT32 OcrBlobNo);
 
 };
 

@@ -40,6 +40,8 @@ namespace rx_CamLib
 
         public enum ENCamCallBackInfo
         {
+            ColorStitchCorr             = 10,
+            OcrResult                   =  9,
             DebugCallBack               =  8,
             StartLinesContinuous        =  7,
             RegisterCorr                =  6,
@@ -69,14 +71,16 @@ namespace rx_CamLib
             MeasureMode_Stitch      = 4,
             MeasureMode_Register    = 5,
             MeasureMode_StartLinesCont = 6,
-            MeasureMode_ColorStitch = 7
+            MeasureMode_ColorStitch = 7,
+            MeasureMode_OCR = 8,
         }
 
         public enum ENDisplayMode
         {
             Display_Off         = 0,
             Display_AllLines    = 1,
-            Display_Correction  = 2
+            Display_Correction  = 2,
+            Display_OCR         = 3,
         }
 
         public enum ENBinarizeMode
@@ -117,9 +121,22 @@ namespace rx_CamLib
             public LineLayoutEnum LineLayout;   //Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right/Covering/Bottom/Left)  
             public LineAttachEnum LineAttach; //Angle, Stitch, Register: 0, StartLines: Line attached to camera limits (Top/Right/None/Bottom/Left)
             public bool micron;                 //Measure is in μm
-            public int NumMeasures;             //Number of successful measure
+            public int NumMeasures;             //Number of successful measures
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            public char[] OcrChars;             //OCR results as ASCII chars
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
             public string Info;             // Debug Info etc.
+        };
+
+        public enum OcrLearnCmdEnum
+        {
+            ReadImage = 0,
+            Next = 1,
+            Edit = 2,
+            SaveAs = 3,
+            Quit = 4,
+            DeleteLearnedOCR = 5,
+            ReloadOCR = 6,
         };
 
         private DsDevice[] DeviceList = null;
@@ -156,6 +173,9 @@ namespace rx_CamLib
         private const int WP_StartLinesCont = 104;
         private const int WP_MeasureTimeout = 105;
         private const int WP_StartLinesTimeout = 106;
+        private const int WP_CallBackDebug = 107;
+        private const int WP_ReadOCR = 108;
+        private const int WP_ColorStitch = 109;
 
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -281,8 +301,8 @@ namespace rx_CamLib
                 LastDsErrorMsg = "No camera selected";
                 return LastDsErrorNum = ENCamResult.Cam_notSelected;
             }
-            result=BuildGraph(hwnd);
-            if (result!=ENCamResult.OK)
+            result = BuildGraph(hwnd);
+            if (result != ENCamResult.OK)
             {
                 return result;
             }
@@ -559,9 +579,10 @@ namespace rx_CamLib
         /// Executes the desired number of measurements, returns result and center position of pattern through CameraCallBack 
         /// </summary>
         /// <param name="NumMeasures">number of measurements to be taken</param>
-        /// <param name="Timeout">number of camera frames without valis measurement before measurement stops with timeout</param>
+        /// <param name="TO_1st">number of camera frames until 1st valid measurement is found, 0 is no tiemeout</param>
+        /// <param name="TO_End">number of camera frames until all measurements are done, o is no timeout</param>
         /// <returns>0: for success or error code</returns>
-        public ENCamResult DoMeasures(ENMeasureMode MeasureMode, UInt32 NumMeasures, UInt32 Timeout)
+        public ENCamResult DoMeasures(ENMeasureMode MeasureMode, UInt32 NumMeasures, UInt32 TO_1st, UInt32 TO_End)
         {
             if (!CameraRunning) return ENCamResult.Cam_notRunning;
 
@@ -571,7 +592,7 @@ namespace rx_CamLib
                 MeasureMode == ENMeasureMode.MeasureMode_StartLines ||
                 MeasureMode == ENMeasureMode.MeasureMode_StartLinesCont) return ENCamResult.Filter_NoMeasurePossible;
 
-            if (halignFilter.DoMeasures(NumMeasures, Timeout)) return ENCamResult.OK;
+            if (halignFilter.DoMeasures(NumMeasures, TO_1st, TO_End)) return ENCamResult.OK;
             else return ENCamResult.Filter_NoMeasurePossible;
         }
 
@@ -903,9 +924,51 @@ namespace rx_CamLib
         /// <param name="CallbackDebug"></param>
         public void SetCallbackDebug(bool CallbackDebug)
         {
-            if (CameraRunning) halignFilter.SetCallbackDebug(CallbackDebug);
+            if (CameraRunning && pMsgWindow != IntPtr.Zero) halignFilter.SetCallbackDebug(CallbackDebug);
         }
 
+        //Debug to Logfile
+        /// <summary>
+        /// Writes debug messages to %temp%\rxAlignFilter\rxAlignFilter.log, default = false
+        /// </summary>
+        /// <param name="DebugToFile"></param>
+        public void SetDebugLogToFile(bool DebugToFile)
+        {
+            if (CameraRunning && pMsgWindow != IntPtr.Zero) halignFilter.SetDebugLogToFile(DebugToFile);
+        }
+
+        //Number of OCR characters
+        /// <summary>
+        /// Set the number of OCR characters to be read 
+        /// </summary>
+        /// <param name="NumOcrChars">range: 1 - 4, default = 2</param>
+        /// <returns>true for success, false if camera is not running or value is out of range</returns>
+        public bool SetNumOcrChars(UInt32 NumOcrChars)
+        {
+            if (NumOcrChars > 4 || NumOcrChars < 1) return false;
+            if (CameraRunning)
+            {
+                halignFilter.SetNumOcrChars(NumOcrChars);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// All learning functionality for OCR reading
+        /// </summary>
+        /// <param name="LearnCommand">OcrLearnCmdEnum</param>
+        /// <param name="OcrChar">only used with LearnCommand = SaveAs: the learned character</param>
+        /// <returns>true for success</returns>
+        public bool SetLearnOCR(OcrLearnCmdEnum LearnCommand, char OcrChar = '\0')
+        {
+            if (CameraRunning)
+            {
+                halignFilter.SetLearnOcr((UInt32)LearnCommand, OcrChar);
+                return true;
+            }
+            return false;
+        }
 
         /// <summary>
         /// Displays frame processing time in debug console, default = false
@@ -976,7 +1039,7 @@ namespace rx_CamLib
                     EventCode EvCode;
                     IntPtr lParam1, lParam2;
                     int hr = 0;
-                    if (CameraRunning)
+                    while (hr == 0 && MediaControl != null)
                     {
                         hr = MediaEventEx.GetEvent(out EvCode, out lParam1, out lParam2, 0);
                         switch (EvCode)
@@ -1042,6 +1105,7 @@ namespace rx_CamLib
                                 break;
                             }
                         }
+                        if(MediaControl != null) MediaEventEx.FreeEventParams(EvCode, lParam1, lParam2);
                     }
                     break;
                 }
@@ -1088,6 +1152,11 @@ namespace rx_CamLib
                             CallBackData.CamResult = Result;
                             CamCallBack?.Invoke(ENCamCallBackInfo.StitchCorr, CallBackData);
                             break;
+                        case WP_ColorStitch:
+                            Result = GetMeasureData(out CallBackData);
+                            CallBackData.CamResult = Result;
+                            CamCallBack?.Invoke(ENCamCallBackInfo.ColorStitchCorr, CallBackData);
+                            break;
                         case WP_Register:
                             Result = GetMeasureData(out CallBackData);
                             CallBackData.CamResult = Result;
@@ -1098,6 +1167,13 @@ namespace rx_CamLib
                             CallBackData = new CallBackDataStruct();
                             CallBackData.CamResult = new ENCamResult();
                             CamCallBack?.Invoke(ENCamCallBackInfo.MeasureTimeout, CallBackData);
+                            break;
+                        case WP_CallBackDebug:
+                            break;
+                        case WP_ReadOCR:
+                            Result = GetMeasureData(out CallBackData);
+                            CallBackData.CamResult = Result;
+                            CamCallBack?.Invoke(ENCamCallBackInfo.OcrResult, CallBackData);
                             break;
                     }
                     break;
@@ -1152,6 +1228,7 @@ namespace rx_CamLib
             catch (Exception excep)
             {
                 CallBackDataStruct callBackData = new CallBackDataStruct();
+                callBackData.Info = excep.Message;
                 CamCallBack?.Invoke(ENCamCallBackInfo.CouldNotBuildGraph, callBackData);
                 return ENCamResult.Error;
             }
@@ -1164,7 +1241,7 @@ namespace rx_CamLib
             int hResult;
 
             halignFilter.SetFrameTiming(false);
-            halignFilter.SetDebug(false);
+            //halignFilter.SetDebug(false);
             halignFilter.SetHostPointer(IntPtr.Zero);
             halignFilter.ShowHistogram(false);
             halignFilter.SetOverlayTxt("");
@@ -1175,6 +1252,17 @@ namespace rx_CamLib
 
             try
             {
+                //Stop Media notification and empty queue
+                MediaEventEx.SetNotifyWindow(IntPtr.Zero, 0, IntPtr.Zero);
+                EventCode EvCode;
+                IntPtr lParam1, lParam2;
+                int hr = 0;
+                while (hr == 0)
+                {
+                    hr = MediaEventEx.GetEvent(out EvCode, out lParam1, out lParam2, 0);
+                    MediaEventEx.FreeEventParams(EvCode, lParam1, lParam2);
+                }
+
                 //Stop Media Control
                 if (MediaControl != null)
                 {
@@ -1215,10 +1303,13 @@ namespace rx_CamLib
                 hResult = Marshal.ReleaseComObject(FilterGraph2);
                 if (hResultError(hResult)) return ENCamResult.Error;
                 FilterGraph2 = null;
+
+                if (SourceFilter != null) SourceFilter = null;
             }
             catch (Exception excep)
             {
                 CallBackDataStruct callBackData = new CallBackDataStruct();
+                callBackData.Info = excep.Message;
                 CamCallBack?.Invoke(ENCamCallBackInfo.GraphNotStoppedCorrectly, callBackData);
                 return ENCamResult.Error;
             }
@@ -1380,6 +1471,9 @@ namespace rx_CamLib
 
             //Set Callback
             if (pMsgWindow != IntPtr.Zero) halignFilter.SetHostPointer(pMsgWindow);
+
+            //Enable CallBackDebug
+            //if (pMsgWindow != IntPtr.Zero) halignFilter.SetCallbackDebug(true);
 
             return ENCamResult.OK;
         }
@@ -1598,6 +1692,8 @@ namespace rx_CamLib
             FilterGraph2 = null;
             MediaControl = null;
 
+            if (SourceFilter != null) SourceFilter = null;
+
             return true;
         }
 
@@ -1671,11 +1767,15 @@ namespace rx_CamLib
         private ENCamResult GetMeasureData(out CallBackDataStruct MeasureData)
         {
             MeasureData = new CallBackDataStruct();
+            MeasureData.OcrChars = new char[4];
 
             //Raw data list
             List<CallBackDataStruct> CorrectionList;
             ENCamResult DataResult = GetMeasureDataList(out CorrectionList);
             if (DataResult != ENCamResult.OK && DataResult != ENCamResult.Filter_NoData && DataResult != ENCamResult.Filter_DataTimeout) return DataResult;
+
+            if (CorrectionList.Count > 0 && CorrectionList[CorrectionList.Count - 1].Info != "")
+                MeasureData.Info = CorrectionList[CorrectionList.Count - 1].Info;
 
             if (CorrectionList.Count == 0 || DataResult == ENCamResult.Filter_NoData ||
                 (CorrectionList.Count == 1 && CorrectionList[0].NumMeasures == 0))
@@ -1765,6 +1865,10 @@ namespace rx_CamLib
             int MeanLineAttach = 0;
             float MeanDX = 0;
             float MeanDY = 0;
+            int MeanOcr_0 = 0;
+            int MeanOcr_1 = 0;
+            int MeanOcr_2 = 0;
+            int MeanOcr_3 = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
                 MeanV1 += CorrectionList[i].Value_1;
@@ -1772,12 +1876,20 @@ namespace rx_CamLib
                 MeanLineAttach += (int)CorrectionList[i].LineAttach;
                 MeanDX += CorrectionList[i].DPosX;
                 MeanDY += CorrectionList[i].DPosY;
+                MeanOcr_0 += CorrectionList[i].OcrChars[0];
+                MeanOcr_1 += CorrectionList[i].OcrChars[1];
+                MeanOcr_2 += CorrectionList[i].OcrChars[2];
+                MeanOcr_3 += CorrectionList[i].OcrChars[3];
             }
             MeanV1 /= CorrectionList.Count;
             MeanLineLayout /= CorrectionList.Count;
             MeanLineAttach /= CorrectionList.Count;
             MeanDX /= CorrectionList.Count;
             MeanDY /= CorrectionList.Count;
+            MeanOcr_0 /= CorrectionList.Count;
+            MeanOcr_1 /= CorrectionList.Count;
+            MeanOcr_2 /= CorrectionList.Count;
+            MeanOcr_3 /= CorrectionList.Count;
 
             //Variance
             double VarV1 = 0;
@@ -1785,6 +1897,10 @@ namespace rx_CamLib
             double VarLineAttach = 0;
             double VarDX = 0;
             double VarDY = 0;
+            double VarOcr_0 = 0;
+            double VarOcr_1 = 0;
+            double VarOcr_2 = 0;
+            double VarOcr_3 = 0;
             for (int i = 0; i < CorrectionList.Count; i++)
             {
                 VarV1 += Math.Pow(CorrectionList[i].Value_1 - MeanV1, 2);
@@ -1792,12 +1908,20 @@ namespace rx_CamLib
                 VarLineAttach += Math.Pow((int)CorrectionList[i].LineAttach - MeanLineAttach, 2);
                 VarDX += Math.Pow(CorrectionList[i].DPosX - MeanDX, 2);
                 VarDY += Math.Pow(CorrectionList[i].DPosY - MeanDY, 2);
+                VarOcr_0 += Math.Pow(CorrectionList[i].OcrChars[0] - MeanOcr_0, 2);
+                VarOcr_1 += Math.Pow(CorrectionList[i].OcrChars[1] - MeanOcr_1, 2);
+                VarOcr_2 += Math.Pow(CorrectionList[i].OcrChars[2] - MeanOcr_2, 2);
+                VarOcr_3 += Math.Pow(CorrectionList[i].OcrChars[3] - MeanOcr_3, 2);
             }
             VarV1 /= CorrectionList.Count;
             VarLineLayout /= CorrectionList.Count;
             VarLineAttach /= CorrectionList.Count;
             VarDX /= CorrectionList.Count;
             VarDY /= CorrectionList.Count;
+            VarOcr_0 /= CorrectionList.Count;
+            VarOcr_1 /= CorrectionList.Count;
+            VarOcr_2 /= CorrectionList.Count;
+            VarOcr_3 /= CorrectionList.Count;
 
             //StdDev
             VarV1 = Math.Sqrt(VarV1);
@@ -1805,9 +1929,18 @@ namespace rx_CamLib
             VarLineAttach = Math.Sqrt(VarLineAttach);
             VarDX = Math.Sqrt(VarDX);
             VarDY = Math.Sqrt(VarDY);
+            VarOcr_0 = Math.Sqrt(VarOcr_0);
+            VarOcr_1 = Math.Sqrt(VarOcr_1);
+            VarOcr_2 = Math.Sqrt(VarOcr_2);
+            VarOcr_3 = Math.Sqrt(VarOcr_3);
 
             //Average within 1 sigma
             int Counter = 0;
+            int OcrSum_0 = 0;
+            int OcrSum_1 = 0;
+            int OcrSum_2 = 0;
+            int OcrSum_3 = 0;
+
             for (int i = 0; i < CorrectionList.Count; i++)
             {
                 if (CorrectionList[i].Value_1 <= MeanV1 + VarV1 &&
@@ -1819,7 +1952,15 @@ namespace rx_CamLib
                     CorrectionList[i].DPosX <= MeanDX + VarDX &&
                     CorrectionList[i].DPosX >= MeanDX - VarDX &&
                     CorrectionList[i].DPosY <= MeanDY + VarDY &&
-                    CorrectionList[i].DPosY >= MeanDY - VarDY)
+                    CorrectionList[i].DPosY >= MeanDY - VarDY &&
+                    CorrectionList[i].OcrChars[0] <= MeanOcr_0 + VarOcr_0 &&
+                    CorrectionList[i].OcrChars[0] >= MeanOcr_0 - VarOcr_0 &&
+                    CorrectionList[i].OcrChars[1] <= MeanOcr_1 + VarOcr_1 &&
+                    CorrectionList[i].OcrChars[1] >= MeanOcr_1 - VarOcr_1 &&
+                    CorrectionList[i].OcrChars[2] <= MeanOcr_2 + VarOcr_2 &&
+                    CorrectionList[i].OcrChars[2] >= MeanOcr_2 - VarOcr_2 &&
+                    CorrectionList[i].OcrChars[3] <= MeanOcr_3 + VarOcr_3 &&
+                    CorrectionList[i].OcrChars[3] >= MeanOcr_3 - VarOcr_3 )
                 {
                     Counter++;
                     MeasureData.Value_1 += CorrectionList[i].Value_1;
@@ -1827,15 +1968,23 @@ namespace rx_CamLib
                     MeasureData.LineAttach += (int)CorrectionList[i].LineAttach;
                     MeasureData.DPosX += CorrectionList[i].DPosX;
                     MeasureData.DPosY += CorrectionList[i].DPosY;
+                    OcrSum_0 += CorrectionList[i].OcrChars[0];
+                    OcrSum_1 += CorrectionList[i].OcrChars[1];
+                    OcrSum_2 += CorrectionList[i].OcrChars[2];
+                    OcrSum_3 += CorrectionList[i].OcrChars[3];
                 }
             }
-            if (Counter>0)
+            if (Counter > 0)
 			{
                 MeasureData.Value_1 /= Counter;
                 MeasureData.LineLayout = (LineLayoutEnum)((int)MeasureData.LineLayout / Counter);
                 MeasureData.LineAttach = (LineAttachEnum)((int)MeasureData.LineAttach / Counter);
                 MeasureData.DPosX /= Counter;
                 MeasureData.DPosY /= Counter;
+                MeasureData.OcrChars[0] = (char)(OcrSum_0 / Counter);
+                MeasureData.OcrChars[1] = (char)(OcrSum_1 / Counter);
+                MeasureData.OcrChars[2] = (char)(OcrSum_2 / Counter);
+                MeasureData.OcrChars[3] = (char)(OcrSum_3 / Counter);
 			}
         }
 
