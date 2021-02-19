@@ -823,7 +823,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Printbar %d is not existing", headAdjustment->printbarNo+1);
         return;
     }
-    if (headAdjustment->headNo == -1 && headAdjustment->axis >= AXE_ANGLE)
+    if (headAdjustment->headNo == -1 && headAdjustment->axis == AXE_ANGLE)
     {
         Error(ERR_CONT, 0, "Angle-Screw is not existing at Head-No: %d", headAdjustment->headNo+1);
         return;
@@ -875,7 +875,11 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw))
     {
         _HeadAdjustment[stepperno] = *headAdjustment;
-        headAdjustment->printbarNo %= 2;
+        if (RX_Config.inkSupplyCnt % 2 == 0)
+            headAdjustment->printbarNo %= 2;
+        else
+            headAdjustment->printbarNo = (headAdjustment->printbarNo + 1) % 2;
+        sok_send(&_step_socket[stepperno], headAdjustment);
         sok_send(&_step_socket[stepperno], headAdjustment);
     }   
     else
