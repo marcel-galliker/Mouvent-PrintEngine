@@ -64,6 +64,7 @@ static uint32_t _MsgsCaptured;
 
 
 static int _CmdRunning = 0;
+static int _BlockedCmd = 0;
 static int _NewCmd = 0;
 static int _Value = 0;
 static int _CmdStarted = FALSE;
@@ -223,6 +224,7 @@ void robi_lb702_main(int ticks, int menu)
                 }
                 _CmdRunning = 0;
                 _NewCmd = 0;
+                _BlockedCmd = 0;
                 _Value = 0;
             }
             break;
@@ -571,6 +573,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
         RX_StepperStatus.screwerinfo.ref_done = FALSE;
         _NewCmd = FALSE;
+        _BlockedCmd = FALSE;
         lb702_reset_variables();
         robi_stop();
         break;
@@ -945,7 +948,7 @@ static void _check_Screwer_Movement()
     int ticks;
     static int _oldScrewState = 0;
     
-    if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && robi_move_done() && _NewCmd && !_CmdRunning)
+    if ((RX_StepperStatus.screwerinfo.screwer_blocked_left || RX_StepperStatus.screwerinfo.screwer_blocked_right) && robi_move_done() && _BlockedCmd && !_CmdRunning)
     {
         if ((RX_StepperStatus.screwerinfo.screwer_blocked_right &&  RX_StepperStatus.screw_posY >= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2) ||
                 (RX_StepperStatus.screwerinfo.screwer_blocked_left && RX_StepperStatus.screw_posY <= (SCREW_Y_BACK + SCREW_Y_FRONT) / 2))
@@ -953,8 +956,8 @@ static void _check_Screwer_Movement()
         else
             ticks = 3;
         robi_set_screw_current(TRUE);
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _NewCmd, &ticks);
-        _NewCmd = 0;
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _BlockedCmd, &ticks);
+        _BlockedCmd = 0;
     }
 }
 
@@ -966,9 +969,9 @@ static void _check_robi_stalled(void)
         RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
         RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;
         if (_CmdRunning == CMD_ROBI_SCREW_LEFT)
-            _NewCmd = CMD_ROBI_SCREW_RIGHT;
+            _BlockedCmd = CMD_ROBI_SCREW_RIGHT;
         else if (_CmdRunning == CMD_ROBI_SCREW_RIGHT)
-            _NewCmd = CMD_ROBI_SCREW_LEFT;
+            _BlockedCmd = CMD_ROBI_SCREW_LEFT;
     }
 }
 
