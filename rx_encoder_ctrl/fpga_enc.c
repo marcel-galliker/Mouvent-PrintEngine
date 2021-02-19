@@ -424,22 +424,16 @@ void  fpga_output(int no)
 //--- fpga_uv_on ------------------------------------
 void  fpga_uv_on(void)
 {
-	if (RX_EncoderCfg.printerType==printer_test_table)
-	{
-		_UV_Power	  = UV_POWER_OUT;
-		FpgaQSys->out = UV_ISOLATOR_OUT | _UV_Power;
-		_UV_SimuCnt=0;			
-	}
+	_UV_Power	  = UV_POWER_OUT;
+	FpgaQSys->out = UV_ISOLATOR_OUT | _UV_Power;
+	_UV_SimuCnt=0;			
 }
 
 //--- fpga_uv_off -------------------------------------
 void  fpga_uv_off(void)
 {
-	if (RX_EncoderCfg.printerType==printer_test_table)
-	{
-		_UV_Power	  = 0;
-		FpgaQSys->out = 0x0000;		
-	}
+	_UV_Power	  = 0;
+	FpgaQSys->out = 0x0000;		
 }
 
 //--- _uv_init --------------------------------------
