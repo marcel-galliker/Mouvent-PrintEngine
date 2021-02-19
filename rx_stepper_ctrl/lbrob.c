@@ -2140,6 +2140,12 @@ static void _vacuum_off()
     if (_WastePumpTimer) _WastePumpTimer = rx_get_ticks();
 }
 
+//--- _head_screw_pos ------------------------------------------
+int _head_screw_pos(void)
+{
+    return _HeadScrewPos;
+}
+
 //--- _lbrob_motor_test ---------------------------------
 static void _lbrob_motor_test(int motorNo, int steps)
 {

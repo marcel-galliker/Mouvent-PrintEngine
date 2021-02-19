@@ -365,8 +365,7 @@ static void* receive_thread(void *par)
                             {
                                 if (rxMessage.error == MOTOR_STALLED && RX_RobiStatus.motors[MOTOR_SCREW].isStalled && strcmp(msg, rxMessage.data))
                                     _ScrewerStalled = TRUE;
-
-                                if (rxMessage.error == MOTOR_TIMEOUTED && RX_RobiStatus.commandRunning[COMMAND0] == MOTOR_MOVE_Z_UP)
+                                else if (rxMessage.error == MOTOR_TIMEOUTED && RX_RobiStatus.commandRunning[COMMAND0] == MOTOR_MOVE_Z_UP)
                                     _ZNotReachedUp = TRUE;
                                 else
                                 {

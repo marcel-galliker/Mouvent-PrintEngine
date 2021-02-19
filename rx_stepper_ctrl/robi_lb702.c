@@ -973,6 +973,13 @@ static void _check_robi_stalled(void)
         else if (_CmdRunning == CMD_ROBI_SCREW_RIGHT)
             _BlockedCmd = CMD_ROBI_SCREW_LEFT;
     }
+    
+    int printhead = (2 * RX_StepperCfg.boardNo) + (RX_StepperStatus.screw_posX > (SCREW_X_LEFT + SCREW_X_RIGHT) / 2) + 1;
+    int axis = RX_StepperStatus.screw_posY > (SCREW_Y_FRONT + SCREW_Y_BACK) / 2;
+    if (robi_screwer_stalled() && RX_RobiStatus.screwCurrent == 1)
+    {
+        Error(ERR_CONT, 0, "Screwer stalled on Screw of printhead %d, Head %d, Axis %d", printhead, _head_screw_pos() - rob_fct_screw_cluster, axis);
+    }
 }
 
 static void _set_moving_variables(void)

@@ -1286,9 +1286,13 @@ void ctrl_reset_cond(void)
 //--- ctrl_set_rob_pos -------------------------------------
 void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
 {
-	if (rx_def_is_lb(RX_Config.printer.type))
+    int clusterNo = 0;
+    if (rx_def_is_lb(RX_Config.printer.type))
 	{
-        int clusterNo = robposition.printBar * RX_Config.headsPerColor/MAX_HEADS_BOARD + (robposition.head/MAX_HEADS_BOARD);
+        if (RX_Config.printer.type != printer_LB702_UV || RX_Config.colorCnt < 5 || RX_Config.colorCnt > 7)
+			clusterNo = robposition.printBar * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition.head / MAX_HEADS_BOARD);
+		else
+			clusterNo = ((robposition.printBar + 4) % RX_Config.colorCnt) * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition.head / MAX_HEADS_BOARD);
 
         int stepperNo;
         if (RX_Config.inkSupplyCnt % 2 == 0)
@@ -1336,7 +1340,12 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
 
 int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
 {
-    int clusterNo = robposition->printbarNo * RX_Config.headsPerColor/MAX_HEADS_BOARD + (robposition->headNo/MAX_HEADS_BOARD);
+    int clusterNo = 0;
+    
+    if (RX_Config.printer.type != printer_LB702_UV || RX_Config.colorCnt < 5 || RX_Config.colorCnt > 7)
+		clusterNo = robposition->printbarNo * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition->headNo / MAX_HEADS_BOARD);
+	else
+		clusterNo = ((robposition->printbarNo + 4) % RX_Config.colorCnt) * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition->headNo / MAX_HEADS_BOARD);
 
     int stepperNo, printbarNo;
     if (RX_Config.inkSupplyCnt % 2 == 0)
