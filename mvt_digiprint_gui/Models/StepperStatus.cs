@@ -93,6 +93,7 @@ namespace RX_DigiPrint.Models
                         RxGlobals.Events.AddItem(new LogItem(string.Format("ScrewCnt={0}", _ScrewCnt)));
                 }
 		}
+
 		//--- Property ScrewBlocked ---------------------------------------
 		private bool _ScrewedOk;
 		public bool ScrewedOk

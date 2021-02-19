@@ -61,7 +61,7 @@ namespace rx_CamLib
 			_Camera = cam;
 			Console.WriteLine ("create RxCamFunctions");
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
-		}		
+		}
 
 		//--- Property Simulation ---------------------------------------
 		public event CameraCallBack SimuCallback = null;
@@ -134,7 +134,7 @@ namespace rx_CamLib
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 15);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
 		}
 
 		//--- MeasureStitch --------------------------------
@@ -157,7 +157,7 @@ namespace rx_CamLib
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 20);
+			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 5, 10, 20);
 		}
 	}
 }
