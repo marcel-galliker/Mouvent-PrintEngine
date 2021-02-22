@@ -156,11 +156,11 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 	SetupAssist_MoveCmd *pmsg = (SetupAssist_MoveCmd*)pmsg_;
 	switch (pmsg->hdr.msgId)
 	{
-    case CMD_SA_REFERENCE:		Error(LOG, 0, "Send CMD_MOTOR_REFERENCE");
+    case CMD_SA_REFERENCE:	//	Error(LOG, 0, "Send CMD_MOTOR_REFERENCE");
 								sok_send_2(&_SaSocket, CMD_MOTOR_REFERENCE,    0, NULL); 
 								break;
 
-    case CMD_SA_STOP:			Error(LOG, 0, "Send CMD_SA_STOP");
+    case CMD_SA_STOP:		//	Error(LOG, 0, "Send CMD_SA_STOP");
 								sok_send_2(&_SaSocket, CMD_MOTOR_STOP,    0, NULL); 
 								break;
 
@@ -178,7 +178,7 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								}
 								break;
 
-    case CMD_SA_OUT_TRIGGER:	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
+    case CMD_SA_OUT_TRIGGER://	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
 								{
 									SetupAssist_OutTriggerCmd cmd;
 									cmd.hdr.msgLen = sizeof(cmd);
@@ -192,8 +192,8 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								plc_move_web(pmsg->steps, pmsg->speed);
 								break;
 
-    case CMD_SA_WEB_STOP:		gui_send_cmd(CMD_SA_WEB_STOP);
-								Error(LOG, 0, "Send CMD_SA_WEB_STOP");
+    case CMD_SA_WEB_STOP:	//	gui_send_cmd(CMD_SA_WEB_STOP);
+							//	Error(LOG, 0, "Send CMD_SA_WEB_STOP");
 								plc_pause_printing(FALSE);
 								break;
 

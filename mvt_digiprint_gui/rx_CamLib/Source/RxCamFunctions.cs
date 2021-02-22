@@ -116,7 +116,7 @@ namespace rx_CamLib
         }
 
 		//--- MeasureAngle --------------------------------
-		public void MeasureAngle()
+		public RxCam.ENCamResult MeasureAngle()
 		{
 			if (SimuCallback!=null)
 			{	
@@ -127,18 +127,18 @@ namespace rx_CamLib
 					Thread.Sleep(100);
 					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.AngleCorr, CallbackData);
 				}).Start();
-				return;
+				return RxCam.ENCamResult.OK;
 			}
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 			_Camera.SetLinesHorizontal(false);
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
+			return _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
 		}
 
 		//--- MeasureStitch --------------------------------
-		public void MeasureStitch()
+		public RxCam.ENCamResult MeasureStitch()
 		{
 			if (SimuCallback!=null)
 			{	
@@ -149,7 +149,7 @@ namespace rx_CamLib
 					Thread.Sleep(100);
 					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StitchCorr, CallbackData);
 				}).Start();
-				return;
+				return RxCam.ENCamResult.OK;
 			}
 
 			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
@@ -157,7 +157,30 @@ namespace rx_CamLib
 			_Camera.NumExtraErodes=3;
 			_Camera.SetLineAspectLimit(5);
 			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-			_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 5, 10, 20);
+			return _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 5, 10, 15);
+		}
+
+		//--- MeasureDist --------------------------------
+		public RxCam.ENCamResult MeasureDist()
+		{
+			if (SimuCallback!=null)
+			{	
+				new Task(() =>
+				{
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					CallbackData.Value_1 = (float)1.2;
+					Thread.Sleep(100);
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StitchCorr, CallbackData);
+				}).Start();
+				return RxCam.ENCamResult.OK;
+			}
+
+			_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
+			_Camera.SetLinesHorizontal(true);
+			_Camera.NumExtraErodes=3;
+			_Camera.SetLineAspectLimit(5);
+			_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
+			return _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Register, 5, 10, 15);
 		}
 	}
 }

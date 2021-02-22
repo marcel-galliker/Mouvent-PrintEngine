@@ -233,7 +233,7 @@ namespace RX_DigiPrint.Models
 					Console.WriteLine("WEB MOVE Error");
 				_WebMoveStartCnt++;
 				Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
-				RxGlobals.Events.AddItem(new LogItem(msg));
+			//	RxGlobals.Events.AddItem(new LogItem(msg));
 				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
 			}
 		}
