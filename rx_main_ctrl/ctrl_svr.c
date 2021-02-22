@@ -1294,11 +1294,12 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
 		else
 			clusterNo = ((robposition.printBar + 4) % RX_Config.colorCnt) * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition.head / MAX_HEADS_BOARD);
 
-        int stepperNo;
+        int stepperNo = 0;
         if (RX_Config.inkSupplyCnt % 2 == 0)
             stepperNo = robposition.printBar / 2;
         else
             stepperNo = (robposition.printBar + 1) / 2;
+        
         robposition.head = robposition.head % MAX_HEADS_BOARD;
         if (!blocked && robposition.head >= 0)
         {

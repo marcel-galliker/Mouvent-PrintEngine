@@ -67,6 +67,7 @@ static void _steplb_rob_do_reference(int no);
 static void _check_screwer(void);
 static void _check_fluid_back_pump(void);
 static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no);
+static void _reset_screw_position(int screwNo, int stepperNo);
 
 
 //--- steplb_init ---------------------------------------------------
@@ -274,6 +275,11 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &cfg, WRITE);
             sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
             _ClusterScrewTurned[i] = FALSE;
+        }
+        
+        if (_Status[i].screwerinfo.screw_reset && (oldStatus[i].screwNr_reset != _Status[i].screwNr_reset || oldStatus[i].screwerinfo.screw_reset == FALSE))
+        {
+            _reset_screw_position(_Status[i].screwNr_reset, i);
         }
 
         // Vacuum Cleaner Timer Start -------------------------------------------------------------------------------
@@ -1046,4 +1052,29 @@ void steplb_set_fluid_off(int no)
         steplb_rob_control(ctrl_off, (no + 1) / 2);
         steplb_rob_stop((no + 1) / 2);
     }
+}
+
+static void _reset_screw_position(int screwNo, int stepperNo)
+{
+    SRobPosition ScrewPosition;
+    memset(&ScrewPosition, 0, sizeof(ScrewPosition));
+    if (screwNo % (RX_Config.headsPerColor * SCREWS_PER_HEAD) == 0)
+    {
+        ScrewPosition.angle = 0;
+        ScrewPosition.dist = MAX_STEPS_DIST;
+        ScrewPosition.head = -1;
+    }
+    else
+    {
+        if (screwNo % 2 == 1)
+            ScrewPosition.angle = 0;
+        else
+            ScrewPosition.dist = MAX_STEPS_DIST;
+
+        ScrewPosition.head = ((screwNo - 1) % (SCREWS_PER_HEAD * RX_Config.headsPerColor)) / 2;
+    }
+
+    ScrewPosition.printBar = screwNo % (SCREWS_PER_HEAD * RX_Config.headsPerColor);
+    
+    ctrl_set_rob_pos(ScrewPosition, TRUE, screwNo % 2 == 0);
 }

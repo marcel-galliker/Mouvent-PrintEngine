@@ -144,6 +144,8 @@ void rx_def_init();
 #define SCREW_Y_FRONT		51300 // um
 #define SCREW_Y_BACK		34900  // um       // SCREW_Y_FRONT - 16400
 
+#define SCREWS_PER_HEAD		2
+
 //--- simple value ----------------------------------------------	
 typedef struct SValue
 {
@@ -1524,7 +1526,7 @@ typedef struct EScrewerInfo
     UINT32 wipe_right_up : 1;			//	0x00010000
     UINT32 screw_in_0 : 1;				//	0x00020000
     UINT32 screw_out_of_range : 1;		//	0x00040000
-    UINT32 r_info_19 : 1;				//	0x00080000
+    UINT32 screw_reset : 1;				//	0x00080000
     UINT32 r_info_20 : 1;				//	0x00100000
     UINT32 r_info_21 : 1;				//	0x00200000
     UINT32 r_info_22 : 1;				//	0x00400000
@@ -1632,6 +1634,7 @@ typedef struct SStepperStat
 	INT32		adjustmentProgress;
 	UINT32		alive[2];
     INT32		screw_count;
+    INT32		screwNr_reset;
 
     INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];

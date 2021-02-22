@@ -87,7 +87,7 @@
 
 #define HEADS_PER_COLOR         8
 #define COLORS_PER_STEPPER      2
-#define SCREWS_PER_HEAD         2
+
 
 #define MAX_VAR_SCREW_POS       2000        // um
 
@@ -118,9 +118,9 @@ static ERobotFunctions _Old_RobFunction = 0;
 static SHeadAdjustment _HeadAdjustment = {0, 0, 0, 0};
 static int _CmdScrewing = 0;
 static int _CmdSearchScrews = 0;
-static int _CmdReleaseScrews = 0;
+static int _CmdResetScrews = 0;
 static int _SearchScrewNr = 0;
-static int _ReleaseScrewNr = 0;
+static int _ResetScrewNr = 0;
 static int _Turns = 0;
 
 static int _HeadScrewPos = 0;
@@ -172,6 +172,10 @@ void lbrob_init(void)
     memset(&_ParCable_ref, 0, sizeof(SMovePar));
     memset(&_ParCable_drive, 0, sizeof(SMovePar));
     memset(&_ParCable_drive_purge, 0, sizeof(SMovePar));
+    
+    memcpy(&RX_StepperStatus.screwclusters, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters, sizeof(RX_StepperStatus.screwclusters));
+    memcpy(&RX_StepperStatus.screwpositions, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions, sizeof(RX_StepperStatus.screwpositions));
+    
 
     // config for referencing cable pull motor (motor 4)
     _ParCable_ref.speed = 1000;
@@ -568,7 +572,7 @@ void lbrob_main(int ticks, int menu)
 
     static int j = 0;
 
-    if (!_CmdSearchScrews && !_CmdScrewing && !_CmdReleaseScrews && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving && 
+    if (!_CmdSearchScrews && !_CmdScrewing && !_CmdResetScrews && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving && 
             !RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right)
         RX_StepperStatus.screwerinfo.screwer_ready = TRUE;
     else
@@ -593,19 +597,19 @@ void lbrob_main(int ticks, int menu)
     if (_CmdSearchScrews)
     {
         _CmdScrewing = 0;
-        _CmdReleaseScrews = 0;
+        _CmdResetScrews = 0;
         _search_all_screws();
     }
     else
         _SearchScrewNr = 0;
 
-    if (_CmdReleaseScrews)
+    if (_CmdResetScrews)
     {
         _CmdScrewing = 0;
         _set_screws_to_zero();
     }
     else
-        _ReleaseScrewNr = 0;
+        _ResetScrewNr = 0;
 
     if (_CmdScrewing)
         _turn_screw(_HeadAdjustment);
@@ -769,7 +773,7 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_SEARCH_ALL_SCREWS, NULL);
         break;
     case 'z':
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RELEASE_ALL_SCREWS, NULL);
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
         break;
     case 'a':
         switch (str[1])
@@ -894,9 +898,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = 0;
         _CmdSearchScrews = 0;
         _CmdScrewing = 0;
-        _CmdReleaseScrews = 0;
+        _CmdResetScrews = 0;
         _ScrewTime = 0;
         RX_StepperStatus.robinfo.ref_done = FALSE;
+        RX_StepperStatus.screwerinfo.screw_reset = FALSE;
         int val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
@@ -1062,7 +1067,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _search_all_screws();
         break;
         
-    case CMD_RELEASE_ALL_SCREWS:
+    case CMD_RESET_ALL_SCREWS:
         _set_screws_to_zero();
         break;
 
@@ -1298,6 +1303,8 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
         
         if (_CmdScrewing == 0)  correction_value = 0;
         if (_CmdScrewing != 6)  wait_time = 0;
+
+        RX_StepperStatus.screwerinfo.screw_reset = FALSE;
 
         switch (_CmdScrewing)
         {
@@ -1541,6 +1548,8 @@ static void _search_all_screws()
             return;
         }
 
+        RX_StepperStatus.screwerinfo.screw_reset = FALSE;
+
         switch (_CmdSearchScrews)
         {
         case 0:
@@ -1680,51 +1689,47 @@ static void _set_screws_to_zero(void)
     static int max_Wait_Time = 40000; // ms
     static int max_Wait_Time_Sledge = 100000; // ms
     static int max_Wait_Time_Screw = 180000; // ms
-    /*int test;
-    int pos_min;*/
     int pos;
     
     if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
-        if (_ReleaseScrewNr >= HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)
+        if (_ResetScrewNr >= HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)
         {
-            Error(ERR_CONT, 0, "Screw %d does not exist", _ReleaseScrewNr - 1);
-            _CmdReleaseScrews = 0;
-            _ReleaseScrewNr = 0;
+            Error(ERR_CONT, 0, "Screw %d does not exist", _ResetScrewNr - 1);
+            _CmdResetScrews = 0;
+            _ResetScrewNr = 0;
             return;
         }
 
-        int printbar = _ReleaseScrewNr / (HEADS_PER_COLOR * SCREWS_PER_HEAD);
-        int front_screw = (_ReleaseScrewNr + 1) % SCREWS_PER_HEAD;
-        int head_nr = (((_ReleaseScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) / COLORS_PER_STEPPER) - 1;
-        /*int head_Dist = (abs(CABLE_SCREW_POS_FRONT) - abs(CABLE_SCREW_POS_BACK)) / 8;
-        int screw_Dist = 16400; // um*/
+        int printbar = _ResetScrewNr / (HEADS_PER_COLOR * SCREWS_PER_HEAD);
+        int front_screw = (_ResetScrewNr + 1) % SCREWS_PER_HEAD;
+        int head_nr = (((_ResetScrewNr % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) + 1) / COLORS_PER_STEPPER) - 1;
 
-        if (_CmdReleaseScrews == 0) correction_value = 0;
+        if (_CmdResetScrews == 0) correction_value = 0;
         if (_ScrewTime && rx_get_ticks() > _ScrewTime)
         {
-            Error(ERR_CONT, 0, "Robot stock in zeroing screw step %d at screw %d", _CmdReleaseScrews, _ReleaseScrewNr);
+            Error(ERR_CONT, 0, "Robot stock in zeroing screw step %d at screw %d", _CmdResetScrews, _ResetScrewNr);
             _ScrewTime = 0;
-            _CmdReleaseScrews = 0;
+            _CmdResetScrews = 0;
             return;
         }
 
-        switch (_CmdReleaseScrews)
+        switch (_CmdResetScrews)
         {
         case 0:
             pos = head_nr + rob_fct_screw_head0;
             if (pos != _HeadScrewPos)
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
-            _CmdReleaseScrews++;
+            _CmdResetScrews++;
             _ScrewTime = rx_get_ticks() + max_Wait_Time_Sledge;
             break;
         case 1:
             if (RX_StepperStatus.robinfo.ref_done && _HeadScrewPos == head_nr + rob_fct_screw_head0)
             {
-                if (_ReleaseScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
+                if (_ResetScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
                 {
                     if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posY)
-                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_ReleaseScrewNr / (HEADS_PER_COLOR * SCREWS_PER_HEAD)].posY + correction_value;
+                        pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_ResetScrewNr / (HEADS_PER_COLOR * SCREWS_PER_HEAD)].posY + correction_value;
                     else
                         pos = SCREW_Y_FRONT + correction_value;
                 }
@@ -1737,13 +1742,13 @@ static void _set_screws_to_zero(void)
                 
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
-                _CmdReleaseScrews++;
+                _CmdResetScrews++;
             }
             break;
         case 2:
             if (RX_StepperStatus.screwerinfo.y_in_pos)
             {
-                if (_ReleaseScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
+                if (_ResetScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
                 {
                     if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posX)
                         pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[printbar].posX;
@@ -1760,7 +1765,7 @@ static void _set_screws_to_zero(void)
                     pos = SCREW_X_RIGHT;
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
-                _CmdReleaseScrews++;
+                _CmdResetScrews++;
             }
             break;
         case 3:
@@ -1768,7 +1773,7 @@ static void _set_screws_to_zero(void)
             {
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
                 if (!RX_StepperStatus.info.z_in_screw) lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
-                _CmdReleaseScrews++;
+                _CmdResetScrews++;
             }
             break;
 
@@ -1777,7 +1782,7 @@ static void _set_screws_to_zero(void)
             {
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
-                _CmdReleaseScrews++;
+                _CmdResetScrews++;
                 _TimeSearchScrew = rx_get_ticks();
             }
             break;
@@ -1798,7 +1803,7 @@ static void _set_screws_to_zero(void)
                     robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
                 }
 
-                _CmdReleaseScrews++;
+                _CmdResetScrews++;
                 _ScrewTime = rx_get_ticks() + max_Wait_Time_Screw;
             }
             else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME)
@@ -1814,7 +1819,7 @@ static void _set_screws_to_zero(void)
                     correction_value = (correction_value + 500) * (-1);
                 else
                     correction_value *= (-1);
-                _CmdReleaseScrews = 1;
+                _CmdResetScrews = 1;
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
             }
             
@@ -1822,7 +1827,7 @@ static void _set_screws_to_zero(void)
             if (RX_StepperStatus.screwerinfo.screw_in_0)
             {
                 int i, difference;
-                if (_ReleaseScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
+                if (_ResetScrewNr % (HEADS_PER_COLOR * SCREWS_PER_HEAD) == 0)
                 {
                     RX_StepperStatus.screwclusters[printbar].posX = RX_StepperStatus.screw_posX;
                     RX_StepperStatus.screwclusters[printbar].posY = RX_StepperStatus.screw_posY;
@@ -1860,18 +1865,20 @@ static void _set_screws_to_zero(void)
                     }
                 }
 
+                RX_StepperStatus.screwNr_reset = _ResetScrewNr;
+                RX_StepperStatus.screwerinfo.screw_reset = TRUE;
                 _ScrewTime = 0;
-                _CmdReleaseScrews = 0;
-                _ReleaseScrewNr++;
+                _CmdResetScrews = 0;
+                _ResetScrewNr++;
                 _TimeSearchScrew = 0;
                 correction_value = 0;
-                if (_ReleaseScrewNr < 4 * HEADS_PER_COLOR)
+                if (_ResetScrewNr < 4 * HEADS_PER_COLOR)
                 {
-                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RELEASE_ALL_SCREWS, NULL);
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
                 }
                 else
                 {
-                    _ReleaseScrewNr = 0;
+                    _ResetScrewNr = 0;
                     robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                     Error(LOG, 0, "All Screws set to 0");
                 }
