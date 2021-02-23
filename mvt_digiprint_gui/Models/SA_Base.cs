@@ -20,6 +20,14 @@ namespace RX_DigiPrint.Models
 			RxGlobals.Timer.TimerFct += _Tick;
 		}
 
+		//--- Property Simu ---------------------------------------
+		private bool _Simu;
+		public bool Simu
+		{
+			get { return _Simu; }
+			set { SetProperty(ref _Simu,value); }
+		}
+
 		//--- Property powerStepStatus ---------------------------------------
 		private UInt32 _powerStepStatus;
 		public UInt32 powerStepStatus
@@ -163,7 +171,8 @@ namespace RX_DigiPrint.Models
 		//--- ScanReference ------------------------------------------
 		public void ScanReference()
 		{
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_REFERENCE);
+			if (false && _Simu) _OnScanMoveDone();
+			else       RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_REFERENCE);
 		}
 
 		//--- ScanMoveTo --------------------------------------------
@@ -173,13 +182,15 @@ namespace RX_DigiPrint.Models
 			cmd.steps	= (Int32)(pos*1000.0);
 			cmd.speed   = speed;
 			Console.WriteLine("{0} SCAN MOVE TO [{1}] from {2:N3} to {3:N3}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, ScanPos, pos);
-			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
+			if (_Simu) _OnScanMoveDone();
+			else RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
 
 		//--- ScanStop ------------------------------
 		public void ScanStop()
 		{
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_STOP);
+			if (_Simu) _OnScanMoveDone();
+			else	   RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_STOP);
 		}
 
 		//--- Property Dist ---------------------------------------
@@ -195,46 +206,31 @@ namespace RX_DigiPrint.Models
 		private int _WebMoveStartCnt=-1;
 		public void WebMove(double? dist=null)
 		{
-			_checkWebMoveDone();
-			/*
-			int time=0;
-			do
-			{
-				RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n"
-                + "STA_MACHINE_STATE" + "\n");
-
-				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-				if (state==EnPlcState.plc_pause) break;
-				if (++time>100) 
-				{
-					Console.WriteLine("WebMove Timeout");
-					return;
-				}
-				Console.WriteLine("WebMove wait, state={0}, time={1}", state, time);
-				Thread.Sleep(100);
-			}
-			while(true);
-			*/
-
-			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
-			if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
-			else            cmd.steps	= (Int32)(1000*dist);
-			cmd.speed = WebSpeed;
-			if (cmd.steps==0)
-			{
-		//		if (_OnWebMoveDone!=null) _OnWebMoveDone();
-			}
+			if (_Simu) _OnWebMoveDone();
 			else
 			{
-				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-				if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
-				string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps);
-				if (_WebMoveCnt!=_WebMoveStartCnt)
-					Console.WriteLine("WEB MOVE Error");
-				_WebMoveStartCnt++;
-				Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
-			//	RxGlobals.Events.AddItem(new LogItem(msg));
-				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
+				_checkWebMoveDone();
+
+				TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
+				if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
+				else            cmd.steps	= (Int32)(1000*dist);
+				cmd.speed = WebSpeed;
+				if (cmd.steps==0)
+				{
+			//		if (_OnWebMoveDone!=null) _OnWebMoveDone();
+				}
+				else
+				{
+					EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
+					if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
+					string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps);
+					if (_WebMoveCnt!=_WebMoveStartCnt)
+						Console.WriteLine("WEB MOVE Error");
+					_WebMoveStartCnt++;
+					Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
+				//	RxGlobals.Events.AddItem(new LogItem(msg));
+					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
+				}
 			}
 		}
 
@@ -242,26 +238,8 @@ namespace RX_DigiPrint.Models
 		public void WebStop()
 		{
 			Console.WriteLine("{0}: WEB STOP", RxGlobals.Timer.Ticks());
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_WEB_STOP);
-			/*
-			int time=0;
-			do
-			{
-				RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n"
-                + "STA_MACHINE_STATE" + "\n");
-
-				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-				if (state!=EnPlcState.plc_run) break;
-				if (++time>100) 
-				{
-					Console.WriteLine("WebStop Timeout");
-					return;
-				}
-				Console.WriteLine("WebStop wait, state={0}, time={1}", state, time);
-				Thread.Sleep(100);
-			}
-			while(true);
-			*/
+			if (_Simu)	_OnWebMoveDone();
+			else		RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_WEB_STOP);
 		}
 		
 		//--- _checkWebMoveDone -----------------------------------------------

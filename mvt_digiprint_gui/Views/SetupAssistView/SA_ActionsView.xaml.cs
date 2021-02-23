@@ -101,13 +101,18 @@ namespace RX_DigiPrint.Views.SetupAssistView
         }
 	}
 
-	//--- Visible_Converter ----------------------------------------------------
-	public class Visible_Converter : IValueConverter
+	//--- FunctionImageVisible_Converter ----------------------------------------------------
+	public class FunctionImageVisible_Converter : IValueConverter
 	{
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			if (value!=null) return Visibility.Visible;
-			return Visibility.Collapsed;
+			switch((ECamFunction)value)
+			{
+				case ECamFunction.CamMeasureAngle:	return Visibility.Visible;
+				case ECamFunction.CamMeasureStitch:	return Visibility.Visible;
+				case ECamFunction.CamMeasureDist:	return Visibility.Visible;
+				default: return Visibility.Collapsed;
+			}
 		}
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {

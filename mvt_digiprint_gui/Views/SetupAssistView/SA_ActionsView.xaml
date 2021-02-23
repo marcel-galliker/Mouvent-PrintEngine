@@ -10,9 +10,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <local:StateBusy_Converter  x:Key="StateBusy_Converter"/>
-        <local:StateImage_Converter x:Key="StateImage_Converter"/>
-        <local:Visible_Converter    x:Key="Visible_Converter"/>
+        <local:StateBusy_Converter              x:Key="StateBusy_Converter"/>
+        <local:StateImage_Converter             x:Key="StateImage_Converter"/>
+        <local:FunctionImageVisible_Converter   x:Key="FunctionImageVisible_Converter"/>
     </UserControl.Resources>
     
     <Grid>
@@ -44,15 +44,30 @@
                         </ig:TemplateColumn>
 
                         <!-- Action _____________________________________________________________________________-->
-                        <ig:TextColumn HeaderText="Action" Key="Name" Width="200"/>
-                        
+                        <ig:TemplateColumn HeaderText="Action" Key="Name" Width="150">
+                            <ig:TemplateColumn.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
+                                            Foreground="Gray"
+                                            Margin="5"
+                                            Width="15" 
+                                            Height="15" 
+                                            Kind="{Binding IconKind}"
+                                            Visibility="{Binding Function, Converter={StaticResource FunctionImageVisible_Converter}}"/>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ig:TemplateColumn.ItemTemplate>
+                        </ig:TemplateColumn>
+
                         <!-- Result _____________________________________________________________________________-->
                         <ig:TemplateColumn HeaderText="Result" Key="Measured" Width="500">
                             <ig:TemplateColumn.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
-                                            <iconPacks:PackIconMaterial Grid.Column="0" Kind="{Binding IconKind}" Foreground="Gray" Margin="0,-5" Visibility="Collapsed"/>
                                             <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0" MinWidth="30"/>
                                             <TextBlock Text="{Binding ValueStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/>
                                         </StackPanel>

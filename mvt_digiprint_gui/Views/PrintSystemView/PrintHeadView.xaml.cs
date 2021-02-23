@@ -62,8 +62,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             if ((bool) e.NewValue)
             {
-                try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();}
-                catch (Exception) { FpVoltage.Text = "";};                
+                if (RxGlobals.PrintSystem.HeadFpVoltage!=null)
+                    FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();
             }
         }
 

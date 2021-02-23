@@ -79,14 +79,6 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _WebMoveDone,value); }
 		}
 
-		//--- Property CamWorking ---------------------------------------
-		private bool _CamWorking=false;
-		public bool CamWorking
-		{
-			get { return _CamWorking; }
-			set { SetProperty(ref _CamWorking,value); }
-		}
-
 		//--- Property ConfirmVisibility ---------------------------------------
 		private bool _ConfirmVisibile=false;
 		public bool ConfirmVisibile
@@ -105,8 +97,8 @@ namespace RX_DigiPrint.Models
 					switch(value)
 					{ 
 					case ECamFunction.CamMeasureAngle:	IconKind=PackIconMaterialKind.AngleAcute; break;
-					case ECamFunction.CamMeasureStitch: IconKind=PackIconMaterialKind.ArrowCollapseVertical; break;
-					case ECamFunction.CamMeasureDist:	IconKind=PackIconMaterialKind.ArrowCollapseRight; break;
+					case ECamFunction.CamMeasureStitch: IconKind=PackIconMaterialKind.ArrowCollapseHorizontal; break;
+					case ECamFunction.CamMeasureDist:	IconKind=PackIconMaterialKind.ArrowExpandDown; break;
 					default: break;
 					}
 				}
@@ -128,18 +120,18 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _State,value); }
 		}
 
-		//--- Property Step ---------------------------------------
-		private int _Step=0;
-		public int Step
-		{
-			get { return _Step; }
-			set { SetProperty(ref _Step,value); }
-		}
-
 		//--- Property MyProperty ---------------------------------------
 		public int MeasureCnt
 		{
 			get { return _Values.Count(); }
+		}
+
+		//--- Property BaseIdx ---------------------------------------
+		private int _BaseIdx=-1;
+		public int BaseIdx
+		{
+			get { return _BaseIdx; }
+			set { SetProperty(ref _BaseIdx,value); }
 		}
 
 		//--- Measured ---
