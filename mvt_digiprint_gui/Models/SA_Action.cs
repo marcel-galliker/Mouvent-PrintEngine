@@ -128,6 +128,14 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _State,value); }
 		}
 
+		//--- Property Step ---------------------------------------
+		private int _Step=0;
+		public int Step
+		{
+			get { return _Step; }
+			set { SetProperty(ref _Step,value); }
+		}
+
 		//--- Property MyProperty ---------------------------------------
 		public int MeasureCnt
 		{
@@ -205,10 +213,5 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _Correction,value); }
 		}
 
-		//--- SendCorrection ------------------------------------------
-		public void SendCorrection()
-		{
-			RxGlobals.Events.AddItem(new LogItem("Camera: SA_Actions.SendCorrection NOT IMPLEMENTED"));
-		}
 	}
 }
