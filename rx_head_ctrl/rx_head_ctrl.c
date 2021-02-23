@@ -105,8 +105,8 @@ void handle_menu(char *str)
 		cond_volume_printed(atoi(&str[no]), 0);
 		eeprom_reset_droplets_printed(atoi(&str[no]));
 	}
-	else if (no=str_start(str,"ra"))			eeprom_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0);
-	else if (no=str_start(str,"rd"))			eeprom_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]));
+	else if (no=str_start(str,"ra"))			eeprom_set_rob_pos(str[no]-'0', str_to_screw(&str[no+1]), 0, FALSE);
+	else if (no=str_start(str,"rd"))			eeprom_set_rob_pos(str[no]-'0', 0, str_to_screw(&str[no+1]), FALSE);
 	else
 	{
 		no = str[1] - '0';

@@ -712,7 +712,8 @@ void pump_tick_10ms(void)
 		
 		case ctrl_purge_step4:
 						_presure_in_max();
-						if (RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) || (_PurgeTime>RX_Config.purgeTime && !_Purge4Ever) || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
+						if ((RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) && RX_Config.purgeDelayPos_y) || 
+							(_PurgeTime>RX_Config.purgeTime && !_Purge4Ever) || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
 						{
 							if (RX_Config.purgeDelayPos_y == 0)_PurgeDelay += cycle_time;
 							temp_ctrl_on(FALSE);

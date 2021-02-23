@@ -441,7 +441,7 @@ static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 //--- _do_rob_pos -------------------------------------------------------------
 static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg)
 {
-	eeprom_set_rob_pos(pmsg->head, pmsg->angle, pmsg->dist);
+	eeprom_set_rob_pos(pmsg->head, pmsg->angle, pmsg->dist, TRUE);
 	return REPLY_OK;	
 }
 

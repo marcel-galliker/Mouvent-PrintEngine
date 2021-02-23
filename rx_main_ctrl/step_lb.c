@@ -934,7 +934,7 @@ static void _check_screwer(void)
                 ScrewPosition.dist = MAX_STEPS_DIST;
             else if (_HeadAdjustment[i].axis == AXE_ANGLE)
                 ScrewPosition.angle = 0;
-
+            
             ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
             _ScrewPositions_Written[i] = TRUE;
         }
@@ -944,7 +944,7 @@ static void _check_screwer(void)
                 ScrewPosition.dist = 0;
             else if (_HeadAdjustment[i].axis == AXE_ANGLE)
                 ScrewPosition.angle = MAX_STEPS_ANGLE;
-
+            
             ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
             _ScrewPositions_Written[i] = TRUE;
         }
@@ -1074,7 +1074,10 @@ static void _reset_screw_position(int screwNo, int stepperNo)
         ScrewPosition.head = ((screwNo - 1) % (SCREWS_PER_HEAD * RX_Config.headsPerColor)) / 2;
     }
 
-    ScrewPosition.printBar = screwNo % (SCREWS_PER_HEAD * RX_Config.headsPerColor);
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+    {
+        ScrewPosition.printBar = stepperNo * 2 + (screwNo / (SCREWS_PER_HEAD * RX_Config.headsPerColor));
+    }
     
     ctrl_set_rob_pos(ScrewPosition, TRUE, screwNo % 2 == 0);
 }

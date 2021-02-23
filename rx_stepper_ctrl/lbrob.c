@@ -32,7 +32,7 @@
 
 #define X_STEPS_PER_REV         3200.0
 #define X_INC_PER_REV           16000.0
-#define X_DIST_PER_REV          36000
+#define X_DIST_PER_REV          54000   // 36000
 
 #define CABLE_CAP_POS           -690000     //	um LB702
 #define CABLE_WASH_POS_FRONT    -634000     //	um LB702
@@ -121,6 +121,7 @@ static int _CmdSearchScrews = 0;
 static int _CmdResetScrews = 0;
 static int _SearchScrewNr = 0;
 static int _ResetScrewNr = 0;
+static int _ResetScrewsLeft = FALSE;
 static int _Turns = 0;
 
 static int _HeadScrewPos = 0;
@@ -175,7 +176,6 @@ void lbrob_init(void)
     
     memcpy(&RX_StepperStatus.screwclusters, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters, sizeof(RX_StepperStatus.screwclusters));
     memcpy(&RX_StepperStatus.screwpositions, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions, sizeof(RX_StepperStatus.screwpositions));
-    
 
     // config for referencing cable pull motor (motor 4)
     _ParCable_ref.speed = 1000;
@@ -679,9 +679,9 @@ void lbrob_menu(int help)
         term_printf("a<n>: Go to adjustment position of head 0 - 7\n");
         term_printf("t<screw_nr>: Turn <screw_nr> n/6 Turn (n can be choosen by command \"T\")\n");
         term_printf("T<n>: Make <n>/6 turns with the command t\n");
-        term_printf("d<n>: Wipe all (n = l: left; n = r : right; n = b: both\n");
+        term_printf("d<n>: Wipe all (n = l: left; n = r: right; n = b: both\n");
         term_printf("b<n>: Set Speed of Waste pump to <n>%, Actual value %d%\n", _PumpSpeed);
-        term_printf("z: Move all Screws to end position\n");
+        term_printf("z<n>: Move all Screws to end position (n = l: left; n = r: right; n = b: both\n");
         term_flush();
     }
     else
@@ -773,6 +773,19 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_SEARCH_ALL_SCREWS, NULL);
         break;
     case 'z':
+        switch (str[1])
+        {
+        case 'l':
+            _ResetScrewsLeft = TRUE;
+            break;
+        case 'r':
+            _ResetScrewNr = 16;
+            _ResetScrewsLeft = FALSE;
+            break;
+        case 'b':
+            _ResetScrewsLeft = FALSE;
+            break;
+        }
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
         break;
     case 'a':
@@ -1788,7 +1801,7 @@ static void _set_screws_to_zero(void)
             break;
             
         case 5:
-            if (RX_StepperStatus.screwerinfo.z_in_up)
+            if (RX_StepperStatus.screwerinfo.z_in_up && !robi_lb702_screw_correction())
             {
                 correction_value = 0;
                 int screwSteps;
@@ -1872,7 +1885,7 @@ static void _set_screws_to_zero(void)
                 _ResetScrewNr++;
                 _TimeSearchScrew = 0;
                 correction_value = 0;
-                if (_ResetScrewNr < 4 * HEADS_PER_COLOR)
+                if ((_ResetScrewNr < COLORS_PER_STEPPER * SCREWS_PER_HEAD * HEADS_PER_COLOR && !_ResetScrewsLeft) || (_ResetScrewsLeft && _ResetScrewNr < SCREWS_PER_HEAD * HEADS_PER_COLOR))
                 {
                     lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
                 }

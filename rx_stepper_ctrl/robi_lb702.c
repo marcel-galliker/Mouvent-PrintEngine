@@ -76,6 +76,7 @@ static int _Loose_Screw_Time = 0;
 
 static int _RobiConnection_Time = 0;
 static int _ErrorFlag = FALSE;
+static int _ScrewCorrect = FALSE;
 
 //--- robi_lb702_init -----------------------------------------------------
 void robi_lb702_init(void)
@@ -313,11 +314,13 @@ void robi_lb702_main(int ticks, int menu)
             if (RX_StepperStatus.screwerinfo.z_in_up && _ScrewCorrection != 0)
             {
                 int val = ((SCREW_SEARCH_DIVISOR - _ScrewCorrection) * SCREW_STEPS) / SCREW_SEARCH_DIVISOR;
-                _ScrewCorrection = 0;
+                _ScrewCorrect = TRUE;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
             }
             break;
         case CMD_ROBI_SCREW_STEPS:
+            _ScrewCorrection = 0;
+            _ScrewCorrect = FALSE;
         case CMD_ROBI_MOVE_Y:
         case CMD_ROBI_MOVE_X:
             _CmdRunning = 0;
@@ -994,4 +997,9 @@ static void _set_moving_variables(void)
     
     if (_CmdRunning != CMD_ROBI_SCREW_STEPS) RX_StepperStatus.screwerinfo.screw_loosed = FALSE;
     if (_CmdRunning != CMD_ROBI_MOVE_Z_DOWN) RX_StepperStatus.screwerinfo.screw_in_0 = FALSE;
+}
+
+int robi_lb702_screw_correction(void)
+{
+    return _ScrewCorrection;
 }
