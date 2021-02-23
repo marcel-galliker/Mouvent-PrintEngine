@@ -45,23 +45,6 @@
                 <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CB_Camera" Margin="10,5"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Stream Caps" VerticalAlignment="Center"/>
-                <ComboBox  Grid.Row="1" Grid.Column="1" x:Name="CB_StreamCaps" Margin="10,5">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel Orientation="Horizontal" Width="120">
-                                    <TextBlock Text="{Binding Mediasubtype, Converter={StaticResource CamCapsMediatype_Converter}}"/>
-                                    <TextBlock Text=" ("/>
-                                    <TextBlock Text="{Binding Resolution, Converter={StaticResource CamCapsResolution_Converter}}"/>
-                                    <TextBlock Text=")"/>
-                                </StackPanel>
-                                <TextBlock Text="@ "/>
-                                <TextBlock Text="{Binding FrameRate}"/>
-                                <TextBlock Text="Hz"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
 
                 <!--
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Camera Caps" VerticalAlignment="Center" />

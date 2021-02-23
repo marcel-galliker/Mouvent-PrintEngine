@@ -20,10 +20,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
     public partial class SA_Settings : CustomWindow
     {
         private RxCam _Camera;
-//      private StreamCaps _StreamCaps;
-        private List<StreamCaps> _StreamCapsList;
-     // private List<RxCamSettings.CamCapStruct> _CamCapsList;
-     // private List<RxCamSettings.CamVideoProcStruct> _CamVideoProcList;
 
 		//--- constructor -----------------------------------------------------
 		public SA_Settings(RxCam cam)
@@ -38,7 +34,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
         private void Init()
 		{
             _InitCamera();
-            _InitStreamCaps();
 		}
 
         //--- _InitCamera ----------------------------
@@ -49,26 +44,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
             NB_DistToStops.Text    = Math.Round(RxGlobals.Settings.SetupAssistCam.DistToStop, 3).ToString();
 		}
 
-        //--- _InitStreamCaps -------------------------------
-        private void _InitStreamCaps()
-		{
-            _StreamCapsList           = _Camera.GetCamStreamCapsList();
-            CB_StreamCaps.ItemsSource = _StreamCapsList;
-            StreamCaps caps=RxGlobals.Settings.SetupAssistCam.StreamCaps;
-            if (_StreamCapsList==null || caps==null) return;
-            foreach (StreamCaps item in _StreamCapsList)
-			{
-                if (!item.Mediasubtype.Equals(caps.Mediasubtype))   continue;
-                if (item.FrameRate    != caps.FrameRate)            continue;
-			    if (item.Resolution.X != caps.Resolution.X)         continue;
-			    if (item.Resolution.Y != caps.Resolution.Y)         continue;
-				{
-                    CB_StreamCaps.SelectedItem = item;
-                    return;
-				}
-			}
-		}
-
         //--- Save_Clicked ------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
@@ -76,7 +51,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			{
                 bool save=true;
                 RxGlobals.Settings.SetupAssistCam.Name       = CB_Camera.SelectedItem as string;
-                RxGlobals.Settings.SetupAssistCam.StreamCaps = CB_StreamCaps.SelectedItem as StreamCaps;
                 RxGlobals.Settings.SetupAssistCam.DistToStop = NB_DistToStops.Value;
 
                 if (save)
@@ -103,4 +77,3 @@ namespace RX_DigiPrint.Views.SetupAssistView
         }
     }
 }
-
