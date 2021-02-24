@@ -991,14 +991,6 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) pc_abort_printing();
 				return REPLY_OK;
 			}
-			else if (RX_Config.printer.type==printer_test_table)
-			{
-			//	if (arg_simuPLC) pc_abort_printing();
-
-				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) 
-					pc_abort_printing(); // curing!
-				return REPLY_OK;
-			}
 			else
 			{
 				if (pnext) 

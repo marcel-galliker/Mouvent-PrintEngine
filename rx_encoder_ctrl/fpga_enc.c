@@ -63,7 +63,7 @@ static int _ALL=FALSE;	// show all registers
 #define UV_FAULT_IN		0x0004
 #define UV_READY_IN		0x0001
 
-#define UV_POS_LEFT		100000
+#define UV_POS_LEFT		 80000
 #define UV_POS_RIGHT	550000
 
 //--- IO in case it is not a TEST TABLE -------------------
@@ -439,15 +439,12 @@ void  fpga_uv_off(void)
 //--- _uv_init --------------------------------------
 static void _uv_init(void)
 {
-	if (RX_EncoderCfg.printerType==printer_test_table)
-	{	
-		_UV_Speed   = 0;
-		_UV_LastPos = Fpga->stat.encIn[0].position;
-		_UV_Shutter = 0;
-		_UV_Stopping = FALSE;
-		_UV_Printing = TRUE;
-		_UV_BiDir	 = FALSE;
-	}
+	_UV_Speed   = 0;
+	_UV_LastPos = Fpga->stat.encIn[0].position;
+	_UV_Shutter = 0;
+	_UV_Stopping = FALSE;
+	_UV_Printing = TRUE;
+	_UV_BiDir	 = FALSE;
 }
 
 //--- _uv_ctrl --------------------------------------------------------
@@ -456,12 +453,12 @@ static void  _uv_ctrl(void)
 	int actPos;
 	int shutter = FALSE;
 	
+	RX_EncoderStatus.info.uv_on		= (FpgaQSys->out & UV_POWER_OUT)!=0;
+	if (arg_simu_uv) RX_EncoderStatus.info.uv_ready = _UV_SimuCnt>5;
+	else             RX_EncoderStatus.info.uv_ready  = (FpgaQSys->in  & UV_READY_IN)!=0;
+
 	if (_Init && RX_EncoderCfg.printerType==printer_test_table)
 	{
-		RX_EncoderStatus.info.uv_on		= (FpgaQSys->out & UV_POWER_OUT)!=0;
-		if (arg_simu_uv) RX_EncoderStatus.info.uv_ready = _UV_SimuCnt>5;
-		else             RX_EncoderStatus.info.uv_ready  = (FpgaQSys->in  & UV_READY_IN)!=0;
-	
 		if (Fpga->cfg.encIn[0].enable)
 		{
 			actPos = Fpga->stat.encIn[0].position;
@@ -548,8 +545,11 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 		if(!tw8_present()) Error(ERR_CONT, 0, "No Communication to analog encoder board");
 	}
 		
-	tw8_config(0, pCfg->speed_mmin, pCfg->printerType);
-	tw8_config(1, pCfg->speed_mmin, pCfg->printerType);
+	if (tw8_present())
+	{
+		tw8_config(0, pCfg->speed_mmin, pCfg->printerType);
+		tw8_config(1, pCfg->speed_mmin, pCfg->printerType);
+	}
 
 //	_SpeedCfg_hz = (int)(pCfg->speed_mmin / 60.0 * 1200 / 25.4);
 	

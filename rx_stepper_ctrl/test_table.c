@@ -653,12 +653,14 @@ static void _scan_state_machine(int menu)
 			return;
 		}
 
+		TrPrintfL(TRUE, "Scan done: ScanCnt %d/%d, _ScanStep=%d, _CureCnt=%d, curingPasses=%d", _ScanCnt, _ScanPar.scanCnt, _ScanStep, _CureCnt, _ScanPar.curingPasses);
+
 		if (_ScanCnt>=_ScanPar.scanCnt && _ScanStep<100)
 		{
 			_CureCnt++;
 			if (_CureCnt < _ScanPar.curingPasses) 
 			{
-				_ScanPar.scanMode=PQ_SCAN_BIDIR;
+			//	_ScanPar.scanMode=PQ_SCAN_BIDIR;	// CLEAF does not want to cure in bidirectional mode
 				_scan_start();
 				slide_set_speed(CURING_SPEED);
 				return;

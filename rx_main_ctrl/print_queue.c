@@ -884,8 +884,18 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 					gui_send_print_queue(EVT_GET_PRINT_QUEUE, pitem);
 					if (rx_def_is_scanning(RX_Config.printer.type))
 					{
-						enc_enable_printing(FALSE);
-						if(*pnextItem==NULL || RX_PrinterStatus.printState==ps_stopping) pc_abort_printing();
+						if (RX_Config.printer.type==printer_test_table && pitem->curingPasses>0)
+						{	
+							TrPrintfL(TRUE, "Wait for %d curing passes", pitem->curingPasses);
+							*jobDone  = FALSE;
+							*pageDone = TRUE;
+							enc_stop_printing();
+						}
+						else
+						{
+							enc_enable_printing(FALSE);
+							if(*pnextItem==NULL || RX_PrinterStatus.printState==ps_stopping) pc_abort_printing();
+						}
 					}
 					if (RX_Config.printer.type==printer_LH702 && *pnextItem)
 					{
