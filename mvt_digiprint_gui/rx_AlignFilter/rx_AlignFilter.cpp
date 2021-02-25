@@ -245,6 +245,16 @@ C_rx_AlignFilter::C_rx_AlignFilter(TCHAR *pName, LPUNKNOWN pUnk, HRESULT *phr) :
 			return;
 		}
 	}
+	if (!InitializeCriticalSectionAndSpinCount(&m_MeasureStartLock, 0x00400000))
+	{
+		if (m_DebugOn)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tInitializeCritical m_MeasureStartLock failed\n", (float)m_TimeStamp / 1000000.0f);
+			return;
+		}
+	}
 
 	//Create initial Font
 	LOGFONT lf;
@@ -304,6 +314,7 @@ C_rx_AlignFilter::~C_rx_AlignFilter()
 	DeleteCriticalSection(&m_MeasureLock);
 	DeleteCriticalSection(&m_OvTextLock);
 	DeleteCriticalSection(&m_SnapShotLock);
+	DeleteCriticalSection(&m_MeasureStartLock);
 }
 
 // GetPinCount
@@ -657,20 +668,24 @@ HRESULT C_rx_AlignFilter::ChangeModes()
 	}
 
 	//Start Measure
-	if (m_StartMeasure)
+	if (TryEnterCriticalSection(&m_MeasureStartLock))
 	{
-		if (m_DebugOn)
+		if (m_StartMeasure)
 		{
-			m_MeasureTime = std::chrono::steady_clock::now();
-			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
-			printf("%6.6f\tMeasure running\n", (float)m_TimeStamp / 1000000.0f);
-		}
-		if (m_LogToFile) LogToFile(L"Measure running");
-		CallbackDebug("Measure running");
+			if (m_DebugOn)
+			{
+				m_MeasureTime = std::chrono::steady_clock::now();
+				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+				printf("%6.6f\tMeasure running\n", (float)m_TimeStamp / 1000000.0f);
+			}
+			if (m_LogToFile) LogToFile(L"Measure running");
+			CallbackDebug("Measure running");
 
-		m_MeasureRunning = true;
+			m_MeasureRunning = true;
+		}
+		m_StartMeasure = false;
+		LeaveCriticalSection(&m_MeasureStartLock);
 	}
-	m_StartMeasure = false;
 
 	return NOERROR;
 }
@@ -4083,7 +4098,7 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	AvgLengthX /= (float)NumBlobsvalid;
 	AvgLengthY /= (float)NumBlobsvalid;
 
-	IFrx_AlignFilter::MeasureDataStruct MeasureData;
+	MeasureDataStruct MeasureData;
 
 	//Line Layout and Position inside Window
 	if (Vertical)
@@ -4432,7 +4447,7 @@ HRESULT C_rx_AlignFilter::MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InR
 	return NOERROR;
 }
 
-HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
+HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown, float MidOuterRatio)
 {
 	//Register from FullAlignment (3 lines, 27px/54px)
 
@@ -4465,6 +4480,43 @@ HRESULT C_rx_AlignFilter::MeasureRegister(BOOL Vertical, BOOL UpsideDown)
 		}
 	}
 	m_ValidMeasure = true;
+
+	//Check for thicker middle Line
+	if (MidOuterRatio > 1 || MidOuterRatio < -1)
+	{
+		if (Vertical && (
+				(MidOuterRatio > 1 && (
+					(m_vQualifyList[BlobNums[1]].Width / m_vQualifyList[BlobNums[0]].Width < MidOuterRatio) ||
+					(m_vQualifyList[BlobNums[1]].Width / m_vQualifyList[BlobNums[2]].Width < MidOuterRatio))) ||
+				(MidOuterRatio < -1 && (
+					(m_vQualifyList[BlobNums[0]].Width / m_vQualifyList[BlobNums[1]].Width < -MidOuterRatio) ||
+					(m_vQualifyList[BlobNums[2]].Width / m_vQualifyList[BlobNums[1]].Width < -MidOuterRatio)))))
+		{
+			for (int BlobNo = 0; BlobNo < (int)m_vQualifyList.size(); BlobNo++)
+			{
+				m_vQualifyList[BlobNo].Display = 0;
+			}
+			//Frame without valid measure
+			if (m_MeasureRunning && (m_Timeout1st > 0 || m_TimeoutEnd > 0)) m_TimeoutCounter++;
+			return NOERROR;
+		}
+		else if (!Vertical && (
+					(MidOuterRatio > 1 && (
+						(m_vQualifyList[BlobNums[1]].Height / m_vQualifyList[BlobNums[0]].Height < MidOuterRatio) ||
+						(m_vQualifyList[BlobNums[1]].Height / m_vQualifyList[BlobNums[2]].Height < MidOuterRatio))) ||
+					(MidOuterRatio < -1 && (
+						(m_vQualifyList[BlobNums[0]].Height / m_vQualifyList[BlobNums[1]].Height < -MidOuterRatio) ||
+						(m_vQualifyList[BlobNums[2]].Height / m_vQualifyList[BlobNums[1]].Height < -MidOuterRatio)))))
+		{
+			for (int BlobNo = 0; BlobNo < (int)m_vQualifyList.size(); BlobNo++)
+			{
+				m_vQualifyList[BlobNo].Display = 0;
+			}
+			//Frame without valid measure
+			if (m_MeasureRunning && (m_Timeout1st > 0 || m_TimeoutEnd > 0)) m_TimeoutCounter++;
+			return NOERROR;
+		}
+	}
 
 	//Distance between outer lines / measured camera-pixels = μm per camera-pixel
 	float umPpx = m_RegisterOuterDistance / (m_vQualifyList[BlobNums[0]].DistToNext + m_vQualifyList[BlobNums[1]].DistToNext);
@@ -5813,7 +5865,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		break;
 
 	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Register:
-		m_prx_AlignFilter->MeasureRegister(Vertical, m_prx_AlignFilter->m_UpsideDown);
+		m_prx_AlignFilter->MeasureRegister(Vertical, m_prx_AlignFilter->m_UpsideDown, m_prx_AlignFilter->m_RegisterMidOuterRatio);
 		break;
 
 	case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_OCR:
@@ -7189,6 +7241,21 @@ STDMETHODIMP C_rx_AlignFilter::SetStartLinesTimeout(UINT32 StartLinesTimeout)
 	}
 	if (m_LogToFile) LogToFile(L"Set StartLinesTimeout: %d", m_StartLinesTimeout);
 
+	return NOERROR;
+}
+
+//Mid/Outer ratio for Register
+STDMETHODIMP C_rx_AlignFilter::SetRegisterMidOuterRatio(float MidOuterRatio)
+{
+	m_RegisterMidOuterRatio = MidOuterRatio;
+
+	if (m_DebugOn)
+	{
+		m_MeasureTime = std::chrono::steady_clock::now();
+		m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+		printf("%6.6f\tSet Register MidOuterRatio: %f\n", (float)m_TimeStamp / 1000000.0f, m_RegisterMidOuterRatio);
+	}
+	if (m_LogToFile) LogToFile(L"Set Register MidOuterRatio: %f", m_RegisterMidOuterRatio);
 
 	return NOERROR;
 }
@@ -7210,7 +7277,6 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 TO_1
 			printf("%6.6f\tDoMeasures but MeasureMode: %d, MeasureRunning: %d\n", (float)m_TimeStamp / 1000000.0f, m_MeasureMode, m_MeasureRunning);
 		}
 		if (m_LogToFile) LogToFile(L"DoMeasures but MeasureMode: %d, MeasureRunning: %d", m_MeasureMode, m_MeasureRunning);
-
 		CallbackDebug("DoMeasures but MeasureMode: %d, MeasureRunning: %d", m_MeasureMode, m_MeasureRunning);
 
 		return false;
@@ -7223,8 +7289,33 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 TO_1
 		printf("%6.6f\tDoMeasures: %d\n", (float)m_TimeStamp / 1000000.0f, NumMeasures);
 	}
 	if (m_LogToFile) LogToFile(L"DoMeasures: %d", NumMeasures);
-
 	CallbackDebug("DoMeasures: %d", NumMeasures);
+
+	int RetryCounter = 0;
+	while (!TryEnterCriticalSection(&m_MeasureStartLock))
+	{
+		if (RetryCounter++ >= 3)
+		{
+			if (m_DebugOn)
+			{
+				m_MeasureTime = std::chrono::steady_clock::now();
+				m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+				printf("%6.6f\tCould not enter Critical Section m_MeasureStartLock\n", (float)m_TimeStamp / 1000000.0f);
+			}
+			if (m_LogToFile) LogToFile(L"Could not enter Critical Section m_MeasureStartLock");
+			CallbackDebug("Could not enter Critical Section m_MeasureStartLock");
+			return false;
+		}
+
+		if (m_DebugOn)
+		{
+			m_MeasureTime = std::chrono::steady_clock::now();
+			m_TimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(m_MeasureTime - m_DebugStartTime).count();
+			printf("%6.6f\tWaiting for Critical Section m_MeasureStartLock: %d\n", (float)m_TimeStamp / 1000000.0f, RetryCounter);
+		}
+		if (m_LogToFile) LogToFile(L"Waiting for Critical Section m_MeasureStartLock: %d", RetryCounter);
+		CallbackDebug("Waiting for Critical Section m_MeasureStartLock: %d", RetryCounter);
+	}
 
 	m_measureDone = false;
 	m_DataListforHostReady = false;
@@ -7235,7 +7326,8 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 TO_1
 	m_TimeoutCounter = 0;
 	m_StartMeasure = true;
 
-	SetDirty(TRUE);
+	LeaveCriticalSection(&m_MeasureStartLock);
+
 	return true;
 }
 

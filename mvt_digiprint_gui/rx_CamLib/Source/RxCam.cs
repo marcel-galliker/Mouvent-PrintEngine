@@ -114,18 +114,18 @@ namespace rx_CamLib
 
         public struct CallBackDataStruct
         {
-            public ENCamResult CamResult;   //Error or other details
-            public float DPosX;             //Center of pattern offset X to center of camera, Angle, Stitch, Register: μm, StartLines: px
-            public float DPosY;             //Center of pattern offset Y to center of camera, Angle, Stitch, Register: μm, StartLines: px
-            public float Value_1;           //Angle, Stitch, Register: Correction Value in Rev or μm (Register, ColorStitch), StartLines: number of lines
+            public ENCamResult CamResult;       //Error or other details
+            public float DPosX;                 //Center of pattern offset X to center of camera, Angle, Stitch, Register: μm, StartLines: px
+            public float DPosY;                 //Center of pattern offset Y to center of camera, Angle, Stitch, Register: μm, StartLines: px
+            public float Value_1;               //Angle, Stitch, Register: Correction Value in Rev or μm (Register, ColorStitch), StartLines: number of lines
             public LineLayoutEnum LineLayout;   //Angle, Stitch, Register: 0, StartLines: Lines layout (Top/Right/Covering/Bottom/Left)  
-            public LineAttachEnum LineAttach; //Angle, Stitch, Register: 0, StartLines: Line attached to camera limits (Top/Right/None/Bottom/Left)
+            public LineAttachEnum LineAttach;   //Angle, Stitch, Register: 0, StartLines: Line attached to camera limits (Top/Right/None/Bottom/Left)
             public bool micron;                 //Measure is in μm
             public int NumMeasures;             //Number of successful measures
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
             public char[] OcrChars;             //OCR results as ASCII chars
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-            public string Info;             // Debug Info etc.
+            public string Info;                 // Debug Info etc.
         };
 
         public enum OcrLearnCmdEnum
@@ -979,6 +979,19 @@ namespace rx_CamLib
             if (CameraRunning) halignFilter.SetFrameTiming(FrameTime);
         }
 
+        /// <summary>
+        /// Sets the thicknes ratio between center and outer lines for MeasureModeEnum.MeasureMode_Register only,
+        /// >+1 : center line is thicker, <-1 : center line is thinner, default 1.5,
+        /// Values between -1 and +1 switch this function off
+        /// </summary>
+        public float RegisterMidOuterRatio
+        {
+            set
+            {
+                if (CameraRunning) halignFilter.SetRegisterMidOuterRatio(value);
+            }
+        }
+
         #endregion
 
 
@@ -1777,8 +1790,7 @@ namespace rx_CamLib
             if (CorrectionList.Count > 0 && CorrectionList[CorrectionList.Count - 1].Info != "")
                 MeasureData.Info = CorrectionList[CorrectionList.Count - 1].Info;
 
-            if (CorrectionList.Count == 0 || DataResult == ENCamResult.Filter_NoData ||
-                (CorrectionList.Count == 1 && CorrectionList[0].NumMeasures == 0))
+            if (CorrectionList.Count == 0 || DataResult == ENCamResult.Filter_NoData)
             {
                 MeasureData.CamResult = new ENCamResult();
                 MeasureData.DPosX = float.NaN;
@@ -1790,13 +1802,18 @@ namespace rx_CamLib
                 MeasureData.CamResult = ENCamResult.Filter_NoData;
                 MeasureData.Info = ENCamCallBackInfo.MeasureTimeout.ToString();
             }
+            else if(CorrectionList.Count == 1)
+            {
+                MeasureData = CorrectionList[0];
+                MeasureData.NumMeasures = 1;
+            }
             else
             {
                 int NumMeasures = CorrectionList.Count;
-            //Average within 1 sigma
+                //Average within 1 sigma
                 if (CorrectionList.Count > 1)
-                AverageData(CorrectionList, ref MeasureData);
-            else MeasureData = CorrectionList[0];
+                    AverageData(CorrectionList, ref MeasureData);
+                else MeasureData = CorrectionList[0];
                 MeasureData.NumMeasures = NumMeasures;
             }
 
@@ -1985,7 +2002,7 @@ namespace rx_CamLib
                 MeasureData.OcrChars[1] = (char)(OcrSum_1 / Counter);
                 MeasureData.OcrChars[2] = (char)(OcrSum_2 / Counter);
                 MeasureData.OcrChars[3] = (char)(OcrSum_3 / Counter);
-			}
+            }
         }
 
         private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e)

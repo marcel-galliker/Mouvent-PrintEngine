@@ -258,6 +258,9 @@ public:
 	//Timeout for StartLines
 	STDMETHOD(SetStartLinesTimeout)(THIS_ UINT32 StartLinesTimeout) PURE;
 
+	//Mid/Outer ratio for Register
+	STDMETHOD(SetRegisterMidOuterRatio)(THIS_ float MidOuterRatio) PURE;
+
 	//Execute Measures
 	STDMETHOD_(BOOL, DoMeasures)(THIS_ UINT32 NumMeasures, UINT32 TO_1st, UINT32 TO_End) PURE;
 
@@ -454,6 +457,7 @@ public:
 	CRITICAL_SECTION m_MeasureLock;
 	CRITICAL_SECTION m_OvTextLock;
 	CRITICAL_SECTION m_SnapShotLock;
+	CRITICAL_SECTION m_MeasureStartLock;
 
 	// Function needed for the class factory
 	static CUnknown * WINAPI CreateInstance(LPUNKNOWN pUnk, HRESULT *phr);
@@ -582,6 +586,9 @@ public:
 	STDMETHODIMP SetStartLinesDistance(float StartLinesDistance);
 	//Timeout for StartLines
 	STDMETHODIMP SetStartLinesTimeout (UINT32 StartLinesTimeout);
+
+	//Mid/Outer ratio for Register
+	STDMETHODIMP SetRegisterMidOuterRatio(float MidOuterRatio);
 
 	//Execute Measures
 	STDMETHODIMP_(BOOL) DoMeasures(UINT32 NumMeasures, UINT32 TO_1st, UINT32 TO_End);
@@ -792,6 +799,7 @@ private:
 	//Register
 	float m_RegisterOuterDistance = 1143;
 	float m_RegisterTargetDistance = 571.5;
+	float m_RegisterMidOuterRatio = 1.5f;
 	//FindLines
 	float m_FindLine_Distance = (float)677.333333333333;
 	float m_PresetFindLine_Distance = (float)677.333333333333;
@@ -923,7 +931,7 @@ private:
 
 	//Dilate/Erode
 	HRESULT Erode(IMediaSample* pSampleIn, BOOL Vertical);
-	void 	CalculateErodeSeed();
+	void CalculateErodeSeed();
 
 	//Blob
 	HRESULT Blob(IMediaSample* pSampleIn);
@@ -934,7 +942,7 @@ private:
 	HRESULT FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Continuous = false);
 	HRESULT MeasureAngle(BOOL Vertical, BOOL UpsideDown);
 	HRESULT MeasureStitch(BOOL Vertical, BOOL UpsideDown, BOOL InRevolutions);
-	HRESULT MeasureRegister(BOOL Vertical, BOOL UpsideDown);
+	HRESULT MeasureRegister(BOOL Vertical, BOOL UpsideDown, float MidOuterRatio = 1.0f);
 	HRESULT ReadOcr(IMediaSample* pSampleIn, BOOL Vertical, BOOL UpsideDown, BOOL Continuous);
 
 	//Display

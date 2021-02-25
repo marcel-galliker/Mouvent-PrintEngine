@@ -210,6 +210,10 @@ namespace rx_CamLib.Models
         [PreserveSig]
         void SetStartLinesTimeout (UInt32 StartLinesTimeout);
 
+        //Mid/Outer ratio for Register
+        [PreserveSig]
+        void SetRegisterMidOuterRatio (float MidOuterRatio);
+
         //Execute Measures
         [PreserveSig]
         bool DoMeasures(UInt32 NumMeasures, UInt32 TO_1st, UInt32 TO_End);

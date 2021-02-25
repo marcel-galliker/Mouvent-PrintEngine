@@ -331,14 +331,14 @@ void eeprom_add_droplets_printed(int headNo, UINT32 droplets, int time)
 }
 
 //--- eeprom_set_rob_pos ------------------------------------
-void eeprom_set_rob_pos(int headNo, int angle, int dist, int fromMain)
+void eeprom_set_rob_pos(int headNo, int angle, int dist)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 
 	SHeadEEpromMvt cfg;
 	memcpy(&cfg, &_NiosMem->stat.eeprom_mvt[headNo], sizeof(cfg));
-	if (angle || fromMain) cfg.robot.angle=angle;
-	if (dist || fromMain)  cfg.robot.dist=dist;
+	if (angle!=INVALID_VALUE) cfg.robot.angle=angle;
+	if (dist !=INVALID_VALUE) cfg.robot.dist=dist;
 	cfg.robot.crc = rx_crc8(&cfg.robot, sizeof(cfg.robot)-1);
 	memcpy(&_NiosMem->cfg.eeprom_mvt[headNo], &cfg, sizeof(cfg));
 	_NiosMem->cfg.eeprom_mvt_writeCnt[headNo]++;

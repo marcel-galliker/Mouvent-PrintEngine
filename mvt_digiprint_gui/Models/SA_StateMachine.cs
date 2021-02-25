@@ -14,8 +14,8 @@ namespace RX_DigiPrint.Models
 	{
 		private const bool		 _Debug=true;
 
-		public const bool		 _SimuCamera  = true;
-		public const bool		 _SimuMachine = true;
+		public const bool		 _SimuCamera  = false;
+		public const bool		 _SimuMachine = false;
 
 		private RxCamFunctions	 _CamFunctions;
 		private List<SA_Action>  _Actions;
@@ -26,12 +26,14 @@ namespace RX_DigiPrint.Models
 		private int				 _HeadNo;
 		private const double	 _AngleDist = (128.0*25.4)/1200;
 		private const double	 _StitchWebDist = (140.0*25.4)/1200;
-		private const double	 _DistWebDist   = (120.0*25.4)/1200;
+//		private const double	 _DistWebDist   = (120.0*25.4)/1200;
+		private const double	 _DistWebDist   = 0.5;
+		private int				 _DistStepCnt   = 0;
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
 
-		private int				_HeadsPerColor=3;
+		private int				_HeadsPerColor=2;
 
 		public SA_StateMachine()
 		{
@@ -215,6 +217,7 @@ namespace RX_DigiPrint.Models
 				}
 			}
 
+			_DistStepCnt = 0;
 			_ActionIdx = 0;
 			_StartAction();
 			return _Actions;
@@ -403,20 +406,50 @@ namespace RX_DigiPrint.Models
 										+ "Measure Dist\n"
 										+ string.Format("  Correction: X={0:0.00}\n", CallBackData.Value_1)
 										+ string.Format("  Center position: X={0:0.00}, y={1:0.00}\n", CallBackData.DPosX, CallBackData.DPosY);
+							Console.WriteLine(CallbackInfo);
+							
 							_CamFunctions.Off();
 							if (CallBackInfo!=RxCam.ENCamCallBackInfo.RegisterCorr)
 								break;
 							
+							if (!float.IsNaN(CallBackData.Value_1) || _DistStepCnt>20)
+							{ 
+								if (!float.IsNaN(CallBackData.Value_1))
+									action.Correction = 1;
+								else action.State = ECamFunctionState.error;
+								_HeadNo++;
+								if (_HeadNo+1<_HeadsPerColor)
+								{
+									_ActionIdx=_DistIdx+_HeadNo;
+									_Action=_Actions[_ActionIdx];
+									RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos, 1000);
+									RxGlobals.SetupAssist.WebMove(-_DistWebDist*_DistStepCnt);
+									_DistStepCnt=0;								
+								}
+								else _CamMeasureDist_done();
+							}
+							else
+							{
+								action.WebMoveDone = false;
+								RxGlobals.SetupAssist.WebMove(_DistWebDist);
+								_DistStepCnt++;
+							}
+							break;
+
+							//---- ---------------------------------
+
 							if (_SimuCamera && action.MeasureCnt<2) CallBackData.Value_1 = float.NaN;
 							if (action.MeasureCnt<5)
 							{
-								if (!CallBackData.Value_1.Equals(float.NaN) && Math.Abs(CallBackData.Value_1)<100 && action.BaseIdx<0)
+							//	if (!CallBackData.Value_1.Equals(float.NaN) && Math.Abs(CallBackData.Value_1)<100 && action.BaseIdx<0)
+								if (!CallBackData.Value_1.Equals(float.NaN) && action.BaseIdx<0)
 								{
 									action.BaseIdx = action.MeasureCnt;
 									if (action.MeasureCnt!=2) 
 									{
 										CallBackData.Value_1 += (float)((action.MeasureCnt-2)*(20.0*25.4)/1200);
 										action.State = ECamFunctionState.waitRob;
+										CallBackData.DPosY = 0;
 									}
 								}
 								else
@@ -597,6 +630,10 @@ namespace RX_DigiPrint.Models
 		
 		public List<SA_Action> Test()
 		{
+			RxCam.ENCamResult result=_CamFunctions.MeasureDist();
+			if (result!=RxCam.ENCamResult.OK) RxGlobals.Events.AddItem(new LogItem("MeasureDist Error {0}", result.ToString()));
+			return _Actions;
+
 			/*
 			if (_Action==null)
 			{
@@ -642,7 +679,7 @@ namespace RX_DigiPrint.Models
 				_Action.ScanPos	= RxGlobals.SetupAssist.ScanPos;
 				_ActionIdx=0;
 			}
-			RxCam.ENCamResult result=_CamFunctions.MeasureAngle();
+			result=_CamFunctions.MeasureAngle();
 			if (result!=RxCam.ENCamResult.OK) RxGlobals.Events.AddItem(new LogItem("MeasureAngle Error {0}", result.ToString()));
 
 			return _Actions;
@@ -763,7 +800,7 @@ namespace RX_DigiPrint.Models
 				}
 				if (_DistIdx+_Action.HeadNo<_Actions.Count())
 				{					
-					_Actions[_DistIdx+_Action.HeadNo].ScanPos = RxGlobals.SetupAssist.ScanPos+_AngleDist-0.2;//+_CallbackData.DPosX/1000;
+					_Actions[_DistIdx+_Action.HeadNo].ScanPos = RxGlobals.SetupAssist.ScanPos+_AngleDist;//+_CallbackData.DPosX/1000;
 					Console.WriteLine("_CamMeasureAngle_done: Set Dist Action[{0}].ScanPos={1}, DPosX={2}", _DistIdx+_Action.HeadNo, _Actions[_DistIdx+_Action.HeadNo].ScanPos, _CallbackData.DPosX);
 				}
 
@@ -792,7 +829,7 @@ namespace RX_DigiPrint.Models
 			for(int i=0; i+1<_HeadsPerColor; i++)
 			{
 				SA_Action action=_Actions[_DistIdx+i];
-				if (action.Correction!=null && Math.Abs((double)action.Correction)>10)
+				if (action.Correction!=null && Math.Abs((double)action.Correction)>=5)
 				{
 					RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] += (double)action.Correction/1000;
 				}
@@ -880,6 +917,7 @@ namespace RX_DigiPrint.Models
 			if (_Action.WebMoveDist==0 || _Action.WebMoveDone) _StartCamFunction();
 		}
 		
+		//--- _WebMoveDone -----------------------------------------------------------------------------------------------
 		private void _WebMoveDone()
 		{
 			Console.WriteLine("{0}: Action[{1}]: _WebMoveDone", RxGlobals.Timer.Ticks(), _ActionIdx);
@@ -984,6 +1022,7 @@ namespace RX_DigiPrint.Models
 					case ECamFunction.CamMeasureDist:
 						Console.WriteLine("Action[{0}]: Start MeasureDist, cnt={1}, ScanPos={2}", _ActionIdx, _Actions[_ActionIdx].MeasureCnt, RxGlobals.SetupAssist.ScanPos);
 					//	if (_Action.State == ECamFunctionState.runningCam)
+						if (false)
 						{
 							result=_CamFunctions.MeasureDist();
 							if (result!=RxCam.ENCamResult.OK) RxGlobals.Events.AddItem(new LogItem("MeasureDist Error {0}", result.ToString()));

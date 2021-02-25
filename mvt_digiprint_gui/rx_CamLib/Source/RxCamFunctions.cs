@@ -200,6 +200,7 @@ namespace rx_CamLib
 				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 				_Camera.SetLinesHorizontal(true);
 				_Camera.NumExtraErodes=3;
+				_Camera.RegisterMidOuterRatio=(float)1.5;
 				_Camera.SetLineAspectLimit(5);
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
 				_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Register, 5, 10, 15);
