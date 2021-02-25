@@ -211,7 +211,8 @@ int main(int argc, char* argv[])
 	// ?? bist du sicher, dass nie ein memset(&RX_Config, 0x00, ...) gemacht wird? (es könnte auch ein übergebener Pointer sein)
 	// ?? problem Konzept: Wenn die Screwpos im RX_Config gespeichert sind, sollten sie im setup_config geschrieben/gelesen werden
 	//    -> andere Lösung: RX_Screwpos als eigene Struktur verwalten, evtl. nur als static im step_lb.c
-	
+	//		die Positionen verändern sich nur nach einem Suchen: ich würde am Ende des Suchvorgangs eine Meldung EVT_SAVE_SCREW_POS ans main schicken.	
+
 	ctrl_update_hostname();
 	
 	if (!strcmp(RX_Hostname, "TEST-0001"))
