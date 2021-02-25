@@ -154,7 +154,7 @@ void scr_malloc(UINT32 lengthPx, UINT8 bitsPerPixel)
 					h = RX_Spooler.headNo[c][n]-1;
 					b = h/MAX_HEADS_BOARD;
 					h = h%MAX_HEADS_BOARD;
-					if (sizeScr>_ScrMem[b][h].sizeScr)
+					if (sizeSep>_ScrMem[b][h].sizeSep)
 					{
 						if (_ScrMem[b][h].separated) rx_mem_free(&_ScrMem[b][h].separated);
 						_ScrMem[b][h].separated = rx_mem_alloc((size_t)sizeSep);
@@ -164,7 +164,9 @@ void scr_malloc(UINT32 lengthPx, UINT8 bitsPerPixel)
 							_ScrMem[b][h].sizeSep=0;
 						}
 						else _ScrMem[b][h].sizeSep=sizeSep;
-						
+					}
+					if (sizeScr>_ScrMem[b][h].sizeScr)
+					{
 						for (int i=0; i<SCR_BUF_SIZE; i++)
 						{
 							if (_ScrMem[b][h].screened[i])  rx_mem_free(&_ScrMem[b][h].screened[i]);
