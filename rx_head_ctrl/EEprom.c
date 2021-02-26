@@ -108,7 +108,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 			case 'c':	sprintf(str, "%02X", fuji_crc(buf, src-buf));
 						crc[2]=0;
 						memcpy(&crc, src,  2);
-						printf("calc=%s, crc=%s\n", str, crc);
+					//	printf("calc=%s, crc=%s\n", str, crc);
 						if (strcmp(str, crc))
 						{
 							Error(WARN, 0, "Head[%d]: EEprom CRC Error: calc=%s read=%s", headNo, str, crc);
