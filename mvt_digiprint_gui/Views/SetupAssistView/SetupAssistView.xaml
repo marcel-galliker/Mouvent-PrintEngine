@@ -132,57 +132,73 @@
             <GroupBox  Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="700" Header="Camera Capture" Style="{StaticResource MvtGroupBox}" >
                 <local:SA_CamCapture x:Name="CamCapture" IsVisibleChanged="CamCapture_IsVisibleChanged"/>
             </GroupBox>
+
+            <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal">
+                <GroupBox  HorizontalAlignment="Left" VerticalAlignment="Top" Width="auto" Header="Scanner" Style="{StaticResource MvtGroupBox}" Grid.ColumnSpan="2" Margin="0,0,1,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
+                        <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding ScanPos}" IsEnabled="False"/>
+
+                        <!--
+                        <TextBlock  Grid.Row="1" Grid.Column="0" Text="Voltage"/>
+                        <TextBox    Grid.Row="1" Grid.Column="1" Text="{Binding motorVoltage}" IsEnabled="False"/>
+
+                        <TextBlock  Grid.Row="2" Grid.Column="0" Text="Move Current"/>
+                        <TextBox    Grid.Row="2" Grid.Column="1" Text="{Binding motorMoveCurrent}" IsEnabled="False"/>
+
+                        <TextBlock  Grid.Row="3" Grid.Column="0" Text="Hold Current"/>
+                        <TextBox    Grid.Row="3" Grid.Column="1" Text="{Binding motorHoldCurrent}" IsEnabled="False"/>
+                        -->
+
+                        <TextBlock  Grid.Row="4" Grid.Column="0" Text="Reference Done"/>
+                        <CheckBox   Grid.Row="4" Grid.Column="1" IsChecked="{Binding ScanRefDone}" IsEnabled="False" HorizontalAlignment="Center"/>
+
+                        <TextBlock  Grid.Row="6" Grid.Column="0" Text="Stop Left"/>
+                        <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
+                        <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
+
+                        <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center" FontWeight="Bold"
+                               Visibility="{Binding ScanConnected, Converter={StaticResource BoolToInVisible_Converter}}">
+                            <TextBlock.RenderTransform>
+                                <RotateTransform Angle="-45"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="auto" Header="Web" Style="{StaticResource MvtGroupBox}" Grid.ColumnSpan="2" Margin="0,0,1,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock  Grid.Row="0" Grid.Column="0" Text="Moving"/>
+                        <CheckBox   Grid.Row="0" Grid.Column="1" IsChecked="{Binding WebMoving}" IsEnabled="False" HorizontalAlignment="Center"/>
+
+                    </Grid>
+                </GroupBox>
+            </StackPanel>
             
-            <GroupBox Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="auto" Header="Status" Style="{StaticResource MvtGroupBox}" Grid.ColumnSpan="2" Margin="0,0,1,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Position"/>
-                    <TextBox    Grid.Row="0" Grid.Column="1" Text="{Binding ScanPos}" IsEnabled="False"/>
-
-                    <!--
-                    <TextBlock  Grid.Row="1" Grid.Column="0" Text="Voltage"/>
-                    <TextBox    Grid.Row="1" Grid.Column="1" Text="{Binding motorVoltage}" IsEnabled="False"/>
-
-                    <TextBlock  Grid.Row="2" Grid.Column="0" Text="Move Current"/>
-                    <TextBox    Grid.Row="2" Grid.Column="1" Text="{Binding motorMoveCurrent}" IsEnabled="False"/>
-
-                    <TextBlock  Grid.Row="3" Grid.Column="0" Text="Hold Current"/>
-                    <TextBox    Grid.Row="3" Grid.Column="1" Text="{Binding motorHoldCurrent}" IsEnabled="False"/>
-                    -->
-
-                    <TextBlock  Grid.Row="4" Grid.Column="0" Text="Reference Done"/>
-                    <CheckBox   Grid.Row="4" Grid.Column="1" IsChecked="{Binding ScanRefDone}" IsEnabled="False" HorizontalAlignment="Center"/>
-
-                    <TextBlock  Grid.Row="6" Grid.Column="0" Text="Stop Left"/>
-                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
-                    <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
-
-                    <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center" FontWeight="Bold"
-                           Visibility="{Binding ScanConnected, Converter={StaticResource BoolToInVisible_Converter}}">
-                        <TextBlock.RenderTransform>
-                            <RotateTransform Angle="-45"/>
-                        </TextBlock.RenderTransform>
-                    </TextBlock>
-                </Grid>
-            </GroupBox>
-
             <common:MvtButton x:Name="BTN_CamSettings"
                               Grid.Row="0" 
                               Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}" 

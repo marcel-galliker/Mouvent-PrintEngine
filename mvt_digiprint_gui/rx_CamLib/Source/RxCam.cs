@@ -1176,9 +1176,10 @@ namespace rx_CamLib
                             CamCallBack?.Invoke(ENCamCallBackInfo.RegisterCorr, CallBackData);
                             break;
                         case WP_MeasureTimeout:
-                            //Sollte nicht mehr eintreten
+                            //Sollte nicht mehr eintreten, jetz schon wieder für Timeout auf 1st Measure
                             CallBackData = new CallBackDataStruct();
                             CallBackData.CamResult = new ENCamResult();
+                            CallBackData.Info = "Timeout 1st Measure";
                             CamCallBack?.Invoke(ENCamCallBackInfo.MeasureTimeout, CallBackData);
                             break;
                         case WP_CallBackDebug:

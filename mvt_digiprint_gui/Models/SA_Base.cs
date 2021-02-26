@@ -90,6 +90,14 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _ScanMoving, value); }				
 		}
 
+		//--- Property WebMoving ---------------------------------------
+		private bool _WebMoving;
+		public bool WebMoving
+		{
+			get { return _WebMoving; }
+			set { SetProperty(ref _WebMoving,value); }
+		}
+
 		//--- Property ScanMoveCnt ---------------------------------------
 		private int _ScanMoveCnt;
 		public int ScanMoveCnt
@@ -227,6 +235,7 @@ namespace RX_DigiPrint.Models
 					if (_WebMoveCnt!=_WebMoveStartCnt)
 						Console.WriteLine("WEB MOVE Error");
 					_WebMoveStartCnt++;
+					WebMoving=true;
 					Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
 				//	RxGlobals.Events.AddItem(new LogItem(msg));
 					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
@@ -256,6 +265,7 @@ namespace RX_DigiPrint.Models
 				if (_WebMoveCnt!=old)
 				{
 					Console.WriteLine("{0}: WEB MOVE DONE {1} (new={2})", RxGlobals.Timer.Ticks(), old, _WebMoveCnt);
+					WebMoving=false;
 					_OnWebMoveDone();
 				}
 			}
