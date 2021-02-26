@@ -17,6 +17,7 @@
 #include "rx_trace.h"
 #include "rx_head_ctrl.h"
 #include "rx_crc.h"
+#include "crc_fuji.h"
 #include "tcp_ip.h"
 #include "nios.h"
 #include "EEprom.h"
@@ -58,8 +59,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 	BYTE *src;
 	BYTE *end;
 	char str[10];
-	char crc[2];
-	unsigned short cc;
+	char crc[4];
 
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 	
@@ -105,7 +105,16 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 						pdata->badNozzleE[badE++] = 2048-val;
 						break;
 			case 'u':	memcpy(pdata->volumeUniformity, src,  2); src+= 2; break;
-			case 'c':	done=TRUE; 						
+			case 'c':	sprintf(str, "%02X", fuji_crc(buf, src-buf));
+						crc[2]=0;
+						memcpy(&crc, src,  2);
+						printf("calc=%s, crc=%s\n", str, crc);
+						if (strcmp(str, crc))
+						{
+							Error(WARN, 0, "Head[%d]: EEprom CRC Error: calc=%s read=%s", headNo, str, crc);
+							memset(pdata, 0, sizeof(SEEpromData));
+						}
+						done=TRUE;
 						break;
 			default:
 				break;

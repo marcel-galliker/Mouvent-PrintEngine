@@ -93,6 +93,7 @@
     <ClCompile Include="args.c" />
     <ClCompile Include="conditioner.c" />
     <ClCompile Include="crc_calc.c" />
+    <ClCompile Include="crc_fuji.c" />
     <ClCompile Include="EEprom.c" />
     <ClCompile Include="firepulse.c" />
     <ClCompile Include="fpga.c" />
@@ -113,6 +114,7 @@
     <ClInclude Include="conditioner.h" />
     <ClInclude Include="cond_comm.h" />
     <ClInclude Include="crc_calc.h" />
+    <ClInclude Include="crc_fuji.h" />
     <ClInclude Include="DataSrv.h" />
     <ClInclude Include="EEprom.h" />
     <ClInclude Include="firepulse.h" />
