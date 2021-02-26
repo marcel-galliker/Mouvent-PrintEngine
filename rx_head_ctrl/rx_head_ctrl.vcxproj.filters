@@ -93,6 +93,9 @@
     <ClCompile Include="putty.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="crc_fuji.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataSrv.h">
@@ -168,6 +171,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="rx_head_ctrl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="crc_fuji.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
