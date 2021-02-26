@@ -434,11 +434,13 @@ void robi_lb702_handle_menu(char *str)
         break;
 	case 'l':
         val = atoi(&str[1]);
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &val);
+        robi_turn_screw_left(val);
+        //robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &val);
         break;
     case 'r':
         val = atoi(&str[1]);
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &val);
+        robi_turn_screw_right(val);
+        //robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &val);
         break;
 	case 'u':
         robi_move_up(); break;

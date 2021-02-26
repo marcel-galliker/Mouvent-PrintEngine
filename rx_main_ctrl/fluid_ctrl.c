@@ -704,7 +704,8 @@ static void _control(int fluidNo)
 											case ctrl_purge_hard_vacc:	_send_purge_par(no, time); break;
                                             case ctrl_purge_hard_wash:	_send_purge_par(no, time); break;
 											case ctrl_purge_hard:		_send_purge_par(no, time); _txrob=FALSE; break;
-                                            case ctrl_purge4ever:		_send_purge_par(no, 0); break;
+                                            case ctrl_purge4ever:		_send_purge_par(no, 0); 
+																		machine_set_capping_timer(FALSE); break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
@@ -1186,11 +1187,6 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	{
 		_PurgeFluidNo=no;
 		_InitDone = 0;
-	}
-	
-	if (ctrlMode >= ctrl_flush_night && ctrlMode <= ctrl_empty_step5 && ctrlMode != ctrl_cap)
-	{
-		machine_set_capping_timer(TRUE);
 	}
 
     _FluidCtrlMode = ctrlMode;
