@@ -17,6 +17,7 @@
 #include "rx_trace.h"
 #include "rx_head_ctrl.h"
 #include "rx_crc.h"
+#include "crc_fuji.h"
 #include "tcp_ip.h"
 #include "nios.h"
 #include "EEprom.h"
@@ -43,13 +44,14 @@ typedef struct
 
 static int _Init=FALSE;
 static SEEpromData _Data[MAX_HEADS_BOARD];
+static int _CRC_Error[MAX_HEADS_BOARD];
 
 //--- prototypes ---------------------------------------------------
 
 //--- eeprom_init_data ------------------------------------------
 void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 {
-	SEEpromData *pdata;
+	SEEpromData data;
 	int badE=0, badM=0;
 	int done=FALSE;
 	int val;
@@ -62,8 +64,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 	
-	pdata = &_Data[headNo];
-	memset(pdata, 0, sizeof(SEEpromData));
+	memset(&data, 0, sizeof(data));
 	memset(str, 0, sizeof(str));
 	memcpy(buf, eeprom, EEPROM_DATA_SIZE);
 
@@ -76,42 +77,59 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 			tag = *src++;
 			switch(tag)
 			{
-			case 'q':	memcpy(pdata->revisionNo,		src,  2); src+= 2; break;
-			case 'p':	memcpy(pdata->partNo,			src, 10); src+=10; break;
-			case 's':	memcpy(pdata->serialNo,			src,  9); src+= 9; break;
+			case 'q':	memcpy(data.revisionNo,		src,  2); src+= 2; break;
+			case 'p':	memcpy(data.partNo,			src, 10); src+=10; break;
+			case 's':	memcpy(data.serialNo,			src,  9); src+= 9; break;
 			case 'd':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  4);	src+= 4;
 						val=atoi(str);
-						pdata->year=2000+val%100;
-						pdata->week=val/100;
+						data.year=2000+val%100;
+						data.week=val/100;
 						break;
-			case 'h':	memcpy(pdata->flexSide,			src,  1); src+= 1; break;
-			case 't':	memcpy(pdata->thermistor,		src,  1); src+= 1; break;
-			case 'v':	memcpy(pdata->driveVoltage,		src,  3); src+= 3; break;
-			case 'f':	memcpy(pdata->flowResistance,	src,  3); src+= 3; break;
-			case 'l':	memcpy(pdata->dropMass[2],		src,  3); src+= 3; break;
-			case 'm':	memcpy(pdata->dropMass[1],		src,  3); src+= 3; break;
-			case 'n':	memcpy(pdata->dropMass[0],		src,  3); src+= 3; break;
-			case 'r':	memcpy(pdata->jetStraightness,  src,  2); src+= 2; break;
+			case 'h':	memcpy(data.flexSide,			src,  1); src+= 1; break;
+			case 't':	memcpy(data.thermistor,		src,  1); src+= 1; break;
+			case 'v':	memcpy(str,		src,  3);		src+= 3;
+						str[3]=0;
+						val=atoi(str);
+						if (val>=80 && val<=120) sprintf(data.driveVoltage, "%03d", val);
+						else if (pInfo->voltage) sprintf(data.driveVoltage, "%03d", pInfo->voltage);
+						else sprintf(data.driveVoltage, "%03d", 100);
+						break;
+			case 'f':	memcpy(data.flowResistance,	src,  3); src+= 3; break;
+			case 'l':	memcpy(data.dropMass[2],		src,  3); src+= 3; break;
+			case 'm':	memcpy(data.dropMass[1],		src,  3); src+= 3; break;
+			case 'n':	memcpy(data.dropMass[0],		src,  3); src+= 3; break;
+			case 'r':	memcpy(data.jetStraightness,  src,  2); src+= 2; break;
 			case 'b':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  3); src+= 3; 
 						sscanf(str, "%x", &val);
-						pdata->badNozzleM[badM++] = 2048-val;
+						data.badNozzleM[badM++] = 2048-val;
 						break;
 			case 'e':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  3); src+= 3; 
 						sscanf(str, "%x", &val);
-						pdata->badNozzleE[badE++] = 2048-val;
+						data.badNozzleE[badE++] = 2048-val;
 						break;
-			case 'u':	memcpy(pdata->volumeUniformity, src,  2); src+= 2; break;
+			case 'u':	memcpy(data.volumeUniformity, src,  2); src+= 2; break;
 			case 'c':	sprintf(str, "%02X", fuji_crc(buf, src-buf));
 						crc[2]=0;
 						memcpy(&crc, src,  2);
-					//	printf("calc=%s, crc=%s\n", str, crc);
-						if (strcmp(str, crc))
+						int cmp = strcmp(str, crc);
+						TrPrintfL(TRUE, "Head[%d]: CRC calc=%s, crc=%s, ErrorCnt=%d", headNo, str, crc, _CRC_Error[headNo]);
+						if (cmp) 
 						{
-							Error(WARN, 0, "Head[%d]: EEprom CRC Error: calc=%s read=%s", headNo, str, crc);
-							memset(pdata, 0, sizeof(SEEpromData));
+							_CRC_Error[headNo]++;
+							TrPrintfL(TRUE, "Head[%d]: CRC calc=%s, crc=%s, ErrorCnt=%d", headNo, str, crc, _CRC_Error[headNo]);
+							if (_CRC_Error[headNo]>10)
+							{
+								Error(WARN, 0, "Head[%d]: EEprom CRC Error cnt=%d", headNo,  _CRC_Error[headNo]);
+								memcpy(&_Data[headNo], &data, sizeof(_Data[headNo]));
+							}
+						}
+						else 
+						{
+							if (_CRC_Error[headNo]) Error(LOG, 0, "Head[%d]: EEprom CRC Error cnt=%d", headNo, _CRC_Error[headNo]);
+							memcpy(&_Data[headNo], &data, sizeof(_Data[headNo]));
 						}
 						done=TRUE;
 						break;
@@ -125,6 +143,8 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 	memset(pInfo, 0, sizeof(*pInfo));
     
 	//--- fill info ----------------------------
+	SEEpromData *pdata = &_Data[headNo];
+
 	int i, n;
 	if (*pdata->serialNo) pInfo->serialNo = 100*atoi(pdata->serialNo) + atoi(&pdata->serialNo[7]);
 	else				  pInfo->serialNo = INVALID_VALUE;
