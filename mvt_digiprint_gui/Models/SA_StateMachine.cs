@@ -29,6 +29,7 @@ namespace RX_DigiPrint.Models
 //		private const double	 _DistWebDist   = (120.0*25.4)/1200;	// 120 dots, 0.254 mm
 		private readonly double	 _DistWebDist   = Math.Round((24.0*25.4)/1200, 3);	// 
 		private int				 _DistStepCnt   = 0;
+		private double			 _DistCorr=0;
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
@@ -148,6 +149,7 @@ namespace RX_DigiPrint.Models
 				Function = ECamFunction.CamFindMark_2,
 				Name="Find Horiz Line",
 				WebMoveDist = -20.0,
+			//	WebMoveDist = -100.0,
 				ScanPos	    = 30.0,
 			});
 
@@ -219,6 +221,7 @@ namespace RX_DigiPrint.Models
 			}
 
 			_DistStepCnt = 0;
+			_DistCorr    = 0;
 			_ActionIdx = 0;
 			_StartAction();
 			return _Actions;
@@ -417,7 +420,11 @@ namespace RX_DigiPrint.Models
 							if (!float.IsNaN(CallBackData.Value_1) || _DistStepCnt>25)
 							{ 
 								if (!float.IsNaN(CallBackData.Value_1))
-									action.Correction = offset+CallBackData.Value_1/1000;
+								{ 
+									double corr=offset+CallBackData.Value_1/1000;
+									action.Correction = _DistCorr+corr;
+									_DistCorr += corr;
+								}
 								else action.State = ECamFunctionState.error;
 								_HeadNo++;								
 								if (_HeadNo+1<_HeadsPerColor)
@@ -426,9 +433,13 @@ namespace RX_DigiPrint.Models
 									_Action=_Actions[_ActionIdx];
 									RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos, 1000);
 									RxGlobals.SetupAssist.WebMove(-_DistWebDist*_DistStepCnt);
-									_DistStepCnt=0;								
+									_DistStepCnt=0;
 								}
-								else _CamMeasureDist_done();
+								else 
+								{
+									_DistCorr = 0;
+									_CamMeasureDist_done();
+								}
 							}
 							else
 							{
@@ -554,23 +565,23 @@ namespace RX_DigiPrint.Models
 		
 		public List<SA_Action> Test()
 		{
-			RxCam.ENCamResult result=_CamFunctions.MeasureDist();
-			if (result!=RxCam.ENCamResult.OK) RxGlobals.Events.AddItem(new LogItem("MeasureDist Error {0}", result.ToString()));
+			RxCam.ENCamResult result;
+
+			_Action = new SA_Action()
+				{
+					Function = ECamFunction.CamMeasureDist,
+					Name="Test",
+					WebMoveDist = 0,
+					ScanPos	    = 0,
+				};
+
+			_ActionIdx=0;
+			_Actions = new List<SA_Action>();
+			_Actions.Add(_Action);
+			_CamFunctions.MeasureDist();
+
 			return _Actions;
 
-			/*
-			if (_Action==null)
-			{
-				_Action = new SA_Action()
-					{
-						Function = ECamFunction.CamFindMark_3,
-						Name="Find Mark 3",
-						WebMoveDist = 0,
-						ScanPos	    = 0,
-					};
-			}
-			_FindMark_3();
-			*/
 
 			if (_Actions==null)
 			{
@@ -916,7 +927,7 @@ namespace RX_DigiPrint.Models
 					case ECamFunction.CamNoFunction:
 						break;
 
-					case ECamFunction.CamFindMark_1:							
+					case ECamFunction.CamFindMark_1:				
 						_CamFunctions.FindMark(false);
 						RxGlobals.SetupAssist.WebMove(1000.0);
 						break;
