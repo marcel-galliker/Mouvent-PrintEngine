@@ -192,9 +192,9 @@ void scr_abort(void)
 }
 
 //--- scr_set_values -----------------------------------------------------------------
-void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUES])
+void scr_set_values(int headNo, INT16 values[MAX_DENSITY_VALUES])
 {
-	int board, head, jet, i, ok;
+	int board, head, jet, i;
 	double sector = (double)MAX_DENSITY_FACTORS/(MAX_DENSITY_VALUES-1);
 	double val[MAX_DENSITY_VALUES];
 
@@ -213,20 +213,12 @@ void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUE
 		TrPrintfL(TRUE, str);
 	}
 
-	ok=TRUE;
 	for (i=0; i<MAX_DENSITY_VALUES; i++)
 	{
-		int v;
-		v = values[i];
-		if (v==0)		 v=max;
-		else if (v<min)	{v=min; ok=FALSE;}
-		else if (v>max) {v=max; ok=FALSE;}
-			
-		val[i] = (double)(v - min) / (double)(max - min);
+		if (values[i]>0) val[i] = (double) values[i] / 1000.0;
+		else val[i]=1.0;
 	}
 	
-	if (!ok) Error(WARN, 0, "Head[%d.%d]: Density Value out of range!", board, head);
-
 	for (jet=0; jet<MAX_DENSITY_FACTORS; jet++)
 	{
 		double d=(double)jet/sector;

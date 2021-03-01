@@ -4057,9 +4057,6 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	//Wait for host to pick data
 	if (m_DataListforHostReady) return NOERROR;
 
-	//Count Timeout
-	if (m_StartLinesTimeout > 0) m_StartLinesTimeoutCounter++;
-
 	//Average/Center of detected Lines
 	int NumBlobsvalid = 0;
 	float AvgLengthX = 0;
@@ -4085,7 +4082,13 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 		}
 	}
 	//Check for minimum number of valid lines
-	if (NumBlobsvalid < (int)m_MinNumStartLines) return NOERROR;
+	if (NumBlobsvalid < (int)m_MinNumStartLines)
+	{
+
+		//Count Timeout
+		if (m_StartLinesTimeout > 0) m_StartLinesTimeoutCounter++;
+		return NOERROR;
+	}
 
 	//Distance between lines / measured camera-pixels = μm per camera-pixel
  //   if (NumBlobsvalid > 1 && NumBlobsvalid >= (int)m_MinNumStartLines)
@@ -4245,6 +4248,8 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 		if (m_LogToFile) LogToFile(L"Lines found, preset Measure Mode: %d", m_PresetMeasureMode);
 		CallbackDebug("Lines found, preset Measure Mode: %d", m_PresetMeasureMode);
 	}
+
+
 
     return NOERROR;
 }
@@ -7159,6 +7164,17 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasureMode(C_rx_AlignFilter::MeasureModeEnum 
 		return S_FALSE;
 	}
 
+	if (MeasureMode == C_rx_AlignFilter::MeasureModeEnum::MeasureMode_StartLines)
+	{
+		m_measureDone = false;
+		m_DataListforHostReady = false;
+		m_vMeasureDataList.clear();
+		m_NumMeasures = 1;
+		m_Timeout1st = 0;
+		m_TimeoutEnd = 0;
+		m_TimeoutCounter = 0;
+		m_StartMeasure = false;
+	}
 	m_PresetMeasureMode = MeasureMode;
 
 	if (m_DebugOn)

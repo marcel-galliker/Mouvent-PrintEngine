@@ -209,6 +209,18 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _WebDist,value); }
 		}
 
+		//--- Property WebPos ---------------------------------------
+		private double _WebPos=0;
+		public double WebPos
+		{
+			get { return _WebPos; }
+			set { SetProperty(ref _WebPos,value); }
+		}
+		public void WebPos_Reset()
+		{
+			_WebPos = 0;
+		}
+
 		//--- WebMove ----------------------------------
 		public const int WebSpeed = 5;	// [m/min]
 		private int _WebMoveStartCnt=-1;
@@ -220,8 +232,16 @@ namespace RX_DigiPrint.Models
 				_checkWebMoveDone();
 
 				TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
-				if (dist==null) cmd.steps	= (Int32)(1000*WebDist);
-				else            cmd.steps	= (Int32)(1000*dist);
+				if (dist==null) 
+				{ 
+					WebPos     += WebDist;
+					cmd.steps	= (Int32)(1000*WebDist);
+				}
+				else
+				{
+					WebPos	   +=(double)dist;
+					cmd.steps	= (Int32)(1000*dist);
+				}
 				cmd.speed = WebSpeed;
 				if (cmd.steps==0)
 				{
@@ -233,7 +253,7 @@ namespace RX_DigiPrint.Models
 					if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
 					string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps);
 					if (_WebMoveCnt!=_WebMoveStartCnt)
-						Console.WriteLine("WEB MOVE Error");
+						Console.WriteLine("WEB MOVE Error: _WebMoveCnt={0}, _WebMoveStartCnt={1}", _WebMoveCnt, _WebMoveStartCnt);
 					_WebMoveStartCnt++;
 					WebMoving=true;
 					Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);

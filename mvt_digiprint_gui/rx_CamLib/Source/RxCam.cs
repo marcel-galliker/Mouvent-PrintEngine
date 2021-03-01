@@ -1144,7 +1144,7 @@ namespace rx_CamLib
                             CallBackData.CamResult = new ENCamResult();
                             CallBackData.DPosX = float.NaN;
                             CallBackData.DPosY = float.NaN;
-                            CallBackData.Value_1 = float.NaN;
+                            CallBackData.Value_1 = 0;
                             CallBackData.NumMeasures = 0;
                             CallBackData.LineLayout = LineLayoutEnum.LineLayout_Undefined;
                             CallBackData.LineAttach = LineAttachEnum.LineAttach_Undefined;

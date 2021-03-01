@@ -949,7 +949,6 @@ static void _check_screwer(void)
             _ScrewPositions_Written[i] = TRUE;
         }
     }
-
     
     for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
     {
