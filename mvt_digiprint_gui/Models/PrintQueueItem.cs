@@ -744,9 +744,9 @@ namespace RX_DigiPrint.Models
             }
 
             // Get file properties
-            bool ok = _read_tiff_properties(filePath) ||
+            bool ok = _read_flz_properties(filePath) || 
+                      _read_tiff_properties(filePath) ||
                       _read_bmp_properties(filePath) ||
-                      _read_flz_properties(filePath) ||
                       _read_pdf_properties(filePath);
 
             // Use variable data printing information

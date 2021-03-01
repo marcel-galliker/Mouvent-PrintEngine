@@ -31,6 +31,6 @@ void sr_get_label_size	(int *width, int *length, UCHAR *bitsPerPixel);
 
 void sr_data_record		(SPrintDataMsg *msg);
 
-int  sr_rip_label		(BYTE* buffer[MAX_COLORS], SBmpInfo *pBmpInfo);
+int sr_rip_label(BYTE *buffer[MAX_COLORS], SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, const char* filepath);
 void sr_rip_unused();
 void sr_abort(void);

@@ -84,6 +84,7 @@ typedef struct SBmpSplitInfo
 
 void data_init(RX_SOCKET socket, int headCnt);
 void data_end(void);
+int data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, int flags, SPrintListItem *pItem);
 
 void data_abort		(void);
 int	 data_cache		(SPageId *id, const char *path, char *localpath, SColorSplitCfg *psplit, int splitCnt);

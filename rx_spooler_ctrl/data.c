@@ -115,7 +115,6 @@ static int  _local_path(const char *filepath, char *localPath);
 static int	_file_used (const char *filename);
 static int  _copy_file (SPageId *pid, char *srcDir, char *filename, char *dstDir);
 static int  _get_blk_cnt(SBmpSplitInfo *pInfo, int bitsPerPixel);
-static int  _data_split		           (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, int flags, SPrintListItem *pItem);
 static int _data_split_prod			   (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
 static int  _data_split_scan           (SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
 static int  _data_split_scan_no_overlap(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int clearBlockUsed, int same, SPrintListItem *pItem);
@@ -675,6 +674,7 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 	char filename[MAX_PATH];
 	char *tiffErr;
 	static EFileType _FileType = ft_undef;
+	int colorOffset[MAX_COLORS];
 
 	if (fileType == ft_undef) fileType = _FileType;
 	_FileType = fileType;
@@ -688,12 +688,14 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 	if (nextIdx == _OutIdx) 
 		return Error(ERR_CONT, 0, "Print List Overflow");
 
+	// save color offset to restore them
+	for (color = 0; color < MAX_COLORS; color++) colorOffset[color] = RX_Color[color].offsetPx;
 	memset(&bmpInfo, 0, sizeof(bmpInfo));
 	
 	if (variable)
 	{
-		while ((ret = sr_rip_label(buffer, &bmpInfo)) == REPLY_ERROR) rx_sleep(10);
-		loaded  = TRUE;
+		loaded = sr_rip_label(buffer, &bmpInfo, offsetPx, lengthPx, blkNo, blkCnt, filepath);
+		ret = REPLY_OK;
 	}
 	else
 	{			
@@ -866,7 +868,7 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 			time = rx_get_ticks()-time;
 			if (time) Error(LOG, 0, "MultiCopy time=%d ms", time);				
 		}
-		_data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, blkCnt, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
+		data_split(id, &bmpInfo, offsetPx, lengthPx, blkNo, blkCnt, flags, clearBlockUsed, same, &_PrintList[_InIdx]);
 		
 		if (loaded || rx_printMode_is_test(printMode))
 		{
@@ -896,6 +898,9 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 	memcpy(&_LastBmpInfo, &bmpInfo, sizeof(bmpInfo));
 	strcpy(_LastFilePath, filepath);
 	_LastWakeupLen = _WakeupLen;
+	// restore color offset 
+	for (color = 0; color < MAX_COLORS; color++) RX_Color[color].offsetPx = colorOffset[color];
+
 	return ret;
 }
 
@@ -921,7 +926,7 @@ int  data_reload	(SPageId *id)
 void data_rip_same(SPrintListItem *pItem, BYTE *buffer[MAX_COLORS])
 {
 	SBmpInfo pBmpInfo;
-	while (sr_rip_label(buffer, &pBmpInfo) == REPLY_ERROR) rx_sleep(10);
+	sr_rip_label(buffer, &pBmpInfo,0,0,0,0,NULL);
 	for (int color = 0; color < MAX_COLORS; color++)
 	{
 		int black = (RX_Color[color].color.colorCode == 0);
@@ -1255,8 +1260,8 @@ static int _get_blk_cnt(SBmpSplitInfo *pInfo, int bitsPerPixel)
 	return		     (dstLineLen * pInfo->srcLineCnt + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 }
 
-//--- _data_split -----------------------------------------------------------------------
-static int _data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int flags, int clearBlockUsed, int same, SPrintListItem *pItem)
+//--- data_split -----------------------------------------------------------------------
+int data_split(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, int flags, int clearBlockUsed, int same, SPrintListItem *pItem)
 {		
 	int srcWidthPx;
 	if (pBmpInfo->printMode==PM_SCANNING && id->id!=_LastSplitId)

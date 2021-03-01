@@ -14,6 +14,7 @@
 #include "rx_def.h"
 #include "rx_error.h"
 #include "rx_tif.h"
+#include "rx_flz.h"
 #include "rx_trace.h"
 #include "rx_bitmap.h"
 #include "rx_mem.h"
@@ -26,6 +27,7 @@
 #include "data.h"
 #include "ctrl_client.h"
 #include "spool_rip.h"
+#include "screening.h"
 
 #ifdef linux
 #include <errno.h>
@@ -320,7 +322,6 @@ static void _multiply_image(SBmpInfo *pinfo, UINT32 width, BYTE *buffer[MAX_COLO
 static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pinfo, UINT64 *pBufSize, BYTE *buffer[MAX_COLORS])
 {
 	int ret;
-	int i;
 	EFileType fileType;
 	int width, length;
 	UINT32 gapPx = 0;
@@ -339,29 +340,44 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 		memset(buffer, 0, MAX_COLORS*sizeof(BYTE*));
 		return;
 	}
-	
-	ret = data_malloc (scanning, pinfo->srcWidthPx, pinfo->lengthPx, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), pBufSize, buffer);
-	if (_Layout.columns>1 && width < pinfo->srcWidthPx) 
+
+	int dist = (int)((double)_Layout.columnDist / 25400.0 * DPIX);
+
+	if ((ret = data_malloc(scanning, width * _Layout.columns + dist * (_Layout.columns - 1), length, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), pBufSize, buffer)) == REPLY_OK)
 	{
-		ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, pinfo->srcWidthPx - width+8/pinfo->bitsPerPixel, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);
-		_multiply_image(pinfo, width, buffer);
-	}
-	else ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);
-	
-	//--- TEST ------------------------------------------------------------------------
-	if (FALSE)
-	{
-		char path[MAX_PATH];
-		for (i=0; i<SIZEOF(RX_Color); i++)
+		if (_Layout.columns>1 && width < pinfo->srcWidthPx) 
 		{
-			if (pinfo->buffer[i])
+			switch (fileType)
 			{
-				sprintf(path, "%s%s_%s.bmp", PATH_TEMP, filename, RX_ColorNameShort(RX_Color[i].inkSupplyNo));
-				bmp_write(path, *(pinfo->buffer)[i], pinfo->bitsPerPixel, pinfo->srcWidthPx, pinfo->lengthPx, pinfo->lineLen, FALSE);
+				case ft_flz:
+					ret = flz_load(&id, filedir, filename, PM_SINGLE_PASS, pinfo->srcWidthPx - width+8/pinfo->bitsPerPixel, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress, NULL);
+					break;
+				case ft_tif:
+					ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, pinfo->srcWidthPx - width+8/pinfo->bitsPerPixel, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);
+					break;
+				default:
+					Error(ERR_ABORT, 0, "Filetype not implemented");
+					return;
 			}
+			_multiply_image(pinfo, width, buffer);
 		}
+		else
+			switch (fileType)
+			{
+				case ft_flz:
+					ret = flz_load(&id, filedir, filename, PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress, NULL);
+					break;
+				case ft_tif:
+					ret = tif_load(&id, filedir, filename, PM_SINGLE_PASS, 0, 0, RX_Color, SIZEOF(RX_Color), buffer, pinfo, ctrl_send_load_progress);
+					break;
+				default:
+					Error(ERR_ABORT, 0, "Filetype not implemented");
+					return;
+			}
 	}
-}
+	if (ret != REPLY_OK) Error(ERR_ABORT, 0, "Error reading VDP image %s", filename);
+	
+	}
 
 void sr_rip_unused()
 {
@@ -375,27 +391,166 @@ void sr_rip_unused()
 		}
 	}
 }
-//--- sr_rip_label -----------------------------------------------------------
-int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
-{
-	int				column, len, color;
-	int				dataOut, data;
-	int				black;
-	int				time0;
-	RX_Bitmap		bmp, bmpLabel, bmpColor;
-	SPrintDataMsg	*pmsg = (SPrintDataMsg*)&_DataBuf[_DataBufOut];
 
-	time0 = rx_get_ticks();
-	bmp.width	 = _BmpInfoLabel.srcWidthPx;
-	bmp.height	 = _BmpInfoLabel.lengthPx;
-	bmp.bppx	 = _BmpInfoLabel.bitsPerPixel;
-	bmp.lineLen	 = _BmpInfoLabel.lineLen;
-	bmp.sizeUsed = bmp.sizeAlloc = bmp.height*bmp.lineLen;
+static int _screen(SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, const char *filepath)
+{
+	const int pixelsPerByte = 4;
+	const int stitchingBt = 32; //128 pixels in 2 bits per pixel on stitching 
+	const headPx = 2048; // pixel by heads
+	const int headBt = headPx / pixelsPerByte; // bytes per head
+
+	SPageId id;
+	int headCnt = RX_Spooler.headsPerColor * RX_Spooler.colorCnt;
+	SPrintListItem *item = NULL;
+	int jetPx0 = 0;
+
+	id.copy = id.id = id.page = id.scan = (pInfo == &_BmpInfoLabel);
+
+	if ((item = (SPrintListItem *)malloc(sizeof(SPrintListItem))) == NULL) return Error(ERR_ABORT, 0, "Could not allocate memory");
+
+	if ((item->splitInfo = (SBmpSplitInfo *)malloc(headCnt * sizeof(SBmpSplitInfo))) == NULL) 
+	{
+		free(item);
+		return Error(ERR_ABORT, 0, "Could not allocate memory");
+	}
+
+	strcpy(item->filepath, filepath);
+	data_split(&id, pInfo, offsetPx, lengthPx, blkNo, blkCnt, 0, 0, 0, item);
+	scr_wait(10);
+
+	pInfo->bitsPerPixel = 2;
+	pInfo->lineLen = (pInfo->srcWidthPx + pixelsPerByte - 1) / pixelsPerByte; // recompute width in Bytes
+
+	// recreate the original big image in 2 bits per pixel
+	for (int color = 0; color < RX_Spooler.colorCnt; color++)
+	{
+		if (!pInfo->buffer[color]) continue; // missing color
+		BYTE *dst = *pInfo->buffer[color];
+
+		// find where the image starts
+		int colorOffset = RX_Color[color].offsetPx;
+		int startPx = offsetPx - colorOffset;
+		int headStart = 0;
+		int btHeadStart = 0;
+		if (startPx <= 0) 
+		{
+			headStart = -startPx / headPx;
+			btHeadStart = ((-startPx % headPx) + pixelsPerByte + 1) / pixelsPerByte;
+		}
+
+		// cancel partially color offset as it is already in the screened image
+		if (pInfo == &_BmpInfoLabel && startPx% pixelsPerByte)
+		{
+			RX_Color[color].offsetPx += (startPx % pixelsPerByte);
+			if (startPx < 0) RX_Color[color].offsetPx += pixelsPerByte; 
+		}
+
+		// rebuild each line of the screened image
+		for (long l = 0; l < pInfo->lengthPx; l++)
+		{
+			int wrtBt =0;
+			// with the screened images of each head of the color
+			for (int h = headStart; h < RX_Spooler.headsPerColor; h++)
+			{
+				int head = color * RX_Spooler.headsPerColor + h;
+				if (item->splitInfo[head].data && *item->splitInfo[head].data)
+				{
+					int bt;
+					int widthBt = min(item->splitInfo[head].widthBt, headBt);
+					BYTE *src = *item->splitInfo[head].data + l * item->splitInfo[head].widthBt;
+					if (h == headStart) 
+					{
+						if (startPx <= 0)
+						{
+							src += btHeadStart;
+							widthBt -= btHeadStart;
+						} 
+						else
+						{
+							memset(dst, 0, startPx / pixelsPerByte);
+							dst += startPx / pixelsPerByte;
+							wrtBt += startPx / pixelsPerByte;
+						}
+					}
+					else
+					{
+						int sBt = min(item->splitInfo[head].widthBt, stitchingBt);
+						for (bt = 0; bt < sBt ; bt++)
+							*dst++ |= *src++ & 0b11001100; // only even pixels
+						widthBt -= sBt;
+						wrtBt += sBt;
+					}
+
+					if (widthBt > 0)
+					{
+						memcpy(dst, src, widthBt);
+						dst += widthBt;
+						src += widthBt;
+						wrtBt += widthBt;
+						for (bt = headBt; bt < item->splitInfo[head].widthBt; bt++)
+						{
+							dst[bt - headBt] = *src++ & 0b00110011; // only odd pixels
+						}
+					}
+				}
+			}
+			// and complete the image with white if print bar is smaller than original image
+			if (pInfo->lineLen > wrtBt)
+			{
+				memset(dst, 0, pInfo->lineLen - wrtBt);
+				dst += pInfo->lineLen - wrtBt;
+			}
+		}
+	}
+	free(item->splitInfo);
+	free(item);
+
+	if (FALSE && pInfo == &_BmpInfoLabel)
+	{
+		char dir[MAX_PATH];
+		char fname[MAX_PATH];
+		sprintf(dir, PATH_RIPPED_DATA "trace/vdp");
+
+		strcpy(fname, "screened");
+		pInfo->planes = RX_Spooler.colorCnt;
+		tif_write(dir, fname, pInfo, NULL);
+	}
+	return jetPx0;
+}
+
+//--- sr_rip_label -----------------------------------------------------------
+int sr_rip_label(BYTE *buffer[MAX_COLORS], SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, const char *filepath)
+{
+
+	int column, len, color;
+	BOOL jcneeded = TRUE;
+	int time0 = rx_get_ticks();
+
+	// screen the background and the mask if needed
+	if (_BmpInfoColor.bitsPerPixel >= 8) _screen(&_BmpInfoColor, offsetPx, lengthPx, blkNo, blkCnt, filepath);
+	if (_BmpInfoLabel.bitsPerPixel >= 8)
+	{
+		_screen(&_BmpInfoLabel, offsetPx, lengthPx, blkNo, blkCnt, filepath);
+		jcneeded = FALSE; // jet compensation is done by screening and not need
+	}
+
+	int dataOut, data;
+	int black;
+	RX_Bitmap bmp, bmpLabel, bmpColor;
+	SPrintDataMsg *pmsg = (SPrintDataMsg *)&_DataBuf[_DataBufOut];
+
+	memcpy(pInfo, &_BmpInfoLabel, sizeof(*pInfo));
+	pInfo->variable = TRUE;
+
+	bmp.width = _BmpInfoLabel.srcWidthPx;
+	bmp.height = _BmpInfoLabel.lengthPx;
+	bmp.bppx = _BmpInfoLabel.bitsPerPixel;
+	bmp.lineLen = _BmpInfoLabel.lineLen;
+	bmp.sizeUsed = bmp.sizeAlloc = bmp.height * bmp.lineLen;
 	memcpy(&bmpLabel, &bmp, sizeof(bmpLabel));
 	memcpy(&bmpColor, &bmp, sizeof(bmpColor));
-	memcpy(pInfo, &_BmpInfoLabel, sizeof(*pInfo));
 	data = dataOut = _DataBufOut;
-	pInfo->variable = TRUE;
+
 	for (color=0; color<MAX_COLORS; color++)
 	{
 		black = (RX_Color[color].color.colorCode == 0);
@@ -419,7 +574,11 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 
 				for (column = 0; column < _Layout.columns; column++)
 				{
-					if (data==_DataBufIn) return Error(ERR_STOP, 0, "VDP: Data Buffer underflow");
+					if (data==_DataBufIn) 
+					{
+						Error(ERR_ABORT, 0, "VDP: Data Buffer underflow");
+						return FALSE;
+					}
 					pmsg = (SPrintDataMsg*)&_DataBuf[data];
 					len = pmsg->hdr.msgLen-sizeof(SPrintDataMsg)+1;
 					int counter = pmsg->id.copy-1;
@@ -445,5 +604,5 @@ int  sr_rip_label(BYTE* buffer[MAX_COLORS], SBmpInfo *pInfo)
 	TrPrintfL(TRUE, "Rip TimeTotal=%dms", rx_get_ticks()-time0);
 
 	_DataBufOut = data;
-	return REPLY_OK;
+	return jcneeded;
 }

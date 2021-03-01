@@ -602,8 +602,12 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			
 			TrPrintfL(TRUE, "Screening[%d][%d]: blk0=%d, blkCnt=%d, blk0=%d, blkCnt=%d", b, h, blk0, blkCnt, pInfo->blk0, pInfo->blkCnt);
 
-			if (FALSE && pInfo->board==2 && pInfo->head==1)
-				_write_tif("screened", pInfo, pInfo->data, pInfo->srcLineLen);
+			if (FALSE)
+			{
+				char fn[256];
+				sprintf(fn, "screened_b%dh%d", pInfo->board, pInfo->head);
+				_write_tif(fn, pInfo, pInfo->data, pInfo->srcLineLen);
+			}
 		}		
 	}
 //	TrPrintfL(TRUE, "_scr_load[%d] END", threadNo);
