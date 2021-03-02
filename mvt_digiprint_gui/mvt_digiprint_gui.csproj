@@ -358,6 +358,8 @@
     <Compile Include="Helpers\CustomWindow.cs" />
     <Compile Include="Helpers\ErrorMessage.cs" />
     <Compile Include="Helpers\MvtInkSupplyRadioButton.cs" />
+    <Compile Include="Helpers\MvtTOTP.cs" />
+    <Compile Include="Helpers\MvtUserLevelManager.cs" />
     <Compile Include="Helpers\ObservableCollectionEx.cs" />
     <Compile Include="Helpers\RxComboBox.cs" />
     <Compile Include="Helpers\RxImaging.cs" />
@@ -501,6 +503,9 @@
     <Compile Include="Services\RxFlz.cs" />
     <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml.cs">
       <DependentUpon>SoftwareValueCorrectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SupervisorsView\CalendarValidity.xaml.cs">
+      <DependentUpon>CalendarValidity.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml.cs">
       <DependentUpon>PrintSystemExtendedView.xaml</DependentUpon>
@@ -703,11 +708,17 @@
     <Compile Include="Views\PrintSystemView\StepperGridLB702.xaml.cs">
       <DependentUpon>StepperGridLB702.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SupervisorsView\QRCodeView.xaml.cs">
+      <DependentUpon>QRCodeView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Settings\NetworkItem.xaml.cs">
       <DependentUpon>NetworkItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings\SettingsDlg.xaml.cs">
       <DependentUpon>SettingsDlg.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SupervisorsView\UserLogin.xaml.cs">
+      <DependentUpon>UserLogin.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
       <DependentUpon>WlanSettings.xaml</DependentUpon>
@@ -750,6 +761,9 @@
     </Compile>
     <Compile Include="Views\TexView\TexStepper.xaml.cs">
       <DependentUpon>TexStepper.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SupervisorsView\SupervisorsView.xaml.cs">
+      <DependentUpon>SupervisorsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\BluetoothWindow.xaml.cs">
       <DependentUpon>BluetoothWindow.xaml</DependentUpon>
@@ -911,6 +925,9 @@
     <Compile Include="Views\UserControls\UVLampView.xaml.cs">
       <DependentUpon>UVLampView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SupervisorsView\AddSupervisor.xaml.cs">
+      <DependentUpon>AddSupervisor.xaml</DependentUpon>
+    </Compile>
     <Page Include="Comparers\Comparers.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1026,6 +1043,10 @@
     <Page Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SupervisorsView\CalendarValidity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml">
       <SubType>Designer</SubType>
@@ -1331,11 +1352,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\SupervisorsView\QRCodeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Settings\NetworkItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Settings\SettingsDlg.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SupervisorsView\UserLogin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1392,6 +1421,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\TexView\TexStepper.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SupervisorsView\SupervisorsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1593,6 +1626,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UserControls\UVLampView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SupervisorsView\AddSupervisor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1908,6 +1945,9 @@
     <PackageReference Include="Dragablz">
       <Version>0.0.3.203</Version>
     </PackageReference>
+    <PackageReference Include="GoogleAuthenticator">
+      <Version>2.1.1</Version>
+    </PackageReference>
     <PackageReference Include="MahApps.Metro">
       <Version>1.6.5</Version>
     </PackageReference>
@@ -1919,6 +1959,9 @@
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
       <Version>3.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Wpf.UI.Controls.WebView">
+      <Version>6.1.2</Version>
     </PackageReference>
     <PackageReference Include="QRCoder">
       <Version>1.3.6</Version>

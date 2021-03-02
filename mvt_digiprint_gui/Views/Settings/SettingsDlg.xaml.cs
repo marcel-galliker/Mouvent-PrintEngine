@@ -169,6 +169,7 @@ namespace RX_DigiPrint.Views.Settings
         private void About_Clicked(object sender, RoutedEventArgs e)
         {
             AboutDlg dlg = new AboutDlg(typeof(MainWindow).Assembly.GetName());
+            dlg.Owner = Window.GetWindow(this);
             dlg.ShowDialog();
         }
 

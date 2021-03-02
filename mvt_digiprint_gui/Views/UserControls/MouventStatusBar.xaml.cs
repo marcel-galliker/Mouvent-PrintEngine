@@ -2,6 +2,8 @@
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
+using RX_DigiPrint.Helpers;
+using RX_DigiPrint.Views.SupervisorsView;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,6 +21,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Timers;
+using RX_DigiPrint.Views.Settings;
 
 namespace RX_DigiPrint.Views.UserControls
 {
@@ -28,6 +32,8 @@ namespace RX_DigiPrint.Views.UserControls
     public partial class MouventStatusBar : UserControl, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private Timer timeTimer = new Timer(60000);
 
         public MouventStatusBar()
         {
@@ -45,9 +51,30 @@ namespace RX_DigiPrint.Views.UserControls
             Counters.Visibility = Visibility.Hidden;
             Speed.Visibility = Counters.Visibility;
 
+            RxGlobals.User.PropertyChanged += UserType_PropertyChanged;
+
             Version.Text = "V " + Settings.SettingsDlg.GetVersion();
 
             UserType_Init();
+
+            SetTime();
+            timeTimer.Elapsed += GetNewTime;
+            timeTimer.AutoReset = true;
+            timeTimer.Start();
+        }
+
+        private void GetNewTime(object sender, ElapsedEventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                SetTime();
+            });
+        }
+
+        private void SetTime()
+        {
+            System.Globalization.CultureInfo.CurrentCulture.ClearCachedData();
+            ActualTime.Text = DateTime.Now.ToString("dd/MM/yy H:mm");
         }
 
         protected void OnPropertyChanged(string name)
@@ -56,6 +83,18 @@ namespace RX_DigiPrint.Views.UserControls
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        void UserType_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("UserType"))
+            {
+                RxBindable.Invoke(() =>
+                {
+                    UserType.Text = RxGlobals.User.UserType.ToString().Substring(4);
+                    Logout.Visibility = RxGlobals.User.UserType > EUserType.usr_operator ? Visibility.Visible : Visibility.Hidden;
+                });
             }
         }
 
@@ -125,16 +164,34 @@ namespace RX_DigiPrint.Views.UserControls
         }
 
         private void UserType_Init()
-		{
-            UserType.DataContext    = RxGlobals.User;
-            UserType.ItemsSource    = new EN_UserTypeList();
-            UserType.SelectedValue  = RxGlobals.User.UserType;
-		}
+        {
+            UserType.Text = RxGlobals.User.UserType.ToString().Substring(4);
+            Logout.Visibility = (RxGlobals.User.UserType == EUserType.usr_operator) ? Visibility.Hidden : Visibility.Visible;
+            
+        }
 
-		private void UserType_SelectionChanged(object sender,SelectionChangedEventArgs e)
-		{
-            RxGlobals.User.UserType = (EUserType)UserType.SelectedValue;
-		}
+        private void UserType_Click(object sender, RoutedEventArgs e)
+        {
+            MvtUserLevelManager ulm = new MvtUserLevelManager(SettingsDlg.GetVersion(), RxGlobals.PrinterProperties.Host_Name);
+            UserLogin ulw = new UserLogin(ulm);
+            ulw.Owner = Window.GetWindow(this);
+            if((bool)ulw.ShowDialog())
+            {
+                /* New user type corresponds to the result of the authentication */
+                RxGlobals.User.UserType = (EUserType)ulm.GetLevel();
+            }
+        }
 
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            RxGlobals.User.UserType = EUserType.usr_operator;
+        }
+
+        private void ActualTime_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Process timedate = new Process();
+            timedate.StartInfo.FileName = "timedate.cpl";
+            timedate.Start();
+        }
     }
 }

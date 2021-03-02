@@ -37,6 +37,18 @@ steps:
     PathtoPublish: 'bin'
     publishLocation: 'Container'
 
+- task: DeleteFiles@1
+  inputs:
+    SourceFolder: 'mvt_service\bin\Release'
+    Contents: '*.pdb'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Mouvent Service Application'
+  inputs:
+    ArtifactName: mvt_service
+    PathtoPublish: 'mvt_service\bin\Release'
+    publishLocation: 'Container'
+
 - script: test\mock_dist.bat
   displayName: 'Package mock dist'
 

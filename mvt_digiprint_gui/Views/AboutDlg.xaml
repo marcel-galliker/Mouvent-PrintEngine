@@ -5,6 +5,7 @@
         Height="350" 
         Width="350"
         ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded"
         >
     <Window.Resources>

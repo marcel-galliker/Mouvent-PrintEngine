@@ -10,6 +10,7 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              Loaded="Window_Loaded"
+             WindowStartupLocation="CenterOwner"
              mc:Ignorable="d"
              Top="20" Left="20"
              Title="Settings"
