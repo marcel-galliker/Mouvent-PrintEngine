@@ -1530,6 +1530,7 @@ static void _turn_screw(SHeadAdjustment headAdjustment)
 
 static void _search_all_screws()
 {
+    // static variablen mit _ anfangen!
     static int correction_value = 0;
     static int max_Wait_Time_Sledge = 100000;    // ms
     static int max_Wait_Time = 40000; // ms
@@ -1537,6 +1538,15 @@ static void _search_all_screws()
     int pos_min;
     int pos;
     
+    //--- _SearchScrewNr to ... ---- code wird lesbarer
+    // int printbar; // 0,1
+    // int head;
+    // int axis;
+
+    // Was ist X, was Y?
+    // Was ist SCREW_FRONT? angle? wieso nicht SCREW_ANGLE und SCREW_DIST benennen?
+    // Wir sollten uns noch einigen: haben wir angle + dist oder angle + stitch (Ist im moment nicht konsequent, speziell auch in der Kamera nicht.)
+
     if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
         if (_SearchScrewNr >= HEADS_PER_COLOR * COLORS_PER_STEPPER * SCREWS_PER_HEAD)
@@ -1583,6 +1593,7 @@ static void _search_all_screws()
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD * HEADS_PER_COLOR)].posY + SCREW_Y_BACK - SCREW_Y_FRONT + correction_value;
                 else
                     pos = _calculate_average_y_pos(_SearchScrewNr) + correction_value;
+                // wenn Y-Pos nicht gespeichert: Position aus vorgänger-Position + ... rechnen?
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _CmdSearchScrews++;
@@ -1608,6 +1619,7 @@ static void _search_all_screws()
                     int y_dist = ((((_SearchScrewNr + 1) / SCREWS_PER_HEAD) % (SCREWS_PER_HEAD * HEADS_PER_COLOR))) * head_Dist - (_SearchScrewNr % SCREWS_PER_HEAD) * screw_Dist;
                     pos = RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters[_SearchScrewNr / (SCREWS_PER_HEAD * HEADS_PER_COLOR)].posX + pos * y_dist / y_dist_old;
                 }
+                // wenn X-Pos nicht gespeichert: Position aus vorgänger-Position + ... rechnen ?
                 _ScrewTime = rx_get_ticks() + max_Wait_Time;
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
                 _CmdSearchScrews++;
@@ -1656,6 +1668,7 @@ static void _search_all_screws()
                                 [((_SearchScrewNr - 1) % (SCREWS_PER_HEAD * HEADS_PER_COLOR)) / SCREWS_PER_HEAD]
                                 [(_SearchScrewNr - 1) % SCREWS_PER_HEAD];
                 }
+                // wenn gefunden: neues Telegram zum speichern der pos ans main (nicht über x Bedingungen aus dem Status zurücklesen)
 
                 _ScrewTime = 0;
                 _CmdSearchScrews = 0;
