@@ -180,8 +180,8 @@ void lbrob_init(void)
     // config for referencing cable pull motor (motor 4)
     _ParCable_ref.speed = 1000;
     _ParCable_ref.accel = 4000;
-    _ParCable_ref.current_acc = 300.0;
-    _ParCable_ref.current_run = 300.0;
+    _ParCable_ref.current_acc = 350.0;
+    _ParCable_ref.current_run = 350.0;
     _ParCable_ref.stop_mux = 0;
     _ParCable_ref.dis_mux_in = 0;
     _ParCable_ref.estop_level = TRUE;
