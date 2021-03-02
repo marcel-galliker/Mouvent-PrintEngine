@@ -30,7 +30,6 @@
 #include "nios.h"
 #include "tse.h"
 #include "EEprom.h"
-#include "crc_calc.h"
 #include "rx_threads.h"
 #include "rx_head_ctrl.h"
 #include "putty.h"

@@ -92,7 +92,6 @@
     <ClCompile Include="..\rx_ink_lib\rx_ink_common.c" />
     <ClCompile Include="args.c" />
     <ClCompile Include="conditioner.c" />
-    <ClCompile Include="crc_calc.c" />
     <ClCompile Include="crc_fuji.c" />
     <ClCompile Include="EEprom.c" />
     <ClCompile Include="firepulse.c" />
@@ -113,7 +112,6 @@
     <ClInclude Include="args.h" />
     <ClInclude Include="conditioner.h" />
     <ClInclude Include="cond_comm.h" />
-    <ClInclude Include="crc_calc.h" />
     <ClInclude Include="crc_fuji.h" />
     <ClInclude Include="DataSrv.h" />
     <ClInclude Include="EEprom.h" />
