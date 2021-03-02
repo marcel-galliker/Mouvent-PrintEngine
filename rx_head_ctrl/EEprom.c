@@ -64,9 +64,9 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 	
+	memcpy(buf, eeprom, EEPROM_DATA_SIZE);
 	memset(&data, 0, sizeof(data));
 	memset(str, 0, sizeof(str));
-	memcpy(buf, eeprom, EEPROM_DATA_SIZE);
 
 	src=buf;
 	end=src+EEPROM_DATA_SIZE;
@@ -79,16 +79,16 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 			{
 			case 'q':	memcpy(data.revisionNo,		src,  2); src+= 2; break;
 			case 'p':	memcpy(data.partNo,			src, 10); src+=10; break;
-			case 's':	memcpy(data.serialNo,			src,  9); src+= 9; break;
+			case 's':	memcpy(data.serialNo,		src,  9); src+= 9; break;
 			case 'd':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  4);	src+= 4;
 						val=atoi(str);
 						data.year=2000+val%100;
 						data.week=val/100;
 						break;
-			case 'h':	memcpy(data.flexSide,			src,  1); src+= 1; break;
+			case 'h':	memcpy(data.flexSide,		src,  1); src+= 1; break;
 			case 't':	memcpy(data.thermistor,		src,  1); src+= 1; break;
-			case 'v':	memcpy(str,		src,  3);		src+= 3;
+			case 'v':	memcpy(str,		src,  3);	src+= 3;
 						str[3]=0;
 						val=atoi(str);
 						if (val>=80 && val<=120) sprintf(data.driveVoltage, "%03d", val);
@@ -96,10 +96,10 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 						else sprintf(data.driveVoltage, "%03d", 100);
 						break;
 			case 'f':	memcpy(data.flowResistance,	src,  3); src+= 3; break;
-			case 'l':	memcpy(data.dropMass[2],		src,  3); src+= 3; break;
-			case 'm':	memcpy(data.dropMass[1],		src,  3); src+= 3; break;
-			case 'n':	memcpy(data.dropMass[0],		src,  3); src+= 3; break;
-			case 'r':	memcpy(data.jetStraightness,  src,  2); src+= 2; break;
+			case 'l':	memcpy(data.dropMass[2],	src,  3); src+= 3; break;
+			case 'm':	memcpy(data.dropMass[1],	src,  3); src+= 3; break;
+			case 'n':	memcpy(data.dropMass[0],	src,  3); src+= 3; break;
+			case 'r':	memcpy(data.jetStraightness,src,  2); src+= 2; break;
 			case 'b':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  3); src+= 3; 
 						sscanf(str, "%x", &val);
@@ -116,6 +116,23 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 						memcpy(&crc, src,  2);
 						int cmp = strcmp(str, crc);
 						TrPrintfL(TRUE, "Head[%d]: CRC calc=%s, crc=%s, ErrorCnt=%d", headNo, str, crc, _CRC_Error[headNo]);
+						
+						if (TRUE) //--- trace EEPROM data ------------------------- 
+						{
+							char code[1024];
+							int l=0;
+							for (int i=0; i<src-buf; i++)
+							{
+								l+=sprintf(&code[l], "%02X ", buf[i]);
+								if (l>128)
+								{
+									TrPrintfL(TRUE, "EEPROM: %s", code);
+									l=0;
+								}
+							}
+							TrPrintfL(TRUE, "EEPROM: %s", code);
+						}
+
 						if (cmp) 
 						{
 							_CRC_Error[headNo]++;
@@ -359,14 +376,14 @@ void eeprom_add_droplets_printed(int headNo, UINT32 droplets, int time)
 }
 
 //--- eeprom_set_rob_pos ------------------------------------
-void eeprom_set_rob_pos(int headNo, int angle, int dist)
+void eeprom_set_rob_pos(int headNo, int angle, int stitch)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 
 	SHeadEEpromMvt cfg;
 	memcpy(&cfg, &_NiosMem->stat.eeprom_mvt[headNo], sizeof(cfg));
 	if (angle!=INVALID_VALUE) cfg.robot.angle=angle;
-	if (dist !=INVALID_VALUE) cfg.robot.dist=dist;
+	if (stitch !=INVALID_VALUE) cfg.robot.stitch=stitch;
 	cfg.robot.crc = rx_crc8(&cfg.robot, sizeof(cfg.robot)-1);
 	memcpy(&_NiosMem->cfg.eeprom_mvt[headNo], &cfg, sizeof(cfg));
 	_NiosMem->cfg.eeprom_mvt_writeCnt[headNo]++;

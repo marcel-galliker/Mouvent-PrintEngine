@@ -321,7 +321,7 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
 			len += sprintf(&str[len], "Angle=%s ", value_str_screw(pstat->eeprom_mvt.robot.angle));
-			len += sprintf(&str[len], "Stitch=%s", value_str_screw(pstat->eeprom_mvt.robot.dist));
+			len += sprintf(&str[len], "Stitch=%s", value_str_screw(pstat->eeprom_mvt.robot.stitch));
 			len += sprintf(&str[len], "\n");
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{

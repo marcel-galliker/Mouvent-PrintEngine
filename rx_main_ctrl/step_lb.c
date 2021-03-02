@@ -834,7 +834,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(ERR_CONT, 0, "Angle-Screw is not existing at Head-No: %d", headAdjustment->headNo+1);
         return;
     }
-    if (headAdjustment->headNo == RX_Config.headsPerColor-1 && headAdjustment->axis >= AXE_DIST)
+    if (headAdjustment->headNo == RX_Config.headsPerColor-1 && headAdjustment->axis >= AXE_STITCH)
     {
         Error(ERR_CONT, 0, "Last screw of each color is pointless to turn");
         return;
@@ -856,7 +856,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         return;
     }
     
-    if (headAdjustment->axis == AXE_DIST && current_screwpos + headAdjustment->steps > MAX_STEPS_DIST)
+    if (headAdjustment->axis == AXE_STITCH && current_screwpos + headAdjustment->steps > MAX_STEPS_DIST)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
 				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
@@ -864,7 +864,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
         return;
     }
-    else if (headAdjustment->axis == AXE_DIST && current_screwpos + headAdjustment->steps < 0)
+    else if (headAdjustment->axis == AXE_STITCH && current_screwpos + headAdjustment->steps < 0)
     {
         Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
 				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
@@ -919,8 +919,8 @@ static void _check_screwer(void)
         ScrewPosition.head = _HeadAdjustment[i].headNo;
         if (_Status[i].screwerinfo.screwed && !_ScrewPositions_Written[i] && _step_socket[i])
         {
-            if (_HeadAdjustment[i].axis == AXE_DIST)
-                ScrewPosition.dist = _HeadAdjustment[i].steps;
+            if (_HeadAdjustment[i].axis == AXE_STITCH)
+                ScrewPosition.stitch = _HeadAdjustment[i].steps;
             else if (_HeadAdjustment[i].axis == AXE_ANGLE)
                 ScrewPosition.angle = -_HeadAdjustment[i].steps;
 
@@ -929,8 +929,8 @@ static void _check_screwer(void)
         }
         else if (_Status[i].screwerinfo.screwer_blocked_left && !_ScrewPositions_Written[i])
         {
-            if (_HeadAdjustment[i].axis == AXE_DIST)
-                ScrewPosition.dist = MAX_STEPS_DIST;
+            if (_HeadAdjustment[i].axis == AXE_STITCH)
+                ScrewPosition.stitch = MAX_STEPS_DIST;
             else if (_HeadAdjustment[i].axis == AXE_ANGLE)
                 ScrewPosition.angle = 0;
             
@@ -939,8 +939,8 @@ static void _check_screwer(void)
         }
         else if (_Status[i].screwerinfo.screwer_blocked_right && !_ScrewPositions_Written[i])
         {
-            if (_HeadAdjustment[i].axis == AXE_DIST)
-                ScrewPosition.dist = 0;
+            if (_HeadAdjustment[i].axis == AXE_STITCH)
+                ScrewPosition.stitch = 0;
             else if (_HeadAdjustment[i].axis == AXE_ANGLE)
                 ScrewPosition.angle = MAX_STEPS_ANGLE;
             
@@ -1059,7 +1059,7 @@ static void _reset_screw_position(int screwNo, int stepperNo)
     if (screwNo % (RX_Config.headsPerColor * SCREWS_PER_HEAD) == 0)
     {
         ScrewPosition.angle = 0;
-        ScrewPosition.dist = MAX_STEPS_DIST;
+        ScrewPosition.stitch = MAX_STEPS_DIST;
         ScrewPosition.head = -1;
     }
     else
@@ -1067,7 +1067,7 @@ static void _reset_screw_position(int screwNo, int stepperNo)
         if (screwNo % 2 == 1)
             ScrewPosition.angle = 0;
         else
-            ScrewPosition.dist = MAX_STEPS_DIST;
+            ScrewPosition.stitch = MAX_STEPS_DIST;
 
         ScrewPosition.head = ((screwNo - 1) % (SCREWS_PER_HEAD * RX_Config.headsPerColor)) / 2;
     }

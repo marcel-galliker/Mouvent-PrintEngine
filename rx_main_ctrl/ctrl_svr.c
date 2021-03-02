@@ -1304,17 +1304,17 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
         if (!blocked && robposition.head >= 0)
         {
             robposition.angle += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.robot.angle;
-            robposition.dist += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.robot.dist;
+            robposition.stitch += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.robot.stitch;
             sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
-        else if (blocked && blocked_Axis == AXE_DIST && robposition.head >= 0)
+        else if (blocked && blocked_Axis == AXE_STITCH && robposition.head >= 0)
         {
             robposition.angle = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.robot.angle;
             sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (blocked && blocked_Axis == AXE_ANGLE)
         {
-            robposition.dist = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.robot.dist;
+            robposition.stitch = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.robot.stitch;
             sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
         }
         else if (robposition.head == -1)
@@ -1323,16 +1323,16 @@ void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
             if (!blocked)
             {
                 if (RX_Config.inkSupplyCnt % 2 == 0)
-					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] += robposition.dist;
+					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] += robposition.stitch;
                 else
-                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1)%2] += robposition.dist;
+                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1)%2] += robposition.stitch;
             }  
             else
             {
                 if (RX_Config.inkSupplyCnt % 2 == 0)
-					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] = robposition.dist;
+					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] = robposition.stitch;
                 else
-                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1) % 2] = robposition.dist;
+                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1) % 2] = robposition.stitch;
             }
                
         }
@@ -1365,8 +1365,8 @@ int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
         return RX_Config.stepper.robot[stepperNo].screwturns[printbarNo];
     else if (robposition->axis == AXE_ANGLE)
         return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.robot.angle;
-    else if (robposition->axis == AXE_DIST)
-        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.robot.dist;
+    else if (robposition->axis == AXE_STITCH)
+        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.robot.stitch;
     else
         return -1;
 }

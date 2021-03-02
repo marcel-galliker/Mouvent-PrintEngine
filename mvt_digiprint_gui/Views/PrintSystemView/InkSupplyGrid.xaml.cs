@@ -78,7 +78,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             
             RowHeight_Side.  Height = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)? GridLength.Auto : new GridLength(0);
-            RowHeight_Heater.Height =  RxGlobals.PrintSystem.HasHeater?                                  GridLength.Auto : new GridLength(0);
             _assign_inksupply(RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.InkCylindersPerColor);
         }
 

@@ -13,7 +13,7 @@
             <RowDefinition Height="auto" x:Name="RowHeight_Side"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto" x:Name="RowHeight_Heater"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -34,8 +34,8 @@
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Pressure Lung" />
         <TextBlock Grid.Row="4" Grid.Column="1" Text="mbar" />
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="Temperature InkSupply"/>
-        <TextBlock Grid.Row="5" Grid.Column="1" Text="°C"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Temperature InkSupply" Visibility="{Binding HasHeater, Converter={StaticResource BooleanToVisibleConverter}}"/>
+        <TextBlock Grid.Row="5" Grid.Column="1" Text="°C"                    Visibility="{Binding HasHeater, Converter={StaticResource BooleanToVisibleConverter}}"/>
         
         <!--
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature Head"/>
