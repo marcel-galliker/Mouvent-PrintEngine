@@ -881,7 +881,6 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         else
             headAdjustment->printbarNo = (headAdjustment->printbarNo + 1) % 2;
         sok_send(&_step_socket[stepperno], headAdjustment);
-        sok_send(&_step_socket[stepperno], headAdjustment);
     }   
     else
     {
