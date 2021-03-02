@@ -63,9 +63,6 @@
     <ClCompile Include="mem_test.c">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="crc_calc.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="conditioner.c">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -135,9 +132,6 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="fpga_msg.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="crc_calc.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="conditioner.h">

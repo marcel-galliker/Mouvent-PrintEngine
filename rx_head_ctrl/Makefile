@@ -34,7 +34,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := ../rx_ink_lib/comm.c ../rx_ink_lib/fifo.c ../rx_ink_lib/nios_def_head.c ../rx_ink_lib/rx_ink_common.c args.c conditioner.c crc_calc.c crc_fuji.c EEprom.c firepulse.c fpga.c head_ctrl.c mem_test.c nios.c putty.c rx_head_ctrl.c tse.c udp_test.c version.c
+SOURCEFILES := ../rx_ink_lib/comm.c ../rx_ink_lib/fifo.c ../rx_ink_lib/nios_def_head.c ../rx_ink_lib/rx_ink_common.c args.c conditioner.c crc_fuji.c EEprom.c firepulse.c fpga.c head_ctrl.c mem_test.c nios.c putty.c rx_head_ctrl.c tse.c udp_test.c version.c
 EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
