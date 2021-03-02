@@ -15,6 +15,7 @@
 
 // according to fuji the EEProm is using the CRC-8/Maxim algorithm
 // source:  https://stackoverflow.com/questions/29214301/ios-how-to-calculate-crc-8-dallas-maxim-of-nsdata
+// info:    https://crccalc.com/
 
 static UCHAR crc_bits(UCHAR data)
 {
