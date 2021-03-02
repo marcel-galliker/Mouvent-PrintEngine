@@ -177,6 +177,9 @@ namespace rx_CamLib
         private const int WP_ReadOCR = 108;
         private const int WP_ColorStitch = 109;
 
+        private const int LP_None = 0;
+        private const int LP_TO1st = 100;
+
         //Property Display
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
         static extern int OleCreatePropertyFrame
@@ -1141,14 +1144,13 @@ namespace rx_CamLib
                             CallBackData.CamResult = new ENCamResult();
                             CallBackData.DPosX = float.NaN;
                             CallBackData.DPosY = float.NaN;
-                            CallBackData.Value_1 = float.NaN;
+                            CallBackData.Value_1 = 0;
                             CallBackData.NumMeasures = 0;
                             CallBackData.LineLayout = LineLayoutEnum.LineLayout_Undefined;
                             CallBackData.LineAttach = LineAttachEnum.LineAttach_Undefined;
                             CallBackData.CamResult = ENCamResult.Filter_NoData;
                             CallBackData.Info = ENCamCallBackInfo.StartLinesTimeout.ToString();
                             CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesDetected, CallBackData);
-                            //CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesTimeout, CallBackData);
                             break;
                         case WP_StartLinesCont:
                             Result = GetMeasureData(out CallBackData);
@@ -1156,30 +1158,61 @@ namespace rx_CamLib
                             CamCallBack?.Invoke(ENCamCallBackInfo.StartLinesContinuous, CallBackData);
                             break;
                         case WP_Angle:
-                            Result = GetMeasureData(out CallBackData);
-                            CallBackData.CamResult = Result;
+                            if(LParam == LP_TO1st)
+                            {
+                                //1st Measure Timeout
+                                Create1stTO(out CallBackData);
+                            }
+                            else
+                            {
+                                Result = GetMeasureData(out CallBackData);
+                                CallBackData.CamResult = Result;
+                            }
                             CamCallBack?.Invoke(ENCamCallBackInfo.AngleCorr, CallBackData);
                             break;
                         case WP_Stitch:
-                            Result = GetMeasureData(out CallBackData);
-                            CallBackData.CamResult = Result;
+                            if (LParam == LP_TO1st)
+                            {
+                                //1st Measure Timeout
+                                Create1stTO(out CallBackData);
+                            }
+                            else
+                            {
+                                Result = GetMeasureData(out CallBackData);
+                                CallBackData.CamResult = Result;
+                            }
                             CamCallBack?.Invoke(ENCamCallBackInfo.StitchCorr, CallBackData);
                             break;
                         case WP_ColorStitch:
-                            Result = GetMeasureData(out CallBackData);
-                            CallBackData.CamResult = Result;
+                            if (LParam == LP_TO1st)
+                            {
+                                //1st Measure Timeout
+                                Create1stTO(out CallBackData);
+                            }
+                            else
+                            {
+                                Result = GetMeasureData(out CallBackData);
+                                CallBackData.CamResult = Result;
+                            }
                             CamCallBack?.Invoke(ENCamCallBackInfo.ColorStitchCorr, CallBackData);
                             break;
                         case WP_Register:
-                            Result = GetMeasureData(out CallBackData);
-                            CallBackData.CamResult = Result;
+                            if (LParam == LP_TO1st)
+                            {
+                                //1st Measure Timeout
+                                Create1stTO(out CallBackData);
+                            }
+                            else
+                            {
+                                Result = GetMeasureData(out CallBackData);
+                                CallBackData.CamResult = Result;
+                            }
                             CamCallBack?.Invoke(ENCamCallBackInfo.RegisterCorr, CallBackData);
                             break;
                         case WP_MeasureTimeout:
-                            //Sollte nicht mehr eintreten, jetz schon wieder für Timeout auf 1st Measure
+                            //Sollte nicht mehr eintreten
                             CallBackData = new CallBackDataStruct();
                             CallBackData.CamResult = new ENCamResult();
-                            CallBackData.Info = "Timeout 1st Measure";
                             CamCallBack?.Invoke(ENCamCallBackInfo.MeasureTimeout, CallBackData);
                             break;
                         case WP_CallBackDebug:
@@ -1207,6 +1240,20 @@ namespace rx_CamLib
                     break;
                 }
             }
+        }
+
+        private void Create1stTO(out CallBackDataStruct CallBackData)
+        {
+            CallBackData = new CallBackDataStruct();
+            CallBackData.CamResult = new ENCamResult();
+            CallBackData.DPosX = float.NaN;
+            CallBackData.DPosY = float.NaN;
+            CallBackData.Info = "1st Measure Timeout";
+            CallBackData.LineAttach = LineAttachEnum.LineAttach_Undefined;
+            CallBackData.LineLayout = LineLayoutEnum.LineLayout_Undefined;
+            CallBackData.CamResult = ENCamResult.Filter_NoData;
+            CallBackData.NumMeasures = 0;
+            CallBackData.Value_1 = float.NaN;
         }
 
         private ENCamResult BuildGraph(IntPtr hwnd)

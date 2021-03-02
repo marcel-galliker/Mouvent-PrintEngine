@@ -55,6 +55,14 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _WebMoveDist,value); }
 		}
 
+		//--- Property WebPos ---------------------------------------
+		private double _WebPos;
+		public double WebPos
+		{
+			get { return _WebPos; }
+			set { SetProperty(ref _WebPos,value); }
+		}
+
 		//--- Property ScanPos ---------------------------------------
 		private double _ScanPos;
 		public double ScanPos

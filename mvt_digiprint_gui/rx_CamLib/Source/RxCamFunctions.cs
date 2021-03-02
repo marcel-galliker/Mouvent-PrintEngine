@@ -26,9 +26,9 @@ namespace rx_CamLib
 	{
 		CamNoFunction,
 		CamConfirmFocus,	
-		CamFindMark_1,	// vertical lines (WEB)	
-		CamFindMark_2,	// horizontal line (WEB)
-		CamFindMark_3,	// end of line (SCAN)
+		CamFindLines_Vertical,		// vertical lines (WEB)	
+		CamFindLine_Horzizontal,	// horizontal line (WEB)
+		CamFindLineEnd,				// end of line (SCAN)
 		CamMeasureAngle,
 		CamMeasureStitch,
 		CamMeasureDist,
@@ -78,51 +78,78 @@ namespace rx_CamLib
 			RxBindable.Invoke(()=>_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Off));
 		}
 
-		//--- FindMark --------------------------------------------------
-		public void FindMark(bool horizontal, int timeout=0)
+		//--- FindLines_Vertical -------------------------
+		public void FindLines_Vertical()
 		{
 			RxBindable.Invoke(()=>
 			{
 				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 				//set very small LineAspectLimit for StartLines
-				_Camera.SetLinesHorizontal(horizontal);
+				_Camera.SetLinesHorizontal(false);
 				_Camera.SetLineAspectLimit(3);
 				_Camera.NumExtraErodes=1;
-				_Camera.StartLineTimeout=(uint)timeout;
+				_Camera.StartLineTimeout=0;
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_AllLines);
-				if (horizontal) 
-				{
-					_Camera.SetMinNumStartLines(1);
-					if (timeout>0) _Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
-					else	       _Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLinesCont);
-					if (SimuCallback!=null)
-					{	
-						CallBackDataStruct CallbackData = new CallBackDataStruct();
-						CallbackData.DPosX=0;
-						CallbackData.DPosY=0;
-						CallbackData.Value_1 = (float)1.2;
-						CallbackData.LineAttach = LineAttachEnum.LineAttach_None;
-						if (timeout>0) 
-						{
-							CallbackData.LineLayout = LineLayoutEnum.LineLayout_Covering;
-							SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesDetected,   CallbackData);
-						}
-						else		   
-						{
-							CallbackData.LineLayout = LineLayoutEnum.LineLayout_FromRight;
-							SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesContinuous, CallbackData);
-						}
-					}
+				_Camera.SetMinNumStartLines(3);
+				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
+				if (SimuCallback!=null)
+				{	
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesDetected, CallbackData);
 				}
-				else            
-				{
-					_Camera.SetMinNumStartLines(3);
-					_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
-					if (SimuCallback!=null)
-					{	
-						CallBackDataStruct CallbackData = new CallBackDataStruct();
-						SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesDetected, CallbackData);
-					}
+			});
+        }
+
+		//--- FindLine_Horizontal --------------------------------------------------
+		public void FindLine_Horizontal()
+		{
+			RxBindable.Invoke(()=>
+			{
+				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
+				//set very small LineAspectLimit for StartLines
+				_Camera.SetLinesHorizontal(true);
+				_Camera.SetLineAspectLimit(3);
+				_Camera.NumExtraErodes=1;
+				_Camera.StartLineTimeout=5;
+				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_AllLines);
+				_Camera.SetMinNumStartLines(1);
+				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLines);
+				if (SimuCallback!=null)
+				{	
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					CallbackData.DPosX=0;
+					CallbackData.DPosY=0;
+					CallbackData.Value_1 = (float)1.2;
+					CallbackData.LineAttach = LineAttachEnum.LineAttach_None;
+					CallbackData.LineLayout = LineLayoutEnum.LineLayout_Covering;
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesDetected,   CallbackData);
+				}
+			});
+        }
+
+		//--- FindLineEnd -----------------------------------------------
+		public void FindLineEnd()
+		{
+			RxBindable.Invoke(()=>
+			{
+				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
+				//set very small LineAspectLimit for StartLines
+				_Camera.SetLinesHorizontal(true);
+				_Camera.SetLineAspectLimit(3);
+				_Camera.NumExtraErodes=1;
+				_Camera.StartLineTimeout=0;
+				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_AllLines);
+				_Camera.SetMinNumStartLines(1);
+				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_StartLinesCont);
+				if (SimuCallback!=null)
+				{	
+					CallBackDataStruct CallbackData = new CallBackDataStruct();
+					CallbackData.DPosX=0;
+					CallbackData.DPosY=0;
+					CallbackData.Value_1 = (float)1.2;
+					CallbackData.LineAttach = LineAttachEnum.LineAttach_None;
+					CallbackData.LineLayout = LineLayoutEnum.LineLayout_FromRight;
+					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.StartLinesContinuous, CallbackData);
 				}
 			});
         }

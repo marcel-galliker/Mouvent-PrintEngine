@@ -4057,9 +4057,6 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 	//Wait for host to pick data
 	if (m_DataListforHostReady) return NOERROR;
 
-	//Count Timeout
-	if (m_StartLinesTimeout > 0) m_StartLinesTimeoutCounter++;
-
 	//Average/Center of detected Lines
 	int NumBlobsvalid = 0;
 	float AvgLengthX = 0;
@@ -4085,7 +4082,13 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 		}
 	}
 	//Check for minimum number of valid lines
-	if (NumBlobsvalid < (int)m_MinNumStartLines) return NOERROR;
+	if (NumBlobsvalid < (int)m_MinNumStartLines)
+	{
+
+		//Count Timeout
+		if (m_StartLinesTimeout > 0) m_StartLinesTimeoutCounter++;
+		return NOERROR;
+	}
 
 	//Distance between lines / measured camera-pixels = μm per camera-pixel
  //   if (NumBlobsvalid > 1 && NumBlobsvalid >= (int)m_MinNumStartLines)
@@ -4245,6 +4248,8 @@ HRESULT C_rx_AlignFilter::FindStartLines(BOOL Vertical, BOOL UpsideDown, BOOL Co
 		if (m_LogToFile) LogToFile(L"Lines found, preset Measure Mode: %d", m_PresetMeasureMode);
 		CallbackDebug("Lines found, preset Measure Mode: %d", m_PresetMeasureMode);
 	}
+
+
 
     return NOERROR;
 }
@@ -5988,6 +5993,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 	}
 
 	//Measure Timeout
+	BOOL Timeout1st = false;
 	if (m_prx_AlignFilter->m_MeasureRunning && (
 		(m_prx_AlignFilter->m_Timeout1st > 0 && m_prx_AlignFilter->m_TimeoutCounter >= m_prx_AlignFilter->m_Timeout1st) ||
 		(m_prx_AlignFilter->m_TimeoutEnd > 0 && m_prx_AlignFilter->m_TimeoutCounter >= m_prx_AlignFilter->m_TimeoutEnd)))
@@ -6001,6 +6007,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		if (m_prx_AlignFilter->m_LogToFile) m_prx_AlignFilter->LogToFile(L"Measurement TimeOut");
 
 		m_prx_AlignFilter->m_MeasureRunning = FALSE;
+		if(m_prx_AlignFilter->m_Timeout1st > 0 && m_prx_AlignFilter->m_TimeoutCounter >= m_prx_AlignFilter->m_Timeout1st)Timeout1st = true;
 		m_prx_AlignFilter->m_Timeout1st = 0;
 		m_prx_AlignFilter->m_TimeoutEnd = 0;
 		m_prx_AlignFilter->m_TimeoutCounter = 0;
@@ -6036,25 +6043,32 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 			switch (m_prx_AlignFilter->m_MeasureMode)
 			{
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Angle:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Angle, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Angle, 
+					Timeout1st ? (LPARAM)LP_TO1st : (LPARAM)LP_None);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Stitch:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Stitch, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Stitch, 
+					Timeout1st ? (LPARAM)LP_TO1st : (LPARAM)LP_None);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_ColorStitch:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_ColorStitch, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_ColorStitch, 
+					Timeout1st ? (LPARAM)LP_TO1st : (LPARAM)LP_None);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_Register:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Register, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_Register, 
+					Timeout1st ? (LPARAM)LP_TO1st : (LPARAM)LP_None);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLines:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLines, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLines, 
+					(LPARAM)LP_None);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_StartLinesCont:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLinesCont, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLinesCont, 
+					(LPARAM)LP_None);
 				break;
 			case IFrx_AlignFilter::MeasureModeEnum::MeasureMode_OCR:
-				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_ReadOCR, (LPARAM)0);
+				if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_ReadOCR, 
+					(LPARAM)LP_None);
 				break;
 			}
 		}
@@ -6078,7 +6092,7 @@ HRESULT C_rx_AlignFilter_InputPin::Receive(IMediaSample *pSampleIn)
 		m_prx_AlignFilter->m_MeasureRunning = FALSE;
 		m_prx_AlignFilter->m_StartLinesTimeout = 0;
 		m_prx_AlignFilter->m_StartLinesTimeoutCounter = 0;
-		if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLinesTimeout, (LPARAM)0);
+		if (m_prx_AlignFilter->m_HostHwnd != NULL) SendNotifyMessage(m_prx_AlignFilter->m_HostHwnd, WM_APP_ALIGNEV, (WPARAM)WP_StartLinesTimeout, (LPARAM)LP_None);
 	}
 
     //Cleanup
@@ -7150,6 +7164,17 @@ STDMETHODIMP C_rx_AlignFilter::SetMeasureMode(C_rx_AlignFilter::MeasureModeEnum 
 		return S_FALSE;
 	}
 
+	if (MeasureMode == C_rx_AlignFilter::MeasureModeEnum::MeasureMode_StartLines)
+	{
+		m_measureDone = false;
+		m_DataListforHostReady = false;
+		m_vMeasureDataList.clear();
+		m_NumMeasures = 1;
+		m_Timeout1st = 0;
+		m_TimeoutEnd = 0;
+		m_TimeoutCounter = 0;
+		m_StartMeasure = false;
+	}
 	m_PresetMeasureMode = MeasureMode;
 
 	if (m_DebugOn)

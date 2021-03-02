@@ -762,6 +762,9 @@ private:
 	#define WP_ReadOCR 108
 	#define WP_ColorStitch 109
 
+	#define LP_None 0
+	#define LP_TO1st 100
+
 	//Line Direction
 	BOOL m_LinesHorizontal = false;
 	BOOL m_PresetLinesHorizontal = false;

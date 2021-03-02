@@ -361,7 +361,7 @@ static int _do_color_cfg		(RX_SOCKET socket, SColorSplitCfg* cfg)
 static int _do_density(RX_SOCKET socket, SDensityMsg *pmsg)
 {
 	jc_set_disabled_jets(pmsg);
-	scr_set_values(pmsg->head, 0, 1000, pmsg->data.densityValue);
+	scr_set_values(pmsg->head, pmsg->data.densityValue);
 	return REPLY_OK;
 }
 
