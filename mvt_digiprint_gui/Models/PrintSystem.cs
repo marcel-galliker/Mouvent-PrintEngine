@@ -142,7 +142,6 @@ namespace RX_DigiPrint.Models
                 case EPrinterType.printer_LB701:			return true;
 	            case EPrinterType.printer_LB702_UV:			return true;
 	            case EPrinterType.printer_LH702:			return true;
-	         // case EPrinterType.printer_LB702_WB:			return true;
 	            default:                                    return false;
 	            }
             }
@@ -457,14 +456,6 @@ namespace RX_DigiPrint.Models
             set { Changed|=SetProperty(ref _ManualFlightTimeComp , value); }
         }
 
-        // property needed for Alignment
-        private bool _CorrectionValuesSet;
-        public bool CorrectionValuesSet
-        {
-            get { return _CorrectionValuesSet; }
-            set { SetProperty(ref _CorrectionValuesSet, value); }
-        }
-
         // Property ExpandSettingsPanel
         private bool _ExpandSettingsPanel;
         public bool ExpandSettingsPanel
@@ -576,7 +567,6 @@ namespace RX_DigiPrint.Models
             for (i = 0; i < _HeadDist.Count(); i++)
             {
                 _HeadDist[i] = msg.headDist[i] / 1000.0;
-                
             }
             
             _HeadDistBack = new double[msg.headDistBack.Count()];
@@ -590,7 +580,7 @@ namespace RX_DigiPrint.Models
             {
                 _ColorOffset[i] = msg.colorOffset[i] / 1000.0;                
             }
-            CorrectionValuesSet = true;
+            this.OnPropertyChanged("CorrectionValuesSet"); // inform Alignment.cs
             
             ExternalData            = msg.externalData!=0;
             

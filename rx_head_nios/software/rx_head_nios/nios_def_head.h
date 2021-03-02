@@ -43,7 +43,7 @@ typedef struct SExecutable
 typedef struct
  {
 	INT16	angle;	// 0=undef
-	INT16	dist;	// 0=undef
+	INT16	stitch;	// 0=undef
 	UINT8	crc;
  } SRobInfo;
 

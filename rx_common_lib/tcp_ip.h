@@ -700,7 +700,7 @@ typedef struct SRobPositionMsg
 	int		printBar;
 	int		head;
 	INT16	angle;
-	INT16	dist;
+	INT16	stitch;
 } SRobPositionMsg;
 
 
@@ -713,7 +713,7 @@ typedef struct
     INT32 headNo;
     INT32 axis;
 #define AXE_ANGLE 0
-#define AXE_DIST 1
+#define AXE_STITCH 1
     INT32 steps; // in steps
 } SHeadAdjustmentMsg;
 
