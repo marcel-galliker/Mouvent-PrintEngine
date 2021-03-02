@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # compute size
     incr = 2048 // args.v # size of a head in pixel
     if printer >= 2000 and printer < 3000: # TX printer
-        w = incr * (len(glob.glob(f"printed/fake id{args.id} c* s* h* b*.bmp"))//4 - len([x is None for x in colors])) 
+        w = incr * (len(glob.glob(f"printed/fake id{args.id} c* s* b* h*.bmp"))//4 - len([x is None for x in colors])) 
     else:
         w = head_color * incr
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         (board, head) = divmod(order * head_color, 4)
         lboard = board + (head_color + 3) // 4 - 1
         copy ="*" if printer >= 2000 else "1" # only the first copy on LB
-        file_format = f"printed/fake id{args.id} c{copy} p{args.page} s* h[{head}-{head + head_color - 1}] b[{board}-{lboard}].bmp"
+        file_format = f"printed/fake id{args.id} c{copy} p{args.page} s* b[{board}-{lboard}] h[{head}-{head + head_color - 1}].bmp"
         logging.debug(f"search files for {file_format} for color {color}")
         bmps[color] = glob.glob(file_format)
         if not bmps[color]:

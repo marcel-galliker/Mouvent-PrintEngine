@@ -24,7 +24,7 @@ class TX(PrinterTests):
         size = rd(offset - start * prw + width * copies, prw)
         scan_by_copy = rd(width, prw ) + len(self.colors)
         for scan in range(start + size, start, -1):
-            yield BmpName(r"printed\fake id%d c%d p1 s%d h%d b%d.bmp" % (id, rd(scan, scan_by_copy) , rd(scan, self.head), fhead + (scan % self.head), board)) 
+            yield BmpName(r"printed\fake id%d c%d p1 s%d b%d h%d.bmp" % (id, rd(scan, scan_by_copy) , rd(scan, self.head), board, fhead + (scan % self.head))) 
 
     def test_print(self):
         # wait the Print Queue tab is loaded and wait for it

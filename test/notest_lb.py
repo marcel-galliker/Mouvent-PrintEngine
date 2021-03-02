@@ -14,7 +14,7 @@ class LB(PrinterTests):
             newcopy = True
             for head in range(self.head):
                 h = self.head - head - 1
-                yield BmpName(r"printed\fake id%d c%d p1 s1 h%d b%d.bmp" % (id, copy+1, h % 4, board + h // 4), newcopy)
+                yield BmpName(r"printed\fake id%d c%d p1 s1 b%d h%d.bmp" % (id, copy+1, board + h // 4, h % 4), newcopy)
                 newcopy = False
 
     def test_print(self):

@@ -200,7 +200,7 @@ class UsedFlags(list):
 def save_image(no, blocks, fpga_images, blk_end, blk_No0):
     "save all images printed by a board"
     for fpga in fpga_images:
-        filename = f"printed/fake id{fpga.id} c{fpga.copy} p{fpga.page} s{fpga.scan} h{fpga.head} b{no}.bmp"
+        filename = f"printed/fake id{fpga.id} c{fpga.copy} p{fpga.page} s{fpga.scan} b{no} h{fpga.head}.bmp"
         logging.info(f"Creating '{filename}' ({fpga.widthPx}x{fpga.lengthPx})...")
         try:
             img = bytearray()
