@@ -118,7 +118,7 @@ static void _main_menu(void)
 	if (_mvteeprom)
 	{
 		term_printf("ra<h><angle>:   set rob_angle[<h>]=<angle>\n");
-    	term_printf("rd<h><dist>:    set rob_dist [<h>]=<dist>\n");
+    	term_printf("rs<h><stitch>:  set rob_stitch [<h>]=<stitch>\n");
 	}
 	if (_status) term_printf("s: hide status       ");
 	else         term_printf("s: show status       ");
@@ -381,7 +381,7 @@ static void _display_mvteeprom(void)
 		term_printf("DisabledJet[%d]:  ", n); PRINTF(4)("         %04d   ",	RX_HBStatus->head[no[i]].eeprom_density.disabledJets[n]);	term_printf("\n");
 	}
 	term_printf("Robot-Angle:     "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.robot.angle));	term_printf("\n");
-	term_printf("Robot-Dist:      "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.robot.dist));	term_printf("\n");
+	term_printf("Robot-Stitch:    "); PRINTF(4)("         %s   ",	value_str_screw(RX_HBStatus->head[no[i]].eeprom_mvt.robot.stitch));	term_printf("\n");
 }
 
 //--- putty_display_fpga_error --------------------------------------------------

@@ -543,7 +543,6 @@ namespace RX_DigiPrint.Models
             for (i = 0; i < _HeadDist.Count(); i++)
             {
                 _HeadDist[i] = msg.headDist[i] / 1000.0;
-                
             }
             
             _HeadDistBack = new double[msg.headDistBack.Count()];

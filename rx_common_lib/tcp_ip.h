@@ -667,7 +667,7 @@ typedef struct SRobPositionMsg
 	int		printBar;
 	int		head;
 	INT16	angle;
-	INT16	dist;
+	INT16	stitch;
 } SRobPositionMsg;
 
 

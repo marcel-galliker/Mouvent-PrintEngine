@@ -99,7 +99,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 			case 'l':	memcpy(data.dropMass[2],		src,  3); src+= 3; break;
 			case 'm':	memcpy(data.dropMass[1],		src,  3); src+= 3; break;
 			case 'n':	memcpy(data.dropMass[0],		src,  3); src+= 3; break;
-			case 'r':	memcpy(data.jetStraightness,  src,  2); src+= 2; break;
+			case 'r':	memcpy(data.jetStraightness,src,  2); src+= 2; break;
 			case 'b':	memset(str, 0, sizeof(str));
 						memcpy(str, src,  3); src+= 3; 
 						sscanf(str, "%x", &val);
@@ -359,14 +359,14 @@ void eeprom_add_droplets_printed(int headNo, UINT32 droplets, int time)
 }
 
 //--- eeprom_set_rob_pos ------------------------------------
-void eeprom_set_rob_pos(int headNo, int angle, int dist)
+void eeprom_set_rob_pos(int headNo, int angle, int stitch)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 
 	SHeadEEpromMvt cfg;
 	memcpy(&cfg, &_NiosMem->stat.eeprom_mvt[headNo], sizeof(cfg));
-	if (angle!=INVALID_VALUE) cfg.robot.angle=angle;
-	if (dist !=INVALID_VALUE) cfg.robot.dist=dist;
+	if (angle !=INVALID_VALUE) cfg.robot.angle =angle;
+	if (stitch!=INVALID_VALUE) cfg.robot.stitch=stitch;
 	cfg.robot.crc = rx_crc8(&cfg.robot, sizeof(cfg.robot)-1);
 	memcpy(&_NiosMem->cfg.eeprom_mvt[headNo], &cfg, sizeof(cfg));
 	_NiosMem->cfg.eeprom_mvt_writeCnt[headNo]++;

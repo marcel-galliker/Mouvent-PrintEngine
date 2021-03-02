@@ -1082,7 +1082,7 @@ namespace RX_DigiPrint.Services
         public struct SRobInfo
 		{
             public Int16  angle;			
-            public Int16  dist;				
+            public Int16  stitch;				
 	        public Byte	  crc;				
 		};
 
