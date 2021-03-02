@@ -122,6 +122,8 @@ static int _CmdResetScrews = 0;
 static int _SearchScrewNr = 0;
 static int _ResetScrewNr = 0;
 static int _ResetScrewsLeft = FALSE;
+static int _ResetScrewsRight = FALSE;
+static int _ResetInfinity = 0;
 static int _Turns = 0;
 
 static int _HeadScrewPos = 0;
@@ -187,7 +189,7 @@ void lbrob_init(void)
     _ParCable_ref.estop_level = TRUE;
     _ParCable_ref.estop_in_bit[MOTOR_X_0] = (1 << CABLE_PULL_REF);
     _ParCable_ref.enc_bwd = TRUE;
-    _ParCable_ref.encCheck = chk_txrob_ref;
+    _ParCable_ref.encCheck = chk_lb_ref1;
 
     // config for moving normal with cable pull motor (motor 4)
     // This commands that use this config need to start the motor with the
@@ -773,6 +775,9 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_SEARCH_ALL_SCREWS, NULL);
         break;
     case 'z':
+        _ResetScrewsLeft = FALSE;
+        _ResetScrewsRight = FALSE;
+        _ResetInfinity = 0;
         switch (str[1])
         {
         case 'l':
@@ -784,6 +789,14 @@ void lbrob_handle_menu(char *str)
             break;
         case 'b':
             _ResetScrewsLeft = FALSE;
+            break;
+        }
+        switch (str[2])
+        {
+        case 'n':
+            _ResetInfinity = 1;
+            break;
+        default:
             break;
         }
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
@@ -1818,13 +1831,19 @@ static void _set_screws_to_zero(void)
                 int screwSteps;
                 if (front_screw)
                 {
-                    screwSteps = 6*35;
-                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                    screwSteps = 6 * 35;
+                    if (_ResetInfinity % 2 == 0)
+                        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                    else
+                        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
                 }
                 else
                 {
-                    screwSteps = 6*20;
-                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                    screwSteps = 6 * 21;
+                    if (_ResetInfinity % 2 == 0)
+                        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LEFT, &screwSteps);
+                    else
+                        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_RIGHT, &screwSteps);
                 }
 
                 _CmdResetScrews++;
@@ -1898,6 +1917,18 @@ static void _set_screws_to_zero(void)
                 correction_value = 0;
                 if ((_ResetScrewNr < COLORS_PER_STEPPER * SCREWS_PER_HEAD * HEADS_PER_COLOR && !_ResetScrewsLeft) || (_ResetScrewsLeft && _ResetScrewNr < SCREWS_PER_HEAD * HEADS_PER_COLOR))
                 {
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
+                }
+                else if (_ResetInfinity && (_ResetScrewsLeft || !_ResetScrewsRight))
+                {
+                    _ResetInfinity++;
+                    _ResetScrewNr = 0;
+                    lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
+                }
+                else if (_ResetInfinity && _ResetScrewsRight)
+                {
+                    _ResetInfinity++;
+                    _ResetScrewNr = SCREWS_PER_HEAD * HEADS_PER_COLOR;
                     lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
                 }
                 else
