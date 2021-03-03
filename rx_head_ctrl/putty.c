@@ -714,7 +714,7 @@ void putty_display_cond_status(int status)
 				int h, m, s;
 				s = RX_NiosStat.cond[no[i]].pumptime%60;
 				h = RX_NiosStat.cond[no[i]].pumptime/3600;
-				m = (RX_NiosStat.cond[no[i]].pumptime%3600)/60;					
+				m = (RX_NiosStat.cond[no[i]].pumptime%3600)/60;
 				term_printf("   %5d:%02d:%02d  ", h, m, s);
 			}
 		}

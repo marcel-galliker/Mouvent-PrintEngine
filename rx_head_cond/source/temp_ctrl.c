@@ -326,8 +326,11 @@ void temp_ctrl_on(int turn_on)
 {
     if (turn_on != _heater_running)
 	{ 			
-		if(RX_Status.pcb_rev>='n') 
+		if(RX_Status.pcb_rev>='n')
+		{
 			_HeatPID.val_max = 100;
+			_HeatPID.P 		 = 100;
+		}
 
         _heater_running = turn_on;
 		if (!_heater_running) 
