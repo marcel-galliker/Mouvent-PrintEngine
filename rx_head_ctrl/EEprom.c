@@ -117,7 +117,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 						int cmp = strcmp(str, crc);
 						TrPrintfL(TRUE, "Head[%d]: CRC calc=%s, crc=%s, ErrorCnt=%d", headNo, str, crc, _CRC_Error[headNo]);
 						
-						if (TRUE) //--- trace EEPROM data ------------------------- 
+						if (_CRC_Error[headNo]<10) //--- trace EEPROM data ------------------------- 
 						{
 							char code[1024];
 							int l=0;
@@ -137,7 +137,7 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 						{
 							_CRC_Error[headNo]++;
 							TrPrintfL(TRUE, "Head[%d]: CRC calc=%s, crc=%s, ErrorCnt=%d", headNo, str, crc, _CRC_Error[headNo]);
-							if (_CRC_Error[headNo]>10)
+							if (_CRC_Error[headNo]==10)
 							{
 								Error(WARN, 0, "Head[%d]: EEprom CRC Error cnt=%d", headNo,  _CRC_Error[headNo]);
 								memcpy(&_Data[headNo], &data, sizeof(_Data[headNo]));
