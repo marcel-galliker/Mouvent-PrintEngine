@@ -78,15 +78,16 @@ static char* _PlcModeOfState[] =
 
 typedef enum
 {
-	scan_moving,	// 00
-	scan_start,		// 01
-	scan_end,		// 02
-	scan_capping,	// 03
-	scan_purge,		// 04
-	scan_wipe,		// 05
-	scan_manual,	// 06
-	scan_stopped,	// 07
-	scan_fill_cap,	// 08
+	scan_moving,		// 00
+	scan_start,			// 01
+	scan_end,			// 02
+	scan_capping,		// 03
+	scan_purge,			// 04
+	scan_wipe,			// 05
+	scan_manual,		// 06
+	scan_standstill,	// 07
+	scan_fill_cap,		// 08
+	scan_stop,			// 09
 } EnScanState;
 
 //--- prototypes -----------------------
@@ -1215,8 +1216,9 @@ static void _plc_set_config()
 	{
 	case printer_TX801:
 	case printer_TX802:
-		sys_set_axes_name( 1, "ScanIn");
-		sys_set_axes_name( 2, "ScanOut");
+	case printer_TX404:
+		sys_set_axes_name( 1, "ScanOut");
+		sys_set_axes_name( 2, "ScanIn");
 		sys_set_axes_name( 3, "ScanChain");
 		sys_set_axes_name( 4, "Belt");
 		sys_set_axes_name( 5, "Unwinder");
