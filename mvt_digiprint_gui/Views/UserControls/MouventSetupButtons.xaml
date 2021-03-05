@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="70" 
              d:DesignWidth="900"
@@ -14,7 +15,7 @@
         <StackPanel x:Name="ButtonsPanel" Orientation="Horizontal" Background="{StaticResource Mouvent.MainColorBrush}" Height="auto">
 
             <common:MvtButton Grid.Column="1"  Margin="15,0,15,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}"
-                              x:Name="CMD_WEBIN" Click="WebIn_Clicked" ToolTip="Web In"
+                              x:Name="CMD_WEBIN" Click="WebIn_Clicked" ToolTip="{mvt:LocalizedBinding WebIn}"
                               IsEnabled="{Binding WebInEnabled}">
                 <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="30" Height="30" Kind="ArrowExpandHorizontal"></iconPacks:PackIconMaterial>
             </common:MvtButton>
@@ -48,13 +49,13 @@
             </common:MvtButton>
             -->
             <common:MvtButton Click="Gluing_Clicked" x:Name="Button_Glue" Margin="15,0,15,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" 
-                              ToolTip="Glue">
+                              ToolTip="{mvt:LocalizedBinding Glue}">
                 <iconPacks:PackIconJamIcons Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.LightJamIcon}" Width="30" Height="30" Kind="Glue"></iconPacks:PackIconJamIcons>
             </common:MvtButton>
 
             <common:MvtButton Click="Washing_Clicked" x:Name="Button_Wash" Margin="15,0,0,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}"
-                              ToolTip="Wash">
+                              ToolTip="{mvt:LocalizedBinding Wash}">
                 <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="30" Height="30" Kind="ShowerHead"></iconPacks:PackIconMaterial>
             </common:MvtButton>

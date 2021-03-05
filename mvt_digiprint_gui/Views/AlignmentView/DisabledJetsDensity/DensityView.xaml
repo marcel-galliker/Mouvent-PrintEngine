@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
               xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              >
@@ -51,7 +52,7 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Firepulse Voltage [%]" Margin="5"/>
+            <TextBlock Grid.Column="0" Text="{mvt:LocalizedBinding FirepulseVoltage}" Margin="5"/>
             <common:MvtNumBox Margin="5" Grid.Column="1" Text="{Binding Voltage}"/>
         </Grid>
         

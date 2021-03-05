@@ -1,4 +1,5 @@
 ﻿using RX_Common;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.ObjectModel;
@@ -125,13 +126,13 @@ namespace RX_DigiPrint.Models
         {
             if(jetNumber < 0  || jetNumber > 2048 + 128 - 1) // jet number from 0 to 20175!
             {
-                MvtMessageBox.Information("", "Invalid jet Nr: " + jetNumber);
+                MvtMessageBox.Information("", RX_DigiPrint.Resources.Language.Resources.InvalidJetNr + jetNumber);
                 return;
             }
 
             if (JetList.Count >= TcpIp.MAX_DISABLED_JETS)
             {
-                MvtMessageBox.Information("", "Max. disabled jets =" + TcpIp.MAX_DISABLED_JETS.ToString() + "!");
+                MvtMessageBox.Information("", RX_DigiPrint.Resources.Language.Resources.MaxDisabledJets + TcpIp.MAX_DISABLED_JETS.ToString() + "!");
                 return;
             }
 
@@ -152,7 +153,7 @@ namespace RX_DigiPrint.Models
                 }
                 else
                 {
-                    MvtMessageBox.Information("", "Jet Nr. " + jetNumber + " already listed!");
+                    MvtMessageBox.Information("", string.Format(RX_DigiPrint.Resources.Language.Resources.JetNumberAlreadyListed, jetNumber));
                 }
             }
             catch (Exception e)

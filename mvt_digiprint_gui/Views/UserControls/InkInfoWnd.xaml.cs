@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace RX_DigiPrint.Views.UserControls
         //---Tara_Clicked ----------------------------------------
         private void Tara_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", _InkSupply.InkType.Name),  MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.SetTara, string.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmSetTaraFor, _InkSupply.InkType.Name),  MessageBoxImage.Question, false))
             {
                 TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SCALES_TARA, ref msg);
@@ -56,7 +57,7 @@ namespace RX_DigiPrint.Views.UserControls
         //---Correct_Clicked ----------------------------------------
         private void Correct_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Set TARA", string.Format("Set Tara for {0}?", _InkSupply.InkType.Name),  MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.SetTara, string.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmSetTaraFor, _InkSupply.InkType.Name),  MessageBoxImage.Question, false))
             {
                 TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SCALES_TARA, ref msg);
@@ -73,7 +74,7 @@ namespace RX_DigiPrint.Views.UserControls
         //---Init_Clicked ----------------------------------------
         private void Init_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Init Barcode Scanner", string.Format("Init Barcode Scanner {0}?", Title),  MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.InitBarcodeScanner, string.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmInitBarcodeScanner, Title),  MessageBoxImage.Question, false))
             {
                 _Identify = true;
                 TcpIp.SValue msg = new TcpIp.SValue(){no=_InkSupply.No-1};

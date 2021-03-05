@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Views.SupervisorsView;
@@ -158,7 +159,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (RxGlobals.PrinterStatus.PrintState != EPrintState.ps_printing)
             {
-                if (MvtMessageBox.YesNo("Reset", "Reset counter", MessageBoxImage.Question, false))
+                if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Reset, RX_DigiPrint.Resources.Language.Resources.ResetCounter, MessageBoxImage.Question, false))
                     RxGlobals.RxInterface.SendCommand(TcpIp.CMD_RESET_CTR);
             }
         }

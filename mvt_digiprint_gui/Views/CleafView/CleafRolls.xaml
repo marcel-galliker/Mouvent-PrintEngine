@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     
@@ -13,7 +14,7 @@
         <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
     </UserControl.Resources>
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Grid.RowSpan="10" Grid.ColumnSpan="2" Header="Rolls produced">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Grid.RowSpan="10" Grid.ColumnSpan="2" Header="{mvt:LocalizedBinding RollsProduced}">
         <ig:XamGrid 
             x:Name="Rolls"
 			AutoGenerateColumns="False"  
@@ -29,9 +30,9 @@
             </ig:XamGrid.SelectionSettings>
 
             <ig:XamGrid.Columns>
-                <ig:TextColumn Key="No"     HeaderText="No"  HorizontalContentAlignment="Center"/>
-                <ig:TextColumn Key="Length" HeaderText="Len" HorizontalContentAlignment="Right" ValueConverter="{StaticResource ToString_Converter}" ValueConverterParameter="1"/>
-                <ig:ImageColumn Key="OK"    HeaderText="OK" ValueConverter="{StaticResource CleafQuality_Converter}" HorizontalContentAlignment="Center" ImageHeight="30"/>
+                <ig:TextColumn Key="No"     HeaderText="{mvt:LocalizedBinding No}"  HorizontalContentAlignment="Center"/>
+                <ig:TextColumn Key="Length" HeaderText="{mvt:LocalizedBinding Len}" HorizontalContentAlignment="Right" ValueConverter="{StaticResource ToString_Converter}" ValueConverterParameter="1"/>
+                <ig:ImageColumn Key="OK"    HeaderText="{mvt:LocalizedBinding Ok}" ValueConverter="{StaticResource CleafQuality_Converter}" HorizontalContentAlignment="Center" ImageHeight="30"/>
                 <ig:UnboundColumn Key="End" HeaderText=" " Width="*" ValueConverter="{StaticResource Filler_Converter}"/>
             </ig:XamGrid.Columns>
 

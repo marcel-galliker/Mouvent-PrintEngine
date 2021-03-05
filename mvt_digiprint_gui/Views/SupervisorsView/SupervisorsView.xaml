@@ -11,6 +11,7 @@
              xmlns:ig="http://schemas.infragistics.com/xaml"
              xmlns:igDP="http://infragistics.com/DataPresenter"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.SupervisorsView"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="1100">
     <Grid>
@@ -33,21 +34,21 @@
             <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
 
             <StackPanel Background="{StaticResource Mouvent.MainColorBrush}" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="AddSupervisor" ToolTip="Add a supervisor" Click="AddSupervisor_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="AddSupervisor" ToolTip="{mvt:LocalizedBinding AddASupervisor}" Click="AddSupervisor_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Plus"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="RemoveSupervisor" ToolTip="Remove a supervisor" Click="RemoveSupervisor_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="RemoveSupervisor" ToolTip="{mvt:LocalizedBinding RemoveASupervisor}" Click="RemoveSupervisor_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Minus"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ChangeValidity" ToolTip="Change a supervisor's validity" Click="ChangeValidity_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ChangeValidity" ToolTip="{mvt:LocalizedBinding ChangeASupervisorValidity}" Click="ChangeValidity_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Calendar"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ShowCode" ToolTip="Show Supervisor's authenticator codes" Click="ShowCode_Click" >
+                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ShowCode" ToolTip="{mvt:LocalizedBinding ShowSupervisorAuthenticatorCodes}" Click="ShowCode_Click" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Qrcode"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
@@ -73,8 +74,8 @@
                 <ig:SelectionSettings CellClickAction="SelectRow"/>
             </ig:XamGrid.SelectionSettings>
             <ig:XamGrid.Columns>
-                <ig:TextColumn Key="Username" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Username" Width="auto"/>
-                <ig:TextColumn Key="Validity" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Validity" Width="*"/>
+                <ig:TextColumn Key="Username" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding UserName}" Width="auto"/>
+                <ig:TextColumn Key="Validity" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Valid}" Width="*"/>
             </ig:XamGrid.Columns>
 
         </ig:XamGrid>

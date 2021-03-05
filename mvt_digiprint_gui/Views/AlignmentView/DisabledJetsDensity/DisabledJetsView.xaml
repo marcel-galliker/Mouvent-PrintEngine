@@ -9,6 +9,7 @@
             xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
             xmlns:ig="http://schemas.infragistics.com/xaml"
             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+            xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
             mc:Ignorable="d"
             d:DesignHeight="450" Width="400">
     <UserControl.Resources>
@@ -175,7 +176,7 @@
 
             <ig:XamGrid.Columns>
 
-                <ig:TemplateColumn Width="50" Key="Index" HeaderText="No" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
+                <ig:TemplateColumn Width="50" Key="Index" HeaderText="{mvt:LocalizedBinding No}" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Margin="10,0,0,0" Text="{Binding Index}" HorizontalAlignment="Left"/>
@@ -183,7 +184,7 @@
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
 
-                <ig:TemplateColumn Width="*" Key="JetNumber" HeaderText="Jet Number"
+                <ig:TemplateColumn Width="*" Key="JetNumber" HeaderText="{mvt:LocalizedBinding JetNumber}"
                                    HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
@@ -192,7 +193,7 @@
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
 
-                <ig:TemplateColumn Width="*" Key="Remove" HeaderText="Remove" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
+                <ig:TemplateColumn Width="*" Key="Remove" HeaderText="{mvt:LocalizedBinding Remove}" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <common:MvtButton Margin="5" Tag="{Binding JetNumber}"

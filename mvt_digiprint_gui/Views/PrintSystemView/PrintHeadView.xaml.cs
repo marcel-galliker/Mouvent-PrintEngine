@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections;
@@ -145,7 +146,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 {
                     if (name!=null && !RxGlobals.StepperStatus[0].X_in_cap) // when slide not under printhead
                     {
-                        if (!MvtMessageBox.YesNo(name, "Printhead NOT in capping position. Continue?",  MessageBoxImage.Question, true)) return;
+                        if (!MvtMessageBox.YesNo(name, RX_DigiPrint.Resources.Language.Resources.PrintheadNotInCappingPosition,  MessageBoxImage.Question, true)) return;
                     }
                 }
 

@@ -7,9 +7,10 @@
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:RX_DigiPrint.Views"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
-        Title="Add Supervisor" 
+        Title="{mvt:LocalizedBinding AddSupervisor}" 
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize">
     <Grid>
@@ -26,10 +27,10 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
-        <GroupBox Header="Username" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+        <GroupBox Header="{mvt:LocalizedBinding UserName}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
             <rx:RxTextBox x:Name="Username" Grid.Row="1" Grid.Column="2"/>
         </GroupBox>
-        <GroupBox Header="Validity Date" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="10">
+        <GroupBox Header="{mvt:LocalizedBinding ValidityDate}" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="10">
             <Calendar x:Name="ValidityCal"/>
         </GroupBox>
         <common:MvtButton  x:Name="ValidateCreation" Grid.Row="3" Grid.Column="1" Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="ValidateCreation_Click">

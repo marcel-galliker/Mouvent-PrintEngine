@@ -283,7 +283,7 @@ namespace RX_DigiPrint.Models
 			{
                 if (inkSupply.InkType!=null && inkSupply.Connected && inkSupply.Flushed)
 				{
-                    MvtMessageBox.Information("Print System", "At least one ink supply is flushed. Please purge first.");
+                    MvtMessageBox.Information(RX_DigiPrint.Resources.Language.Resources.PrintSystem, RX_DigiPrint.Resources.Language.Resources.AtLeastOneInkSupplyIsFlushed);
                     return true;
 				}
 			}

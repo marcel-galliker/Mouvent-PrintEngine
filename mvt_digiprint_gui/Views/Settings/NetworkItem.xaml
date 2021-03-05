@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              MouseEnter="UserControl_MouseEnter"
@@ -22,7 +23,7 @@
         </Grid.RowDefinitions>
         <Image          Grid.Column="0" Source="{Binding SignalQuality, Converter={StaticResource WlanQuality_Converter}}" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left"/>
         <TextBlock      Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Name}" />
-        <TextBlock      Grid.Row="1"    Grid.Column="1" Text="Password"/>
+        <TextBlock      Grid.Row="1"    Grid.Column="1" Text="{mvt:LocalizedBinding Password}"/>
         <rx:RxTextBox   Grid.Row="1"    Grid.Column="2" Text="Password" x:Name="Password" LostFocus="Password_LostFocus"/>
     </Grid>
 </UserControl>

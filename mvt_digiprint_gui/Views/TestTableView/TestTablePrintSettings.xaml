@@ -5,12 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800"
              >
     <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="90"/>
+            <ColumnDefinition Width="175"/>
             <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="90"/>
             <ColumnDefinition Width="*"/>
@@ -23,8 +24,8 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Scan Mode" />
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding ScanMode}" />
         <igWPF:XamComboEditor Grid.Row="0" Grid.Column="1"
                         x:Name="CB_ScanMode"
                         HorizontalAlignment="Stretch"
@@ -35,10 +36,10 @@
                         DropDownResizeMode="None"
                         />
 
-        <TextBlock Grid.Row="0" Grid.Column="2" Text="Width [mm]" Margin="5,0"/>
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="{mvt:LocalizedBinding Width}" Margin="5,0"/>
         <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding SrcWidth}" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Passes" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding Passes}" />
         <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1"
                         x:Name="CB_Passes"
                         HorizontalAlignment="Stretch"
@@ -48,10 +49,10 @@
                         DropDownResizeMode="None"
                         />
 
-        <TextBlock Grid.Row="1" Grid.Column="2" Text="Height [mm]" Margin="5,0"/>
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="{mvt:LocalizedBinding Height}" Margin="5,0"/>
         <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding SrcHeight}" />
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Curing Passes" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding CuringPasses}" />
         <igWPF:XamComboEditor Grid.Row="2" Grid.Column="1"
                         x:Name="CB_CuringPasses"
                         HorizontalAlignment="Stretch"
@@ -61,7 +62,7 @@
                         DropDownResizeMode="None"
                         />
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="Speed" />
+        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding Speed}" />
         <igWPF:XamComboEditor Grid.Row="3" Grid.Column="1"
                         x:Name="CB_Speed"
                         HorizontalAlignment="Stretch"
@@ -72,7 +73,7 @@
                         />
         <TextBlock Grid.Row="3" Grid.Column="2" Text="m/min" Margin="5,0"/>
 
-        <TextBlock   Grid.Row="4" Grid.Column="0" Text="Image Margin"/>
+        <TextBlock   Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding ImageMargin}"/>
         <common:MvtNumBox Grid.Row="4" Grid.Column="1" Text="{Binding PageMargin}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right"/>
         <TextBlock   Grid.Row="4" Grid.Column="2" Text="mm" Margin="5,0,0,0" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 

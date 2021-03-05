@@ -3,18 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <GroupBox Header="Commands" Style="{StaticResource MvtGroupBox}">
+        <GroupBox Header="{mvt:LocalizedBinding Commands}" Style="{StaticResource MvtGroupBox}">
             <StackPanel>
-                <CheckBox Content="STOP" Click="Stop_Clicked" Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="{mvt:LocalizedBinding Stop}" Click="Stop_Clicked" Style="{DynamicResource RxCommandButton}"/>
                 <TextBlock/>
-                <CheckBox Content="Reference"         Click="StartRef_Clicked"   Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="{mvt:LocalizedBinding Reference}"         Click="StartRef_Clicked"   Style="{DynamicResource RxCommandButton}"/>
                 <TextBlock/>
-                <CheckBox Content="Slide To Right"    Click="ScanRight_Clicked"  Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="{mvt:LocalizedBinding SlideToRight}"    Click="ScanRight_Clicked"  Style="{DynamicResource RxCommandButton}"/>
                 <TextBlock/>
-                <CheckBox Content="Slide To Left"     Click="ScanLeft_Clicked"   Style="{DynamicResource RxCommandButton}"/>
+                <CheckBox Content="{mvt:LocalizedBinding SlideToLeft}"     Click="ScanLeft_Clicked"   Style="{DynamicResource RxCommandButton}"/>
             </StackPanel>
 
         </GroupBox>

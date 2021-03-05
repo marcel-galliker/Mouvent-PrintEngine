@@ -1,7 +1,8 @@
 ﻿<Window x:Class="RX_DigiPrint.Views.AboutDlg"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About RX-DigiPrint" 
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
+        Title="{mvt:LocalizedBinding AboutRxDigiPrint}" 
         Height="350" 
         Width="350"
         ResizeMode="NoResize"
@@ -30,12 +31,12 @@
                      Background="Transparent"
                      FontSize="20" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="Version:  "/>
+                <TextBlock Text="{mvt:LocalizedBinding VersionSP}"/>
                 <TextBlock HorizontalAlignment="Center" Text=" "/>
                 <TextBlock Text="{Binding Version}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="Publish:  "/>
+                <TextBlock Text="{mvt:LocalizedBinding PublishSP}"/>
                 <TextBlock HorizontalAlignment="Center" Text=" "/>
                 <TextBlock Text="{Binding PublishVersion}"/>
             </StackPanel>

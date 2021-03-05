@@ -10,12 +10,9 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_CollateList()
         {
-            if (_List==null)
-            {
-                _List = new List<RxEnum<int>>();
-                _List.Add(new RxEnum<int>(0,    "Pages"));
-                _List.Add(new RxEnum<int>(1,    "Docs" ));
-            }
+            _List = new List<RxEnum<int>>();
+            _List.Add(new RxEnum<int>(0, RX_DigiPrint.Resources.Language.Resources.Pages));
+            _List.Add(new RxEnum<int>(1, RX_DigiPrint.Resources.Language.Resources.Docs));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

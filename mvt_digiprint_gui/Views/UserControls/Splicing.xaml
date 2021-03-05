@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="100" d:DesignWidth="300">
     <Grid>
@@ -11,7 +12,7 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="35*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="1" Text="Splicing" Foreground="White" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" 
+        <TextBlock Grid.Column="1" Text="{mvt:LocalizedBinding Splicing}" Foreground="White" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" 
                    Visibility="{Binding Splicing, Converter={StaticResource BoolToVisible_Converter}}"/>
     </Grid>
 </UserControl>

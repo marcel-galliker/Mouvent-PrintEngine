@@ -4,7 +4,8 @@
                      xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:rx   ="clr-namespace:RX_DigiPrint.Helpers"
-        Title="Ink Supply Commands"  Width="300" Height="auto">
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
+        Title="{mvt:LocalizedBinding InkSupplyCommands}"  Width="300" Height="auto">
     
     <Window.Resources>
        
@@ -15,17 +16,17 @@
         <StackPanel>
             <Rectangle x:Name="Rectangle" Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="0"/>
             <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_OnOff" Content="OFF" Margin="5" Click="OnOff_Clicked"/>
-            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Print" Click="Print_Clicked" Margin="5" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Print}" Click="Print_Clicked" Margin="5" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
             <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1"/>
-            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" x:Name="FlushButton"  Content="Flush"  Margin="5" Click="Flush_Clicked" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
-            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Purge" Margin="5" Click="Purge_Clicked"/>
-            <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Purge + Wipe"  Margin="5" Click="PurgeWipe_Clicked" x:Name="Button_PurgeWipe"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" x:Name="FlushButton"  Content="{mvt:LocalizedBinding Flush}"  Margin="5" Click="Flush_Clicked" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="{mvt:LocalizedBinding Purge}" Margin="5" Click="Purge_Clicked"/>
+            <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="{mvt:LocalizedBinding PurgeAndWipe}"  Margin="5" Click="PurgeWipe_Clicked" x:Name="Button_PurgeWipe"/>
             <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1"/>
-            <Button    Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Fill" Margin="5" Click="Fill_Clicked"/>
-            <Button   Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Empty" Margin="5" Click="Empty_Clicked" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>
+            <Button    Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="{mvt:LocalizedBinding Fill}" Margin="5" Click="Fill_Clicked"/>
+            <Button   Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="{mvt:LocalizedBinding Empty}" Margin="5" Click="Empty_Clicked" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>
             <Rectangle x:Name="Line_Calibrate"  Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" x:Name="Button_Calibrate" Content="Calibrate" Margin="5" Click="Calibrate_Clicked"/>
-            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  Content="Check" Margin="5" Click="Check_Clicked"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" x:Name="Button_Calibrate" Content="{mvt:LocalizedBinding Calibrate}" Margin="5" Click="Calibrate_Clicked"/>
+            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  Content="{mvt:LocalizedBinding Check}" Margin="5" Click="Check_Clicked"/>
         </StackPanel>
         
         <rx:RxPopup x:Name="FlushPopup"
@@ -38,9 +39,9 @@
             <Grid Background="White">
                 <GroupBox Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
                     <StackPanel Margin="10,2">
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Night" Click="Flush_Clicked_0" Margin="5"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Weekend" Click="Flush_Clicked_1" Margin="5"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Week" Click="Flush_Clicked_2" Margin="5"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Night}" Click="Flush_Clicked_0" Margin="5"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Weekend}" Click="Flush_Clicked_1" Margin="5"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Week}" Click="Flush_Clicked_2" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
             </Grid>
@@ -56,7 +57,7 @@
                 <GroupBox Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
                     <StackPanel Margin="10,2">
                         <TextBlock x:Name="MsgText" TextWrapping="Wrap"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Done" Click="Done_Clicked"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="{mvt:LocalizedBinding Done}" Click="Done_Clicked"/>
                     </StackPanel>
                 </GroupBox>
             </Grid>

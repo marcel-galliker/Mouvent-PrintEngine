@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="260" >
 
@@ -108,7 +109,7 @@
                                                 Kind="Power"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="ALL" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSizeLarge}" FontWeight="Bold"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding All}" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSizeLarge}" FontWeight="Bold"/>
 
             <common:MvtButton Grid.Row="0" Grid.Column="1" x:Name="PAR_WINDER_1_ON" Click="OnOff_Clicked"
                               Style="{StaticResource MouventTexMachineButtonStyle}">

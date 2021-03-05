@@ -7,10 +7,11 @@
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:RX_DigiPrint.Views"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        Title="QRCode" 
+        Title="{mvt:LocalizedBinding QRCode}" 
         SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.ColumnDefinitions>

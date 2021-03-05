@@ -2,6 +2,7 @@
 using MahApps.Metro.IconPacks;
 using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Threading;
@@ -338,7 +339,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             else
             {
                 if (_SelectedItems==0) return;
-                if (MvtMessageBox.YesNo("Delete", "Delete the Items",  MessageBoxImage.Question, false))
+                if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, RX_DigiPrint.Resources.Language.Resources.DeleteTheItems,  MessageBoxImage.Question, false))
                 {
                     foreach(Row row in PrintQueueGrid.Rows)
                     {
@@ -368,7 +369,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 			    }
                 if (selected>0)
                 {
-                    if (MvtMessageBox.YesNo("Delete", "Delete the Item", MessageBoxImage.Question, false))
+                    if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, RX_DigiPrint.Resources.Language.Resources.DeleteTheItems, MessageBoxImage.Question, false))
                     {
                         for (int i=0; i<PrintQueueGrid.Rows.Count; i++)
 			            {

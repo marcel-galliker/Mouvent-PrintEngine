@@ -9,6 +9,7 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.TexView"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="350" d:DesignWidth="500"
              >
@@ -18,7 +19,7 @@
         <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
     </UserControl.Resources>
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Parameter">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Parameter}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -46,7 +47,7 @@
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock  Grid.Column="0" Text="Material" VerticalAlignment="Center" Padding="0,0,10,0"/>
+                                <TextBlock  Grid.Column="0" Text="{mvt:LocalizedBinding Material}" VerticalAlignment="Center" Padding="0,0,10,0"/>
                                 <igWPF:XamComboEditor 
                                 Grid.Column="1"
 			                    x:Name="CB_Material"
@@ -59,7 +60,7 @@
                                 
                                />
                                 <!-- SelectedItemChanged="CB_Material_SelectedItemChanged" -->
-                                <TextBox Grid.Column="1" x:Name="MaterialName" Text="NAME" Visibility="Collapsed"/>
+                                <TextBox Grid.Column="1" x:Name="MaterialName" Text="{mvt:LocalizedBinding Name}" Visibility="Collapsed"/>
                             </Grid>
                         </StackPanel>
 
@@ -81,10 +82,10 @@
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
-                            
-                            <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="0" ID="XML_MATERIAL_THICKNESS" Label="Thickness"    Unit="mm" UnitWidth="30"  Format="1" UserEnabled="usr_supervisor"  Background="{DynamicResource XamGrid_Alternate}"/>
-                            <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="0" ID="XML_HEAD_HEIGHT"        Label="Print Height" Unit="mm" UnitWidth="30" Format="1" UserEnabled="usr_supervisor"/>
-                            <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="2" ID="PAR_MAX_WEB_TEMP"       Label="Dryer Temp"   Unit="°C" UnitWidth="30" Format="n" UserEnabled="usr_supervisor" Background="{DynamicResource XamGrid_Alternate}"/>
+
+                            <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="0" ID="XML_MATERIAL_THICKNESS" Label="{mvt:LocalizedBinding Thickness}"    Unit="mm" UnitWidth="30"  Format="1" UserEnabled="usr_supervisor"  Background="{DynamicResource XamGrid_Alternate}"/>
+                            <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="0" ID="XML_HEAD_HEIGHT"        Label="{mvt:LocalizedBinding PrintHeight}" Unit="mm" UnitWidth="30" Format="1" UserEnabled="usr_supervisor"/>
+                            <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="2" ID="PAR_MAX_WEB_TEMP"       Label="{mvt:LocalizedBinding DryerTemp}"   Unit="°C" UnitWidth="30" Format="n" UserEnabled="usr_supervisor" Background="{DynamicResource XamGrid_Alternate}"/>
 
                             <!--
                         <rx_uc:PlcParCtrl Grid.Row="0" Grid.Column="2"                       ID="PAR_MAX_WEB_TEMP"              Label="Dryer Temp"          Unit="°C" UnitWidth="30" Format="n" UserEnabled="usr_supervisor" Background="{DynamicResource XamGrid_Alternate}"/>
@@ -92,15 +93,15 @@
 -->
                             <Rectangle Grid.Column="1" Grid.RowSpan="10" Fill="{StaticResource Mouvent.MainColorBrush}" Width="1" HorizontalAlignment="Center" />
 
-                            <rx_uc:PlcTitle   Grid.Row="2" Grid.Column="0" Header="Unwinder"/>
-                            <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="0"                       ID="PAR_MATERIAL_FLEXIBILITY_UW"   Label="Mat Flexibility"  UnitWidth="30" MinVal="1" MaxVal="10" UserEnabled="usr_supervisor"/>
-                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="0"                       ID="PAR_TENSION_WINDER_1"          Label="Tension"          Unit="N" LabelWidth="100"  UnitWidth="30" Format="n" MinVal="1" MaxVal="200"  UserEnabled="usr_supervisor" Background="{DynamicResource XamGrid_Alternate}"/>
-                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="0" x:Name="CB_RotUW"     ID="PAR_WIND_DIRECTION_WINDER1"    Label="Rotation"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_supervisor"/>
+                            <rx_uc:PlcTitle   Grid.Row="2" Grid.Column="0" Header="{mvt:LocalizedBinding Unwinder}"/>
+                            <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="0"                       ID="PAR_MATERIAL_FLEXIBILITY_UW"   Label="{mvt:LocalizedBinding MatFlexibility}"  UnitWidth="30" MinVal="1" MaxVal="10" UserEnabled="usr_supervisor"/>
+                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="0"                       ID="PAR_TENSION_WINDER_1"          Label="{mvt:LocalizedBinding Tension}"          Unit="N" LabelWidth="100"  UnitWidth="30" Format="n" MinVal="1" MaxVal="200"  UserEnabled="usr_supervisor" Background="{DynamicResource XamGrid_Alternate}"/>
+                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="0" x:Name="CB_RotUW"     ID="PAR_WIND_DIRECTION_WINDER1"    Label="{mvt:LocalizedBinding Rotation}"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_supervisor"/>
 
-                            <rx_uc:PlcTitle   Grid.Row="2" Grid.Column="2" x:Name="RW_Title"        Header="Rewinder" Background="{DynamicResource XamGrid_Alternate}"/>
-                            <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="2" x:Name="RW_Flexibility"  ID="PAR_MATERIAL_FLEXIBILITY_RW"   Label="Mat Flexibility"  UnitWidth="30" UserEnabled="usr_supervisor" Format="n"/>
-                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="2" x:Name="RW_Tension"      ID="PAR_TENSION_WINDER_2"          Label="Tension"          Unit="N" LabelWidth="100"  UnitWidth="30" Format="n" MinVal="0" MaxVal="200" Background="{DynamicResource XamGrid_Alternate}" UserEnabled="usr_supervisor"/>
-                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2" x:Name="RW_Rotation"     ID="PAR_WIND_DIRECTION_WINDER2"    Label="Rotation"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_supervisor"/>
+                            <rx_uc:PlcTitle   Grid.Row="2" Grid.Column="2" x:Name="RW_Title"        Header="{mvt:LocalizedBinding Rewinder}" Background="{DynamicResource XamGrid_Alternate}"/>
+                            <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="2" x:Name="RW_Flexibility"  ID="PAR_MATERIAL_FLEXIBILITY_RW"   Label="{mvt:LocalizedBinding MatFlexibility}"  UnitWidth="30" UserEnabled="usr_supervisor" Format="n"/>
+                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="2" x:Name="RW_Tension"      ID="PAR_TENSION_WINDER_2"          Label="{mvt:LocalizedBinding Tension}"          Unit="N" LabelWidth="100"  UnitWidth="30" Format="n" MinVal="0" MaxVal="200" Background="{DynamicResource XamGrid_Alternate}" UserEnabled="usr_supervisor"/>
+                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2" x:Name="RW_Rotation"     ID="PAR_WIND_DIRECTION_WINDER2"    Label="{mvt:LocalizedBinding Rotation}"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_supervisor"/>
                         </Grid>
                     </rx_uc:PlcParPanel>
 

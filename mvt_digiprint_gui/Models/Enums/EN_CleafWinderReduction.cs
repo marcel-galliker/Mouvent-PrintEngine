@@ -14,14 +14,12 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_CleafWinderReduction()
         {
-            if (_List==null)
-            {
-                _List = new List<RxEnum<int>>();
-                _List.Add(new RxEnum<int>( 0,  "none"));
-                _List.Add(new RxEnum<int>( 1,  "Unwinder"));
-                _List.Add(new RxEnum<int>( 2,  "Rewinder"));
-                _List.Add(new RxEnum<int>( 3,  "ALL"));
-            }
+
+            _List = new List<RxEnum<int>>();
+            _List.Add(new RxEnum<int>( 0, RX_DigiPrint.Resources.Language.Resources.None));
+            _List.Add(new RxEnum<int>( 1, RX_DigiPrint.Resources.Language.Resources.Unwinder));
+            _List.Add(new RxEnum<int>( 2, RX_DigiPrint.Resources.Language.Resources.Rewinder));
+            _List.Add(new RxEnum<int>( 3, RX_DigiPrint.Resources.Language.Resources.All));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -10,6 +10,7 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:models="clr-namespace:RX_DigiPrint.Models"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              Loaded="UserControl_Loaded"
              d:DesignHeight="300" 
@@ -24,7 +25,7 @@
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="File" Margin="0,0,10,0"/>
+                    <TextBlock Text="{mvt:LocalizedBinding File}" Margin="0,0,10,0"/>
                     <rx:MvtTextBox Text="{Binding Source={x:Static models:RxGlobals.FileNameFilter}, Path=Filter}" Grid.Column="1" MinWidth="100"/>
                     <!--<rx:MvtTextBox Text="{Binding Source={x:Static models:RxGlobals.FileNameFilter}, Path=Filter}" Grid.Column="1" MinWidth="100" TextChanged="{x:Static models:FileNameFilter.Changed}"/> -->
                 </Grid>
@@ -47,14 +48,14 @@
         <!-- title ____________________________________________________________-->
         <Grid Margin="10" Grid.Row="0" Grid.ColumnSpan="2" ShowGridLines="false">
             <Border Height="30"  Background="WhiteSmoke">
-                <TextBlock Foreground="#ff303030" Text="Open File"
+                <TextBlock Foreground="#ff303030" Text="{mvt:LocalizedBinding OpenFile}"
                           FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
         </Grid>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,2" >
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="RippedData" Content="Ripped Data" Checked="RippedData_Checked" />
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="SourceData" Content="Source Data" Checked="SourceData_Checked" Last="True"/>
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="RippedData" Content="{mvt:LocalizedBinding RippedData}" Checked="RippedData_Checked" />
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="SourceData" Content="{mvt:LocalizedBinding SourceData}" Checked="SourceData_Checked" Last="True"/>
         </StackPanel>
         <TextBlock x:Name="ActDirCtrl" Grid.Row="1" Grid.Column="1" Margin="10,5" VerticalAlignment="Center"/>
 
@@ -94,7 +95,7 @@
             <ig:XamGrid.Columns>
                 <ig:ImageColumn    Key="FileType"    HeaderText=""        IsSortable="False" Width="auto"  ValueConverter="{StaticResource FileTypeImage_Converter}" ImageHeight="32"/>
 
-                <ig:TemplateColumn Key="FileName"    HeaderText="File" Width="auto" 
+                <ig:TemplateColumn Key="FileName"    HeaderText="{mvt:LocalizedBinding File}" Width="auto" 
                                    ValueConverter="{StaticResource FileName_Converter}"
                                    IsSortable="True"
                                    SortComparer="{StaticResource FileName_Comparer}"
@@ -108,9 +109,9 @@
                         </DataTemplate>
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
-                <ig:TextColumn     Key="Date"        HeaderText="Date"    IsSortable="True"  Width="auto"  SortComparer="{StaticResource Date_Comparer}"/>
+                <ig:TextColumn     Key="Date"        HeaderText="{mvt:LocalizedBinding Date}"    IsSortable="True"  Width="auto"  SortComparer="{StaticResource Date_Comparer}"/>
 
-                <ig:TemplateColumn Key="Preview"     HeaderText="Preview" IsSortable="False" Width="auto" VerticalContentAlignment="Stretch" >
+                <ig:TemplateColumn Key="Preview"     HeaderText="{mvt:LocalizedBinding Preview}" IsSortable="False" Width="auto" VerticalContentAlignment="Stretch" >
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -134,8 +135,8 @@
         </ig:XamGrid>
         
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="5,5">
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="MidSize"   Content="Mid"   HorizontalAlignment="Center" MinWidth="50" Checked="Mid_Checked"   />
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="LargeSize" Content="Large" HorizontalAlignment="Center" MinWidth="50" Checked="Large_Checked" Last="True"/>
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="MidSize"   Content="{mvt:LocalizedBinding Mid}"   HorizontalAlignment="Center" MinWidth="50" Checked="Mid_Checked"   />
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="LargeSize" Content="{mvt:LocalizedBinding Large}" HorizontalAlignment="Center" MinWidth="50" Checked="Large_Checked" Last="True"/>
         </StackPanel>
         
         <common:MvtButton Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -147,7 +148,7 @@
         </common:MvtButton>
 
 
-        <TextBlock Panel.ZIndex="20" Text="Refreshing" Grid.RowSpan="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="100" x:Name="MsgRefresh" Foreground="#FFFF0909" RenderTransformOrigin="0.5,0.5">
+        <TextBlock Panel.ZIndex="20" Text="{mvt:LocalizedBinding Refreshing}" Grid.RowSpan="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="100" x:Name="MsgRefresh" Foreground="#FFFF0909" RenderTransformOrigin="0.5,0.5">
             <TextBlock.RenderTransform> 
                 <RotateTransform Angle="-20"/>
             </TextBlock.RenderTransform>

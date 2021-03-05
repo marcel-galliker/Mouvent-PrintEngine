@@ -231,7 +231,7 @@ namespace RX_DigiPrint.Views.TestTableView
         {
             if (Button_UV.IsChecked)
             {
-                if (MvtMessageBox.YesNo("UV Dryer", "Switch OFF",  MessageBoxImage.Question, false))
+                if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.UvDryer, RX_DigiPrint.Resources.Language.Resources.SwitchOff,  MessageBoxImage.Question, false))
                 {
                     RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
                 }

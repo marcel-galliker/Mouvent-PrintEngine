@@ -15,12 +15,9 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_RectoVerso()
         {
-            if (_List == null)
-            {
-                _List = new List<RxEnum<ERectoVerso>>();
-                _List.Add(new RxEnum<ERectoVerso>(ERectoVerso.rv_recto, "Recto"));
-                _List.Add(new RxEnum<ERectoVerso>(ERectoVerso.rv_verso, "Verso"));
-            }
+            _List = new List<RxEnum<ERectoVerso>>();
+            _List.Add(new RxEnum<ERectoVerso>(ERectoVerso.rv_recto, RX_DigiPrint.Resources.Language.Resources.Recto));
+            _List.Add(new RxEnum<ERectoVerso>(ERectoVerso.rv_verso, RX_DigiPrint.Resources.Language.Resources.Verso));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -8,6 +8,7 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="1200">
     
@@ -75,12 +76,12 @@
                 </ig:UnboundColumn.ItemTemplate>
                 </ig:UnboundColumn>
 
-                <ig:TextColumn Key="TimeStrShort"  HeaderText="Time" Width="auto" TextBlockStyle="{StaticResource XamGridTextBlockStyle}"/>
-                <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Device"  Width="auto" HorizontalContentAlignment="Left"/>
-                <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="No"      HorizontalContentAlignment="Left"/>
-                <ig:TextColumn Key="Message"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Message" Width="*"/>
-                <ig:TextColumn Key="File"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="File"    Width="auto"/>
-                <ig:TextColumn Key="Line"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Line"    Width="auto" HorizontalContentAlignment="Left"/>
+                <ig:TextColumn Key="TimeStrShort"  HeaderText="{mvt:LocalizedBinding Time}" Width="auto" TextBlockStyle="{StaticResource XamGridTextBlockStyle}"/>
+                <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Device}"  Width="auto" HorizontalContentAlignment="Left"/>
+                <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding No}"      HorizontalContentAlignment="Left"/>
+                <ig:TextColumn Key="Message"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Message}" Width="*"/>
+                <ig:TextColumn Key="File"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding File}"    Width="auto"/>
+                <ig:TextColumn Key="Line"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Line}"    Width="auto" HorizontalContentAlignment="Left"/>
             </ig:XamGrid.Columns>
         </ig:XamGrid>
 

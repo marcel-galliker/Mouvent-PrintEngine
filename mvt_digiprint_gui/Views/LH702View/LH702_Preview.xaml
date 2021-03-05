@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              SizeChanged="UserControl_SizeChanged"
              d:DesignHeight="300" d:DesignWidth="500">
@@ -30,7 +31,7 @@
                 >
                 <Grid MouseUp="Image_Clicked">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="19,-32,19,0">
-                        <TextBlock Text="Printing " FontSize="{StaticResource MvtFontSizeLarge}"/>
+                        <TextBlock Text="{mvt:LocalizedBinding Printing}" FontSize="{StaticResource MvtFontSizeLarge}"/>
                         <TextBlock Text="{Binding CopiesPrinted}" FontSize="{StaticResource MvtFontSizeLarge}"/>
                     </StackPanel>
                     <Image 
@@ -69,7 +70,7 @@
                             <RotateTransform Angle="90"/>
                         </Image.LayoutTransform>
                     </Image>
-                    <TextBlock Text="Next" HorizontalAlignment="Center" Margin="0,-32,0,0" FontSize="{StaticResource MvtFontSizeLarge}"/>
+                    <TextBlock Text="{mvt:LocalizedBinding Next}" HorizontalAlignment="Center" Margin="0,-32,0,0" FontSize="{StaticResource MvtFontSizeLarge}"/>
                 </Grid>
             </Border>
 

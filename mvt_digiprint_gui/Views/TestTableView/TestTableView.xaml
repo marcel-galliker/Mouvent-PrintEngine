@@ -8,6 +8,7 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:view="clr-namespace:RX_DigiPrint.Views.TestTableView"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="800"
              >
@@ -28,7 +29,7 @@
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
 
                 <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Margin="15, 0, 15, 0"
-                              x:Name="Button_UV"  Grid.Row="0" Click="UV_Clicked" ToolTip="UV Dryer"
+                              x:Name="Button_UV"  Grid.Row="0" Click="UV_Clicked" ToolTip="{mvt:LocalizedBinding UVDryer}"
                              IsChecked="{Binding UV_On}" 
                      IsBusy="{Binding UV_Busy}"
                      Visibility="{Binding Visibility, ElementName=TT_PrintSettings}">
@@ -51,12 +52,12 @@
             <!-- <Image x:Name="MachineImg" Source="..\..\Resources\Bitmaps\TestTable\TestTable.jpg" SizeChanged="MachineImg_SizeChanged"/> -->
             <Canvas>
 
-                <CheckBox x:Name="Button_Load"   Content="Load"   Width="100" Height="32" Click="MoveToLoad_Clicked"   Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
-                <CheckBox x:Name="Button_Cap"    Content="Cap"    Width="100" Height="32" Click="MoveToCap_Clicked"    Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
-                <CheckBox x:Name="Button_Purge"  Content="Purge"  Width="100" Height="32" Click="MoveToPurge_Clicked"  Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
-                <CheckBox x:Name="Button_Adjust" Content="Adjust" Width="100" Height="32" Click="MoveToAdjust_Clicked" Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
-                <CheckBox x:Name="Button_Table"  Content="Table"  Width="100" Height="32" Click="MoveToTable_Clicked"  Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
-                <CheckBox x:Name="Button_Vacuum" Content="Vacuum" Width="100" Height="32" Click="Vacuum_Clicked"       Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
+                <CheckBox x:Name="Button_Load"   Content="{mvt:LocalizedBinding Load}"   Width="100" Height="32" Click="MoveToLoad_Clicked"   Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
+                <CheckBox x:Name="Button_Cap"    Content="{mvt:LocalizedBinding Cap}"    Width="100" Height="32" Click="MoveToCap_Clicked"    Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
+                <CheckBox x:Name="Button_Purge"  Content="{mvt:LocalizedBinding Purge}"  Width="100" Height="32" Click="MoveToPurge_Clicked"  Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
+                <CheckBox x:Name="Button_Adjust" Content="{mvt:LocalizedBinding Adjust}" Width="100" Height="32" Click="MoveToAdjust_Clicked" Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
+                <CheckBox x:Name="Button_Table"  Content="{mvt:LocalizedBinding Table}"  Width="100" Height="32" Click="MoveToTable_Clicked"  Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
+                <CheckBox x:Name="Button_Vacuum" Content="{mvt:LocalizedBinding Vacuum}" Width="100" Height="32" Click="Vacuum_Clicked"       Style="{DynamicResource RxCommandButton}" Visibility="{Binding Visibility, ElementName=TT_PrintSettings}"/>
 
             </Canvas>
             <Image x:Name="PreviewImg" HorizontalAlignment="Left" VerticalAlignment="Bottom" MouseDown="Image_Clicked"/>
@@ -75,11 +76,11 @@
         </Grid>
 
         <!-- Settings __________________________________________________________________________ -->
-        <GroupBox Header="Settings" Style="{StaticResource MvtGroupBox}" Grid.Row="2">
+        <GroupBox Header="{mvt:LocalizedBinding Settings}" Style="{StaticResource MvtGroupBox}" Grid.Row="2">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="175"/>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="90"/>
                         <ColumnDefinition Width="*"/>
@@ -91,7 +92,7 @@
                     </Grid.RowDefinitions>
                     <!-- <TextBox Grid.Row="0" Grid.ColumnSpan="4" Text="Settings" Background="#FFC6C6C6" Height="32" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>-->
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Image" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding Image}" VerticalAlignment="Center"/>
                     <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Orientation="Horizontal">
                         <TextBox Text="{Binding FilePath}" Width="300" IsReadOnly="True" VerticalContentAlignment="Center" x:Name="ImagePath"/>
                         <Button  Content="..." Click="Image_Clicked" Padding="10,0" Margin="5,0,10,0" VerticalAlignment="Stretch"/>

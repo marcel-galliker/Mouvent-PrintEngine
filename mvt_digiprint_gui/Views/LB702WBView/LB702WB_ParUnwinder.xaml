@@ -9,12 +9,13 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="700" 
              d:DesignWidth="300"
              >
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Unwinder">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Unwinder}">
 
         <Grid>
             <Grid.RowDefinitions>
@@ -23,9 +24,9 @@
             </Grid.RowDefinitions>
             <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120" Margin="0,1,0,0">
 
-                <rx_uc:PlcTitle Grid.Row="0" Grid.Column="2" Header="Corona"/>
-                <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"           Label="Mode"   Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Corona" />
-                <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"      Label="Power"  Unit="%" UnitWidth="50" Format="n" />
+                <rx_uc:PlcTitle Grid.Row="0" Grid.Column="2" Header="{mvt:LocalizedBinding Corona}"/>
+                <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"           Label="{mvt:LocalizedBinding Mode}"   Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Corona" />
+                <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"      Label="{mvt:LocalizedBinding Power}"  Unit="%" UnitWidth="50" Format="n" />
             </rx_uc:PlcParPanel>
 
             <StackPanel VerticalAlignment="Bottom" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">

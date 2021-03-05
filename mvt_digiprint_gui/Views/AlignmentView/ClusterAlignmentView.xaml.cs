@@ -135,7 +135,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             if (tag == -1 || clusterAlignment == null)
@@ -151,7 +151,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             int globalHeadNumber = -1;
@@ -193,7 +193,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             if (tag == -1 || clusterAlignment == null)
@@ -209,7 +209,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             int globalHeadNumber = -1;
@@ -250,7 +250,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             if (tag < 0 || clusterAlignment == null)
@@ -287,7 +287,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             if (tag == -1 || clusterAlignment == null)
@@ -302,7 +302,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch (Exception)
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
             
             int globalHeadNumber = -1;
@@ -341,7 +341,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             if (tag == -1 || clusterAlignment == null)
@@ -356,7 +356,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch (Exception)
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             int globalHeadNumber = -1;
@@ -394,7 +394,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             if (tag == -1 || clusterAlignment == null)
@@ -409,7 +409,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch (Exception)
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
             
             SoftwareValueCorrection.SoftwareValueType type = SoftwareValueCorrection.SoftwareValueType.TypeColorOffset;
@@ -452,7 +452,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
         }
 
@@ -471,7 +471,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
 
             if (_Alignment.CorrectionValuesChanged == true)
@@ -485,7 +485,7 @@ namespace RX_DigiPrint.Views.Alignment
                 catch
                 {
                     // software internal problem!
-                    MvtMessageBox.InformationAndExit("Error", "");
+                    MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
                 }
 
                 int globalHeadNumber = -1;

@@ -7,9 +7,10 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="450">
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Configuration">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Configuration}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -37,27 +38,27 @@
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="3" Header="Washing Unit"/>
-                        <rx_uc:PlcParCtrl Grid.Row="1"                     ID="CFG_WATER_ON_TIME"                   Label="Water ON  Time"      Format="n" UserEnabled="usr_service"/>
+                        <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding WashingUnit}"/>
+                        <rx_uc:PlcParCtrl Grid.Row="1"                     ID="CFG_WATER_ON_TIME"                   Label="{mvt:LocalizedBinding WaterOnTime}"      Format="n" UserEnabled="usr_service"/>
                         <TextBlock Grid.Row="1" Grid.Column="1"             Text="s" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
-                        <rx_uc:PlcParCtrl Grid.Row="2"                     ID="CFG_WATER_OFF_TIME"                  Label="Water OFF Time"      Format="n" UserEnabled="usr_service"/>
+                        <rx_uc:PlcParCtrl Grid.Row="2"                     ID="CFG_WATER_OFF_TIME"                  Label="{mvt:LocalizedBinding WaterOffTime}"      Format="n" UserEnabled="usr_service"/>
                         <TextBlock Grid.Row="2" Grid.Column="1"             Text="s" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
-                        <rx_uc:PlcTitle   Grid.Row="3" Grid.ColumnSpan="3" Header="Gluing"/>
-                        <rx_uc:PlcParCtrl Grid.Row="4"                      ID="PAR_SPEED_GLUE"                      Label="Glue Speed"          Format="f" UserEnabled="usr_service"/>
+                        <rx_uc:PlcTitle   Grid.Row="3" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding Gluing}"/>
+                        <rx_uc:PlcParCtrl Grid.Row="4"                      ID="PAR_SPEED_GLUE"                      Label="{mvt:LocalizedBinding GlueSpeed}"          Format="f" UserEnabled="usr_service"/>
                         <TextBlock Grid.Row="4" Grid.Column="1"             Text="m/min" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
-                        <rx_uc:PlcTitle Grid.Row="5" Grid.ColumnSpan="3" Header="Spread Roller"/>
-                        <rx_uc:PlcParCtrl Grid.Row="6" ID="CFG_SPREADERROLLER_CONFIGURATION" Label="Active"  Type="Combo"      x:Name="CB_SpreadRoller" UserEnabled="usr_service"/>
+                        <rx_uc:PlcTitle Grid.Row="5" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding SpreadRoller}"/>
+                        <rx_uc:PlcParCtrl Grid.Row="6" ID="CFG_SPREADERROLLER_CONFIGURATION" Label="{mvt:LocalizedBinding Active}"  Type="Combo"      x:Name="CB_SpreadRoller" UserEnabled="usr_service"/>
 
-                        <rx_uc:PlcTitle Grid.Row="7" Grid.ColumnSpan="3" Header="Slide"/>
-                        <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="0" ID="CFG_HEAD_REFERENCE"               Label="Head Reference"  Format="f" UserEnabled="usr_service"/>
+                        <rx_uc:PlcTitle Grid.Row="7" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding Slide}"/>
+                        <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="0" ID="CFG_HEAD_REFERENCE"               Label="{mvt:LocalizedBinding HeadReference}"  Format="f" UserEnabled="usr_service"/>
                         <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="1" ID="STA_HEAD_REFERENCE_POSITION"      Label=""  Unit="mm"     Format="f" IsEnabled="False"/>
-                        <rx_uc:PlcCommand Grid.Row="8" Grid.Column="2" ID="CMD_REFENCE_HEADS"                Label="SET" Padding="5,0" User="usr_service"/>
+                        <rx_uc:PlcCommand Grid.Row="8" Grid.Column="2" ID="CMD_REFENCE_HEADS"                Label="{mvt:LocalizedBinding Set}" Padding="5,0" User="usr_service"/>
 
-                        <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="0" ID="CFG_SLAVE_OFFSET"                 Label="Slave Offset"    Format="f" UserEnabled="usr_service"/>
+                        <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="0" ID="CFG_SLAVE_OFFSET"                 Label="{mvt:LocalizedBinding SlaveOffset}"    Format="f" UserEnabled="usr_service"/>
                         <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="1" ID="STA_SLAVE_OFFSET"                 Label=""      Unit="mm" Format="f" IsEnabled="False"/>
-                        <rx_uc:PlcCommand Grid.Row="9" Grid.Column="2" ID="CMD_OFFSET_SLAVE"                 Label="SET"  Padding="5,0"  User="usr_service"/>
+                        <rx_uc:PlcCommand Grid.Row="9" Grid.Column="2" ID="CMD_OFFSET_SLAVE"                 Label="{mvt:LocalizedBinding Set}"  Padding="5,0"  User="usr_service"/>
                     </Grid>
                 </rx_uc:PlcParPanel>
             </ScrollViewer>

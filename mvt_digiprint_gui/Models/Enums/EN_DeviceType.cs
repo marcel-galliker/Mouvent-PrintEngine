@@ -11,19 +11,16 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_DeviceTypeList()
         {
-            if (_List==null)
-            {
-                _List = new List<RxEnum<EDeviceType>>();
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_undef,    "undef"      ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_gui,      "gui"        ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_main,     "main"       ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_plc,      "plc"        ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_enc,      "encoder"    ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_fluid,    "fluid"      ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_stepper,  "stepper"    ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_head,     "cluster"    ));
-                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_spool,    "spooler"    ));            
-            }
+            _List = new List<RxEnum<EDeviceType>>();
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_undef, RX_DigiPrint.Resources.Language.Resources.Undef));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_gui, RX_DigiPrint.Resources.Language.Resources.Gui));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_main, RX_DigiPrint.Resources.Language.Resources.Main));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_plc, RX_DigiPrint.Resources.Language.Resources.Plc));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_enc, RX_DigiPrint.Resources.Language.Resources.Encoder));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_fluid, RX_DigiPrint.Resources.Language.Resources.Fluid));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_stepper, RX_DigiPrint.Resources.Language.Resources.Stepper));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_head, RX_DigiPrint.Resources.Language.Resources.Cluster));
+            _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_spool, RX_DigiPrint.Resources.Language.Resources.Spooler));            
         }
 
         /*

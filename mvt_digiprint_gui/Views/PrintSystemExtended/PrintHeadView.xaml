@@ -8,6 +8,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="520" d:DesignWidth="300">
     
@@ -184,21 +185,21 @@
                     <StackPanel Margin="10,2">
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="OFF" Height="40" Click="OFF_Clicked"
                                 x:Name="Button_Off"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="Print"  Height="40"
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="{mvt:LocalizedBinding Print}"  Height="40"
                                 Click="Print_Clicked" Padding="10" x:Name="Button_Print"/>
 
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
 
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Micro" Click="PurgeMicro_Clicked"
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeMicro}" Click="PurgeMicro_Clicked"
                                 Padding="10" x:Name="Button_PurgeMicro"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Soft" Click="PurgeSoft_Clicked"
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeSoft}" Click="PurgeSoft_Clicked"
                                 Padding="10" x:Name="Button_PurgeSoft"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge"
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Purge}"
                                 Click="Purge_Clicked"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Hard"
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeHard}"
                                 Click="PurgeHard_Clicked" x:Name="Button_PurgeHard"/>
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Wipe" Click="Wipe_Clicked"
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Wipe}" Click="Wipe_Clicked"
                                 x:Name="Button_Wipe"/>
                     </StackPanel>
                 </GroupBox>

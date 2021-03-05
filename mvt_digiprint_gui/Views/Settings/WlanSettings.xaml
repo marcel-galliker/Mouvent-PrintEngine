@@ -4,6 +4,7 @@
         xmlns:ig="http://schemas.infragistics.com/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         Background="White"
         IsVisibleChanged="UserControl_IsVisibleChanged"
         Height="auto"

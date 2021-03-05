@@ -7,6 +7,7 @@
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="300" 
              d:DesignWidth="300"
@@ -28,8 +29,8 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Orientation="Horizontal" Margin="10,2" Grid.ColumnSpan="2">
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="RippedData" Content="Ripped Data" Checked="RippedData_Checked" />
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="SourceData" Content="Source Data" Checked="SourceData_Checked" Last="True"/>
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="RippedData" Content="{mvt:LocalizedBinding RippedData}" Checked="RippedData_Checked" />
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="SourceData" Content="{mvt:LocalizedBinding SourceData}" Checked="SourceData_Checked" Last="True"/>
             <TextBlock x:Name="ActDirCtrl" Grid.Row="0" Margin="10,5"/>
         </StackPanel>
 
@@ -77,9 +78,9 @@
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
 
-                <ig:TextColumn    Key="FileName"    HeaderText="File"    IsSortable="True"  Width="auto"  ValueConverter="{StaticResource FileName_Converter}" />
-                <ig:TextColumn    Key="Time"        HeaderText="Date"    IsSortable="True"  Width="auto"  />
-                <ig:ImageColumn   Key="Preview"     HeaderText="Preview" IsSortable="False" Width="auto" HorizontalContentAlignment="Left"/>
+                <ig:TextColumn    Key="FileName"    HeaderText="{mvt:LocalizedBinding File}"    IsSortable="True"  Width="auto"  ValueConverter="{StaticResource FileName_Converter}" />
+                <ig:TextColumn    Key="Time"        HeaderText="{mvt:LocalizedBinding Date}"    IsSortable="True"  Width="auto"  />
+                <ig:ImageColumn   Key="Preview"     HeaderText="{mvt:LocalizedBinding Preview}" IsSortable="False" Width="auto" HorizontalContentAlignment="Left"/>
                 <ig:UnboundColumn Key="End"         HeaderText=" "       IsSortable="False" Width="*" ValueConverter="{StaticResource Filler_Converter}"/>
                 <!--
             <ig:TemplateColumnLayout Key="DirVisible" HeaderText="Child" ColumnWidth="*">
@@ -94,9 +95,9 @@
         </ig:XamGrid>
         
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="5,5">
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="Small" HorizontalAlignment="Center" MinWidth="50" Checked="Small_Checked" />
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="MidSize" Content="Mid"   HorizontalAlignment="Center" MinWidth="50" Checked="Mid_Checked"   />
-            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="Large" HorizontalAlignment="Center" MinWidth="50" Checked="Large_Checked"/>
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="{mvt:LocalizedBinding Small}" HorizontalAlignment="Center" MinWidth="50" Checked="Small_Checked" />
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" x:Name="MidSize" Content="{mvt:LocalizedBinding Mid}"   HorizontalAlignment="Center" MinWidth="50" Checked="Mid_Checked"   />
+            <common:MvtRadioButton Style="{StaticResource MvtSelectionRadioButton}" Content="{mvt:LocalizedBinding Large}" HorizontalAlignment="Center" MinWidth="50" Checked="Large_Checked"/>
         </StackPanel>
     </Grid>
 </Window>

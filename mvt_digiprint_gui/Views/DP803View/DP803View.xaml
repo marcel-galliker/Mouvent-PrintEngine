@@ -8,6 +8,7 @@
              xmlns:rx_view="clr-namespace:RX_DigiPrint.Views.DP803View"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1300"
              >
@@ -47,11 +48,11 @@
             
 
             <StackPanel x:Name="SettingsTab" Grid.Row="0" Orientation="Horizontal" Background="Transparent" Margin="0,0,0,10">
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Stepper"       Content="Stepper"       />
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cfg"           Content="Configuration" />
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="PLC Log"       />
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="PLC Info"      Last="True"/>
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="{mvt:LocalizedBinding Main}"          IsChecked="true"/>
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Stepper"       Content="{mvt:LocalizedBinding Stepper}"       />
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cfg"           Content="{mvt:LocalizedBinding Configuration}" />
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="{mvt:LocalizedBinding PlcLog}"       />
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="{mvt:LocalizedBinding PlcInfo}"      Last="True"/>
             </StackPanel>
 
             <!-- configuration ____________________________________________________________-->
@@ -94,7 +95,7 @@
             <TextBlock x:Name="PlcNotConnected"
                 Grid.Row="1"
                 Grid.ColumnSpan="2"
-                Text="PLC NOT CONNECTED" 
+                Text="{mvt:LocalizedBinding PlcNotConnected}" 
                 FontSize="100" 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center" 

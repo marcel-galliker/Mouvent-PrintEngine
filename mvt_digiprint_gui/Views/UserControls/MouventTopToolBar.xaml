@@ -6,7 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
-             
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="60"
              d:DesignWidth="900"
@@ -22,7 +22,7 @@
         <rx_uc:MouventUVToolBar Grid.Column="1" HorizontalAlignment="Left"></rx_uc:MouventUVToolBar>
 
         <rx_uc:MouventSetupButtons Margin="15,0,15,0" Grid.Column="2"></rx_uc:MouventSetupButtons>
-        <common:MvtButton Grid.Column="3" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Test" Click="Test_Clicked" ToolTip="Test" Margin="15, 0, 15, 0">
+        <common:MvtButton Grid.Column="3" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Test" Click="Test_Clicked" ToolTip="{mvt:LocalizedBinding Test}" Margin="15, 0, 15, 0">
          <!--   <iconPacks:PackIconMaterial Kind="FolderTableOutline" Foreground="White" Width="25" Height="25" HorizontalAlignment="Stretch" VerticalAlignment="Center"/> -->
             <iconPacks:PackIconMaterial Kind="Ruler" Foreground="White" Width="25" Height="25"/>
         </common:MvtButton>

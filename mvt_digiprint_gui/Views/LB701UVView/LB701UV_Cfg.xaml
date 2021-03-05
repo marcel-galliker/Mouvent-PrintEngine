@@ -7,10 +7,11 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="550">
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Configuration">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Configuration}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
@@ -26,10 +27,10 @@
                     <ScrollViewer Grid.Row="0" Margin="0, 5, 0, 0" ScrollViewer.VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
 
                         <rx_uc:PlcParPanel x:Name="CfgPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" HorizontalAlignment="Stretch">
-                            <rx_uc:PlcParCtrl ID="STA_REWINDER_SENSOR_DIST"     Label="Rewinder Dist"      Unit="mm" Format="n" IsEnabled="False" />
+                            <rx_uc:PlcParCtrl ID="STA_REWINDER_SENSOR_DIST"     Label="{mvt:LocalizedBinding RewinderDist}"      Unit="mm" Format="n" IsEnabled="False" />
                             <!-- <rx_uc:PlcParCtrl ID="STA_REWINDER_SENSOR_DIST_MAX" Label="Rewinder Dist MAX"  Unit="mm" Format="n" IsEnabled="False" /> -->
-                            <rx_uc:PlcParCtrl ID="CFG_REWINDER_SENSOR_DIST"     Label="Rewinder Dist"      Unit="mm" Type="Combo" UserEnabled="usr_service" x:Name="CB_Dist"/>
-                            <rx_uc:PlcParCtrl ID="CFG_DIECUT"   Label="Die Cutter" Type="Combo" x:Name="CB_DieCut" />
+                            <rx_uc:PlcParCtrl ID="CFG_REWINDER_SENSOR_DIST"     Label="{mvt:LocalizedBinding RewinderDist}"      Unit="mm" Type="Combo" UserEnabled="usr_service" x:Name="CB_Dist"/>
+                            <rx_uc:PlcParCtrl ID="CFG_DIECUT"   Label="{mvt:LocalizedBinding DieCutter}" Type="Combo" x:Name="CB_DieCut" />
                         </rx_uc:PlcParPanel>
                     </ScrollViewer>
 

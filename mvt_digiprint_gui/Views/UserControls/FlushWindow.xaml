@@ -3,7 +3,8 @@
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        Title="Flushing"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
+        Title="{mvt:LocalizedBinding Flushing}"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Height="300" 
@@ -18,11 +19,11 @@
 
         <!-- FLUSH BUTTONS _________________________________________________-->
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
-            <Button Style="{StaticResource Mouvent.StandardButton}" Content="Night"     Click="Night_Clicked"    
+            <Button Style="{StaticResource Mouvent.StandardButton}" Content="{mvt:LocalizedBinding Night}"     Click="Night_Clicked"    
                     Width="170" Height="30" Margin="10"/>
-            <Button Style="{StaticResource Mouvent.StandardButton}" Content="Weekend"   Click="Weekend_Clicked"
+            <Button Style="{StaticResource Mouvent.StandardButton}" Content="{mvt:LocalizedBinding Weekend}"   Click="Weekend_Clicked"
                     Width="170" Height="30" Margin="10"/>
-            <Button Style="{StaticResource Mouvent.StandardButton}" Content="Week"      Click="Week_Clicked"
+            <Button Style="{StaticResource Mouvent.StandardButton}" Content="{mvt:LocalizedBinding Week}"      Click="Week_Clicked"
                     Width="170" Height="30" Margin="10"/>
         </StackPanel>
 

@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignWidth="190"
              d:DesignHeight="350"
@@ -37,17 +38,17 @@
         </common:MvtButton>
 
             <common:MvtButton Margin="12, 10, 10, 10" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                              Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeXL}" x:Name="Button_Stop" Click="Stop_Clicked" ToolTip="Stop Printing" >
+                              Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeXL}" x:Name="Button_Stop" Click="Stop_Clicked" ToolTip="{mvt:LocalizedBinding StopPrinting}" >
             <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" 
                                         Width="30" Height="35" Kind="Stop"></iconPacks:PackIconMaterial>
         </common:MvtButton>
 
-            <common:MvtButton Margin="7, 10, 10, 10" Grid.Row="1" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Abort" Click="Abort_Clicked" ToolTip="Abort Printing" Visibility="Collapsed">
+            <common:MvtButton Margin="7, 10, 10, 10" Grid.Row="1" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Abort" Click="Abort_Clicked" ToolTip="{mvt:LocalizedBinding AbortPrinting}" Visibility="Collapsed">
             <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Flash"></iconPacks:PackIconMaterial>
         </common:MvtButton>
 
-            <common:MvtButton Margin="7, 10, 10, 10" Grid.Row="3" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Settings" Click="Button_Settings_Click" ToolTip="Settings">
+            <common:MvtButton Margin="7, 10, 10, 10" Grid.Row="3" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Settings" Click="Button_Settings_Click" ToolTip="{mvt:LocalizedBinding Settings}">
                 <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="25" Height="25" Kind="CogOutline"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 

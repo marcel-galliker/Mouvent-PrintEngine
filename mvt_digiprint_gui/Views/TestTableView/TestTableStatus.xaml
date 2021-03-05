@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <GroupBox Header="Status" Style="{StaticResource MvtGroupBox}">
+        <GroupBox Header="{mvt:LocalizedBinding Status}" Style="{StaticResource MvtGroupBox}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="120"/>
@@ -21,22 +22,22 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0"  Text="Reference Done" />
+                <TextBlock Grid.Row="0" Grid.Column="0"  Text="{mvt:LocalizedBinding ReferenceDone}" />
                 <TextBlock Grid.Row="0" Grid.Column="1"  Text="{Binding RefDone}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0"  Text="Moving" />
+                <TextBlock Grid.Row="1" Grid.Column="0"  Text="{mvt:LocalizedBinding Moving}" />
                 <TextBlock Grid.Row="1" Grid.Column="1"  Text="{Binding Moving}"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0"  Text="Position X" />
+                <TextBlock Grid.Row="2" Grid.Column="0"  Text="{mvt:LocalizedBinding PositionX}" />
                 <TextBlock Grid.Row="2" Grid.Column="1"  Text="{Binding PosX}"/>
 
-                <TextBlock Grid.Row="3" Grid.Column="0"  Text="Position Y" />
+                <TextBlock Grid.Row="3" Grid.Column="0"  Text="{mvt:LocalizedBinding PositionY}" />
                 <TextBlock Grid.Row="3" Grid.Column="1"  Text="{Binding PosY}"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0"  Text="UV Ready" />
+                <TextBlock Grid.Row="4" Grid.Column="0"  Text="{mvt:LocalizedBinding UvReady}" />
                 <TextBlock Grid.Row="4" Grid.Column="1"  Text="{Binding UV_Ready}"/>
 
-                <TextBlock Grid.Row="5" Grid.Column="0"  Text="Cover Open" />
+                <TextBlock Grid.Row="5" Grid.Column="0"  Text="{mvt:LocalizedBinding CoverOpen}" />
                 <TextBlock Grid.Row="5" Grid.Column="1"  Text="{Binding CoverOpen}"/>
             </Grid>
             

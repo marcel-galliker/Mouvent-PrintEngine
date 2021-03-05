@@ -8,6 +8,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1500"
              Background="Transparent"
@@ -44,18 +45,18 @@
             </Grid.ColumnDefinitions>
             <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
             <StackPanel Background="{StaticResource Mouvent.MainColorBrush}" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Settings" x:Name="Button_Settings" Click="SettingsButton_Click" Margin="15, 5, 15, 5" >
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="{mvt:LocalizedBinding Settings}" x:Name="Button_Settings" Click="SettingsButton_Click" Margin="15, 5, 15, 5" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="25" Height="25" Kind="CogOutline"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Import Scan Check Values" x:Name="Button_ScanCheck" Click="ScanCheckImportButton_Click" Margin="0, 5, 15, 5" >
+
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="{mvt:LocalizedBinding ImportScanCheckValues}" x:Name="Button_ScanCheck" Click="ScanCheckImportButton_Click" Margin="0, 5, 15, 5" >
                     <iconPacks:PackIconMaterial Kind="Import" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIconM}"
                                                 Width="20" Height="20"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Reset all Values"
+                <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="{mvt:LocalizedBinding ResetAllValues}"
                                  x:Name="Button_ScanCheckClearValues" Click="ScanCheckClearButton_Click" Margin="0, 0, 15, 0" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
@@ -63,7 +64,7 @@
                 </common:MvtButton>
                 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" IsChecked="{Binding CorrectionValuesChanged}"
-                                  ToolTip="Save Values"
+                                  ToolTip="{mvt:LocalizedBinding SaveValues}"
                                  x:Name="Button_SaveCorrectionValues" Click="SaveCorrectionValuesButton_Click" Margin="0, 0, 15, 0" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
@@ -103,7 +104,7 @@
         <Grid Grid.Row="4">
             <mahapps:ToggleSwitch Margin="10,5,10,5" Grid.Row="1" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
                               Visibility="{Binding RegisterEditMode, Converter={StaticResource BoolToVisible_Converter}}"
-                          Content="Propagate correction values to all following print heads"
+                          Content="{mvt:LocalizedBinding PropagateCorrectionValuesToAllFollowingPrintHeads}"
                           IsChecked="{Binding ApplyCorrectionValuesToAllFollowingPrintHeads}">
             </mahapps:ToggleSwitch>
         </Grid>

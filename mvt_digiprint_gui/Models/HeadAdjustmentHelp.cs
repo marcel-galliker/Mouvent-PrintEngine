@@ -210,7 +210,7 @@ namespace RX_DigiPrint.Models
                 catch
                 {
                     // software internal problem!
-                    MvtMessageBox.InformationAndExit("Error", "");
+                    MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
                 }
                 ConversionInfoString = "1 Revolution = 5 μm";
             }
@@ -225,7 +225,7 @@ namespace RX_DigiPrint.Models
                 catch
                 {
                     // software internal problem!
-                    MvtMessageBox.InformationAndExit("Error", "");
+                    MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
                 }
 
                 ConversionInfoString = "1 Revolution = 11 μm";

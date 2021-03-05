@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:rx_common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              >
     <UserControl.Resources>
@@ -23,8 +24,8 @@
             </Grid.ColumnDefinitions>
             
             <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Background="Transparent">
-                <rx_common:MvtRadioButton Margin="10,0,0,0" x:Name="RB_InkSupply" Content="Ink Cylinder" IsChecked="True" Style="{StaticResource MvtTabsSelectionRadioButton}"/>
-                <rx_common:MvtRadioButton x:Name="RB_PrintHeads" Content="Print Heads" Style="{StaticResource MvtTabsSelectionRadioButton}"/>
+                <rx_common:MvtRadioButton Margin="10,0,0,0" x:Name="RB_InkSupply" Content="{mvt:LocalizedBinding InkCylinder}" IsChecked="True" Style="{StaticResource MvtTabsSelectionRadioButton}"/>
+                <rx_common:MvtRadioButton x:Name="RB_PrintHeads" Content="{mvt:LocalizedBinding PrintHeads}" Style="{StaticResource MvtTabsSelectionRadioButton}"/>
                 
                 <!--="{Binding SuperUser, Converter={StaticResource BooleanToVisibleConverter}}"/>-->
             </StackPanel>

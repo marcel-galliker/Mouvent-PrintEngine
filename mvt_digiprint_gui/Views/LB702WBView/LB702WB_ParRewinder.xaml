@@ -9,12 +9,13 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="700" 
              d:DesignWidth="300"
              >
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Rewinder">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Rewinder}">
 
         <Grid>
             <Grid.RowDefinitions>
@@ -23,8 +24,8 @@
             </Grid.RowDefinitions>
 
             <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
-                <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER2" Label="Rotation"     Unit=""     UnitWidth="50" Type="ImgCombo"/>
-                <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_2"       Label="Tension"      Unit="N/mm" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER2" Label="{mvt:LocalizedBinding Rotation}"     Unit=""     UnitWidth="50" Type="ImgCombo"/>
+                <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_2"       Label="{mvt:LocalizedBinding Tension}"      Unit="N/mm" UnitWidth="50" Format="1" />
             </rx_uc:PlcParPanel>
             
             <StackPanel VerticalAlignment="Bottom" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">

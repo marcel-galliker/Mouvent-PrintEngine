@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.AlignmentView;
 using System;
@@ -113,7 +114,7 @@ namespace RX_DigiPrint.Views.Alignment
             }
             catch (Exception)
             {
-                MvtMessageBox.Information("", "Could not load button style.");
+                MvtMessageBox.Information("", RX_DigiPrint.Resources.Language.Resources.CouldNotLoadButtonStyle);
                 System.Environment.Exit(-1);
             }
 
@@ -150,7 +151,7 @@ namespace RX_DigiPrint.Views.Alignment
                 }
                 catch (Exception)
                 {
-                    MvtMessageBox.Information("", "Could not load button style.");
+                    MvtMessageBox.Information("", RX_DigiPrint.Resources.Language.Resources.CouldNotLoadButtonStyle);
                     System.Environment.Exit(-1);
                 }
 
@@ -365,7 +366,7 @@ namespace RX_DigiPrint.Views.Alignment
 
         private void ScanCheckClearButton_Click(object sender, RoutedEventArgs e)
         {
-            bool result = MvtMessageBox.YesNo("Reset Values", "Do you want to reset all values?", MessageBoxImage.Question, false);
+            bool result = MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ResetValues, RX_DigiPrint.Resources.Language.Resources.DoYouWantToResetAllValues, MessageBoxImage.Question, false);
             if (result == true)
             {
                 _Alignment.ClearCorrectionValues();
@@ -388,7 +389,7 @@ namespace RX_DigiPrint.Views.Alignment
 
         private void RobotDownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            MvtMessageBox.Information("Robot", "Robot functionality not implemented yet.");
+            MvtMessageBox.Information(RX_DigiPrint.Resources.Language.Resources.Robot, RX_DigiPrint.Resources.Language.Resources.RobotFunctionalityNotImplementedYet);
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)

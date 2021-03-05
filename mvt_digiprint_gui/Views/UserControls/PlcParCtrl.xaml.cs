@@ -269,8 +269,25 @@ namespace RX_DigiPrint.Views.UserControls
             }
         }
 
+        public static readonly DependencyProperty LabelProperty
+        = DependencyProperty.Register(
+            "Label",
+            typeof(String),
+            typeof(PlcParCtrl),
+            new FrameworkPropertyMetadata("", 
+                OnLabelChanged
+                )
+            );
+
+        private static void OnLabelChanged(DependencyObject source,
+        DependencyPropertyChangedEventArgs e)
+        {
+            PlcParCtrl p = source as PlcParCtrl;
+            p.Label = (String)e.NewValue;
+        }
+
         //--- Property LabelWidth ---------------------------------------
-	    public int LabelWidth
+        public int LabelWidth
 	    {
 		    set { MainGrid.ColumnDefinitions[0].Width = new GridLength(value);}
 	    }

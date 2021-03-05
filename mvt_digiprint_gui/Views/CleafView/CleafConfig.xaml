@@ -7,21 +7,22 @@
                           xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="350"
              Width="250">
     <Grid>
         <!-- the settings _______________________________ -->
-        <GroupBox Header="Configuration" Style="{StaticResource MvtGroupBox}">
+        <GroupBox Header="{mvt:LocalizedBinding Configuration}" Style="{StaticResource MvtGroupBox}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown">
-                    <rx_uc:PlcTitle Header="Diameter Offset"/>
+                    <rx_uc:PlcTitle Header="{mvt:LocalizedBinding Diameter Offset}"/>
 
-                    <rx_uc:PlcTitle Header="Tension Offset"/>
+                    <rx_uc:PlcTitle Header="{mvt:LocalizedBinding TensionOffset}"/>
 
-                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_1"           Label="Unwinder"  Unit="N" UnitWidth="30" Format="1"/>
-                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_2"           Label="Rewinder"  Unit="N" UnitWidth="30" Format="1"/>
-                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_3"           Label="NIP"       Unit="N" UnitWidth="30" Format="1"/>
+                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_1"           Label="{mvt:LocalizedBinding Unwinder}"  Unit="N" UnitWidth="30" Format="1"/>
+                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_2"           Label="{mvt:LocalizedBinding Rewinder}"  Unit="N" UnitWidth="30" Format="1"/>
+                    <rx_uc:PlcParCtrl ID="CFG_TENSION_SENSOR_OFFSET_3"           Label="{mvt:LocalizedBinding NIP}"       Unit="N" UnitWidth="30" Format="1"/>
 
                     <Grid Margin="20,0">
 

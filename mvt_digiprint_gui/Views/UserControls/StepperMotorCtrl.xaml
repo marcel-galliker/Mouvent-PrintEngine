@@ -5,6 +5,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              Width="auto"
              Height="auto"
@@ -52,20 +53,20 @@
                 </Grid.RowDefinitions>
 
 
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="State"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{mvt:LocalizedBinding State}"/>
                 <!--        <Image     Grid.Row="0" Grid.Column="2"  Source="{Binding State,   Converter={StaticResource StepperStateImg_Converter}}" HorizontalAlignment="Left" Height="20"/> -->
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding State,   Converter={StaticResource StepperStateImg_Converter}}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="End"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{mvt:LocalizedBinding End}"/>
                 <Image     Grid.Row="1" Grid.Column="2"  Source="{Binding EndSwitch,   Converter={StaticResource LedImg_Converter}}" HorizontalAlignment="Left" Height="20"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="Motor"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{mvt:LocalizedBinding Motor}"/>
                 <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal">
                     <TextBlock Text="{Binding MotorPos, Converter={StaticResource ToString_Converter}, ConverterParameter=3}"/>
                     <TextBlock Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Bottom"/>
                 </StackPanel>
 
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="Encoder"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{mvt:LocalizedBinding Encoder}"/>
                 <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" Background="{Binding EncoderColor}">
                     <TextBlock Text="{Binding EncoderPos, Converter={StaticResource ToString_Converter}, ConverterParameter=3}"/>
                     <TextBlock Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Bottom"/>

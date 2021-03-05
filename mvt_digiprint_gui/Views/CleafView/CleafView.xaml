@@ -10,6 +10,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:cleaf="clr-namespace:RX_DigiPrint.Views.CleafView"
               xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1500">
 
@@ -54,11 +55,11 @@
         <cleaf:CleafMachine  Grid.Row="1" Grid.ColumnSpan="10"/>
 
         <StackPanel x:Name="SettingsTab" Grid.Row="2" Orientation="Horizontal" Background="Transparent" Margin="10">
-            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="Main" IsChecked="True"/>
-            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Order"         Content="Order"/>
-            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cfg"           Content="Configuration" />
-            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="PLC Log" />
-            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_PlcInfo"       Content="Plc Info"  Last="True"/>
+            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="{mvt:LocalizedBinding Main}" IsChecked="True"/>
+            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Order"         Content="{mvt:LocalizedBinding Order}"/>
+            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Cfg"           Content="{mvt:LocalizedBinding Configuration}" />
+            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="{mvt:LocalizedBinding PlcLog}" />
+            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_PlcInfo"       Content="{mvt:LocalizedBinding PlcInfo}"  Last="True"/>
         </StackPanel>
 
         <!-- Settings __________________________________________________________________________ -->
@@ -85,7 +86,7 @@
                     </Grid.ColumnDefinitions>
                 
                 <cleaf:CleafStatus Grid.Row="0" Grid.Column="0"/>
-                <GroupBox Grid.Row="1" Grid.Column="0" Margin="0,10,0,0" Style="{StaticResource MvtGroupBox}" Header="Consumables">
+                    <GroupBox Grid.Row="1" Grid.Column="0" Margin="0,10,0,0" Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Consumables}">
                     <rx_uc:ConsumablesView />
                 </GroupBox>
                     <cleaf:CleafCommands Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" MinWidth="150" Margin="10,0,0,0"/>

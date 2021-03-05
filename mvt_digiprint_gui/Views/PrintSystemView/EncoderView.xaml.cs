@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System.Windows;
 using System.Windows.Controls;
@@ -79,14 +80,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- Save_Clicked ---------------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Encoder Compensation", "Save new compensation parameters?", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.EncoderCompensation, RX_DigiPrint.Resources.Language.Resources.SaveNewCompensationParameters, MessageBoxImage.Question, false))
                 RxGlobals.Encoder[0].Save();
         }
 
         //--- Save2_Clicked ---------------------------------------------
         private void Save2_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Encoder Compensation", "Save new compensation parameters?", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.EncoderCompensation, RX_DigiPrint.Resources.Language.Resources.SaveNewCompensationParameters, MessageBoxImage.Question, false))
                 RxGlobals.Encoder[1].Save();
         }
 

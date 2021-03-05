@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
         >
 
@@ -58,7 +59,7 @@
             </Grid.RowDefinitions>
 
             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Tag="1" Name="GoBackButton" Grid.Column="5" Grid.Row="0"
-                             Margin="5" Click="GoBackButton_Click" ToolTip="Back"
+                             Margin="5" Click="GoBackButton_Click" ToolTip="{mvt:LocalizedBinding Back}"
                              HorizontalAlignment="Left" Visibility="{Binding HasRecommendedValue, Converter={StaticResource BoolToInVisible_Converter}}">
                 <Grid Height="32" Width="32">
                     <iconPacks:PackIconMaterial  Kind="ImageOutline"  Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="17" Height="12" HorizontalAlignment="Left" Margin="0,10,0,0"/>

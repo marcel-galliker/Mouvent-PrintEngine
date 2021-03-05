@@ -6,11 +6,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
-        Title="Head Adjustment">
+        Title="{mvt:LocalizedBinding HeadAdjustment}">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -75,7 +76,7 @@
             </Grid.RowDefinitions>
 
             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Tag="1" Name="GoBackButton" Grid.Column="5" Grid.Row="0"
-                             Margin="5" Click="GoBackButton_Click" ToolTip="Back"
+                             Margin="5" Click="GoBackButton_Click" ToolTip="{mvt:LocalizedBinding Back}"
                              HorizontalAlignment="Left">
                 <Grid Height="32" Width="32">
                     <iconPacks:PackIconMaterial  Kind="ImageOutline"  Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="17" Height="12" HorizontalAlignment="Left" Margin="0,10,0,0"/>

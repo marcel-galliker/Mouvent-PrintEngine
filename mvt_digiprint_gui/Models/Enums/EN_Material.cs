@@ -15,13 +15,10 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_MaterialList()
         {
-            if (_List==null)
-            {
-                _List = new List<RxEnum<int>>();
-                _List.Add(new RxEnum<int>(0,  "ABS 1.0mm"));
-                _List.Add(new RxEnum<int>(1,  "ABS 2.5mm"));
-                _List.Add(new RxEnum<int>(2,  "Paper"));
-            }
+            _List = new List<RxEnum<int>>();
+            _List.Add(new RxEnum<int>(0,  "ABS 1.0mm"));
+            _List.Add(new RxEnum<int>(1,  "ABS 2.5mm"));
+            _List.Add(new RxEnum<int>(2, RX_DigiPrint.Resources.Language.Resources.Paper));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

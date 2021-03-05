@@ -9,6 +9,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LH702View"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="700" 
              d:DesignWidth="600"
@@ -17,7 +18,7 @@
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
     </UserControl.Resources>
 
-    <GroupBox Grid.Column="0" Header="Substrate Settings" Style="{StaticResource MvtGroupBox}">
+    <GroupBox Grid.Column="0" Header="{mvt:LocalizedBinding SubstrateSettings}" Style="{StaticResource MvtGroupBox}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -30,7 +31,7 @@
                         <ColumnDefinition Width="120"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Material"/>
+                    <TextBlock Grid.Column="0" Text="{mvt:LocalizedBinding Material}"/>
                     <igWPF:XamComboEditor 
 			            x:Name="CB_Material"
                         Grid.Column="1"
@@ -42,14 +43,14 @@
                         ValueToDisplayTextConverter="{StaticResource MaterialName_Converter}"
                         SelectedItemChanged="CB_Material_SelectedItemChanged"
                         />
-                    <TextBox Grid.Column="1" x:Name="MaterialName" Text="Name" Visibility="Collapsed"/>
+                    <TextBox Grid.Column="1" x:Name="MaterialName" Text="{mvt:LocalizedBinding Name}" Visibility="Collapsed"/>
                 </Grid>
                 <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
 
-                <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"        Label="Print Height" Unit="mm" UnitWidth="50" Format="1"/>
-                <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS" Label="Thickness"    Unit="mm" UnitWidth="50" Format="f"/>
-                <rx_uc:PlcParCtrl ID="XML_ENC_OFFSET"         Label="Encoder Adj"  Unit="inc" UnitWidth="50" Format="n"/>
-                <rx_uc:PlcParCtrl ID="XML_JC_RATIO"        Label="Jet Overcorrection" Unit="%"  UnitWidth="50" Format="n"/>
+                <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"        Label="{mvt:LocalizedBinding PrintHeight}" Unit="mm" UnitWidth="50" Format="1"/>
+                <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS" Label="{mvt:LocalizedBinding Thickness}"    Unit="mm" UnitWidth="50" Format="f"/>
+                <rx_uc:PlcParCtrl ID="XML_ENC_OFFSET"         Label="{mvt:LocalizedBinding EncoderAdj}"  Unit="inc" UnitWidth="50" Format="n"/>
+                <rx_uc:PlcParCtrl ID="XML_JC_RATIO"        Label="{mvt:LocalizedBinding JetOvercorrection}" Unit="%"  UnitWidth="50" Format="n"/>
             </rx_uc:PlcParPanel>
 
             <StackPanel VerticalAlignment="Bottom" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">

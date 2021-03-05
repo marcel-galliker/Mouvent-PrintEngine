@@ -4,25 +4,26 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignWidth="150">
 
-        <GroupBox Grid.Column="1" Header="Setup Commands" Style="{StaticResource MvtGroupBox}">
+    <GroupBox Grid.Column="1" Header="{mvt:LocalizedBinding SetupCommands}" Style="{StaticResource MvtGroupBox}">
             <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main">
           <!--      <rx_uc:PlcCommand ID="CMD_SERVICE"                   Label="Service"/> -->
 
-                <rx_uc:PlcTitle Header="Calibrate Diameter"/>
+            <rx_uc:PlcTitle Header="{mvt:LocalizedBinding CalibrateDiameter}"/>
                 
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_1"    Label="Diameter UW-R"/>
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_2"    Label="Diameter UW-L"/>
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_3"    Label="Diameter RW-R"/>
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_4"    Label="Diameter RW-L"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_1"    Label="{mvt:LocalizedBinding DiameterUw-R}"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_2"    Label="{mvt:LocalizedBinding DiameterUw-L}"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_3"    Label="{mvt:LocalizedBinding DiameterRw-R}"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_DIAMETER_SENSOR_WINDER_4"    Label="{mvt:LocalizedBinding DiameterRw-L}"/>
 
-                <rx_uc:PlcTitle Header="Calibrate Tension"/>
+                <rx_uc:PlcTitle Header="{mvt:LocalizedBinding CalibrateTension}"/>
                 
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_1" Label="Tesion UW"/>
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_2" Label="Tesion RW"/>
-                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_3" Label="Tesion NIP"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_1" Label="{mvt:LocalizedBinding TensionUw}"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_2" Label="{mvt:LocalizedBinding TensionRw}"/>
+                <rx_uc:PlcCommand ID="CMD_CALIBRATE_TENSION_SENSORS_3" Label="{mvt:LocalizedBinding TensionNip}"/>
 
             </rx_uc:PlcParPanel>
         </GroupBox>

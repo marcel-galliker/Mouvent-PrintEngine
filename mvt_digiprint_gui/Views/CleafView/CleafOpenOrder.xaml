@@ -5,6 +5,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         IsVisibleChanged="UserControl_IsVisibleChanged"
         >
 
@@ -13,7 +14,7 @@
         <!--    <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">50</sys:Double> -->
     </UserControl.Resources>
 
-    <GroupBox Header="Orders" Style="{StaticResource MvtGroupBox}">
+    <GroupBox Header="{mvt:LocalizedBinding Orders}" Style="{StaticResource MvtGroupBox}">
         <Grid>
 
             <Grid.RowDefinitions>
@@ -36,9 +37,9 @@
                 </ig:XamGrid.SelectionSettings>
 
                 <ig:XamGrid.Columns>
-                    <ig:TextColumn  Key="Id"     HeaderText="ID"  HorizontalContentAlignment="Center"/>
-                    <ig:TextColumn  Key="Code"   HeaderText="Code" />
-                    <ig:TextColumn  Key="Length" HeaderText="Len" HorizontalContentAlignment="Right"/>
+                    <ig:TextColumn  Key="Id"     HeaderText="{mvt:LocalizedBinding Id}"  HorizontalContentAlignment="Center"/>
+                    <ig:TextColumn  Key="Code"   HeaderText="{mvt:LocalizedBinding Code}" />
+                    <ig:TextColumn  Key="Length" HeaderText="{mvt:LocalizedBinding Len}" HorizontalContentAlignment="Right"/>
                     <ig:UnboundColumn Key="End"  HeaderText=" " Width="*" ValueConverter="{StaticResource Filler_Converter}"/>
                 </ig:XamGrid.Columns>
 

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300"
              d:DesignWidth="300"
@@ -26,13 +27,13 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="2" Header="Prepare Sate"/>
+        <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="2" Header="{mvt:LocalizedBinding PrepareState}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Unwinder Tension"/>
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Nip Tension"          Background="{StaticResource XamGrid_Alternate}" Grid.ColumnSpan="2"/>
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Rewinder Tension"/>
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="Unwinder Buffer"  Background="{StaticResource XamGrid_Alternate}" Grid.ColumnSpan="2"/>
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="Rewinder Bufffer"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding UnwinderTension}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding NipTension}"          Background="{StaticResource XamGrid_Alternate}" Grid.ColumnSpan="2"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding RewinderTension}"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding UnwinderBuffer}"  Background="{StaticResource XamGrid_Alternate}" Grid.ColumnSpan="2"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding RewinderBuffer}"/>
         <TextBlock Grid.Row="6" Grid.Column="0" Text="UV Flexo 1"  Background="{StaticResource XamGrid_Alternate}" Grid.ColumnSpan="2"/>
         <TextBlock Grid.Row="7" Grid.Column="0" Text="UV Flexo 2"/>
         <TextBlock Grid.Row="8" Grid.Column="0" Text="UV Printer"  Background="{StaticResource XamGrid_Alternate}" Grid.ColumnSpan="2"/>

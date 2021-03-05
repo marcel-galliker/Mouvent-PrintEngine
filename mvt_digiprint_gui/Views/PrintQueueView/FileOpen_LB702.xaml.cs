@@ -382,7 +382,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void _item_delete(DirItem item)
         {
             string[] name=item.FileName.Split('\\');
-            if (name.Length > 1 && MvtMessageBox.YesNo("Delete", String.Format("Delete {0}?", name[name.Length - 1]), MessageBoxImage.Question, false))
+            if (name.Length > 1 && MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, String.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmDelete, name[name.Length - 1]), MessageBoxImage.Question, false))
             {
                 PrintQueueItem pq = new PrintQueueItem();     
                 pq.FilePath = item.FileName;

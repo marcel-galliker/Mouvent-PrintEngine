@@ -14,14 +14,11 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_CleafSpliceType()
         {
-            if (_List==null)
-            {
-                _List = new List<RxEnum<int>>();
-                _List.Add(new RxEnum<int>( 0,  "Knife small / Tape"));
-                _List.Add(new RxEnum<int>( 1,  "Knife small / Ultrasonic"));
-                _List.Add(new RxEnum<int>( 2,  "Knife large / Tape"));
-                _List.Add(new RxEnum<int>( 3,  "Knife large / Ultrasonic"));
-            }
+            _List = new List<RxEnum<int>>();
+            _List.Add(new RxEnum<int>( 0, RX_DigiPrint.Resources.Language.Resources.KnifeSmallTape));
+            _List.Add(new RxEnum<int>( 1, RX_DigiPrint.Resources.Language.Resources.KnifeSmallUltrasonic));
+            _List.Add(new RxEnum<int>( 2, RX_DigiPrint.Resources.Language.Resources.KnifeLargeTape));
+            _List.Add(new RxEnum<int>( 3, RX_DigiPrint.Resources.Language.Resources.KnifeLargeUltrasonic));
         }
 
        IEnumerator IEnumerable.GetEnumerator()

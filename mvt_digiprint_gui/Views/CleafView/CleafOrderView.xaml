@@ -7,6 +7,7 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
               xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              IsVisibleChanged="UserControl_IsVisibleChanged"
              d:DesignHeight="300" 
@@ -34,8 +35,8 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
-            <GroupBox Style="{StaticResource MvtGroupBox}" Grid.Row="0" Header="Settings">
+
+            <GroupBox Style="{StaticResource MvtGroupBox}" Grid.Row="0" Header="{mvt:LocalizedBinding Settings}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
@@ -91,28 +92,28 @@
                 </Grid.ColumnDefinitions>
 
                 <!--Operator __________________________________________-->
-                <TextBlock Grid.Column="0" Grid.Row="0"  Text="Operator"  FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="0"  Text="{mvt:LocalizedBinding Operator}"  FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <ComboBox x:Name="CB_Operator" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" 
                   DropDownOpened="Operator_DropDownOpened" 
                   SelectionChanged="Operator_SelectionChanged"
                   SelectedItem="{Binding User}" Margin="0,-2,0.2,2.4"/>
 
-                <TextBlock Grid.Column="0" Grid.Row="1" Text="Length" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="{mvt:LocalizedBinding Length}" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal">
                     <TextBlock Text="{Binding Length}" VerticalAlignment="Center"/>
                     <TextBlock Text=" m" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <TextBlock Grid.Column="0" Grid.Row="2" Text="Produced" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="2" Text="{mvt:LocalizedBinding Produced}" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
                 <rx:RxProgressBar x:Name="ProgBar" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="2" VerticalAlignment="Stretch" Margin="0,5"/>
                 <TextBlock        x:Name="ProgStr" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
 
-                <TextBlock Grid.Column="0" Grid.Row="3" Text="Waste" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="3" Text="{mvt:LocalizedBinding Waste}" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <rx:RxProgressBar x:Name="WasteBar" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="3" VerticalAlignment="Stretch" Margin="0,5"  Foreground="Red"/>
                 <TextBlock        x:Name="WasteStr" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
 
-                <TextBlock Grid.Column="0" Grid.Row="4" Text="Ink" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="0" Grid.Row="4" Text="{mvt:LocalizedBinding Ink}" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <TextBox Grid.Column="1" Grid.Row="4" x:Name="Ink0"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource MvtFontSize}" BorderThickness="0"/>
                 <TextBox Grid.Column="2" Grid.Row="4" x:Name="Ink1"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource MvtFontSize}" BorderThickness="0"/>
                 <TextBox Grid.Column="3" Grid.Row="4" x:Name="Ink2"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True" HorizontalContentAlignment="Center" FontSize="{StaticResource MvtFontSize}" BorderThickness="0"/>
@@ -123,7 +124,7 @@
         </Grid>
 
 <!--        Order ________________________________________________________________________________________-->
-        <GroupBox Grid.Column="2" Header="Order" Style="{StaticResource MvtGroupBox}" Margin="10,0,0,0">
+        <GroupBox Grid.Column="2" Header="{mvt:LocalizedBinding Orders}" Style="{StaticResource MvtGroupBox}" Margin="10,0,0,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -145,26 +146,26 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="ID"/>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Id}" FontWeight="Bold" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Code"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding Code}"/>
                 <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Code}"/>
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Length"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding Length}"/>
                 <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal">
                     <TextBlock Text="{Binding Length}"/>
                     <TextBlock Text=" m"/>
                 </StackPanel>
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Material"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding Material}"/>
                 <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Material}"/>
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Abs"/>
                 <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding AbsCode}"/>
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Speed"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding Speed}"/>
                 <StackPanel Grid.Row="5" Grid.Column="2" Orientation="Horizontal">
                     <TextBlock Text="{Binding Speed}"/>
                     <TextBlock Text=" m/min"/>
                 </StackPanel>
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="Gloss"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="{mvt:LocalizedBinding Gloss}"/>
                 <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding Gloss}"/>
 
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="Note"/>
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="{mvt:LocalizedBinding Note}"/>
                 <TextBlock Grid.Row="7" Grid.Column="2" Text="{Binding Note}" TextWrapping="Wrap"/>
 
                 <common:MvtButton x:Name="CmdButton" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Margin="10"

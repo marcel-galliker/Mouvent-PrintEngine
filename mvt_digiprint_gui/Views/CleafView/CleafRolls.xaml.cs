@@ -1,6 +1,7 @@
 ﻿using Infragistics.Controls.Grids;
 using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace RX_DigiPrint.Views.CleafView
         private void Rolls_CellClicked(object sender, CellClickedEventArgs e)
         {
             CleafRoll roll = e.Cell.Row.Data as CleafRoll;
-            bool? res= MvtMessageBox.YesNoCancel(string.Format("Roll {0}", roll.No), "Good quality", MessageBoxImage.Question, false);
+            bool? res= MvtMessageBox.YesNoCancel(string.Format(RX_DigiPrint.Resources.Language.Resources.RollNo, roll.No), RX_DigiPrint.Resources.Language.Resources.GoodQuality, MessageBoxImage.Question, false);
             roll.send_quality(res);
         }
     }

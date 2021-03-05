@@ -1,7 +1,7 @@
 ﻿using RX_Common;
-using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.PrintQueueView;
 using System;
@@ -143,7 +143,7 @@ namespace RX_DigiPrint.Views.UserControls
 #if !DEBUG
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
             {
-                MvtMessageBox.YesNo("Print System", "Drip Pans below the clusters. Move it out before printing", MessageBoxImage.Question, true);
+                MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.PrintSystem, RX_DigiPrint.Resources.Language.Resources.DripPansBelowTheClusters, MessageBoxImage.Question, true);
                 return;
             }
 #endif
@@ -158,13 +158,13 @@ namespace RX_DigiPrint.Views.UserControls
 
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
-                if (!MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Print anyway?", MessageBoxImage.Question, false))
+                if (!MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.PrintSystem, RX_DigiPrint.Resources.Language.Resources.SomeInkSuppliesAreOff, MessageBoxImage.Question, false))
                     return;
             }
 
             if (RxGlobals.UvLamp.Visible==Visibility.Visible && !RxGlobals.UvLamp.Ready)
             {
-                if (!MvtMessageBox.YesNo("UV Lamp", "The UV Lamp is NOT READY.\n\nStart Printing?",  MessageBoxImage.Question, false))
+                if (!MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.UvLamp, RX_DigiPrint.Resources.Language.Resources.UvLampIsNotReady,  MessageBoxImage.Question, false))
                     return;
             }
          

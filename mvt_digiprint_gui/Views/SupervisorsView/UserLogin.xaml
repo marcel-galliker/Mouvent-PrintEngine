@@ -6,10 +6,11 @@
         xmlns:local="clr-namespace:RX_DigiPrint.Views.Settings"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
         mc:Ignorable="d"
-        Title="Enter authentication code"
+        Title="{mvt:LocalizedBinding EnterAuthenticationCode}"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner">
@@ -55,7 +56,7 @@
                 <TextBox x:Name="UserPin4" Style="{StaticResource PinTextBlock}"/>
                 <TextBox x:Name="UserPin5" Style="{StaticResource PinTextBlock}"/>
             </StackPanel>
-            <Label x:Name="AuthenticationStatus" Visibility="Collapsed" Content="Authentication Failed" Foreground="Red" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <Label x:Name="AuthenticationStatus" Visibility="Collapsed" Content="{mvt:LocalizedBinding AuthenticationFailed}" Foreground="Red" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </StackPanel>
 
 
@@ -81,9 +82,9 @@
             <common:MvtButton x:Name="Seven" Margin="10" Width="60" Height="60" Style="{StaticResource Mouvent.StandardButton}" Grid.Column="0" Grid.Row="2" Content="7" Click="Number_Click"/>
             <common:MvtButton x:Name="Eight" Margin="10" Width="60" Height="60" Style="{StaticResource Mouvent.StandardButton}" Grid.Column="1" Grid.Row="2" Content="8" Click="Number_Click"/>
             <common:MvtButton x:Name="Nine" Margin="10" Width="60" Height="60" Style="{StaticResource Mouvent.StandardButton}" Grid.Column="2" Grid.Row="2" Content="9" Click="Number_Click"/>
-            <common:MvtButton x:Name="DeletePin" Margin="10" Height="60" Width="60" MinWidth="40"  Style="{StaticResource Mouvent.StandardButton}" Grid.Column="0" Grid.Row="3" Content="Clear" Click="DeletePin_Click"/>
+            <common:MvtButton x:Name="DeletePin" Margin="10" Height="60" Width="60" MinWidth="40"  Style="{StaticResource Mouvent.StandardButton}" Grid.Column="0" Grid.Row="3" Content="{mvt:LocalizedBinding Clear}" Click="DeletePin_Click"/>
             <common:MvtButton x:Name="Zero" Margin="10" Width="60" Height="60" Style="{StaticResource Mouvent.StandardButton}" Grid.Column="1" Grid.Row="3" Content="0" Click="Number_Click"/>
-            <common:MvtButton x:Name="SuppressChar" Margin="10" Height="60" Width="60" MinWidth="40" Style="{StaticResource Mouvent.StandardButton}" Grid.Column="2" Grid.Row="3" Content="Back" Click="SuppressChar_Click"/>
+            <common:MvtButton x:Name="SuppressChar" Margin="10" Height="60" Width="60" MinWidth="40" Style="{StaticResource Mouvent.StandardButton}" Grid.Column="2" Grid.Row="3" Content="{mvt:LocalizedBinding Back}" Click="SuppressChar_Click"/>
         </Grid>
 
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">

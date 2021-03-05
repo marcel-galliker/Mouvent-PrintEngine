@@ -4,12 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignWidth="300">
     
     <Grid Margin="0,5">
         <!-- <Button x:Name="ButtonCtrl" Click="ButtonCtrl_Click" Content="Button"/> -->
-        <CheckBox x:Name="ButtonCtrl" Click="ButtonCtrl_Click" Content="Button" Height="30" Style="{DynamicResource RxCommandButton}" />
+        <CheckBox x:Name="ButtonCtrl" Click="ButtonCtrl_Click" Content="{mvt:LocalizedBinding Button}" Height="30" Style="{DynamicResource RxCommandButton}" />
         <TextBlock x:Name="CheckMark" Text="X" Margin="10,0" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="Hidden" /> 
     </Grid>
 </UserControl>

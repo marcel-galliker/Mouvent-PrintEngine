@@ -10,6 +10,7 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LH702View"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="700" 
              d:DesignWidth="600"
@@ -19,7 +20,7 @@
         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
     </UserControl.Resources>
 
-    <GroupBox Grid.Column="0" Header="Image Settings" Style="{StaticResource MvtGroupBox}">
+    <GroupBox Grid.Column="0" Header="{mvt:LocalizedBinding ImageSettings}" Style="{StaticResource MvtGroupBox}">
         <Grid x:Name="Grid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -43,14 +44,14 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Image"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding Image}"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="10"
 			        Text="{Binding FilePath, Converter={StaticResource FileName_Converter}}"
 			        Background="Transparent"
                     VerticalAlignment="Center"
                     />
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="PrintGo"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding PrintGo}"/>
                 <rx:RxComboBox x:Name="CB_PrintGoMode"
                     Grid.Row="2" Grid.Column="1"
                     SelectedValue="{Binding PrintGoMode}"
@@ -59,7 +60,7 @@
                     >
                 </rx:RxComboBox>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Distance"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding Distance}"/>
                 <common:MvtNumBox Grid.Row="3" Grid.Column="1" 
 			        Text="{Binding PrintGoDist}"
 			        HorizontalContentAlignment="Right"
@@ -68,7 +69,7 @@
                     />
                 <TextBlock Grid.Row="3" Grid.Column="2" Text="mm" FontSize="{StaticResource MvtFontSize}" Padding="3,0,0,0" VerticalAlignment="Center"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Lateral"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding Lateral}"/>
                 <common:MvtNumBox Grid.Row="4" Grid.Column="1"
 			        Text="{Binding PageMargin}"
 			        HorizontalContentAlignment="Right"
@@ -77,7 +78,7 @@
                     />
                 <TextBlock Grid.Row="4" Grid.Column="2" Text="mm" FontSize="{StaticResource MvtFontSize}" Padding="3,0,0,0" VerticalAlignment="Center"/>
 
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Copies"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding Copies}"/>
                 <common:MvtNumBox Grid.Row="5" Grid.Column="1"
 			        Text="{Binding Copies}"
 			        HorizontalContentAlignment="Right"

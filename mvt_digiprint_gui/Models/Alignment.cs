@@ -299,7 +299,7 @@ namespace RX_DigiPrint.Models
                 }
                 catch (Exception ex)
                 {
-                    RX_Common.MvtMessageBox.Information("Scan Check Import", "Failed to import values, check file format.\nError Message: " + ex.Message);
+                    RX_Common.MvtMessageBox.Information(RX_DigiPrint.Resources.Language.Resources.ScanCheckImport, RX_DigiPrint.Resources.Language.Resources.FailedToImportValues + ex.Message);
                     return;
                 }
 

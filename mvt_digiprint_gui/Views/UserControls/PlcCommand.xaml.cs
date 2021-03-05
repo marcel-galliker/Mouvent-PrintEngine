@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,22 @@ namespace RX_DigiPrint.Views.UserControls
         {
             get { return ButtonCtrl.Content.ToString(); }
             set { ButtonCtrl.Content = value; }
+        }
+        public static readonly DependencyProperty LabelProperty
+         = DependencyProperty.Register(
+        "Label",
+        typeof(String),
+        typeof(PlcCommand),
+        new FrameworkPropertyMetadata("",
+                OnLabelChanged
+                )
+            );
+
+        private static void OnLabelChanged(DependencyObject source,
+        DependencyPropertyChangedEventArgs e)
+        {
+            PlcCommand p = source as PlcCommand;
+            p.Label = (String)e.NewValue;
         }
 
         //--- Property User ---------------------------------------
@@ -96,7 +113,7 @@ namespace RX_DigiPrint.Views.UserControls
             if (val!=0 && Confirm)
             {
                 // ask and return of not "YES"
-                if (MvtMessageBox.YesNo(Label, string.Format("Execute {0} ?", Label.ToUpper()),  MessageBoxImage.Question, false))
+                if (MvtMessageBox.YesNo(Label, string.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmExecute, Label.ToUpper()),  MessageBoxImage.Question, false))
                     return;
             }
             Console.WriteLine("Command >>{0}<<", ID);

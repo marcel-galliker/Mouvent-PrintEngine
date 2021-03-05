@@ -62,6 +62,7 @@ namespace RX_DigiPrint.Views
             RxBindable.Dispatcher = Dispatcher;
 
             InitializeComponent();
+
             System.Diagnostics.PresentationTraceSources.DataBindingSource.Switch.Level = System.Diagnostics.SourceLevels.Critical;
             #if DEBUG__RIP
                 {

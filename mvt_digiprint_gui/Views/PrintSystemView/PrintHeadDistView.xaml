@@ -3,11 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              Margin="5,0"
              >
     <StackPanel>
-        <TextBlock x:Name="Title" Text="Cluster 1" HorizontalAlignment="Center"/>
+        <TextBlock x:Name="Title" Text="{mvt:LocalizedBinding Cluster1}" HorizontalAlignment="Center"/>
         <Grid>
             <Border x:Name="Border" BorderThickness="1" MinWidth="100" Height="140" VerticalAlignment="Top" BorderBrush="#FF3F3F3F">
                 <Grid x:Name="DirText">

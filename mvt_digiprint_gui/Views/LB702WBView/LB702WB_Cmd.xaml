@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="300">
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Commands">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Commands}">
 
         <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main">
-            <rx_uc:PlcCommand ID="CMD_CLEAR_ERROR" Label="Clear Error"/>
+            <rx_uc:PlcCommand ID="CMD_CLEAR_ERROR" Label="{mvt:LocalizedBinding ClearError}"/>
             <!--
                 <rx_uc:PlcTitle Header="Calibration"/>
                 <rx_uc:PlcCommand ID="CMD_SETUP/CMD_REFERENCE" Label="Calibration"/>

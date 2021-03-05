@@ -5,22 +5,23 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB702WBView"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignWidth="300">
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Status">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Status}">
         <Grid Grid.Row="0">
             <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel">
-                <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="Version"/>
-                <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="Machine State" x:Name="CB_MainState" Type="ComboStr"/>
+                <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="{mvt:LocalizedBinding Version}"/>
+                <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="{mvt:LocalizedBinding MachineState}" x:Name="CB_MainState" Type="ComboStr"/>
 
-                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"            Label="Unwinder Ø"                   Format="f"/>
-                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"            Label="Rewinder Ø"                   Format="f"/>
-                <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_IN"               Label="Length IN"  Unit="m" Format="n"/>
-                <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_OUT"              Label="Length OUT" Unit="m" Format="n"/>
-                <rx_uc:PlcParCtrl ID="STA_REMAININGLENGTH_OUT"          Label="Left OUT"   Unit="m" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"            Label="{mvt:LocalizedBinding UnwinderØ}"                   Format="f"/>
+                <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"            Label="{mvt:LocalizedBinding RewinderØ}"                   Format="f"/>
+                <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_IN"               Label="{mvt:LocalizedBinding LengthIn}"  Unit="m" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_OUT"              Label="{mvt:LocalizedBinding LengthOut}" Unit="m" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_REMAININGLENGTH_OUT"          Label="{mvt:LocalizedBinding LeftOut}"   Unit="m" Format="n"/>
 
-                <rx_uc:PlcParCtrl ID="STA_PREPARE_ACTIVE"               Label="Prepare" Visibility="Collapsed"/>
+                <rx_uc:PlcParCtrl ID="STA_PREPARE_ACTIVE"               Label="{mvt:LocalizedBinding Prepare}" Visibility="Collapsed"/>
                 <local:LB702WB_Prepare x:Name="MlPrepare"/>
 
             </rx_uc:PlcParPanel>

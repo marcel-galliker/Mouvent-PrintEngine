@@ -9,12 +9,13 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="700" 
              d:DesignWidth="300"
              >
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Printer">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Printer}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -22,14 +23,14 @@
             </Grid.RowDefinitions>
 
             <rx_uc:PlcParPanel x:Name="ParPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120" Margin="0,1,0,0">
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_MODE"                        Label="Mode"         Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Mode" />
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE1_SETPOINT"     Label="Zone 1"       Unit="°C" UnitWidth="50" Format="1" />
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE2_SETPOINT"     Label="Zone 2"       Unit="°C" UnitWidth="50" Format="1" />
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE3_SETPOINT"     Label="Zone 3"       Unit="°C" UnitWidth="50" Format="1" />
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_BUSES_UP_SETPOINT"           Label="Buses Up"     Unit="Pa" UnitWidth="50" Format="n" />
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_EXHAUST_UP_SETPOINT"         Label="Exhaust Up"   Unit="Pa" UnitWidth="50" Format="n" />
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_BUSES_DOWN_SETPOINT"         Label="Buses Down"   Unit="Pa" UnitWidth="50" Format="n" />
-                <rx_uc:PlcParCtrl ID="PAR_DRYER2_EXHAUST_DOWN_SETPOINT"       Label="Exhaust Down" Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_MODE"                        Label="{mvt:LocalizedBinding Mode}"         Unit=""  UnitWidth="50" Type="Combo" x:Name="CB_Mode" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE1_SETPOINT"     Label="{mvt:LocalizedBinding Zone1}"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE2_SETPOINT"     Label="{mvt:LocalizedBinding Zone2}"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_IR_LAMPS_ZONE3_SETPOINT"     Label="{mvt:LocalizedBinding Zone3}"       Unit="°C" UnitWidth="50" Format="1" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_BUSES_UP_SETPOINT"           Label="{mvt:LocalizedBinding BusesUp}"     Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_EXHAUST_UP_SETPOINT"         Label="{mvt:LocalizedBinding ExhaustUp}"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_BUSES_DOWN_SETPOINT"         Label="{mvt:LocalizedBinding BusesDown}"   Unit="Pa" UnitWidth="50" Format="n" />
+                <rx_uc:PlcParCtrl ID="PAR_DRYER2_EXHAUST_DOWN_SETPOINT"       Label="{mvt:LocalizedBinding ExhaustDown}" Unit="Pa" UnitWidth="50" Format="n" />
 
             </rx_uc:PlcParPanel>
             

@@ -12,6 +12,7 @@
         xmlns:view_lh702="clr-namespace:RX_DigiPrint.Views.LH702View"
         xmlns:views_psex="clr-namespace:RX_DigiPrint.Views.PrintSystemExtendedView"
         xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
         d:DesignWidth="1200"
         WindowStyle="None"
@@ -70,7 +71,7 @@
             <TabItem x:Name="TabPrintQueue" IsEnabled="False">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabPrintQueue}" x:Name="PrintQueueName">
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Print Queue" />
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding PrintQueue}" />
                     </Grid>
                 </TabItem.Header>
                 <views_pq:PrintQueueView x:Name="PrintQueueView"/>
@@ -79,7 +80,7 @@
             <TabItem x:Name="TabMachine">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabMachine}" >
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Machine" x:Name="MachineName"/>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Machine}" x:Name="MachineName"/>
                     </Grid>
                 </TabItem.Header>
             </TabItem>
@@ -91,7 +92,7 @@
                     </Grid>
                 </TabItem.Header>
                 <Grid>
-                    <view_lh702:LH702_View/>
+                    <!-- <view_lh702:LH702_View/> -->
                 </Grid>
             </TabItem>
 
@@ -99,7 +100,7 @@
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabEvents}">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource TabItemStyle}" Text="Events"/>
+                            <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Events}"/>
                             <Rectangle Fill="{Binding TabHeaderUnderlineColor}" Width="auto" Height="2"/>
                         </StackPanel>
                     </Grid>
@@ -112,7 +113,7 @@
             <TabItem x:Name="TabLog">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabLog}">
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Log"/>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Log}"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
@@ -123,7 +124,7 @@
             <TabItem x:Name="TabNetwork">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabNetwork}">
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Network"/>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Network}"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
@@ -135,7 +136,7 @@
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabPrintSystem}">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource TabItemStyle}" Text="Print System"/>
+                            <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding PrintSystem}"/>
                             <Rectangle Width="auto" Height="2" Fill="{Binding StateBrush}" x:Name="PrintSystemState"/>
                         </StackPanel>
                     </Grid>
@@ -149,7 +150,7 @@
             <TabItem x:Name="TabAlignment">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabAlignment}">
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Alignment"/>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Alignment}"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
@@ -160,7 +161,7 @@
             <TabItem x:Name="TabSupervisors">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabSupervisors}">
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="Supervisors"/>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Supervisors}"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
@@ -176,7 +177,7 @@
         <!-- NO Connection _______________________________________________________________________-->
         <TextBlock x:Name="MainNotConnected"
                 Grid.Row="0" 
-                Text="MAIN-CTRL NOT CONNECTED" 
+                Text="{mvt:LocalizedBinding MainCtrlNotConnected}" 
                 FontSize="80" 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center" 

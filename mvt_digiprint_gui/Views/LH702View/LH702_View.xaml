@@ -8,6 +8,7 @@
              xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1500">
 

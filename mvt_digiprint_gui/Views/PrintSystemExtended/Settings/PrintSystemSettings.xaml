@@ -8,10 +8,11 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                        Loaded="CustomWindow_Loaded"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
                        mc:Ignorable="d" 
         SizeToContent="Height"
          ResizeMode="NoResize"
-            Title="Printer Settings"
+            Title="{mvt:LocalizedBinding PrinterSettings}"
              >
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -21,7 +22,7 @@
         </Grid.RowDefinitions>
        
         <DockPanel x:Name="TopPanel" Grid.Row="0" LastChildFill="True">
-        <GroupBox DockPanel.Dock="Left" x:Name="PrintSystemSettingsGroup" Header="Print System" Style="{StaticResource MvtGroupBox}">
+            <GroupBox DockPanel.Dock="Left" x:Name="PrintSystemSettingsGroup" Header="{mvt:LocalizedBinding PrintSystem}" Style="{StaticResource MvtGroupBox}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -34,8 +35,8 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Printer Type" Margin="0, 0, 10, 5"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding PrinterType}" Margin="0, 0, 10, 5"/>
                 <igWPF:XamComboEditor Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="10, 0, 0, 5"
                     HorizontalAlignment="Stretch"
                     ItemsSource="{Binding LocalPrinterTypeList}"
@@ -47,13 +48,13 @@
                     >
                 </igWPF:XamComboEditor>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Colors" Margin="0, 0, 10, 5"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding Colors}" Margin="0, 0, 10, 5"/>
                 <common:MvtNumBox Grid.Row="1" Grid.Column="1" Text="{Binding LocalColorCnt}" Margin="10, 0, 0, 5"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Ink Cylinders / Color" Margin="0, 0, 10, 5"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding InkCylindersColor}" Margin="0, 0, 10, 5"/>
                 <common:MvtNumBox Grid.Row="2" Grid.Column="1" Text="{Binding LocalInkSupplyPerColorCnt}" Margin="10, 0, 0, 5"/>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Heads / Color" Margin="0, 0, 10, 5"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding HeadsColor}" Margin="0, 0, 10, 5"/>
                 <common:MvtNumBox Grid.Row="3" Grid.Column="1" Text="{Binding LocalPrintHeadsPerColor}" Margin="10, 0, 0, 5"/>
             </Grid>
             </GroupBox>

@@ -5,11 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="220" 
              d:DesignWidth="700">
 
-    <GroupBox Header="Stepper" Style="{StaticResource MvtGroupBox}">
+    <GroupBox Header="{mvt:LocalizedBinding Stepper}" Style="{StaticResource MvtGroupBox}">
         <Grid x:Name="MainGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2"/>
@@ -30,10 +31,10 @@
                 <ColumnDefinition Width="45"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock       Grid.Row="1" Grid.Column="0" Text="Basket"/>
-            <TextBlock       Grid.Row="2" Grid.Column="0" Text="Ref Height (back)"/>
-            <TextBlock       Grid.Row="3" Grid.Column="0" Text="Ref Height (front)"/>
-            <TextBlock       Grid.Row="4" Grid.Column="0" Text="Capping Height"/>
+            <TextBlock       Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding Basket}"/>
+            <TextBlock       Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding RefHeightBack}"/>
+            <TextBlock       Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding RefHeightFront}"/>
+            <TextBlock       Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding CappingHeight}"/>
 
             <TextBlock       Grid.Row="1" Grid.Column="1" Text="1" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
             <TextBlock       Grid.Row="1" Grid.Column="2" Text="2" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
@@ -77,15 +78,15 @@
                 <Rectangle Grid.Column="1" x:Name="Col7" Fill="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"/>
             </Grid>
 
-            <TextBlock Grid.Row="5"      Text="FlightTime"/>
+            <TextBlock Grid.Row="5"      Text="{mvt:LocalizedBinding FlightTime}"/>
             <common:MvtNumBox Grid.Row="5" Grid.Column="1" Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" x:Name="ManualFlightTimeComp" />
             <TextBlock       Grid.Row="5" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
-            <TextBlock       Grid.Row="6" Grid.Column="0" Text="Wiping Delay"/>
+            <TextBlock       Grid.Row="6" Grid.Column="0" Text="{mvt:LocalizedBinding WipingDelay}"/>
             <common:MvtNumBox Grid.Row="6" Grid.Column="1" Text="{Binding WipeDelay}" HorizontalContentAlignment="Right"/>
             <TextBlock       Grid.Row="6" Grid.Column="2" Text=" ms" FontSize="{StaticResource MvtFontSize}"/>
 
-            <TextBlock       Grid.Row="7" Grid.Column="0" Text="Wiping Speed"/>
+            <TextBlock       Grid.Row="7" Grid.Column="0" Text="{mvt:LocalizedBinding WipingSpeed}"/>
             <common:MvtNumBox Grid.Row="7" Grid.Column="1" Text="{Binding WipeSpeed}" HorizontalContentAlignment="Right"/>
             <TextBlock       Grid.Row="7" Grid.Column="2" Text=" mm/s" FontSize="{StaticResource MvtFontSize}"/>
 

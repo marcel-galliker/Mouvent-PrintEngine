@@ -15,24 +15,20 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_TestImageList()
         {
-            if (_List!=null) _List=null;
-            if (_List==null)
-            {
-                _List = new List<RxEnum<ETestImage>>();
-                _List.Add(new RxEnum<ETestImage>( ETestImage.jets,            "Jets"));
-                _List.Add(new RxEnum<ETestImage>( ETestImage.jet_numbers,     "Jet Numbers"));
-                _List.Add(new RxEnum<ETestImage>( ETestImage.encoder,         "Encoder"));
-                if (RxGlobals.User.UserType>=EUserType.usr_service)
-				{
-                    _List.Add(new RxEnum<ETestImage>( ETestImage.fullAlignment,   "Full Alignment"));
-                    _List.Add(new RxEnum<ETestImage>( ETestImage.density,         "Density"));   
-                    if (RxGlobals.PrintSystem.IsTx)
-                        _List.Add(new RxEnum<ETestImage>( ETestImage.scanning,        "Scanning"));
-                    _List.Add(new RxEnum<ETestImage>( ETestImage.angle_overlap,   "Angle Overlapped"));
-                    _List.Add(new RxEnum<ETestImage>( ETestImage.angle_separated, "Angle Separated"));
-                    _List.Add(new RxEnum<ETestImage>( ETestImage.grid,            "Grid"));
-				}
-            }
+            _List = new List<RxEnum<ETestImage>>();
+            _List.Add(new RxEnum<ETestImage>( ETestImage.jets, RX_DigiPrint.Resources.Language.Resources.Jets));
+            _List.Add(new RxEnum<ETestImage>( ETestImage.jet_numbers, RX_DigiPrint.Resources.Language.Resources.JetNumbers));
+            _List.Add(new RxEnum<ETestImage>( ETestImage.encoder, RX_DigiPrint.Resources.Language.Resources.Encoder));
+            if (RxGlobals.User.UserType>=EUserType.usr_service)
+			{
+                _List.Add(new RxEnum<ETestImage>( ETestImage.fullAlignment, RX_DigiPrint.Resources.Language.Resources.FullAlignment));
+                _List.Add(new RxEnum<ETestImage>( ETestImage.density, RX_DigiPrint.Resources.Language.Resources.Density));   
+                if (RxGlobals.PrintSystem.IsTx)
+                    _List.Add(new RxEnum<ETestImage>( ETestImage.scanning, RX_DigiPrint.Resources.Language.Resources.Scanning));
+                _List.Add(new RxEnum<ETestImage>( ETestImage.angle_overlap, RX_DigiPrint.Resources.Language.Resources.AngleOverlapped));
+                _List.Add(new RxEnum<ETestImage>( ETestImage.angle_separated, RX_DigiPrint.Resources.Language.Resources.AngleSeparated));
+                _List.Add(new RxEnum<ETestImage>( ETestImage.grid, RX_DigiPrint.Resources.Language.Resources.Grid));
+			}
         }
 
         IEnumerator IEnumerable.GetEnumerator()

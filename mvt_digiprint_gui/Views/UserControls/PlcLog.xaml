@@ -6,6 +6,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:ig="http://schemas.infragistics.com/xaml"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     
@@ -28,16 +29,16 @@
             </ig:XamGrid.SelectionSettings>
             <ig:XamGrid.Columns>
                 <!-- Key="State" ImageColumn -->
-                <ig:UnboundColumn Key="Image"  HeaderText="St">
+                <ig:UnboundColumn Key="Image"  HeaderText="{mvt:LocalizedBinding St}">
                     <ig:UnboundColumn.ItemTemplate>
                         <DataTemplate>
                             <Image Source="{Binding Converter={StaticResource PlcLogState_Converter}}" Height="24"/>
                         </DataTemplate>
                     </ig:UnboundColumn.ItemTemplate>
                 </ig:UnboundColumn>
-                <ig:TextColumn    Key="Time"   HeaderText="Time"     Width="auto"/>
-                <ig:TextColumn    Key="ErrNo"  HeaderText="Error No" Width="auto" ValueConverter="{DynamicResource PlcLogNo_Converter}"/>
-                <ig:TextColumn    Key="Text"   HeaderText="Text"     Width="*" />
+                <ig:TextColumn    Key="Time"   HeaderText="{mvt:LocalizedBinding Time}"     Width="auto"/>
+                <ig:TextColumn    Key="ErrNo"  HeaderText="{mvt:LocalizedBinding ErrorNo}" Width="auto" ValueConverter="{DynamicResource PlcLogNo_Converter}"/>
+                <ig:TextColumn    Key="Text"   HeaderText="{mvt:LocalizedBinding Text}"     Width="*" />
                 <!--
                 <ig:UnboundColumn Key="End"     HeaderText=" " Width="*" ValueConverter="{StaticResource Filler_Converter}"/>
                 -->

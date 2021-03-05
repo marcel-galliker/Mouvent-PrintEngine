@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RX_DigiPrint.Helpers;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
@@ -97,7 +98,7 @@ namespace RX_DigiPrint.Views.UserControls
 
         public void ResetLampBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (RX_Common.MvtMessageBox.YesNo("UV lamp", "Reset the counter of UV lamp operating hours?", MessageBoxImage.Question, false))
+            if (RX_Common.MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.UvLamp, RX_DigiPrint.Resources.Language.Resources.ResetTheCounterOfUvLampOperatingHours, MessageBoxImage.Question, false))
             {
                 Task.Run(() =>
                 {

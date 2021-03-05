@@ -11,9 +11,9 @@ using RX_DigiPrint.Models.Enums;
 using System.Collections.ObjectModel;
 using RX_DigiPrint.External;
 using System.Threading;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
-using RX_DigiPrint.Helpers;
 
 namespace RX_DigiPrint.Views.Settings
 {
@@ -58,13 +58,28 @@ namespace RX_DigiPrint.Views.Settings
         public SettingsDlg()
         {
             InitializeComponent();
-
+            CB_Langue.ItemsSource = new EN_LanguesList();
             CB_Units.ItemsSource = new EN_UnitsList();
 
             Button_Save.IsEnabled = true;
             RxGlobals.Timer.TimerFct += WlanTimer;
 
+            RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            _UserTypeChanged();
+
             Init();
+        }
+
+        void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("UserType")) _UserTypeChanged();
+
+        }
+
+        private EUserType _UserType = EUserType.usr_undef;
+        private void _UserTypeChanged()
+        {
+            if (RxGlobals.User.UserType != _UserType) CB_Langue.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_mouvent;
         }
 
         private void Confirm_Click(object sender, RoutedEventArgs e)
@@ -199,7 +214,7 @@ namespace RX_DigiPrint.Views.Settings
         //--- RestartMain_Clicked ---------------------------------------------
         private void RestartMain_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Restart", "Restarting the MAIN!", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Restart, RX_DigiPrint.Resources.Language.Resources.RestartingTheMain, MessageBoxImage.Question, false))
             {
                 RxGlobals.RxInterface.SendCommand(TcpIp.CMD_RESTART_MAIN);
             }
@@ -208,7 +223,7 @@ namespace RX_DigiPrint.Views.Settings
         //--- RestartGUI_Clicked ---------------------------------------------
         private void RestartGUI_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Restart", "Restarting the GUI!", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Restart, RX_DigiPrint.Resources.Language.Resources.RestartingTheGui, MessageBoxImage.Question, false))
             {
                 Rx.StartProcess("shutdown", "/r /t 0");
             }
@@ -217,7 +232,7 @@ namespace RX_DigiPrint.Views.Settings
         //--- ShutDown_Clicked ---------------------------------------------
         private void ShutDown_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Shut Down", "Shutting Down the GUI!", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ShutDown, RX_DigiPrint.Resources.Language.Resources.ShuttingDownTheGui, MessageBoxImage.Question, false))
             {
                 Rx.StartProcess("shutdown", "/s /t 0");
             }
@@ -226,7 +241,7 @@ namespace RX_DigiPrint.Views.Settings
         //--- Update_Clicked ---------------------------------------------
         private void Update_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Windows Update", "Updating Windows!", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.WindowsUpdate, RX_DigiPrint.Resources.Language.Resources.UpdatingWindows, MessageBoxImage.Question, false))
             {
                 Rx.StartProcess("C:\\Windows\\System32\\control.exe", "/name Microsoft.WindowsUpdate");
             }
@@ -236,5 +251,6 @@ namespace RX_DigiPrint.Views.Settings
         {
             RxGlobals.Screen.PlaceWindow(this);
         }
+
     }
 }

@@ -14,18 +14,15 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_MachineScannerPosList()
         {
-            if (_List==null)
-            {
-                _List = new List<RxEnum<int>>();
-                _List.Add(new RxEnum<int>( 0,  "Moving"));
-                _List.Add(new RxEnum<int>( 1,  "Start"));
-                _List.Add(new RxEnum<int>( 2,  "End"));
-                _List.Add(new RxEnum<int>( 3,  "Capping"));
-                _List.Add(new RxEnum<int>( 4,  "Purge"));
-                _List.Add(new RxEnum<int>( 5,  "Wipe"));
-                _List.Add(new RxEnum<int>( 6,  "Manual"));
-                _List.Add(new RxEnum<int>( 7,  "Stopped"));
-            }
+            _List = new List<RxEnum<int>>();
+            _List.Add(new RxEnum<int>( 0, RX_DigiPrint.Resources.Language.Resources.Moving));
+            _List.Add(new RxEnum<int>( 1, RX_DigiPrint.Resources.Language.Resources.Start));
+            _List.Add(new RxEnum<int>( 2, RX_DigiPrint.Resources.Language.Resources.End));
+            _List.Add(new RxEnum<int>( 3, RX_DigiPrint.Resources.Language.Resources.Capping));
+            _List.Add(new RxEnum<int>( 4, RX_DigiPrint.Resources.Language.Resources.Purge));
+            _List.Add(new RxEnum<int>( 5, RX_DigiPrint.Resources.Language.Resources.Wipe));
+            _List.Add(new RxEnum<int>( 6, RX_DigiPrint.Resources.Language.Resources.Manual));
+            _List.Add(new RxEnum<int>( 7, RX_DigiPrint.Resources.Language.Resources.Stopped));
         }
 
        IEnumerator IEnumerable.GetEnumerator()

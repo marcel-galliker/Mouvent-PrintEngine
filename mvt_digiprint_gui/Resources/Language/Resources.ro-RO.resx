@@ -1,0 +1,1173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AboutRxDigiPrint" xml:space="preserve">
+    <value>Despre RX-DigiPrint</value>
+  </data>
+  <data name="AddFileToPrint" xml:space="preserve">
+    <value>Adăugați fișier de printat</value>
+  </data>
+  <data name="Adjust" xml:space="preserve">
+    <value>Reglaţi</value>
+  </data>
+  <data name="Adjustment" xml:space="preserve">
+    <value>Reglare</value>
+  </data>
+  <data name="AdjustPosition" xml:space="preserve">
+    <value>Reglați poziția</value>
+  </data>
+  <data name="AirValve" xml:space="preserve">
+    <value>Supapă de aer</value>
+  </data>
+  <data name="Alignment" xml:space="preserve">
+    <value>Aliniere</value>
+  </data>
+  <data name="AlignmentSettings" xml:space="preserve">
+    <value>Setări aliniere</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>TOATE LEMENTELE</value>
+  </data>
+  <data name="Angle" xml:space="preserve">
+    <value>Unghi</value>
+  </data>
+  <data name="AngleStitchCorrection" xml:space="preserve">
+    <value>Unghi/Corecție îmbinare</value>
+  </data>
+  <data name="AngleStp" xml:space="preserve">
+    <value>Unghi [stp]</value>
+  </data>
+  <data name="AutoGenerateMessage" xml:space="preserve">
+    <value>Generare automată mesaj</value>
+  </data>
+  <data name="BackLeft" xml:space="preserve">
+    <value>Stânga spate</value>
+  </data>
+  <data name="BackRight" xml:space="preserve">
+    <value>Dreapta spate</value>
+  </data>
+  <data name="Bar" xml:space="preserve">
+    <value>Bară</value>
+  </data>
+  <data name="BarcodeScanner" xml:space="preserve">
+    <value>Scaner coduri de bare</value>
+  </data>
+  <data name="Basket" xml:space="preserve">
+    <value>Coş</value>
+  </data>
+  <data name="BeltStep" xml:space="preserve">
+    <value>Pas centură [µm]</value>
+  </data>
+  <data name="BleedValve" xml:space="preserve">
+    <value>Supapă de aerisire</value>
+  </data>
+  <data name="BufferInStart" xml:space="preserve">
+    <value>Buffer în mod start</value>
+  </data>
+  <data name="Build" xml:space="preserve">
+    <value>Compilați</value>
+  </data>
+  <data name="Buses" xml:space="preserve">
+    <value>Duze</value>
+  </data>
+  <data name="Button" xml:space="preserve">
+    <value>Buton</value>
+  </data>
+  <data name="Calibrate" xml:space="preserve">
+    <value>Calibrați</value>
+  </data>
+  <data name="CalibrateDiameter" xml:space="preserve">
+    <value>Calibrați diametrul</value>
+  </data>
+  <data name="CalibrateTension" xml:space="preserve">
+    <value>Calibrați tensiunea</value>
+  </data>
+  <data name="Calibration" xml:space="preserve">
+    <value>Calibrare</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Anulați</value>
+  </data>
+  <data name="Cap" xml:space="preserve">
+    <value>Dispozitiv protecție</value>
+  </data>
+  <data name="CappingHeight" xml:space="preserve">
+    <value>Înălțime sistem de protecție</value>
+  </data>
+  <data name="CarriageCap" xml:space="preserve">
+    <value>Sanie CAP</value>
+  </data>
+  <data name="CarriageRef" xml:space="preserve">
+    <value>Sanie REF</value>
+  </data>
+  <data name="ChangeComputerName" xml:space="preserve">
+    <value>Modificați numele computerului</value>
+  </data>
+  <data name="ChangeNameTo" xml:space="preserve">
+    <value>Modificați numele în</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Verificați</value>
+  </data>
+  <data name="Child" xml:space="preserve">
+    <value>Răcire</value>
+  </data>
+  <data name="Chiller" xml:space="preserve">
+    <value>Dispozitiv răcire</value>
+  </data>
+  <data name="ChillerNotRunning" xml:space="preserve">
+    <value>Dispozitivul răcire nu funcționează</value>
+  </data>
+  <data name="Cleaning" xml:space="preserve">
+    <value>Curățare</value>
+  </data>
+  <data name="Cluster1" xml:space="preserve">
+    <value>Grup 1</value>
+  </data>
+  <data name="CoatingDryer" xml:space="preserve">
+    <value>Uscător acoperire</value>
+  </data>
+  <data name="CoatingPosition" xml:space="preserve">
+    <value>Poziție acoperire</value>
+  </data>
+  <data name="CoatingTension" xml:space="preserve">
+    <value>Tensiune acoperire</value>
+  </data>
+  <data name="CoatingUnit" xml:space="preserve">
+    <value>Unitate acoperire</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Cod</value>
+  </data>
+  <data name="Collate" xml:space="preserve">
+    <value>Colaj</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Culoare</value>
+  </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Culori</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Comenzi</value>
+  </data>
+  <data name="ConditionerPressureInlet" xml:space="preserve">
+    <value>Conditioner: Intrare de presiune</value>
+  </data>
+  <data name="ConditionerPumpsSpeed" xml:space="preserve">
+    <value>Conditioner: Viteză pompe</value>
+  </data>
+  <data name="Configuration" xml:space="preserve">
+    <value>Configurare</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Element conectat</value>
+  </data>
+  <data name="Consumables" xml:space="preserve">
+    <value>Consumabile</value>
+  </data>
+  <data name="ControlMode" xml:space="preserve">
+    <value>Mod Control</value>
+  </data>
+  <data name="Copies" xml:space="preserve">
+    <value>Copiere</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copiați</value>
+  </data>
+  <data name="Corona" xml:space="preserve">
+    <value>Coroană</value>
+  </data>
+  <data name="CoverOpen" xml:space="preserve">
+    <value>Deschideți carterul</value>
+  </data>
+  <data name="CuringLamp" xml:space="preserve">
+    <value>Lampă de uscare</value>
+  </data>
+  <data name="CuringPasses" xml:space="preserve">
+    <value>Deplasări de uscare</value>
+  </data>
+  <data name="CutterNipStandstill" xml:space="preserve">
+    <value>Imobilizare ghiară cutter</value>
+  </data>
+  <data name="Cutting" xml:space="preserve">
+    <value>Tăiere</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="DataReady" xml:space="preserve">
+    <value>Date disponibile</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Coordonate de timp</value>
+  </data>
+  <data name="Density" xml:space="preserve">
+    <value>Densitate</value>
+  </data>
+  <data name="DensityAndJetCompensation" xml:space="preserve">
+    <value>Densitate şi Compensare Jet</value>
+  </data>
+  <data name="DensityJetCompensation" xml:space="preserve">
+    <value>Densitate şi Compensare Jet</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Descriere</value>
+  </data>
+  <data name="Device" xml:space="preserve">
+    <value>Dispozitiv</value>
+  </data>
+  <data name="DiameterOffset" xml:space="preserve">
+    <value>Offset diametru</value>
+  </data>
+  <data name="DieCut" xml:space="preserve">
+    <value>Decupare</value>
+  </data>
+  <data name="DieNipStandstill" xml:space="preserve">
+    <value>Imobilizare ghiară decupare</value>
+  </data>
+  <data name="DieNipTension" xml:space="preserve">
+    <value>Tensiune ghiară decupare</value>
+  </data>
+  <data name="Directory" xml:space="preserve">
+    <value>Fișier director</value>
+  </data>
+  <data name="Displayed" xml:space="preserve">
+    <value>Afișat (ă)</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>Distanţă</value>
+  </data>
+  <data name="DistVerso" xml:space="preserve">
+    <value>Dist Verso [mm]</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Operațiune finalizată</value>
+  </data>
+  <data name="DripPans" xml:space="preserve">
+    <value>PLATOURI SCURGERE</value>
+  </data>
+  <data name="DropSize" xml:space="preserve">
+    <value>Dimensiune Picătură</value>
+  </data>
+  <data name="Dryer" xml:space="preserve">
+    <value>Uscător</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Gol (goală)</value>
+  </data>
+  <data name="Empty2Min" xml:space="preserve">
+    <value>Gol (goală) 2 min</value>
+  </data>
+  <data name="Encoder" xml:space="preserve">
+    <value>Codificator [inc/m]</value>
+  </data>
+  <data name="EncodersType" xml:space="preserve">
+    <value>Tip de codificatoare</value>
+  </data>
+  <data name="EncoderVerso" xml:space="preserve">
+    <value>Verso Codificator [inc/m]</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>Final</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Limba engleză</value>
+  </data>
+  <data name="ErrorNo" xml:space="preserve">
+    <value>Eroare nr.:</value>
+  </data>
+  <data name="Errors" xml:space="preserve">
+    <value>Erori</value>
+  </data>
+  <data name="Events" xml:space="preserve">
+    <value>Evenimente</value>
+  </data>
+  <data name="Exhaust" xml:space="preserve">
+    <value>Evacuare</value>
+  </data>
+  <data name="FactoryNetwork" xml:space="preserve">
+    <value>Rețea uzină</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>Familie</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>Fișier</value>
+  </data>
+  <data name="Fill" xml:space="preserve">
+    <value>Umpleți</value>
+  </data>
+  <data name="Fill5Sec" xml:space="preserve">
+    <value>Umpleți 5sec</value>
+  </data>
+  <data name="Finisher" xml:space="preserve">
+    <value>Finisor</value>
+  </data>
+  <data name="FirepulseVoltage" xml:space="preserve">
+    <value>Tensiune firepulse</value>
+  </data>
+  <data name="Flexo" xml:space="preserve">
+    <value>Flexo</value>
+  </data>
+  <data name="FlexoDryer" xml:space="preserve">
+    <value>Uscător flexo</value>
+  </data>
+  <data name="FlexoReady" xml:space="preserve">
+    <value>Flexo disponibil</value>
+  </data>
+  <data name="FlexoTension" xml:space="preserve">
+    <value>Tensiune flexo</value>
+  </data>
+  <data name="FlexoUnit" xml:space="preserve">
+    <value>Unitate flexo</value>
+  </data>
+  <data name="FlightTime" xml:space="preserve">
+    <value>FlightTime [mm]</value>
+  </data>
+  <data name="FlowFactor" xml:space="preserve">
+    <value>Factor de debit</value>
+  </data>
+  <data name="Flush" xml:space="preserve">
+    <value>Evacuare</value>
+  </data>
+  <data name="Flushed" xml:space="preserve">
+    <value>EVACUARE</value>
+  </data>
+  <data name="Flushing" xml:space="preserve">
+    <value>Evacuare în curs</value>
+  </data>
+  <data name="FontSize" xml:space="preserve">
+    <value>Dimensiune Font</value>
+  </data>
+  <data name="French" xml:space="preserve">
+    <value>Limba franceză</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>De la</value>
+  </data>
+  <data name="FrontLeft" xml:space="preserve">
+    <value>Recto stânga</value>
+  </data>
+  <data name="FrontRight" xml:space="preserve">
+    <value>Recto Dreapta</value>
+  </data>
+  <data name="Gloss" xml:space="preserve">
+    <value>Luciu</value>
+  </data>
+  <data name="Gluing" xml:space="preserve">
+    <value>Lipire</value>
+  </data>
+  <data name="HeadAdjustment" xml:space="preserve">
+    <value>Reglare cap</value>
+  </data>
+  <data name="HeadAdjustmentView" xml:space="preserve">
+    <value>Vizualizare reglare cap</value>
+  </data>
+  <data name="HeadAlign" xml:space="preserve">
+    <value>Aliniere cap</value>
+  </data>
+  <data name="HeadInPrintingPosition" xml:space="preserve">
+    <value>Capul în poziția de printare</value>
+  </data>
+  <data name="HeadsColor" xml:space="preserve">
+    <value>Capete / Culoare</value>
+  </data>
+  <data name="HeadsPrintPos" xml:space="preserve">
+    <value>Capete la Poz Print</value>
+  </data>
+  <data name="HeadsReferenced" xml:space="preserve">
+    <value>Capete referențiate</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Înălțime (mm)</value>
+  </data>
+  <data name="HostName" xml:space="preserve">
+    <value>Nume Gazdă</value>
+  </data>
+  <data name="Id" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Identify" xml:space="preserve">
+    <value>Identificați</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>Imagine</value>
+  </data>
+  <data name="ImageGap" xml:space="preserve">
+    <value>Spațiere imagine</value>
+  </data>
+  <data name="ImageInCnt" xml:space="preserve">
+    <value>Imagine în Cnt (buffer)</value>
+  </data>
+  <data name="ImageMargin" xml:space="preserve">
+    <value>Margine imagine</value>
+  </data>
+  <data name="ImageSettings" xml:space="preserve">
+    <value>Setări imagine</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Ink" xml:space="preserve">
+    <value>Cerneală</value>
+  </data>
+  <data name="InkColor" xml:space="preserve">
+    <value>Culoare cerneală</value>
+  </data>
+  <data name="InkCylinder" xml:space="preserve">
+    <value>Cilindru cerneală</value>
+  </data>
+  <data name="InkCylindersColor" xml:space="preserve">
+    <value>Cilindri cerneală / Culoare</value>
+  </data>
+  <data name="InkSupply" xml:space="preserve">
+    <value>Furnizare cerneală</value>
+  </data>
+  <data name="InkSupplyCommands" xml:space="preserve">
+    <value>Comenzi furnizare cerneală</value>
+  </data>
+  <data name="InkTankPressure" xml:space="preserve">
+    <value>Presiunea rezervorului de cerneală</value>
+  </data>
+  <data name="IpAddress" xml:space="preserve">
+    <value>Adresă IP</value>
+  </data>
+  <data name="JetCompensation" xml:space="preserve">
+    <value>Compensare jet</value>
+  </data>
+  <data name="JetNumber" xml:space="preserve">
+    <value>Număr jet</value>
+  </data>
+  <data name="LampTime" xml:space="preserve">
+    <value>Coordonate orare lampă</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Limba</value>
+  </data>
+  <data name="Large" xml:space="preserve">
+    <value>Nivel mare</value>
+  </data>
+  <data name="Laser" xml:space="preserve">
+    <value>Laser</value>
+  </data>
+  <data name="Lateral" xml:space="preserve">
+    <value>Lateral</value>
+  </data>
+  <data name="Len" xml:space="preserve">
+    <value>Lun.</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Lungime</value>
+  </data>
+  <data name="Line" xml:space="preserve">
+    <value>Linie</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Încărcați</value>
+  </data>
+  <data name="Log" xml:space="preserve">
+    <value>Jurnal</value>
+  </data>
+  <data name="MacAddress" xml:space="preserve">
+    <value>Adresă Mac</value>
+  </data>
+  <data name="Machine" xml:space="preserve">
+    <value>Mașină</value>
+  </data>
+  <data name="MagneticBand" xml:space="preserve">
+    <value>Bandă magnetică</value>
+  </data>
+  <data name="Main" xml:space="preserve">
+    <value>Principal</value>
+  </data>
+  <data name="MainCtrlNotConnected" xml:space="preserve">
+    <value>MAIN-CTRL NU ESTE CONECTAT</value>
+  </data>
+  <data name="Material" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="Meniscus" xml:space="preserve">
+    <value>Menisc</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Mid" xml:space="preserve">
+    <value>Mediu</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Mod</value>
+  </data>
+  <data name="Motor" xml:space="preserve">
+    <value>Motor</value>
+  </data>
+  <data name="Moving" xml:space="preserve">
+    <value>Deplasare</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nume</value>
+  </data>
+  <data name="NetMask" xml:space="preserve">
+    <value>Mască rețea</value>
+  </data>
+  <data name="Network" xml:space="preserve">
+    <value>Rețea</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Următorul</value>
+  </data>
+  <data name="Night" xml:space="preserve">
+    <value>Noapte</value>
+  </data>
+  <data name="NIP" xml:space="preserve">
+    <value>GHIARĂ</value>
+  </data>
+  <data name="NipTension" xml:space="preserve">
+    <value>Tensiune ghiară</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nu</value>
+  </data>
+  <data name="NotConnected" xml:space="preserve">
+    <value>NU ESTE CONECTAT (Ă)</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Notă</value>
+  </data>
+  <data name="NumberColors" xml:space="preserve">
+    <value>Număr de culori</value>
+  </data>
+  <data name="NumberSettings" xml:space="preserve">
+    <value>Setări număr</value>
+  </data>
+  <data name="Offsets" xml:space="preserve">
+    <value>Offset-uri</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="OnlyAvailableInErrorState" xml:space="preserve">
+    <value>DISPONIBIL NUMAI ÎN STARE DE EROARE</value>
+  </data>
+  <data name="OpenFile" xml:space="preserve">
+    <value>Deschideți fișier</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Operator</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Comandă</value>
+  </data>
+  <data name="Orders" xml:space="preserve">
+    <value>Comenzi</value>
+  </data>
+  <data name="Orientation" xml:space="preserve">
+    <value>Orientare</value>
+  </data>
+  <data name="Overlap" xml:space="preserve">
+    <value>Suprapunere</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Pagină</value>
+  </data>
+  <data name="Pages" xml:space="preserve">
+    <value>Pagini</value>
+  </data>
+  <data name="Parameter" xml:space="preserve">
+    <value>Parametru</value>
+  </data>
+  <data name="Passes" xml:space="preserve">
+    <value>Deplasări</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Parolă</value>
+  </data>
+  <data name="PlcInfo" xml:space="preserve">
+    <value>Informaţii PLC</value>
+  </data>
+  <data name="PlcLog" xml:space="preserve">
+    <value>Jurnal PLC</value>
+  </data>
+  <data name="PlcNotConnected" xml:space="preserve">
+    <value>PLC NU ESTE CONECTAT</value>
+  </data>
+  <data name="PositionX" xml:space="preserve">
+    <value>Poziție X</value>
+  </data>
+  <data name="PositionY" xml:space="preserve">
+    <value>Poziție Y</value>
+  </data>
+  <data name="PrepareState" xml:space="preserve">
+    <value>Stare pregătire</value>
+  </data>
+  <data name="PrepareStatePlc" xml:space="preserve">
+    <value>Stare pregătire: PLC</value>
+  </data>
+  <data name="PrepareStatePrintEngine" xml:space="preserve">
+    <value>Stare pregătire: Echipament printare</value>
+  </data>
+  <data name="Pressure" xml:space="preserve">
+    <value>Presiune</value>
+  </data>
+  <data name="PressureInlet" xml:space="preserve">
+    <value>Admisie presiune</value>
+  </data>
+  <data name="PressureLung" xml:space="preserve">
+    <value>Organ presiune</value>
+  </data>
+  <data name="PressureOutlet" xml:space="preserve">
+    <value>Ieșire presiune</value>
+  </data>
+  <data name="PressureRoller" xml:space="preserve">
+    <value>Roller presiune</value>
+  </data>
+  <data name="PressureRollerInStart" xml:space="preserve">
+    <value>Roller presiune la Start</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Previzualizați</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Printați</value>
+  </data>
+  <data name="PrintDryer" xml:space="preserve">
+    <value>Uscător printare</value>
+  </data>
+  <data name="Printed" xml:space="preserve">
+    <value>Element printat</value>
+  </data>
+  <data name="PrintEnvironment" xml:space="preserve">
+    <value>Mediu printare</value>
+  </data>
+  <data name="Printer" xml:space="preserve">
+    <value>Imprimantă</value>
+  </data>
+  <data name="PrinterNipStandstill" xml:space="preserve">
+    <value>Imobilizare ghiară imprimantă</value>
+  </data>
+  <data name="PrinterNipTension" xml:space="preserve">
+    <value>Tensiune ghiară imprimantă</value>
+  </data>
+  <data name="PrinterSettings" xml:space="preserve">
+    <value>Setări imprimantă</value>
+  </data>
+  <data name="PrinterType" xml:space="preserve">
+    <value>Tip imprimantă</value>
+  </data>
+  <data name="PrintGo" xml:space="preserve">
+    <value>Print Go</value>
+  </data>
+  <data name="PrintGoMode" xml:space="preserve">
+    <value>Mod PrintGo</value>
+  </data>
+  <data name="PrintHeads" xml:space="preserve">
+    <value>Capete de printare</value>
+  </data>
+  <data name="Printing" xml:space="preserve">
+    <value>Printare în curs</value>
+  </data>
+  <data name="PrintingTime" xml:space="preserve">
+    <value>Durată printare</value>
+  </data>
+  <data name="PrintQueue" xml:space="preserve">
+    <value>Coadă printare</value>
+  </data>
+  <data name="PrintSystem" xml:space="preserve">
+    <value>Sistem printare</value>
+  </data>
+  <data name="PrintTension" xml:space="preserve">
+    <value>Tensiune printare</value>
+  </data>
+  <data name="PrintTestImage" xml:space="preserve">
+    <value>Imagine de test printare</value>
+  </data>
+  <data name="PrintUnitDryer" xml:space="preserve">
+    <value>Uscător unitate printare</value>
+  </data>
+  <data name="Produced" xml:space="preserve">
+    <value>Produs (ă)</value>
+  </data>
+  <data name="PropagateCorrectionValuesToAllFollowingPrintHeads" xml:space="preserve">
+    <value>Propagarea valorilor corecţiei la toate capetele de tipărire următoare</value>
+  </data>
+  <data name="PumpSpeed" xml:space="preserve">
+    <value>Viteză pompă</value>
+  </data>
+  <data name="Purge" xml:space="preserve">
+    <value>Purjare</value>
+  </data>
+  <data name="PurgeAndVacuum" xml:space="preserve">
+    <value>Purjare şi vacuum</value>
+  </data>
+  <data name="PurgeAndWipe" xml:space="preserve">
+    <value>Purjare şi ștergere</value>
+  </data>
+  <data name="PurgeHard" xml:space="preserve">
+    <value>Purjare hard</value>
+  </data>
+  <data name="PurgeMicro" xml:space="preserve">
+    <value>Purjare micro</value>
+  </data>
+  <data name="PurgeSoft" xml:space="preserve">
+    <value>Purjare soft</value>
+  </data>
+  <data name="Putty" xml:space="preserve">
+    <value>Putty</value>
+  </data>
+  <data name="Queue" xml:space="preserve">
+    <value>Coadă</value>
+  </data>
+  <data name="Recto" xml:space="preserve">
+    <value>RECTO</value>
+  </data>
+  <data name="Ref" xml:space="preserve">
+    <value>Ref</value>
+  </data>
+  <data name="Reference" xml:space="preserve">
+    <value>Referința</value>
+  </data>
+  <data name="ReferenceDone" xml:space="preserve">
+    <value>Referință finalizată</value>
+  </data>
+  <data name="RefHeight" xml:space="preserve">
+    <value>Înălțime Ref</value>
+  </data>
+  <data name="RefHeightBack" xml:space="preserve">
+    <value>Înălțime Ref (recto)</value>
+  </data>
+  <data name="RefHeightFront" xml:space="preserve">
+    <value>Înălțime Ref (verso)</value>
+  </data>
+  <data name="Refreshing" xml:space="preserve">
+    <value>Actualizare</value>
+  </data>
+  <data name="RefRobot" xml:space="preserve">
+    <value>Robot Ref</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Eliminați</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Resetați</value>
+  </data>
+  <data name="ResetLengthL" xml:space="preserve">
+    <value>Resetare lungime L</value>
+  </data>
+  <data name="ResetLengthR" xml:space="preserve">
+    <value>Resetare lungime R</value>
+  </data>
+  <data name="RestartGui" xml:space="preserve">
+    <value>Reporniți GUI</value>
+  </data>
+  <data name="RestartMain" xml:space="preserve">
+    <value>Reporniți Principal</value>
+  </data>
+  <data name="Rewinder" xml:space="preserve">
+    <value>Înfășurător</value>
+  </data>
+  <data name="Rewinder1Standstill" xml:space="preserve">
+    <value>Blocare Înfășurător 1</value>
+  </data>
+  <data name="Rewinder1Tension" xml:space="preserve">
+    <value>Tensiune Înfășurător 1</value>
+  </data>
+  <data name="Rewinder2Standstill" xml:space="preserve">
+    <value>Blocare Înfășurător 2</value>
+  </data>
+  <data name="Rewinder2Tension" xml:space="preserve">
+    <value>Tensiune Înfășurător 2</value>
+  </data>
+  <data name="RewinderBuffer" xml:space="preserve">
+    <value>Buffer Înfășurător</value>
+  </data>
+  <data name="RewinderGridStandstill" xml:space="preserve">
+    <value>Blocare Rewinder Grid</value>
+  </data>
+  <data name="RewinderGridTension" xml:space="preserve">
+    <value>Tensiune Rewinder Grid</value>
+  </data>
+  <data name="RewinderStandstill" xml:space="preserve">
+    <value>Blocare înfășurător</value>
+  </data>
+  <data name="RewinderTension" xml:space="preserve">
+    <value>Tensiune înfășurător</value>
+  </data>
+  <data name="Ripped" xml:space="preserve">
+    <value>Element rasterizat</value>
+  </data>
+  <data name="RippedData" xml:space="preserve">
+    <value>Date rasterizate</value>
+  </data>
+  <data name="RollsDiameter" xml:space="preserve">
+    <value>Diametru role</value>
+  </data>
+  <data name="RollsProduced" xml:space="preserve">
+    <value>Role produse</value>
+  </data>
+  <data name="RwTension0" xml:space="preserve">
+    <value>RW Tensiune &amp; Ø</value>
+  </data>
+  <data name="ScalesCalibration" xml:space="preserve">
+    <value>Calibrare scale</value>
+  </data>
+  <data name="Scan" xml:space="preserve">
+    <value>Scanare</value>
+  </data>
+  <data name="ScanMode" xml:space="preserve">
+    <value>Mod scanare</value>
+  </data>
+  <data name="ScannerInStart" xml:space="preserve">
+    <value>Scaner în mod start</value>
+  </data>
+  <data name="Scans" xml:space="preserve">
+    <value>Scanează</value>
+  </data>
+  <data name="SerialNo" xml:space="preserve">
+    <value>Nr. de serie</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Setări</value>
+  </data>
+  <data name="SetupCommands" xml:space="preserve">
+    <value>Comenzi configurare</value>
+  </data>
+  <data name="ShutDownGui" xml:space="preserve">
+    <value>Închideți GUI</value>
+  </data>
+  <data name="Side" xml:space="preserve">
+    <value>Lateral</value>
+  </data>
+  <data name="Slide" xml:space="preserve">
+    <value>Glisare</value>
+  </data>
+  <data name="SlideToLeft" xml:space="preserve">
+    <value>Glisați la stânga</value>
+  </data>
+  <data name="SlideToRight" xml:space="preserve">
+    <value>Glisați la dreapta</value>
+  </data>
+  <data name="Small" xml:space="preserve">
+    <value>Nivel mic</value>
+  </data>
+  <data name="Software" xml:space="preserve">
+    <value>Software</value>
+  </data>
+  <data name="SoftwareVersion" xml:space="preserve">
+    <value>Versiune software</value>
+  </data>
+  <data name="SourceData" xml:space="preserve">
+    <value>Date sursă</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Viteza</value>
+  </data>
+  <data name="SpeedUnit" xml:space="preserve">
+    <value>Unitate viteză</value>
+  </data>
+  <data name="Splicing" xml:space="preserve">
+    <value>Îmbinare</value>
+  </data>
+  <data name="SpreadRoller" xml:space="preserve">
+    <value>Roller expansiune</value>
+  </data>
+  <data name="St" xml:space="preserve">
+    <value>St.</value>
+  </data>
+  <data name="StartAt" xml:space="preserve">
+    <value>Start la</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>Stare</value>
+  </data>
+  <data name="Static" xml:space="preserve">
+    <value>Static</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Stare</value>
+  </data>
+  <data name="Stepper" xml:space="preserve">
+    <value>Stepper</value>
+  </data>
+  <data name="StepperLeft" xml:space="preserve">
+    <value>Stepper stânga</value>
+  </data>
+  <data name="StepperRight" xml:space="preserve">
+    <value>Stepper dreapta</value>
+  </data>
+  <data name="Stitch" xml:space="preserve">
+    <value>Colaj</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>STOP</value>
+  </data>
+  <data name="SubstrateSettings" xml:space="preserve">
+    <value>Setări substrat</value>
+  </data>
+  <data name="SupportCommands" xml:space="preserve">
+    <value>Comenzi suport</value>
+  </data>
+  <data name="SystemTime" xml:space="preserve">
+    <value>Coordonate orare sistem</value>
+  </data>
+  <data name="Table" xml:space="preserve">
+    <value>Tabel</value>
+  </data>
+  <data name="TaskSwitch" xml:space="preserve">
+    <value>Comutator activitate</value>
+  </data>
+  <data name="Temp" xml:space="preserve">
+    <value>Temp</value>
+  </data>
+  <data name="TempDown" xml:space="preserve">
+    <value>Reducere temp</value>
+  </data>
+  <data name="TemperatureConditioner" xml:space="preserve">
+    <value>Conditioner temperatură</value>
+  </data>
+  <data name="TemperatureHead" xml:space="preserve">
+    <value>Cap temperatură</value>
+  </data>
+  <data name="TemperatureInkSupply" xml:space="preserve">
+    <value>Temperatură InkSupply</value>
+  </data>
+  <data name="TempUp" xml:space="preserve">
+    <value>Creștere temp</value>
+  </data>
+  <data name="Tension" xml:space="preserve">
+    <value>Tensiune</value>
+  </data>
+  <data name="TensionOffset" xml:space="preserve">
+    <value>Offset Tensiune</value>
+  </data>
+  <data name="Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="TestImage" xml:space="preserve">
+    <value>Imaginea de test</value>
+  </data>
+  <data name="Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Coordonate orare</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Titlu</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>La</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>total</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Unități</value>
+  </data>
+  <data name="Unused" xml:space="preserve">
+    <value>Neutilizate</value>
+  </data>
+  <data name="Unwinder" xml:space="preserve">
+    <value>Desfășurător</value>
+  </data>
+  <data name="UnwinderBuffer" xml:space="preserve">
+    <value>Buffer desfășurător</value>
+  </data>
+  <data name="UnwinderStandstill" xml:space="preserve">
+    <value>Blocare desfășurător</value>
+  </data>
+  <data name="UnwinderTension" xml:space="preserve">
+    <value>Tensiune desfășurător</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>Sus</value>
+  </data>
+  <data name="UserAccount" xml:space="preserve">
+    <value>Cont utilizator</value>
+  </data>
+  <data name="UvReady" xml:space="preserve">
+    <value>UV disponibil</value>
+  </data>
+  <data name="UwTension0" xml:space="preserve">
+    <value>UW Tensiune &amp; Ø</value>
+  </data>
+  <data name="Vacuum" xml:space="preserve">
+    <value>Vacuum</value>
+  </data>
+  <data name="Valve" xml:space="preserve">
+    <value>Supapă</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Versiune</value>
+  </data>
+  <data name="Verso" xml:space="preserve">
+    <value>VERSO</value>
+  </data>
+  <data name="Volume" xml:space="preserve">
+    <value>Volum</value>
+  </data>
+  <data name="WakeUp" xml:space="preserve">
+    <value>Inițializare</value>
+  </data>
+  <data name="Wash" xml:space="preserve">
+    <value>Spălați</value>
+  </data>
+  <data name="WashingUnit" xml:space="preserve">
+    <value>Unitate Spălare</value>
+  </data>
+  <data name="Waste" xml:space="preserve">
+    <value>Deșeuri</value>
+  </data>
+  <data name="WebLength" xml:space="preserve">
+    <value>Lungime web</value>
+  </data>
+  <data name="WebTensions" xml:space="preserve">
+    <value>Tensiuni web</value>
+  </data>
+  <data name="Week" xml:space="preserve">
+    <value>Săptămână</value>
+  </data>
+  <data name="Weekend" xml:space="preserve">
+    <value>weekend</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Lățime (mm)</value>
+  </data>
+  <data name="WindowsCommands" xml:space="preserve">
+    <value>Comenzi Windows</value>
+  </data>
+  <data name="WindowsUpdate" xml:space="preserve">
+    <value>Actualizare Windows</value>
+  </data>
+  <data name="Wipe" xml:space="preserve">
+    <value>Ștergeți</value>
+  </data>
+  <data name="WipingDelay" xml:space="preserve">
+    <value>Interval ștergere</value>
+  </data>
+  <data name="WipingHeight" xml:space="preserve">
+    <value>Înălțime Ștergere</value>
+  </data>
+  <data name="WipingSpeed" xml:space="preserve">
+    <value>Viteză ștergere</value>
+  </data>
+</root>

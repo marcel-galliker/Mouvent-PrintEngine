@@ -4,6 +4,7 @@
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         Height="300"
         Width="500"
         ResizeMode="NoResize"
@@ -11,7 +12,7 @@
         ShowInTaskbar="False"
         Topmost="True"
         >
-    <GroupBox x:Name="GroupBox" Style="{StaticResource MvtGroupBox}" Header="Title">
+    <GroupBox x:Name="GroupBox" Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Title}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -29,9 +30,9 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="BarcodeScanner" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="{StaticResource MvtFontSizeSmall}"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding BarcodeScanner}" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="{StaticResource MvtFontSizeSmall}"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ScannerSN}" VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" FontSize="{StaticResource MvtFontSizeSmall}"/>
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Info" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding Info}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BarCode}" VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap"/>
 
                 <rx_uc:InkLevel Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" x:Name="Level" />

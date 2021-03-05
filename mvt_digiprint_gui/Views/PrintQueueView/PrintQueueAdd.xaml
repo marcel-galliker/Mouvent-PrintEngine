@@ -2,8 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:pq_views="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         
-        Title="Add file to print" 
+        Title="{mvt:LocalizedBinding AddFileToPrint}" 
         Height="435" 
         Width="520" 
         ResizeMode="NoResize"
@@ -19,8 +20,8 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
-        
-        <GroupBox Header="File">
+
+        <GroupBox Header="{mvt:LocalizedBinding File}">
             <Grid>
                 <TextBox   Text="{Binding FilePath}" VerticalAlignment="Center" />
                 <Button    HorizontalAlignment="Right" Content="..." Width="32" Click="File_Clicked" VerticalAlignment="Center"/>
@@ -34,7 +35,7 @@
             Grid.Row="3"
             Grid.Column="0"
             Grid.ColumnSpan="2"
-            Content="PRINT" 
+            Content="{mvt:LocalizedBinding Print}" 
             Width="100" 
             Height="auto" 
             Click="Print_Clicked" 

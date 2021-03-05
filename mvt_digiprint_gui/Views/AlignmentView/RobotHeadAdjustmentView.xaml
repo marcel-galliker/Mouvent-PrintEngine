@@ -7,9 +7,10 @@
          xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:local="clr-namespace:RX_DigiPrint.Views.Alignment"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
-        Title="HeadAdjustmentView"
+        Title="{mvt:LocalizedBinding HeadAdjustmentView}"
         SizeToContent="WidthAndHeight" MinHeight="200" MinWidth="400"
         ResizeMode="NoResize">
     <Grid>
@@ -76,21 +77,21 @@
                         </Grid.ColumnDefinitions>
 
                         <common:MvtButton Margin="10,0,10,0" Visibility="{Binding Done, Converter={StaticResource BoolToInVisible_Converter}}"
-                                  ToolTip="Adjust"
+                                  ToolTip="{mvt:LocalizedBinding Adjust}"
                           Click="Adjust_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
                             <iconPacks:PackIconMaterial VerticalAlignment="Center" HorizontalAlignment="Center"
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="RobotIndustrial"></iconPacks:PackIconMaterial>
                         </common:MvtButton>
                         <common:MvtButton Margin="10,0,10,0" Visibility="{Binding Done, Converter={StaticResource BoolToVisible_Converter}}"
-                                  ToolTip="Done"
+                                  ToolTip="{mvt:LocalizedBinding Done}"
                           Click="Done_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
                             <iconPacks:PackIconMaterial VerticalAlignment="Center" HorizontalAlignment="Center"
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 
                                                 Kind="Cancel"></iconPacks:PackIconMaterial>
                         </common:MvtButton>
 
-                        <common:MvtButton Grid.Column="1" Margin="10,0,10,0" ToolTip="Close"
+                        <common:MvtButton Grid.Column="1" Margin="10,0,10,0" ToolTip="{mvt:LocalizedBinding Close}"
                           Click="Cancel_Clicked" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeL}">
                             <iconPacks:PackIconMaterial VerticalAlignment="Center" HorizontalAlignment="Center"
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkIcon}" Width="20" Height="20" 

@@ -7,6 +7,7 @@
              xmlns:views="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
              DataContextChanged="UserControl_DataContextChanged">
@@ -63,19 +64,19 @@
                 <GroupBox x:Name="CommandGrid" Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
                     <StackPanel Margin="10,2">
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="OFF" Height="40"           Click="OFF_Clicked"         Padding="10" x:Name="Button_Off"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="Print"  Height="40"         Click="Print_Clicked"       Padding="10" x:Name="Button_Print"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="{mvt:LocalizedBinding Print}"  Height="40"         Click="Print_Clicked"       Padding="10" x:Name="Button_Print"/>
                         
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
 
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Micro"   Click="PurgeMicro_Clicked"  Padding="10" x:Name="Button_PurgeMicro"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Soft"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge"         Click="Purge_Clicked"       Padding="10"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Hard"    Click="PurgeHard_Clicked"   Padding="10" x:Name="Button_PurgeHard"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeMicro}"   Click="PurgeMicro_Clicked"  Padding="10" x:Name="Button_PurgeMicro"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeSoft}"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Purge}"         Click="Purge_Clicked"       Padding="10"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeHard}"    Click="PurgeHard_Clicked"   Padding="10" x:Name="Button_PurgeHard"/>
                    <!-- <Button Content="Flush"         Click="Flush_Clicked"/>     - -->
 
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
 
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Wipe"          Click="Wipe_Clicked"        Padding="10" x:Name="Button_Wipe"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Wipe}"          Click="Wipe_Clicked"        Padding="10" x:Name="Button_Wipe"/>
                     </StackPanel>
                 </GroupBox>
             </Grid>
@@ -150,7 +151,7 @@
         <!-- NO Connection _______________________________________________________________________-->
         <TextBlock x:Name="NotConnected"
                 Grid.RowSpan="100"
-                Text="NOT CONNECTED" 
+                Text="{mvt:LocalizedBinding NotConnected}" 
                 FontSize="15" 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center" 

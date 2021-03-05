@@ -10,6 +10,7 @@
     xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
     xmlns:pq_views="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
       mc:Ignorable="d"
       d:DesignHeight="600" d:DesignWidth="900"
       x:Name="Main"
@@ -41,13 +42,13 @@
             
             <StackPanel Background="{StaticResource Mouvent.MainColorBrush}" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Margin="15, 0, 15, 0"
-                              x:Name="Button_Add"  Grid.Row="1" Grid.Column="1" Click="Add_Clicked" ToolTip="Add Image">
+                              x:Name="Button_Add"  Grid.Row="1" Grid.Column="1" Click="Add_Clicked" ToolTip="{mvt:LocalizedBinding AddImage}">
                     <iconPacks:PackIconMaterial x:Name="Button_Add_Icon" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="20" Height="20" Kind="Plus"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Margin="0, 0, 15, 0"
-                              x:Name="Button_Delete" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" Click="Delete_Clicked"  ToolTip="Remove Image">
+                              x:Name="Button_Delete" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" Click="Delete_Clicked"  ToolTip="{mvt:LocalizedBinding RemoveImage}">
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="20" Height="20" Kind="Delete"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
@@ -65,13 +66,13 @@
                 
 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Margin="0, 0, 15, 0"
-                              x:Name="Button_Up" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" Click="Up_Clicked"  ToolTip="Advance Image">
+                              x:Name="Button_Up" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" Click="Up_Clicked"  ToolTip="{mvt:LocalizedBinding AdvanceImage}">
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="20" Height="20" Kind="ArrowUp"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Margin="0, 0, 15, 0"
-                              x:Name="Button_Down" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" Click="Down_Clicked"  ToolTip="Delay Image">
+                              x:Name="Button_Down" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" Click="Down_Clicked"  ToolTip="{mvt:LocalizedBinding DelayImage}">
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="20" Height="20" Kind="ArrowDown"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
@@ -96,7 +97,7 @@
             <!-- title ____________________________________________________________-->
           <Grid Margin="10" Grid.Row="1" ShowGridLines="false">
                 <Border Height="30"  Background="WhiteSmoke">
-                    <TextBlock Foreground="#ff303030" Text="Queue" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Foreground="#ff303030" Text="{mvt:LocalizedBinding Queue}" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
             </Grid>
            
@@ -135,7 +136,7 @@
                     <ig:RowSelectorSettings Visibility="Collapsed"/>
                 </ig:XamGrid.RowSelectorSettings>
                 <ig:XamGrid.Columns>
-                    <ig:TemplateColumn Key="ID" HeaderText="ID" IsFixed="Left">
+                    <ig:TemplateColumn Key="ID" HeaderText="{mvt:LocalizedBinding Id}" IsFixed="Left">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
                                 <Grid PreviewMouseDown="Grid_MouseDown" Height="auto" Background="Transparent" >
@@ -174,24 +175,24 @@
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
                     </ig:TemplateColumn>
-                    <ig:TextColumn Key="FileName" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="File"    Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
-                    <ig:TextColumn Key="PageStr" TextBlockStyle="{StaticResource XamGridTextBlockStyle}"       HeaderText="Pages"   Width="auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
-                    <ig:TemplateColumn Key="Copies" HeaderText="Copies">
+                    <ig:TextColumn Key="FileName" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding File}"    Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
+                    <ig:TextColumn Key="PageStr" TextBlockStyle="{StaticResource XamGridTextBlockStyle}"       HeaderText="{mvt:LocalizedBinding Pages}"   Width="auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
+                    <ig:TemplateColumn Key="Copies" HeaderText="{mvt:LocalizedBinding Copies}">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={StaticResource Copies_Converter}}" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
                     </ig:TemplateColumn>
-                    <ig:TemplateColumn Key="ScanLength" HeaderText="Volume" Width="auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
+                    <ig:TemplateColumn Key="ScanLength" HeaderText="{mvt:LocalizedBinding Volume}" Width="auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" >
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={StaticResource ScanLength_Converter}}" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
                     </ig:TemplateColumn>
-                    <ig:ImageColumn Key="Ripped"        HeaderText="Ripped" Width="auto" ValueConverter="{StaticResource BoolImg_Converter}" HorizontalContentAlignment="Left"/>
-                    <ig:TemplateColumn Key="Progress"   HeaderText="Printed">
+                    <ig:ImageColumn Key="Ripped"        HeaderText="{mvt:LocalizedBinding Ripped}" Width="auto" ValueConverter="{StaticResource BoolImg_Converter}" HorizontalContentAlignment="Left"/>
+                    <ig:TemplateColumn Key="Progress"   HeaderText="{mvt:LocalizedBinding Printed}">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
                                 <Grid Width="200" Visibility="{Binding Progress, Converter={StaticResource IntToVisible_Converter}}">
@@ -203,14 +204,14 @@
                     </ig:TemplateColumn>
                     <ig:UnboundColumn Key="End"     HeaderText=" " Width="*" ValueConverter="{StaticResource Filler_Converter}"/>
 
-                    <ig:TemplateColumnLayout Key="Child" HeaderText="Child" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
+                    <ig:TemplateColumnLayout Key="Child" HeaderText="{mvt:LocalizedBinding Child}" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
                         <ig:TemplateColumnLayout.Template>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <pq_views:FileSettingsWeb/>
                                     <pq_views:FileSettingsScan/>
                                     <GroupBox Style="{StaticResource MvtGroupBox}"
-                                        Header="Preview"
+                                        Header="{mvt:LocalizedBinding Preview}"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Top"
                                         Visibility="Visible"
@@ -248,7 +249,7 @@
         <rx:RxGridSplitter 
             Grid.Row="2" Height="30" 
             HorizontalAlignment="Stretch" 
-            Title="Printed"
+            Title="{mvt:LocalizedBinding Printed}"
             Background="WhiteSmoke"
             TextBlock.FontSize="{DynamicResource MvtFontSize}"
             TextBlock.FontWeight="SemiBold"
@@ -284,24 +285,24 @@
                     <ig:RowSelectorSettings Visibility="Collapsed"/>
                 </ig:XamGrid.RowSelectorSettings>
                 <ig:XamGrid.Columns>
-                    <ig:TextColumn Key="ID"         HeaderText="ID"             Width="auto"/>
-                    <ig:TextColumn Key="FileName"   HeaderText="File"           Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
-                    <ig:TextColumn Key="PageStr"    HeaderText="Pages"          Width="auto" HorizontalContentAlignment="Left"/>
-                    <ig:TemplateColumn Key="Copies" HeaderText="Copies">
+                    <ig:TextColumn Key="ID"         HeaderText="{mvt:LocalizedBinding Id}"             Width="auto"/>
+                    <ig:TextColumn Key="FileName"   HeaderText="{mvt:LocalizedBinding File}"           Width="auto" ValueConverter="{StaticResource FileName_Converter}"/>
+                    <ig:TextColumn Key="PageStr"    HeaderText="{mvt:LocalizedBinding Pages}"          Width="auto" HorizontalContentAlignment="Left"/>
+                    <ig:TemplateColumn Key="Copies" HeaderText="{mvt:LocalizedBinding Copies}">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={StaticResource Copies_Converter}}" HorizontalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
                     </ig:TemplateColumn>
-                    <ig:UnboundColumn Key="ScanLength"  HeaderText="Volume" Width="auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" ValueConverter="{StaticResource ScanLength_Converter}"/>
-                    <ig:TextColumn Key="State"      HeaderText="State"          Width="auto" />
-                    <ig:TextColumn Key="ActPage"    HeaderText="Page"           Width="auto" HorizontalContentAlignment="Left"/>
-                    <ig:TextColumn Key="ActCopy"    HeaderText="Copy"           Width="auto" HorizontalContentAlignment="Left"/>
-                    <ig:TextColumn Key="Scans"      HeaderText="Scans"          Width="auto" HorizontalContentAlignment="Left"/>
-                    <ig:TextColumn Key="ScansPrinted"    HeaderText="Scan"      Width="auto" HorizontalContentAlignment="Left"/>
+                    <ig:UnboundColumn Key="ScanLength"  HeaderText="{mvt:LocalizedBinding Volume}" Width="auto" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" ValueConverter="{StaticResource ScanLength_Converter}"/>
+                    <ig:TextColumn Key="State"      HeaderText="{mvt:LocalizedBinding State}"          Width="auto" />
+                    <ig:TextColumn Key="ActPage"    HeaderText="{mvt:LocalizedBinding Page}"           Width="auto" HorizontalContentAlignment="Left"/>
+                    <ig:TextColumn Key="ActCopy"    HeaderText="{mvt:LocalizedBinding Copy}"           Width="auto" HorizontalContentAlignment="Left"/>
+                    <ig:TextColumn Key="Scans"      HeaderText="{mvt:LocalizedBinding Scans}"          Width="auto" HorizontalContentAlignment="Left"/>
+                    <ig:TextColumn Key="ScansPrinted"    HeaderText="{mvt:LocalizedBinding Scan}"      Width="auto" HorizontalContentAlignment="Left"/>
 
-                    <ig:TemplateColumn Key="ProgressStr" HeaderText="Printed">
+                    <ig:TemplateColumn Key="ProgressStr" HeaderText="{mvt:LocalizedBinding Printed}">
                         <ig:TemplateColumn.ItemTemplate>
                             <DataTemplate>
                                 <Grid Width="200">
@@ -312,9 +313,9 @@
                         </ig:TemplateColumn.ItemTemplate>
                     </ig:TemplateColumn>
                    
-                    <ig:TextColumn Key="RipState" HeaderText=" " Width="*"/>                    
+                    <ig:TextColumn Key="RipState" HeaderText=" " Width="*"/>
 
-                    <ig:TemplateColumnLayout Key="Child" HeaderText="Child" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
+                    <ig:TemplateColumnLayout Key="Child" HeaderText="{mvt:LocalizedBinding Child}" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
                         <ig:TemplateColumnLayout.Template>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -322,7 +323,7 @@
                                     <pq_views:FileSettingsScan
                                         IsEnabled="False"/>
                                     <GroupBox Style="{StaticResource MvtGroupBox}"
-                                        Header="Preview"
+                                        Header="{mvt:LocalizedBinding Preview}"
                                         HorizontalAlignment="Left"
                                         Visibility="Visible"
                                         Margin="10,0,0,0"

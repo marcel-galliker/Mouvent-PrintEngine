@@ -8,6 +8,7 @@
     xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
     x:Class="RX_DigiPrint.Views.LogView"
  
              mc:Ignorable="d" 
@@ -78,22 +79,22 @@
                 </common:MvtButton>
                 -->
 
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="MoveTop" ToolTip="Go to oldest Message" Click="Top_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="MoveTop" ToolTip="{mvt:LocalizedBinding GoToOldestMessage}" Click="Top_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowCollapseUp"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="PageUp" ToolTip="Page Up" Click="PageUp_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="PageUp" ToolTip="{mvt:LocalizedBinding PageUp}" Click="PageUp_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowUp"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="PageDown" ToolTip="PageDown" Click="PageDown_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="PageDown" ToolTip="{mvt:LocalizedBinding PageDown}" Click="PageDown_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowDown"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="MoveBottom" ToolTip="Go to latest Message" Click="Bottom_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="MoveBottom" ToolTip="{mvt:LocalizedBinding GoToLatestMessage}" Click="Bottom_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="ArrowCollapseDown"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
@@ -143,12 +144,12 @@
                     </ig:UnboundColumn.ItemTemplate>
                 </ig:UnboundColumn>
 
-                <ig:TextColumn Key="TimeStr"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Time"    Width="auto"/>
-                <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Device"  Width="auto"/>
-                <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="No"/>
-                <ig:TextColumn Key="Message"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Message" Width="*"/>
-                <ig:TextColumn Key="File"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="File"    Width="auto"/>
-                <ig:TextColumn Key="Line"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="Line"    Width="auto"/>
+                <ig:TextColumn Key="TimeStr"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Time}"    Width="auto"/>
+                <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Device}"  Width="auto"/>
+                <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding No}"/>
+                <ig:TextColumn Key="Message"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Message}" Width="*"/>
+                <ig:TextColumn Key="File"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding File}"    Width="auto"/>
+                <ig:TextColumn Key="Line"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Line}"    Width="auto"/>
             </ig:XamGrid.Columns>
         </ig:XamGrid>
         <ScrollBar x:Name="Scroll"

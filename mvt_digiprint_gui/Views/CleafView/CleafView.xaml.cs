@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace RX_DigiPrint.Views.CleafView
 
         private void PrintRelease_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Ready to Print", "Is the machine ready to print?\nNo Splices in the machine?", MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ReadyToPrint, RX_DigiPrint.Resources.Language.Resources.IsTheMachineReadyToPrint, MessageBoxImage.Question, false))
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_PRINT_RELEASE");
         }
     }

@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (RxGlobals.UvLamp.On || RxGlobals.UvLamp.Ready)
             {
-                if ((RxGlobals.UvLamp.ActionStr == null || !RxGlobals.UvLamp.ActionStr.Equals("OFF")) && MvtMessageBox.YesNo("UV Dryer", "Switch OFF", MessageBoxImage.Question, false))
+                if ((RxGlobals.UvLamp.ActionStr == null || !RxGlobals.UvLamp.ActionStr.Equals("OFF")) && MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.UvDryer, RX_DigiPrint.Resources.Language.Resources.SwitchOff, MessageBoxImage.Question, false))
                 {
                     RxGlobals.UvLamp.SwitchOff();
                 }

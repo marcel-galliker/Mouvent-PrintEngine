@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"            
              d:DesignHeight="300" d:DesignWidth="300"
              >
@@ -113,7 +114,7 @@
 
         <DataTemplate x:Key="DataTemplate1">
             <Grid>
-                <TextBlock Text="Test"/>
+                <TextBlock Text="{mvt:LocalizedBinding Test}"/>
             </Grid>
         </DataTemplate>
 
@@ -225,7 +226,7 @@
 
         
         <Border Background="WhiteSmoke" BorderThickness="2" BorderBrush="WhiteSmoke" Margin="0,1,0,0">
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" Foreground="#ff303030" Text="Directory"/>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" Foreground="#ff303030" Text="{mvt:LocalizedBinding Directory}"/>
         </Border>
         
         

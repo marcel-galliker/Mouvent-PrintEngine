@@ -8,6 +8,7 @@
     xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
     xmlns:rxView="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
     xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+    xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
     mc:Ignorable="d"
     d:DesignHeight="1000" d:DesignWidth="1500"
     Background="Transparent"
@@ -72,7 +73,7 @@
                             <Border Margin="10,0,0,0" Visibility="{Binding ExpandSettingsPanel, Converter={StaticResource BoolToInVisible_Converter}}" Background="WhiteSmoke"
                                     Grid.Column="2" Grid.ColumnSpan="5" Grid.Row="0" Height="30" VerticalAlignment="Top">
                                 <TextBlock Foreground="#ff303030" FontSize="{StaticResource MvtFontSize}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Text="Settings"></TextBlock>
+                       Text="{mvt:LocalizedBinding Settings}"></TextBlock>
                             </Border>
 
                             <Grid Grid.Row="0" Grid.Column="2">
@@ -106,7 +107,7 @@
 
                 <!-- Ink Supply ________________________________________________________________________________________________________________________ -->
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="10,2,10,0">
-                    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Ink Supply" >
+                    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding InkSupply}" >
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto"/>
@@ -114,7 +115,7 @@
                             </Grid.ColumnDefinitions>
 
                             <rxView:InkSupplyGrid x:Name="InkSupplyGrid"/>
-                            <TextBlock x:Name="ChillerError" Text="Chiller not running" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"
+                            <TextBlock x:Name="ChillerError" Text="{mvt:LocalizedBinding ChillerNotRunning}" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"
                                        Foreground="{StaticResource RX.Error}" FontWeight="Bold" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                     </GroupBox>
@@ -122,7 +123,7 @@
 
                 <!-- Print Heads ____________________________________________________________________________________________________________-->
                 <ScrollViewer HorizontalScrollBarVisibility="Auto"  Margin="10,10,10,10" VerticalScrollBarVisibility="Hidden">
-                    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Print Heads">
+                    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding PrintHeads}">
                         <Grid>
                             <rxView:PrintHeadGrid x:Name="PrintHeadGrid"/>
                         </Grid>

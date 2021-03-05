@@ -14,13 +14,10 @@ namespace RX_DigiPrint.Models.Enums
 
         public EN_SpreadRollerList()
         {
-            if (_List == null)
-            {
-                _List = new List<RxEnum<int>>();
-                _List.Add(new RxEnum<int>(0, "NO"));
-                _List.Add(new RxEnum<int>(1, "Mounted"));
-                _List.Add(new RxEnum<int>(2, "Running"));
-            }
+            _List = new List<RxEnum<int>>();
+            _List.Add(new RxEnum<int>(0, RX_DigiPrint.Resources.Language.Resources.No));
+            _List.Add(new RxEnum<int>(1, RX_DigiPrint.Resources.Language.Resources.Mounted));
+            _List.Add(new RxEnum<int>(2, RX_DigiPrint.Resources.Language.Resources.Running));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <GroupBox Header="Erors" Style="{StaticResource MvtGroupBox}">
+        <GroupBox Header="{mvt:LocalizedBinding Errors}" Style="{StaticResource MvtGroupBox}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="120"/>
@@ -19,13 +20,13 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0"  Text="Stepper Left" />
+                <TextBlock Grid.Row="0" Grid.Column="0"  Text="{mvt:LocalizedBinding StepperLeft}" />
                 <TextBlock Grid.Row="0" Grid.Column="1"  Text="{Binding Error, Converter={StaticResource Error_Converter}, ConverterParameter=stepper_left}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0"  Text="Stepper Right" />
+                <TextBlock Grid.Row="1" Grid.Column="0"  Text="{mvt:LocalizedBinding StepperRight}" />
                 <TextBlock Grid.Row="1" Grid.Column="1"  Text="{Binding Error, Converter={StaticResource Error_Converter}, ConverterParameter=stepper_right}"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0"  Text="Slide" />
+                <TextBlock Grid.Row="2" Grid.Column="0"  Text="{mvt:LocalizedBinding Slide}" />
                 <TextBlock Grid.Row="2" Grid.Column="1"  Text="{Binding Error, Converter={StaticResource Error_Converter}, ConverterParameter=slide}"/>
             </Grid>
             

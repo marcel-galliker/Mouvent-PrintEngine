@@ -1,4 +1,5 @@
 ﻿using RX_Common;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Collections;
@@ -77,8 +78,8 @@ namespace RX_DigiPrint.Models.Enums
         public EN_UnitsList()
         {
             _List = new List<RxEnum<EUnits>>();
-            _List.Add(new RxEnum<EUnits>(EUnits.metric,   "metric"));
-            _List.Add(new RxEnum<EUnits>(EUnits.imperial, "imperial"));
+            _List.Add(new RxEnum<EUnits>(EUnits.metric, RX_DigiPrint.Resources.Language.Resources.Metric));
+            _List.Add(new RxEnum<EUnits>(EUnits.imperial, RX_DigiPrint.Resources.Language.Resources.Imperial));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

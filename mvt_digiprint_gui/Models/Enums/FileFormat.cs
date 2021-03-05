@@ -18,12 +18,9 @@ namespace RX_LabelComposer.Models.Enums
 
         public FileFormatList()
         {
-            if (_List == null)
-            {
-                _List = new List<RxEnum<FileFormatEnum>>();
-                _List.Add(new RxEnum<FileFormatEnum>(FileFormatEnum.Fixed,     "Fixed"));
-                _List.Add(new RxEnum<FileFormatEnum>(FileFormatEnum.Variable,  "Variable"));
-            }
+            _List = new List<RxEnum<FileFormatEnum>>();
+            _List.Add(new RxEnum<FileFormatEnum>(FileFormatEnum.Fixed, RX_DigiPrint.Resources.Language.Resources.Fixed));
+            _List.Add(new RxEnum<FileFormatEnum>(FileFormatEnum.Variable, RX_DigiPrint.Resources.Language.Resources.Variable));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

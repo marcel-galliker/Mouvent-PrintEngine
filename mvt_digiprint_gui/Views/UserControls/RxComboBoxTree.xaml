@@ -8,6 +8,7 @@
              xmlns:igDP="http://infragistics.com/DataPresenter"
              xmlns:igEditors="http://infragistics.com/Editors"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="40" d:DesignWidth="100"
              >
@@ -57,9 +58,9 @@
                             <ig:RowSelectorSettings Visibility="Collapsed"/>
                         </ig:XamGrid.RowSelectorSettings>
                         <ig:XamGrid.Columns>
-                            <ig:UnboundColumn Key="Family"     HeaderText="Family" Width="auto" ValueConverter="{StaticResource ToString_Converter}"/>
+                            <ig:UnboundColumn Key="Family"     HeaderText="{mvt:LocalizedBinding Family}" Width="auto" ValueConverter="{StaticResource ToString_Converter}"/>
 
-                            <ig:TemplateColumnLayout Key="Child" HeaderText="Child" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
+                            <ig:TemplateColumnLayout Key="Child" HeaderText="{mvt:LocalizedBinding Child}" CellStyle="{StaticResource XamGridColumnLayoutStyle}">
                                 <ig:TemplateColumnLayout.Template>
                                     <DataTemplate>
                                         <ig:XamGrid
@@ -74,9 +75,9 @@
                                                 <ig:SelectionSettings CellSelection="None" ColumnSelection="None" RowSelection="Single" CellClickAction="SelectRow"/>
                                             </ig:XamGrid.SelectionSettings>
                                             <ig:XamGrid.Columns>
-                                                <ig:TextColumn Key="Family"      HeaderText="Family"        Width="auto" Visibility="Collapsed"/>
-                                                <ig:TextColumn Key="Name"        HeaderText="Name"          Width="auto" />
-                                                <ig:TextColumn Key="Description" HeaderText="Description"   Width="auto" />
+                                                <ig:TextColumn Key="Family"      HeaderText="{mvt:LocalizedBinding Family}"        Width="auto" Visibility="Collapsed"/>
+                                                <ig:TextColumn Key="Name"        HeaderText="{mvt:LocalizedBinding Name}"          Width="auto" />
+                                                <ig:TextColumn Key="Description" HeaderText="{mvt:LocalizedBinding Description}"   Width="auto" />
                                             </ig:XamGrid.Columns>
                                         </ig:XamGrid>
                                     </DataTemplate>
@@ -86,7 +87,7 @@
                     </ig:XamGrid>
 
                     <Button Grid.Row="1"  
-                            Content="unused" 
+                            Content="{mvt:LocalizedBinding Unused}" 
                             HorizontalContentAlignment="Left" 
                             Margin="32,0,0,0" 
                             Padding="5" 

@@ -389,7 +389,7 @@ EXIT 0</Command>
     </Link>
     <PostBuildEvent>
       <Command>copy $(TargetPath) ..\RX-LabelComposer\  2&gt;nul 1&gt;nul
-copy $(TargetPath) ..\RX-DigiPrint\bin\release  2&gt;nul 1&gt;nul
+copy $(TargetPath) ..\mvt_digiprint_gui\_out\Release_x64\  2&gt;nul 1&gt;nul
 copy $(TargetPath) ..\bin\gui\
 copy $(TargetPath) ..\bin\win\
 copy ..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11.dll ..\RX-LabelComposer\  2&gt;nul 1&gt;nul

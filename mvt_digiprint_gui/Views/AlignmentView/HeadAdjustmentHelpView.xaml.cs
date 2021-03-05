@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_Common;
 using System.Windows.Controls;
 
@@ -74,7 +75,7 @@ namespace RX_DigiPrint.Views.Alignment
             catch (Exception)
             {
                 // software internal problem!
-                MvtMessageBox.InformationAndExit("Error", "");
+                MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
             }
         }
 

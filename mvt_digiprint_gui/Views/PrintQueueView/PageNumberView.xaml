@@ -4,12 +4,13 @@
         xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
         xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         Height="auto" 
         Width="auto"
         Background="White"
         >
-    
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Number Settings">
+
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding NumberSettings}">
         <Grid Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -21,7 +22,7 @@
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock      Grid.Row="0" Grid.Column="0" Text="Font Size"/>
+            <TextBlock      Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding FontSize}"/>
             <igWPF:XamComboEditor Grid.Row="0" Grid.Column="1"
                     x:Name="FontSizeCombo"
                     HorizontalAlignment="Stretch"
@@ -46,7 +47,7 @@
                 <!-- ItemsSource="{Binding FontSizeList}" -->
             </igWPF:XamComboEditor>
 
-            <TextBlock      Grid.Row="1" Grid.Column="0" Text="Distance"/>
+            <TextBlock      Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding Distance}"/>
             <common:MvtNumBox    Grid.Row="1" Grid.Column="1" Text="{Binding ImgDist}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="5,0"/>
             <TextBlock      Grid.Row="1" Grid.Column="2" Text="mm"/>
 

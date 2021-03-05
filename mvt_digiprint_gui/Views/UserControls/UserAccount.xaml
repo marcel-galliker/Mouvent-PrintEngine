@@ -4,10 +4,11 @@
         xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
         SizeToContent="Height"
-        Title="UserAccount"
+        Title="{mvt:LocalizedBinding UserAccount}"
         Height="450" Width="300"
         ResizeMode="NoResize">
     <Grid>
@@ -23,7 +24,7 @@
 
         <StackPanel x:Name="BluetoothPanel" Visibility="{Binding BluetoothVisibility}" Grid.Row="2" Margin="15, 35, 15, 0">
             <TextBlock Margin="0">Bluetooth Login</TextBlock>
-            <TextBlock Text="Device: " x:Name="DeviceName" Margin="0, 10, 0, 0"/>
+            <TextBlock Text="{mvt:LocalizedBinding Device}" x:Name="DeviceName" Margin="0, 10, 0, 0"/>
             <Image Margin="0, 5, 0, 15" x:Name="Barcode" Height="150"/>
         </StackPanel>
         

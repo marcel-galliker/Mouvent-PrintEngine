@@ -20,13 +20,10 @@ namespace RX_LabelComposer.Models.Enums
 
         public FieldSeparatorList()
         {
-            if (_List == null)
-            {
-                _List = new List<RxEnum<FieldSeparatorEnum>>();
-                _List.Add(new RxEnum<FieldSeparatorEnum>(FieldSeparatorEnum.Tab, "Tab"));
-                _List.Add(new RxEnum<FieldSeparatorEnum>(FieldSeparatorEnum.Semicolon, "Semicolon"));
-                _List.Add(new RxEnum<FieldSeparatorEnum>(FieldSeparatorEnum.Comma, "Comma"));
-            }
+            _List = new List<RxEnum<FieldSeparatorEnum>>();
+            _List.Add(new RxEnum<FieldSeparatorEnum>(FieldSeparatorEnum.Tab, RX_DigiPrint.Resources.Language.Resources.Tab));
+            _List.Add(new RxEnum<FieldSeparatorEnum>(FieldSeparatorEnum.Semicolon, RX_DigiPrint.Resources.Language.Resources.Semicolon));
+            _List.Add(new RxEnum<FieldSeparatorEnum>(FieldSeparatorEnum.Comma, RX_DigiPrint.Resources.Language.Resources.Comma));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

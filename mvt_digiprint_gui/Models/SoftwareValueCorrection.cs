@@ -210,7 +210,7 @@ namespace RX_DigiPrint.Models
                 catch
                 {
                     // software internal problem!
-                    MvtMessageBox.InformationAndExit("Error", "");
+                    MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
                 }
             }
             else if (ValueType == SoftwareValueType.TypeRegisterBackwards)
@@ -232,7 +232,7 @@ namespace RX_DigiPrint.Models
                 catch
                 {
                     // software internal problem!
-                    MvtMessageBox.InformationAndExit("Error", "");
+                    MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
                 }
             }
             else if (ValueType == SoftwareValueType.TypeColorOffset)
@@ -279,7 +279,7 @@ namespace RX_DigiPrint.Models
                 catch
                 {
                     // software internal problem!
-                    MvtMessageBox.InformationAndExit("Error", "");
+                    MvtMessageBox.InformationAndExit(RX_DigiPrint.Resources.Language.Resources.Error, "");
                 }
             }
             else

@@ -4,7 +4,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        Title="AlignmentSettings" 
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
+        Title="{mvt:LocalizedBinding AlignmentSettings}" 
         ResizeMode="NoResize"
         Loaded="Window_Loaded"
         SizeToContent="Height"
@@ -17,7 +18,7 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <GroupBox Grid.Row="0" Margin="10" Style="{StaticResource MvtGroupBox}" Header="Units">
+        <GroupBox Grid.Row="0" Margin="10" Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Units}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -31,7 +32,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,5,10,5">Color Offset Correction</TextBlock>
-            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,5,10,5" Text="Angle / Stitch Correction"></TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,5,10,5" Text="{mvt:LocalizedBinding AngleStitchCorrection}"></TextBlock>
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,5,10,5">Register Correction</TextBlock>
 
             <ComboBox Grid.Row="0" Grid.Column="1"

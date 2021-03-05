@@ -8,8 +8,9 @@
         xmlns:helpers="clr-namespace:RX_DigiPrint.Helpers"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:density="clr-namespace:RX_DigiPrint.Views.Density"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
-        Title="Density and Jet Compensation"
+        Title="{mvt:LocalizedBinding DensityAndJetCompensation}"
         Height="650" Width="990"
         ResizeMode="NoResize"
         Loaded="CustomWindow_Loaded">
@@ -29,10 +30,10 @@
                        Text="{Binding HeadName}"></TextBlock>
         </Border>
 
-        <GroupBox Grid.Row="1" Margin="10" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Header="Density">
+        <GroupBox Grid.Row="1" Margin="10" Grid.Column="0" Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Density}">
         <density:DensityView x:Name="Density" Margin="5"></density:DensityView>
         </GroupBox>
-        <GroupBox Grid.Row="1" Margin="10" Grid.Column="1" Style="{StaticResource MvtGroupBox}" Header="Jet Compensation">
+        <GroupBox Grid.Row="1" Margin="10" Grid.Column="1" Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding JetCompensation}">
             <local:DisabledJetsView x:Name="DisabledJets" Margin="5"></local:DisabledJetsView>
         </GroupBox>
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">

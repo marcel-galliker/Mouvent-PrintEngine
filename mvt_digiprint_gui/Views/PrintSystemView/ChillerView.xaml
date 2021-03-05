@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Chiller">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Chiller}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100"/>
@@ -16,7 +17,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="0" Text="Temp"/>
+            <TextBlock Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding Temp}"/>
             <StackPanel Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Text="{Binding Temp, Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" ("/>
@@ -24,10 +25,10 @@
                 <TextBlock Text=") °C"/>
             </StackPanel>
 
-            <TextBlock Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="0" Text="Pressure"/>
+            <TextBlock Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding Pressure}"/>
             <StackPanel Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Text="{Binding Pressure, Converter={StaticResource HeadVal_Converter10}}"/>
-                <TextBlock Text=" Bar"/>
+                <TextBlock Text="{mvt:LocalizedBinding Bar}"/>
             </StackPanel>
         </Grid>
     </GroupBox>

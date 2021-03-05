@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -59,7 +60,7 @@ namespace RX_DigiPrint.Views.UserControls
             string name = Rx.GetComputerName();
             if (name!=null)
             {
-                if ( SetMachineName(NewName.Text) && MvtMessageBox.YesNo("Restart", "Restarting the GUI!",  MessageBoxImage.Question, false))
+                if ( SetMachineName(NewName.Text) && MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Restart, RX_DigiPrint.Resources.Language.Resources.RestartingTheGui,  MessageBoxImage.Question, false))
                 { 
                     Rx.StartProcess("shutdown", "/r /t 0");
                 }

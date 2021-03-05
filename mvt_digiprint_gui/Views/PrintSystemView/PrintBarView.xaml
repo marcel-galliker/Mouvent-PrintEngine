@@ -6,6 +6,7 @@
              xmlns:ig   ="http://schemas.infragistics.com/xaml" 
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>

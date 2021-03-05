@@ -6,11 +6,12 @@
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
     <!--<GroupBox Header="Print System" Style="{StaticResource MvtGroupBox}">-->
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Print System">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding PrintSystem}">
         <Grid x:Name="PrintSystem">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -26,7 +27,7 @@
                 <ColumnDefinition Width="*" MaxWidth="300"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Printer Type" Margin="0, 0, 0, 5"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding PrinterType}" Margin="0, 0, 0, 5"/>
             <igWPF:XamComboEditor Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="0, 0, 0, 5"
                     HorizontalAlignment="Stretch"
                     ItemsSource="{Binding PrinterTypeList}"
@@ -37,16 +38,16 @@
                     >
             </igWPF:XamComboEditor>
 
-            <TextBlock   Grid.Row="1" Grid.Column="0" Text="Number of Colors" Margin="0, 0, 10, 5"/>
+            <TextBlock   Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding NumberColors}" Margin="0, 0, 10, 5"/>
             <common:MvtNumBox Grid.Row="1" Grid.Column="1" Text="{Binding ColorCnt}" Margin="0, 0, 0, 5"/>
 
-            <TextBlock   Grid.Row="2" Grid.Column="0" Text="Ink Cylinders/Color" Margin="0, 0, 10, 5"/>
+            <TextBlock   Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding InkCylindersColor}" Margin="0, 0, 10, 5"/>
             <common:MvtNumBox Grid.Row="2" Grid.Column="1" Text="{Binding InkCylindersPerColor}" Margin="0, 0, 0, 5"/>
 
-            <TextBlock   Grid.Row="3" Grid.Column="0" Text="Heads/Color" Margin="0, 0, 0, 5"/>
+            <TextBlock   Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding HeadsColor}" Margin="0, 0, 0, 5"/>
             <common:MvtNumBox Grid.Row="3" Grid.Column="1" Text="{Binding HeadsPerColor}" Margin="0, 0, 0, 5"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Encoders Type" Margin="0, 0, 10, 5" x:Name="EncoderType"/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding EncodersType}" Margin="0, 0, 10, 5" x:Name="EncoderType"/>
             <igWPF:XamComboEditor Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="0, 0, 0, 5" x:Name="EncoderChoice"
                     HorizontalAlignment="Stretch"
                     ItemsSource="{Binding EncoderTypeList}"

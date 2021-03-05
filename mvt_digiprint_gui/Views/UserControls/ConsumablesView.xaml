@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:views_ml="clr-namespace:RX_DigiPrint.Views.LB701UVView"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              IsVisibleChanged="UserControl_IsVisibleChanged"
              mc:Ignorable="d" 
             

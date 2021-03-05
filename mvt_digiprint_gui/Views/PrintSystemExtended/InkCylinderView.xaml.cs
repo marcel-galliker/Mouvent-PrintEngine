@@ -1,5 +1,6 @@
 using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.ComponentModel;
@@ -95,14 +96,14 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             {
                 if (_InkSupply.CtrlMode == EFluidCtrlMode.ctrl_fill_step1)
                 {
-                    MsgText.Text = "Put new ink canister.";
+                    MsgText.Text = RX_DigiPrint.Resources.Language.Resources.PutNewInkCanister;
                     MsgPopup.IsOpen = true;
                 }
                 else if (_InkSupply.CtrlMode == EFluidCtrlMode.ctrl_empty_step1)
                 {
-                    MsgText.Text = "Remove fill tube.\n"
+                    MsgText.Text = RX_DigiPrint.Resources.Language.Resources.RemoveFillTube
                                + "\n"
-                               + "Put bleed tube to empty canister.";
+                               + RX_DigiPrint.Resources.Language.Resources.PutBleedTubeToEmptyCanister;
                     MsgPopup.IsOpen = true;
                 }
                 else MsgPopup.IsOpen = false;
@@ -156,7 +157,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                 {
                     if (name != null) // && !RxGlobals.TestTableStatus.Z_in_cap)
                     {
-                        if (!MvtMessageBox.YesNo(name, "Insert purge tray. Continue?", MessageBoxImage.Question, true)) return;
+                        if (!MvtMessageBox.YesNo(name, RX_DigiPrint.Resources.Language.Resources.InsertPurgeTray, MessageBoxImage.Question, true)) return;
                     }
                 }
 
@@ -218,28 +219,28 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         private void Purge_Clicked(object sender, RoutedEventArgs e)
         {
             RX_Common.MvtMessageBox.EPurgeResult result =
-                MvtMessageBox.Purge("Purge", PrintSystemView.PrintSystemView.allowPurgeAll(), "Purge " + _InkSupply.InkType.Name + " ?");
+                MvtMessageBox.Purge(RX_DigiPrint.Resources.Language.Resources.Purge,PrintSystemView.PrintSystemView.allowPurgeAll(), RX_DigiPrint.Resources.Language.Resources.Purge + _InkSupply.InkType.Name + " ?");
             if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
                 || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
-                _command("Purge", EFluidCtrlMode.ctrl_purge_hard, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+                _command(RX_DigiPrint.Resources.Language.Resources.Purge, EFluidCtrlMode.ctrl_purge_hard, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
         }
 
         private void PurgeVacc_Clicked(object sender, RoutedEventArgs e)
         {
             RX_Common.MvtMessageBox.EPurgeResult result =
-               MvtMessageBox.Purge("Purge", PrintSystemView.PrintSystemView.allowPurgeAll(), "Purge and Vacuum " + _InkSupply.InkType.Name + " ?");
+               MvtMessageBox.Purge(RX_DigiPrint.Resources.Language.Resources.Purge, PrintSystemView.PrintSystemView.allowPurgeAll(), RX_DigiPrint.Resources.Language.Resources.PurgeAndVacuum + _InkSupply.InkType.Name + " ?");
             if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
                 || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
-                _command("Purge+Vacc", EFluidCtrlMode.ctrl_purge_hard_vacc, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+                _command(RX_DigiPrint.Resources.Language.Resources.ShortPurgeAndVacc, EFluidCtrlMode.ctrl_purge_hard_vacc, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
         }
 
         private void PurgeWipe_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Purge + Wipe", "PURGE and WIPE all printheads?", MessageBoxImage.Question, true))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ShortPurgeAndWipe, RX_DigiPrint.Resources.Language.Resources.PurgeAndWipeAllPrintheads, MessageBoxImage.Question, true))
             {
                 _command("Purge+Wipe", EFluidCtrlMode.ctrl_purge_hard_wipe, true);
             }

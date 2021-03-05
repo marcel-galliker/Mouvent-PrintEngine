@@ -5,22 +5,23 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.TexView"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Status">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Status}">
         <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="Panel">
-            <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="Version"/>
-            <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="Machine State" x:Name="CB_MainState" Type="ComboStr"/>
+            <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="{mvt:LocalizedBinding Version}"/>
+            <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="{mvt:LocalizedBinding MachineState}" x:Name="CB_MainState" Type="ComboStr"/>
        <!--     <rx_uc:PlcParCtrl ID="STA_TEACH_WRINKLE_SENSOR"         Label="Wrinkle OK"   Type="ComboStr" x:Name="CB_WrinkleSensor" /> -->
 
-            <rx_uc:PlcParCtrl ID="STA_HEAD_IS_UP"                   Label="Head is UP"                               UserVisible="usr_service"/>
+            <rx_uc:PlcParCtrl ID="STA_HEAD_IS_UP"                   Label="{mvt:LocalizedBinding HeadIsUp}"                               UserVisible="usr_service"/>
 
             <!--            
             <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"            Label="Unwinder Ø"   Unit="mm" Format="f"/>
             <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"            Label="Rewinder Ø"   Unit="mm" Format="f"/>
             -->
 
-            <rx_uc:PlcParCtrl ID="STA_PREPARE_ACTIVE"               Label="Prepare Active" Visibility="Collapsed"/>
+            <rx_uc:PlcParCtrl ID="STA_PREPARE_ACTIVE"               Label="{mvt:LocalizedBinding PrepareActive}" Visibility="Collapsed"/>
             <local:TexPrepare x:Name="TexPrepare"/>
         </rx_uc:PlcParPanel>
     </GroupBox>

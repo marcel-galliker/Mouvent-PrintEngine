@@ -46,6 +46,23 @@ namespace RX_DigiPrint.Views.UserControls
             set {_Header = value; }
         }
 
+        public static readonly DependencyProperty HeaderProperty
+        = DependencyProperty.Register(
+            "Header",
+            typeof(String),
+            typeof(StepperMotorCtrl),
+            new FrameworkPropertyMetadata("",
+                OnHeaderChanged
+                )
+            );
+
+        private static void OnHeaderChanged(DependencyObject source,
+        DependencyPropertyChangedEventArgs e)
+        {
+            StepperMotorCtrl p = source as StepperMotorCtrl;
+            p.Header = (String)e.NewValue;
+        }
+
         //--- GroupBox_Loaded ---------------------
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
         {

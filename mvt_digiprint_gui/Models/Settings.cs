@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_Common.Source;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models.Enums;
 
 namespace RX_DigiPrint.Models
@@ -49,6 +50,17 @@ namespace RX_DigiPrint.Models
             get { return _Units; }
             set { SetProperty(ref _Units, value); }
         }
-        
+
+        //--- Property Langue ---------------------------------------
+        private ELangues _Langue = ELangues.English;
+        public ELangues Langue
+        {
+            get { return _Langue; }
+            set { 
+                SetProperty(ref _Langue, value);
+                TranslationSource.Instance.CurrentCulture = RX_DigiPrint.Resources.Language.Resources.Culture = new EN_LanguesList().GetCultureInfo(_Langue);
+                
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using System;
@@ -71,7 +72,7 @@ namespace RX_DigiPrint.Views.TexView
             Material  material = RxGlobals.MaterialList.FindByName(XML_MATERIAL.Value);
             if (material!=null)
             {
-                if (MvtMessageBox.YesNo("Delte", string.Format("Delete Material >>{0}<<?", material.Name),  MessageBoxImage.Question, false))
+                if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, string.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmDeleteMaterial, material.Name),  MessageBoxImage.Question, false))
                 {
                     material.Delete();
                 }
@@ -164,21 +165,21 @@ namespace RX_DigiPrint.Views.TexView
                 {
                     case 0:     // first rewinder with buffer
                                 RW_Flexibility.ID="PAR_MATERIAL_FLEXIBILITY_RW";
-                                RW_Flexibility.Label="Mat Flexibility";
+                                RW_Flexibility.Label= RX_DigiPrint.Resources.Language.Resources.MatFlexibility;
                                 RW_Flexibility.Unit="";
                                 RW_Tension.Unit = "N";
                                 break;
 
                     case 1:     // rewinder without buffer, WITH Laser, OLD diameter 
                                 RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
-                                RW_Flexibility.Label="Fabric Position";
+                                RW_Flexibility.Label= RX_DigiPrint.Resources.Language.Resources.FabricPosition;
                                 RW_Flexibility.Unit="mm";
-                               RW_Tension.Unit = "%";
+                                RW_Tension.Unit = "%";
                                 break;
 
                     case 2:     // rewinder without buffer, WITH Laser, NEW diameter 
                                 RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
-                                RW_Flexibility.Label="Fabric Position";
+                                RW_Flexibility.Label= RX_DigiPrint.Resources.Language.Resources.FabricPosition;
                                 RW_Flexibility.Unit="mm";
                                 RW_Tension.Unit = "N";
                                 break;
@@ -223,14 +224,14 @@ namespace RX_DigiPrint.Views.TexView
                 if (sc)
                 {
                     RW_Flexibility.ID="PAR_SPEED_CORRECTION_RW";
-                    RW_Flexibility.Label="Speed Offset";
+                    RW_Flexibility.Label= RX_DigiPrint.Resources.Language.Resources.SpeedOffset;
                     RW_Flexibility.Unit="%";
                     RW_Tension.Unit = "%";
                 }
                 else
                 {
                     RW_Flexibility.ID="PAR_MATERIAL_FLEXIBILITY_RW";
-                    RW_Flexibility.Label="Mat Flexibility";
+                    RW_Flexibility.Label= RX_DigiPrint.Resources.Language.Resources.MatFlexibility;
                     RW_Flexibility.Unit="";
                     RW_Tension.Unit = "N";
                 }

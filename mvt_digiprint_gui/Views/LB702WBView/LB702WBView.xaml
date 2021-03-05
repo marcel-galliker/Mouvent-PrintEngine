@@ -8,6 +8,7 @@
               xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1700">
 
@@ -49,9 +50,9 @@
             </Grid.RowDefinitions>
                    
                         <StackPanel Grid.Row="0" x:Name="SettingsTab" Orientation="Horizontal" Background="Transparent" Margin="0,0,0,10">
-                            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
-                            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="PLC Log"           />
-                            <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="PLC Info"      Last="True"/>
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="{mvt:LocalizedBinding Main}"          IsChecked="true"/>
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="{mvt:LocalizedBinding PlcLog}"           />
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="{mvt:LocalizedBinding PlcInfo}"      Last="True"/>
                         </StackPanel>
 
                         <!-- TAB: Main ___________________________________________________________________-->
@@ -69,10 +70,10 @@
 
                             <local:LB702WB_ParMain Grid.Column="0" x:Name="ParMain"/>
 
-                            <tex:TexConsumables    Grid.Column="1"  Margin="10,0,0,0"  />
+                            <tex:TexConsumables    Grid.Column="1"  Margin="10,0,0,0"/>
 
 
-                            <ScrollViewer Grid.Column="2" Margin="10,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                    <ScrollViewer Grid.Column="2" Margin="10,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto"></RowDefinition>
@@ -103,7 +104,7 @@
         <!-- NO Connection _______________________________________________________________________-->
         <TextBlock x:Name="PlcNotConnected"
                 Grid.RowSpan="10" Grid.ColumnSpan="10"                
-                Text="PLC NOT CONNECTED" 
+                Text="{mvt:LocalizedBinding PlcNotConnected}" 
                 FontSize="100" 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center" 

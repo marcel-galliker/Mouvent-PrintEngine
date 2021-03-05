@@ -8,6 +8,7 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="760" d:DesignWidth="350"
              Width="350">
@@ -19,7 +20,7 @@
 
     
         <!-- the settings _______________________________ -->
-    <GroupBox Header="Settings" Style="{StaticResource MvtGroupBox}">
+    <GroupBox Header="{mvt:LocalizedBinding Settings}" Style="{StaticResource MvtGroupBox}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -49,66 +50,66 @@
 
                         <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
 
-                        <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED"           Label="Speed"           Unit="m/min" UnitWidth="50"  Format="n"  />
-                        <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED_MAX"       Label="Speed Max"       Unit="m/min" UnitWidth="50" Format="n"/>
+                        <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED"           Label="{mvt:LocalizedBinding Speed}"           Unit="m/min" UnitWidth="50"  Format="n"  />
+                        <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED_MAX"       Label="{mvt:LocalizedBinding SpeedMax}"       Unit="m/min" UnitWidth="50" Format="n"/>
 
-                        <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS"       Label="Thickness"       Unit="mm"    UnitWidth="50" Format="1"/>
-                        <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"              Label="Print Height"    Unit="mm"    UnitWidth="50" Format="1"/>
+                        <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS"       Label="{mvt:LocalizedBinding Thickness}"       Unit="mm"    UnitWidth="50" Format="1"/>
+                        <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"              Label="{mvt:LocalizedBinding PrintHeight}"    Unit="mm"    UnitWidth="50" Format="1"/>
 
-                        <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_1"         Label="Tension UW"      Unit="N"    UnitWidth="50" Format="n"/>
-                        <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_2"         Label="Tension RW"      Unit="N"    UnitWidth="50" Format="n"/>
-                        <rx_uc:PlcParCtrl ID="PAR_NIP_TENSION_1"            Label="Tension NIP"     Unit="N"    UnitWidth="50" Format="n"/>
+                        <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_1"         Label="{mvt:LocalizedBinding TensionUw}"      Unit="N"    UnitWidth="50" Format="n"/>
+                        <rx_uc:PlcParCtrl ID="PAR_WINDER_TENSION_2"         Label="{mvt:LocalizedBinding TensionRw}"      Unit="N"    UnitWidth="50" Format="n"/>
+                        <rx_uc:PlcParCtrl ID="PAR_NIP_TENSION_1"            Label="{mvt:LocalizedBinding TensionNip}"     Unit="N"    UnitWidth="50" Format="n"/>
 
-                        <rx_uc:PlcParCtrl ID="PAR_DISTANCE_TO_STOP"         Label="Dist to Stop"    Unit="m"    UnitWidth="50" Format="f"/>
-                        <rx_uc:PlcParCtrl ID="PAR_WINDER_REDUCTION_CONFIG"  Label="Winder Red."     Type="Combo" x:Name="CB_WinderReduction"/>
+                        <rx_uc:PlcParCtrl ID="PAR_DISTANCE_TO_STOP"         Label="{mvt:LocalizedBinding DistToStop}"    Unit="m"    UnitWidth="50" Format="f"/>
+                        <rx_uc:PlcParCtrl ID="PAR_WINDER_REDUCTION_CONFIG"  Label="{mvt:LocalizedBinding WinderRed}"     Type="Combo" x:Name="CB_WinderReduction"/>
 
-                        <rx_uc:PlcParCtrl ID="PAR_FLEXO_CONFIGURATION"          Label="Flexo"        Type="CheckBox" x:Name="CB_Flexo"/>
+                        <rx_uc:PlcParCtrl ID="PAR_FLEXO_CONFIGURATION"          Label="{mvt:LocalizedBinding Flexo}"        Type="CheckBox" x:Name="CB_Flexo"/>
 
-                        <rx_uc:PlcParCtrl ID="PAR_CLEANER_ON"                   Label="Cleaner"      Type="Combo" x:Name="CB_Cleaner"/>
-                        <rx_uc:PlcParCtrl ID="PAR_IRHEATER_ON"                  Label="IR-Heater"    Type="Combo" x:Name="CB_IrHeater"/>
-                        <rx_uc:PlcParCtrl ID="PAR_SUPERVISION_CONFIGURED"       Label="Supervision"  Type="Combo" x:Name="CB_Supervision"/>
+                        <rx_uc:PlcParCtrl ID="PAR_CLEANER_ON"                   Label="{mvt:LocalizedBinding Cleaner}"      Type="Combo" x:Name="CB_Cleaner"/>
+                        <rx_uc:PlcParCtrl ID="PAR_IRHEATER_ON"                  Label="{mvt:LocalizedBinding IRHeater}"    Type="Combo" x:Name="CB_IrHeater"/>
+                        <rx_uc:PlcParCtrl ID="PAR_SUPERVISION_CONFIGURED"       Label="{mvt:LocalizedBinding Supervision}"  Type="Combo" x:Name="CB_Supervision"/>
 
                         <Grid Loaded="Grid_Loaded">
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_MODE"           Label="UV Flexo 1" Type="Combo" Padding="0,0,70,0"                    x:Name="CB_Lamp1"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_MODE"           Label="{mvt:LocalizedBinding UvFlexo1}" Type="Combo" Padding="0,0,70,0"                    x:Name="CB_Lamp1"/>
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70"  x:Name="UVPower1"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_2_MODE"           Label="UV Flexo 2" Type="Combo" x:Name="CB_Lamp2" Padding="0,0,70,0"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_2_MODE"           Label="{mvt:LocalizedBinding UvFlexo2}" Type="Combo" x:Name="CB_Lamp2" Padding="0,0,70,0"/>
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_2_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower2"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_3_MODE"           Label="UV Printer" Type="Combo" x:Name="CB_Lamp3" Padding="0,0,70,0"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_3_MODE"           Label="{mvt:LocalizedBinding UvPrinter}" Type="Combo" x:Name="CB_Lamp3" Padding="0,0,70,0"/>
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_3_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower3"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_4_MODE"           Label="UV Flexo 3" Type="Combo" x:Name="CB_Lamp4" Padding="0,0,70,0"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_4_MODE"           Label="{mvt:LocalizedBinding UvFlexo3}" Type="Combo" x:Name="CB_Lamp4" Padding="0,0,70,0"/>
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_4_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower4"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_5_MODE"           Label="UV Flexo 4" Type="Combo" x:Name="CB_Lamp5" Padding="0,0,70,0"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_5_MODE"           Label="{mvt:LocalizedBinding UvFlexo4}" Type="Combo" x:Name="CB_Lamp5" Padding="0,0,70,0"/>
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_5_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower5"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
-                            <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"              Label="Corona" Type="Combo" x:Name="CB_Corona"   Padding="0,0,70,0"/>
+                            <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"              Label="{mvt:LocalizedBinding Corona}" Type="Combo" x:Name="CB_Corona"   Padding="0,0,70,0"/>
                             <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"         Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
-                            <rx_uc:PlcParCtrl ID="PAR_PINNING_LAMP_MODE"        Label="Pinning Lamp" Type="Combo" x:Name="CB_PinnningLamp" Padding="0,0,70,0"/>
+                            <rx_uc:PlcParCtrl ID="PAR_PINNING_LAMP_MODE"        Label="{mvt:LocalizedBinding PinningLamp}" Type="Combo" x:Name="CB_PinnningLamp" Padding="0,0,70,0"/>
                             <rx_uc:PlcParCtrl ID="PAR_PINNING_LAMP_POWER_MAX"   Label=""  Format="n" HorizontalAlignment="Right"           Unit="%" Width="70"/>
                         </Grid>
 
                         <!-- Splicing ___________________________________________________________________________-->
-                        <rx_uc:PlcTitle Header="Splicing"/>
-                        <rx_uc:PlcParCtrl ID="PAR_SPLICING_TYPE"                            Label="Splicing Type"               Type="Combo" x:Name="CB_SpliceType"/>
-                        <rx_uc:PlcParCtrl ID="PAR_MANUAL_SPLICING"                          Label="Man Splicing"             Type="Combo" x:Name="CB_ManualSplice"/>
-                        <rx_uc:PlcParCtrl ID="PAR_ULTRASONIC_WELDING_TIME"                  Label="Timer"                                    Format="n"/>
-                        <rx_uc:PlcParCtrl ID="PAR_CONTROL_LOOP_GAIN_FACTOR"                 Label="C.L. Gain Fact"             Format="f"/>
+                        <rx_uc:PlcTitle Header="{mvt:LocalizedBinding Splicing}"/>
+                        <rx_uc:PlcParCtrl ID="PAR_SPLICING_TYPE"                            Label="{mvt:LocalizedBinding SplicingType}"               Type="Combo" x:Name="CB_SpliceType"/>
+                        <rx_uc:PlcParCtrl ID="PAR_MANUAL_SPLICING"                          Label="{mvt:LocalizedBinding ManSplicing}"             Type="Combo" x:Name="CB_ManualSplice"/>
+                        <rx_uc:PlcParCtrl ID="PAR_ULTRASONIC_WELDING_TIME"                  Label="{mvt:LocalizedBinding Timer}"                                    Format="n"/>
+                        <rx_uc:PlcParCtrl ID="PAR_CONTROL_LOOP_GAIN_FACTOR"                 Label="{mvt:LocalizedBinding CLGainFact}"             Format="f"/>
 
                         <!-- Length ___________________________________________________________________________-->
                         <Grid Margin="0,10,0,10">
@@ -116,8 +117,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Margin="10,5,10,0" Style="{StaticResource Mouvent.StandardButton}" Content="Reset Length L" Click="Reset_Length_L_Clicked" Grid.Column="0" />
-                            <Button Margin="10,5,10,0" Style="{StaticResource Mouvent.StandardButton}" Content="Reset Length R" Click="Reset_Length_R_Clicked" Grid.Column="1"/>
+                            <Button Margin="10,5,10,0" Style="{StaticResource Mouvent.StandardButton}" Content="{mvt:LocalizedBinding ResetLengthL}" Click="Reset_Length_L_Clicked" Grid.Column="0" />
+                            <Button Margin="10,5,10,0" Style="{StaticResource Mouvent.StandardButton}" Content="{mvt:LocalizedBinding ResetLengthR}" Click="Reset_Length_R_Clicked" Grid.Column="1"/>
                         </Grid>
                     </rx_uc:PlcParPanel>
                 </StackPanel>

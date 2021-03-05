@@ -4,27 +4,28 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="300">
 
-        <GroupBox Grid.Column="1" Header="Commands" Style="{StaticResource MvtGroupBox}">
+    <GroupBox Grid.Column="1" Header="{mvt:LocalizedBinding Commands}" Style="{StaticResource MvtGroupBox}">
             <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main">
-                <rx_uc:PlcCommand ID="CMD_CLEAR_ERROR"              Label="Clear Error"/>
+            <rx_uc:PlcCommand ID="CMD_CLEAR_ERROR"              Label="{mvt:LocalizedBinding ClearError}"/>
                 
                 <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/>
                 
-                <rx_uc:PlcCommand ID="CMD_PRODUCTION"               Label="Production"/>
-                <rx_uc:PlcCommand ID="CMD_RUN"                      Label="Run"/>
-                <rx_uc:PlcCommand ID="CMD_PAUSE"                    Label="Pause"/>
-                <rx_uc:PlcCommand ID="CMD_STOP"                     Label="STOP"/>
-                <rx_uc:PlcCommand ID="CMD_BUFFER_REFERENCE"         Label="Ref Buffer" IsEnabled="{Binding ReferenceEnabled}"/>
+                <rx_uc:PlcCommand ID="CMD_PRODUCTION"               Label="{mvt:LocalizedBinding Production}"/>
+                <rx_uc:PlcCommand ID="CMD_RUN"                      Label="{mvt:LocalizedBinding Run}"/>
+                <rx_uc:PlcCommand ID="CMD_PAUSE"                    Label="{mvt:LocalizedBinding Pause}"/>
+                <rx_uc:PlcCommand ID="CMD_STOP"                     Label="{mvt:LocalizedBinding STOP}"/>
+                <rx_uc:PlcCommand ID="CMD_BUFFER_REFERENCE"         Label="{mvt:LocalizedBinding RefBuffer}" IsEnabled="{Binding ReferenceEnabled}"/>
 
                 <Rectangle Fill="LightGray" StrokeThickness="2" Height="5"/>
                 
-                <rx_uc:PlcCommand ID="CMD_SETUP"                    Label="Setup"/>
-                <rx_uc:PlcCommand ID="CMD_WEBIN"                    Label="Web In"/>
-                <rx_uc:PlcCommand ID="CMD_WEBOUT"                   Label="Web Out"/>                
-                <rx_uc:PlcCommand ID="CMD_MAINTENANCE"              Label="Maintenance"/>
+                <rx_uc:PlcCommand ID="CMD_SETUP"                    Label="{mvt:LocalizedBinding Setup}"/>
+                <rx_uc:PlcCommand ID="CMD_WEBIN"                    Label="{mvt:LocalizedBinding WebIn}"/>
+                <rx_uc:PlcCommand ID="CMD_WEBOUT"                   Label="{mvt:LocalizedBinding WebOut}"/>                
+                <rx_uc:PlcCommand ID="CMD_MAINTENANCE"              Label="{mvt:LocalizedBinding Maintenance}"/>
 
             </rx_uc:PlcParPanel>
         </GroupBox>

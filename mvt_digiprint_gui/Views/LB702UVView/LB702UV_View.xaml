@@ -9,6 +9,7 @@
              xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="800"
              d:DesignWidth="1500">
@@ -58,9 +59,9 @@
             </Grid.RowDefinitions>
 
             <StackPanel Margin="0,-5,0,0" Grid.Row="0" x:Name="SettingsTab" Orientation="Horizontal" Background="Transparent">
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="Main"          IsChecked="true"/>
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="PLC Log"           />
-                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="PLC Info"      Last="True"/>
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Main"          Content="{mvt:LocalizedBinding Main}"          IsChecked="true"/>
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Log"           Content="{mvt:LocalizedBinding PlcLog}"           />
+                <common:MvtRadioButton Style="{StaticResource MvtTabsSelectionRadioButton}" x:Name="RB_Plc"           Content="{mvt:LocalizedBinding PlcInfo}"      Last="True"/>
             </StackPanel>
 
 
@@ -114,7 +115,7 @@
         <!-- NO Connection _______________________________________________________________________-->
         <TextBlock x:Name="PlcNotConnected"
                 Grid.RowSpan="10" Grid.ColumnSpan="10"
-                Text="PLC NOT CONNECTED" 
+                Text="{mvt:LocalizedBinding PlcNotConnected}" 
                 FontSize="100" 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center" 

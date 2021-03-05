@@ -11,6 +11,7 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              x:Name="_this"
              d:DesignHeight="600" d:DesignWidth="1200"
@@ -70,7 +71,7 @@
             </ig:XamGrid.SelectionSettings>
             
             <ig:XamGrid.Columns>
-                <ig:TemplateColumn  HeaderText="Connected"      Key="Connected"     Width="auto">
+                <ig:TemplateColumn  HeaderText="{mvt:LocalizedBinding Connected}"      Key="Connected"     Width="auto">
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <Grid Width="80" VerticalAlignment="Center">
@@ -82,15 +83,15 @@
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
 
-                <ig:TemplateColumn  HeaderText="Type" Key="DeviceType" Width="auto">
+                <ig:TemplateColumn  HeaderText="{mvt:LocalizedBinding Type}" Key="DeviceType" Width="auto">
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding DeviceType, Converter={StaticResource DeviceType_Converter}}"/>
                         </DataTemplate>
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
-                
-                <ig:TemplateColumn  HeaderText="No" Key="DeviceNo" Width="auto">
+
+                <ig:TemplateColumn  HeaderText="{mvt:LocalizedBinding No}" Key="DeviceNo" Width="auto">
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
                             <ComboBox
@@ -110,10 +111,10 @@
                     </ig:TemplateColumn.ItemTemplate>
                 </ig:TemplateColumn>
 
-                <ig:TextColumn      HeaderText="IP Address"     Key="IpAddr"        Width="auto" IsReadOnly="True" />
+                <ig:TextColumn      HeaderText="{mvt:LocalizedBinding IpAddress}"     Key="IpAddr"        Width="auto" IsReadOnly="True" />
 
                 <ig:TextColumn      
-                    HeaderText="Mac Address"    
+                    HeaderText="{mvt:LocalizedBinding MacAddress}"    
                     Key="MacAddr"       
                     MinimumWidth="150"
                     Width="auto"
@@ -123,14 +124,14 @@
                     />
 
                 <ig:TextColumn      
-                    HeaderText="SerialNo"       
+                    HeaderText="{mvt:LocalizedBinding SerialNo}"       
                     Key="SerialNo"
                     Width="150" 
                     IsReadOnly="True"
                     />
  
                 <ig:TemplateColumn  
-                    HeaderText="Identify"          
+                    HeaderText="{mvt:LocalizedBinding Identify}"          
                     Key="Flash"         
                     VerticalContentAlignment="Stretch" 
                     HorizontalContentAlignment="Stretch"
@@ -170,7 +171,7 @@
                 </ig:TemplateColumn>
                 
                 <ig:TemplateColumn
-                    HeaderText="Putty"
+                    HeaderText="{mvt:LocalizedBinding Putty}"
                     Key="PuttyDebug"
                     VerticalContentAlignment="Stretch" 
                     HorizontalContentAlignment="Stretch"
@@ -187,7 +188,7 @@
                 </ig:TemplateColumn>
 
                 <ig:TemplateColumn  
-                    HeaderText="Putty"          
+                    HeaderText="{mvt:LocalizedBinding Putty}"          
                     Key="Putty"         
                     VerticalContentAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"

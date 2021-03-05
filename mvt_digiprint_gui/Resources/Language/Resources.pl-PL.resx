@@ -1,0 +1,1173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AboutRxDigiPrint" xml:space="preserve">
+    <value>Informacje o RX-DigiPrint</value>
+  </data>
+  <data name="AddFileToPrint" xml:space="preserve">
+    <value>Dodaj plik do druku</value>
+  </data>
+  <data name="Adjust" xml:space="preserve">
+    <value>Dostosuj</value>
+  </data>
+  <data name="Adjustment" xml:space="preserve">
+    <value>Dostosowywanie</value>
+  </data>
+  <data name="AdjustPosition" xml:space="preserve">
+    <value>Dostosuj pozycję</value>
+  </data>
+  <data name="AirValve" xml:space="preserve">
+    <value>Zawór powietrza</value>
+  </data>
+  <data name="Alignment" xml:space="preserve">
+    <value>Wyrównanie</value>
+  </data>
+  <data name="AlignmentSettings" xml:space="preserve">
+    <value>Ustawienia wyrównania</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>WSZYSTKO</value>
+  </data>
+  <data name="Angle" xml:space="preserve">
+    <value>Kąt</value>
+  </data>
+  <data name="AngleStitchCorrection" xml:space="preserve">
+    <value>Korekta kąta/Stitch</value>
+  </data>
+  <data name="AngleStp" xml:space="preserve">
+    <value>Kąt [stp]</value>
+  </data>
+  <data name="AutoGenerateMessage" xml:space="preserve">
+    <value>Komunikat generowany automatycznie</value>
+  </data>
+  <data name="BackLeft" xml:space="preserve">
+    <value>Lewy tył</value>
+  </data>
+  <data name="BackRight" xml:space="preserve">
+    <value>Prawy tył</value>
+  </data>
+  <data name="Bar" xml:space="preserve">
+    <value>Bar</value>
+  </data>
+  <data name="BarcodeScanner" xml:space="preserve">
+    <value>Skaner kodów kreskowych</value>
+  </data>
+  <data name="Basket" xml:space="preserve">
+    <value>Koszyk</value>
+  </data>
+  <data name="BeltStep" xml:space="preserve">
+    <value>Skok taśmy [µm]</value>
+  </data>
+  <data name="BleedValve" xml:space="preserve">
+    <value>Zawór upustowy</value>
+  </data>
+  <data name="BufferInStart" xml:space="preserve">
+    <value>Bufor w poz. startowej</value>
+  </data>
+  <data name="Build" xml:space="preserve">
+    <value>Kompilacja</value>
+  </data>
+  <data name="Buses" xml:space="preserve">
+    <value>Magistrale</value>
+  </data>
+  <data name="Button" xml:space="preserve">
+    <value>Przycisk</value>
+  </data>
+  <data name="Calibrate" xml:space="preserve">
+    <value>Kalibruj</value>
+  </data>
+  <data name="CalibrateDiameter" xml:space="preserve">
+    <value>Kalibruj średnicę</value>
+  </data>
+  <data name="CalibrateTension" xml:space="preserve">
+    <value>Kalibruj napięcie</value>
+  </data>
+  <data name="Calibration" xml:space="preserve">
+    <value>Kalibracja</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Anuluj</value>
+  </data>
+  <data name="Cap" xml:space="preserve">
+    <value>Osłona</value>
+  </data>
+  <data name="CappingHeight" xml:space="preserve">
+    <value>Wysokość zakładania osłony</value>
+  </data>
+  <data name="CarriageCap" xml:space="preserve">
+    <value>Ustaw w poz. zakładania osłony</value>
+  </data>
+  <data name="CarriageRef" xml:space="preserve">
+    <value>Ustaw w poz. referencyjnej</value>
+  </data>
+  <data name="ChangeComputerName" xml:space="preserve">
+    <value>Zmień nazwę komputera</value>
+  </data>
+  <data name="ChangeNameTo" xml:space="preserve">
+    <value>Zmień nazwę na</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Sprawdź</value>
+  </data>
+  <data name="Child" xml:space="preserve">
+    <value>Podrzędny</value>
+  </data>
+  <data name="Chiller" xml:space="preserve">
+    <value>Chiller</value>
+  </data>
+  <data name="ChillerNotRunning" xml:space="preserve">
+    <value>Chiller nie pracuje</value>
+  </data>
+  <data name="Cleaning" xml:space="preserve">
+    <value>Czyszczenie</value>
+  </data>
+  <data name="Cluster1" xml:space="preserve">
+    <value>Klaster 1</value>
+  </data>
+  <data name="CoatingDryer" xml:space="preserve">
+    <value>Suszarka powlekająca</value>
+  </data>
+  <data name="CoatingPosition" xml:space="preserve">
+    <value>Pozycja modułu powlekania</value>
+  </data>
+  <data name="CoatingTension" xml:space="preserve">
+    <value>Napięcie modułu powlekania</value>
+  </data>
+  <data name="CoatingUnit" xml:space="preserve">
+    <value>Powlekarka</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Kod</value>
+  </data>
+  <data name="Collate" xml:space="preserve">
+    <value>Sortuj</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Kolor</value>
+  </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Kolory</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Polecenia</value>
+  </data>
+  <data name="ConditionerPressureInlet" xml:space="preserve">
+    <value>Kondycjoner: Ciśnienie wlotowe</value>
+  </data>
+  <data name="ConditionerPumpsSpeed" xml:space="preserve">
+    <value>Kondycjoner: Prędkość pomp</value>
+  </data>
+  <data name="Configuration" xml:space="preserve">
+    <value>Konfiguracja</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Połączono</value>
+  </data>
+  <data name="Consumables" xml:space="preserve">
+    <value>Materiały eksploatacyjne</value>
+  </data>
+  <data name="ControlMode" xml:space="preserve">
+    <value>Tryb sterowania</value>
+  </data>
+  <data name="Copies" xml:space="preserve">
+    <value>Kopie</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopiuj</value>
+  </data>
+  <data name="Corona" xml:space="preserve">
+    <value>Moduł koronowy</value>
+  </data>
+  <data name="CoverOpen" xml:space="preserve">
+    <value>Pokrywa otwarta</value>
+  </data>
+  <data name="CuringLamp" xml:space="preserve">
+    <value>Lampa utwardzająca</value>
+  </data>
+  <data name="CuringPasses" xml:space="preserve">
+    <value>Przebiegi utwardzające</value>
+  </data>
+  <data name="CutterNipStandstill" xml:space="preserve">
+    <value>Postój docisku krajarki</value>
+  </data>
+  <data name="Cutting" xml:space="preserve">
+    <value>Cięcie</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Dane</value>
+  </data>
+  <data name="DataReady" xml:space="preserve">
+    <value>Dane gotowe</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="Density" xml:space="preserve">
+    <value>Gęstość</value>
+  </data>
+  <data name="DensityAndJetCompensation" xml:space="preserve">
+    <value>Kompensacja gęstości i strumienia</value>
+  </data>
+  <data name="DensityJetCompensation" xml:space="preserve">
+    <value>Kompensacja gęstości i strumienia</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Device" xml:space="preserve">
+    <value>Urządzenie</value>
+  </data>
+  <data name="DiameterOffset" xml:space="preserve">
+    <value>Offset średnicy</value>
+  </data>
+  <data name="DieCut" xml:space="preserve">
+    <value>Wykrojnik</value>
+  </data>
+  <data name="DieNipStandstill" xml:space="preserve">
+    <value>Postój docisku wykrojnika</value>
+  </data>
+  <data name="DieNipTension" xml:space="preserve">
+    <value>Napięcie docisku wykrojnika</value>
+  </data>
+  <data name="Directory" xml:space="preserve">
+    <value>Katalog</value>
+  </data>
+  <data name="Displayed" xml:space="preserve">
+    <value>Wyświetlono</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>Odległość</value>
+  </data>
+  <data name="DistVerso" xml:space="preserve">
+    <value>Odległość Verso [mm]</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Gotowe</value>
+  </data>
+  <data name="DripPans" xml:space="preserve">
+    <value>TACE OCIEKOWE</value>
+  </data>
+  <data name="DropSize" xml:space="preserve">
+    <value>Wielkość kropel</value>
+  </data>
+  <data name="Dryer" xml:space="preserve">
+    <value>Suszarka</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Opróżnij</value>
+  </data>
+  <data name="Empty2Min" xml:space="preserve">
+    <value>Opróżnij w 2 min</value>
+  </data>
+  <data name="Encoder" xml:space="preserve">
+    <value>Enkoder [przyrost/m]</value>
+  </data>
+  <data name="EncodersType" xml:space="preserve">
+    <value>Typ enkodera</value>
+  </data>
+  <data name="EncoderVerso" xml:space="preserve">
+    <value>Enkoder Verso [przyrost/m]</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>Koniec</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Angielski</value>
+  </data>
+  <data name="ErrorNo" xml:space="preserve">
+    <value>Nr błędu</value>
+  </data>
+  <data name="Errors" xml:space="preserve">
+    <value>Błędy</value>
+  </data>
+  <data name="Events" xml:space="preserve">
+    <value>Zdarzenia</value>
+  </data>
+  <data name="Exhaust" xml:space="preserve">
+    <value>Wylot</value>
+  </data>
+  <data name="FactoryNetwork" xml:space="preserve">
+    <value>Sieć zakładowa</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>Rodzina</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>Plik</value>
+  </data>
+  <data name="Fill" xml:space="preserve">
+    <value>Napełnij</value>
+  </data>
+  <data name="Fill5Sec" xml:space="preserve">
+    <value>Napełnij w 5 s</value>
+  </data>
+  <data name="Finisher" xml:space="preserve">
+    <value>Finiszer</value>
+  </data>
+  <data name="FirepulseVoltage" xml:space="preserve">
+    <value>Napięcie impulsu aktywacyjnego</value>
+  </data>
+  <data name="Flexo" xml:space="preserve">
+    <value>Fleksograficzny</value>
+  </data>
+  <data name="FlexoDryer" xml:space="preserve">
+    <value>Suszarka fleksograficzna</value>
+  </data>
+  <data name="FlexoReady" xml:space="preserve">
+    <value>Moduł fleksograficzny gotowy</value>
+  </data>
+  <data name="FlexoTension" xml:space="preserve">
+    <value>Napięcie modułu fleksograficznego</value>
+  </data>
+  <data name="FlexoUnit" xml:space="preserve">
+    <value>Moduł fleksograficzny</value>
+  </data>
+  <data name="FlightTime" xml:space="preserve">
+    <value>Czas przelotu [mm]</value>
+  </data>
+  <data name="FlowFactor" xml:space="preserve">
+    <value>Współczynnik przepływu</value>
+  </data>
+  <data name="Flush" xml:space="preserve">
+    <value>Przepłucz</value>
+  </data>
+  <data name="Flushed" xml:space="preserve">
+    <value>PRZEPŁUKANO</value>
+  </data>
+  <data name="Flushing" xml:space="preserve">
+    <value>Płukanie</value>
+  </data>
+  <data name="FontSize" xml:space="preserve">
+    <value>Rozmiar czcionki</value>
+  </data>
+  <data name="French" xml:space="preserve">
+    <value>Francuski</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Od</value>
+  </data>
+  <data name="FrontLeft" xml:space="preserve">
+    <value>Lewy przód</value>
+  </data>
+  <data name="FrontRight" xml:space="preserve">
+    <value>Prawy przód</value>
+  </data>
+  <data name="Gloss" xml:space="preserve">
+    <value>Połysk</value>
+  </data>
+  <data name="Gluing" xml:space="preserve">
+    <value>Klejenie</value>
+  </data>
+  <data name="HeadAdjustment" xml:space="preserve">
+    <value>Regulacja głowicy</value>
+  </data>
+  <data name="HeadAdjustmentView" xml:space="preserve">
+    <value>Podgląd regulacji głowicy</value>
+  </data>
+  <data name="HeadAlign" xml:space="preserve">
+    <value>Wyrównanie głowicy</value>
+  </data>
+  <data name="HeadInPrintingPosition" xml:space="preserve">
+    <value>Głowica w pozycji drukowania</value>
+  </data>
+  <data name="HeadsColor" xml:space="preserve">
+    <value>Głowice/kolor</value>
+  </data>
+  <data name="HeadsPrintPos" xml:space="preserve">
+    <value>Głowice w poz. drukowania</value>
+  </data>
+  <data name="HeadsReferenced" xml:space="preserve">
+    <value>Głowice z odniesieniami</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Wysokość [mm]</value>
+  </data>
+  <data name="HostName" xml:space="preserve">
+    <value>Nazwa hosta</value>
+  </data>
+  <data name="Id" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Identify" xml:space="preserve">
+    <value>Identyfikuj</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>Obraz</value>
+  </data>
+  <data name="ImageGap" xml:space="preserve">
+    <value>Odstęp między obrazami</value>
+  </data>
+  <data name="ImageInCnt" xml:space="preserve">
+    <value>Obraz na środku (bufor)</value>
+  </data>
+  <data name="ImageMargin" xml:space="preserve">
+    <value>Margines dla obrazu</value>
+  </data>
+  <data name="ImageSettings" xml:space="preserve">
+    <value>Ustawienia obrazu</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Informacje</value>
+  </data>
+  <data name="Ink" xml:space="preserve">
+    <value>Tusz</value>
+  </data>
+  <data name="InkColor" xml:space="preserve">
+    <value>Kolor tuszu</value>
+  </data>
+  <data name="InkCylinder" xml:space="preserve">
+    <value>Cylinder z tuszem</value>
+  </data>
+  <data name="InkCylindersColor" xml:space="preserve">
+    <value>Cylindry z tuszem/kolor</value>
+  </data>
+  <data name="InkSupply" xml:space="preserve">
+    <value>Zasilanie tuszem</value>
+  </data>
+  <data name="InkSupplyCommands" xml:space="preserve">
+    <value>Polecenia zasilania tuszem</value>
+  </data>
+  <data name="InkTankPressure" xml:space="preserve">
+    <value>Ciśnienie w zbiorniku z tuszem</value>
+  </data>
+  <data name="IpAddress" xml:space="preserve">
+    <value>Adres IP</value>
+  </data>
+  <data name="JetCompensation" xml:space="preserve">
+    <value>Kompensacja strumienia</value>
+  </data>
+  <data name="JetNumber" xml:space="preserve">
+    <value>Numer strumienia</value>
+  </data>
+  <data name="LampTime" xml:space="preserve">
+    <value>Czas pracy lampy</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Język</value>
+  </data>
+  <data name="Large" xml:space="preserve">
+    <value>Duże</value>
+  </data>
+  <data name="Laser" xml:space="preserve">
+    <value>Laser</value>
+  </data>
+  <data name="Lateral" xml:space="preserve">
+    <value>Poprzeczne</value>
+  </data>
+  <data name="Len" xml:space="preserve">
+    <value>Dł.</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Długość</value>
+  </data>
+  <data name="Line" xml:space="preserve">
+    <value>Wiersz</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Wczytaj</value>
+  </data>
+  <data name="Log" xml:space="preserve">
+    <value>Dziennik</value>
+  </data>
+  <data name="MacAddress" xml:space="preserve">
+    <value>Adres MAC</value>
+  </data>
+  <data name="Machine" xml:space="preserve">
+    <value>Maszyna</value>
+  </data>
+  <data name="MagneticBand" xml:space="preserve">
+    <value>Taśma magnetyczna</value>
+  </data>
+  <data name="Main" xml:space="preserve">
+    <value>Główna</value>
+  </data>
+  <data name="MainCtrlNotConnected" xml:space="preserve">
+    <value>NIE PODŁĄCZONO STEROWNIKA GŁÓWNEGO</value>
+  </data>
+  <data name="Material" xml:space="preserve">
+    <value>Materiał</value>
+  </data>
+  <data name="Meniscus" xml:space="preserve">
+    <value>Menisk</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Komunikat</value>
+  </data>
+  <data name="Mid" xml:space="preserve">
+    <value>Śr.</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Tryb</value>
+  </data>
+  <data name="Motor" xml:space="preserve">
+    <value>Silnik</value>
+  </data>
+  <data name="Moving" xml:space="preserve">
+    <value>W ruchu</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nazwa</value>
+  </data>
+  <data name="NetMask" xml:space="preserve">
+    <value>Maska sieci</value>
+  </data>
+  <data name="Network" xml:space="preserve">
+    <value>Sieć</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Dalej</value>
+  </data>
+  <data name="Night" xml:space="preserve">
+    <value>Noc</value>
+  </data>
+  <data name="NIP" xml:space="preserve">
+    <value>DOCISK</value>
+  </data>
+  <data name="NipTension" xml:space="preserve">
+    <value>Napięcie docisku</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nie</value>
+  </data>
+  <data name="NotConnected" xml:space="preserve">
+    <value>NIE PODŁĄCZONO</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Uwaga</value>
+  </data>
+  <data name="NumberColors" xml:space="preserve">
+    <value>Liczba kolorów</value>
+  </data>
+  <data name="NumberSettings" xml:space="preserve">
+    <value>Ustawienia numeracji</value>
+  </data>
+  <data name="Offsets" xml:space="preserve">
+    <value>Offset</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="OnlyAvailableInErrorState" xml:space="preserve">
+    <value>DOSTĘPNE TYLKO W STANIE BŁĘDU</value>
+  </data>
+  <data name="OpenFile" xml:space="preserve">
+    <value>Otwórz plik</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Operator</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Zlecenie</value>
+  </data>
+  <data name="Orders" xml:space="preserve">
+    <value>Zlecenia</value>
+  </data>
+  <data name="Orientation" xml:space="preserve">
+    <value>Orientacja</value>
+  </data>
+  <data name="Overlap" xml:space="preserve">
+    <value>Nakładanie</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Strona</value>
+  </data>
+  <data name="Pages" xml:space="preserve">
+    <value>Strony</value>
+  </data>
+  <data name="Parameter" xml:space="preserve">
+    <value>Parametr</value>
+  </data>
+  <data name="Passes" xml:space="preserve">
+    <value>Przebiegi</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Hasło</value>
+  </data>
+  <data name="PlcInfo" xml:space="preserve">
+    <value>Informacje o PLC</value>
+  </data>
+  <data name="PlcLog" xml:space="preserve">
+    <value>Dziennik PLC</value>
+  </data>
+  <data name="PlcNotConnected" xml:space="preserve">
+    <value>NIE PODŁĄCZONO PLC</value>
+  </data>
+  <data name="PositionX" xml:space="preserve">
+    <value>Pozycja X</value>
+  </data>
+  <data name="PositionY" xml:space="preserve">
+    <value>Pozycja Y</value>
+  </data>
+  <data name="PrepareState" xml:space="preserve">
+    <value>Stan przygotowania</value>
+  </data>
+  <data name="PrepareStatePlc" xml:space="preserve">
+    <value>Stan przygotowania: PLC</value>
+  </data>
+  <data name="PrepareStatePrintEngine" xml:space="preserve">
+    <value>Stan przygotowania: Mechanizm drukujący</value>
+  </data>
+  <data name="Pressure" xml:space="preserve">
+    <value>Ciśnienie</value>
+  </data>
+  <data name="PressureInlet" xml:space="preserve">
+    <value>Ciśnienie wlotowe</value>
+  </data>
+  <data name="PressureLung" xml:space="preserve">
+    <value>Ciśnienie odgazowywania</value>
+  </data>
+  <data name="PressureOutlet" xml:space="preserve">
+    <value>Ciśnienie wylotowe</value>
+  </data>
+  <data name="PressureRoller" xml:space="preserve">
+    <value>Wałek dociskowy</value>
+  </data>
+  <data name="PressureRollerInStart" xml:space="preserve">
+    <value>Wałek dociskowy w poz. startowej</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Podgląd</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Drukuj</value>
+  </data>
+  <data name="PrintDryer" xml:space="preserve">
+    <value>Drukuj z suszarką</value>
+  </data>
+  <data name="Printed" xml:space="preserve">
+    <value>Wydrukowano</value>
+  </data>
+  <data name="PrintEnvironment" xml:space="preserve">
+    <value>Środowisko druku</value>
+  </data>
+  <data name="Printer" xml:space="preserve">
+    <value>Drukarka</value>
+  </data>
+  <data name="PrinterNipStandstill" xml:space="preserve">
+    <value>Postój docisku drukarki</value>
+  </data>
+  <data name="PrinterNipTension" xml:space="preserve">
+    <value>Napięcie docisku drukarki</value>
+  </data>
+  <data name="PrinterSettings" xml:space="preserve">
+    <value>Ustawienia drukarki</value>
+  </data>
+  <data name="PrinterType" xml:space="preserve">
+    <value>Typ drukarki</value>
+  </data>
+  <data name="PrintGo" xml:space="preserve">
+    <value>PrintGo</value>
+  </data>
+  <data name="PrintGoMode" xml:space="preserve">
+    <value>Tryb PrintGo</value>
+  </data>
+  <data name="PrintHeads" xml:space="preserve">
+    <value>Głowice drukujące</value>
+  </data>
+  <data name="Printing" xml:space="preserve">
+    <value>Drukowanie</value>
+  </data>
+  <data name="PrintingTime" xml:space="preserve">
+    <value>Czas drukowania</value>
+  </data>
+  <data name="PrintQueue" xml:space="preserve">
+    <value>Kolejka wydruku</value>
+  </data>
+  <data name="PrintSystem" xml:space="preserve">
+    <value>System druku</value>
+  </data>
+  <data name="PrintTension" xml:space="preserve">
+    <value>Napięcie druku</value>
+  </data>
+  <data name="PrintTestImage" xml:space="preserve">
+    <value>Drukuj obraz testowy</value>
+  </data>
+  <data name="PrintUnitDryer" xml:space="preserve">
+    <value>Drukarka z suszarką</value>
+  </data>
+  <data name="Produced" xml:space="preserve">
+    <value>Wyprodukowano</value>
+  </data>
+  <data name="PropagateCorrectionValuesToAllFollowingPrintHeads" xml:space="preserve">
+    <value>Propaguj wartości korekty do wszystkich kolejnych głowic drukujących</value>
+  </data>
+  <data name="PumpSpeed" xml:space="preserve">
+    <value>Prędkość pompy</value>
+  </data>
+  <data name="Purge" xml:space="preserve">
+    <value>Przeczyść</value>
+  </data>
+  <data name="PurgeAndVacuum" xml:space="preserve">
+    <value>Przeczyść i odkurz</value>
+  </data>
+  <data name="PurgeAndWipe" xml:space="preserve">
+    <value>Przeczyść i przetrzyj</value>
+  </data>
+  <data name="PurgeHard" xml:space="preserve">
+    <value>Przeczyszczanie dokładne</value>
+  </data>
+  <data name="PurgeMicro" xml:space="preserve">
+    <value>Przeczyszczanie minimalne</value>
+  </data>
+  <data name="PurgeSoft" xml:space="preserve">
+    <value>Przeczyszczanie łagodne</value>
+  </data>
+  <data name="Putty" xml:space="preserve">
+    <value>PuTTY</value>
+  </data>
+  <data name="Queue" xml:space="preserve">
+    <value>Kolejka</value>
+  </data>
+  <data name="Recto" xml:space="preserve">
+    <value>RECTO</value>
+  </data>
+  <data name="Ref" xml:space="preserve">
+    <value>Ref.</value>
+  </data>
+  <data name="Reference" xml:space="preserve">
+    <value>Odniesienie</value>
+  </data>
+  <data name="ReferenceDone" xml:space="preserve">
+    <value>Odniesienie gotowe</value>
+  </data>
+  <data name="RefHeight" xml:space="preserve">
+    <value>Wysokość ref.</value>
+  </data>
+  <data name="RefHeightBack" xml:space="preserve">
+    <value>Wysokość ref. (tył)</value>
+  </data>
+  <data name="RefHeightFront" xml:space="preserve">
+    <value>Wysokość ref. (przód)</value>
+  </data>
+  <data name="Refreshing" xml:space="preserve">
+    <value>Odświeżanie</value>
+  </data>
+  <data name="RefRobot" xml:space="preserve">
+    <value>Robot ref.</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Resetuj</value>
+  </data>
+  <data name="ResetLengthL" xml:space="preserve">
+    <value>Resetuj długość L</value>
+  </data>
+  <data name="ResetLengthR" xml:space="preserve">
+    <value>Resetuj długość P</value>
+  </data>
+  <data name="RestartGui" xml:space="preserve">
+    <value>Ponownie uruchom GUI</value>
+  </data>
+  <data name="RestartMain" xml:space="preserve">
+    <value>Ponownie uruchom menu główne</value>
+  </data>
+  <data name="Rewinder" xml:space="preserve">
+    <value>Przewijarka</value>
+  </data>
+  <data name="Rewinder1Standstill" xml:space="preserve">
+    <value>Postój przewijarki 1</value>
+  </data>
+  <data name="Rewinder1Tension" xml:space="preserve">
+    <value>Napięcie przewijarki 1</value>
+  </data>
+  <data name="Rewinder2Standstill" xml:space="preserve">
+    <value>Postój przewijarki 2</value>
+  </data>
+  <data name="Rewinder2Tension" xml:space="preserve">
+    <value>Napięcie przewijarki 2</value>
+  </data>
+  <data name="RewinderBuffer" xml:space="preserve">
+    <value>Bufor przewijarki</value>
+  </data>
+  <data name="RewinderGridStandstill" xml:space="preserve">
+    <value>Postój przewijarki Rewinder Grid</value>
+  </data>
+  <data name="RewinderGridTension" xml:space="preserve">
+    <value>Napięcie przewijarki Rewinder Grid</value>
+  </data>
+  <data name="RewinderStandstill" xml:space="preserve">
+    <value>Postój przewijarki</value>
+  </data>
+  <data name="RewinderTension" xml:space="preserve">
+    <value>Napięcie przewijarki</value>
+  </data>
+  <data name="Ripped" xml:space="preserve">
+    <value>Zgrano</value>
+  </data>
+  <data name="RippedData" xml:space="preserve">
+    <value>Zgrane dane</value>
+  </data>
+  <data name="RollsDiameter" xml:space="preserve">
+    <value>Średnica zwojów</value>
+  </data>
+  <data name="RollsProduced" xml:space="preserve">
+    <value>Wyprodukowane zwoje</value>
+  </data>
+  <data name="RwTension0" xml:space="preserve">
+    <value>Napięcie i Ø przewijarki</value>
+  </data>
+  <data name="ScalesCalibration" xml:space="preserve">
+    <value>Kalibracja wagi</value>
+  </data>
+  <data name="Scan" xml:space="preserve">
+    <value>Skanuj</value>
+  </data>
+  <data name="ScanMode" xml:space="preserve">
+    <value>Tryb skanowania</value>
+  </data>
+  <data name="ScannerInStart" xml:space="preserve">
+    <value>Skaner w poz. startowej</value>
+  </data>
+  <data name="Scans" xml:space="preserve">
+    <value>Skany</value>
+  </data>
+  <data name="SerialNo" xml:space="preserve">
+    <value>Nr seryjny</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Ustawienia</value>
+  </data>
+  <data name="SetupCommands" xml:space="preserve">
+    <value>Polecenia konfiguracji</value>
+  </data>
+  <data name="ShutDownGui" xml:space="preserve">
+    <value>Wyłącz GUI</value>
+  </data>
+  <data name="Side" xml:space="preserve">
+    <value>Strona</value>
+  </data>
+  <data name="Slide" xml:space="preserve">
+    <value>Suwak</value>
+  </data>
+  <data name="SlideToLeft" xml:space="preserve">
+    <value>Przesuń do lewej</value>
+  </data>
+  <data name="SlideToRight" xml:space="preserve">
+    <value>Przesuń do prawej</value>
+  </data>
+  <data name="Small" xml:space="preserve">
+    <value>Małe</value>
+  </data>
+  <data name="Software" xml:space="preserve">
+    <value>Oprogramowanie</value>
+  </data>
+  <data name="SoftwareVersion" xml:space="preserve">
+    <value>Wersja oprogramowania</value>
+  </data>
+  <data name="SourceData" xml:space="preserve">
+    <value>Dane źródłowe</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Prędkość</value>
+  </data>
+  <data name="SpeedUnit" xml:space="preserve">
+    <value>Jednostka prędkości</value>
+  </data>
+  <data name="Splicing" xml:space="preserve">
+    <value>Łączenie</value>
+  </data>
+  <data name="SpreadRoller" xml:space="preserve">
+    <value>Wałek rozfałdowujący</value>
+  </data>
+  <data name="St" xml:space="preserve">
+    <value>Stan</value>
+  </data>
+  <data name="StartAt" xml:space="preserve">
+    <value>Uruchom o</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>Stan</value>
+  </data>
+  <data name="Static" xml:space="preserve">
+    <value>Statyczne</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Stepper" xml:space="preserve">
+    <value>Silnik krokowy</value>
+  </data>
+  <data name="StepperLeft" xml:space="preserve">
+    <value>Silnik krokowy lewy</value>
+  </data>
+  <data name="StepperRight" xml:space="preserve">
+    <value>Silnik krokowy prawy</value>
+  </data>
+  <data name="Stitch" xml:space="preserve">
+    <value>Stitch</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>STOP</value>
+  </data>
+  <data name="SubstrateSettings" xml:space="preserve">
+    <value>Ustawienia podłoża</value>
+  </data>
+  <data name="SupportCommands" xml:space="preserve">
+    <value>Polecenia dla zespołu technicznego</value>
+  </data>
+  <data name="SystemTime" xml:space="preserve">
+    <value>Czas systemowy</value>
+  </data>
+  <data name="Table" xml:space="preserve">
+    <value>Stół</value>
+  </data>
+  <data name="TaskSwitch" xml:space="preserve">
+    <value>Przełącznik zadań</value>
+  </data>
+  <data name="Temp" xml:space="preserve">
+    <value>Temp.</value>
+  </data>
+  <data name="TempDown" xml:space="preserve">
+    <value>Obniżenie temp.</value>
+  </data>
+  <data name="TemperatureConditioner" xml:space="preserve">
+    <value>Kondycjoner termiczny</value>
+  </data>
+  <data name="TemperatureHead" xml:space="preserve">
+    <value>Głowica termiczna</value>
+  </data>
+  <data name="TemperatureInkSupply" xml:space="preserve">
+    <value>Zasilanie tuszem termicznym</value>
+  </data>
+  <data name="TempUp" xml:space="preserve">
+    <value>Wzrost temp.</value>
+  </data>
+  <data name="Tension" xml:space="preserve">
+    <value>Napięcie</value>
+  </data>
+  <data name="TensionOffset" xml:space="preserve">
+    <value>Offset napięcia</value>
+  </data>
+  <data name="Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="TestImage" xml:space="preserve">
+    <value>Obraz testowy</value>
+  </data>
+  <data name="Text" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Czas</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Tytuł</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Do</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>łącznie</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Jednostki</value>
+  </data>
+  <data name="Unused" xml:space="preserve">
+    <value>Nieużywane</value>
+  </data>
+  <data name="Unwinder" xml:space="preserve">
+    <value>Odwijarka</value>
+  </data>
+  <data name="UnwinderBuffer" xml:space="preserve">
+    <value>Bufor odwijarki</value>
+  </data>
+  <data name="UnwinderStandstill" xml:space="preserve">
+    <value>Postój odwijarki</value>
+  </data>
+  <data name="UnwinderTension" xml:space="preserve">
+    <value>Napięcie odwijarki</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>W górę</value>
+  </data>
+  <data name="UserAccount" xml:space="preserve">
+    <value>Konto użytkownika</value>
+  </data>
+  <data name="UvReady" xml:space="preserve">
+    <value>Lampa UV gotowa</value>
+  </data>
+  <data name="UwTension0" xml:space="preserve">
+    <value>Napięcie i Ø odwijarki</value>
+  </data>
+  <data name="Vacuum" xml:space="preserve">
+    <value>Podciśnienie</value>
+  </data>
+  <data name="Valve" xml:space="preserve">
+    <value>Zawór</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Wersja</value>
+  </data>
+  <data name="Verso" xml:space="preserve">
+    <value>VERSO</value>
+  </data>
+  <data name="Volume" xml:space="preserve">
+    <value>Objętość</value>
+  </data>
+  <data name="WakeUp" xml:space="preserve">
+    <value>Wznowienie</value>
+  </data>
+  <data name="Wash" xml:space="preserve">
+    <value>Mycie</value>
+  </data>
+  <data name="WashingUnit" xml:space="preserve">
+    <value>Jednostka myjąca</value>
+  </data>
+  <data name="Waste" xml:space="preserve">
+    <value>Odpady</value>
+  </data>
+  <data name="WebLength" xml:space="preserve">
+    <value>Długość wstęgi</value>
+  </data>
+  <data name="WebTensions" xml:space="preserve">
+    <value>Naprężenie wstęgi</value>
+  </data>
+  <data name="Week" xml:space="preserve">
+    <value>Tydzień</value>
+  </data>
+  <data name="Weekend" xml:space="preserve">
+    <value>Weekend</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Szerokość [mm]</value>
+  </data>
+  <data name="WindowsCommands" xml:space="preserve">
+    <value>Polecenia Windows</value>
+  </data>
+  <data name="WindowsUpdate" xml:space="preserve">
+    <value>Windows Update</value>
+  </data>
+  <data name="Wipe" xml:space="preserve">
+    <value>Przetrzyj</value>
+  </data>
+  <data name="WipingDelay" xml:space="preserve">
+    <value>Opóźnienie przecierania</value>
+  </data>
+  <data name="WipingHeight" xml:space="preserve">
+    <value>Wysokość przecierania</value>
+  </data>
+  <data name="WipingSpeed" xml:space="preserve">
+    <value>Prędkość przecierania</value>
+  </data>
+</root>

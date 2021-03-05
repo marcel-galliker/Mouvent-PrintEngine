@@ -6,11 +6,12 @@
              xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d"
              Width="250"
              d:DesignHeight="300" d:DesignWidth="230">
 
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Offsets">
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Offsets}">
         <StackPanel>
             <Grid x:Name="Encoder" Margin="0, 0, 0, 5">
                 <TextBlock Text="Encoder [inc/m]"/>
@@ -18,17 +19,17 @@
             </Grid>
 
             <Grid x:Name="Belt" Margin="0, 0, 0, 5">
-                <TextBlock       Text="Belt Step [µm]"/>
+                <TextBlock       Text="{mvt:LocalizedBinding BeltStep}"/>
                 <common:MvtNumBox Text="{Binding OffsetStep}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
 
             <Grid x:Name="Angle" Margin="0, 0, 0, 5">
-                <TextBlock       Text="Angle [stp]"/>
+                <TextBlock       Text="{mvt:LocalizedBinding AngleStp}"/>
                 <common:MvtNumBox Text="{Binding OffsetAngle}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
 
             <Grid x:Name="Overlap" Margin="0, 0, 0, 5">
-                <TextBlock       Text="Overlap"/>
+                <TextBlock       Text="{mvt:LocalizedBinding Overlap}"/>
                 <igWPF:XamComboEditor 
                                 x:Name="CB_Overlap"
 			                    Value="{Binding Overlap, Converter={StaticResource EnumToInt_Converter}}"
@@ -41,17 +42,17 @@
             </Grid>
 
             <Grid x:Name="EncoderVerso" Margin="0, 0, 0, 5">
-                <TextBlock       Text="Encoder Verso [inc/m]"/>
+                <TextBlock       Text="{mvt:LocalizedBinding EncoderVerso}"/>
                 <common:MvtNumBox Text="{Binding OffsetIncPerMeterVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
 
             <Grid x:Name="DistVerso" Margin="0, 0, 0, 5">
-                <TextBlock       Text="Dist Verso [mm]"/>
+                <TextBlock       Text="{mvt:LocalizedBinding DistVerso}"/>
                 <common:MvtNumBox Text="{Binding OffsetVerso}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
 
             <Grid x:Name="ManualFlightTimeComp" Margin="0, 0, 0, 5">
-                <TextBlock       Text="FlightTime [mm]"/>
+                <TextBlock       Text="{mvt:LocalizedBinding FlightTime}"/>
                 <common:MvtNumBox Text="{Binding ManualFlightTimeComp}" HorizontalContentAlignment="Right" Width="70" HorizontalAlignment="Right"/>
             </Grid>
             

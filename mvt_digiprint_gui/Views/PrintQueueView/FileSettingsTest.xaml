@@ -7,8 +7,8 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
-             
              >
 
     <StackPanel 
@@ -23,11 +23,11 @@
         <!-- RIP Settings _____________________________________________________________________________-->
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="15" />
-                <ColumnDefinition Width="90" />
-                <ColumnDefinition Width="70" />
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -40,7 +40,7 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Test Image" />
+            <TextBlock Margin="0, 0, 5, 5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding TestImage}" />
             <igWPF:XamComboEditor Margin="0, 0, 0, 5" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
                 x:Name="CB_TestImage"
                 Value="{Binding TestImage}"
@@ -49,7 +49,7 @@
                 DropDownResizeMode="None"
                 LostFocus="ComboBox_LostFocus"
             />
-            <TextBlock Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Drop Size"/>
+            <TextBlock Margin="0, 0, 5, 5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding DropSize}"/>
             <igWPF:XamComboEditor Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="2"
                 x:Name="CB_DropSize"
                 HorizontalAlignment="Stretch"
@@ -59,7 +59,7 @@
                 DropDownResizeMode="None"
                 LostFocus="ComboBox_LostFocus"
                 />
-            <TextBlock Grid.Row="2" Margin="0, 0, 0, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="Speed" />
+            <TextBlock Grid.Row="2" Margin="0, 0, 5, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding Speed}" />
             <igWPF:XamComboEditor Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="2"
             x:Name="CB_Speed"
             HorizontalAlignment="Stretch"
@@ -71,7 +71,7 @@
             />
             <TextBlock Grid.Row="2" Grid.Column="3" Text="m/min"  Margin="5, 0, 0, 5"  x:Name="SpeedUnit"/>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 5" Text="Scan Mode" x:Name="CT_ScanMode"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 5" Text="{mvt:LocalizedBinding ScanMode}" x:Name="CT_ScanMode"/>
             <igWPF:XamComboEditor Grid.Row="3" Grid.Column="2" Margin="0, 0, 0, 5"
                 x:Name="CB_ScanMode"
                 HorizontalAlignment="Stretch"
@@ -81,19 +81,19 @@
                 DropDownResizeMode="None"
                 />
 
-            <TextBlock   Grid.Row="4" Margin="0, 0, 0, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="Image Margin"/>
+            <TextBlock   Grid.Row="4" Margin="0, 0, 5, 5" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding ImageMargin}"/>
             <common:MvtNumBox Grid.Row="4" Margin="0, 0, 0, 5" Grid.Column="2" 
                               Text="{Binding PageMargin, Converter={StaticResource Len_Unit_Converter}, ConverterParameter=mm}"
                               HorizontalAlignment="Stretch" LostFocus="TextBox_LostFocus" />
             <TextBlock   Grid.Row="4" Grid.Column="3" Text="mm" Margin="5,0,0,5" x:Name="MarginUnit"/>
 
-            <TextBlock   Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="Copies" Margin="0, 0, 0, 5"/>
+            <TextBlock   Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding Copies}" Margin="0, 0, 0, 5"/>
             <common:MvtNumBox Grid.Row="5" Grid.Column="2" Text="{Binding Copies}" HorizontalAlignment="Stretch" Margin="0, 0, 0, 5"/>
 
-            <TextBlock   Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="Message" Margin="0, 10, 0, 5"/>
+            <TextBlock   Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="{mvt:LocalizedBinding Message}" Margin="0, 10, 0, 5"/>
             <rx:MvtTextBox x:Name="Message" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding TestMessage}" HorizontalAlignment="Stretch" Margin="0, 10, 0, 5"/>
 
-            <CheckBox x:Name="MessageCheckBox" Style="{StaticResource LargeCheckBox}" Grid.ColumnSpan="2" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left" Content="Auto-generate message"
+            <CheckBox x:Name="MessageCheckBox" Style="{StaticResource LargeCheckBox}" Grid.ColumnSpan="3" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left" Content="{mvt:LocalizedBinding AutoGenerateMessage}"
                     Checked="MessageCheckBoxChanged" Unchecked="MessageCheckBoxChanged" >
                 </CheckBox>
         </Grid>

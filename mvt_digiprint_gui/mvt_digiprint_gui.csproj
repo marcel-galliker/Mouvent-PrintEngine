@@ -380,12 +380,21 @@
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\Enums\EN_EncoderTypeList.cs" />
+    <Compile Include="Models\Enums\EN_Langue.cs" />
     <Compile Include="Models\FileNameFilter.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
     <Compile Include="Models\SoftwareValueCorrection.cs" />
     <Compile Include="Models\StepperStatus.cs" />
+    <Compile Include="Helpers\ITranslationSource.cs" />
+    <Compile Include="Helpers\LocalizedBinding.cs" />
+    <Compile Include="Resources\Language\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\TranslationSource.cs" />
     <Compile Include="Services\RestService.cs" />
     <Compile Include="Views\AlignmentView\AlignmentSettings.xaml.cs">
       <DependentUpon>AlignmentSettings.xaml</DependentUpon>
@@ -1648,6 +1657,20 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="Resources\Language\Resources.de-DE.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.es-ES.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.fr-FR.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Language\Resources.it-IT.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.nl-NL.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.pl-PL.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.pt-PT.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Language\Resources.ro-RO.resx" />
     <Resource Include="Resources\Bitmaps\PG_Mark_INV.ico" />
     <Resource Include="Resources\Bitmaps\density.png" />
     <Resource Include="Resources\Bitmaps\Tex\TX801.png" />
@@ -1989,14 +2012,25 @@ copy $(ProjectDir)..\ScanCheckParser\ScanCheckParser\bin\Debug\netstandard2.0\*.
 GOTO :END
 
 :RELEASE_64
+if not exist  $(ProjectDir)..\bin\gui md $(ProjectDir)..\bin\gui
+copy $(ProjectDir)\..\_out\Release_x64\rx_rip_lib.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)dll\*.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)$(OutDir)*.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)..\ssh\id_rsa.ppk $(ProjectDir)..\bin\gui
 copy $(TargetFileName) $(ProjectDir)..\bin\gui
 copy $(TargetFileName).* $(ProjectDir)..\bin\gui
+xcopy /y /s /i $(ProjectDir)$(OutDir)\de-DE $(ProjectDir)..\bin\gui\de-DE
+xcopy /y /s /i $(ProjectDir)$(OutDir)\es-ES $(ProjectDir)..\bin\gui\es-ES
+xcopy /y /s /i $(ProjectDir)$(OutDir)\fr-FR $(ProjectDir)..\bin\gui\fr-FR
+xcopy /y /s /i $(ProjectDir)$(OutDir)\it-IT $(ProjectDir)..\bin\gui\it-IT
+xcopy /y /s /i $(ProjectDir)$(OutDir)\nl-NL $(ProjectDir)..\bin\gui\nl-NL
+xcopy /y /s /i $(ProjectDir)$(OutDir)\pl-PL $(ProjectDir)..\bin\gui\pl-PL
+xcopy /y /s /i $(ProjectDir)$(OutDir)\pt-PT $(ProjectDir)..\bin\gui\pt-PT
+xcopy /y /s /i $(ProjectDir)$(OutDir)\ro-RO $(ProjectDir)..\bin\gui\ro-RO
 GOTO :END
 
 :END</PostBuildEvent>
+
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>call $(ProjectDir)VersionUpdate $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs

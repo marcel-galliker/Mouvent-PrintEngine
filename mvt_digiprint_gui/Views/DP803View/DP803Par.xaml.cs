@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using System;
@@ -64,7 +65,7 @@ namespace RX_DigiPrint.Views.DP803View
             Material  material = RxGlobals.MaterialList.FindByName(XML_MATERIAL.Value);
             if (material!=null)
             {
-                if (MvtMessageBox.YesNo("Delte", string.Format("Delete Material >>{0}<<?", material.Name),  MessageBoxImage.Question, false))
+                if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, string.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmDeleteMaterial, material.Name),  MessageBoxImage.Question, false))
                 {
                     material.Delete();
                 }

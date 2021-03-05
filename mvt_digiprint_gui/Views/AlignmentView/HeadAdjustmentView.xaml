@@ -6,10 +6,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
         ResizeMode="NoResize"
-        Title="HeadAdjustment" SizeToContent="WidthAndHeight">
+        Title="{mvt:LocalizedBinding HeadAdjustment}" SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

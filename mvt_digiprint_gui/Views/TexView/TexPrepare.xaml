@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300"
              d:DesignWidth="300"
@@ -21,16 +22,16 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="2" Header="Prepare State"/>
+        <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="2" Header="{mvt:LocalizedBinding PrepareState}"/>
 
-        <TextBlock Grid.Row="1" Text="UW Tension &amp; Ø"        FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
-        <TextBlock Grid.Row="2" Text="UW Tension"                FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
-        <TextBlock Grid.Row="3" Text="Buffer in Start"           FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" />
-        <TextBlock Grid.Row="4" Text="Pressure Roller in Start"  FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
-        <TextBlock Grid.Row="5" Text="Scanner in Start"          FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
-        <TextBlock Grid.Row="6" Text="RW Tension &amp; Ø"        FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
-        <TextBlock Grid.Row="7" Text="RW Tension"                FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
-        <TextBlock Grid.Row="8" Text="Head in Printing Position" FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
-        <TextBlock Grid.Row="9" Text="Data Ready"                FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
+        <TextBlock Grid.Row="1" Text="{mvt:LocalizedBinding UwTension0}"        FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
+        <TextBlock Grid.Row="2" Text="{mvt:LocalizedBinding UnwinderTension}"                FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
+        <TextBlock Grid.Row="3" Text="{mvt:LocalizedBinding BufferInStart}"           FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" />
+        <TextBlock Grid.Row="4" Text="{mvt:LocalizedBinding PressureRollerInStart}"  FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
+        <TextBlock Grid.Row="5" Text="{mvt:LocalizedBinding ScannerInStart}"          FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
+        <TextBlock Grid.Row="6" Text="{mvt:LocalizedBinding RwTension0}"        FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
+        <TextBlock Grid.Row="7" Text="{mvt:LocalizedBinding RewinderTension}"                FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
+        <TextBlock Grid.Row="8" Text="{mvt:LocalizedBinding HeadInPrintingPosition}" FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0" Background="{StaticResource XamGrid_Alternate}"/>
+        <TextBlock Grid.Row="9" Text="{mvt:LocalizedBinding DataReady}"                FontSize="{StaticResource MvtFontSize}" Margin="25,0,0,0"/>
     </Grid>
 </UserControl>

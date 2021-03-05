@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
 using System.Linq;
@@ -64,7 +65,7 @@ namespace RX_DigiPrint.Views.LH702View
         {
             if (_Item!=null)
             {
-                if (MvtMessageBox.YesNo("Delete", "Delete the Items",  MessageBoxImage.Question, false))
+                if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, RX_DigiPrint.Resources.Language.Resources.DeleteTheItems,  MessageBoxImage.Question, false))
                 {
                     _Item.SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
                 }

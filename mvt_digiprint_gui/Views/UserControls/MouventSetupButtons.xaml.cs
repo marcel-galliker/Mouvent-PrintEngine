@@ -129,7 +129,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Washing_Clicked -------------------------------------------------
         private void Washing_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Washing", "Start Washing the belt?",  MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Washing, RX_DigiPrint.Resources.Language.Resources.ConfirmStartWashingTheBelt,  MessageBoxImage.Question, false))
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WASHING");
         }
 
@@ -142,7 +142,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- Gluing_Clicked -------------------------------------------------
         private void Gluing_Clicked(object sender, RoutedEventArgs e)
         {            
-            if (MvtMessageBox.YesNo("Gluing", "Start Gluing?",  MessageBoxImage.Question, false))
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Gluing, RX_DigiPrint.Resources.Language.Resources.ConfirmStartGluing,  MessageBoxImage.Question, false))
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_GLUE");
         }
 

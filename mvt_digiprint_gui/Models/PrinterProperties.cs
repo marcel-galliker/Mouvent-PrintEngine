@@ -90,6 +90,7 @@ namespace RX_DigiPrint.Models
                 Name        = RxGlobals.Settings.Name;
                 IP_Address  = RxGlobals.Settings.IP_Addr;
                 Units       = RxGlobals.Settings.Units;
+                Langue = RxGlobals.Settings.Langue;
                 use();
             }
         }
@@ -107,7 +108,8 @@ namespace RX_DigiPrint.Models
         {
             RxGlobals.Settings.Name     = Name;
             RxGlobals.Settings.IP_Addr  = IP_Address;
-            RxGlobals.Settings.Units    = Units;
+            RxGlobals.Settings.Units = Units;
+            RxGlobals.Settings.Langue = Langue;
             RxGlobals.Settings.Save(_Path);
             use();
         }
@@ -142,6 +144,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _Units; }
             set { if(SetProperty(ref _Units, value)) Changed=true; }
+        }
+
+        //--- Property Langue ---------------------------------------
+        private ELangues _Langue;
+        public ELangues Langue
+        {
+            get { return _Langue; }
+            set { if (SetProperty(ref _Langue, value)) Changed = true; }
         }
 
         //--- Property IP_AddressList ---------------------------------------

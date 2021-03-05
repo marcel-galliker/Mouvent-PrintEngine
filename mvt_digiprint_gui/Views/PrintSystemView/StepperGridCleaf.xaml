@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+             xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="200" 
              d:DesignWidth="700">
@@ -25,8 +26,8 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    
-    <GroupBox Style="{StaticResource MvtGroupBox}" Header="Stepper">
+
+    <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Stepper}">
 
         <Grid Grid.Row="1" x:Name="MainGrid" Margin="5">
             <Grid.RowDefinitions>
@@ -49,11 +50,11 @@
                 <ColumnDefinition Width="45"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="1" Grid.Column="0" Text="Wiping Height"/>
+            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding WipingHeight}"/>
             <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="1" Grid.Column="1" Text="{Binding WipeHeight}" HorizontalContentAlignment="Right"/>
             <TextBlock  Margin="0, 0, 0, 5"     Grid.Row="1" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
-            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="0" Text="Capping Height"/>
+            <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding CappingHeight}"/>
             <common:MvtNumBox Margin="0, 0, 0, 5" Grid.Row="2" Grid.Column="1" Text="{Binding CapHeight}" HorizontalContentAlignment="Right"/>
             <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="2" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 
@@ -72,8 +73,8 @@
                    BorderBrush="{Binding InkType, Converter={StaticResource InkType_ColorBG}}" Foreground="{Binding InkType, Converter={StaticResource InkType_ColorBG}}"></Button>
 
 
-            <TextBlock Margin="0, 0, 0, 5"      Grid.Row="1" Grid.Column="3" Text="Ref Height"/>
-            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="2" Grid.Column="3"><Run Language="de-ch" Text="Head Align"/></TextBlock>
+            <TextBlock Margin="0, 0, 0, 5"      Grid.Row="1" Grid.Column="3" Text="{mvt:LocalizedBinding RefHeight}"/>
+            <TextBlock    Margin="0, 0, 0, 5"   Grid.Row="2" Grid.Column="3"><Run Language="de-ch" Text="{mvt:LocalizedBinding HeadAlign}"/></TextBlock>
             <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="1" Grid.Column="8" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
             <TextBlock   Margin="0, 0, 0, 5"    Grid.Row="2" Grid.Column="8" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
 

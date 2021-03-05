@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.External;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Helpers;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -57,7 +58,7 @@ namespace RX_DigiPrint.Views.Settings
         //--- WlanStatus_MouseLeftButtonUp --------------------------------------------
         private void WlanStatus_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (_connected && MvtMessageBox.YesNo("WLAN", "Disconnect.",  MessageBoxImage.Question, false))
+            if (_connected && MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Wlan, RX_DigiPrint.Resources.Language.Resources.Disconnect,  MessageBoxImage.Question, false))
             {
                  RX_Wlan.Disconnect(_interfaceGuid);
                  _update();

@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         Topmost="True"
-        Title="Scales Calibration"
+        Title="{mvt:LocalizedBinding ScalesCalibration}"
         SizeToContent="WidthAndHeight"
         Height="auto" Width="auto">
     <Grid Margin="10">
@@ -18,7 +19,7 @@
             <ColumnDefinition Width="70"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Displayed" Margin="10"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding Displayed}" Margin="10"/>
         <TextBlock Grid.Row="0" Grid.Column="1" x:Name="Value" Margin="10" HorizontalAlignment="Right"/>
         <TextBlock Grid.Row="0" Grid.Column="2" Text="Kg" Margin="10"/>
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Real" Margin="10"/>

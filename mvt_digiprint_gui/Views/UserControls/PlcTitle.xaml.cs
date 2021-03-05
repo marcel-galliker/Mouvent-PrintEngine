@@ -36,6 +36,24 @@ namespace RX_DigiPrint.Views.UserControls
             set { _Header = value; }
         }
 
+        public static readonly DependencyProperty HeaderProperty
+        = DependencyProperty.Register(
+            "Header",
+            typeof(String),
+            typeof(PlcTitle),
+            new FrameworkPropertyMetadata("",
+                OnHeaderChanged
+                )
+            );
+
+        private static void OnHeaderChanged(DependencyObject source,
+        DependencyPropertyChangedEventArgs e)
+        {
+            PlcTitle p = source as PlcTitle;
+            p.Header = (String)e.NewValue;
+        }
+
+
         //--- Property User ---------------------------------------
         private EUserType _User;
         public EUserType User
