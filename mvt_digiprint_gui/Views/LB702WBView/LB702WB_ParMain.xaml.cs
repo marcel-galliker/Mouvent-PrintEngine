@@ -26,7 +26,7 @@ namespace RX_DigiPrint.Views.LB702WBView
 
             CB_Material.ItemsSource = RxGlobals.MaterialList.List;
             CB_RotUW.ItemsSource = new EN_RotationList();
-            CB_RotRW.ItemsSource = new EN_RotationList();
+            CB_RotRW.ItemsSource = new EN_RotationList_OFF();
             CB_Corona.ItemsSource = new EN_OnOff();
 
             XML_MATERIAL.PropertyChanged += XML_MATERIAL_PropertyChanged;
