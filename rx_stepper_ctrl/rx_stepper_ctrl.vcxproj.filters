@@ -222,5 +222,8 @@
     <ClInclude Include="robi.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="rob_tcp_ip.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

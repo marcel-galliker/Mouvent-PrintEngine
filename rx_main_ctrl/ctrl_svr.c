@@ -1283,91 +1283,12 @@ void ctrl_reset_cond(void)
     
 }
 
-//--- ctrl_set_rob_pos -------------------------------------
-void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis)
+//--- ctrl_set_rob_pos -----------------------------
+void ctrl_set_rob_pos(int headNo, INT32 angle, INT32 stitch)
 {
-    int clusterNo = 0;
-    if (rx_def_is_lb(RX_Config.printer.type))
-	{
-        if (RX_Config.printer.type != printer_LB702_UV || RX_Config.colorCnt < 5 || RX_Config.colorCnt > 7)
-			clusterNo = robposition.printBar * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition.head / MAX_HEADS_BOARD);
-		else
-			clusterNo = ((robposition.printBar + 4) % RX_Config.colorCnt) * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition.head / MAX_HEADS_BOARD);
-
-        int stepperNo = 0;
-        if (RX_Config.inkSupplyCnt % 2 == 0)
-            stepperNo = robposition.printBar / 2;
-        else
-            stepperNo = (robposition.printBar + 1) / 2;
-        
-        robposition.head = robposition.head % MAX_HEADS_BOARD;
-        if (!blocked && robposition.head >= 0)
-        {
-            robposition.angle += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.robot.angle;
-            robposition.stitch += RX_HBStatus[clusterNo].head[robposition.head%HEAD_CNT].eeprom_mvt.robot.stitch;
-            sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
-        }
-        else if (blocked && blocked_Axis == AXE_STITCH && robposition.head >= 0)
-        {
-            robposition.angle = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.robot.angle;
-            sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
-        }
-        else if (blocked && blocked_Axis == AXE_ANGLE)
-        {
-            robposition.stitch = RX_HBStatus[clusterNo].head[robposition.head].eeprom_mvt.robot.stitch;
-            sok_send_2(&_HeadCtrl[clusterNo].socket, CMD_SET_ROB_POS, sizeof(robposition), &robposition);
-        }
-        else if (robposition.head == -1)
-        {
-            steplb_cluster_Screw_Turned(stepperNo);
-            if (!blocked)
-            {
-                if (RX_Config.inkSupplyCnt % 2 == 0)
-					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] += robposition.stitch;
-                else
-                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1)%2] += robposition.stitch;
-            }  
-            else
-            {
-                if (RX_Config.inkSupplyCnt % 2 == 0)
-					RX_Config.stepper.robot[stepperNo].screwturns[robposition.printBar%2] = robposition.stitch;
-                else
-                    RX_Config.stepper.robot[stepperNo].screwturns[(robposition.printBar+1) % 2] = robposition.stitch;
-            }
-               
-        }
-	}
+	SRobPosition msg;
+	msg.head	= headNo%HEAD_CNT;
+	msg.angle	= angle;
+	msg.stitch	= stitch;
+	sok_send_2(&_HeadCtrl[headNo/HEAD_CNT].socket, CMD_SET_ROB_POS, sizeof(msg), &msg);
 }
-
-int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition)
-{
-    int clusterNo = 0;
-    
-    if (RX_Config.printer.type != printer_LB702_UV || RX_Config.colorCnt < 5 || RX_Config.colorCnt > 7)
-		clusterNo = robposition->printbarNo * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition->headNo / MAX_HEADS_BOARD);
-	else
-		clusterNo = ((robposition->printbarNo + 4) % RX_Config.colorCnt) * RX_Config.headsPerColor / MAX_HEADS_BOARD + (robposition->headNo / MAX_HEADS_BOARD);
-
-    int stepperNo, printbarNo;
-    if (RX_Config.inkSupplyCnt % 2 == 0)
-    {
-        stepperNo = robposition->printbarNo / 2;
-        printbarNo = robposition->printbarNo % 2;
-    }
-    else
-    {
-        stepperNo = (robposition->printbarNo + 1) / 2;
-        printbarNo = (robposition->printbarNo + 1) % 2;
-    }
-    
-                    
-    if (robposition->headNo == -1)
-        return RX_Config.stepper.robot[stepperNo].screwturns[printbarNo];
-    else if (robposition->axis == AXE_ANGLE)
-        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.robot.angle;
-    else if (robposition->axis == AXE_STITCH)
-        return RX_HBStatus[clusterNo].head[robposition->headNo%HEAD_CNT].eeprom_mvt.robot.stitch;
-    else
-        return -1;
-}
-

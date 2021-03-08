@@ -87,8 +87,12 @@ static int  _incs_2_micron(int incs);
 //--- lb702_init --------------------------------------
 void lb702_init(void)
 {
+#ifdef DEBUG
+	RX_StepperStatus.robot_used = (RX_StepperCfg.printerType==printer_LB702_WB);
+#else
 	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
-		
+#endif
+
     motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
 
@@ -132,11 +136,7 @@ void lb702_init(void)
 	_ParZ_cap.enc_bwd		= TRUE;	
 		
 	if (RX_StepperStatus.robot_used) lbrob_init();
-    
-	memcpy(&RX_StepperStatus.screwclusters, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwclusters, sizeof(RX_StepperStatus.screwclusters));
-    
-    memcpy(&RX_StepperStatus.screwpositions, &RX_StepperCfg.robot[RX_StepperCfg.boardNo].screwpositions, sizeof(RX_StepperStatus.screwpositions));
-
+        
     RX_StepperStatus.robinfo.auto_cap = TRUE;
 }
 

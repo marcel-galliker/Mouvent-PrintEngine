@@ -33,15 +33,10 @@
 
 #define STEPPER_CNT		    4
 
-#define MAX_STEPS_DIST      27 * 6  // 30 turns with 6 steps each turn
-#define MAX_STEPS_ANGLE     15 * 6  // 15 turns with 6 steps each turn
-
 static RX_SOCKET		    _step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		    _Status[STEPPER_CNT];
 static int				    _AbortPrinting=FALSE;
-static int                  _ClusterScrewTurned[STEPPER_CNT] = {FALSE};
-static int                  _ScrewPositions_Written[STEPPER_CNT] = {FALSE};
 static int                  _WashStarted;
 static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 static int                  _ScrewCommandSend[STEPPER_CNT] = {FALSE};
@@ -67,16 +62,15 @@ static void _steplb_rob_do_reference(int no);
 static void _check_screwer(void);
 static void _check_fluid_back_pump(void);
 static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no);
-static void _reset_screw_position(int screwNo, int stepperNo);
-
+static int  _rob_get_printbar(int rob, int printbar);
 
 //--- steplb_init ---------------------------------------------------
-void steplb_init(int no, RX_SOCKET psocket)
+void steplb_init(int no, RX_SOCKET socket)
 {	
 	setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);
 	if (no>=0 && no<STEPPER_CNT)
 	{
-		_step_socket[no] = psocket;
+		_step_socket[no] = socket;
 		memset(&_Status[no], 0, sizeof(_Status[no]));
 	}
 	memset(_Status, 0, sizeof(_Status));
@@ -148,6 +142,17 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	return REPLY_OK;
 }
 
+//--- _rob_get_printbar ------------------------------------------
+static int _rob_get_printbar(int rob, int printbar)
+{
+    switch(RX_Config.printer.type)
+    {
+    case printer_LB702_WB:  return printbar;
+    default:                Error(ERR_CONT, 0, "Not implemented");
+                            return printbar;
+    }
+}
+
 //--- steplb_handle_status ----------------------------------------------------------------------
 int steplb_handle_status(int no, SStepperStat *pStatus)
 {
@@ -196,6 +201,22 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     {
         if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
         {
+            if (_Status[i].robot_used && !oldStatus[i].robot_used)
+            {
+                SScrewPositions pos;
+                setup_screw_positions(PATH_USER FILENAME_SCREW_POS , no, &pos, READ);
+                for (int printbar=0; printbar<2; printbar++)
+                {
+                    for (int head=0; head<RX_Config.headsPerColor; head++)
+                    {
+                        int no=_rob_get_printbar(i, printbar)*RX_Config.headsPerColor+head;
+                        pos.screwpositions[printbar][head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
+                        pos.screwpositions[printbar][head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
+                    }
+                }
+                sok_send_2(&_step_socket[i], CMD_SET_SCREW_POS, sizeof(pos), &pos);
+            }
+
             info.ref_done &= _Status[i].info.ref_done;
             info.printhead_en &= _Status[i].info.printhead_en;
             info.moving |= _Status[i].info.moving;
@@ -261,27 +282,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 
     for (i = 0; i < STEPPER_CNT; i++)
     {
-        if ((memcmp(&oldStatus[i].screwclusters, &_Status[i].screwclusters, sizeof(_Status[i].screwclusters)) ||
-            memcmp(&oldStatus[i].screwpositions, &_Status[i].screwpositions, sizeof(_Status[i].screwpositions)) || _ClusterScrewTurned[i] == TRUE)
-			&& _step_socket[i] != INVALID_SOCKET && RX_StepperStatus.robot_used)
-        {
-            SRxConfig cfg;
-            setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &cfg, READ);
-            memcpy(cfg.stepper.robot[i].screwclusters, _Status[i].screwclusters, sizeof(_Status[i].screwclusters));
-            memcpy(RX_Config.stepper.robot[i].screwclusters, _Status[i].screwclusters, sizeof(_Status[i].screwclusters));
-            memcpy(cfg.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
-            memcpy(RX_Config.stepper.robot[i].screwpositions, _Status[i].screwpositions, sizeof(_Status[i].screwpositions));
-            memcpy(cfg.stepper.robot[i].screwturns, RX_Config.stepper.robot[i].screwturns, sizeof(RX_Config.stepper.robot[i].screwturns));
-            setup_screw_positions(PATH_USER FILENAME_SCREW_POS, &cfg, WRITE);
-            sok_send_2(&_step_socket[i], CMD_CFG_SCREW_POS, sizeof(RX_Config.stepper.robot[i]), &RX_Config.stepper.robot[i]);
-            _ClusterScrewTurned[i] = FALSE;
-        }
-        
-        if (_Status[i].screwerinfo.screw_reset && (oldStatus[i].screwNr_reset != _Status[i].screwNr_reset || oldStatus[i].screwerinfo.screw_reset == FALSE))
-        {
-            _reset_screw_position(_Status[i].screwNr_reset, i);
-        }
-
         // Vacuum Cleaner Timer Start -------------------------------------------------------------------------------
         // Just needed for testing phase -> Need to be taken out before it goes to customers
         if (_OldVacuum_Cleaner_State == FALSE && _Status[i].info.vacuum_running && i == 1)
@@ -311,6 +311,22 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         _check_screwer();
         _check_fluid_back_pump();
     }
+    return REPLY_OK;
+}
+
+//--- steplb_set_ScrewPos -----------------------------------------
+int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
+{
+    setup_screw_positions(PATH_USER FILENAME_SCREW_POS , no, ppos, WRITE);
+    for (int printbar=0; printbar<2; printbar++)
+    {
+        for (int head=0; head<RX_Config.headsPerColor; head++)
+        {
+            int headNo=_rob_get_printbar(no, printbar)*RX_Config.headsPerColor+head;
+            ctrl_set_rob_pos(headNo, ppos->screwpositions[printbar][head][AXE_ANGLE].turns, ppos->screwpositions[printbar][head][AXE_STITCH].turns);
+        }
+    }
+
     return REPLY_OK;
 }
 
@@ -812,12 +828,6 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
 //    SHeadAdjustment msg;
     int stepperno=0;    // Variable is not set!!!
-    int current_screwpos = ctrl_current_screw_pos(headAdjustment);
-    if (current_screwpos == -1)
-    {
-        Error(ERR_CONT, 0, "Invalid current screwposition value");
-        return;
-    }
 
     if (RX_Config.inkSupplyCnt % 2 == 0)
         stepperno = headAdjustment->printbarNo / 2;
@@ -837,39 +847,6 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     if (headAdjustment->headNo == RX_Config.headsPerColor-1 && headAdjustment->axis >= AXE_STITCH)
     {
         Error(ERR_CONT, 0, "Last screw of each color is pointless to turn");
-        return;
-    }
-    if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps > MAX_STEPS_ANGLE)
-    {
-        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
-				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
-				(current_screwpos - headAdjustment->steps)/6, abs((current_screwpos - headAdjustment->steps)%6));
-        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
-        return;
-    }
-    else if (headAdjustment->axis == AXE_ANGLE && current_screwpos - headAdjustment->steps < 0)
-    {
-        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
-				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
-				abs((int)(current_screwpos - headAdjustment->steps))/6, abs((int)(current_screwpos - headAdjustment->steps))%6);
-        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
-        return;
-    }
-    
-    if (headAdjustment->axis == AXE_STITCH && current_screwpos + headAdjustment->steps > MAX_STEPS_DIST)
-    {
-        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach %d.%d", 
-				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
-				(current_screwpos + headAdjustment->steps)/6, (current_screwpos + headAdjustment->steps)%6);
-        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
-        return;
-    }
-    else if (headAdjustment->axis == AXE_STITCH && current_screwpos + headAdjustment->steps < 0)
-    {
-        Error(ERR_CONT, 0, "Screw moves out of range; Printbar: %d, Head: %d, Axis: %d, Turn to reach -%d.%d", 
-				headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, 
-				abs((int)(current_screwpos + headAdjustment->steps))/6, abs((int)(current_screwpos + headAdjustment->steps))%6);
-        sok_send_2(&_step_socket[stepperno], CMD_HEAD_OUT_OF_RANGE, 0, NULL);
         return;
     }
     
@@ -908,47 +885,9 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 //--- _check_screwer --------------------------------------------------
 static void _check_screwer(void)
 {
-    SRobPosition ScrewPosition;
-    SHeadAdjustmentMsg headAdjustment;
-    memset(&ScrewPosition, 0, sizeof(ScrewPosition));
     int i, j;
-    for (i = 0; i < SIZEOF(_Status); i++)
-    {
-        if (_ScrewPositions_Written[i] == TRUE && !_Status[i].screwerinfo.screwer_blocked_left && !_Status[i].screwerinfo.screwer_blocked_right && !_Status[i].screwerinfo.screwed) _ScrewPositions_Written[i] = FALSE;
-        ScrewPosition.printBar = _HeadAdjustment[i].printbarNo;
-        ScrewPosition.head = _HeadAdjustment[i].headNo;
-        if (_Status[i].screwerinfo.screwed && !_ScrewPositions_Written[i] && _step_socket[i])
-        {
-            if (_HeadAdjustment[i].axis == AXE_STITCH)
-                ScrewPosition.stitch = _HeadAdjustment[i].steps;
-            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
-                ScrewPosition.angle = -_HeadAdjustment[i].steps;
 
-            ctrl_set_rob_pos(ScrewPosition, FALSE, FALSE);
-            _ScrewPositions_Written[i] = TRUE;
-        }
-        else if (_Status[i].screwerinfo.screwer_blocked_left && !_ScrewPositions_Written[i])
-        {
-            if (_HeadAdjustment[i].axis == AXE_STITCH)
-                ScrewPosition.stitch = MAX_STEPS_DIST;
-            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
-                ScrewPosition.angle = 0;
-            
-            ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
-            _ScrewPositions_Written[i] = TRUE;
-        }
-        else if (_Status[i].screwerinfo.screwer_blocked_right && !_ScrewPositions_Written[i])
-        {
-            if (_HeadAdjustment[i].axis == AXE_STITCH)
-                ScrewPosition.stitch = 0;
-            else if (_HeadAdjustment[i].axis == AXE_ANGLE)
-                ScrewPosition.angle = MAX_STEPS_ANGLE;
-            
-            ctrl_set_rob_pos(ScrewPosition, TRUE, _HeadAdjustment[i].axis);
-            _ScrewPositions_Written[i] = TRUE;
-        }
-    }
-    
+    SHeadAdjustmentMsg headAdjustment;
     for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
     {
         for (j = 1; j < SIZEOF(_HeadAdjustmentBuffer[i]); j++)
@@ -958,8 +897,7 @@ static void _check_screwer(void)
                 _HeadAdjustmentBuffer[i][j - 1] = _HeadAdjustmentBuffer[i][j];
                 _HeadAdjustmentBuffer[i][j].printbarNo = -1;
             }
-        }
-        
+        } 
     }
     
     for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
@@ -1016,16 +954,10 @@ static void _check_fluid_back_pump(void)
     }
 }
 
-//--- steplb_cluster_Screw_Turned ----------------------------------------------------
-void steplb_cluster_Screw_Turned(int stepperNo)
-{
-    _ClusterScrewTurned[stepperNo] = TRUE;
-}
-
 //--- steplb_set_autocapMode --------------------------------------------------------
 void steplb_set_autocapMode(int state)
 {
-        _AutoCapMode = state;
+    _AutoCapMode = state;
 }
 
 void steplb_set_fluid_off(int no)
@@ -1050,32 +982,4 @@ void steplb_set_fluid_off(int no)
         steplb_rob_control(ctrl_off, (no + 1) / 2);
         steplb_rob_stop((no + 1) / 2);
     }
-}
-
-static void _reset_screw_position(int screwNo, int stepperNo)
-{
-    SRobPosition ScrewPosition;
-    memset(&ScrewPosition, 0, sizeof(ScrewPosition));
-    if (screwNo % (RX_Config.headsPerColor * SCREWS_PER_HEAD) == 0)
-    {
-        ScrewPosition.angle = 0;
-        ScrewPosition.stitch = MAX_STEPS_DIST;
-        ScrewPosition.head = -1;
-    }
-    else
-    {
-        if (screwNo % 2 == 1)
-            ScrewPosition.angle = 0;
-        else
-            ScrewPosition.stitch = MAX_STEPS_DIST;
-
-        ScrewPosition.head = ((screwNo - 1) % (SCREWS_PER_HEAD * RX_Config.headsPerColor)) / 2;
-    }
-
-    if (RX_Config.inkSupplyCnt % 2 == 0)
-    {
-        ScrewPosition.printBar = stepperNo * 2 + (screwNo / (SCREWS_PER_HEAD * RX_Config.headsPerColor));
-    }
-    
-    ctrl_set_rob_pos(ScrewPosition, TRUE, screwNo % 2 == 0);
 }

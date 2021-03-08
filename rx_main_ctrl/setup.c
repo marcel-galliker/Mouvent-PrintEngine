@@ -279,7 +279,7 @@ int setup_fluid_system	(const char *filepath,	UINT32	*pflushed,	EN_setup_Action 
 	return REPLY_OK;									
 }
 
-int setup_screw_positions (const char *filepath, SRxConfig *pcfg, EN_setup_Action action)
+int setup_screw_positions (const char *filepath, int robot,	SScrewPositions *ppos, EN_setup_Action  action)
 {
     int i, j, k, l;
 //  char path[MAX_PATH];
@@ -289,38 +289,35 @@ int setup_screw_positions (const char *filepath, SRxConfig *pcfg, EN_setup_Actio
 
     if (setup_chapter(file, "Screw_Positions", -1, action) == REPLY_OK)
     {
-        for (i = 0; i < SIZEOF(pcfg->stepper.robot); i++)
+        if (setup_chapter(file, "Robot", robot, action) == REPLY_OK)
         {
-            if (setup_chapter(file, "Robot", i, action) == REPLY_OK)
+            for (j = 0; j < SIZEOF(ppos->screwpositions); j++)
             {
-                for (j = 0; j < SIZEOF(RX_StepperCfg.robot[i].screwpositions); j++)
+                if (setup_chapter(file, "Printbar", j, action) == REPLY_OK)
                 {
-                    if (setup_chapter(file, "Printbar", j, action) == REPLY_OK)
-                    {
-						setup_int32(file, "Screw_Turns", action, &pcfg->stepper.robot[i].screwturns[j], 0);
-                        setup_int32(file, "Cluster_X_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posX, 0);
-						setup_int32(file, "Cluster_Y_Pos", action, &pcfg->stepper.robot[i].screwclusters[j].posY, 0);
-						for (k = 0; k < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0]); k++)
-						{
-                            if (setup_chapter(file, "Head", k, action) == REPLY_OK)
-                            {
-                                for (l = 0; l < SIZEOF(RX_StepperCfg.robot[i].screwpositions[0][0]); l++)
-								{
-                                    if (setup_chapter(file, "Axis", l, action) == REPLY_OK)
-                                    {
-                                        setup_int32(file, "X_Pos", action, &pcfg->stepper.robot[i].screwpositions[j][k][l].posX, 0);
-										setup_int32(file, "Y_Pos", action,&pcfg->stepper.robot[i].screwpositions[j][k][l].posY, 0);
-										setup_chapter(file, "..", -1, action);
-                                    }
-								}
-								setup_chapter(file, "..", -1, action);
-                            }
-						}
-						setup_chapter(file, "..", -1, action);
-                    }
+					setup_int32(file, "Screw_Turns", action, &ppos->screwclusters[j].turns, 0);
+                    setup_int32(file, "Cluster_X_Pos", action, &ppos->screwclusters[j].x, 0);
+					setup_int32(file, "Cluster_Y_Pos", action, &ppos->screwclusters[j].y, 0);
+					for (k = 0; k < SIZEOF(ppos->screwpositions[0]); k++)
+					{
+                        if (setup_chapter(file, "Head", k, action) == REPLY_OK)
+                        {
+                            for (l = 0; l < SIZEOF(ppos->screwpositions[0][0]); l++)
+							{
+                                if (setup_chapter(file, "Axis", l, action) == REPLY_OK)
+                                {
+                                    setup_int32(file, "X_Pos", action, &ppos->screwpositions[j][k][l].x, 0);
+									setup_int32(file, "Y_Pos", action,&ppos->screwpositions[j][k][l].y, 0);
+									setup_chapter(file, "..", -1, action);
+                                }
+							}
+							setup_chapter(file, "..", -1, action);
+                        }
+					}
+					setup_chapter(file, "..", -1, action);
                 }
-                setup_chapter(file, "..", -1, action);
             }
+            setup_chapter(file, "..", -1, action);
         }
         setup_chapter(file, "..", -1, action);
     }

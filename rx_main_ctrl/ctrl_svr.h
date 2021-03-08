@@ -55,5 +55,4 @@ void ctrl_reset_cond(void);
 
 void ctrl_empty_PurgeBuffer(int fluidNo);
 
-void ctrl_set_rob_pos(SRobPosition robposition, int blocked, int blocked_Axis);
-int ctrl_current_screw_pos(SHeadAdjustmentMsg *robposition);
+void ctrl_set_rob_pos(int headNo, INT32 angle, INT32 stitch);

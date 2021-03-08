@@ -1271,12 +1271,19 @@ typedef struct SDriveStat
     INT32	actualpoint;
 } SDriveStat;
 
+typedef struct
+{
+	INT32	x;
+	INT32	y;
+	INT32	turns;
+} SScrewPos;
+
 typedef struct SScrewPositions
 {
-    INT32 posX;
-    INT32 posY;
+	SScrewPos	screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
+    SScrewPos	screwclusters[2];	// to align whole printpar
 } SScrewPositions;
-	
+
 typedef struct SRobotOffsets
 {
 	INT32			ref_height;
@@ -1284,9 +1291,6 @@ typedef struct SRobotOffsets
 	INT32			ref_height_back;
 	INT32			ref_height_front;
 	INT32			cap_height;
-    SScrewPositions screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
-    SScrewPositions screwclusters[2]; // 1. printbarNo, 2. headNo, 3. axis
-    INT32			screwturns[2];
 } SRobotOffsets;
 	
 typedef enum ERobotFunctions
@@ -1383,6 +1387,8 @@ typedef struct
     INT32 axis;
 #define AXE_ANGLE	0
 #define AXE_STITCH	1
+#define AXE_MAX		1
+
     INT32 steps; // in steps
 } SHeadAdjustment;
 
@@ -1638,8 +1644,6 @@ typedef struct SStepperStat
 
     INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
-    SScrewPositions screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
-    SScrewPositions screwclusters[2];  // 1. printbarNo, 2. headNo, 3. axis
 //	INT32			unused_set_io_cnt;
 } SStepperStat;
 

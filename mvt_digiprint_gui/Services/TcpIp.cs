@@ -1325,14 +1325,6 @@ namespace RX_DigiPrint.Services
             public Int32			inputs;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
 	        public SStepperMotor[]	motor;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-            public SScrewPositions[] screwpositions;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-            public SScrewPositions[] screwclusters;
-
-            //          public Int32		set_io_cnt;
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

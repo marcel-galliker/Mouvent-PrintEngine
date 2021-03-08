@@ -95,7 +95,6 @@ void robi_lb702_main(int ticks, int menu)
 
     robi_main(ticks, menu);
     
-
     if (!robi_connected() && _RobiConnection_Time == 0)
     {
         _RobiConnection_Time = rx_get_ticks();
@@ -114,9 +113,8 @@ void robi_lb702_main(int ticks, int menu)
         _ErrorFlag = TRUE;
     }
 
-
     RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
-    RX_StepperStatus.screwerinfo.z_in_up = RX_RobiStatus.zPos == POS_UP;
+    RX_StepperStatus.screwerinfo.z_in_up   = RX_RobiStatus.zPos == POS_UP;
 
     if (_CmdRunning)	RX_StepperStatus.screwerinfo.moving = TRUE;
     else				RX_StepperStatus.screwerinfo.moving = FALSE;

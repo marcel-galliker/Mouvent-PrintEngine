@@ -214,6 +214,10 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									// fluid_control_robot(_LB_Rob);
 									return ret;
                                    
+
+                case REP_SET_SCREW_POS:
+									steplb_set_ScrewPos(no, (SScrewPositions*)&phdr[1]);
+									break;
                 case REP_LIFT_CALIBRATE:
 									gui_set_stepper_offsets(no, (SRobotOffsets*)pStat);
 									return REPLY_OK;
@@ -523,7 +527,6 @@ static void _step_set_config(int no)
     case STEPPER_TTS:   steptts_init	(no, _step_Socket[no]); break;
 	default: 			steps_init		(    _step_Socket[0]);
 	}
-
 	sok_send_2(&_step_Socket[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
 }
 

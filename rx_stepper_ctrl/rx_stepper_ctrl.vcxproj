@@ -237,6 +237,7 @@
     <ClInclude Include="robi_lb702.h" />
     <ClInclude Include="robi_def.h" />
     <ClInclude Include="robi.h" />
+    <ClInclude Include="rob_tcp_ip.h" />
     <ClInclude Include="stepper_ctrl.h" />
     <ClInclude Include="slide.h" />
     <ClInclude Include="test.h" />
