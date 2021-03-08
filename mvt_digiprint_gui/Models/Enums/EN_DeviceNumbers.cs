@@ -117,8 +117,18 @@ namespace RX_DigiPrint.Models.Enums
                                                 }
                                                 for (color=0; color<cnt && color<4; color++)
                                                     _List.Add(new RxEnum<int>(color+1, string.Format("{0}", color+1)));
-                                                break;   
-           }
+                                                break;
+
+                 case EDeviceType.dev_robot:    switch (RxGlobals.PrintSystem.PrinterType)
+                                                {
+                                                    case EPrinterType.printer_LB702_WB:         cnt=4; break;
+                                                    default: cnt=4; break;
+                                                }
+                                                for (color=0; color<cnt; color++)
+                                                    _List.Add(new RxEnum<int>(color+1, string.Format("{0}", color+1)));
+                                                break;
+
+           }                                                    
         }
 
         IEnumerator IEnumerable.GetEnumerator()

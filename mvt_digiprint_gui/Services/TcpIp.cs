@@ -30,7 +30,7 @@ namespace RX_DigiPrint.Services
 	    dev_fluid,	// 05
         dev_6,      // 06
         dev_7,      // 07
-        dev_8,      // 08
+        dev_robot,  // 08
         dev_stepper,// 09
 	    dev_head,	// 10
 	    dev_spool,	// 11

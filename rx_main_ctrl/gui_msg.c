@@ -515,6 +515,7 @@ static void _do_export_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 							break;
         case dev_fluid:     sprintf(message, "Fluid%d", item.deviceNo+1); break;
         case dev_stepper:   sprintf(message, "Stepper%d", item.deviceNo+1); break;
+        case dev_robot:     sprintf(message, "Robot%d", item.deviceNo+1); break;
 	    case dev_head:      {
 								/*
 								int head0 = (_DevNo*(int)TcpIp.HEAD_CNT)%RxGlobals.PrintSystem.HeadCnt;

@@ -31,6 +31,7 @@
 #define RX_CTRL_ENC_0		4				// 6..8
 #define RX_CTRL_FLUID_0		6				// 6..8
 #define RX_CTRL_STEPPER_0	9				// 9..10
+#define RX_CTRL_ROBOT_0		50
 #define RX_CTRL_STEPPER_HD	RX_CTRL_SUBNET "9"
 #define RX_CTRL_STEPPER_CLN	RX_CTRL_SUBNET "10"
 #define RX_CTRL_IQ500		RX_CTRL_SUBNET "240"

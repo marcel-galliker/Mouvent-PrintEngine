@@ -20,6 +20,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_plc,      "plc"        ));
                 _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_enc,      "encoder"    ));
                 _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_fluid,    "fluid"      ));
+                _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_robot,    "robot"      ));
                 _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_stepper,  "stepper"    ));
                 _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_head,     "cluster"    ));
                 _List.Add(new RxEnum<EDeviceType>(EDeviceType.dev_spool,    "spooler"    ));            

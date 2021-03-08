@@ -111,6 +111,7 @@ namespace RX_DigiPrint.Models
                         case Services.EDeviceType.dev_enc:      return "ENC";
                         case Services.EDeviceType.dev_fluid:    return "FL "+item.DeviceNo+1;
                         case Services.EDeviceType.dev_stepper:  return "ST "+item.DeviceNo+1;
+                        case Services.EDeviceType.dev_robot:    return "ROB "+item.DeviceNo+1;
                         case Services.EDeviceType.dev_main:     return "MAIN";
                     }
                 }

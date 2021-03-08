@@ -165,11 +165,11 @@ typedef enum EDevice
 	dev_fluid,	// 05
 	dev_6,		// 06
 	dev_enc32,	// 07
-	dev_8,		// 08
+	dev_robot,	// 08
 	dev_stepper,// 09
 	dev_head,	// 10
 	dev_spooler,// 11
-	dev_end		// 13
+	dev_end		// 12
 } EDevice;
 extern char *DeviceStr[];
 
