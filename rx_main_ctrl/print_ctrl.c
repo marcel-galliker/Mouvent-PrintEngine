@@ -885,7 +885,7 @@ static int _print_next(void)
 						item.lengthUnit = PQ_LENGTH_UNDEF;
 						if (_Item.variable) label_send_data(&_Item.id);
 						spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
-						_Item.pageMargin=_PageMargin_Next;
+						if (RX_Config.printer.type == printer_LH702) _Item.pageMargin = _PageMargin_Next;
 					}
 					
 					if (RX_Config.printer.type==printer_LH702 && _NextItem==NULL)
