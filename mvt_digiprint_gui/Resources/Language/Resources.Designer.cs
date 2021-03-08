@@ -1842,7 +1842,18 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("Fill", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to FillCap.
+        /// </summary>
+        public static string FillCap
+        {
+            get
+            {
+                return ResourceManager.GetString("Fill Cap", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Fill /1.
         /// </summary>
@@ -5489,7 +5500,18 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("St", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Standstill.
+        /// </summary>
+        public static string Standstill
+        {
+            get
+            {
+                return ResourceManager.GetString("Standstill", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Start.
         /// </summary>

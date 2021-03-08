@@ -1669,6 +1669,7 @@
     <EmbeddedResource Include="Resources\Language\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Language\Resources.ro-RO.resx" />
     <Resource Include="Resources\Bitmaps\PG_Mark_INV.ico" />
@@ -2030,7 +2031,6 @@ xcopy /y /s /i $(ProjectDir)$(OutDir)\ro-RO $(ProjectDir)..\bin\gui\ro-RO
 GOTO :END
 
 :END</PostBuildEvent>
-
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>call $(ProjectDir)VersionUpdate $(ProjectDir)Properties\AssemblyInfo.cs.template  $(ProjectDir)Properties\AssemblyInfo.cs

@@ -532,11 +532,16 @@ static void _steptx_rob_control(void)
 								{
                                     if (RX_Config.printer.type == printer_TX404 && RX_Config.headsPerColor == 4)
                                     {
-                                        _RobotCtrlMode = ctrl_vacuum_step8;
-                                        _RisingEdge = FALSE;
-                                        _Status[1].robinfo.vacuum_done = FALSE;
-                                        step_lift_to_wipe_pos(ctrl_vacuum);
-                                    }
+										if (plc_in_wipe_pos())
+										{
+											_RobotCtrlMode = ctrl_vacuum_step8;
+											_RisingEdge = FALSE;
+											_Status[1].robinfo.vacuum_done = FALSE;
+											step_lift_to_wipe_pos(ctrl_vacuum);
+										}
+										else
+											plc_to_wipe_pos();
+									}
                                     else
                                     {
                                         _RobotCtrlMode = ctrl_vacuum_step6;
@@ -556,12 +561,14 @@ static void _steptx_rob_control(void)
 	case ctrl_vacuum_step7:		if (step_rob_in_wipe_pos(rob_fct_vacuum) == FALSE || _RisingEdge)		// rising edge
 								{
 									_RisingEdge = TRUE;
-									if (step_rob_in_wipe_pos(rob_fct_vacuum))
+									if (step_rob_in_wipe_pos(rob_fct_vacuum) && plc_in_wipe_pos())
 									{
-										_RobotCtrlMode=ctrl_vacuum_step8;
+										_RobotCtrlMode = ctrl_vacuum_step8;
 										step_lift_to_wipe_pos(ctrl_vacuum);
 										_RisingEdge = FALSE;
 									}
+									else if (!plc_in_wipe_pos())
+										plc_to_wipe_pos();
 								}
 								break;
 				
@@ -597,12 +604,14 @@ static void _steptx_rob_control(void)
 	case ctrl_vacuum_step11:	if (step_rob_in_wipe_pos(rob_fct_vacuum) == FALSE || _RisingEdge)		// rising edge
 								{
 									_RisingEdge = TRUE;
-									if (step_rob_in_wipe_pos(rob_fct_vacuum))
+									if (step_rob_in_wipe_pos(rob_fct_vacuum) && plc_in_wipe_pos())
 									{
 										_RobotCtrlMode = ctrl_vacuum_step12;
 										_RisingEdge = FALSE;
 										step_lift_to_wipe_pos(ctrl_vacuum);
 									}
+									else if (!plc_in_wipe_pos())
+										plc_to_wipe_pos();
 								}
 								break;
 		
