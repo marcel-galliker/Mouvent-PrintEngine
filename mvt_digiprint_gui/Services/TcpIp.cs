@@ -924,7 +924,7 @@ namespace RX_DigiPrint.Services
             public Int32        ref_height_back;
             public Int32        ref_height_front;
             public Int32        cap_height;
-
+            /*
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
             public SScrewPositions[] screwpositions;
 
@@ -933,6 +933,7 @@ namespace RX_DigiPrint.Services
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public Int32[] screwturns;
+            */
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

@@ -127,7 +127,7 @@ static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
 	{
 		if (socket==_step_Socket[i])
 		{
-			Error(ERR_CONT, 0, "Stepper %d Socket %d closed", i, socket);
+			Error(ERR_CONT, 0, "Stepper %d Socket %d closed", i+1, socket);
 			sok_close(&_step_Socket[i]);
 			switch(_StepperType)
 			{

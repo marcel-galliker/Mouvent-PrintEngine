@@ -1524,7 +1524,7 @@ typedef struct EScrewerInfo
     UINT32 screw_loosed : 1;			//	0x00000100
     UINT32 screw_tight : 1;				//	0x00000200
     UINT32 screws_found : 1;			//	0x00000400
-    UINT32 screwed : 1;					//	0x00000800
+    UINT32 unused_screwed : 1;			//	0x00000800
     UINT32 screwer_blocked_left : 1;	//	0x00001000
     UINT32 screwer_blocked_right : 1;   //	0x00002000
     UINT32 screwer_ready : 1;			//  0x00004000

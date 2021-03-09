@@ -4,6 +4,7 @@
 
 #include "rx_common.h"
 #include "rx_threads.h"
+#include "rx_trace.h"
 #include "rx_error.h"
 #include "robi_def.h"
 #include "robi.h"
@@ -300,6 +301,8 @@ static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 
     _isSync = FALSE;
     _syncMessageId = _msgId;
+
+//    TrPrintfL(TRUE, "robi send_command 0x%08x", commandCode);
 
     pTxMessage = &_txFifo[_txFifoInIndex];
     pTxMessage->command = commandCode;

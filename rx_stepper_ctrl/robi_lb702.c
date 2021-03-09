@@ -244,8 +244,7 @@ void robi_lb702_main(int ticks, int menu)
         case CMD_ROBI_MOVE_TO_Y:
             if (abs(RX_StepperStatus.screw_posY - SCREW_Y_BACK) < MAX_VAR_SCREW_POS || abs(RX_StepperStatus.screw_posY - SCREW_Y_FRONT) < MAX_VAR_SCREW_POS)
                 RX_StepperStatus.screwerinfo.y_in_pos = TRUE;
-            _CmdRunning = 0;
-            
+            _CmdRunning = 0;            
             break;
 
         case CMD_ROBI_MOVE_TO_X:
@@ -533,7 +532,6 @@ void robi_lb702_display_status(void)
     term_printf("Ref: \t\t\t %d\n", RX_RobiStatus.isInRef);
     term_printf("Robi blocked left: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_left);
     term_printf("Robi blocked right: \t %d\n", RX_StepperStatus.screwerinfo.screwer_blocked_right);
-    term_printf("Robi screwed: \t\t %d\n", RX_StepperStatus.screwerinfo.screwed);
     term_printf("Screwer ready: \t\t %d\n", RX_StepperStatus.screwerinfo.screwer_ready);
 }
 
