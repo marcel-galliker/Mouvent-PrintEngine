@@ -138,13 +138,17 @@ void rx_def_init();
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
+//--- robot ----------
+#define ROB_PRINTBAR_CNT		2
+#define ROB_HEADS_PER_BAR	   16
+#define ROB_SCREWS_PER_HEAD		2
+
+//--- coordinates: X in web direction, Y in slide direction
 #define SCREW_X_LEFT		-19200		// -17700	// um
 #define SCREW_X_RIGHT		73800		// 75300	// um       // SCREW_X_LEFT + 93000
 
-#define SCREW_Y_FRONT		51300 // um
-#define SCREW_Y_BACK		34900  // um       // SCREW_Y_FRONT - 16400
-
-#define SCREWS_PER_HEAD		2
+#define SCREW_Y_STITCH		51300 // um
+#define SCREW_Y_ANGLE		34900  // um       // SCREW_Y_STITCH - 16400
 
 //--- simple value ----------------------------------------------	
 typedef struct SValue
@@ -1280,8 +1284,11 @@ typedef struct
 
 typedef struct SScrewPositions
 {
-	SScrewPos	screwpositions[2][8][2]; // 1. printbarNo, 2. headNo, 3. axis
-    SScrewPos	screwclusters[2];	// to align whole printpar
+	struct
+	{
+		SScrewPos stitch;
+		SScrewPos head[ROB_HEADS_PER_BAR][ROB_SCREWS_PER_HEAD];
+	} printbar[ROB_PRINTBAR_CNT];
 } SScrewPositions;
 
 typedef struct SRobotOffsets
@@ -1380,10 +1387,10 @@ typedef struct
 
 typedef struct
 {
-    INT32 printbarNo;
+    INT32 printbar;
 #define LEFT		0
 #define RIGHT		1
-    INT32 headNo;
+    INT32 head;
     INT32 axis;
 #define AXE_ANGLE	0
 #define AXE_STITCH	1

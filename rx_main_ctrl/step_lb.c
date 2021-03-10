@@ -210,8 +210,8 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
                     for (int head=0; head<RX_Config.headsPerColor; head++)
                     {
                         int no=_rob_get_printbar(i, printbar)*RX_Config.headsPerColor+head;
-                        pos.screwpositions[printbar][head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
-                        pos.screwpositions[printbar][head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
+                        pos.printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
+                        pos.printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
                     }
                 }
                 sok_send_2(&_step_socket[i], CMD_SET_SCREW_POS, sizeof(pos), &pos);
@@ -323,9 +323,7 @@ int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
         for (int head=0; head<RX_Config.headsPerColor; head++)
         {
             int headNo=_rob_get_printbar(no, printbar)*RX_Config.headsPerColor+head;
-            if (printbar==1)
-                printf("Printbar1\n");
-            ctrl_set_rob_pos(headNo, ppos->screwpositions[printbar][head][AXE_ANGLE].turns, ppos->screwpositions[printbar][head][AXE_STITCH].turns);
+            ctrl_set_rob_pos(headNo, ppos->printbar[printbar].head[head][AXE_ANGLE].turns, ppos->printbar[printbar].head[head][AXE_STITCH].turns);
         }
     }
 

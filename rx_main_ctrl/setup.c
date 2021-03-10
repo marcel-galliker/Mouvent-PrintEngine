@@ -281,8 +281,7 @@ int setup_fluid_system	(const char *filepath,	UINT32	*pflushed,	EN_setup_Action 
 
 int setup_screw_positions (const char *filepath, int robot,	SScrewPositions *ppos, EN_setup_Action  action)
 {
-    int i, j, k, l;
-//  char path[MAX_PATH];
+    int p, h, a;
     HANDLE file = setup_create();
 
     setup_load(file, filepath);
@@ -291,23 +290,23 @@ int setup_screw_positions (const char *filepath, int robot,	SScrewPositions *ppo
     {
         if (setup_chapter(file, "Robot", robot, action) == REPLY_OK)
         {
-            for (j = 0; j < SIZEOF(ppos->screwpositions); j++)
+            for (p = 0; p < SIZEOF(ppos->printbar) ; p++)
             {
-                if (setup_chapter(file, "Printbar", j, action) == REPLY_OK)
+                if (setup_chapter(file, "Printbar", p, action) == REPLY_OK)
                 {
-					setup_int32(file, "Screw_Turns", action, &ppos->screwclusters[j].turns, 0);
-                    setup_int32(file, "Cluster_X_Pos", action, &ppos->screwclusters[j].x, 0);
-					setup_int32(file, "Cluster_Y_Pos", action, &ppos->screwclusters[j].y, 0);
-					for (k = 0; k < SIZEOF(ppos->screwpositions[0]); k++)
+                    setup_int32(file, "Stitch_X", action, &ppos->printbar[p].stitch.x, 0);
+					setup_int32(file, "Stitch_Y", action, &ppos->printbar[p].stitch.y, 0);
+					setup_int32(file, "Stitch_Turns", action, &ppos->printbar[p].stitch.turns, 0);
+					for (h = 0; h < SIZEOF(ppos->printbar[p].head); h++)
 					{
-                        if (setup_chapter(file, "Head", k, action) == REPLY_OK)
+                        if (setup_chapter(file, "Head", h, action) == REPLY_OK)
                         {
-                            for (l = 0; l < SIZEOF(ppos->screwpositions[0][0]); l++)
+                            for (a = 0; a < SIZEOF(ppos->printbar[p].head[h]); a++)
 							{
-                                if (setup_chapter(file, "Axis", l, action) == REPLY_OK)
+                                if (setup_chapter(file, "Axis", a, action) == REPLY_OK)
                                 {
-                                    setup_int32(file, "X_Pos", action, &ppos->screwpositions[j][k][l].x, 0);
-									setup_int32(file, "Y_Pos", action,&ppos->screwpositions[j][k][l].y, 0);
+                                    setup_int32(file, "X", action, &ppos->printbar[p].head[h][a].x, 0);
+									setup_int32(file, "Y", action,&ppos->printbar[p].head[h][a].y, 0);
 									setup_chapter(file, "..", -1, action);
                                 }
 							}
