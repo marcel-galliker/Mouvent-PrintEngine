@@ -147,7 +147,7 @@ static int _rob_get_printbar(int rob, int printbar)
 {
     switch(RX_Config.printer.type)
     {
-    case printer_LB702_WB:  return printbar;
+    case printer_LB702_WB:  return rob*2+printbar;
     default:                Error(ERR_CONT, 0, "Not implemented");
                             return printbar;
     }
@@ -323,6 +323,8 @@ int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
         for (int head=0; head<RX_Config.headsPerColor; head++)
         {
             int headNo=_rob_get_printbar(no, printbar)*RX_Config.headsPerColor+head;
+            if (printbar==1)
+                printf("Printbar1\n");
             ctrl_set_rob_pos(headNo, ppos->screwpositions[printbar][head][AXE_ANGLE].turns, ppos->screwpositions[printbar][head][AXE_STITCH].turns);
         }
     }

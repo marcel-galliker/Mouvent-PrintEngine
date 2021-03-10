@@ -1287,6 +1287,7 @@ void ctrl_reset_cond(void)
 void ctrl_set_rob_pos(int headNo, INT32 angle, INT32 stitch)
 {
 	SRobPosition msg;
+	msg.printBar= 0;
 	msg.head	= headNo%HEAD_CNT;
 	msg.angle	= angle;
 	msg.stitch	= stitch;

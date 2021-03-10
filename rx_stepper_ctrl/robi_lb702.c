@@ -942,7 +942,6 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     }
 }
 
-
 //--- _check_Screwer_Movement -----------------------------------------------------------
 static void _check_Screwer_Movement()
 {
