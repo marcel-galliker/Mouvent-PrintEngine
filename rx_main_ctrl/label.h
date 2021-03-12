@@ -14,8 +14,8 @@
 #include "rx_def.h"
 
 void label_reset();
-int  label_load(SPrintQueueItem *pitem, char *datapath);
-int  label_send_data(SPageId *pid);
+int label_load(SPrintQueueItem *pitem, char *datapath);
+int label_send_data(SPageId *pid, UINT32 nbCopies);
 
 void label_rep_file_hdr();
 void label_rep_file_block();

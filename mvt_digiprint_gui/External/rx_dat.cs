@@ -26,13 +26,15 @@ namespace RX_LabelComposer.External
         public Int32    unicode;
         public Int32    codePage;
         public Int32    recordCnt;
+        public Int32    nbRows;
+        public Int32    nbCols;
 
         public FileFormatEnum       fileFormat;
         public Int32                recLen;
         public Int32                filter;
         public FieldSeparatorEnum   fieldSep;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
         public SFieldDef[]    field;
     }
 
@@ -46,7 +48,7 @@ namespace RX_LabelComposer.External
         public static extern int dat_save_file_def(IntPtr doc, string tempPath, ref SFileDef fileDef);
 
         [DllImport("rx_rip_lib.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void dat_set_file_def(ref SFileDef fileDef);
+        public static extern int dat_set_file_def(ref SFileDef fileDef);
 
         [DllImport("rx_rip_lib.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int dat_seek(int recNo);

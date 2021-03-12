@@ -157,8 +157,9 @@ int label_load(SPrintQueueItem *pitem, char *datapath)
 		_FileDef.size = sizeof(_FileDef);
 		_Layout.size  = sizeof(_Layout);
 		dat_load_file_def(doc, _ActDataPath, &_FileDef);
-		ctr_load_def     (doc, &_CtrDef);
-		rip_load_layout  (doc, _ActDataPath, &_Layout);
+		rip_load_layout(doc, _ActDataPath, &_Layout);
+		ctr_load_def(doc, &_CtrDef);
+		_CtrDef.incrementType = _Layout.IncrementType;
 	//	rip_load_files   (doc, _ActDataPath, NULL);
 		_FileDef.id = _Layout.id = pitem->id.id;
 		if (*_Layout.label)		 sprintf(labelName, "%s", name); else *labelName=0;
@@ -215,7 +216,7 @@ int label_load(SPrintQueueItem *pitem, char *datapath)
 		*/
 		pq_ripping(pitem);
 		//--- open data file -----------------------------------------------------
-		dat_set_file_def(&_FileDef);
+		if (dat_set_file_def(&_FileDef)) Error(ERR_ABORT, 0, "Bad codepage for variable data");
 
 		strcpy(_ActFilePath, pitem->filepath);
 
@@ -239,7 +240,7 @@ int label_load(SPrintQueueItem *pitem, char *datapath)
 }
 
 //--- label_send_data --------------------------------------------
-int  label_send_data(SPageId *pid)
+int  label_send_data(SPageId *pid, UINT32 nbRaws)
 {
 	int len, i, cnt, idlen;
 
@@ -258,6 +259,7 @@ int  label_send_data(SPageId *pid)
 			_DataMsg->hdr.msgId  = CMD_PRINT_DATA;
 			_DataMsg->hdr.msgLen = sizeof(SPrintDataMsg)-1+2*len;
 			memcpy(&_DataMsg->id, pid, sizeof(SPageId));
+			_DataMsg->nbRaws = nbRaws;
 			dat_get_buffer(0, len, _DataMsg->data);
 			cnt = spool_send_msg(_DataMsg);
 			if (cnt==0) return Error(ERR_CONT, 0, "No Spoolers connected");

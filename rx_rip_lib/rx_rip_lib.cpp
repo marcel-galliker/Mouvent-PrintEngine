@@ -150,14 +150,16 @@ void   rip_enum_fonts(rx_doc *pDoc, font_callback callback)
 //--- rip_load_layout ----------------------------------
 int rip_load_layout(void *doc, char *tempPath, SLayoutDef *pLayout)
 {
-	if (pLayout->size!=sizeof(SLayoutDef))
+	BOOL short_def = FALSE;
+	if (pLayout->size == sizeof(SLayoutDef) - MAX_BOXES * sizeof(SLayoutBoxDef))
+		short_def = TRUE; // struct without the box def (from cs)
+	else if (pLayout->size!=sizeof(SLayoutDef))
 	{
 		int error=0;
 		error=1/error;
 		return 1;
 	}
-	memset(pLayout, 0, sizeof(SLayoutDef));
-	pLayout->size = sizeof(SLayoutDef);
+	memset(pLayout, 0, pLayout->size);
 
 	TiXmlDocument	*pDoc = (TiXmlDocument*)doc;
 
@@ -179,12 +181,14 @@ int rip_load_layout(void *doc, char *tempPath, SLayoutDef *pLayout)
 	layout->Attribute("WebWidth",	&pLayout->webWidth,		300000);
 	layout->Attribute("Columns",	&pLayout->columns,		1);
 	layout->Attribute("ColumnDist",	&pLayout->columnDist,   0);
+	layout->Attribute("IncrementType", (int*)&pLayout->IncrementType, IncTypeByLineAsc);
 
 	for (i=0; i<SIZEOF(pLayout->box); i++)
 	{
 		snprintf(str, SIZEOF(str), "Box%02d", i);
 		box = (CRX_XmlElement*)layout->FirstChild(str);
 		if (box==NULL) break;
+		if (short_def) continue; // does not fill the box in the layout 
 		box->Attribute("Type",			&pLayout->box[i].hdr.boxType, BOX_TYPE_TEXT);
 		box->Attribute("X",				&pLayout->box[i].hdr.x, 0);
 		box->Attribute("Y",				&pLayout->box[i].hdr.y, 0);
@@ -503,7 +507,7 @@ static void _set_box_hdr(SBoxHeader *hdr, SBoxHeaderDef *pHdr, int type, double 
 //--- rip_set_layout ----------------------------------
 int rip_set_layout(SLayoutDef *pLayout, SRipBmpInfo *pInfo)
 {
-	int			size=4096; // size of buffer
+	int			size; // size of buffer
 	int			b, i;
 	BYTE		*buf;
 	SMsgLayout	*layout;
@@ -536,7 +540,11 @@ int rip_set_layout(SLayoutDef *pLayout, SRipBmpInfo *pInfo)
 	ft_init(DPIX, DPIX, monoDropSize);
 
 	//------------------------------------------------------------------------
-	buf = (BYTE*)malloc(size);
+	size = pLayout->boxCnt * max(sizeof(STextBox), sizeof(SBarcodeBox)) + sizeof(SMsgLayout);
+	buf = (BYTE *)malloc(size);
+	if (buf == NULL) 
+		return Error(ERR_ABORT, 0, "Memory overflow");
+
 	layout = (SMsgLayout*)buf;
 	memset(layout, 0, size);
 	layout->cmd			= CMD_SET_LAYOUT;

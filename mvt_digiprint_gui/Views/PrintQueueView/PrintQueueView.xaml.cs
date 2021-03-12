@@ -276,12 +276,22 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
         //--- Print_Clicked -----------------------------------
         private void Print_Clicked(object sender, RoutedEventArgs e)
-        {                        
-            if (_UseLB702) FileOpen_LB702.Print();
+        {
+            if (_UseLB702)
+            {
+                FileOpen_LB702.Print();
+                foreach (Row row in PrintQueueGrid.Rows)
+                {
+                    row.IsSelected = false;
+                    PrintQueueItem item = row.Data as PrintQueueItem;
+                    if (item != null) item.IsSelected = false;
+                }
+                PrintSettings.DataContext = null;
+            }
         }
 
-        //--- FileOpen_LB702_SelectedChanged ---------------------------------------
-        void FileOpen_LB702_SelectedChanged(int selected)
+            //--- FileOpen_LB702_SelectedChanged ---------------------------------------
+            void FileOpen_LB702_SelectedChanged(int selected)
         {
             if (FileOpen_LB702!=null && selected>0) 
             {               
@@ -338,6 +348,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else
             {
+                _update_selected_items();
                 if (_SelectedItems==0) return;
                 if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, RX_DigiPrint.Resources.Language.Resources.DeleteTheItems,  MessageBoxImage.Question, false))
                 {
@@ -350,8 +361,9 @@ namespace RX_DigiPrint.Views.PrintQueueView
                             item.SendMsg(TcpIp.CMD_DEL_PRINT_QUEUE);
                         }
                     }
-                    AllButtons(Visibility.Collapsed);
                     _update_selected_items();
+                    AllButtons(Visibility.Collapsed);
+                    
                 }
             }
         }
@@ -435,7 +447,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- PrintQueueGrid_SelectedRowsCollectionChanged ---------------------------------------------------
         private void PrintQueueGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
         {
-            AllButtons(Visibility.Visible);
             if (sender.Equals(PrintQueueGrid))
             {
                 PrintedQueueGrid.ActiveItem=null;
@@ -452,6 +463,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
                 if (selected)
                 {
+                    AllButtons(Visibility.Visible);
+
                     //--- remove selection in printed list ----
                     PrintedQueueGrid.ActiveItem = null;
                     foreach (Row row in PrintedQueueGrid.Rows)
@@ -790,6 +803,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     _IsExanded[row] = PrintQueueGrid.Rows[row].IsExpanded; 
                 _save_item(button.DataContext as PrintQueueItem);
             }
+            PrintSettings.DataContext = null;
             e.Handled = true;
         }
 
@@ -810,6 +824,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 PrintQueueItem item = button.DataContext as PrintQueueItem;
                 if (item != null) item.SendMsg(TcpIp.CMD_GET_PRINT_QUEUE_ITM);
             }
+            PrintSettings.DataContext = null;
             e.Handled = true;
         }
 

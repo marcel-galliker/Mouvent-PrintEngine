@@ -343,7 +343,7 @@ static void _load_buffer(const char *filedir, const char *filename, SBmpInfo *pi
 
 	int dist = (int)((double)_Layout.columnDist / 25400.0 * DPIX);
 
-	if ((ret = data_malloc(scanning, width * _Layout.columns + dist * (_Layout.columns - 1), length, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), pBufSize, buffer)) == REPLY_OK)
+	if ((ret = data_malloc(scanning, max(width, dist) * _Layout.columns, length, pinfo->bitsPerPixel, RX_Color, SIZEOF(RX_Color), pBufSize, buffer)) == REPLY_OK)
 	{
 		if (_Layout.columns>1 && width < pinfo->srcWidthPx) 
 		{
@@ -392,7 +392,7 @@ void sr_rip_unused()
 	}
 }
 
-static int _screen(SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, const char *filepath)
+static int _screen(SBmpInfo *pInfo, int widthPx, int offsetPx, int lengthPx, int blkNo, int blkCnt, const char *filepath)
 {
 	const int pixelsPerByte = 4;
 	const int stitchingBt = 32; //128 pixels in 2 bits per pixel on stitching 
@@ -418,8 +418,10 @@ static int _screen(SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int b
 	data_split(&id, pInfo, offsetPx, lengthPx, blkNo, blkCnt, 0, 0, 0, item);
 	scr_wait(10);
 
+	if (!widthPx) widthPx = pInfo->srcWidthPx;
 	pInfo->bitsPerPixel = 2;
-	pInfo->lineLen = (pInfo->srcWidthPx + pixelsPerByte - 1) / pixelsPerByte; // recompute width in Bytes
+	pInfo->lineLen = (widthPx + pixelsPerByte - 1) / pixelsPerByte; // recompute width in Bytes
+	pInfo->srcWidthPx = widthPx;
 
 	// recreate the original big image in 2 bits per pixel
 	for (int color = 0; color < RX_Spooler.colorCnt; color++)
@@ -435,14 +437,13 @@ static int _screen(SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int b
 		if (startPx <= 0) 
 		{
 			headStart = -startPx / headPx;
-			btHeadStart = ((-startPx % headPx) + pixelsPerByte + 1) / pixelsPerByte;
+			btHeadStart = (-startPx % headPx) / pixelsPerByte;
 		}
 
 		// cancel partially color offset as it is already in the screened image
 		if (pInfo == &_BmpInfoLabel && startPx% pixelsPerByte)
 		{
 			RX_Color[color].offsetPx += (startPx % pixelsPerByte);
-			if (startPx < 0) RX_Color[color].offsetPx += pixelsPerByte; 
 		}
 
 		// rebuild each line of the screened image
@@ -498,20 +499,22 @@ static int _screen(SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int b
 			if (pInfo->lineLen > wrtBt)
 			{
 				memset(dst, 0, pInfo->lineLen - wrtBt);
-				dst += pInfo->lineLen - wrtBt;
 			}
+			dst += pInfo->lineLen - wrtBt;
 		}
 	}
 	free(item->splitInfo);
 	free(item);
 
-	if (FALSE && pInfo == &_BmpInfoLabel)
+	if (FALSE)
 	{
 		char dir[MAX_PATH];
 		char fname[MAX_PATH];
 		sprintf(dir, PATH_RIPPED_DATA "trace/vdp");
-
-		strcpy(fname, "screened");
+		if (pInfo == &_BmpInfoLabel)
+			strcpy(fname, "screenedLabel");
+		else
+			strcpy(fname, "screenedColor");
 		pInfo->planes = RX_Spooler.colorCnt;
 		tif_write(dir, fname, pInfo, NULL);
 	}
@@ -521,16 +524,15 @@ static int _screen(SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int b
 //--- sr_rip_label -----------------------------------------------------------
 int sr_rip_label(BYTE *buffer[MAX_COLORS], SBmpInfo *pInfo, int offsetPx, int lengthPx, int blkNo, int blkCnt, const char *filepath)
 {
-
 	int column, len, color;
 	BOOL jcneeded = TRUE;
 	int time0 = rx_get_ticks();
 
 	// screen the background and the mask if needed
-	if (_BmpInfoColor.bitsPerPixel >= 8) _screen(&_BmpInfoColor, offsetPx, lengthPx, blkNo, blkCnt, filepath);
+	if (_BmpInfoColor.bitsPerPixel >= 8) _screen(&_BmpInfoColor, _BmpInfoLabel.srcWidthPx, offsetPx, lengthPx, blkNo, blkCnt, filepath);
 	if (_BmpInfoLabel.bitsPerPixel >= 8)
 	{
-		_screen(&_BmpInfoLabel, offsetPx, lengthPx, blkNo, blkCnt, filepath);
+		_screen(&_BmpInfoLabel, _BmpInfoLabel.srcWidthPx, offsetPx, lengthPx, blkNo, blkCnt, filepath);
 		jcneeded = FALSE; // jet compensation is done by screening and not need
 	}
 
@@ -581,8 +583,21 @@ int sr_rip_label(BYTE *buffer[MAX_COLORS], SBmpInfo *pInfo, int offsetPx, int le
 					}
 					pmsg = (SPrintDataMsg*)&_DataBuf[data];
 					len = pmsg->hdr.msgLen-sizeof(SPrintDataMsg)+1;
-					int counter = pmsg->id.copy-1;
-					if (ctr_increment_mode() == INC_perLabel) counter = counter*_Layout.columns+column;
+					int line = pmsg->id.copy - 1;
+					int nbLines = pmsg->nbRaws;
+					int nbColumns = _Layout.columns;
+					int nbLabels = nbLines *_Layout.columns - 1;
+					int counter = 0;
+					switch (ctr_increment_type())
+					{
+						default:
+						case IncTypeByLineAsc: counter = line * nbColumns + column; break;
+						case IncTypeByLineDec: counter = nbLabels - (line * nbColumns + column); break;
+						case IncTypeByColAsc: counter = line + column * nbLines; break;
+						case IncTypeByColDec: counter = nbLabels - (line + column * nbLines); break;
+						case IncTypeByRowAsc: counter = line; break;
+						case IncTypeByRowDec: counter = (nbLines - 1) - line ; break;
+					}
 					ctr_set_counter(counter);
 					dat_set_buffer(0, len/2, pmsg->data);
 					rip_data(&_Layout, column*_Layout.columnDist, 0, &bmp, &bmpLabel, &bmpColor, black);

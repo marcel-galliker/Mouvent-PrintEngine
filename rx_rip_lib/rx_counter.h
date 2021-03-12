@@ -16,10 +16,13 @@
 
 typedef enum
 {
-	INC_undef,		//	0
-	INC_perLabel,	//	1
-	INC_perRow		//  2
-} EIncrement;
+	IncTypeByLineAsc = 0,	// By line in increasing order
+	IncTypeByLineDec = 1,	// By line in decreasing order
+	IncTypeByColAsc = 2,	// By column in increasing order
+	IncTypeByColDec = 3,	// By column in decreasing order
+	IncTypeByRowAsc = 4,	// By raw in increasing order (all labels on a row have the same counter value)
+	IncTypeByRowDec = 5,	// By raw in decreasing order (all labels on a row have the same counter value)
+} EIncType;
 
 typedef struct
 {
@@ -31,7 +34,7 @@ typedef struct
 	char		start[32];
 	char		end[32];
 	INT32		leadingZeros;
-	EIncrement	increment;
+	EIncType	incrementType;
 } SCounterDef;
 
 extern int					CTR_Counter;
@@ -45,7 +48,7 @@ EXPORT int  ctr_save_def(void *doc, SCounterDef *pCtrDef);
 
 EXPORT int  ctr_def_is_equal(SCounterDef *pCtrDef1, SCounterDef *pCtrDef2);
 EXPORT void ctr_set_def		(SCounterDef *pCtrDef);
-EXPORT EIncrement ctr_increment_mode();
+EXPORT EIncType ctr_increment_type();
 EXPORT void ctr_set_counter	(INT32 recNo);
 EXPORT void ctr_inc_counter	(void);
 EXPORT int  ctr_get_counter	(INT32 recNo, char *str);

@@ -41,7 +41,6 @@ int  ctr_load_def(void *doc, SCounterDef *pCtrDef)
 	ctr->Attribute("Start",		    pCtrDef->start,		 SIZEOF(pCtrDef->start),		"000001");
 	ctr->Attribute("End",		    pCtrDef->end,		 SIZEOF(pCtrDef->end),			"999999");
 	ctr->Attribute("LeadingZeros",	&pCtrDef->leadingZeros,								1);		
-	ctr->Attribute("Increment",		(int*)&pCtrDef->increment,							INC_perLabel);		
 	return 0;
 }
 
@@ -61,7 +60,6 @@ int  ctr_save_def(void *doc, SCounterDef *pCtrDef)
 	ctr->SetAttribute("Start",		    pCtrDef->start);
 	ctr->SetAttribute("End",		    pCtrDef->end);
 	ctr->SetAttribute("LeadingZeros",	pCtrDef->leadingZeros);		
-	ctr->SetAttribute("Increment",		pCtrDef->increment);		
 
 	// all pointers are deleted in the DOC destructor!
 	return 0;	
@@ -138,9 +136,9 @@ void  ctr_set_def(SCounterDef *pCtrDef)
 }
 
 //--- ctr_increment_mode --------------------------------------------
-EIncrement ctr_increment_mode()
+EIncType ctr_increment_type()
 {
-	return _CtrDef.increment;
+	return _CtrDef.incrementType;
 }
 
 //--- ctr_set_counter ------------------------------------------------

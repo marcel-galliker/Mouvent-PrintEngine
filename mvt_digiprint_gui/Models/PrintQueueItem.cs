@@ -1,4 +1,4 @@
-﻿using BitMiracle.LibTiff.Classic;
+using BitMiracle.LibTiff.Classic;
 using iTextSharp.text.pdf;
 using RX_Common;
 using RX_DigiPrint.Models.Enums;
@@ -154,6 +154,12 @@ namespace RX_DigiPrint.Models
             if (File.Exists(path))
             {
                 if (!_Label.Load(path)) return false;
+                // Error for VDP with too many boxes as they could not be printed
+                if (_Label.NbCols > 256 || _Label.BoxCnt > 256)
+                { 
+                    RxGlobals.Events.AddItem(new LogItem("Too many variable elements in job {0} (max 256)", _FilePath){LogType=ELogType.eErrWarn});
+                    return false;
+                }
                 Variable = true;
             }
 
@@ -558,7 +564,18 @@ namespace RX_DigiPrint.Models
         public double ScanLength
         {
             get { return _ScanLength; }
-            set { Changed |= SetProperty(ref _ScanLength, value); }
+            set {
+                if (Variable)
+                { 
+                    if (_Label == null) load_label();
+                    if (value > _Label.NbRows)
+                    {
+                        value = _Label.NbRows;
+                        RxGlobals.Events.AddItem(new LogItem("Maximum of {0} copies possible for variable data in '{1}'", _Label.NbRows, _FileName));
+                    }
+                }
+                Changed |= SetProperty(ref _ScanLength, value);
+            }
         }
 
         //--- Property LengthUnit ---------------------------------------
@@ -748,15 +765,6 @@ namespace RX_DigiPrint.Models
                       _read_tiff_properties(filePath) ||
                       _read_bmp_properties(filePath) ||
                       _read_pdf_properties(filePath);
-
-            // Use variable data printing information
-            if (Variable)
-            {
-                Copies = 1;
-                SrcPages = _Label.Pages;
-                SrcWidth = _Label.Width;
-                SrcHeight = _Label.Height;
-            }
 
             return ok;
         }

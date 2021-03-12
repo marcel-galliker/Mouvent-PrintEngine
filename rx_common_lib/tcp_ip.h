@@ -678,6 +678,7 @@ typedef struct SPrintDataMsg
 {
 	SMsgHdr		hdr;
 	SPageId		id;
+	INT32		nbRaws;
 	BYTE		data[1];
 } SPrintDataMsg;
 

@@ -1,4 +1,4 @@
-﻿using RX_DigiPrint.Models;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using System;
@@ -27,13 +27,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             InitializeComponent();
             Visibility = RxGlobals.PrintSystem.IsScanning ? Visibility.Collapsed : Visibility.Visible;
-            
+
             PrintQueueItem item = DataContext as PrintQueueItem;
-            CB_PrintGoMode.ItemsSource  = new EN_PgModeList();
+            CB_PrintGoMode.ItemsSource = new EN_PgModeList();
             RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
             LengthBox.ShowRolls = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf);
-
-            NumBox_StartFrom.DataContext = this;
 
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702 && !RxGlobals.PrintSystem.LH702_simulation) SpeedHeight.Height = new GridLength(0);
             else SpeedHeight.Height = GridLength.Auto;
@@ -59,6 +57,9 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 SpeedUnit.Text = new CUnit("m/min").Name;
                 MarginUnit.Text = DistUnit.Text = new CUnit("mm").Name;
 
+                // Limit length selection to "Copies" for VDP jobs
+                LengthUnit.Visibility = item.Variable ? Visibility.Collapsed : Visibility.Visible;
+
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.SrcHeight);
                 if (!item.Variable && item.SrcPages > 1)
                 {
@@ -68,7 +69,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 }
                 else
                 {
-                    if (item.Variable) LengthUnit.Visibility = Visibility.Collapsed;
                     Length_Settings.Visibility = Visibility.Visible;
                     Page_Settings.Visibility = StartPageTxt.Visibility = StartPageNum.Visibility = Visibility.Collapsed;
                     item._hasPageSettings = false;
@@ -82,36 +82,5 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
         }
 
-        //--- Property StartFrom ---------------------------------------
-        public double StartFrom
-        {
-            get
-            {
-                PrintQueueItem item = DataContext as PrintQueueItem;
-                if (item != null)
-                {
-                    if (item.LengthUnitMM)
-                    {
-                        CUnit unit = new CUnit("m");
-                        return Math.Round(item.StartFrom * unit.Factor * 100) / 100;
-                    }
-                    return item.StartFrom;
-                }
-                return 0;
-            }
-            set
-            {
-                PrintQueueItem item = DataContext as PrintQueueItem;
-                if (item != null)
-                {
-                    if (item.LengthUnitMM)
-                    {
-                        CUnit unit = new CUnit("m");
-                        item.StartFrom = value / unit.Factor;
-                    }
-                    else item.StartFrom = (int)value;
-                }
-            }
-        }
-	}
+    }
 }

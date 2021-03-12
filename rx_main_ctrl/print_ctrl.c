@@ -883,7 +883,7 @@ static int _print_next(void)
 						SPrintQueueItem item;
 						memcpy(&item, &_Item, sizeof(item));
 						item.lengthUnit = PQ_LENGTH_UNDEF;
-						if (_Item.variable) label_send_data(&_Item.id);
+						if (_Item.variable) label_send_data(&_Item.id, _Item.copies);
 						spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
 						if (RX_Config.printer.type == printer_LH702) _Item.pageMargin = _PageMargin_Next;
 					}

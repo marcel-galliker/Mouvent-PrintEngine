@@ -68,6 +68,16 @@ namespace RX_LabelComposer.External
         public SBarcodeBox  bc;
     }
 
+    public enum IncrementTypeEnum : int
+    {
+        IncTypeByLineAsc = 0,   // By line in increasing order
+        IncTypeByLineDec = 1,   // By line in decreasing order
+        IncTypeByColAsc = 2,    // By column in increasing order
+        IncTypeByColDec = 3,    // By column in decreasing order
+        IncTypeByRowAsc = 4,    // By raw in increasing order (all labels on a row have the same counter value)
+        IncTypeByRowDec = 5,	// By raw in decreasing order (all labels on a row have the same counter value)
+    }
+
     public struct SLayoutDef
     {
         public Int32 size;
@@ -77,6 +87,7 @@ namespace RX_LabelComposer.External
         public Int32 webWidth;
         public Int32 columns;
         public Int32 columnDist;
+        public IncrementTypeEnum IncrementType;
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
         public string label;
@@ -85,8 +96,9 @@ namespace RX_LabelComposer.External
         public string colorLayer;
 
         public Int32 boxCnt;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-        public SLayoutBox[] box;
+// short struct without the box def as it is too long
+//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+//        public SLayoutBox[] box;
     }
 
     public struct SRipBmpInfo

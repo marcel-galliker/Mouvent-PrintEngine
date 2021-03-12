@@ -87,6 +87,8 @@ int dat_load_file_def(void *doc, char *tempPath, SFileDef *pFileDef)
 	file->Attribute("RecLen",			&pFileDef->recLen, 100);
 	file->Attribute("FieldSeparator",	(INT16*)&pFileDef->fieldSep, 0x09);
 	file->Attribute("Filter",			(INT32*)&pFileDef->filter, 0);
+	file->Attribute("NbRows", (INT32 *)&pFileDef->nbRows, 0);
+	file->Attribute("NbColumns", (INT32 *)&pFileDef->nbCols, 0);
 
 	for (int i=0; i<SIZEOF(pFileDef->field); i++)
 	{
@@ -170,7 +172,7 @@ static int _file_open()
 	_file_close();
 	_File = fopen(_DataFile, "rb");
 	_FilePos	= 0;
-	_RecNo		= 0;
+	_RecNo		= -1;
 	
 	if (_BufferW==NULL) _BufferW=(UTF16*)  malloc(2*MAX_RECORD_SIZE);
 	if (_BufferA==NULL) _BufferA=(char*)   malloc(2*MAX_RECORD_SIZE);
@@ -178,7 +180,7 @@ static int _file_open()
 }
 
 //--- dat_set_file_def ---------------------------------------------------------
-void dat_set_file_def (SFileDef *pFileDef)
+int dat_set_file_def (SFileDef *pFileDef)
 {
 	char root[MAX_PATH];
 	if (strcmp(_FileDef.dataFile, pFileDef->dataFile))
@@ -192,6 +194,7 @@ void dat_set_file_def (SFileDef *pFileDef)
 	if (_File==NULL) _file_open();
 
 //	if (_Locale) _free_locale(_Locale);
+#ifdef WIN32
 	if (_FileDef.codePage>0)
 	{
 		char str[32];
@@ -201,6 +204,11 @@ void dat_set_file_def (SFileDef *pFileDef)
 	}
 	else setlocale(LC_CTYPE, ".ACP");	// _Locale = _create_locale(LC_CTYPE, ".ACP");
 		
+#else
+	_FileDef.unicode = TRUE;
+	if (_FileDef.codePage != 1200) return 1;
+#endif
+	return 0;
 }
 
 //--- dat_seek ------------------------------------------------------------------
@@ -215,8 +223,10 @@ int dat_seek (int recNo)
 		return 0;
 	}
 	if (recNo<0) return 1;
-	_RecNo   = recNo;
 
+	if (_RecNo == recNo) return 0;
+
+	_RecNo = recNo;
 	_FilePos = 0;
 	if (_FileDef.fileFormat==FF_Fixed) _FilePos = _FileDef.header*charsize+recNo*_FileDef.recLen;
 	else

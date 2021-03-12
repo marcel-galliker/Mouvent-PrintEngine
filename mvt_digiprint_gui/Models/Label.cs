@@ -99,61 +99,24 @@ namespace RX_DigiPrint.Models
             catch(Exception e)
             {
                 Console.WriteLine("Exception {0}", e.Message);
-                return _read_xml(path);
             }
             return false;
         }
 
-        //--- _read_attribute ---------------------------------------
-        private void _read_attribute(string line, string name, ref int val)
+
+        public Int32 NbRows
         {
-            if (line.Contains(name))
-            {
-                string[] list=line.Split('"');
-                string name1=list[0].TrimStart().TrimEnd('=', ' ');
-                if (name1.Equals(name)) 
-                    Int32.TryParse(list[1], out val);
-            }
+            get { return Math.Max(_FileDef.nbRows, _FileDef.recordCnt); }
         }
-
-        //--- _read_xml --------------------------------
-        private bool _read_xml(string path)
+        public Int32 NbCols
         {
-            _FileDef.recordCnt  = 0;
-            _Layout.width       = 0;
-            _Layout.height      = 0;
-            try 
-            { 
-                StreamReader xml = new StreamReader(path);
-                bool file=false;
-                bool layout=false;
-                while(!xml.EndOfStream)
-                {
-                    string line=xml.ReadLine();
+            get { return _FileDef.nbCols; }
 
-                    if (line.Contains("<Layout")) layout=true;
-                    if (line.Contains(">"))       layout=false;
+        }
+        public Int32 BoxCnt
+        {
+            get { return _Layout.boxCnt; }
 
-                    if(layout)
-                    {
-                        _read_attribute(line, "Width", ref _Layout.width);
-                        _read_attribute(line, "Height", ref _Layout.height);
-                    }
-
-                    if (line.Contains("<File"))   file=true;
-                    if (line.Contains("</File>")) file=false;
-                    if (file)
-                    {
-                        _read_attribute(line, "RecordCnt", ref _FileDef.recordCnt);
-                    }
-                };
-                return (_FileDef.recordCnt>0);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return false;
         }
 
         //--- Property Width ---------------------------------------

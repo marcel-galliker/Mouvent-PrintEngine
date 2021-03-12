@@ -103,7 +103,7 @@
                                    >
                     <ig:TemplateColumn.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsSelected}" Checked="IsSelected_Changed" Unchecked="IsSelected_Changed">
+                            <CheckBox IsChecked="{Binding IsSelected}" Checked="IsSelected_Changed" Unchecked="IsSelected_Changed"  IsEnabled="{Binding Error, Converter={StaticResource BooleanNotConverter}}">
                                 <TextBlock Text="{Binding FileName, Converter={StaticResource FileName_Converter}}"/>
                             </CheckBox>
                         </DataTemplate>

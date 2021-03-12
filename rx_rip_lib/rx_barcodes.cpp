@@ -1547,6 +1547,7 @@ void bc_draw_bitmap(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode
 {
 	SBarCode*	pBarCode = (SBarCode*)hBarCode;
 	RECT		rect;
+	rect.bottom = rect.top = rect.left = rect.right = 0;
 
 	if (pBarCode->code_2d) 
 	{

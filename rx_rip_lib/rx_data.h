@@ -13,7 +13,7 @@
 
 #include "export.h"
 
-#define DATA_FIELD_CNT	64
+#define DATA_FIELD_CNT	256
 #define FIELD_NAME_LEN	32
 
 typedef enum // : INT32
@@ -41,8 +41,11 @@ typedef struct
     INT32    unicode;
     INT32    codePage;
 	INT32    recordCnt;
+	INT32 nbRows;
+	INT32 nbCols;
 
-    FileFormatEnum			fileFormat;
+
+	FileFormatEnum			fileFormat;
     INT32					recLen;
 	INT32					filter;
 	char					fieldSep;
@@ -60,7 +63,7 @@ int dat_interprete_data_fields(UTF16 *text, UTF16 *src, int size);
 EXPORT int  dat_load_file_def(void *doc, char *tempPath, SFileDef *pFileDef);
 EXPORT int  dat_save_file_def(void *doc, char *tempPath, SFileDef *pFileDef,  char *dstPath);
 
-EXPORT void dat_set_file_def	(SFileDef *pFileDef);
+EXPORT int dat_set_file_def	(SFileDef *pFileDef);
 EXPORT int  dat_seek			(int recNo);
 EXPORT int  dat_read_next_record (void);
 EXPORT int  dat_get_field	(int no, BYTE *data, int maxsize);

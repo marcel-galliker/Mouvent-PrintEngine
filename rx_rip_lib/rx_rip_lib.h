@@ -14,10 +14,11 @@
 #include "export.h"
 #include "rx_xml.h"
 #include "rx_bitmap.h"
+#include "rx_counter.h"
 
 //--------- layout -------------------------------------
 
-#define MAX_BOXES			64
+#define MAX_BOXES			256
 
 #define LAYOUT_CNT			1
 #define BOX_TYPE_TEXT		0
@@ -98,14 +99,14 @@ typedef struct
 
 typedef struct
 {
-	INT32	size;
-	INT32	id;
-	INT32	width;		// in �m
-	INT32	height;		// in �m
-	INT32	webWidth;	// in �m
-	INT32	columns;
-	INT32	columnDist;	// in �m
-
+	INT32		size;
+	INT32		id;
+	INT32		width;			// in �m
+	INT32		height;			// in �m
+	INT32		webWidth;		// in �m
+	INT32		columns;
+	INT32		columnDist;		// in �m
+	EIncType	IncrementType;	
 	char	label[256];
 	char	colorLayer[256];
 	INT32	boxCnt;
