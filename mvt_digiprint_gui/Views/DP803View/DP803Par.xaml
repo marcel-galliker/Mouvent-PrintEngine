@@ -50,7 +50,7 @@
                             SelectedItemChanged="CB_Material_SelectedItemChanged"
                             />
                             <TextBox Grid.Column="1" x:Name="MaterialName" Text="{mvt:LocalizedBinding Name}" Visibility="Collapsed"/>
-                            <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
+                            <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed" Width="auto"/>
                         </Grid>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -87,38 +87,38 @@
                                     <RowDefinition Height="auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="110"/>
-                                    <ColumnDefinition Width="110"/>
-                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <rx_uc:PlcTitle Grid.Row="0" Grid.Column="0" Header="{mvt:LocalizedBinding Dryer}"/>
-                                <rx_uc:PlcTitle Grid.Row="0" Grid.Column="1" Header="{mvt:LocalizedBinding Recto}"/>
-                                <rx_uc:PlcTitle Grid.Row="0" Grid.Column="2" Header="{mvt:LocalizedBinding Verso}"/>
+                                <rx_uc:PlcTitle Grid.Row="0" Grid.Column="1" Header="{mvt:LocalizedBinding Recto}" HorizontalAlignment="Right"/>
+                                <rx_uc:PlcTitle Grid.Row="0" Grid.Column="2" Header="{mvt:LocalizedBinding Verso}" HorizontalAlignment="Right"/>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding Mode}" VerticalAlignment="Center"/>
-                                <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="1" ID="PAR_DRYER_1_MODE" Label="" Type="Combo" x:Name="CB_LampModeR"/>
-                                <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="2" ID="PAR_DRYER_2_MODE" Label="" Type="Combo" x:Name="CB_LampModeV"/>
+                                <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="1" ID="PAR_DRYER_1_MODE" Label="" Type="Combo" x:Name="CB_LampModeR" Width="auto"/>
+                                <rx_uc:PlcParCtrl Grid.Row="1" Grid.Column="2" ID="PAR_DRYER_2_MODE" Label="" Type="Combo" x:Name="CB_LampModeV" Width="auto"/>
 
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding Buses}"/>
-                                <rx_uc:PlcParCtrl Grid.Row="2" Grid.Column="1"   ID="PAR_DRYER_1_BUSES"  Label=""  Unit="" Format="n"/>
-                                <rx_uc:PlcParCtrl Grid.Row="2" Grid.Column="2"   ID="PAR_DRYER_2_BUSES"  Label=""  Unit="" Format="n"/>
+                                <rx_uc:PlcParCtrl Grid.Row="2" Grid.Column="1"   ID="PAR_DRYER_1_BUSES"  Label=""  Unit="" Format="n" Width="auto"/>
+                                <rx_uc:PlcParCtrl Grid.Row="2" Grid.Column="2"   ID="PAR_DRYER_2_BUSES"  Label=""  Unit="" Format="n" Width="auto"/>
                                 <TextBlock Grid.Row="2" Grid.Column="3" Text="%" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
 
                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding Exhaust}"/>
-                                <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="1"   ID="PAR_DRYER_1_EXHAUST"  Label=""  Unit="" Format="n"/>
-                                <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="2"   ID="PAR_DRYER_2_EXHAUST"  Label=""  Unit="" Format="n"/>
+                                <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="1"   ID="PAR_DRYER_1_EXHAUST"  Label=""  Unit="" Format="n" Width="auto"/>
+                                <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="2"   ID="PAR_DRYER_2_EXHAUST"  Label=""  Unit="" Format="n" Width="auto"/>
                                 <TextBlock Grid.Row="3" Grid.Column="3" Text="%" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
 
                                 <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding TempUp}"/>
-                                <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="1"   ID="PAR_DRYER_1UP_POWER_MAX"  Label=""  Unit="" Format="n"/>
-                                <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="2"   ID="PAR_DRYER_2UP_POWER_MAX"  Label=""  Unit="" Format="n"/>
+                                <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="1"   ID="PAR_DRYER_1UP_POWER_MAX"  Label=""  Unit="" Format="n" Width="auto"/>
+                                <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="2"   ID="PAR_DRYER_2UP_POWER_MAX"  Label=""  Unit="" Format="n" Width="auto"/>
                                 <TextBlock Grid.Row="4" Grid.Column="3" Text="°C" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
 
                                 <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding TempDown}"/>
-                                <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="1"   ID="PAR_DRYER_1DOWN_POWER_MAX"  Label=""  Unit="" Format="n"/>
-                                <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2"   ID="PAR_DRYER_2DOWN_POWER_MAX"  Label=""  Unit="" Format="n"/>
+                                <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="1"   ID="PAR_DRYER_1DOWN_POWER_MAX"  Label=""  Unit="" Format="n" Width="auto"/>
+                                <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2"   ID="PAR_DRYER_2DOWN_POWER_MAX"  Label=""  Unit="" Format="n" Width="auto"/>
                                 <TextBlock Grid.Row="5" Grid.Column="3" Text="°C" VerticalAlignment="Center" FontSize="{StaticResource MvtFontSize}"/>
                             </Grid>
                         </Grid>

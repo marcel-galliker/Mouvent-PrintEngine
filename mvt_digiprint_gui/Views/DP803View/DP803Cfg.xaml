@@ -34,9 +34,9 @@
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
                         <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding WashingUnit}"/>
                         <rx_uc:PlcParCtrl Grid.Row="1"                     ID="CFG_WATER_ON_TIME"                   Label="{mvt:LocalizedBinding WaterOnTime}"      Format="n" UserEnabled="usr_service"/>
@@ -53,11 +53,11 @@
 
                         <rx_uc:PlcTitle Grid.Row="7" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding Slide}"/>
                         <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="0" ID="CFG_HEAD_REFERENCE"               Label="{mvt:LocalizedBinding HeadReference}"  Format="f" UserEnabled="usr_service"/>
-                        <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="1" ID="STA_HEAD_REFERENCE_POSITION"      Label=""  Unit="mm"     Format="f" IsEnabled="False"/>
+                        <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="1" ID="STA_HEAD_REFERENCE_POSITION"      Label=""  Unit="mm"     Format="f" IsEnabled="False" Width="auto"/>
                         <rx_uc:PlcCommand Grid.Row="8" Grid.Column="2" ID="CMD_REFENCE_HEADS"                Label="{mvt:LocalizedBinding Set}" Padding="5,0" User="usr_service"/>
 
                         <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="0" ID="CFG_SLAVE_OFFSET"                 Label="{mvt:LocalizedBinding SlaveOffset}"    Format="f" UserEnabled="usr_service"/>
-                        <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="1" ID="STA_SLAVE_OFFSET"                 Label=""      Unit="mm" Format="f" IsEnabled="False"/>
+                        <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="1" ID="STA_SLAVE_OFFSET"                 Label=""      Unit="mm" Format="f" IsEnabled="False" Width="auto"/>
                         <rx_uc:PlcCommand Grid.Row="9" Grid.Column="2" ID="CMD_OFFSET_SLAVE"                 Label="{mvt:LocalizedBinding Set}"  Padding="5,0"  User="usr_service"/>
                     </Grid>
                 </rx_uc:PlcParPanel>

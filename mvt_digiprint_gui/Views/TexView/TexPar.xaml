@@ -64,7 +64,7 @@
                             </Grid>
                         </StackPanel>
 
-                        <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
+                        <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed" Width="auto"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>

@@ -41,9 +41,9 @@
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="250"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
                         <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding WashingUnit}"/>
                         <rx_uc:PlcParCtrl Grid.Row="1"                     ID="CFG_WATER_ON_TIME"                   Label="{mvt:LocalizedBinding WaterOnTime}"      Format="n" UserEnabled="usr_service"/>
@@ -64,20 +64,20 @@
 
                         <rx_uc:PlcParCtrl Grid.Row="8"                      ID="CFG_BELTHEATER_MAX"                Label="{mvt:LocalizedBinding BeltHeaterMax}"     Format="n" UserEnabled="usr_service"/>
                     <TextBlock Grid.Row="8" Grid.Column="1"             Text="%" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
-                    <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="2"      ID="CFG_BELTHEATER_ON" Label="" Unit="" Type="Combo" UserEnabled="usr_supervisor" x:Name="CB_BeltHeaterOn" />
+                        <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="2"      ID="CFG_BELTHEATER_ON" Label="" Unit="" Type="Combo" UserEnabled="usr_supervisor" x:Name="CB_BeltHeaterOn" Width="auto"/>
 
                     <rx_uc:PlcTitle Grid.Row="9" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding SpreadRoller}"/>
                         <rx_uc:PlcParCtrl Grid.Row="10" Grid.ColumnSpan="2" ID="CFG_SPREADERROLLER_CONFIGURATION" Label="{mvt:LocalizedBinding Active}"  Type="Combo"      x:Name="CB_SpreadRoller" UserEnabled="usr_service"/>
 
                     <rx_uc:PlcTitle Grid.Row="11" Grid.ColumnSpan="3" Header="{mvt:LocalizedBinding Slide}"/>
                         <rx_uc:PlcParCtrl Grid.Row="12" Grid.Column="0" ID="CFG_HEAD_REFERENCE"               Label="{mvt:LocalizedBinding HeadReference}"  Format="f" UserEnabled="usr_service" x:Name="HeadReference"/>
-                    <rx_uc:PlcParCtrl Grid.Row="12" Grid.Column="1" ID="STA_HEAD_REFERENCE_POSITION"      Label=""  Unit="mm"     Format="f" IsEnabled="False"/>
+                        <rx_uc:PlcParCtrl Grid.Row="12" Grid.Column="1" ID="STA_HEAD_REFERENCE_POSITION"      Label=""  Unit="mm"     Format="f" IsEnabled="False" Width="auto"/>
                         <rx_uc:PlcCommand Grid.Row="12" Grid.Column="2" ID="CMD_REFERENCE_HEADS"              Label="{mvt:LocalizedBinding Set}" Padding="5,0" User="usr_service" PreviewMouseUp="Reference_Clicked"/>
                     <Grid Grid.Row="12" Grid.ColumnSpan="3" Background="#7FD3D3D3" Margin="150,0,0,0" x:Name="HeadRefEnable">
                             <TextBlock Text="{mvt:LocalizedBinding OnlyAvailableInErrorState}" HorizontalAlignment="Center" Foreground="Red" FontWeight="Bold"/>
                     </Grid>
                         <rx_uc:PlcParCtrl Grid.Row="13" Grid.Column="0" ID="CFG_SLAVE_OFFSET"                 Label="{mvt:LocalizedBinding WebOutOffset}"    Format="f" UserEnabled="usr_service" x:Name="SlaveOffset"/>
-                    <rx_uc:PlcParCtrl Grid.Row="13" Grid.Column="1" ID="STA_SLAVE_OFFSET"                 Label=""      Unit="mm"   Format="f" IsEnabled="False"/>
+                        <rx_uc:PlcParCtrl Grid.Row="13" Grid.Column="1" ID="STA_SLAVE_OFFSET"                 Label=""      Unit="mm"   Format="f" IsEnabled="False" Width="auto"/>
                         <rx_uc:PlcCommand Grid.Row="13" Grid.Column="2" ID="CMD_OFFSET_SLAVE"                 Label="{mvt:LocalizedBinding Set}"  Padding="5,0"  User="usr_service" PreviewMouseUp="Offset_Clicked" x:Name="Scanner_Offset_CMD"/>
                         <TextBlock Grid.Row="14" Grid.Column="0" Text="{mvt:LocalizedBinding MagneticBand}"/>
                         <rx_uc:PlcCommand Grid.Row="14" Grid.Column="2" ID="CMD_RESET_MAGNETIC_BAND"          Label="{mvt:LocalizedBinding RESET}"  Padding="5,0"  User="usr_service" x:Name="MagneticBand"/>

@@ -1719,9 +1719,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Language\english.resources" />
-    <EmbeddedResource Include="Resources\Language\german.resources" />
-    <None Include=".editorconfig" />
     <None Include="app.config" />
     <Content Include="id_rsa.ppk">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -1732,8 +1729,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="Resources\Language\Compile.bat" />
-    <None Include="Resources\Language\Language.csv" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -1778,82 +1773,82 @@
   <ItemGroup>
     <PublishFile Include="InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="InfragisticsWPF4.Controls.Grids.XamGrid.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="InfragisticsWPF4.Controls.Menus.XamMenu.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="InfragisticsWPF4.DataManager.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="InfragisticsWPF4.DataPresenter.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="InfragisticsWPF4.Editors.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="InfragisticsWPF4.Olap.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="InfragisticsWPF4.v17.2">
       <Visible>False</Visible>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
   </ItemGroup>
@@ -1903,8 +1898,6 @@
     <Resource Include="Resources\Bitmaps\LB701UV\LB701UV.jpg" />
     <Resource Include="Resources\Bitmaps\Clean.ico" />
     <Resource Include="Resources\Bitmaps\OFF.ico" />
-    <Resource Include="Resources\Language\English.txt" />
-    <Resource Include="Resources\Language\German.txt" />
     <Resource Include="Resources\Bitmaps\TestTable\TestTable.JPG" />
     <Resource Include="Resources\Bitmaps\Cleaf\Cleaf.PNG" />
     <Resource Include="Resources\Bitmaps\TestTable\Slide.png" />

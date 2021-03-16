@@ -22,8 +22,8 @@
         <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="180"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -39,44 +39,50 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Display"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Serial No"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="SerielNo"/>
+                <rx_uc:PlcParPanel Grid.Row="0" Grid.Column="0" UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel">
+                    <rx_uc:PlcParCtrl ID="STA_VERSION" Label="{mvt:LocalizedBinding Version}" LabelWidth="120"/>
+                </rx_uc:PlcParPanel>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Display"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Serial No"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="SerielNo"/>
                 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Temparature"/>
-                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="Temparature"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Temparature"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="Temparature"/>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Temparature Max"/>
-                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TemparatureMax"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Temparature Max"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TemparatureMax"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Version HW"/>
-                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="VersionHW"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Version HW"/>
+                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="VersionHW"/>
 
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Version FW"/>
-                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="VersionFW"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Version FW"/>
+                <TextBlock Grid.Row="6" Grid.Column="1" x:Name="VersionFW"/>
 
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="Version Logic"/>
-                <TextBlock Grid.Row="6" Grid.Column="1" x:Name="VersionLogic"/>
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="Version Logic"/>
+                <TextBlock Grid.Row="7" Grid.Column="1" x:Name="VersionLogic"/>
 
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="Version BSP"/>
-                <TextBlock Grid.Row="7" Grid.Column="1" x:Name="VersionBSP"/>
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Version BSP"/>
+                <TextBlock Grid.Row="8" Grid.Column="1" x:Name="VersionBSP"/>
 
-                <TextBlock Grid.Row="8" Grid.Column="0" Text="Version MLPI"/>
-                <TextBlock Grid.Row="8" Grid.Column="1" x:Name="VersionMPLI"/>
+                <TextBlock Grid.Row="9" Grid.Column="0" Text="Version MLPI"/>
+                <TextBlock Grid.Row="9" Grid.Column="1" x:Name="VersionMPLI"/>
 
-                <TextBlock Grid.Row="9" Grid.Column="0" Text="Hardware Details"/>
-                <TextBlock Grid.Row="9" Grid.Column="1" x:Name="HardwareDetail"/>
+                <TextBlock Grid.Row="10" Grid.Column="0" Text="Hardware Details"/>
+                <TextBlock Grid.Row="10" Grid.Column="1" x:Name="HardwareDetail"/>
 
-                <TextBlock Grid.Row="10" Grid.Column="0" Text="Local Bus Config"/>
-                <TextBlock Grid.Row="10" Grid.Column="1" x:Name="LocalBusConfig"/>
+                <TextBlock Grid.Row="11" Grid.Column="0" Text="Local Bus Config"/>
+                <TextBlock Grid.Row="11" Grid.Column="1" x:Name="LocalBusConfig"/>
 
-                <TextBlock Grid.Row="11" Grid.Column="0" Text="Modul Bus Config"/>
-                <TextBlock Grid.Row="11" Grid.Column="1" x:Name="ModulBusConfig"/>
+                <TextBlock Grid.Row="12" Grid.Column="0" Text="Modul Bus Config"/>
+                <TextBlock Grid.Row="12" Grid.Column="1" x:Name="ModulBusConfig"/>
 
-                <TextBlock Grid.Row="12" Grid.Column="0" Text="Modul HW Details"/>
-                <TextBlock Grid.Row="12" Grid.Column="1" x:Name="ModulHwDetails"/>
+                <TextBlock Grid.Row="13" Grid.Column="0" Text="Modul HW Details"/>
+                <TextBlock Grid.Row="13" Grid.Column="1" x:Name="ModulHwDetails"/>
 
             </Grid>
         </ScrollViewer>

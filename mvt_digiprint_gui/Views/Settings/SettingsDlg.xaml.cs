@@ -64,8 +64,9 @@ namespace RX_DigiPrint.Views.Settings
             Button_Save.IsEnabled = true;
             RxGlobals.Timer.TimerFct += WlanTimer;
 
-            RxGlobals.User.PropertyChanged += User_PropertyChanged;
-            _UserTypeChanged();
+            CB_Langue.IsEnabled = false;
+            //RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            //_UserTypeChanged();
 
             Init();
         }

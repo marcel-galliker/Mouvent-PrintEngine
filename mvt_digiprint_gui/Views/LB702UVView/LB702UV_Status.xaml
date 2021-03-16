@@ -19,7 +19,6 @@
 
         <Grid>
             <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel">
-                <rx_uc:PlcParCtrl ID="STA_VERSION"                    Label="{mvt:LocalizedBinding Version}" LabelWidth="120"/>
                 <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"              Label="{mvt:LocalizedBinding MachineState}" x:Name="CB_MainState" Type="ComboStr"/>
 
                 <rx_uc:PlcParCtrl ID="STA_UV_LAMPS_READY"             Label="{mvt:LocalizedBinding CuringLampOk}"   Visibility="Collapsed"/>

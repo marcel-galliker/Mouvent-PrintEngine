@@ -48,7 +48,7 @@
                         <!--SelectedItemChanged="CB_SelectedItemChanged"  -->
                         <TextBox x:Name="ProcessParName" Text="{Binding ElementName=XML_MATERIAL, Path=Value}" Visibility="Collapsed"/>
 
-                        <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed"/>
+                        <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed" Width="auto"/>
 
                         <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED"           Label="{mvt:LocalizedBinding Speed}"           Unit="m/min" UnitWidth="50"  Format="n"  />
                         <rx_uc:PlcParCtrl ID="PAR_PRINTING_SPEED_MAX"       Label="{mvt:LocalizedBinding SpeedMax}"       Unit="m/min" UnitWidth="50" Format="n"/>
@@ -71,37 +71,37 @@
 
                         <Grid Loaded="Grid_Loaded">
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_MODE"           Label="{mvt:LocalizedBinding UvFlexo1}" Type="Combo" Padding="0,0,70,0"                    x:Name="CB_Lamp1"/>
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70"  x:Name="UVPower1"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto"  x:Name="UVPower1"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_2_MODE"           Label="{mvt:LocalizedBinding UvFlexo2}" Type="Combo" x:Name="CB_Lamp2" Padding="0,0,70,0"/>
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_2_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower2"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_2_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto" x:Name="UVPower2"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_3_MODE"           Label="{mvt:LocalizedBinding UvPrinter}" Type="Combo" x:Name="CB_Lamp3" Padding="0,0,70,0"/>
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_3_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower3"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_3_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto" x:Name="UVPower3"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_4_MODE"           Label="{mvt:LocalizedBinding UvFlexo3}" Type="Combo" x:Name="CB_Lamp4" Padding="0,0,70,0"/>
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_4_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower4"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_4_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto" x:Name="UVPower4"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
                             <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_5_MODE"           Label="{mvt:LocalizedBinding UvFlexo4}" Type="Combo" x:Name="CB_Lamp5" Padding="0,0,70,0"/>
-                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_5_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70" x:Name="UVPower5"/>
+                            <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_5_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto" x:Name="UVPower5"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
                             <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"              Label="{mvt:LocalizedBinding Corona}" Type="Combo" x:Name="CB_Corona"   Padding="0,0,70,0"/>
-                            <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"         Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="70"/>
+                            <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"         Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto"/>
                         </Grid>
 
                         <Grid Loaded="Grid_Loaded">
                             <rx_uc:PlcParCtrl ID="PAR_PINNING_LAMP_MODE"        Label="{mvt:LocalizedBinding PinningLamp}" Type="Combo" x:Name="CB_PinnningLamp" Padding="0,0,70,0"/>
-                            <rx_uc:PlcParCtrl ID="PAR_PINNING_LAMP_POWER_MAX"   Label=""  Format="n" HorizontalAlignment="Right"           Unit="%" Width="70"/>
+                            <rx_uc:PlcParCtrl ID="PAR_PINNING_LAMP_POWER_MAX"   Label=""  Format="n" HorizontalAlignment="Right"           Unit="%" Width="auto"/>
                         </Grid>
 
                         <!-- Splicing ___________________________________________________________________________-->

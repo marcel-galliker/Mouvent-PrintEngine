@@ -1,6 +1,7 @@
 ﻿using Dragablz;
 using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.Settings;
 using RX_DigiPrint.Views.UserControls;
@@ -95,6 +96,10 @@ namespace RX_DigiPrint.Views
             _UserTypeChanged();
 
             _ShowTab(false, TabLH702, AddLocationHint.After);
+
+            RxGlobals.PrinterProperties.Langue = ELangues.English;
+            RxGlobals.PrinterProperties.SetNetworkSettings();
+            RxGlobals.PrinterProperties.Save();
         }
 
         

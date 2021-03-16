@@ -92,7 +92,7 @@
                     </Grid>
                 </TabItem.Header>
                 <Grid>
-                    <!-- <view_lh702:LH702_View/> -->
+                    <view_lh702:LH702_View/>
                 </Grid>
             </TabItem>
 
