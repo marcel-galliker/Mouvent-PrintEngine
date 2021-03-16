@@ -2376,4 +2376,301 @@ No Splices in the machine?</value>
   <data name="StopPrinting" xml:space="preserve">
     <value>Stop Printing</value>
   </data>
+  <data name="Error.01" xml:space="preserve">
+    <value>E-Stop</value>
+  </data>
+  <data name="Error.02" xml:space="preserve">
+    <value>CAUTION Webdyer overheated</value>
+  </data>
+  <data name="Error.03" xml:space="preserve">
+    <value>CAUTION Beltheater overheated</value>
+  </data>
+  <data name="Error.04" xml:space="preserve">
+    <value>CAUTION Scanner enable signal missing</value>
+  </data>
+  <data name="Error.05" xml:space="preserve">
+    <value>CAUTION Headcrash, wrinkles in web</value>
+  </data>
+  <data name="Error.06" xml:space="preserve">
+    <value>CAUTION Speed was too high</value>
+  </data>
+  <data name="Error.07" xml:space="preserve">
+    <value>CAUTION Positions on Scanner different</value>
+  </data>
+  <data name="Error.08" xml:space="preserve">
+    <value>E-Stop Button Unwinder Operator Side pressed</value>
+  </data>
+  <data name="Error.09" xml:space="preserve">
+    <value>E-Stop Button Unwinder Service Side pressed</value>
+  </data>
+  <data name="Error.10" xml:space="preserve">
+    <value>E-Stop Button Main Operator Side pressed</value>
+  </data>
+  <data name="Error.11" xml:space="preserve">
+    <value>E-Stop Button Main Service Side pressed</value>
+  </data>
+  <data name="Error.12" xml:space="preserve">
+    <value>E-Stop Button Rewinder Operator Side pressed</value>
+  </data>
+  <data name="Error.13" xml:space="preserve">
+    <value>E-Stop Button Rewinder Service Side pressed</value>
+  </data>
+  <data name="Error.14" xml:space="preserve">
+    <value>Material in washing unit</value>
+  </data>
+  <data name="Error.15" xml:space="preserve">
+    <value>Airpressure is low</value>
+  </data>
+  <data name="Error.16" xml:space="preserve">
+    <value>Safety Door Main operator side opened</value>
+  </data>
+  <data name="Error.17" xml:space="preserve">
+    <value>Safety Door Main service side opened</value>
+  </data>
+  <data name="Error.18" xml:space="preserve">
+    <value>Safety Door Main left side opened</value>
+  </data>
+  <data name="Error.19" xml:space="preserve">
+    <value>Safety Door Main right side opened</value>
+  </data>
+  <data name="Error.20" xml:space="preserve">
+    <value>Belt out of positionError.20=Belt out of position</value>
+  </data>
+  <data name="Error.21" xml:space="preserve">
+    <value>Error after booted up first time</value>
+  </data>
+  <data name="Error.22" xml:space="preserve">
+    <value>Pressure Roller not down: Check cable</value>
+  </data>
+  <data name="Error.23" xml:space="preserve">
+    <value>ERROR 23:</value>
+  </data>
+  <data name="Error.24" xml:space="preserve">
+    <value>ERROR 24:</value>
+  </data>
+  <data name="Error.25" xml:space="preserve">
+    <value>ERROR 25:</value>
+  </data>
+  <data name="Error.26" xml:space="preserve">
+    <value>ERROR 26:</value>
+  </data>
+  <data name="Error.27" xml:space="preserve">
+    <value>ERROR 27:</value>
+  </data>
+  <data name="Error.28" xml:space="preserve">
+    <value>ERROR 28:</value>
+  </data>
+  <data name="Error.29" xml:space="preserve">
+    <value>ERROR 29:</value>
+  </data>
+  <data name="Error.30" xml:space="preserve">
+    <value>ERROR 30:</value>
+  </data>
+  <data name="Error.31" xml:space="preserve">
+    <value>ERROR 31:</value>
+  </data>
+  <data name="Error.32" xml:space="preserve">
+    <value>ERROR 32:</value>
+  </data>
+  <data name="ESTOP 00" xml:space="preserve">
+    <value>ESTOP 00: Unwinder</value>
+  </data>
+  <data name="ESTOP 01" xml:space="preserve">
+    <value>ESTOP 01: Unwinder</value>
+  </data>
+  <data name="ESTOP 02" xml:space="preserve">
+    <value>ESTOP 02: Printer</value>
+  </data>
+  <data name="ESTOP 03" xml:space="preserve">
+    <value>ESTOP 03: Printer</value>
+  </data>
+  <data name="ESTOP 04" xml:space="preserve">
+    <value>ESTOP 04: Printer</value>
+  </data>
+  <data name="ESTOP 05" xml:space="preserve">
+    <value>ESTOP 05: Printer</value>
+  </data>
+  <data name="ESTOP 06" xml:space="preserve">
+    <value>ESTOP 06: Dryer</value>
+  </data>
+  <data name="ESTOP 07" xml:space="preserve">
+    <value>ESTOP 07: Dryer</value>
+  </data>
+  <data name="ESTOP 08" xml:space="preserve">
+    <value>ESTOP 08: Rewinder</value>
+  </data>
+  <data name="ESTOP 09" xml:space="preserve">
+    <value>ESTOP 09: Rewinder</value>
+  </data>
+  <data name="ESTOP 10" xml:space="preserve">
+    <value>ESTOP 10:</value>
+  </data>
+  <data name="ESTOP 11" xml:space="preserve">
+    <value>ESTOP 11:</value>
+  </data>
+  <data name="ESTOP 12" xml:space="preserve">
+    <value>ESTOP 12:</value>
+  </data>
+  <data name="ESTOP 13" xml:space="preserve">
+    <value>ESTOP 13:</value>
+  </data>
+  <data name="ESTOP 14" xml:space="preserve">
+    <value>ESTOP 14:</value>
+  </data>
+  <data name="ESTOP 15" xml:space="preserve">
+    <value>ESTOP 15:</value>
+  </data>
+  <data name="ESTOP 16" xml:space="preserve">
+    <value>ESTOP 16:</value>
+  </data>
+  <data name="ESTOP 17" xml:space="preserve">
+    <value>ESTOP 17:</value>
+  </data>
+  <data name="ESTOP 18" xml:space="preserve">
+    <value>ESTOP 18:</value>
+  </data>
+  <data name="ESTOP 19" xml:space="preserve">
+    <value>ESTOP 19:</value>
+  </data>
+  <data name="ESTOP 20" xml:space="preserve">
+    <value>ESTOP 20:</value>
+  </data>
+  <data name="ESTOP 21" xml:space="preserve">
+    <value>ESTOP 21:</value>
+  </data>
+  <data name="ESTOP 22" xml:space="preserve">
+    <value>ESTOP 22:</value>
+  </data>
+  <data name="ESTOP 23" xml:space="preserve">
+    <value>ESTOP 23:</value>
+  </data>
+  <data name="ESTOP 24" xml:space="preserve">
+    <value>ESTOP 24:</value>
+  </data>
+  <data name="ESTOP 25" xml:space="preserve">
+    <value>ESTOP 25:</value>
+  </data>
+  <data name="ESTOP 26" xml:space="preserve">
+    <value>ESTOP 26:</value>
+  </data>
+  <data name="ESTOP 27" xml:space="preserve">
+    <value>ESTOP 27:</value>
+  </data>
+  <data name="ESTOP 28" xml:space="preserve">
+    <value>ESTOP 28:</value>
+  </data>
+  <data name="ESTOP 29" xml:space="preserve">
+    <value>ESTOP 29:</value>
+  </data>
+  <data name="ESTOP 30" xml:space="preserve">
+    <value>ESTOP 30:</value>
+  </data>
+  <data name="ESTOP 31" xml:space="preserve">
+    <value>ESTOP 31:</value>
+  </data>
+  <data name="ESTOP 32" xml:space="preserve">
+    <value>ESTOP 32:</value>
+  </data>
+  <data name="FillCap" xml:space="preserve">
+    <value>Fill cap</value>
+  </data>
+  <data name="Standstill" xml:space="preserve">
+    <value>Standstill</value>
+  </data>
+  <data name="WARN 01" xml:space="preserve">
+    <value>WARN 01:</value>
+  </data>
+  <data name="WARN 02" xml:space="preserve">
+    <value>WARN 02:</value>
+  </data>
+  <data name="WARN 03" xml:space="preserve">
+    <value>WARN 03:</value>
+  </data>
+  <data name="WARN 04" xml:space="preserve">
+    <value>WARN 04:</value>
+  </data>
+  <data name="WARN 05" xml:space="preserve">
+    <value>WARN 05:</value>
+  </data>
+  <data name="WARN 06" xml:space="preserve">
+    <value>WARN 06:</value>
+  </data>
+  <data name="WARN 07" xml:space="preserve">
+    <value>WARN 07:</value>
+  </data>
+  <data name="WARN 08" xml:space="preserve">
+    <value>WARN 08:</value>
+  </data>
+  <data name="WARN 09" xml:space="preserve">
+    <value>WARN 09:</value>
+  </data>
+  <data name="WARN 10" xml:space="preserve">
+    <value>WARN 10:</value>
+  </data>
+  <data name="WARN 11" xml:space="preserve">
+    <value>WARN 11:</value>
+  </data>
+  <data name="WARN 12" xml:space="preserve">
+    <value>WARN 12:</value>
+  </data>
+  <data name="WARN 13" xml:space="preserve">
+    <value>WARN 13:</value>
+  </data>
+  <data name="WARN 14" xml:space="preserve">
+    <value>WARN 14:</value>
+  </data>
+  <data name="WARN 15" xml:space="preserve">
+    <value>WARN 15:</value>
+  </data>
+  <data name="WARN 16" xml:space="preserve">
+    <value>WARN 16:</value>
+  </data>
+  <data name="WARN 17" xml:space="preserve">
+    <value>WARN 17:</value>
+  </data>
+  <data name="WARN 18" xml:space="preserve">
+    <value>WARN 18:</value>
+  </data>
+  <data name="WARN 19" xml:space="preserve">
+    <value>WARN 19:</value>
+  </data>
+  <data name="WARN 20" xml:space="preserve">
+    <value>WARN 20:</value>
+  </data>
+  <data name="WARN 21" xml:space="preserve">
+    <value>WARN 21:</value>
+  </data>
+  <data name="WARN 22" xml:space="preserve">
+    <value>WARN 22:</value>
+  </data>
+  <data name="WARN 23" xml:space="preserve">
+    <value>WARN 23:</value>
+  </data>
+  <data name="WARN 24" xml:space="preserve">
+    <value>WARN 24:</value>
+  </data>
+  <data name="WARN 25" xml:space="preserve">
+    <value>WARN 25:</value>
+  </data>
+  <data name="WARN 26" xml:space="preserve">
+    <value>WARN 26:</value>
+  </data>
+  <data name="WARN 27" xml:space="preserve">
+    <value>WARN 27:</value>
+  </data>
+  <data name="WARN 28" xml:space="preserve">
+    <value>WARN 28:</value>
+  </data>
+  <data name="WARN 29" xml:space="preserve">
+    <value>WARN 29:</value>
+  </data>
+  <data name="WARN 30" xml:space="preserve">
+    <value>WARN 30:</value>
+  </data>
+  <data name="WARN 31" xml:space="preserve">
+    <value>WARN 31:</value>
+  </data>
+  <data name="WARN 32" xml:space="preserve">
+    <value>WARN 32:</value>
+  </data>
 </root>

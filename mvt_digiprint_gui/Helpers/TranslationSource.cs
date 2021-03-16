@@ -91,6 +91,11 @@ namespace RX_DigiPrint.Helpers
         #endregion
 
         #region Methods
+        public static bool has(string key)
+        {
+            string text = Instance._resourceManager?.GetString(key, Instance._currentCulture);
+            return text != null;
+        }
 
         /// <inheritdoc/>
         public void SetResourceManager(ResourceManager resourceManager)

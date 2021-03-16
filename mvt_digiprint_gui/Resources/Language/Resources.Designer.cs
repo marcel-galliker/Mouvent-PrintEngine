@@ -1735,6 +1735,294 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to E-Stop.
+        /// </summary>
+        public static string Error_01 {
+            get {
+                return ResourceManager.GetString("Error.01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CAUTION Webdyer overheated.
+        /// </summary>
+        public static string Error_02 {
+            get {
+                return ResourceManager.GetString("Error.02", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CAUTION Beltheater overheated.
+        /// </summary>
+        public static string Error_03 {
+            get {
+                return ResourceManager.GetString("Error.03", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CAUTION Scanner enable signal missing.
+        /// </summary>
+        public static string Error_04 {
+            get {
+                return ResourceManager.GetString("Error.04", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CAUTION Headcrash, wrinkles in web.
+        /// </summary>
+        public static string Error_05 {
+            get {
+                return ResourceManager.GetString("Error.05", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CAUTION Speed was too high.
+        /// </summary>
+        public static string Error_06 {
+            get {
+                return ResourceManager.GetString("Error.06", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CAUTION Positions on Scanner different.
+        /// </summary>
+        public static string Error_07 {
+            get {
+                return ResourceManager.GetString("Error.07", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to E-Stop Button Unwinder Operator Side pressed.
+        /// </summary>
+        public static string Error_08 {
+            get {
+                return ResourceManager.GetString("Error.08", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to E-Stop Button Unwinder Service Side pressed.
+        /// </summary>
+        public static string Error_09 {
+            get {
+                return ResourceManager.GetString("Error.09", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to E-Stop Button Main Operator Side pressed.
+        /// </summary>
+        public static string Error_10 {
+            get {
+                return ResourceManager.GetString("Error.10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to E-Stop Button Main Service Side pressed.
+        /// </summary>
+        public static string Error_11 {
+            get {
+                return ResourceManager.GetString("Error.11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to E-Stop Button Rewinder Operator Side pressed.
+        /// </summary>
+        public static string Error_12 {
+            get {
+                return ResourceManager.GetString("Error.12", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to E-Stop Button Rewinder Service Side pressed.
+        /// </summary>
+        public static string Error_13 {
+            get {
+                return ResourceManager.GetString("Error.13", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Material in washing unit.
+        /// </summary>
+        public static string Error_14 {
+            get {
+                return ResourceManager.GetString("Error.14", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Airpressure is low.
+        /// </summary>
+        public static string Error_15 {
+            get {
+                return ResourceManager.GetString("Error.15", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Safety Door Main operator side opened.
+        /// </summary>
+        public static string Error_16 {
+            get {
+                return ResourceManager.GetString("Error.16", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Safety Door Main service side opened.
+        /// </summary>
+        public static string Error_17 {
+            get {
+                return ResourceManager.GetString("Error.17", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Safety Door Main left side opened.
+        /// </summary>
+        public static string Error_18 {
+            get {
+                return ResourceManager.GetString("Error.18", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Safety Door Main right side opened.
+        /// </summary>
+        public static string Error_19 {
+            get {
+                return ResourceManager.GetString("Error.19", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Belt out of positionError.20=Belt out of position.
+        /// </summary>
+        public static string Error_20 {
+            get {
+                return ResourceManager.GetString("Error.20", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error after booted up first time.
+        /// </summary>
+        public static string Error_21 {
+            get {
+                return ResourceManager.GetString("Error.21", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pressure Roller not down: Check cable.
+        /// </summary>
+        public static string Error_22 {
+            get {
+                return ResourceManager.GetString("Error.22", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 23:.
+        /// </summary>
+        public static string Error_23 {
+            get {
+                return ResourceManager.GetString("Error.23", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 24:.
+        /// </summary>
+        public static string Error_24 {
+            get {
+                return ResourceManager.GetString("Error.24", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 25:.
+        /// </summary>
+        public static string Error_25 {
+            get {
+                return ResourceManager.GetString("Error.25", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 26:.
+        /// </summary>
+        public static string Error_26 {
+            get {
+                return ResourceManager.GetString("Error.26", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 27:.
+        /// </summary>
+        public static string Error_27 {
+            get {
+                return ResourceManager.GetString("Error.27", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 28:.
+        /// </summary>
+        public static string Error_28 {
+            get {
+                return ResourceManager.GetString("Error.28", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 29:.
+        /// </summary>
+        public static string Error_29 {
+            get {
+                return ResourceManager.GetString("Error.29", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 30:.
+        /// </summary>
+        public static string Error_30 {
+            get {
+                return ResourceManager.GetString("Error.30", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 31:.
+        /// </summary>
+        public static string Error_31 {
+            get {
+                return ResourceManager.GetString("Error.31", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ERROR 32:.
+        /// </summary>
+        public static string Error_32 {
+            get {
+                return ResourceManager.GetString("Error.32", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error No.
         /// </summary>
         public static string ErrorNo {
@@ -1749,6 +2037,303 @@ namespace RX_DigiPrint.Resources.Language {
         public static string Errors {
             get {
                 return ResourceManager.GetString("Errors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 00: Unwinder.
+        /// </summary>
+        public static string ESTOP_00 {
+            get {
+                return ResourceManager.GetString("ESTOP 00", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 01: Unwinder.
+        /// </summary>
+        public static string ESTOP_01 {
+            get {
+                return ResourceManager.GetString("ESTOP 01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 02: Printer.
+        /// </summary>
+        public static string ESTOP_02 {
+            get {
+                return ResourceManager.GetString("ESTOP 02", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 03: Printer.
+        /// </summary>
+        public static string ESTOP_03 {
+            get {
+                return ResourceManager.GetString("ESTOP 03", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 04: Printer.
+        /// </summary>
+        public static string ESTOP_04 {
+            get {
+                return ResourceManager.GetString("ESTOP 04", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 05: Printer.
+        /// </summary>
+        public static string ESTOP_05 {
+            get {
+                return ResourceManager.GetString("ESTOP 05", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 06: Dryer.
+        /// </summary>
+        public static string ESTOP_06 {
+            get {
+                return ResourceManager.GetString("ESTOP 06", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 07: Dryer.
+        /// </summary>
+        public static string ESTOP_07 {
+            get {
+                return ResourceManager.GetString("ESTOP 07", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 08: Rewinder.
+        /// </summary>
+        public static string ESTOP_08 {
+            get {
+                return ResourceManager.GetString("ESTOP 08", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 09: Rewinder.
+        /// </summary>
+        public static string ESTOP_09 {
+            get {
+                return ResourceManager.GetString("ESTOP 09", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 10:.
+        /// </summary>
+        public static string ESTOP_10 {
+            get {
+                return ResourceManager.GetString("ESTOP 10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 11:.
+        /// </summary>
+        public static string ESTOP_11 {
+            get {
+                return ResourceManager.GetString("ESTOP 11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 12:.
+        /// </summary>
+        public static string ESTOP_12 {
+            get {
+                return ResourceManager.GetString("ESTOP 12", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 13:.
+        /// </summary>
+        public static string ESTOP_13 {
+            get {
+                return ResourceManager.GetString("ESTOP 13", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 14:.
+        /// </summary>
+        public static string ESTOP_14 {
+            get {
+                return ResourceManager.GetString("ESTOP 14", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 15:.
+        /// </summary>
+        public static string ESTOP_15 {
+            get {
+                return ResourceManager.GetString("ESTOP 15", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 16:.
+        /// </summary>
+        public static string ESTOP_16 {
+            get {
+                return ResourceManager.GetString("ESTOP 16", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 17:.
+        /// </summary>
+        public static string ESTOP_17 {
+            get {
+                return ResourceManager.GetString("ESTOP 17", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 18:.
+        /// </summary>
+        public static string ESTOP_18 {
+            get {
+                return ResourceManager.GetString("ESTOP 18", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 19:.
+        /// </summary>
+        public static string ESTOP_19 {
+            get {
+                return ResourceManager.GetString("ESTOP 19", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 20:.
+        /// </summary>
+        public static string ESTOP_20 {
+            get {
+                return ResourceManager.GetString("ESTOP 20", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 21:.
+        /// </summary>
+        public static string ESTOP_21 {
+            get {
+                return ResourceManager.GetString("ESTOP 21", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 22:.
+        /// </summary>
+        public static string ESTOP_22 {
+            get {
+                return ResourceManager.GetString("ESTOP 22", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 23:.
+        /// </summary>
+        public static string ESTOP_23 {
+            get {
+                return ResourceManager.GetString("ESTOP 23", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 24:.
+        /// </summary>
+        public static string ESTOP_24 {
+            get {
+                return ResourceManager.GetString("ESTOP 24", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 25:.
+        /// </summary>
+        public static string ESTOP_25 {
+            get {
+                return ResourceManager.GetString("ESTOP 25", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 26:.
+        /// </summary>
+        public static string ESTOP_26 {
+            get {
+                return ResourceManager.GetString("ESTOP 26", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 27:.
+        /// </summary>
+        public static string ESTOP_27 {
+            get {
+                return ResourceManager.GetString("ESTOP 27", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 28:.
+        /// </summary>
+        public static string ESTOP_28 {
+            get {
+                return ResourceManager.GetString("ESTOP 28", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 29:.
+        /// </summary>
+        public static string ESTOP_29 {
+            get {
+                return ResourceManager.GetString("ESTOP 29", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 30:.
+        /// </summary>
+        public static string ESTOP_30 {
+            get {
+                return ResourceManager.GetString("ESTOP 30", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 31:.
+        /// </summary>
+        public static string ESTOP_31 {
+            get {
+                return ResourceManager.GetString("ESTOP 31", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ESTOP 32:.
+        /// </summary>
+        public static string ESTOP_32 {
+            get {
+                return ResourceManager.GetString("ESTOP 32", resourceCulture);
             }
         }
         
@@ -1842,18 +2427,7 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("Fill", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to FillCap.
-        /// </summary>
-        public static string FillCap
-        {
-            get
-            {
-                return ResourceManager.GetString("Fill Cap", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Fill /1.
         /// </summary>
@@ -1905,6 +2479,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string Fill5Sec {
             get {
                 return ResourceManager.GetString("Fill5Sec", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fill cap.
+        /// </summary>
+        public static string FillCap {
+            get {
+                return ResourceManager.GetString("FillCap", resourceCulture);
             }
         }
         
@@ -5500,18 +6083,16 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("St", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Standstill.
         /// </summary>
-        public static string Standstill
-        {
-            get
-            {
+        public static string Standstill {
+            get {
                 return ResourceManager.GetString("Standstill", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Start.
         /// </summary>
@@ -6436,6 +7017,294 @@ namespace RX_DigiPrint.Resources.Language {
         public static string WarmUp {
             get {
                 return ResourceManager.GetString("WarmUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 01:.
+        /// </summary>
+        public static string WARN_01 {
+            get {
+                return ResourceManager.GetString("WARN 01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 02:.
+        /// </summary>
+        public static string WARN_02 {
+            get {
+                return ResourceManager.GetString("WARN 02", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 03:.
+        /// </summary>
+        public static string WARN_03 {
+            get {
+                return ResourceManager.GetString("WARN 03", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 04:.
+        /// </summary>
+        public static string WARN_04 {
+            get {
+                return ResourceManager.GetString("WARN 04", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 05:.
+        /// </summary>
+        public static string WARN_05 {
+            get {
+                return ResourceManager.GetString("WARN 05", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 06:.
+        /// </summary>
+        public static string WARN_06 {
+            get {
+                return ResourceManager.GetString("WARN 06", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 07:.
+        /// </summary>
+        public static string WARN_07 {
+            get {
+                return ResourceManager.GetString("WARN 07", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 08:.
+        /// </summary>
+        public static string WARN_08 {
+            get {
+                return ResourceManager.GetString("WARN 08", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 09:.
+        /// </summary>
+        public static string WARN_09 {
+            get {
+                return ResourceManager.GetString("WARN 09", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 10:.
+        /// </summary>
+        public static string WARN_10 {
+            get {
+                return ResourceManager.GetString("WARN 10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 11:.
+        /// </summary>
+        public static string WARN_11 {
+            get {
+                return ResourceManager.GetString("WARN 11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 12:.
+        /// </summary>
+        public static string WARN_12 {
+            get {
+                return ResourceManager.GetString("WARN 12", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 13:.
+        /// </summary>
+        public static string WARN_13 {
+            get {
+                return ResourceManager.GetString("WARN 13", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 14:.
+        /// </summary>
+        public static string WARN_14 {
+            get {
+                return ResourceManager.GetString("WARN 14", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 15:.
+        /// </summary>
+        public static string WARN_15 {
+            get {
+                return ResourceManager.GetString("WARN 15", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 16:.
+        /// </summary>
+        public static string WARN_16 {
+            get {
+                return ResourceManager.GetString("WARN 16", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 17:.
+        /// </summary>
+        public static string WARN_17 {
+            get {
+                return ResourceManager.GetString("WARN 17", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 18:.
+        /// </summary>
+        public static string WARN_18 {
+            get {
+                return ResourceManager.GetString("WARN 18", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 19:.
+        /// </summary>
+        public static string WARN_19 {
+            get {
+                return ResourceManager.GetString("WARN 19", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 20:.
+        /// </summary>
+        public static string WARN_20 {
+            get {
+                return ResourceManager.GetString("WARN 20", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 21:.
+        /// </summary>
+        public static string WARN_21 {
+            get {
+                return ResourceManager.GetString("WARN 21", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 22:.
+        /// </summary>
+        public static string WARN_22 {
+            get {
+                return ResourceManager.GetString("WARN 22", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 23:.
+        /// </summary>
+        public static string WARN_23 {
+            get {
+                return ResourceManager.GetString("WARN 23", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 24:.
+        /// </summary>
+        public static string WARN_24 {
+            get {
+                return ResourceManager.GetString("WARN 24", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 25:.
+        /// </summary>
+        public static string WARN_25 {
+            get {
+                return ResourceManager.GetString("WARN 25", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 26:.
+        /// </summary>
+        public static string WARN_26 {
+            get {
+                return ResourceManager.GetString("WARN 26", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 27:.
+        /// </summary>
+        public static string WARN_27 {
+            get {
+                return ResourceManager.GetString("WARN 27", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 28:.
+        /// </summary>
+        public static string WARN_28 {
+            get {
+                return ResourceManager.GetString("WARN 28", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 29:.
+        /// </summary>
+        public static string WARN_29 {
+            get {
+                return ResourceManager.GetString("WARN 29", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 30:.
+        /// </summary>
+        public static string WARN_30 {
+            get {
+                return ResourceManager.GetString("WARN 30", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 31:.
+        /// </summary>
+        public static string WARN_31 {
+            get {
+                return ResourceManager.GetString("WARN 31", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WARN 32:.
+        /// </summary>
+        public static string WARN_32 {
+            get {
+                return ResourceManager.GetString("WARN 32", resourceCulture);
             }
         }
         
