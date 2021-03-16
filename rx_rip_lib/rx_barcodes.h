@@ -33,7 +33,7 @@ int			bc_states(e_BarCType bcType);
 
 
 //--- bc_draw_barcode ------------------
-int			bc_draw_code	(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode pBarCode, RECT *rect, const UTF16 *code, int codelen);
+ERRCODE			bc_draw_code	(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode pBarCode, RECT *rect, const UTF16 *code, int codelen);
 void		bc_draw_bitmap	(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode pBarCode, int dropSize, RX_Bitmap *pColor);
 
 // draws the barcode

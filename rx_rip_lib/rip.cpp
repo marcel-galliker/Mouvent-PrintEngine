@@ -197,7 +197,8 @@ int rip_data(int x0, int y0, SMsgPrintData *printData, RX_Bitmap *pBmp, RX_Bitma
 	SRipLayout	*lay;
 	SRipBox		*box;
 //	char		test[64];
-	
+	int ret = REPLY_OK;
+
 	if (!_Init) return REPLY_ERROR;
 
 	if (printData->layoutNo>=LAYOUT_CNT)
@@ -296,16 +297,15 @@ int rip_data(int x0, int y0, SMsgPrintData *printData, RX_Bitmap *pBmp, RX_Bitma
 										else
 										{
 											char str[100];
-											UTF16 wstr[100];
 											BCGetErrorTextA(eCode, str, SIZEOF(str));
-											rx_mbstowcs(wstr, str, SIZEOF(wstr));
-											ft_text_out(pBmp, x0+box->bcBox.hdr.rect.left, y0+box->bcBox.hdr.rect.top, _DefaultFont, 500, 0, (UINT16*)wstr, (int)strlen(str), black);
-											eCode=eCode;									
+											Error(WARN, 0, "Barcode error: %s on box %d", str, b);
+											eCode=eCode;
+											ret=REPLY_ERROR;
 										}
 									}
 								}
 								break;
 		}
 	}
-	return REPLY_OK;
+	return ret;
 }

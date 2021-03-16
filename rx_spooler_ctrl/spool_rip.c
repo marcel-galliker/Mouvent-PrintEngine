@@ -396,7 +396,7 @@ static int _screen(SBmpInfo *pInfo, int widthPx, int offsetPx, int lengthPx, int
 {
 	const int pixelsPerByte = 4;
 	const int stitchingBt = 32; //128 pixels in 2 bits per pixel on stitching 
-	const headPx = 2048; // pixel by heads
+	const int headPx = 2048; // pixel by heads
 	const int headBt = headPx / pixelsPerByte; // bytes per head
 
 	SPageId id;
@@ -407,6 +407,7 @@ static int _screen(SBmpInfo *pInfo, int widthPx, int offsetPx, int lengthPx, int
 	id.copy = id.id = id.page = id.scan = (pInfo == &_BmpInfoLabel);
 
 	if ((item = (SPrintListItem *)malloc(sizeof(SPrintListItem))) == NULL) return Error(ERR_ABORT, 0, "Could not allocate memory");
+	memset(item, 0, sizeof(SPrintListItem));
 
 	if ((item->splitInfo = (SBmpSplitInfo *)malloc(headCnt * sizeof(SBmpSplitInfo))) == NULL) 
 	{
@@ -415,6 +416,7 @@ static int _screen(SBmpInfo *pInfo, int widthPx, int offsetPx, int lengthPx, int
 	}
 
 	strcpy(item->filepath, filepath);
+	item->variable = TRUE;
 	data_split(&id, pInfo, offsetPx, lengthPx, blkNo, blkCnt, 0, 0, 0, item);
 	scr_wait(10);
 
@@ -600,7 +602,8 @@ int sr_rip_label(BYTE *buffer[MAX_COLORS], SBmpInfo *pInfo, int offsetPx, int le
 					}
 					ctr_set_counter(counter);
 					dat_set_buffer(0, len/2, pmsg->data);
-					rip_data(&_Layout, column*_Layout.columnDist, 0, &bmp, &bmpLabel, &bmpColor, black);
+					if (rip_data(&_Layout, column * _Layout.columnDist, 0, &bmp, &bmpLabel, &bmpColor, black) != REPLY_OK)
+						Error(ERR_CONT, 0, "Could not rip data for id %d copy %d", pmsg->id.id, pmsg->id.copy);
 					data = (data+1) % DATA_BUF_SIZE;
 				}
 		

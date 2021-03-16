@@ -31,6 +31,7 @@ typedef struct
 	SPageId					id;
 	int						offsetWidth;
 	BOOL					sent;
+	BOOL					variable;
 	BOOL					clearBlockUsed;
 	int						flags;
 	UINT8					virtualPasses;

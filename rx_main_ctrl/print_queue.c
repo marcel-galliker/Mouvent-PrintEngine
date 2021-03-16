@@ -396,8 +396,12 @@ SPrintQueueItem *pq_add_item(SPrintQueueItem *pitem)
 	
 	if (_Size<SIZEOF(_List))
 	{
-//		if (pitem->variable) _load_variable_info(pitem);
-		if (pitem->firstPage<1) pitem->firstPage=1;
+		if (_Size > 0 && (_List[_Size - 1].variable || pitem->variable) && _List[_Size - 1].state <= PQ_STATE_PRINTING)
+		{
+			Error(WARN, 0, "VDP job only possible alone");
+			return NULL;
+		}
+		if (pitem->firstPage < 1) pitem->firstPage = 1;
 		if (pitem->lastPage<pitem->firstPage) pitem->lastPage=pitem->firstPage;
 		if (!rx_def_use_pq(RX_Config.printer.type) && pitem->copies<1) pitem->copies=1;
 		pitem->id.id = ++_ID;

@@ -880,11 +880,12 @@ int rip_data(SLayoutDef *pLayout, int x, int y, void *pbmp, void *prxBmpLabel, v
 			(*pLineCnt)++;
 		}
 	}
-	
-	if (pbmp==NULL) rip_data(x, y, msg, &_Bmp,             (RX_Bitmap*)prxBmpLabel, (RX_Bitmap*)prxBmpColor, black);
-	else            rip_data(x, y, msg, (RX_Bitmap*)pbmp,  (RX_Bitmap*)prxBmpLabel, (RX_Bitmap*)prxBmpColor, black);
+
+	int ret = REPLY_OK;
+	if (pbmp==NULL) ret = rip_data(x, y, msg, &_Bmp,             (RX_Bitmap*)prxBmpLabel, (RX_Bitmap*)prxBmpColor, black);
+	else            ret = rip_data(x, y, msg, (RX_Bitmap*)pbmp,  (RX_Bitmap*)prxBmpLabel, (RX_Bitmap*)prxBmpColor, black);
 	free(buf);
-	return 0;
+	return ret;
 }
 
 //--- rip_get_bitmap ----------------------------------------------------------------------

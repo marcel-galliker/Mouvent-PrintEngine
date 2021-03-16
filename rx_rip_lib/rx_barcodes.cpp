@@ -364,7 +364,7 @@ static int _bc_is2D_scaling(e_BarCType type)
 }
 
 //--- bc_draw_code ---------------------------------------------------
-int bc_draw_code(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode hBarCode, RECT *rect, const UTF16 *code, int codeLen)
+ERRCODE bc_draw_code(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode hBarCode, RECT *rect, const UTF16 *code, int codeLen)
 {
 	SBarCode*	pBarCode = (SBarCode*)hBarCode;
 	ERRCODE		eCode;
@@ -393,19 +393,19 @@ int bc_draw_code(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode hB
 			fl=l = 0;
 			for(ch=code, end=&code[codeLen/2]; ch<end; ch++)
 			{
-				if (*ch==(UTF16)'/' && ch[1]==(UTF16)'A' || ch[1]==(UTF16)'a')		
+				if (*ch==(UTF16)'/' && (ch[1]==(UTF16)'A' || ch[1]==(UTF16)'a'))		
 				{
 					ch++;
 					manual = TRUE;
 					format[fl++]='A';
 				}
-				else if (*ch==(UTF16)'/' && ch[1]==(UTF16)'B' || ch[1]==(UTF16)'b')	
+				else if (*ch==(UTF16)'/' && (ch[1]==(UTF16)'B' || ch[1]==(UTF16)'b'))	
 				{
 					ch++;
 					manual = TRUE;
 					format[fl++]='B';
 				}
-				else if (*ch==(UTF16)'/' && ch[1]==(UTF16)'C' || ch[1]==(UTF16)'c') 
+				else if (*ch==(UTF16)'/' && (ch[1]==(UTF16)'C' || ch[1]==(UTF16)'c')) 
 				{
 					ch++;
 					manual = TRUE;
