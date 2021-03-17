@@ -231,7 +231,7 @@ int dat_seek (int recNo)
 	if (_FileDef.fileFormat==FF_Fixed) _FilePos = _FileDef.header*charsize+recNo*_FileDef.recLen;
 	else
 	{
-		_FilePos = _FileDef.header*charsize;
+		_FilePos = _FileDef.header*charsize + 2; // remove the charset order in UTF16
 		while (recNo) 
 		{
 			_file_read_record(&len); // seeking variable record file
