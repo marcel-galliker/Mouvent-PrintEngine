@@ -2007,9 +2007,9 @@ static int _check_encoder_tel_freq(void)
 			_EncoderTelFreq_delay--;
 			_cnt=0;
 		}
-		else if (_EncoderTelFreq<500000)
+		else if (_EncoderTelFreq<400000)
 		{
-			if (++_cnt>=3) ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
+			if (++_cnt>=3) ErrorFlag(WARN, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
 		} 
 	}
 	else _cnt=0;
