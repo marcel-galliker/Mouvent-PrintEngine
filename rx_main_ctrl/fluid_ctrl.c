@@ -51,6 +51,7 @@ static int				_PurgeFluidNo;
 static int				_Scanning;
 static int				_ScalesFluidNo=-1;
 static UINT32			_InitDone = 0x00;
+static int				_MeasurementNumber = 0;
 
 
 //--- prototypes -----------------------
@@ -98,6 +99,9 @@ static INT32			_HeadErr[INK_SUPPLY_CNT+2];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 // EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
 
+static INT32			_CanisterLevel[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER];
+static INT64			_CanisterLevelSum[INK_SUPPLY_CNT + 2];
+
 
 
 //--- fluid_init ----------------------------------------------------------------
@@ -118,6 +122,12 @@ int	fluid_init(void)
 	fluid_init_flushed();
 
 	for (i=0; i<SIZEOF(_ScalesStatus); i++) _ScalesStatus[i]=INVALID_VALUE;
+
+	for (i = 0; i < INK_SUPPLY_CNT + 2; i++)
+	{
+		_CanisterLevelSum[i] = 0;
+		for (int j = 0; j < MEASUREMENT_NUMBER; j++) _CanisterLevel[i][j] = 0;
+	}
 	
 	for (i=0; i<SIZEOF(_FluidThreadPar); i++)
 	{
@@ -871,6 +881,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	int i;
 	int	canisterLow;
 	int	canisterEmpty;
+	int canisterHysteresis;
 	int wasteHigh;
 	int wasteFull;
 	switch (RX_Config.printer.type)
@@ -879,16 +890,19 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	case printer_TX802:	
 	case printer_TX404:	canisterLow   = 1500;
 						canisterEmpty = 500;
+						canisterHysteresis = 100;
 						break;
 
     case printer_cleaf:	canisterLow   = 1500;
 						canisterEmpty =  500;
+						canisterHysteresis = 100;
 						wasteHigh	  = 6000;
 						wasteFull	  = 7000;
 						break;
 
 	default:			canisterLow   = 1500;
 						canisterEmpty = 500;
+						canisterHysteresis = 100;
 						wasteHigh	  = 18500;
 						wasteFull	  = 19500;
 	}
@@ -901,29 +915,39 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 			_FluidStatus[i].info.flushed   = ((_Flushed & (0x01<<i))!=0);
 		}
 
-		_FluidStatus[i].canisterLevel  = _ScalesStatus[_FluidToScales[i]];
+		_FluidStatus[i].canisterLevel = moving_average(_CanisterLevel, _CanisterLevelSum, i, _MeasurementNumber, _ScalesStatus[_FluidToScales[i]]);
 
-		if(*RX_Config.inkSupply[i].ink.fileName && _ScalesErr[i] != LOG_TYPE_UNDEF)
+		if(*RX_Config.inkSupply[i].ink.fileName)
 		{
-			if(_FluidStatus[i].canisterLevel <= canisterEmpty && _ScalesErr[i] < LOG_TYPE_ERROR_CONT)
+			if (_FluidStatus[i].canisterLevel <= canisterEmpty || _FluidStatus[i].canisterLevel <= canisterEmpty + canisterHysteresis && _ScalesErr[i] == LOG_TYPE_ERROR_CONT)
 			{
-				if (i==INK_SUPPLY_CNT) Error(ERR_CONT, 0, "Flush Canister EMPTY!");
-				else Error(ERR_CONT, 0, "Ink Canister %s EMPTY = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), _FluidStatus[i].canisterLevel, canisterEmpty);
-				_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
-				if (RX_PrinterStatus.printState == ps_printing) pc_pause_printing(FALSE);
+				if (_ScalesErr[i] != LOG_TYPE_ERROR_CONT)
+				{
+					if (i == INK_SUPPLY_CNT)
+						Error(ERR_CONT, 0, "Flush Canister EMPTY!");
+					else
+						Error(ERR_CONT, 0, "Ink Canister %s EMPTY = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), _FluidStatus[i].canisterLevel, canisterEmpty);
+					_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
+					if (RX_PrinterStatus.printState == ps_printing) pc_pause_printing(FALSE);
+				}
 			}
-			else if(_FluidStatus[i].canisterLevel <= canisterLow && _ScalesErr[i] < LOG_TYPE_WARN)
+			else if (_FluidStatus[i].canisterLevel <= canisterLow || _FluidStatus[i].canisterLevel <= canisterLow + canisterHysteresis && _ScalesErr[i] == LOG_TYPE_WARN)
 			{
-				if (i==INK_SUPPLY_CNT) Error(WARN, 0, "Flush Canister LOW!");
-				else Error(WARN, 0, "Ink Canister %s LOW = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode),_FluidStatus[i].canisterLevel,canisterLow);
-				_ScalesErr[i] = LOG_TYPE_WARN;
+				if (_ScalesErr[i] != LOG_TYPE_WARN)
+				{
+					if (i == INK_SUPPLY_CNT)
+						Error(WARN, 0, "Flush Canister LOW!");
+					else
+						Error(WARN, 0, "Ink Canister %s LOW = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), _FluidStatus[i].canisterLevel, canisterLow);
+					_ScalesErr[i] = LOG_TYPE_WARN;
+				}
 			}
-			_FluidStatus[i].canisterErr = _ScalesErr[i];
+			else if (_FluidStatus[i].canisterLevel > canisterLow && _FluidStatus[i].canisterLevel < 50000 && _ScalesErr[i] != LOG_TYPE_LOG)
+			{
+				_ScalesErr[i] = LOG_TYPE_LOG;
+			}
 		}
-		else if (_FluidStatus[i].canisterLevel>0 && _FluidStatus[i].canisterLevel<50000)
-		{
-			_ScalesErr[i] = LOG_TYPE_LOG;
-		}
+		_FluidStatus[i].canisterErr = _ScalesErr[i];
 		
 		dl_get_barcode(i, _FluidStatus[i].scannerSN, _FluidStatus[i].barcode);
 		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
@@ -934,24 +958,33 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	
 	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf )
 	{
-		_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel  = _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]];
+		_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel = moving_average(_CanisterLevel, _CanisterLevelSum, INK_SUPPLY_CNT + 1, _MeasurementNumber, _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]]);
 		
 		if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel < 50000)
 		{
-			if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteFull && _ScalesErr[INK_SUPPLY_CNT + 1] < LOG_TYPE_ERROR_CONT)
+			if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteFull || _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteFull - canisterHysteresis && _ScalesErr[INK_SUPPLY_CNT + 1] == LOG_TYPE_ERROR_CONT)
 			{
-				Error(ERR_CONT, 0, "Waste Canister FULL = %dg > %dg", _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteFull);
-				_ScalesErr[INK_SUPPLY_CNT + 1] = LOG_TYPE_ERROR_CONT;
+				if (_ScalesErr[INK_SUPPLY_CNT + 1] != LOG_TYPE_ERROR_CONT)
+				{
+					Error(ERR_CONT, 0, "Waste Canister FULL = %dg > %dg", _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteFull);
+					_ScalesErr[INK_SUPPLY_CNT + 1] = LOG_TYPE_ERROR_CONT;
+				}
 			}
-			else if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteHigh && _ScalesErr[INK_SUPPLY_CNT + 1] < LOG_TYPE_WARN)
+			else if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteHigh || _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteHigh - canisterHysteresis && _ScalesErr[INK_SUPPLY_CNT + 1] == LOG_TYPE_WARN)
 			{
-				Error(WARN, 0, "Waste Canister HIGH = %dg (> %dg)", _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteHigh);
-				_ScalesErr[INK_SUPPLY_CNT + 1] = LOG_TYPE_WARN;
+				if (_ScalesErr[INK_SUPPLY_CNT + 1] != LOG_TYPE_WARN)
+				{
+					Error(WARN, 0, "Waste Canister HIGH = %dg (> %dg)", _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteHigh);
+					_ScalesErr[INK_SUPPLY_CNT + 1] = LOG_TYPE_WARN;
+				}
 			}	
 		}
 		
 		_FluidStatus[INK_SUPPLY_CNT + 1].canisterErr = _ScalesErr[INK_SUPPLY_CNT + 1];
 	}
+
+	_MeasurementNumber++;
+	_MeasurementNumber = _MeasurementNumber % MEASUREMENT_NUMBER;
 
 	{
 		SInkSupplyStatMsg msg;
@@ -1289,4 +1322,12 @@ static int _fluid_get_flush_time(int flush_cycle)
             time_s = RX_Config.inkSupply[i].ink.flushTime[flush_cycle];
     }
     return time_s;
+}
+
+//--- moving_average ------------------------------------
+INT32 moving_average(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value)
+{
+	sum[canisterNumber] = sum[canisterNumber] - buffer[canisterNumber][pos] + value;
+	buffer[canisterNumber][pos] = value;
+	return sum[canisterNumber] / MEASUREMENT_NUMBER;
 }

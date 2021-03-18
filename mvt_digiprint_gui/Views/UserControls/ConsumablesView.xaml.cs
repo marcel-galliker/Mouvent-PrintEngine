@@ -42,7 +42,7 @@ namespace RX_DigiPrint.Views.UserControls
                 if (RxGlobals.PrintSystem.IsLb) additionalInkLevels = 2;    // Flush + waste
                 for (int i=0; i<additionalInkLevels; i++)
                 {
-                    InkLevel additionalLevel = new InkLevel(){DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt+i]};
+                    InkLevel additionalLevel = new InkLevel(RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt + i]);
                     Grid.SetColumn(additionalLevel, i);
                     MainGrid.Children.Add(additionalLevel);
                 }
@@ -55,7 +55,7 @@ namespace RX_DigiPrint.Views.UserControls
                         int inkCylinderIndex = i * RxGlobals.PrintSystem.InkCylindersPerColor;
                         if (inkCylinderIndex < RxGlobals.PrintSystem.IS_Order.Length)
                         {
-                            ctrl = new InkLevel() { DataContext = RxGlobals.InkSupply.List[RxGlobals.PrintSystem.IS_Order[inkCylinderIndex]] };
+                            ctrl = new InkLevel(RxGlobals.InkSupply.List[RxGlobals.PrintSystem.IS_Order[inkCylinderIndex]]);
                         }
                         else
                         {

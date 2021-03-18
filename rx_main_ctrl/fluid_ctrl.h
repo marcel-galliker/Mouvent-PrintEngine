@@ -14,6 +14,8 @@
 #include "rx_def.h"
 #include "rx_sok.h"
 
+#define MEASUREMENT_NUMBER 10
+
 int	 fluid_init(void);
 void fluid_init_flushed(void);
 int  fluid_end(void);
@@ -40,5 +42,6 @@ INT32 fluid_get_pumpSpeed	   (int no);
 INT32 fluid_get_pumpFeedback   (int no);
 // INT32 fluid_get_amcTemp        (int no);
 INT32 fluid_get_error          (int no);
+INT32 moving_average(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value);
 
 void undefine_PurgeCtrlMode(void);

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <!-- Bootstrap CSS -->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+  </head>
+  <body onload="init()">	
+
+  	<b>Scale 2</b>
+	<br/>
+	Current value: <span id="printengine-value"></span> <button type="button" onclick="init()">Refresh</button>
+	<br/>
+	New value: <span id="printengine-value"></span>
+	<input type="text" id="scale-value" value=5000></input>
+	<button type="button" onclick="changeScale()">Update</button>
+
+	<!-- Sripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+	<!--ipt src="https://cdn.jsdelivr.net/npm/umbrellajs" crossorigin="anonymous"></script>-->
+    <script type="text/javascript" language="javascript">
+		var config = ""
+		const init = async () => {
+			const response = await  fetch('http://localhost:8080/Fluid/0')
+			config = await response.json()
+
+			div = document.getElementById("printengine-value")
+			div.innerText = config.REP_SCALES_STAT.val[2]
+		}
+		const changeScale = async () => {	
+			textField = document.getElementById("scale-value")
+
+			config.REP_SCALES_STAT.val[2] = parseInt(textField.value);
+			const response = await fetch('http://localhost:8080/Fluid/0', {
+				method: 'POST',
+				body: JSON.stringify(config),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			config = await response.json()
+
+			div = document.getElementById("printengine-value")
+			div.innerText = config.REP_SCALES_STAT.val[2];			
+		}
+	</script>
+  </body>
+</html>

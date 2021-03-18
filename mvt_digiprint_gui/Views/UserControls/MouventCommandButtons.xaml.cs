@@ -40,7 +40,6 @@ namespace RX_DigiPrint.Views.UserControls
             get { return _ShowPauseButton; }
             set { _ShowPauseButton = value; OnPropertyChanged("ShowPauseButton"); }
         }
-
         
         public static Func<bool> StartClicked = null;
        
@@ -74,11 +73,20 @@ namespace RX_DigiPrint.Views.UserControls
             }
 
             Button_Stop.IsChecked   = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_stopping;
-            
+
             //--- enable ------------------------------------------------------
+            bool canisterError = false;
+            foreach (var InkSupplyElt in RxGlobals.InkSupply.List)
+            {
+                if (InkSupplyElt.CanisterErr == ELogType.eErrCont)
+                {
+                    canisterError = true;
+                }
+            }
+
             Button_Start.IsEnabled  = RxGlobals.Plc.IsReadyForProduction
                                       && !RxGlobals.PrinterStatus.Cleaning
-                                      
+                                      && !canisterError
                                       && 
                                         (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power 
                                         || (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause && (RxGlobals.Encoder[0]!=null && RxGlobals.Encoder[0].CanStart))

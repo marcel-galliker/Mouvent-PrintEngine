@@ -31,6 +31,19 @@ namespace RX_DigiPrint.Views.UserControls
             Progress.Visibility = Visibility.Collapsed;
         }
 
+        public InkLevel(InkSupply InputInkSupply)
+        {
+            InitializeComponent();
+            Progress.Visibility = Visibility.Collapsed;
+            _InkSupply = InputInkSupply;
+            if (_InkSupply != null)
+            {
+                _InkSupply.PropertyChanged += _InkSupply_PropertyChanged;
+                _update_InkType();
+                _update_level();
+            }
+        }
+
         //--- Property Enabled ---------------------------------------
         private bool _Enabled = true;
         public bool Enabled
@@ -42,24 +55,12 @@ namespace RX_DigiPrint.Views.UserControls
                 Progress.ShowText = _Enabled;
             }
         }
-        
-        //--- InkLevel_DataContextChanged ----------------------------------------------------------------
-        private void InkLevel_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            _InkSupply = DataContext as InkSupply;
-            if (_InkSupply!=null)
-            {
-                _InkSupply.PropertyChanged += _InkSupply_PropertyChanged;
-                _update_InkType();
-                _update_level();
-            }
-        }
 
         //--- _InkSupply_PropertyChanged ------------------------------
         void _InkSupply_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("InkType")) _update_InkType();
-            else if (e.PropertyName.Equals("CanisterLevel")) _update_level();
+            else if (e.PropertyName.Equals("CanisterLevel") || e.PropertyName.Equals("CanisterErr")) _update_level();
         }
 
         //--- _update_InkType --------------------------
