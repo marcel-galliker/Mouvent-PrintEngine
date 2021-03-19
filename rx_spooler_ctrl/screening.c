@@ -498,14 +498,17 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			if (_PlaneScreenConfig[no].fctclose) rx_planescreen_close(&_PlaneScreenConfig[no]);
 			if (pInfo->printMode==PM_TEST) sprintf(settingsPath,	"%s/prEnvSettings.xml", PATH_BIN_SPOOLER);
 			else						   sprintf(settingsPath,	"%s/prEnvSettings.xml", pInfo->pListItem->filepath);
-			ret = rx_planescreen_init(pInfo->inkSupplyNo, settingsPath, PATH_BIN_SPOOLER, _ScrMem[b][h].fact, &_PlaneScreenConfig[no]);
+			// set the default plane number to the inksupply (even if it is normally not used - historical)
+			_PlaneScreenConfig[no].planeNumber = pInfo->inkSupplyNo;
+			// but use the ColorCode informationto retreive the good plane number and its limits
+			ret = rx_planescreen_init(pInfo->colorCode, settingsPath, PATH_BIN_SPOOLER, _ScrMem[b][h].fact, &_PlaneScreenConfig[no]);
 			strcpy(_PlaneFilePath[no], pInfo->pListItem->filepath);
 		}
 
 		if (rx_def_is_scanning(RX_Spooler.printerType) || !pInfo->same)
 			_ScrMem[b][h].screenedIdx = (_ScrMem[b][h].screenedIdx+1) % SCR_BUF_SIZE;
 
-		linplane.planeNumber	= pInfo->inkSupplyNo;	// plane number
+		linplane.planeNumber	= pInfo->inkSupplyNo;	// plane number (not used)
 		linplane.Xoffset		= pInfo->pListItem->offsetWidth; // X offset 
 		linplane.widthPx		= pInfo->widthPx*pInfo->resol.x/DPI_X;
 		linplane.lengthPx		= pInfo->srcLineCnt;

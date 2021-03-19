@@ -82,8 +82,8 @@ typedef struct
 extern "C"{
 #endif
 
-	int rx_planescreen_load(int planeNumber, const char * settingsPath, const char * ressourcesPath, SPlaneScreenConfig* pplaneScreenConfig);
-	int rx_planescreen_init(int planeNumber, const char * settingsPath, const char * ressourcesPath, const double fact[JET_CNT], SPlaneScreenConfig* pplaneScreenConfig);
+	int rx_planescreen_load(int colorCode, const char * settingsPath, const char * ressourcesPath, SPlaneScreenConfig* pplaneScreenConfig);
+	int rx_planescreen_init(int colorCode, const char * settingsPath, const char * ressourcesPath, const double fact[JET_CNT], SPlaneScreenConfig* pplaneScreenConfig);
 	int rx_planescreen_close(SPlaneScreenConfig* pplaneScreenConfig);
 	int rx_screen_slice(SSLiceInfo *inplane, SSLiceInfo *outplane, SPlaneScreenConfig* pplaneScreenConfig);
 	int rx_screen_outslice_init(SSLiceInfo *inplane, SSLiceInfo *outplane, SPlaneScreenConfig* pplaneScreenConfig);

@@ -42,13 +42,12 @@ void _RatioFill(HANDLE file, SRatio * ratio) {
 	*ratio = lratio;
 }
 
-int rx_planescreen_load(int planeNumber, const char * settingsPath, const char * ressourcesPath, SPlaneScreenConfig* pplaneScreenConfig)
+int rx_planescreen_load(int colorCode, const char * settingsPath, const char * ressourcesPath, SPlaneScreenConfig* pplaneScreenConfig)
 {
 	int lplanenumber, rationumber, first, second;
 	char Name[32];
 	HANDLE  file;
 
-	pplaneScreenConfig->planeNumber = planeNumber;
 	pplaneScreenConfig->ressourcePath = (char *)ressourcesPath;
 	
 	file = setup_create();
@@ -170,6 +169,7 @@ int rx_planescreen_load(int planeNumber, const char * settingsPath, const char *
 		goto Next1;
 	}
 	while (1) {
+		UINT32 lcolorCode;
 		setup_int32(file, "PlaneNumber", READ, &lplanenumber, -1);
 		setup_uint32(file, "First", READ, &first, pplaneScreenConfig->limit[0]);
 		if (first < 1) first = 1;
@@ -178,9 +178,16 @@ int rx_planescreen_load(int planeNumber, const char * settingsPath, const char *
 		// when limit is zero, it is not used (drop SM)
 		if (second < first + 1 && second != 0) second = first + 1;
 		if (second > 99) second = 99;
-		if ((lplanenumber < 0) || (lplanenumber== pplaneScreenConfig->planeNumber)) {
+		setup_uint32(file, "ColorCode", READ, &lcolorCode, -1);
+		if (lplanenumber!=-1 && lcolorCode == -1) Error(ERR_CONT, 0, "No color code in prEnvSettings.xml (could use bad ScreenLimit)", colorCode);
+
+		if (lplanenumber < 0 || colorCode==lcolorCode || (lcolorCode == -1 && pplaneScreenConfig->planeNumber == lplanenumber))
+		{
+			if (lplanenumber >= 0) pplaneScreenConfig->planeNumber = lplanenumber;
 			pplaneScreenConfig->limit[0] = first;
 			pplaneScreenConfig->limit[1] = second;
+			setup_chapter(file, "..", -1, READ);
+			break;
 		}
 
 		setup_chapter_next(file, READ, Name, sizeof(Name));
@@ -301,14 +308,14 @@ End:
 }
 
 
-int rx_planescreen_init(int planeNumber, const char * settingsPath, const char * ressourcesPath, const double fact[JET_CNT], SPlaneScreenConfig* pplaneScreenConfig)
+int rx_planescreen_init(int colorCode, const char * settingsPath, const char * ressourcesPath, const double fact[JET_CNT], SPlaneScreenConfig* pplaneScreenConfig)
 {
 	char filepath[MAX_PATH];
 	STaConfig*	lTA, *lTARot;
 	int i;
 	
 	memset(pplaneScreenConfig, 0, sizeof(SPlaneScreenConfig));
-	if (rx_planescreen_load(planeNumber, settingsPath, ressourcesPath, pplaneScreenConfig))
+	if (rx_planescreen_load(colorCode, settingsPath, ressourcesPath, pplaneScreenConfig))
 		Error(WARN, 0, "Screen parameters file <%s> maybe inconsistent", settingsPath);
 
 	// Init lut16 tables
@@ -335,23 +342,14 @@ int rx_planescreen_init(int planeNumber, const char * settingsPath, const char *
 			return (REPLY_ERROR);
 		}
 
-		if (planeNumber < 4) { // 0,1,2,3
-			if (rx_tas_rotate(lTA, planeNumber, &pplaneScreenConfig->TA))
+		if (colorCode < 4) { // 0,1,2,3
+			if (rx_tas_rotate(lTA, colorCode, &pplaneScreenConfig->TA))
 				return (REPLY_ERROR);
 		}
 		else {
-			if ((planeNumber < 8) || (planeNumber > 11)) { // 4,5,6,7 and 12,13,14,15
-				if (rx_tas_rotate(lTA, planeNumber % 4, &lTARot))
-					return (REPLY_ERROR);
-				if (rx_tas_shift(lTARot, &pplaneScreenConfig->TA))
-				return (REPLY_ERROR);
-				rx_tas_free(lTARot);
-			}
-			else { // 8,9,10, 11
-				if (rx_tas_rotate(lTA, planeNumber % 4, &pplaneScreenConfig->TA))
-					return (REPLY_ERROR);
-			}
-
+			if (rx_tas_rotate(lTA, colorCode % 4, &lTARot)) return (REPLY_ERROR);
+			if (rx_tas_shift(lTARot, &pplaneScreenConfig->TA)) return (REPLY_ERROR);
+			rx_tas_free(lTARot);
 		}
 		rx_tas_free(lTA);
 
