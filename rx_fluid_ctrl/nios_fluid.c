@@ -590,6 +590,7 @@ void _update_status(void)
 		pstat->cylinderPresSet	= _Stat->ink_supply[i].cylinderPresSet;		
 		pstat->cylinderSetpoint	= _Stat->ink_supply[i].IS_Pressure_Setpoint;
 		pstat->cylinderPres		= _Stat->ink_supply[i].IS_Pressure_Actual;
+		pstat->cylinderPresDiff	= _Stat->ink_supply[i].IS_Pressure_Diff;
 		pstat->flushTime		= _Stat->ink_supply[i].flushTime;
 		pstat->airPressureTime	= _Stat->airPressureTime;
 		pstat->temp				= _Stat->ink_supply[i].heaterTemp;
@@ -686,11 +687,16 @@ static void _display_status(void)
 			}
 		term_printf("\n");
 		term_printf("pressure:          ");	
+		
 		if (_Cfg->ink_supply[i].test_cylinderPres) 
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].test_cylinderPres);
 		else 
 //			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].cylinderPresSet);		
-			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Stat->ink_supply[i].PIDsetpoint_Output);		
+			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) 
+			{			
+				term_printf("%5s", value_str(_Stat->ink_supply[i].IS_Pressure_Actual));
+				term_printf("(~%4s) ", value_str(_Stat->ink_supply[i].IS_Pressure_Diff));		
+			}
 		term_printf("\n");
 		term_printf("inkPump:           ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%4s(%3d%%)  ", value_str(_Stat->ink_supply[i].inkPumpSpeed_measured), _Stat->ink_supply[i].inkPumpSpeed_set); term_printf("\n");
 				

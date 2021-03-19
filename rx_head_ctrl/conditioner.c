@@ -673,6 +673,16 @@ void cond_set_clusterNo(INT32 clusterNo)
 	RX_HBStatus->clusterNo = clusterNo;
 }
 
+//--- cond_set_serialNo --------------------------------
+void cond_set_serialNo(int headNo, int serialNo)
+{
+	if (headNo>=0 && headNo<MAX_HEADS_BOARD)
+	{
+		_NiosCfg->cond[headNo].serialNo = serialNo;
+		_NiosCfg->cond[headNo].cmd.save_eeprom = TRUE;			
+	}
+}
+
 //--- cond_setInk ---------------------------------------
 void cond_setInk(int headNo, SInkDefinition *pink)
 {

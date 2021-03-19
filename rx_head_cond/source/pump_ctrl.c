@@ -369,7 +369,7 @@ void pump_tick_10ms(void)
 							if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
 							pid_reset(&_PumpPID);
 							RX_Status.pressure_in_max=INVALID_VALUE;
-							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
+							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink | COND_ERR_p_in_too_high);
 							_meniscus_err_cnt=0;
 							_no_ink_err_cnt  =0;		
 						//	_TimeFlowResistancestablePRINT = 0;							
@@ -759,6 +759,7 @@ void pump_tick_10ms(void)
 		case ctrl_flush_weekend:
 		case ctrl_flush_week:
 						turn_off_pump(); // opens FLUSH valve
+						_set_valve(VALVE_FLUSH);
 						max_pressure 	= MBAR_500;
 						RX_Status.mode 	= RX_Config.mode;
                         break;
@@ -868,7 +869,7 @@ static void _set_valve(int state)
 		case VALVE_INK:		RX_Status.info.valve_flush 	= FALSE;
 							RX_Status.info.valve_ink	= TRUE;
 							break;
-		default:			RX_Status.info.valve_flush 	= TRUE;
+		default:			RX_Status.info.valve_flush 	= FALSE;
 							RX_Status.info.valve_ink	= FALSE;
 	}
 	if(RX_Status.pcb_rev>='n')

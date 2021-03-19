@@ -319,7 +319,7 @@ void RxMessage_Handler(void)
 		ctr_save();
 	}
 	RX_Status.cmdConfirm.resetPumpTime = RX_Config.cmd.resetPumpTime;
-
+	
 	//--- pump watchdog ------------------------
 	pump_watchdog();
 }

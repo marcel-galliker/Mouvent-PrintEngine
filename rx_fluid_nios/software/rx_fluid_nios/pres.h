@@ -28,6 +28,6 @@
 void pres_init(void);
 void pres_tick_10ms(void);
 int  pres_valid(int isNo);
-
+void pres_reset_min_max(int isNo);
 
 #endif /* __pres_h__ */

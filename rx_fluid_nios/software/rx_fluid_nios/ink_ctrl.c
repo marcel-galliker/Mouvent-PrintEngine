@@ -377,6 +377,7 @@ void ink_tick_10ms(void)
 						_PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet / 5;	// start with low setpoint
 					else _PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet;
 					_StartModePRINT[isNo] = 0;
+					pres_reset_min_max(isNo);
 				}
 				else _StartModePRINT[isNo]++;
 

@@ -1199,6 +1199,7 @@ typedef struct SInkSupplyStat
 	
 	INT32	cylinderPresSet;	//  Pressure intermediate Tank Set
 	INT32	cylinderPres;		//  Pressure intermediate Tank
+	INT32	cylinderPresDiff;
 	INT32	cylinderSetpoint;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
 	INT32	flushTime;

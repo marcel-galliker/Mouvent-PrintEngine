@@ -113,7 +113,8 @@ static void _main_menu(void)
 	}
 	if (_cond)
 	{
-		term_printf("P<n>: Set pump to 40%\n");		
+		term_printf("P<n>: Set pump to 40%\n");	
+		term_printf("#<n><number>: Set SerialNo of conditioner<n>\n");	
 	}
 	if (_mvteeprom)
 	{
@@ -586,7 +587,8 @@ void putty_display_cond_status(int status)
 			l = sprintf(str, "%lu.%lu.%lu.%lu", RX_NiosStat.cond[no[i]].version.major, RX_NiosStat.cond[no[i]].version.minor, RX_NiosStat.cond[no[i]].version.revision, RX_NiosStat.cond[no[i]].version.build);
 			memcpy(&line[16*i+(14-l)], str, l);
 		}
-		term_printf("%s\n", line);		
+		term_printf("%s\n", line);
+		term_printf("SerialNo:        "); PRINTF(MAX_HEADS_BOARD)("         %06d ", _NiosMem->stat.cond[no[i]].serialNo); term_printf("\n");	
 		term_printf("alive:           "); PRINTF(MAX_HEADS_BOARD)("         %06d ", RX_NiosStat.cond[no[i]].alive); term_printf("\n");
 
 		term_printf("error:            ");

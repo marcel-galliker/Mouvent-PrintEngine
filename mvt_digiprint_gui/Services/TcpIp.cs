@@ -952,6 +952,7 @@ namespace RX_DigiPrint.Services
 
 	        public Int32	cylinderPresSet;	//  Pressure intermediate Tank
 	        public Int32	cylinderPres;	    //  Pressure intermediate Tank
+	        public Int32	cylinderPresDiff;	//  Pressure intermediate Tank
             public Int32    cylinderSetpoint;	 //  Pressure intermediate Tank
             public Int32    airPressureTime;
             public Int32	flushTime;

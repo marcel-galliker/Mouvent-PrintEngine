@@ -105,7 +105,7 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CylinderPresSet, value); }
         }
 
-        //--- Property PresIntTank ---------------------------------------
+        //--- Property CylinderPres ---------------------------------------
         private Int32 _CylinderPres;
         public Int32 CylinderPres
         {
@@ -113,8 +113,16 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CylinderPres, value); }
         }
 
-        //--- Property PresIntTank ---------------------------------------
-        private Int32 _CylinderSetpoint;
+		//--- Property CylinderPresDiff ---------------------------------------
+		private int _CylinderPresDiff;
+		public int CylinderPresDiff
+		{
+			get { return _CylinderPresDiff; }
+			set { SetProperty(ref _CylinderPresDiff,value); }
+		}
+
+		//--- Property PresIntTank ---------------------------------------
+		private Int32 _CylinderSetpoint;
         public Int32 CylinderSetpoint
         {
             get { return _CylinderSetpoint; }
@@ -384,6 +392,7 @@ namespace RX_DigiPrint.Models
 
             CylinderPresSet  = msg.cylinderPresSet;
             CylinderPres     = msg.cylinderPres;
+            CylinderPresDiff = msg.cylinderPresDiff;
             CylinderSetpoint = msg.cylinderSetpoint;
             PresLung        = msg.presLung;
             CondPresOut     = msg.condPresOut;

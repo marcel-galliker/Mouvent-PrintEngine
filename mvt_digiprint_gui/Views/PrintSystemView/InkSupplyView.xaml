@@ -256,8 +256,8 @@
 
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding CylinderPres,      Converter={StaticResource HeadVal_Converter}}" />
-                    <TextBlock Text=" ("/>
-                    <TextBlock Text="{Binding CylinderSetpoint,      Converter={StaticResource HeadVal_Converter}}"/>
+                    <TextBlock Text=" (~"/>
+                    <TextBlock Text="{Binding CylinderPresDiff,      Converter={StaticResource HeadVal_Converter}}"/>
                     <TextBlock Margin="0,0,2,0"  Text=")"/>
                 </StackPanel>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
