@@ -363,7 +363,6 @@ static void _update_clusterNo(void)
 			mvt->dropletsPrinted = 0;
 			mvt->dropletsPrintedCRC = rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted));
 		}
-		RX_HBStatus->head[condNo].printedDroplets = mvt->dropletsPrinted; 
 		RX_HBStatus[0].head[condNo].dropVolume = 0.0000000000024;
 	}
 
@@ -446,10 +445,15 @@ static void _cond_copy_status(void)
 				RX_HBStatus->head[i].meniscus_Setpoint  = RX_NiosStat.cond[i].meniscus_setpoint;
 				RX_HBStatus->head[i].pumpSpeed			= RX_NiosStat.cond[i].pump;
 				RX_HBStatus->head[i].pumpFeedback		= RX_NiosStat.cond[i].pump_measured * 60/100;	// in 0.1 ml
-				RX_HBStatus->head[i].printingSeconds	= RX_NiosStat.cond[i].pumptime;
+				RX_HBStatus->head[i].condPrintingSec	= RX_NiosStat.cond[i].pumptime;
 				RX_HBStatus->head[i].flowFactor			= RX_NiosStat.cond[i].flowFactor;
 				RX_HBStatus->head[i].ctrlMode			= RX_NiosStat.cond[i].mode;
-				
+				if (rx_crc8(&RX_HBStatus->head[i].eeprom_mvt.dropletsPrinted, sizeof(RX_HBStatus->head[i].eeprom_mvt.dropletsPrinted)) == RX_HBStatus->head[i].eeprom_mvt.dropletsPrintedCRC)
+				{
+					RX_HBStatus->head[i].printed_ml	= (UINT32)(RX_HBStatus->head[i].eeprom_mvt.dropletsPrinted*1000000.0*1000.0*RX_HBStatus->head[i].dropVolume);
+				}
+				else RX_HBStatus->head[i].printed_ml = INVALID_VALUE;
+
 				if (RX_NiosStat.cond[i].error & COND_ERR_status_struct_missmatch)
 					printf("Error status_struct_missmatch\n");						
 
@@ -470,8 +474,8 @@ static void _cond_copy_status(void)
 				RX_HBStatus->head[i].presOut		= INVALID_VALUE;
 				RX_HBStatus->head[i].pumpSpeed		= INVALID_VALUE;
 				RX_HBStatus->head[i].pumpFeedback	= INVALID_VALUE;
-				RX_HBStatus->head[i].printingSeconds= INVALID_VALUE;
-				RX_HBStatus->head[i].printedDroplets= INVALID_VALUE;
+				RX_HBStatus->head[i].condPrintingSec= INVALID_VALUE;
+				RX_HBStatus->head[i].printed_ml		= INVALID_VALUE;
 				RX_HBStatus->head[i].ctrlMode		= INVALID_VALUE;	
 				RX_HBStatus->head[i].presIn_0out    = INVALID_VALUE;
 				RX_NiosStat.cond[i].pcb_rev		    = '-';	

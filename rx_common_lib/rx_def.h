@@ -828,9 +828,10 @@ typedef struct SHeadStat
 	FLOAT			dropVolume;	// in pl
 	UINT32			pumpSpeed;
 	UINT32			pumpFeedback;
-	UINT32			printingSeconds;
-	UINT64			printedDroplets;
-	UINT64			printed_ml;
+	UINT32			condPrintingSec;
+//	UINT64			printedDroplets;
+	UINT32			printed_ml;
+//	UINT32			printed_sec;
 
 	INT32			presIn_0out;
 	EnFluidCtrlMode	ctrlMode;

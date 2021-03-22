@@ -1107,7 +1107,9 @@ namespace RX_DigiPrint.Services
             public Byte dropletsPrintedCRC;
 
             public SRobInfo robot;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+            public UInt32   printedSec;
+            public Byte     printedSecCRC;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 7)]
             public Byte[]   filler;
         };
 
@@ -1159,9 +1161,9 @@ namespace RX_DigiPrint.Services
             public float			dropVolume;	// in pl
 	        public UInt32			pumpSpeed;
 	        public UInt32			pumpFeedback;
-	        public UInt32			printingSeconds;
-	        public UInt64			printedDroplets;
-	        public UInt64			printed_ml;
+	        public UInt32			condPrintingSec;
+	     //   public UInt64			printedDroplets;
+	        public UInt32			printed_ml;
             public Int32			presIn_0out;
 	        public EFluidCtrlMode   ctrlMode;
 

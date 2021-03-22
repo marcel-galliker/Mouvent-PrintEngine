@@ -478,7 +478,8 @@ void putty_display_nios_status(int nios, int status)
 			term_printf("Cooler:        PCB missing\n");
 		}
 
-		term_printf("printed: [l]    "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str(RX_HBStatus->head[no[i]].printed_ml)); term_printf("\n");
+		term_printf("printed: [l]    "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str3(RX_HBStatus->head[no[i]].printed_ml)); term_printf("\n");
+		term_printf("printed: [time] "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_time(RX_HBStatus->head[no[i]].eeprom_mvt.printingSec)); term_printf("\n");
 		term_printf("Temp Head:      "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_temp(RX_NiosStat.head_temp[no[i]])); term_printf("\n");
 		term_printf("Cluster:  No: %06d", RX_HBStatus->clusterNo);
 		{

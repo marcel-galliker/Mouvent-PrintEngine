@@ -198,6 +198,16 @@ char *value_str_temp(int val)
 	return str;
 }
 
+//--- value_str_time ---------------------------------------------
+char *value_str_time(int sec)
+{
+	static char str[32];
+	int min=sec/60; sec=sec%60;
+	int hr=min/60;  min=min%60;
+	sprintf(str, "%5d:%02d:%02d", hr, min, sec);
+	return str;
+}
+
 //--- value_str_u ---------------------------------------------
 char *value_str_u(int val)
 {

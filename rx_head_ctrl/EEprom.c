@@ -19,6 +19,7 @@
 #include "rx_crc.h"
 #include "crc_fuji.h"
 #include "tcp_ip.h"
+#include "fpga.h"
 #include "nios.h"
 #include "EEprom.h"
 
@@ -275,7 +276,7 @@ int  eeprom_main(int ticks, int menu)
 				else 
 				{
 					memset(&RX_HBStatus->head[head].eeprom_density, 0, sizeof(RX_HBStatus->head[head].eeprom_density));
-				} 
+				}
 				_NiosMem->cfg.eeprom_density_readCnt[head]++;
 			}
 		}
@@ -337,24 +338,53 @@ void eeprom_add_droplets_printed(int headNo, UINT32 droplets, int time)
 {
 	static UINT64 _droplets[MAX_HEADS_BOARD];
 	static int    _time[MAX_HEADS_BOARD];
+	static int    _timePrinting[MAX_HEADS_BOARD];
+	int save=FALSE;
+
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 
-	_droplets[headNo]+=(UINT64)droplets;
-	
+	if (_timePrinting[headNo]==0) _timePrinting[headNo]=time;
 	if (_time[headNo]==0) _time[headNo]=time;
+
+	_droplets[headNo]+=(UINT64)droplets;
+
+	SHeadEEpromMvt cfg;
+	memcpy(&cfg, &_NiosMem->stat.eeprom_mvt[headNo], sizeof(cfg));
+
 	if (time-_time[headNo]>60000)
 	{
 		if (_droplets[headNo]>1000000)
 		{		
-			SHeadEEpromMvt cfg;
-			memcpy(&cfg, &_NiosMem->stat.eeprom_mvt[headNo], sizeof(cfg));
 			cfg.dropletsPrinted += _droplets[headNo]/1000000;
-			cfg.dropletsPrintedCRC = rx_crc8(&cfg.dropletsPrinted, sizeof(cfg.dropletsPrinted));
-			memcpy(&_NiosMem->cfg.eeprom_mvt[headNo], &cfg, sizeof(cfg));
-			_NiosMem->cfg.eeprom_mvt_writeCnt[headNo]++;
 			_droplets[headNo] = 0;
+			save=TRUE;
 		}
 		_time[headNo] = time;
+	}
+
+	if (time-_timePrinting[headNo]>1000)
+	{
+		if (fpga_is_printing())
+		{
+			cfg.printingSec++;
+			save=TRUE;
+		}
+		_timePrinting[headNo] = time;
+	}
+
+	/*
+	#ifdef DEBUG
+		save=TRUE;
+		cfg.dropletsPrinted = 123456;
+		cfg.printingSec=123;
+	#endif	*/
+
+	if (save)
+	{
+		cfg.dropletsPrintedCRC	= rx_crc8(&cfg.dropletsPrinted, sizeof(cfg.dropletsPrinted));
+		cfg.printingSecCRC		= rx_crc8(&cfg.printingSec, sizeof(cfg.printingSec));
+		memcpy(&_NiosMem->cfg.eeprom_mvt[headNo], &cfg, sizeof(cfg));
+		_NiosMem->cfg.eeprom_mvt_writeCnt[headNo]++;
 	}
 }
 
