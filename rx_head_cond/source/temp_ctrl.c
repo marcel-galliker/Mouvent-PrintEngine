@@ -711,8 +711,8 @@ void ADC0_IRQHandler(void)
 						{
 							int sum, i;
 							for (i=sum=0; i<BUF_SIZE; i++) sum+=s->buf[i];
-							if (RX_Status.pcb_rev=='n' && s->addr==ADC_CHAN_2)
-								sum =sum*30/20;
+						//	if (RX_Status.pcb_rev=='n' && s->addr==ADC_CHAN_2)
+						//		sum =sum*30/20;
 							(*s->pTemp) = sum/BUF_SIZE;
 						}
 					}

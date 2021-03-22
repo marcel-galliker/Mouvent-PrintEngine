@@ -1113,8 +1113,8 @@ typedef struct SInkSupplyInfo
 		struct
 		{
 			UINT32 connected : 1;		// 0x00000001
-			UINT32 bleedValve : 1;		// 0x00000002
-			UINT32 cusionValve : 1;		// 0x00000004
+			UINT32 info_1 : 1;			// 0x00000002
+			UINT32 info_2 : 1;			// 0x00000004
 			UINT32 flushed : 1;			// 0x00000008
 			UINT32 condTempReady : 1;	// 0x00000010
 			UINT32 heaterTempReady : 1;	// 0x00000020
@@ -1204,6 +1204,8 @@ typedef struct SInkSupplyStat
 	INT32	cylinderSetpoint;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
 	INT32	flushTime;
+	UINT8	airValve;
+	UINT8	bleedValve;
 	INT32	purge_putty_ON;
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;	

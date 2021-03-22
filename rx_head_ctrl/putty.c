@@ -662,8 +662,8 @@ void putty_display_cond_status(int status)
 			term_printf("\n");
     	}
 		
-		term_printf("meniscus flowRes: "); PRINTF(MAX_HEADS_BOARD)("     %d.%02d (%d.%02d)", _NiosMem->stat.cond[no[i]].flowResistance/100, _NiosMem->stat.cond[no[i]].flowResistance%100, _NiosMem->cfg.cond[no[i]].flowResistance/100, _NiosMem->cfg.cond[no[i]].flowResistance%100); term_printf("\n");
-		term_printf("meniscus setpoint:"); PRINTF(MAX_HEADS_BOARD)(" %14s ", value_str1(RX_NiosStat.cond[no[i]].meniscus_setpoint)); term_printf("\n");
+		term_printf("meniscus flowRes: "); PRINTF(MAX_HEADS_BOARD)("   %d.%02d (%d.%02d)  ", _NiosMem->stat.cond[no[i]].flowResistance/100, _NiosMem->stat.cond[no[i]].flowResistance%100, _NiosMem->cfg.cond[no[i]].flowResistance/100, _NiosMem->cfg.cond[no[i]].flowResistance%100); term_printf("\n");
+		term_printf("meniscus setpoint:"); PRINTF(MAX_HEADS_BOARD)("%14s  ", value_str1(RX_NiosStat.cond[no[i]].meniscus_setpoint)); term_printf("\n");
 		
     	term_printf("Pressure out:    ");
     	{
@@ -725,7 +725,7 @@ void putty_display_cond_status(int status)
 
 		for (i = 0; i < MAX_HEADS_BOARD; i++) if (RX_NiosStat.cond[no[i]].error&COND_ERR_temp_head_overheat) str[i]='E'; else str[i]=' ';
 		term_printf("Temp Head [C]:    "); PRINTF(MAX_HEADS_BOARD)("   %s(%02d<%02d)%c ", value_str_temp(_NiosCfg->cond[no[i]].tempHead), _NiosCfg->cond[no[i]].temp / 1000, _NiosCfg->cond[no[i]].tempMax / 1000, str[no[i]]); term_printf("\n"); 
-		term_printf("Temp Ready:       "); PRINTF(MAX_HEADS_BOARD)("           %d %d ", RX_HBStatus->head[no[i]].info.temp_ready, RX_HBStatus->head[no[i]].info.flowFactor_ok); term_printf("\n"); 		
+		term_printf("Temp Ready:       "); PRINTF(MAX_HEADS_BOARD)("           %d %d  ", RX_HBStatus->head[no[i]].info.temp_ready, RX_HBStatus->head[no[i]].info.flowFactor_ok); term_printf("\n"); 		
 		term_printf("Temp Inlet [C]:   "); PRINTF(MAX_HEADS_BOARD)("%14s  ",  value_str_temp(RX_NiosStat.cond[no[i]].tempIn)); term_printf("\n");
 		term_printf("Temp Heater [C]:  "); PRINTF(MAX_HEADS_BOARD)("%14s  ", value_str_temp(RX_NiosStat.cond[no[i]].tempHeater)); term_printf("\n");
 		term_printf("Heater:           "); PRINTF(MAX_HEADS_BOARD)("          %3d%%  ", RX_NiosStat.cond[no[i]].heater_percent); term_printf("\n");
@@ -743,7 +743,7 @@ void putty_display_cond_status(int status)
 		
 		term_printf("Meniscus Check:   "); PRINTF(MAX_HEADS_BOARD)("%14s  ", STATUS_STRING[_NiosMem->cfg.cond[no[i]].cmd.disable_meniscus_check]); term_printf("\n"); 
 		term_printf("PID sum:          "); PRINTF(MAX_HEADS_BOARD)("%14d  ", _NiosMem->stat.cond[no[i]].pid_sum); term_printf("\n"); 
-		term_printf("PID: ");			   PRINTF(MAX_HEADS_BOARD)("(%4d %4d) ", RX_NiosStat.cond[no[i]].pid_P, RX_NiosStat.cond[no[i]].pid_I); term_printf("\n");
+		term_printf("PID:              "); PRINTF(MAX_HEADS_BOARD)("   (%4d %4d)  ", RX_NiosStat.cond[no[i]].pid_P, RX_NiosStat.cond[no[i]].pid_I); term_printf("\n");
 							
 		if (status)	{term_printf("Heater   pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.heater_pg, RX_NiosStat.cond[no[i]].gpio_state.heater_flg); term_printf("\n");}
 		if (status)	{term_printf("24V      pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.u_24v_pg, RX_NiosStat.cond[no[i]].gpio_state.u_24v_flg); term_printf("\n");}
