@@ -159,6 +159,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct);
 static void _rob_state_machine(void);
 static void _set_ScrewPos(SScrewPositions *pos);
 static void _save_ScrewPos(void);
+static void _calibrate_new_ScrewPos(void);
 static void _handle_waste_pump(void);
 static void _handle_flush_pump(void);
 static void _handle_ink_pump_back(void);
@@ -1402,32 +1403,14 @@ static void _rob_state_machine(void)
             if (_ScrewPar.head<0) _ScrewPos.printbar[_ScrewPar.printbar].stitch.turns += _ScrewPar.steps;
             else if (_ScrewPar.axis==AXE_ANGLE) _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].turns += _ScrewPar.steps;
             else _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_STITCH].turns += _ScrewPar.steps;
-            if (_ScrewPar.axis == AXE_STITCH)
-            {
-                distance = (robi_screw_count() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
-                for (int i = _ScrewPar.head + 1; i < RX_StepperCfg.headsPerColor; i++)
-                {
-                    _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_ANGLE].y += distance;
-                    if (i != RX_StepperCfg.headsPerColor-1)
-                       _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_STITCH].y += distance;
-                }
-            }
+            _calibrate_new_ScrewPos();
             _save_ScrewPos();
             _RobStateMachine_Step=0; // wait for next command
             break;
 
         //--------------- next screw ---------------
         case 900:
-            if (_ScrewPar.axis == AXE_STITCH)
-            {
-                distance = (robi_screw_count() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
-                for (int i = _ScrewPar.head + 1; i < RX_StepperCfg.headsPerColor; i++)
-                {
-                    _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_ANGLE].y += distance;
-                    if (i != RX_StepperCfg.headsPerColor-1)
-                       _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_STITCH].y += distance;
-                }
-            }
+            _calibrate_new_ScrewPos();
             _save_ScrewPos();
             robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             _RobStateMachine_Step++;
@@ -1496,6 +1479,21 @@ static void _set_ScrewPos(SScrewPositions *pos)
 static void _save_ScrewPos(void)
 {
     ctrl_send_2(REP_SET_SCREW_POS, sizeof(_ScrewPos), &_ScrewPos);
+}
+
+//--- _calibrate_new_ScrewPos ------------------------------------
+static void _calibrate_new_ScrewPos(void)
+{
+    if (_ScrewPar.axis == AXE_STITCH)
+    {
+        int distance = (robi_screw_count() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
+        for (int i = _ScrewPar.head + 1; i < RX_StepperCfg.headsPerColor; i++)
+        {
+            _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_ANGLE].y += distance;
+            if (i != RX_StepperCfg.headsPerColor - 1)
+                _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_STITCH].y += distance;
+        }
+    }
 }
 
 //--- _handle_waste_pump -----------------------------------------
