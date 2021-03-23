@@ -135,14 +135,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
             else                                 SettingsGrid.RowDefinitions[6].Height = new GridLength(0);
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
-            Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
             visible = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB && RxGlobals.StepperStatus[0].RobotUsed ? Visibility.Visible : Visibility.Collapsed;
             for (i = 0; i < RxGlobals.StepperStatus.Length; i++)
             {
                 if (RxGlobals.StepperStatus[i].RobotUsed && RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB) visible = Visibility.Visible;
             }
             Button_PurgeWash.Visibility = visible;
-            Button_Wipe.Visibility = visible;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------

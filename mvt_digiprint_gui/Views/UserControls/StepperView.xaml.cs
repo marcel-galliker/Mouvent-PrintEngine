@@ -17,12 +17,12 @@ namespace RX_DigiPrint.Views.UserControls
         private const bool SIMU=false;
 
         private const int STEPPER_CNT=4;
-        private Image[] _LedRef   = new Image[STEPPER_CNT];
-        private Image[] _RefDone  = new Image[STEPPER_CNT];
-        private Image[] _LedUp    = new Image[STEPPER_CNT];
-        private Image[] _LedPrint = new Image[STEPPER_CNT];
-        private Image[] _LedCap   = new Image[STEPPER_CNT];
-        private Image[] _LedRobRef = new Image[STEPPER_CNT];
+        private Image[] _LedRef     = new Image[STEPPER_CNT];
+        private Image[] _RefDone    = new Image[STEPPER_CNT];
+        private Image[] _LedUp      = new Image[STEPPER_CNT];
+        private Image[] _LedPrint   = new Image[STEPPER_CNT];
+        private Image[] _LedCap     = new Image[STEPPER_CNT];
+        private Image[] _LedRobRef  = new Image[STEPPER_CNT];
 
         private static ImageSource _GreenLedImg;
         private static ImageSource _GreyLedImg;
@@ -123,12 +123,12 @@ namespace RX_DigiPrint.Views.UserControls
                         if (RxGlobals.StepperStatus[i].CmdRunning==0 && RxGlobals.StepperStatus[i].RefDone) refDone=true;
                         if (RxGlobals.StepperStatus[i].RobotUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) visible = Visibility.Visible;
                     }
-                    Button_Up.IsEnabled     = refDone;
-                    Button_Print.IsEnabled  = refDone;
-                    Button_Wash.Visibility = visible;
-                    Button_Vacuum.Visibility = visible;
-                    Button_Wipe.Visibility = visible;
-                    Button_RefRobot.Visibility = visible;
+                    Button_Up.IsEnabled         = refDone;
+                    Button_Print.IsEnabled      = refDone;
+                    Button_Wash.Visibility      = visible;
+                    Button_Vacuum.Visibility    = visible;
+                    Button_RefRobot.Visibility  = visible;
+                    Button_Service.Visibility   = visible;
 
                 }
                 else
@@ -151,8 +151,8 @@ namespace RX_DigiPrint.Views.UserControls
             }
             Button_Wash.Visibility = visible;
             Button_Vacuum.Visibility = visible;
-            Button_Wipe.Visibility = visible;
             Button_RefRobot.Visibility = visible;
+            Button_Service.Visibility = visible;
         }
 
         //--- _button_active -----------------------------
@@ -340,6 +340,12 @@ namespace RX_DigiPrint.Views.UserControls
         {
             _button_active(sender as CheckBox);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROB_DRIP_PANS_REF);
+        }
+
+        private void Service_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROB_SERVICE);
         }
     }
 }

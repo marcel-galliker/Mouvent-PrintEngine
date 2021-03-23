@@ -44,9 +44,6 @@ int	 steplb_rob_in_fct_pos_all(ERobotFunctions rob_function);
 void steplb_rob_fct_start(int no, ERobotFunctions rob_function);
 int	 steplb_rob_fct_done (int no, ERobotFunctions rob_function);
 
-void steplb_rob_wipe_start_all(void);
-void steplb_rob_wipe_start(int stepperNo, EWipeSide side);
-
 void steplb_rob_do_reference(void);
 void steplb_rob_empty_waste(int time);
 int  steplb_rob_reference_done(void);
@@ -57,7 +54,6 @@ void steplb_rob_stop(int no);
 void steplb_rob_control_all(EnFluidCtrlMode ctrlMode);
 void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no);
 void steplb_rob_start_cap_all(void);
-void steplb_rob_wash_all(void);
 
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 void steplb_cluster_Screw_Turned(int stepperNo);

@@ -43,14 +43,14 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define PRINTHEAD_EN			11			// Input from SPS // '1' Allows Head to go down
 
 #define STEPS_REV				(200*STEPS)	// steps per motor revolution * STEPS times oversampling
-#define DIST_REV				2000.0		// moving distance per revolution [�m]
+#define DIST_REV				2000.0		// moving distance per revolution [um]
 
 #define DIST_MECH_REF			500
 
 #define MIN_CAP_HEIGHT			7500		// um under Ref height
 
-#define DIST_CAP_WASH			5300		// um -> higher than capping hight
-#define DIST_CAP_SCREW			7900		// um -> higher than capping hight
+#define DIST_CAP_WASH			3400		// um -> higher than capping hight
+#define DIST_CAP_SCREW			6100		// um -> higher than capping hight
 
 #define CLUSTER_CHANGE_HEIGHT	60000	//um
 
@@ -188,9 +188,9 @@ void lb702_main(int ticks, int menu)
 				{
                     motors_reset(MOTOR_Z_BITS);
                     TrPrintfL(TRUE, "CMD_LIFT_REFERENCE done, _Cmd_New=0x%08x", _Cmd_New);
+                    RX_StepperStatus.info.z_in_ref = TRUE;
 					if (_Cmd_New)
 					{
-                        RX_StepperStatus.info.z_in_ref = TRUE;
                         _lb702_move_to_pos(_Cmd_New, _PrintPos_New[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_FRONT]);
                         memcpy(_PrintPos_Act, _PrintPos_New, sizeof(_PrintPos_Act));
                         RX_StepperStatus.cmdRunning = _Cmd_New;
@@ -207,6 +207,7 @@ void lb702_main(int ticks, int menu)
                 {
                     Error(ERR_CONT, 0, "Voltage on Motor power supply too low (%dV)", ps_get_power()/1000);
                     _Cmd_New = FALSE;
+                    _NewCmd = FALSE;
                     RX_StepperStatus.cmdRunning = FALSE;
                 }
                 else
@@ -274,7 +275,7 @@ void lb702_main(int ticks, int menu)
             RX_StepperStatus.info.z_in_ref = (cmd == CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_up = (cmd == CMD_LIFT_UP_POS && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_print = (cmd == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
-            RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && RX_StepperStatus.screwerinfo.y_in_ref && RX_RobiStatus.isInGarage);
+            RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && ((RX_StepperStatus.screwerinfo.y_in_ref && RX_RobiStatus.isInGarage) || !RX_StepperStatus.robot_used));
             RX_StepperStatus.info.z_in_wash = (cmd == CMD_LIFT_WASH_POS && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_screw = (cmd == CMD_LIFT_SCREW && RX_StepperStatus.info.ref_done);
         }
@@ -492,7 +493,21 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 {
     RX_StepperStatus.cmdRunning = cmd;
     if (cmd == _NewCmd) _NewCmd = 0;
-    if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
+    if (RX_StepperStatus.robot_used && !RX_StepperStatus.screwerinfo.z_in_down)
+    {
+        _CmdRunningRobi = CMD_ROBI_MOVE_Z_DOWN;
+        _NewCmd = cmd;
+        RX_StepperStatus.cmdRunning = 0;
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
+    }
+    else if (!RX_StepperStatus.info.ref_done)
+    {
+		_Cmd_New = cmd;
+        _PrintPos_New[MOTOR_Z_BACK] = pos0;
+        _PrintPos_New[MOTOR_Z_FRONT] = pos1;
+        _lb702_do_reference();
+    }
+    else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
@@ -516,7 +531,6 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 		_PrintPos_New[MOTOR_Z_FRONT] = pos1;
 		motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0);
 		motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1);
-
 		motors_start(MOTOR_Z_BITS, TRUE);	
 	} 
 	else 
@@ -578,14 +592,14 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									if(!RX_StepperStatus.info.printhead_en) return ErrorFlag(ERR_ABORT, &_ErrorFlags, 0x00001, 0, "Allow Head Down signal not set!");
 									_PrintHeight   = (*((INT32*)pdata));
 									_Step=0;
+                                    val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - _PrintHeight);
+									val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
 									if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back < 10000) Error(ERR_ABORT, 0, "Reference Height back must be > 10mm");
 									else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front < 10000) Error(ERR_ABORT, 0, "Reference Height must be > 10mm");
 									else if (abs(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back) > MAX_ALIGN) 
 										Error(ERR_ABORT, 0, "Reference Height front/back too differents (> 10mm)");									
 									else if(!RX_StepperStatus.cmdRunning || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
 									{
-										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - _PrintHeight);
-										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - _PrintHeight);
                                         if ((!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE || !RX_StepperStatus.info.ref_done)

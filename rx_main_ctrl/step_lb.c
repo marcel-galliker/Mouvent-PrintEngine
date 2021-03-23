@@ -33,6 +33,7 @@
 
 #define STEPPER_CNT		    4
 
+#define VACUUM_DELAY        10 * 1000       // ms -> 10 seconds
 static RX_SOCKET		    _step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		    _Status[STEPPER_CNT];
@@ -54,8 +55,6 @@ static EnFluidCtrlMode	    _RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 static SHeadAdjustmentMsg   _HeadAdjustment[STEPPER_CNT] = {0};
 
 static SHeadAdjustmentMsg   _HeadAdjustmentBuffer[STEPPER_CNT][MAX_HEAD_DIST];
-
-static EWipeSide            _WipeCommand[STEPPER_CNT];
 
 static void _steplb_rob_do_reference(int no);
 
@@ -128,6 +127,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_LIFT_CAPPING_POS:
 			case CMD_LIFT_REFERENCE:
 			case CMD_ROB_REFERENCE:
+            case CMD_ROB_SERVICE:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
@@ -465,42 +465,12 @@ void steplb_rob_fct_start(int no, ERobotFunctions rob_function)
 	sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
 }
 
-//--- steplb_rob_wipe_start_all ---------------------------------------------------------------
-void steplb_rob_wipe_start_all(void)
-{
-    int i;
-    EWipeSide wipeside = wipe_all;
-    for (i = 0; i < STEPPER_CNT; i++)
-    {
-        if (_step_socket[i] != INVALID_SOCKET) steplb_rob_wipe_start(i, wipeside);
-    }
-}
-
-//--- steplb_rob_wipe_start ---------------------------------------
-void steplb_rob_wipe_start(int stepperNo, EWipeSide side)
-{
-    switch (side)
-    {
-    case wipe_none:     
-    case wipe_all:     _WipeCommand[stepperNo] = side; break;
-    case wipe_left:     if ( _WipeCommand[stepperNo] == wipe_right) _WipeCommand[stepperNo] = wipe_all;
-                        else                                        _WipeCommand[stepperNo] = side;
-                        break;
-    case wipe_right:    if ( _WipeCommand[stepperNo] == wipe_left)  _WipeCommand[stepperNo] = wipe_all;
-                        else                                        _WipeCommand[stepperNo] = side;
-                        break;
-    }
-    
-    if (_step_socket[stepperNo] != INVALID_SOCKET && (_RobotCtrlMode[stepperNo] == ctrl_off || _RobotCtrlMode[stepperNo] == ctrl_undef)) _RobotCtrlMode[stepperNo] = ctrl_wipe;
-}
-
 //--- steplb_rob_fct_done --------------------------------------
 int	 steplb_rob_fct_done(int no, ERobotFunctions rob_function)
 {
 	if (_step_socket[no]==INVALID_SOCKET) return TRUE;
 	switch (rob_function)
 	{
-	case rob_fct_wipe:		return _Status[no].robinfo.wipe_done;
 	case rob_fct_wash:		return _Status[no].robinfo.wash_done;
 	case rob_fct_vacuum:	return _Status[no].robinfo.vacuum_done;
 	case rob_fct_cap:		return _Status[no].robinfo.cap_ready;
@@ -605,15 +575,6 @@ void steplb_rob_start_cap_all(void)
 	}
 }
 
-//--- stepl_rob_wash_all -------------------------------------------------------------
-void steplb_rob_wash_all(void)
-{
-    for (int no = 0; no < SIZEOF(_step_socket); no++)
-    {
-        if (_step_socket[no] != INVALID_SOCKET && (_RobotCtrlMode[no] == ctrl_off || _RobotCtrlMode[no] == ctrl_undef)) _RobotCtrlMode[no] = ctrl_wash;
-    }
-}
-
 //--- steplb_pump_back_fluid ----------------------------------
 void steplb_pump_back_fluid(int fluidNo, int state)
 {
@@ -664,7 +625,11 @@ void steplb_pump_back_fluid(int fluidNo, int state)
 void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 {		
     static int _risingEdge[STEPPER_CNT] = {0};
+    static int _time[STEPPER_CNT] = {0};
     ERobotFunctions function;
+
+    if (ctrlMode != ctrl_vacuum && ctrlMode != ctrl_vacuum_step1) _time[no] = 0;
+    
 	if (_Status[no].robot_used)
 	{
 		EnFluidCtrlMode	old = _RobotCtrlMode[no];
@@ -735,64 +700,47 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     if (_Status[no].robinfo.wash_done && _WashStarted) 
                                     {
                                         _RobotCtrlMode[no] = ctrl_wash_step2;
-                                        _steplb_rob_do_reference(no);
+                                        steplb_lift_to_top_pos();
                                     }
 									break;
 
-        case ctrl_wash_step2:       if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_wash_step3;
-                                    break;
-                                    
-        case ctrl_wash_step3:		_RobotCtrlMode[no] = ctrl_off;
+        case ctrl_wash_step2:		if (steplb_lift_in_top_pos())
+                                    {
+                                        _RobotCtrlMode[no] = ctrl_wash_step3; 
+                                    }
                                     _WashStarted = FALSE;
 									break;
+                                    
+        case ctrl_wash_step3:		_RobotCtrlMode[no] = ctrl_off;
+									break;
+                                    
+        case ctrl_vacuum:           _RobotCtrlMode[no] = ctrl_vacuum_step1;
+                                    _time[no] = rx_get_ticks() + VACUUM_DELAY;
+                                    break;
 
-        case ctrl_vacuum:			if (!_Status[no].robinfo.moving)
+        case ctrl_vacuum_step1:		if (!_Status[no].robinfo.moving && rx_get_ticks() >= _time[no])
                                     {
                                         function = rob_fct_vacuum;
-									    if (ctrl_vacuum_step1 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
-                                        _RobotCtrlMode[no] = ctrl_vacuum_step1;
-                                    }
-                                    else if (_RobotCtrlMode[no] != ctrl_vacuum_step1)_RobotCtrlMode[no] = ctrl_vacuum;
-                                    break;
-                                    
-        case ctrl_vacuum_step1:     if (_Status[no].robinfo.vacuum_done)
-                                    {
+									    if (ctrl_vacuum_step2 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
                                         _RobotCtrlMode[no] = ctrl_vacuum_step2;
-                                        _steplb_rob_do_reference(no);
                                     }
+                                    else if (_RobotCtrlMode[no] != ctrl_vacuum_step2) _RobotCtrlMode[no] = ctrl_vacuum_step1;
                                     break;
                                     
-        case ctrl_vacuum_step2:		if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_vacuum_step3;
-									break;
-                                    
-        case ctrl_vacuum_step3:		 _RobotCtrlMode[no] = ctrl_off;
-									break;
-                                    
-        case ctrl_wipe:             if (!_Status[no].robinfo.moving)
-				                    {
-                                        function = rob_fct_wipe;
-                                        sok_send_2(&_step_socket[no], CMD_ROB_WIPE, sizeof(_WipeCommand[no]), &_WipeCommand[no]);
-                                        _WipeCommand[no] = wipe_none;
-                                        _RobotCtrlMode[no] = ctrl_wipe_step1;
-                                    }
-                                    else _RobotCtrlMode[no] = ctrl_wipe;
-                                    break;
-                                    
-        case ctrl_wipe_step1:       if (_Status[no].robinfo.wipe_done) 
+        case ctrl_vacuum_step2:     if (_Status[no].robinfo.vacuum_done)
                                     {
-                                        _RobotCtrlMode[no] = ctrl_wipe_step2;
+                                        _RobotCtrlMode[no] = ctrl_vacuum_step3;
                                         _steplb_rob_do_reference(no);
                                     }
                                     break;
                                     
-        case ctrl_wipe_step2:       if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_wipe_step3;
-                                    break;
+        case ctrl_vacuum_step3:		if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_vacuum_step4;
+									break;
                                     
-        case ctrl_wipe_step3:       _RobotCtrlMode[no] = ctrl_off;
-                                    break;
+        case ctrl_vacuum_step4:		 _RobotCtrlMode[no] = ctrl_off;
+									break;
 
-		case ctrl_off:
-                                    _RobotCtrlMode[no] = ctrl_off;
+		case ctrl_off:              _RobotCtrlMode[no] = ctrl_off;
                                     break;
 		default: return;
 		

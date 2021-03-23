@@ -144,8 +144,8 @@ void rx_def_init();
 #define ROB_SCREWS_PER_HEAD		2
 
 //--- coordinates: X in web direction, Y in slide direction
-#define SCREW_X_LEFT		-19200		// -17700	// um
-#define SCREW_X_RIGHT		73800		// 75300	// um       // SCREW_X_LEFT + 93000
+#define SCREW_X_LEFT		-18200		// -17700	// um
+#define SCREW_X_RIGHT		74800		// 75300	// um       // SCREW_X_LEFT + 93000
 
 #define SCREW_Y_STITCH		51300 // um
 #define SCREW_Y_ANGLE		34900  // um       // SCREW_Y_STITCH - 16400
@@ -203,14 +203,6 @@ typedef enum ERectoVerso
 	rv_recto,	// 01
 	rv_verso,	// 02
 } ERectoVerso;
-
-typedef enum EWipeSide
-{
-    wipe_none,	// 0
-    wipe_left,  // 1
-    wipe_right, // 2
-    wipe_all,	// 3
-} EWipeSide;
 
 typedef enum
 {
@@ -1330,6 +1322,7 @@ typedef enum ERobotFunctions
     rob_fct_screw_head5,	// 25: Screw Pos head 5
     rob_fct_screw_head6,	// 26: Screw Pos head 6
     rob_fct_screw_head7,	// 27: Screw Pos head 7
+	rob_fct_maintenance,	// 28: Maintenance Pos
 } ERobotFunctions;
 
 typedef enum ERobotVaccumState

@@ -225,7 +225,8 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
     if (speed<MIN_SPEED_HZ+500) 
     {
         if (speed<1000 && microsteps!=MICROSTEPS && (!RX_StepperStatus.robot_used || motor != 4)) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
-        minSpeed = speed-500;    
+        minSpeed = speed-500;
+        if (minSpeed <= 0) minSpeed = speed;
 	}
     else minSpeed = MIN_SPEED_HZ;
 	
@@ -311,14 +312,24 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		
 		// Dividing by encoder step to morot step ratio if we drive to a target position based on the encoder
 		min_speed = minSpeed * FIX_POINT_SPEED;
+        
+        // Motor already in position
+        if (rising_steps < microsteps && linear_steps < CURRENT_OFFSET && falling_steps < microsteps)
+        {
+            _motor_start_cnt[motor]--;
+            return 0;
+        }
 		
 		cnt=0;
-		// Set rising ramp parameters
-		move[cnt].cc0_256 = (UINT32) speed*FIX_POINT_SPEED;
-		move[cnt].a_256   = accel;
-		move[cnt].steps   = rising_steps/microsteps;
-		move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
-		cnt++;
+        if (rising_steps >= microsteps)
+        {
+            // Set rising ramp parameters
+            move[cnt].cc0_256 = (UINT32)speed * FIX_POINT_SPEED;
+            move[cnt].a_256 = accel;
+            move[cnt].steps = rising_steps / microsteps;
+            move[cnt].amp = Tval_Current_to_Par(par->current_acc);
+            cnt++;
+        }
 		
 		// Set linear movement parameters 
 		if (linear_steps>CURRENT_OFFSET)
@@ -343,13 +354,16 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 			move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
 			cnt++;
 		}
-		
-		// Set falling ramp parameters
-		move[cnt].cc0_256 = min_speed;
-		move[cnt].a_256   = -accel;
-		move[cnt].steps   = falling_steps/microsteps;
-		move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
-		cnt++;
+
+        if (falling_steps >= microsteps)
+        {
+            // Set falling ramp parameters
+            move[cnt].cc0_256 = min_speed;
+            move[cnt].a_256 = -accel;
+            move[cnt].steps = falling_steps / microsteps;
+            move[cnt].amp = Tval_Current_to_Par(par->current_acc);
+            cnt++;
+        }
 
 		// Set acc current after move done
 		move[cnt].cc0_256 = 1;
@@ -373,18 +387,31 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		rising_steps  = (int)(steps / 2);
 		falling_steps = (int)(steps - (steps / 2));
 		min_speed = minSpeed*FIX_POINT_SPEED;
-		
-		// Set rising ramp parameters
-		move[0].cc0_256 = (UINT32)(v_max * FIX_POINT_SPEED);
-		move[0].a_256   = accel;
-		move[0].steps   = rising_steps/microsteps;
-		move[0].amp		= Tval_Current_to_Par(par->current_acc);
 
-		// Set falling ramp parameters
-		move[1].cc0_256 = min_speed;
-		move[1].a_256   = -accel;
-		move[1].steps   = falling_steps/microsteps;
-		move[1].amp		= Tval_Current_to_Par(par->current_acc);
+        // Motor already in position
+        if (rising_steps < microsteps && falling_steps < microsteps)
+        {
+            _motor_start_cnt[motor]--;
+            return 0;
+        }
+
+        if (rising_steps >= microsteps)
+        {
+            // Set rising ramp parameters
+            move[0].cc0_256 = (UINT32)(v_max * FIX_POINT_SPEED);
+            move[0].a_256 = accel;
+            move[0].steps = rising_steps / microsteps;
+            move[0].amp = Tval_Current_to_Par(par->current_acc);
+        }
+
+        if (falling_steps >= microsteps)
+        {
+            // Set falling ramp parameters
+            move[1].cc0_256 = min_speed;
+            move[1].a_256 = -accel;
+            move[1].steps = falling_steps / microsteps;
+            move[1].amp = Tval_Current_to_Par(par->current_acc);
+        }
 
 		// Set acc current after move done
 		move[2].cc0_256 = 1;

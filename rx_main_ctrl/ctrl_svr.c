@@ -964,7 +964,7 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 }
 
 //--- ctrl_send_purge_par ----------------------------------------------
-int ctrl_send_purge_par(int fluidNo, int time)
+int ctrl_send_purge_par(int fluidNo, int time, int position_check)
 {
 #define HEAD_WIDTH	43000
 	int head;
@@ -973,12 +973,12 @@ int ctrl_send_purge_par(int fluidNo, int time)
     SPurgePar par;
 	SHeadCfg *pcfg;
 	
-    if (RX_Config.stepper.wipe_speed)
+    if (RX_Config.stepper.wipe_speed && position_check)
         delay_pos_y = HEAD_WIDTH;
     else
         delay_pos_y = 0;
 
-    if (RX_StepperStatus.robot_used || time == 0)
+    if ((RX_StepperStatus.robot_used && position_check) || time == 0)
         delay_time = 0;
     else
         delay_time = 5000;

@@ -168,10 +168,18 @@ int robi_is_init(void)
     return _isInit;
 }
 
+//--- robi_in_ref ---------------------------------------------------------------
 int robi_in_ref(void)
 {
     return RX_RobiStatus.gpio.inputs & (1UL << Y_IN_REF);
 }
+
+//--- robi_screwer_in_ref --------------------------------------------------
+int robi_screwer_in_ref(void)
+{
+    return RX_RobiStatus.gpio.inputs & (1UL << SCREW_IN_REF);
+}
+
 
 //--- robi_stop ------------------------------------------------------------------------
 void robi_stop(void)
@@ -185,8 +193,8 @@ void robi_reference(void)
     send_command(MOTORS_DO_REFERENCE, 0, NULL);
 }
 
-//--- robi_move_x_relative_steps ---------------------------------------------------------
-void robi_move_x_relative_steps(INT32 steps)
+//--- robi_move_X_relative_steps ---------------------------------------------------------
+void robi_move_X_relative_steps(INT32 steps)
 {
     send_command(MOTOR_MOVE_X_RELATIVE, sizeof(steps), &steps);
 }

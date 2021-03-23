@@ -200,8 +200,6 @@
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge4Ever"
                                 Click="Purge4Ever_Clicked" x:Name="Button_Purge4Ever"/>
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Wipe" Click="Wipe_Clicked"
-                                x:Name="Button_Wipe"/>
                     </StackPanel>
                 </GroupBox>
             </Grid>

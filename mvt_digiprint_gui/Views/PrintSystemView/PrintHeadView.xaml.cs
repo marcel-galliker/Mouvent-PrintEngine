@@ -116,8 +116,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             visible = (RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
             Button_Purge4Ever.Visibility = visible;
 
-//          Button_Wipe.Visibility  = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
-
             //--- printer_test_table_seon -----------------------------------------------------------
             visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible   : Visibility.Collapsed;
             collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible;
