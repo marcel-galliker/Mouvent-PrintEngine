@@ -1487,7 +1487,8 @@ static void _calibrate_new_ScrewPos(void)
     if (_ScrewPar.axis == AXE_STITCH)
     {
         int distance = (robi_screw_count() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
-        for (int i = _ScrewPar.head + 1; i < RX_StepperCfg.headsPerColor; i++)
+        int i;
+        for (i = _ScrewPar.head + 1; i < RX_StepperCfg.headsPerColor; i++)
         {
             _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_ANGLE].y += distance;
             if (i != RX_StepperCfg.headsPerColor - 1)
