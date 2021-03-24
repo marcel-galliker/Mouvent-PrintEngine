@@ -678,21 +678,21 @@ static void _control(int fluidNo)
                 case ctrl_purge_hard_wash:
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		
-                case ctrl_purge4ever:		if (lbrob && even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever)
+                case ctrl_purge4ever:		_PurgeCtrlMode = pstat->ctrlMode;
+											if (lbrob && even_number_of_colors && _PurgeCtrlMode == ctrl_purge4ever)
 											{
                                                 if (!steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever))
 													steplb_rob_to_fct_pos(no / 2, rob_fct_purge4ever);
 											}
-											else if (lbrob && !even_number_of_colors && pstat->ctrlMode == ctrl_purge4ever) 
+											else if (lbrob && !even_number_of_colors && _PurgeCtrlMode == ctrl_purge4ever) 
                                             {
                                                 if (!steplb_rob_in_fct_pos((no +1) / 2, rob_fct_purge4ever))
 													steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_purge4ever);
                                             }
-											else if (lbrob && even_number_of_colors) steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
-											else if (lbrob && !even_number_of_colors) steplb_rob_to_fct_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
-											else	   step_lift_to_top_pos();
+											else if (lbrob && even_number_of_colors && _PurgeCtrlMode != ctrl_purge_hard_wash) steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
+											else if (lbrob && !even_number_of_colors && _PurgeCtrlMode != ctrl_purge_hard_wash) steplb_rob_to_fct_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
+											else if (!(_PurgeCtrlMode == ctrl_purge_hard_wash && lbrob))	   step_lift_to_top_pos();
 
-                                            _PurgeCtrlMode = pstat->ctrlMode;
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
                                             int time = (RX_Config.printer.type==printer_TX802 || RX_Config.printer.type == printer_TX404)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
 											if (pstat->purge_putty_ON) time=0;
@@ -813,7 +813,7 @@ static void _control(int fluidNo)
 												else													_Flushed &= ~(0x01<<no);
 												setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);				
 											}
-                                            if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
+                                            if ((!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) || RX_StepperStatus.robot_used) step_empty_waste(0);
 
 											if (_txrob && _PurgeFluidNo < 0) 
 											{
@@ -850,7 +850,6 @@ static void _control(int fluidNo)
 												{
 	                                                _send_ctrlMode(-1, _EndCtrlMode[no], TRUE);
 													_PurgeCtrlMode = ctrl_undef;
-													if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
                                                 }											
                                             }
 											else 
@@ -1152,8 +1151,6 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 		    ctrlMode = ctrl_purge_hard_wash;
 		}
     }
-    
-
 
     if ((RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.info.ref_done) &&
         ctrlMode == ctrl_print && (rx_def_is_scanning(RX_Config.printer.type) || (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.robot_used)))

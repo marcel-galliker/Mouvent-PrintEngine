@@ -968,6 +968,7 @@ int ctrl_send_purge_par(int fluidNo, int time, int position_check)
 {
 #define HEAD_WIDTH	43000
 	int head;
+    int number_of_heads = RX_Config.headsPerColor * RX_Config.colorCnt;
     int delay_pos_y;
     int delay_time;
     SPurgePar par;
@@ -983,18 +984,26 @@ int ctrl_send_purge_par(int fluidNo, int time, int position_check)
     else
         delay_time = 5000;
 
-
     int timeTotal = 0;
     par.delay_pos_y = 0;
     par.delay_time = 0;
     par.time  = time;
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
-		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
+        if (RX_StepperStatus.robot_used && !position_check && head < number_of_heads)
+            pcfg = &RX_Config.headBoard[(number_of_heads - 1 - head)/MAX_HEADS_BOARD].head[(number_of_heads- 1 - head)%MAX_HEADS_BOARD];
+        else
+			pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
 		if (pcfg->enabled && pcfg->inkSupply==fluidNo)
 		{
-			par.no = head%HEAD_CNT;
-			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+            if (RX_StepperStatus.robot_used && !position_check && head < number_of_heads)
+                par.no = (number_of_heads - 1 - head)%MAX_HEADS_BOARD;
+            else
+				par.no = head%HEAD_CNT;
+            if (RX_StepperStatus.robot_used && !position_check && head < number_of_heads)
+                sok_send_2(&_HeadCtrl[(number_of_heads - 1 - head)/MAX_HEADS_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+            else
+				sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
             if (delay_pos_y)
             {
                 timeTotal = par.time;
