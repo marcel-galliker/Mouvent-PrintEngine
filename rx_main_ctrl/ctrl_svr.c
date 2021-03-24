@@ -389,7 +389,7 @@ void ctrl_set_max_speed(void)
 				len += sprintf(&str[len], " %d", RX_Config.inkSupply[color].ink.maxSpeed[n]);
 				if (RX_Config.inkSupply[color].ink.maxSpeed[n] && RX_Config.inkSupply[color].ink.maxSpeed[n] < inkSpeed[n]) inkSpeed[n] = RX_Config.inkSupply[color].ink.maxSpeed[n];
 			}
-			TrPrintfL(TRUE, "Waveform[%s].maxSpeed:%s m/s", RX_Config.inkSupply[color].ink.name, str);
+			TrPrintfL(TRUE, "Waveform[%s].maxSpeed:%s m/min", RX_Config.inkSupply[color].ink.name, str);
 		}
 	}
 
@@ -423,9 +423,9 @@ void ctrl_set_max_speed(void)
 	
 	for (n=0; n<MAX_DROP_SIZES; n++)
 	{
-		if(inkSpeed[n]) RX_PrinterStatus.maxSpeed[n] = (int) (0.95*inkSpeed[n]); // for safety
-		else			RX_PrinterStatus.maxSpeed[n] = 30;
-		if ((int)RX_PrinterStatus.maxSpeed[n]>maxSpeed[n]) RX_PrinterStatus.maxSpeed[n]=maxSpeed[n];				
+		// do not limit the maxSpeed regarding the inkSpeed, as it is done in the GUI
+		// depeding on inks used in the job
+		RX_PrinterStatus.maxSpeed[n] = maxSpeed[n];				
 	}
 	
 	TrPrintfL(TRUE, "ctrl_set_max_speed speed=%d %d %d %d, hostname=>>%s<<, analogenc=%d", 

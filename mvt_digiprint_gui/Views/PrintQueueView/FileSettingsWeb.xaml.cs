@@ -60,7 +60,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 // Limit length selection to "Copies" for VDP jobs
                 LengthUnit.Visibility = item.Variable ? Visibility.Collapsed : Visibility.Visible;
 
-                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.SrcHeight);
+                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.getInk(), item.SrcHeight);
                 if (!item.Variable && item.SrcPages > 1)
                 {
                     Length_Settings.Visibility = Visibility.Collapsed;

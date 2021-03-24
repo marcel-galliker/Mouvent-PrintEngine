@@ -16,7 +16,7 @@ namespace RX_DigiPrint.Models.Enums
         private int _MaxSpeed = 0;
         private const double TX801_MIN_HEIGHT = 1000;
 
-        public EN_SpeedList(UInt32 maxSpeed, double imgHeight)
+        public EN_SpeedList(Int32 maxSpeed, double imgHeight)
         {
             if (maxSpeed!=_MaxSpeed) 
             {

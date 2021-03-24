@@ -11,6 +11,7 @@ using System.Threading;
 using System.Windows.Media;
 using System.Xml;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace RX_DigiPrint.Models
 {
@@ -742,6 +743,33 @@ namespace RX_DigiPrint.Models
         {
             FieldValue[] value = tif.GetField(tag);
             return value[0].ToInt();
+        }
+
+         //--- getInk ------------------------------------
+         /// <summary>
+         /// retreive the inks use by the job (depeding on the existing color files in the folder)
+         /// </summary>
+         /// <returns>List of InkSupply that have a color file</returns>
+        public ObservableCollection<InkSupply> getInk()
+        {
+            ObservableCollection<InkSupply> inks = new ObservableCollection<InkSupply>();
+            string filePath = Dir.local_path(FilePath);
+            string fileName = Path.GetFileName(filePath);
+            foreach (InkSupply ink in RxGlobals.InkSupply.List) 
+            {
+                try
+                {
+                    if (ink.InkType != null && Directory.GetFiles(filePath, fileName + "_" + InkType.ColorNameShort(ink.InkType.ColorCode) + ".*").Length > 0)
+                    {
+                        inks.Add(ink);
+                    }
+                }
+                catch (Exception e)
+                {
+                    RxGlobals.Events.AddItem(new LogItem("Could not find '{1}' in '{0}' \n{2}", filePath, fileName + "_" + InkType.ColorNameShort(ink.InkType.ColorCode) + ".*", e) { LogType = ELogType.eErrWarn });
+                }
+            }
+            return inks;
         }
 
         //--- read_image_properties ------------------------------------

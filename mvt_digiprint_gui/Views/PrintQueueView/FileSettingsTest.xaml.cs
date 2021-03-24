@@ -68,7 +68,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else if (!RxGlobals.PrintSystem.IsScanning)
             {
-                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(1, 2000);
+                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(1, RxGlobals.InkSupply.List, 2000);
                 MarginRow.Height = new GridLength(0);
                 MarginIsShown = false;
                 if (init)
@@ -79,7 +79,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
             else
             {
-                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(1, 2000);
+                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(1, RxGlobals.InkSupply.List, 2000);
                 if (init)
                 {
                     _Item.Speed = EN_SpeedList.DefaultValue;

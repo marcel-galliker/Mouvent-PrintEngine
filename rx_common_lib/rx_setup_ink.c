@@ -136,7 +136,7 @@ static void	_calc_maxFreq(SInkDefinition *pink)
 	for (i=0; i<SIZEOF(pink->wf); i++)
 	{
 		if(trace) printf("%03d: %03d  %03d", i, pink->wf[i].pos, pink->wf[i].volt);
-		if (pink->wf[i].volt==0 && pink->wf[i+1].volt>0) 
+		if (i+1 < SIZEOF(pink->wf) && pink->wf[i].volt == 0 && pink->wf[i + 1].volt > 0) 
 		{
 			if(trace) printf("   >>>");
 			start[droplet++]=pink->wf[i].pos*140/160;

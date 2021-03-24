@@ -24,6 +24,7 @@ namespace RX_DigiPrint.Models
             Name        = msg.name;
             ColorCode   = msg.colorCode; 
             Description = msg.description;
+            MaxSpeed = msg.maxSpeed;
             CanFlush    = msg.flushTime[0]!=0 || msg.flushTime[1]!=0 || msg.flushTime[2]!=0;
             Color=new Color(){R=msg.r, G=msg.g, B=msg.b, A=255};
             Temp = (double)msg.temp * 1000.0;
@@ -32,6 +33,8 @@ namespace RX_DigiPrint.Models
             int i;
             for (i=0; i<msg.printingSpeed.Length; i++) _PrintingSpeed[i] = msg.printingSpeed[i];
         }
+
+        public Int32[] MaxSpeed  { get; set; }
 
         //--- Property FileName ---------------------------------------
         private string _FileName;

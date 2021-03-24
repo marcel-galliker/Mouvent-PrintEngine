@@ -463,8 +463,6 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 	double mmin = khz*25.4/1200.0*60.0;
 //	TrPrintfL(TRUE, "Head[%d]: dots: >>%s<< sub-pulses: %d, seq-length: %d, max Speed; %d m/min", head, dots, cfg->fp_subPulses, cfg->fp_length, (int)mmin);
 	TrPrintfL(TRUE, "Head[%d]: dots: >>%s<<, max Speed=%d m/min", head, dots, (int)mmin);
-	if (RX_HBConfig.ctrlAddr == sok_addr_32("192.168.200.11") && head==0) 
-		Error(LOG, 0, "Head[%d]: dots: >>%s<<, max Speed=%d m/min", head, dots, (int)mmin);
 	
 	if (mmin>_MaxSpeed) _MaxSpeed = mmin;
 	

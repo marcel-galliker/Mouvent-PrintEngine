@@ -79,7 +79,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 SpeedUnit.Text     = new CUnit("m/min").Name;
                 MarginUnit.Text    = DistUnit.Text = new CUnit("mm").Name;
 
-                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.SrcHeight);
+                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, RxGlobals.InkSupply.List, item.SrcHeight);
                 CB_Passes.IsEnabled  = item.PenetrationPasses<2;
                 if(item.SrcPages>1)
                 {

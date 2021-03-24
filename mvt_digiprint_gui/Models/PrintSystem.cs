@@ -58,19 +58,25 @@ namespace RX_DigiPrint.Models
             get { return new EN_EncoderTypeList(); }
         }
 
-        //--- SpeedList ---------------------------------------------
-        /*
-        private List<EN_SpeedList> _SpeedList;
-        public List<EN_SpeedList> SpeedList
+        //--- EN_SpeedList ---------------------------------------------
+        /// <summary>
+        /// Possible speeds in m/min for a job depending on the MaxSpeed of wafeform
+        /// </summary>
+        /// <param name="dropSize">dropSize of the job</param>
+        /// <param name="inks">list of inks in the jobs (or all inks)</param>
+        /// <param name="imgHeight">size of the image in mm (not used)</param>
+        /// <returns>A list of possible speed each 5 m/min</returns>
+        public EN_SpeedList SpeedList(int dropSize, ObservableCollection<InkSupply> inks, double imgHeight)
         {
-            set { SetProperty(ref _SpeedList, value); }
-            get { return _SpeedList; }
-        }
-        */
+            int maxSpeed = (int)RxGlobals.PrinterStatus.MaxSpeed(dropSize);
+            // Compute the maximun speed regarding the active inkSupply
+            foreach (InkSupply ink in inks)
+            {
+                if (ink.InkType?.MaxSpeed?[dropSize]>0 && maxSpeed > 0.95 * ink.InkType.MaxSpeed[dropSize])
+                        maxSpeed = (int) (0.95 * ink.InkType.MaxSpeed[dropSize]); // 95% for security
+            } 
 
-        public EN_SpeedList SpeedList(int dropSize, double imgHeight)
-        {
-            return new EN_SpeedList(RxGlobals.PrinterStatus.MaxSpeed(dropSize), imgHeight);
+            return new EN_SpeedList(maxSpeed, imgHeight);
         }
 
         //--- Property IsScanning ---------------------------------------

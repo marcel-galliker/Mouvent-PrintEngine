@@ -772,7 +772,7 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
 	        public Int32[]	flushTime;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-	        Int32[]	maxFreq;
+	        public Int32[]	maxSpeed;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
 	        byte[]	greyLevel;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
