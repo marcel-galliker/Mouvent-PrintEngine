@@ -34,8 +34,6 @@
 /******************************************************************************/
 /* Local function prototypes ('static')                                       */
 /******************************************************************************/
-static void Iomux_ADC0_Init(void);
-
 static void Iomux_GPIO_Init(void);
 
 static void Iomux_DEBUG_Init(void);
@@ -58,17 +56,6 @@ static void Iomux_MFS0_UART_Init(void);
 /* Function implementation - global ('extern') and local ('static')          */
 /*****************************************************************************/
 
-
-/**
- *****************************************************************************
- ** \brief This function initializes ADC0
- **
- *****************************************************************************/
-static void Iomux_ADC0_Init(void)
-{
-	// Init ADC0 pin function
-	SetPinFunc_AN02();    // Set ADC analog input pin
-}
 
 /**
  *****************************************************************************
@@ -382,12 +369,11 @@ void Iomux_Init(void)
 	Iomux_DAC_Init();
 
 	Iomux_GPIO_Init();
-
-	//Iomux_BT_Init(); //only used for debug, else 	toogle_watchdog(watchdog); used !
+//	Iomux_BT_Init(); //only used for debug, else 	toogle_watchdog(watchdog); used !
 	Iomux_MFS2_I2C_Init();	
 	Iomux_MFS3_I2C_Init();	
 	Iomux_MFS0_UART_Init();	
-	Iomux_ADC0_Init();	
+//	Iomux_ADC0_Init();	// is done in temp_init
 }
 
 //@} // IomuxGroup
