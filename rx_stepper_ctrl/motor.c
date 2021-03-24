@@ -311,6 +311,13 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		
 		// Dividing by encoder step to morot step ratio if we drive to a target position based on the encoder
 		min_speed = minSpeed * FIX_POINT_SPEED;
+        
+        // Motor already in position
+        if (rising_steps < microsteps && linear_steps < CURRENT_OFFSET && falling_steps < microsteps)
+        {
+            _motor_start_cnt[motor]--;
+            return 0;
+        }
 		
 		cnt=0;
         if (rising_steps >= microsteps)
