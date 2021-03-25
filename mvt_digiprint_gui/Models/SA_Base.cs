@@ -222,7 +222,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- WebMove ----------------------------------
-		public const int WebSpeed = 5;	// [m/min]
+		public const int WebSpeed = 2;	// [m/min]
 		private int _WebMoveStartCnt=-1;
 		public void WebMove(double? dist=null)
 		{
