@@ -178,7 +178,7 @@ void robi_lb702_main(int ticks, int menu)
     }
 
     _check_robi_stalled();
-    _check_Screwer_Movement();
+    //_check_Screwer_Movement();
     _screwer_counter();
 
     if (!robi_move_done())
@@ -262,33 +262,23 @@ void robi_lb702_main(int ticks, int menu)
             _CmdRunning = 0;
             break;
 
-        case CMD_ROBI_SCREW_RIGHT:
+        case CMD_ROBI_SCREW_LOOSE:
             if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
                 RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
-                RX_StepperStatus.screwerinfo.screw_in_0 = TRUE;
             }
-            else if (RX_StepperStatus.screw_posY < (SCREW_Y_ANGLE + SCREW_Y_STITCH) / 2)
-                RX_StepperStatus.screwerinfo.screw_tight = TRUE;
-            else if (RX_StepperStatus.screw_posY > (SCREW_Y_ANGLE + SCREW_Y_STITCH) / 2)
-                RX_StepperStatus.screwerinfo.screw_loosed = TRUE;
             _CmdRunning = 0;
             break;
-            
-        case CMD_ROBI_SCREW_LEFT:
+
+        case CMD_ROBI_SCREW_TIGHT:
             if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
                 _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
                 RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
-                RX_StepperStatus.screwerinfo.screw_in_0 = TRUE;
             }
-            else if (RX_StepperStatus.screw_posY > (SCREW_Y_ANGLE + SCREW_Y_STITCH) / 2)
-                RX_StepperStatus.screwerinfo.screw_tight = TRUE;
-            else if (RX_StepperStatus.screw_posY < (SCREW_Y_ANGLE + SCREW_Y_STITCH) / 2)
-                RX_StepperStatus.screwerinfo.screw_loosed = TRUE;
             _CmdRunning = 0;
             break;
 
@@ -724,10 +714,12 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             robi_turn_screw_relative(steps);
         }
         break;
-        
-    case CMD_ROBI_SCREW_LEFT:
+
+    case CMD_ROBI_SCREW_TIGHT:
         if (!_CmdRunning)
         {
+            if (RX_StepperStatus.screwerinfo.screwer_blocked_right)
+                robi_set_screw_current(TRUE);
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
             _CmdRunning = msgId;
@@ -738,9 +730,11 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         }
         break;
 
-    case CMD_ROBI_SCREW_RIGHT:
+    case CMD_ROBI_SCREW_LOOSE:
         if (!_CmdRunning)
         {
+            if (RX_StepperStatus.screwerinfo.screwer_blocked_left)
+                robi_set_screw_current(TRUE);
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
             _CmdRunning = msgId;
@@ -974,14 +968,14 @@ static void _check_Screwer_Movement()
 //--- _check_robi_stalled -----------------------------------------------------------
 static void _check_robi_stalled(void)
 {
-    if ((_CmdRunning == CMD_ROBI_SCREW_LEFT || _CmdRunning == CMD_ROBI_SCREW_RIGHT) && RX_RobiStatus.screwCurrent == 0 && robi_screwer_stalled())
+    if ((_CmdRunning == CMD_ROBI_SCREW_TIGHT || _CmdRunning == CMD_ROBI_SCREW_LOOSE) && RX_RobiStatus.screwCurrent == 0 && robi_screwer_stalled())
     {
-        RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_LEFT;
-        RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_RIGHT;
-        if (_CmdRunning == CMD_ROBI_SCREW_LEFT)
-            _BlockedCmd = CMD_ROBI_SCREW_RIGHT;
-        else if (_CmdRunning == CMD_ROBI_SCREW_RIGHT)
-            _BlockedCmd = CMD_ROBI_SCREW_LEFT;
+        RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_TIGHT;
+        RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_LOOSE;
+        if (_CmdRunning == CMD_ROBI_SCREW_TIGHT)
+            _BlockedCmd = CMD_ROBI_SCREW_LOOSE;
+        else if (_CmdRunning == CMD_ROBI_SCREW_LOOSE)
+            _BlockedCmd = CMD_ROBI_SCREW_TIGHT;
     }
     
     int printhead = (2 * RX_StepperCfg.boardNo) + (RX_StepperStatus.screw_posX > (SCREW_X_LEFT + SCREW_X_RIGHT) / 2) + 1;
@@ -996,11 +990,11 @@ static void _check_robi_stalled(void)
 static void _screwer_counter(void)
 {
     static int _OldSensorState = 0;
-    if (_CmdRunning == CMD_ROBI_SCREW_LEFT && !_OldSensorState && robi_screwer_in_ref())
+    if (_CmdRunning == CMD_ROBI_SCREW_TIGHT && !_OldSensorState && robi_screwer_in_ref())
     {
         _RobiSteps++;
     }
-    if (_CmdRunning == CMD_ROBI_SCREW_RIGHT && !_OldSensorState && robi_screwer_in_ref())
+    if (_CmdRunning == CMD_ROBI_SCREW_LOOSE && !_OldSensorState && robi_screwer_in_ref())
     {
         _RobiSteps--;
     }
@@ -1018,12 +1012,8 @@ static void _set_moving_variables(void)
     RX_StepperStatus.screwerinfo.x_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
-    RX_StepperStatus.screwerinfo.screw_tight = FALSE;
     RX_StepperStatus.screwerinfo.wipe_left_up = FALSE;
     RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
-    
-    if (_CmdRunning != CMD_ROBI_SCREW_STEPS) RX_StepperStatus.screwerinfo.screw_loosed = FALSE;
-    if (_CmdRunning != CMD_ROBI_MOVE_Z_DOWN) RX_StepperStatus.screwerinfo.screw_in_0 = FALSE;
 }
 
 int robi_lb702_screw_correction(void)

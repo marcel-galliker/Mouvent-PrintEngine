@@ -730,11 +730,11 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
         case ctrl_vacuum_step2:     if (_Status[no].robinfo.vacuum_done)
                                     {
                                         _RobotCtrlMode[no] = ctrl_vacuum_step3;
-                                        _steplb_rob_do_reference(no);
+                                        steplb_rob_to_fct_pos(no, rob_fct_cap);
                                     }
                                     break;
                                     
-        case ctrl_vacuum_step3:		if (_Status[no].info.x_in_ref) _RobotCtrlMode[no] = ctrl_vacuum_step4;
+        case ctrl_vacuum_step3:		if (steplb_rob_in_fct_pos(no, rob_fct_cap)) _RobotCtrlMode[no] = ctrl_vacuum_step4;
 									break;
                                     
         case ctrl_vacuum_step4:		 _RobotCtrlMode[no] = ctrl_off;
