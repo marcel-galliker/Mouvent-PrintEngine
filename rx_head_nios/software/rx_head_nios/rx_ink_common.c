@@ -225,10 +225,12 @@ int str_to_screw(const char *str)
 {
 	int val=0;
 	int nachkomma=0;
-	const char *ch;
-	for (ch=str; *ch; ch++)
+    int sign = 1;
+    const char *ch;
+    if (str[0] == '-') sign = -1;
+    for (ch=str; *ch; ch++)
 	{
-		if (*ch>='0' && *ch<='9') val=(val*10)+*ch-'0';
+        if (*ch>='0' && *ch<='9') val=(val*10)+*ch-'0';
 		if (*ch=='.' || *ch==',') 
 		{
 			ch++;
@@ -237,7 +239,7 @@ int str_to_screw(const char *str)
 		}
 	}
 	if (nachkomma>5) nachkomma=5;
-	return 6*val+nachkomma;
+	return sign * (6*val+nachkomma);
 }
 //--- value_str3 ---------------------------------------------
 char *value_str3(int val)

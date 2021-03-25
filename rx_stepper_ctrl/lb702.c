@@ -369,9 +369,9 @@ static void _lb702_handle_menu(char *str)
 		case 'z': _lb702_motor_z_test(atoi(&str[1]));break;
         case 'a': RX_StepperStatus.robinfo.auto_cap = !RX_StepperStatus.robinfo.auto_cap;
 		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
-        case 'l': _lift = !_lift;
-        case 'C': _rob = !_rob;
-        case 'A': _robi = !_robi;
+        case 'L': _lift = !_lift; break;
+        case 'C': _rob = !_rob; break;
+        case 'A': _robi = !_robi; break;
 		}
 	}			
 }

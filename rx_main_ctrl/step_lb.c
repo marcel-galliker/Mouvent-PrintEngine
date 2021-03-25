@@ -62,6 +62,7 @@ static void _check_screwer(void);
 static void _check_fluid_back_pump(void);
 static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no);
 static int  _rob_get_printbar(int rob, int printbar);
+static int  _set_screw_pos(int stepperNo);
 
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET socket)
@@ -203,18 +204,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         {
             if (_Status[i].robot_used && !oldStatus[i].robot_used)
             {
-                SScrewPositions pos;
-                setup_screw_positions(PATH_USER FILENAME_SCREW_POS , no, &pos, READ);
-                for (int printbar=0; printbar<2; printbar++)
-                {
-                    for (int head=0; head<RX_Config.headsPerColor; head++)
-                    {
-                        int no=_rob_get_printbar(i, printbar)*RX_Config.headsPerColor+head;
-                        pos.printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
-                        pos.printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
-                    }
-                }
-                sok_send_2(&_step_socket[i], CMD_SET_SCREW_POS, sizeof(pos), &pos);
+                _set_screw_pos(i);
             }
 
             info.ref_done &= _Status[i].info.ref_done;
@@ -312,6 +302,23 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         _check_fluid_back_pump();
     }
     return REPLY_OK;
+}
+
+//--- _set_screw_pos -----------------------------------------
+static int _set_screw_pos(int stepperNo)
+{
+    SScrewPositions pos;
+    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, stepperNo, &pos, READ);
+    for (int printbar=0; printbar<2; printbar++)
+    {
+        for (int head=0; head<RX_Config.headsPerColor; head++)
+        {
+            int no = _rob_get_printbar(stepperNo, printbar)*RX_Config.headsPerColor+head;
+            pos.printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
+            pos.printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
+        }
+    }
+    sok_send_2(&_step_socket[stepperNo], CMD_SET_SCREW_POS, sizeof(pos), &pos);
 }
 
 //--- steplb_set_ScrewPos -----------------------------------------
@@ -800,6 +807,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     
     if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw))
     {
+        _set_screw_pos(stepperno);
         _HeadAdjustment[stepperno] = *headAdjustment;
         if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
             headAdjustment->printbarNo %= 2;

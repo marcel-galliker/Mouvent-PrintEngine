@@ -266,7 +266,6 @@ void robi_lb702_main(int ticks, int menu)
             if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
-                _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
                 RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
             }
             _CmdRunning = 0;
@@ -276,7 +275,6 @@ void robi_lb702_main(int ticks, int menu)
             if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
-                _NewCmd = CMD_ROBI_MOVE_Z_DOWN;
                 RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             }
             _CmdRunning = 0;
@@ -716,14 +714,14 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_SCREW_TIGHT:
-        if (!_CmdRunning)
+        ticks = *((INT32 *)pdata);
+        if (!_CmdRunning && ticks)
         {
             if (RX_StepperStatus.screwerinfo.screwer_blocked_right)
                 robi_set_screw_current(TRUE);
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
             _CmdRunning = msgId;
-            ticks = *((INT32 *)pdata);
             robi_turn_screw_left(ticks);
             _TurnDirection = TURN_LEFT;
             break; 
@@ -731,14 +729,14 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_SCREW_LOOSE:
-        if (!_CmdRunning)
+        ticks = *((INT32 *)pdata);
+        if (!_CmdRunning && ticks)
         {
             if (RX_StepperStatus.screwerinfo.screwer_blocked_left)
                 robi_set_screw_current(TRUE);
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
             _CmdRunning = msgId;
-            ticks = *((INT32 *)pdata);
             robi_turn_screw_right(ticks);
             _TurnDirection = TURN_RIGHT;
             break; 

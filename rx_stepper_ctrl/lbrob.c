@@ -96,7 +96,8 @@
 
 #define MAX_STEPS_STITCH    (30 * 6)  // 30 turns with 6 steps each turn
 #define MAX_STEPS_ANGLE     (18 * 6)  // 15 turns with 6 steps each turn
-#define OVERTURN            (2*6)     // 2 turns  
+#define OVERTURN            (2*6)     // 2 turns
+#define LOOSE_TURN          (6/2)     // half turn for reserve, that the mechanical end should never be reached anymore
 
 #define MAX_VAR_SCREW_POS       2000        // um
 
@@ -537,6 +538,8 @@ void lbrob_main(int ticks, int menu)
             case CMD_ROB_MOVE_POS:
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_RobFunction);
                 break;
+            case CMD_ROB_FILL_CAP:
+                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_RobFunction);
             default:
                 Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", loc_new_cmd);
                 break;
@@ -725,7 +728,11 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_SEARCH_ALL_SCREWS, NULL);
         break;
     case 'z':
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, NULL);
+        if (str[1] == 'r')
+            val = 1;
+        else
+            val = 0;
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, &val);
         break;
     case 'a':
         switch (str[1])
@@ -793,7 +800,11 @@ static void _lbrob_move_to_pos(int cmd, int pos, int wipe_state)
         motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, pos);
     }
     else if (_CapIsWet && !moving_forward)
+    {
+        _vacuum_on();
         motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, pos);
+    }
+        
     else
         motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, pos);
 }
@@ -819,13 +830,8 @@ static void _lbrob_do_reference()
         RX_StepperStatus.robinfo.ref_done = FALSE;
         motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
     }
-	else if (_CmdRunning_old == CMD_ROB_MOVE_POS && _RobFunction >= rob_fct_screw_cluster && _RobFunction <= rob_fct_screw_head7)
-		motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(3000));
-    else
-    {
-        _vacuum_on();
+	else
         motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, _micron_2_steps(3000));
-    }        
 }
 
 //--- lbrob_handle_ctrl_msg -----------------------------------
@@ -1013,9 +1019,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
         
     case CMD_RESET_ALL_SCREWS:
+        val = (*(INT32 *)pdata);
         Error(WARN, 0, "CMD_RESET_ALL_SCREWS Starting at printbar 1");
         _ScrewFunction = CMD_RESET_ALL_SCREWS;
-        _ScrewPar.printbar=0;
+        _ScrewPar.printbar=val;
         _ScrewPar.head=-1;
         _ScrewPar.axis=AXE_STITCH;
         _ScrewPar.steps=0;
@@ -1240,23 +1247,26 @@ static void _rob_state_machine(void)
                 Error(ERR_CONT, 0, "Screw (printbar=%d, head=%d, axis=%d) does not exist", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
                 return;
             }
-
-            // adjustment range check             
-            if (_turns+_ScrewPar.steps<0)
+            if (_ScrewFunction == CMD_HEAD_ADJUST)
             {
-                _ScrewPar.steps = -_turns;
-                Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
+                // adjustment range check             
+                if (_turns+_ScrewPar.steps>0)
+                {
+                    _ScrewPar.steps = -_turns;
+                    Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
+                }
+                else if (_ScrewPar.axis==AXE_ANGLE && _ScrewPar.steps>MAX_STEPS_ANGLE-OVERTURN)
+                {
+                    _ScrewPar.steps = MAX_STEPS_ANGLE-OVERTURN-_turns;
+                    Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
+                }
+                else if (_ScrewPar.axis==AXE_STITCH && _ScrewPar.steps>MAX_STEPS_STITCH-OVERTURN)
+                {
+                    _ScrewPar.steps = MAX_STEPS_STITCH-OVERTURN-_turns;
+                    Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
+                }
             }
-            else if (_ScrewPar.axis==AXE_ANGLE && _ScrewPar.steps>MAX_STEPS_ANGLE-OVERTURN)
-            {
-                _ScrewPar.steps = MAX_STEPS_ANGLE-OVERTURN-_turns;
-                Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
-            }
-            else if (_ScrewPar.axis==AXE_STITCH && _ScrewPar.steps>MAX_STEPS_STITCH-OVERTURN)
-            {
-                _ScrewPar.steps = MAX_STEPS_STITCH-OVERTURN-_turns;
-                Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
-            }
+            
             // no break here!
 
        case 1:  // move slide 
@@ -1269,7 +1279,7 @@ static void _rob_state_machine(void)
             // no break here!
 
         case 2: // move rob to y (move robi and slide simultanious)
-            if (RX_StepperStatus.robinfo.ref_done)
+            if (!RX_StepperStatus.screwerinfo.moving && RX_StepperStatus.robinfo.ref_done && (RX_StepperStatus.info.z_in_screw || RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_wash || RX_StepperStatus.info.z_in_cap))
             {
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y(%d)", _pos.y);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_pos.y);
@@ -1368,8 +1378,8 @@ static void _rob_state_machine(void)
 
         case 101:
             // turn left to middle + 2 turns
-            if (_ScrewPar.axis==AXE_ANGLE) pos = MAX_STEPS_ANGLE/2  + OVERTURN;
-            else                           pos = MAX_STEPS_STITCH/2 + OVERTURN;
+            if (_ScrewPar.axis==AXE_ANGLE) pos = MAX_STEPS_ANGLE/2  + OVERTURN + LOOSE_TURN;
+            else                           pos = MAX_STEPS_STITCH/2 + OVERTURN + LOOSE_TURN;
             robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LOOSE, &pos);
             _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME_SCREW;
             _RobStateMachine_Step++;
@@ -1394,27 +1404,65 @@ static void _rob_state_machine(void)
 
         //--- CMD_HEAD_ADJUST ------------------------------------------
         case 200:
-            if (_ScrewPar.steps > 0)
+            if (_ScrewPar.steps < 0)
             {
-                pos = _ScrewPar.steps + 2*6;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_TIGHT, &pos);
+                pos = abs(_ScrewPar.steps - 2*6);
+                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LOOSE, &pos);
             }
+            _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME_SCREW;
             _RobStateMachine_Step++;
             break;
 
         case 201:
-            if (_ScrewPar.steps > 0) pos = 2*6; 
+            if (_ScrewPar.steps < 0) pos = 2*6; 
             else                     pos = _ScrewPar.steps;
-            robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LOOSE, &pos);
+            robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_TIGHT, &pos);
             _RobStateMachine_Step++;
+            _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME_SCREW;
             break;
-
+            
         case 202:
-            if (_ScrewPar.head<0) _ScrewPos.printbar[_ScrewPar.printbar].stitch.turns += _ScrewPar.steps;
+            if (_ScrewPar.head<0 && RX_StepperStatus.screwerinfo.screwer_blocked_left)
+                _ScrewPos.printbar[_ScrewPar.printbar].stitch.turns = 0;
+            else if (_ScrewPar.head<0 && RX_StepperStatus.screwerinfo.screwer_blocked_right)
+                _ScrewPos.printbar[_ScrewPar.printbar].stitch.turns = MAX_STEPS_STITCH;
+            else if (_ScrewPar.head<0) _ScrewPos.printbar[_ScrewPar.printbar].stitch.turns += _ScrewPar.steps;
+            else if (RX_StepperStatus.screwerinfo.screwer_blocked_left)
+                _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].turns = 0;
+            else if (RX_StepperStatus.screwerinfo.screwer_blocked_right && _ScrewPar.axis == AXE_ANGLE)
+                _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].turns = -MAX_STEPS_ANGLE;
+            else if (RX_StepperStatus.screwerinfo.screwer_blocked_left && _ScrewPar.axis == AXE_STITCH)
+                _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_STITCH].turns = -MAX_STEPS_STITCH;
             else if (_ScrewPar.axis==AXE_ANGLE) _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].turns += _ScrewPar.steps;
             else _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_STITCH].turns += _ScrewPar.steps;
             _save_ScrewPos(TRUE);
-            _RobStateMachine_Step=0; // wait for next command
+            
+            if (!RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right)
+            {
+                _ScrewTime = 0;
+                _RobStateMachine_Step = 0; // wait for next command
+                RX_StepperStatus.screw_count++;
+            }
+            else
+            {
+                if (RX_StepperStatus.screwerinfo.screwer_blocked_left)
+                {
+                    pos = LOOSE_TURN;
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_LOOSE, &pos);
+                }
+                else
+                {
+                    pos = OVERTURN + LOOSE_TURN;
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_TIGHT, &pos);
+                }
+                _RobStateMachine_Step++;    
+            }
+            break;
+            
+        case 203:
+            _ScrewTime = 0;
+            _RobStateMachine_Step = 0; // wait for next command
+            RX_StepperStatus.screw_count++;
             break;
 
         //--------------- next screw ---------------

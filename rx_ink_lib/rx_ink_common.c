@@ -216,7 +216,8 @@ char *value_str_screw(INT16 val)
 //	if (val<=0)	strcpy(str, "----");
 //	else		sprintf(str, "%02d.%d", val/6, val%6);
 	if (val==(INT16)INVALID_VALUE) strcpy(str, "-----");
-	else					sprintf(str, "%02d.%d", val/6, abs(val)%6);
+    else if (val > -6 && val < 0) sprintf(str, "-%02d.%d", val / 6, abs(val) % 6);
+	else sprintf(str, "%02d.%d", val / 6, abs(val) % 6);
 	return str;
 }
 
@@ -225,10 +226,12 @@ int str_to_screw(const char *str)
 {
 	int val=0;
 	int nachkomma=0;
-	const char *ch;
-	for (ch=str; *ch; ch++)
+    int sign = 1;
+    const char *ch;
+    if (str[0] == '-') sign = -1;
+    for (ch=str; *ch; ch++)
 	{
-		if (*ch>='0' && *ch<='9') val=(val*10)+*ch-'0';
+        if (*ch>='0' && *ch<='9') val=(val*10)+*ch-'0';
 		if (*ch=='.' || *ch==',') 
 		{
 			ch++;
@@ -237,7 +240,7 @@ int str_to_screw(const char *str)
 		}
 	}
 	if (nachkomma>5) nachkomma=5;
-	return 6*val+nachkomma;
+	return sign * (6*val+nachkomma);
 }
 //--- value_str3 ---------------------------------------------
 char *value_str3(int val)

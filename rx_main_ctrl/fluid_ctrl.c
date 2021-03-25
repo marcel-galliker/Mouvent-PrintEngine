@@ -689,9 +689,22 @@ static void _control(int fluidNo)
                                                 if (!steplb_rob_in_fct_pos((no +1) / 2, rob_fct_purge4ever))
 													steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_purge4ever);
                                             }
-											else if (lbrob && even_number_of_colors && _PurgeCtrlMode != ctrl_purge_hard_wash) steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
-											else if (lbrob && !even_number_of_colors && _PurgeCtrlMode != ctrl_purge_hard_wash) steplb_rob_to_fct_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
-											else if (!(_PurgeCtrlMode == ctrl_purge_hard_wash && lbrob))	   step_lift_to_top_pos();
+											else if (lbrob && even_number_of_colors && _PurgeCtrlMode != ctrl_purge_hard_wash)
+                                            {
+                                                if (_PurgeCtrlMode == ctrl_purge_hard_vacc)
+                                                    steplb_rob_to_fct_pos(no / 2, rob_fct_purge_all + RX_Config.headsPerColor);
+                                                else
+													steplb_rob_to_fct_pos(no / 2, HeadNo + rob_fct_purge_head0);
+                                            } 
+											else if (lbrob && !even_number_of_colors && _PurgeCtrlMode != ctrl_purge_hard_wash)
+                                            {
+                                                if (_PurgeCtrlMode == ctrl_purge_hard_vacc)
+                                                    steplb_rob_to_fct_pos((no+1) / 2, rob_fct_purge_all + RX_Config.headsPerColor);
+                                                else
+													steplb_rob_to_fct_pos((no+1) / 2, HeadNo + rob_fct_purge_head0);
+                                            } 
+											else if (!(_PurgeCtrlMode == ctrl_purge_hard_wash && lbrob))
+                                                step_lift_to_top_pos();
 
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
                                             int time = (RX_Config.printer.type==printer_TX802 || RX_Config.printer.type == printer_TX404)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
@@ -701,7 +714,7 @@ static void _control(int fluidNo)
 											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE, TRUE); _txrob=FALSE; break;
 											case ctrl_purge:			_send_purge_par(no, TIME_PURGE, TRUE);	  _txrob=FALSE; break;
 											case ctrl_purge_hard_wipe:	_send_purge_par(no, time, TRUE); break;
-											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, TRUE); break;
+											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, FALSE); break;
                                             case ctrl_purge_hard_wash:	_send_purge_par(no, time, FALSE); break;
 											case ctrl_purge_hard:		_send_purge_par(no, time, TRUE); _txrob=FALSE; break;
                                             case ctrl_purge4ever:		_send_purge_par(no, 0, FALSE); 
@@ -750,14 +763,19 @@ static void _control(int fluidNo)
                                                     else						steplb_lift_to_fct_pos((no+1)/2, rob_fct_cap);
                                                 }
 												else if (lbrob && even_number_of_colors && !steplb_rob_in_fct_pos(no/2, HeadNo + rob_fct_purge_head0) && _PurgeCtrlMode != ctrl_purge_hard_wash)
-												
 												{
-													steplb_rob_to_fct_pos(no/2, HeadNo + rob_fct_purge_head0);
+                                                    if (_PurgeCtrlMode == ctrl_purge_hard_vacc)
+                                                        steplb_rob_to_fct_pos(no/2, rob_fct_purge_head7);
+                                                    else
+														steplb_rob_to_fct_pos(no/2, HeadNo + rob_fct_purge_head0);
 													break;
 												}
                                                 else if(lbrob && !even_number_of_colors && !steplb_rob_in_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0) && _PurgeCtrlMode != ctrl_purge_hard_wash)
                                                 {
-                                                    steplb_rob_to_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0);
+                                                    if (_PurgeCtrlMode == ctrl_purge_hard_vacc)
+                                                        steplb_rob_to_fct_pos((no+1)/2, rob_fct_purge_head7);
+                                                    else
+														steplb_rob_to_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0);
 													break;
                                                 }
                                                 
@@ -999,7 +1017,6 @@ static void _control_flush(void)
 		
 		case ctrl_flush_done:	ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
 								
-							//  if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(0);
 								if (!RX_StepperStatus.robinfo.moving && rx_def_is_tx(RX_Config.printer.type) && step_active(1)) step_empty_waste(_fluid_get_flush_time(_startCtrlMode - ctrl_flush_night));
 
 								if (_txrob)
