@@ -915,7 +915,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 			_FluidStatus[i].info.flushed   = ((_Flushed & (0x01<<i))!=0);
 		}
 
-		_FluidStatus[i].canisterLevel = moving_average(_CanisterLevel, _CanisterLevelSum, i, _MeasurementNumber, _ScalesStatus[_FluidToScales[i]]);
+		_FluidStatus[i].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, i, _MeasurementNumber, _ScalesStatus[_FluidToScales[i]]);
 
 		if(*RX_Config.inkSupply[i].ink.fileName)
 		{
@@ -958,7 +958,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	
 	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf )
 	{
-		_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel = moving_average(_CanisterLevel, _CanisterLevelSum, INK_SUPPLY_CNT + 1, _MeasurementNumber, _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]]);
+		_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, INK_SUPPLY_CNT + 1, _MeasurementNumber, _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]]);
 		
 		if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel < 50000)
 		{
@@ -1324,10 +1324,14 @@ static int _fluid_get_flush_time(int flush_cycle)
     return time_s;
 }
 
-//--- moving_average ------------------------------------
-INT32 moving_average(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value)
+//--- moving_average_canisterLevel ------------------------------------
+INT32 moving_average_canisterLevel(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value)
 {
 	sum[canisterNumber] = sum[canisterNumber] - buffer[canisterNumber][pos] + value;
 	buffer[canisterNumber][pos] = value;
-	return sum[canisterNumber] / MEASUREMENT_NUMBER;
+	static int measurementNumber = 1;
+	INT32 avergage = sum[canisterNumber] / measurementNumber;
+	if (canisterNumber == INK_SUPPLY_CNT && measurementNumber < MEASUREMENT_NUMBER) 
+		measurementNumber++;
+	return avergage;
 }

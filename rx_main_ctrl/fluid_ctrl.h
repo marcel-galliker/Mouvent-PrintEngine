@@ -42,6 +42,6 @@ INT32 fluid_get_pumpSpeed	   (int no);
 INT32 fluid_get_pumpFeedback   (int no);
 // INT32 fluid_get_amcTemp        (int no);
 INT32 fluid_get_error          (int no);
-INT32 moving_average(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value);
+INT32 moving_average_canisterLevel(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value);
 
 void undefine_PurgeCtrlMode(void);
