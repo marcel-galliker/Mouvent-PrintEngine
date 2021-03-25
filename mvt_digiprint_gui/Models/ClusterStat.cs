@@ -48,7 +48,9 @@ namespace RX_DigiPrint.Models
             if ((item.info & 1) != 0)
             {
                 SerialNo = item.serialNo;
-                ClusterTime = item.clusterTime;
+                UInt64 printingSecondsSum = 0;
+                for (int i = 0; i < item.head.Length; i++) printingSecondsSum += item.head[i].printingSeconds;
+                ClusterTime = (UInt32)(printingSecondsSum / (UInt64)item.head.Length);
             }
             else
             {
