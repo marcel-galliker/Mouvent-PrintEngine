@@ -36,7 +36,7 @@
 #define X_DIST_PER_REV          54000   // 36000
 
 #define CABLE_MAINTENANCE_POS   -770000     //  um LB702
-#define CABLE_CAP_POS           -688000     //	um LB702
+#define CABLE_CAP_POS           -687000     //	um LB702
 #define CABLE_WASH_POS_FRONT    -634000     //	um LB702
 #define CABLE_WASH_POS_BACK     -221000     //	um LB702
 #define CABLE_PURGE_POS_BACK    -311000     //  um LB702
@@ -127,7 +127,6 @@ static ERobotFunctions _Old_RobFunction = 0;
 static int _ScrewFunction=0;
 static int _RobStateMachine_Step = 0;
 static SHeadAdjustment _ScrewPar;
-static int _Turns = 0;
 
 static int _HeadScrewPos = 0;
 
@@ -630,8 +629,6 @@ void lbrob_menu(int help)
         term_printf("m<n><steps>: move Motor<n> by <steps>\n");
         term_printf("f: Find all the screws\n");
         term_printf("a<n>: Go to adjustment position of head 0 - 7\n");
-        term_printf("t<p><h><a>: Turn screw (printhead p, head h, axis a) n/6 Turn (n can be choosen by command \"T\")\n");
-        term_printf("T<n>: Make <n>/6 turns with the command t\n");
         term_printf("b<n>: Set Speed of Waste pump to <n>%, Actual value %d%\n", _PumpSpeed);
         term_printf("z: Move all Screws to end position\n");
         term_flush();
@@ -762,16 +759,6 @@ void lbrob_handle_menu(char *str)
             break;
         }
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
-        break;
-    case 't':
-        screw_head.printbar = atoi(&str[1]) ;
-        screw_head.head = atoi(&str[2]);
-        screw_head.axis   = atoi(&str[3]);
-        screw_head.steps  = _Turns;
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_HEAD_ADJUST, &screw_head);
-        break;
-    case 'T':
-        _Turns = atoi(&str[1]);
         break;
     case 'b':
         val = atoi(&str[1]);
@@ -1174,6 +1161,7 @@ static void _rob_state_machine(void)
     static SScrewPos _pos;
     static int _correction_value;
     int pos, distance = 0;
+    int _turns = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].turns;
     
     if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
@@ -1254,19 +1242,19 @@ static void _rob_state_machine(void)
             }
 
             // adjustment range check             
-            if (_Turns+_ScrewPar.steps<0)
+            if (_turns+_ScrewPar.steps<0)
             {
-                _ScrewPar.steps = -_Turns;
+                _ScrewPar.steps = -_turns;
                 Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
             }
             else if (_ScrewPar.axis==AXE_ANGLE && _ScrewPar.steps>MAX_STEPS_ANGLE-OVERTURN)
             {
-                _ScrewPar.steps = MAX_STEPS_ANGLE-OVERTURN-_Turns;
+                _ScrewPar.steps = MAX_STEPS_ANGLE-OVERTURN-_turns;
                 Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
             }
             else if (_ScrewPar.axis==AXE_STITCH && _ScrewPar.steps>MAX_STEPS_STITCH-OVERTURN)
             {
-                _ScrewPar.steps = MAX_STEPS_STITCH-OVERTURN-_Turns;
+                _ScrewPar.steps = MAX_STEPS_STITCH-OVERTURN-_turns;
                 Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
             }
             // no break here!

@@ -74,6 +74,9 @@ static int		_CmdRunningRobi = 0;
 static int		_Help=FALSE;
 static int		_Menu=1;
 static UINT32	_ErrorFlags=0;
+static int		_lift = TRUE;
+static int		_rob = TRUE;
+static int		_robi = TRUE;
 
 //--- prototypes --------------------------------------------
 static void _lb702_motor_z_test(int steps);
@@ -355,7 +358,6 @@ static void _lb702_handle_menu(char *str)
 		switch (str[0])
 		{
 		case 's': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_STOP,		NULL); break;
-		case 'D': RX_StepperStatus.info.ref_done = FALSE; break;
 		case 'R': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE,	NULL); break;           
 		case 'r': motors_reset(1<<atoi(&str[1])); break;
 		case 'c': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,NULL); break;
@@ -367,6 +369,9 @@ static void _lb702_handle_menu(char *str)
 		case 'z': _lb702_motor_z_test(atoi(&str[1]));break;
         case 'a': RX_StepperStatus.robinfo.auto_cap = !RX_StepperStatus.robinfo.auto_cap;
 		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
+        case 'l': _lift = !_lift;
+        case 'C': _rob = !_rob;
+        case 'A': _robi = !_robi;
 		}
 	}			
 }
@@ -378,11 +383,11 @@ int lb702_menu(void)
 	int synth=FALSE;
 	int pos=10000;
 
-	_lb702_display_status();
+	if (_lift)	_lb702_display_status();
     if (RX_StepperStatus.robot_used)
     {
-        lbrob_display_status();
-        robi_lb702_display_status();
+        if (_rob)	lbrob_display_status();
+        if(_robi)	robi_lb702_display_status();
     }
 
     if (_Menu == 1)
@@ -409,7 +414,19 @@ int lb702_menu(void)
 			term_printf("m<n><steps>: move Motor<n> by <steps>\n");
             if (RX_StepperCfg.boardNo == 0)
                 term_printf("a: Change Cap Auto State\n");
-            term_printf("x: exit\n");	
+            if (_lift)
+                term_printf("L: hide LB702 Menu  ");
+            else
+                term_printf("L: show LB702 Menu  ");
+            if (_rob)
+                term_printf("C: hide ROBOT Menu  ");
+            else
+                term_printf("C: show ROBOT Menu  ");
+            if (_robi)
+                term_printf("A: hide ROBI Menu\n");
+            else
+                term_printf("A: show ROBI Menu\n");
+            term_printf("x: exit\n");
             
 		}
 		else
