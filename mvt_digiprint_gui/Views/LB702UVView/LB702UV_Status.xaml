@@ -7,7 +7,7 @@
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB702UVView"
              xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
-            d:DesignWidth="300">
+            d:DesignWidth="350">
     
     <UserControl.Resources>
         <Style x:Key="rx_uc:PlcParPanel" TargetType="{x:Type rx_uc:PlcParPanel}">
@@ -31,6 +31,10 @@
 
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"    Label="{mvt:LocalizedBinding UnwinderDiameter}"  Unit="mm" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_2"    Label="{mvt:LocalizedBinding RewinderDiameter}"  Unit="mm" Format="n"/>
+                <rx_uc:PlcParCtrl ID="STA_UNWINDER_TENSION"     Label="{mvt:LocalizedBinding UnwinderTension}"	Unit="N/mm"		Format="2"/>
+                <rx_uc:PlcParCtrl ID="STA_PRINT_TENSION"        Label="{mvt:LocalizedBinding PrintTension}"		Unit="N/mm"		Format="2"/>
+                <rx_uc:PlcParCtrl ID="STA_REWINDER_TENSION"     Label="{mvt:LocalizedBinding RewinderTension}"	Unit="N/mm"		Format="2"/>
+
                 <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_IN"       Label="{mvt:LocalizedBinding LengthIn}"  Unit="m" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_PAPERLENGTH_OUT"      Label="{mvt:LocalizedBinding LengthOut}" Unit="m" Format="n"/>
                 <rx_uc:PlcParCtrl ID="STA_REMAININGLENGTH_OUT"  Label="{mvt:LocalizedBinding LeftOut}"   Unit="m" Format="n"/>

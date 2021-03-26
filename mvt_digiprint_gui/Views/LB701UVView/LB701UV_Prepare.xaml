@@ -30,7 +30,6 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <rx_uc:PlcTitle Grid.Row="0" Grid.ColumnSpan="2" Header="{mvt:LocalizedBinding PrepareState}"/>
 

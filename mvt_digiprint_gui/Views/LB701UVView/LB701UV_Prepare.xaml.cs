@@ -42,7 +42,7 @@ namespace RX_DigiPrint.Views.LB701UVView
                         Grid.SetColumnSpan(ctrl, 2);
                     }
                     Image img = new Image();
-                    Grid.SetRow(img, i+1);
+                    Grid.SetRow(img, Grid.GetRow(ctrl));
                     Grid.SetColumn(img, 1);
                     img.Source = _img_ok;
                     img.Height = 20;

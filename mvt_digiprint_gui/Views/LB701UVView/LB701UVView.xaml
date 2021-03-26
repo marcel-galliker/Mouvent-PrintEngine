@@ -74,12 +74,14 @@
 
                     <local:LB701UV_Par Grid.Column="0"/>
 
-                    <StackPanel Grid.Column="1" Margin="10,0,0,0" Width="250">
-                        <local:LB701UV_Status/>
-                        <local:LB701UV_Cmd/>
-                    </StackPanel>
+                    <ScrollViewer Grid.Column="1" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                        <StackPanel Width="auto">
+                            <local:LB701UV_Status/>
+                            <local:LB701UV_Cmd/>
+                        </StackPanel>
+                    </ScrollViewer>
 
-                    <ScrollViewer Grid.Column="2" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                <ScrollViewer Grid.Column="2" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"></RowDefinition>
