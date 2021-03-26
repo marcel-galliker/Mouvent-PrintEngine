@@ -36,9 +36,6 @@
 
 #define MAX_VAR_SCREW_POS           6000    // um
 
-#define WIPE_POS_LEFT               -7600   // um
-#define WIPE_POS_RIGHT              4500    // um
-
 // Turn Directions
 #define TURN_LEFT                   -1
 #define TURN_0                      0
@@ -77,13 +74,8 @@ static int _Loose_Screw_Time = 0;
 static int _RobiConnection_Time = 0;
 static int _ErrorFlag = FALSE;
 static int _ScrewCorrect = FALSE;
-static int _FindScrew = FALSE;
-static int _Timer = 0;
-static int _CommandNr = 0;
+
 static int _RobiSteps;
-
-static int power(int base, int exponent);
-
 
 //--- robi_lb702_init -----------------------------------------------------
 void robi_lb702_init(void)
@@ -279,15 +271,6 @@ void robi_lb702_main(int ticks, int menu)
             }
             _CmdRunning = 0;
             break;
-
-        case CMD_ROBI_WIPE_LEFT:
-            RX_StepperStatus.screwerinfo.wipe_left_up = TRUE;
-            _CmdRunning = 0;
-            break;
-        case CMD_ROBI_WIPE_RIGHT:
-            RX_StepperStatus.screwerinfo.wipe_right_up = TRUE;
-            _CmdRunning = 0;
-            break;
             
         case CMD_ROBI_MOVE_Z_DOWN:
             
@@ -340,8 +323,6 @@ void robi_lb702_main(int ticks, int menu)
             case CMD_ROBI_MOVE_X:
             case CMD_ROBI_MOVE_TO_X:
             case CMD_ROBI_MOVE_TO_Y:
-            case CMD_ROBI_WIPE_LEFT:
-            case CMD_ROBI_WIPE_RIGHT:
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, loc_new_cmd, &loc_new_value);
                 break;
             case CMD_ROBI_MOVE_Z_DOWN:
@@ -454,14 +435,6 @@ void robi_lb702_handle_menu(char *str)
     case 'c':
         current = atoi(&str[1]);
         robi_set_screw_current(current);
-        break;
-    case 'a':
-        val = 1;
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_WIPE_LEFT, &val);
-        break;
-    case 'b':
-        val = 1;
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_WIPE_RIGHT, &val);
         break;
     default:
         break;
@@ -668,7 +641,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
                 break;
             }
-            if (RX_StepperStatus.screw_posY < MIN_Y_POS && _NewCmd != CMD_ROBI_WIPE_LEFT && _NewCmd != CMD_ROBI_WIPE_RIGHT)
+            if (RX_StepperStatus.screw_posY < MIN_Y_POS)
             {
                 Error(ERR_CONT, 0, "Screwer too close to garage to move up");
                 break;
@@ -749,7 +722,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in x-Axis");
             break;
         }
-        if (!_CmdRunning || _CmdRunning == CMD_ROBI_WIPE_LEFT || _CmdRunning == CMD_ROBI_WIPE_RIGHT)
+        if (!_CmdRunning)
         {
             pos = *((INT32 *)pdata);
             if (!RX_StepperStatus.screwerinfo.ref_done)
@@ -766,14 +739,14 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                 break;
             }
-            else if (RX_StepperStatus.screw_posY < MIN_Y_POS && _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT && pos != 0)
+            else if (RX_StepperStatus.screw_posY < MIN_Y_POS && pos != 0)
             {
                 Error(ERR_CONT, 0, "Screwer too close to garage to move in x axis");
                 break;
             }
             else
             {
-                if ( _CmdRunning != CMD_ROBI_WIPE_LEFT && _CmdRunning != CMD_ROBI_WIPE_RIGHT) _CmdRunning = msgId;
+                _CmdRunning = msgId;
                 _set_moving_variables();
                 RX_StepperStatus.screwerinfo.moving = TRUE;
                 micron = pos - RX_StepperStatus.screw_posX;
@@ -858,83 +831,6 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         }
         break;
 
-    case CMD_ROBI_WIPE_LEFT:
-        pos = *((INT32 *)pdata);
-        if (pos == 0 && !RX_StepperStatus.screwerinfo.wipe_left_up && !RX_StepperStatus.screwerinfo.wipe_right_up) break;
-        if (!_CmdRunning)
-        {
-            if (!RX_StepperStatus.screwerinfo.ref_done)
-            {
-                _NewCmd = msgId;
-                _Value = pos;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
-            }
-            else if (!RX_StepperStatus.screwerinfo.z_in_down)
-            {
-                _NewCmd = msgId;
-                _Value = pos;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
-            }
-            else if (abs(RX_StepperStatus.screw_posY) > 700)
-            {
-                _NewCmd = msgId;
-                _Value = pos;
-                pos = 0;
-                if (abs(RX_StepperStatus.screw_posX) > MAX_VARIANCE)
-                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
-                else
-                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Y, &pos);
-            }
-            else
-            {
-                _CmdRunning = msgId;
-                RX_StepperStatus.screwerinfo.moving = TRUE;
-                _set_moving_variables();
-                if (pos) pos = WIPE_POS_LEFT;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
-            }
-            
-        }
-        break;
-
-    case CMD_ROBI_WIPE_RIGHT:
-        pos = *((INT32 *)pdata);
-        if (pos == 0 && !RX_StepperStatus.screwerinfo.wipe_left_up && !RX_StepperStatus.screwerinfo.wipe_right_up) break;
-        if (!_CmdRunning)
-        {
-            if (!RX_StepperStatus.screwerinfo.ref_done)
-            {
-                _NewCmd = msgId;
-                _Value = pos;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
-            }
-            else if (!RX_StepperStatus.screwerinfo.z_in_down)
-            {
-                _NewCmd = msgId;
-                _Value = pos;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
-            }
-            else if (abs(RX_StepperStatus.screw_posY) > 700)
-            {
-                _NewCmd = msgId;
-                _Value = pos;
-                pos = 0;
-                if (abs(RX_StepperStatus.screw_posX) > MAX_VARIANCE)
-                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
-                else
-                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Y, &pos);
-            }
-            else
-            {
-                _CmdRunning = msgId;
-                RX_StepperStatus.screwerinfo.moving = TRUE;
-                _set_moving_variables();
-                if (pos) pos = WIPE_POS_RIGHT;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
-            }        
-        }
-        break;
-
     case CMD_ERROR_RESET:
         _ErrorFlag = FALSE;
         break;
@@ -1004,14 +900,13 @@ int robi_screw_count(void)
     return _RobiSteps;
 }
 
+//--- _set_moving_variables ---------------------------------------------
 static void _set_moving_variables(void)
 {
     RX_StepperStatus.screwerinfo.robi_in_ref = FALSE;
     RX_StepperStatus.screwerinfo.x_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
-    RX_StepperStatus.screwerinfo.wipe_left_up = FALSE;
-    RX_StepperStatus.screwerinfo.wipe_right_up = FALSE;
 }
 
 int robi_lb702_screw_correction(void)

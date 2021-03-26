@@ -319,6 +319,7 @@ static int _set_screw_pos(int stepperNo)
         }
     }
     sok_send_2(&_step_socket[stepperNo], CMD_SET_SCREW_POS, sizeof(pos), &pos);
+    return REPLY_OK;
 }
 
 //--- steplb_set_ScrewPos -----------------------------------------
@@ -659,7 +660,8 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									{
 										steplb_rob_fct_start(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step3;
-									}else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
+                                    }
+                                    else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
                                         _risingEdge[no] = TRUE;
 									break;
 		
@@ -667,7 +669,8 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 									{
 										steplb_lift_to_fct_pos(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step4;
-									}else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
+                                    }
+                                    else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
                                         _risingEdge[no] = TRUE;
 									break;
 		
@@ -919,8 +922,8 @@ void steplb_set_autocapMode(int state)
 void steplb_set_fluid_off(int no)
 {
     if (_RobotCtrlMode[no/2] != ctrl_off && RX_Config.inkSupplyCnt % 2 == 0 && 
-            ((no %2 == 0 && (fluid_get_ctrlMode(no+1) < ctrl_wipe || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6))) || 
-            (no %2 == 1 && (fluid_get_ctrlMode(no-1) < ctrl_wipe || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6)))))
+            ((no %2 == 0 && (fluid_get_ctrlMode(no+1) < ctrl_cap || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6))) || 
+            (no %2 == 1 && (fluid_get_ctrlMode(no-1) < ctrl_cap || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6)))))
     {
         _RobotCtrlMode[no / 2] = ctrl_off;
         _send_ctrlMode(ctrl_off, no/2);
@@ -930,8 +933,8 @@ void steplb_set_fluid_off(int no)
         
     }
 	else if (_RobotCtrlMode[(no+1)/2] != ctrl_off && RX_Config.inkSupplyCnt % 2 == 1 && 
-                 (no == 0 || (no %2 == 0 && (fluid_get_ctrlMode(no-1) < ctrl_wipe || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6))) || 
-            (no %2 == 1 && (fluid_get_ctrlMode(no+1) < ctrl_wipe || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6)))))
+                 (no == 0 || (no %2 == 0 && (fluid_get_ctrlMode(no-1) < ctrl_cap || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6))) || 
+            (no %2 == 1 && (fluid_get_ctrlMode(no+1) < ctrl_cap || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6)))))
     {
         _RobotCtrlMode[(no+1) / 2] = ctrl_off;
         _send_ctrlMode(ctrl_off, (no+1) / 2);

@@ -738,6 +738,7 @@ int  ctrl_singleHead(void)
 	return _SingleHead;
 }
 
+//--- ctrl_empty_PurgeBuffer -----------------------------------------
 void ctrl_empty_PurgeBuffer(int fluidNo)
 {
     int i, j;
@@ -800,8 +801,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
             {
                 _BufferFluidCmd[i].used = 0;
             }
-            if (i >= 1 && _BufferFluidCmd[i - 1].used == 0 &&
-                _BufferFluidCmd[i].used)
+			if (i >= 1 && _BufferFluidCmd[i - 1].used == 0 && _BufferFluidCmd[i].used)
             {
                 _BufferFluidCmd[i - 1] = _BufferFluidCmd[i];
                 _BufferFluidCmd[i].used = 0;
@@ -818,7 +818,6 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
         cmd.no = headNo % HEAD_CNT;
         cmd.ctrlMode = ctrlMode;
         sok_send(&_HeadCtrl[headNo / HEAD_CNT].socket, &cmd);
-        //if (sendToFluid) fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrlMode, FALSE);
         return;
     }
 
@@ -882,6 +881,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 	}
 }	
 
+//--- _ctrl_check_stepper_in_purgeMode ----------------------------------------
 static int _ctrl_check_stepper_in_purgeMode(int headNo)
 {
     if (_SingleHead == -1) return FALSE;
@@ -919,6 +919,7 @@ static int _ctrl_check_stepper_in_purgeMode(int headNo)
     return FALSE;
 }
 
+//--- _ctrl_stepper_in_purge4ever_pos -------------------------------------
 static int _ctrl_stepper_in_purge4ever_pos(int headNo)
 {
     int fluidNo = headNo / RX_Config.headsPerColor;
