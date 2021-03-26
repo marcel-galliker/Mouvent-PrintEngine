@@ -308,6 +308,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 static int _set_screw_pos(int stepperNo)
 {
     SScrewPositions pos;
+    memset(&pos, 0, sizeof(pos));
     setup_screw_positions(PATH_USER FILENAME_SCREW_POS, stepperNo, &pos, READ);
     for (int printbar=0; printbar<2; printbar++)
     {
