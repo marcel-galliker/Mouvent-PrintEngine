@@ -57,6 +57,10 @@ namespace RX_DigiPrint.Models
             return HeadNumber;
         }
 
+        /// <summary>
+        /// Add a array of disabled jets if valid, sort the list and reload the UI if needed
+        /// </summary>
+        /// <param name="disabledJets">Array of jet number</param>
         public void SetDisablesJets(UInt16[] disabledJets)
         {
             var currentList = JetList.ToList();
@@ -64,7 +68,7 @@ namespace RX_DigiPrint.Models
             _JetList.Clear();
             for (int i = 0; i < disabledJets.Length && i < TcpIp.MAX_DISABLED_JETS; i++)
             {
-                if (!(disabledJets[i] <= 0 || disabledJets[i] > 2048 + 128))
+                if (IsValidJet(disabledJets[i]) && !_JetList.Any(x => x.JetNumber == disabledJets[i]))
                 {
                     _JetList.Add(new JetCompensation { JetNumber = disabledJets[i], Index = i + 1 });
                 }
@@ -122,9 +126,23 @@ namespace RX_DigiPrint.Models
             return closePopup;
         }
 
+        /// <summary>
+        /// Is a jet number valid in a head
+        /// </summary>
+        /// <param name="jetNumber">jet number to check</param>
+        /// <returns>True if the number is valid (between 0 and 2175)</returns>
+        private bool IsValidJet(int jetNumber) 
+        {
+            return (jetNumber>= 0  && jetNumber < 2048 + 128); // jet number from 0 to 2175!
+        }
+
+        /// <summary>
+        /// Add a jet number in the list of jet compensation (if it is valid, else display a warning dialogbox)
+        /// </summary>
+        /// <param name="jetNumber">jet number to disable</param>
         private void AddJet(int jetNumber)
         {
-            if(jetNumber < 0  || jetNumber > 2048 + 128 - 1) // jet number from 0 to 20175!
+            if (!IsValidJet(jetNumber))
             {
                 MvtMessageBox.Information("", RX_DigiPrint.Resources.Language.Resources.InvalidJetNr + jetNumber);
                 return;

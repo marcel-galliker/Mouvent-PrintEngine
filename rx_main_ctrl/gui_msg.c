@@ -860,6 +860,7 @@ static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
 	int color = pmsg->head / RX_Config.headsPerColor;
 	int head  = pmsg->head % RX_Config.headsPerColor;
 	memset(reply.value, 0, sizeof(reply.value));
+	reply.voltage = 0;
 	HANDLE file = setup_create();
 	if (setup_load(file, PATH_USER "newdensity.cfg")==REPLY_OK)
 	{
