@@ -29,7 +29,6 @@ namespace rx_CamLib
 		CamFindLines_Vertical,		// vertical lines (WEB)	
 		CamFindLine_Horzizontal,	// horizontal line (WEB)
 		CamFindFirstAngle,
-		CamFindLineEnd,				// end of line (SCAN)
 		CamMeasureAngle,
 		CamMeasureStitch,
 		CamMeasureDist,
@@ -176,10 +175,8 @@ namespace rx_CamLib
 				_Camera.NumExtraErodes=3;
 				_Camera.SetLineAspectLimit(5);
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-				if (first)
-					_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 1, 0, 0);
-				else
-					_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
+				if (first) _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 1,  0,  0);
+				else       _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
 			});
 			return RxCam.ENCamResult.OK;
 		}

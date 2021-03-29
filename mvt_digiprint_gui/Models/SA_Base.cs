@@ -189,7 +189,9 @@ namespace RX_DigiPrint.Models
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 			cmd.steps	= (Int32)(pos*1000.0);
 			cmd.speed   = speed;
-			Console.WriteLine("{0} SCAN MOVE TO [{1}] from {2:N3} to {3:N3}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, ScanPos, pos);
+			if (speed>0 && speed<20) cmd.acc = 20;
+			else cmd.acc=0;
+		//	Console.WriteLine("{0} SCAN MOVE TO [{1}] from {2:N3} to {3:N3}, speed={4}, acc={5}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, ScanPos, pos, cmd.speed, cmd.acc);
 			if (_Simu) _OnScanMoveDone();
 			else RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
@@ -201,14 +203,6 @@ namespace RX_DigiPrint.Models
 			else	   RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_STOP);
 		}
 
-		//--- Property Dist ---------------------------------------
-		private double _WebDist;
-		public double WebDist
-		{
-			get { return _WebDist; }
-			set { SetProperty(ref _WebDist,value); }
-		}
-
 		//--- Property WebPos ---------------------------------------
 		private double _WebPos=0;
 		public double WebPos
@@ -218,13 +212,14 @@ namespace RX_DigiPrint.Models
 		}
 		public void WebPos_Reset()
 		{
-			_WebPos = 0;
+			Console.WriteLine("WebPos_Reset");
+			WebPos = 0;
 		}
 
 		//--- WebMove ----------------------------------
-		public const int WebSpeed = 2;	// [m/min]
+		public const int WebSpeed = 1;	// [m/min]
 		private int _WebMoveStartCnt=-1;
-		public void WebMove(double? dist=null)
+		public void WebMove(double dist)
 		{
 			if (_Simu) _OnWebMoveDone();
 			else
@@ -232,16 +227,9 @@ namespace RX_DigiPrint.Models
 				_checkWebMoveDone();
 
 				TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
-				if (dist==null) 
-				{ 
-					WebPos     += WebDist;
-					cmd.steps	= (Int32)(1000*WebDist);
-				}
-				else
-				{
-					WebPos	   +=(double)dist;
-					cmd.steps	= (Int32)(1000*dist);
-				}
+				double old=WebPos;
+				WebPos	   += (double)dist;
+				cmd.steps	= (Int32)(1000*dist);
 				cmd.speed = WebSpeed;
 				if (cmd.steps==0)
 				{
@@ -251,7 +239,7 @@ namespace RX_DigiPrint.Models
 				{
 					EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
 					if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
-					string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps);
+					string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3} oldpos={4} WebPos={5}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps, old, WebPos);
 					if (_WebMoveCnt!=_WebMoveStartCnt)
 						Console.WriteLine("WEB MOVE Error: _WebMoveCnt={0}, _WebMoveStartCnt={1}", _WebMoveCnt, _WebMoveStartCnt);
 					_WebMoveStartCnt++;

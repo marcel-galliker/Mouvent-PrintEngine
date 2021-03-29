@@ -216,7 +216,7 @@ char *value_str_screw(INT16 val)
 //	if (val<=0)	strcpy(str, "----");
 //	else		sprintf(str, "%02d.%d", val/6, val%6);
 	if (val==(INT16)INVALID_VALUE) strcpy(str, "-----");
-	else					sprintf(str, "%02d.%d", val/6, abs(val)%6);
+    else sprintf(str, "%02d.%d", val/6, abs(val)%6);
 	return str;
 }
 
