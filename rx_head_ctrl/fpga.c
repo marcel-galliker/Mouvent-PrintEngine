@@ -751,7 +751,7 @@ int	  fpga_is_ready(void)
 //--- fpga_is_printing ---------------------------------------
 int   fpga_is_printing(void)
 {
-	return _Printing;
+	return _Printing || FpgaCfg.encoder->synth.enable;
 }
 
 //--- fpga_udp_block_size ----------------------------------------

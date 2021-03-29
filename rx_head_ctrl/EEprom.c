@@ -339,6 +339,7 @@ void eeprom_add_droplets_printed(int headNo, UINT32 droplets, int time)
 	static UINT64 _droplets[MAX_HEADS_BOARD];
 	static int    _time[MAX_HEADS_BOARD];
 	static int    _timePrinting[MAX_HEADS_BOARD];
+	static UINT32 _PrintingSec[MAX_HEADS_BOARD]={0,0,0,0};
 	int save=FALSE;
 
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
@@ -351,7 +352,7 @@ void eeprom_add_droplets_printed(int headNo, UINT32 droplets, int time)
 	SHeadEEpromMvt cfg;
 	memcpy(&cfg, &_NiosMem->stat.eeprom_mvt[headNo], sizeof(cfg));
 
-	if (time-_time[headNo]>60000)
+	if (time-_time[headNo]>=60000)
 	{
 		if (_droplets[headNo]>1000000)
 		{		
@@ -364,20 +365,15 @@ void eeprom_add_droplets_printed(int headNo, UINT32 droplets, int time)
 
 	if (time-_timePrinting[headNo]>1000)
 	{
-		if (fpga_is_printing())
+		if (fpga_is_printing()) _PrintingSec[headNo]++;
+		if (_PrintingSec[headNo]>=60)
 		{
-			cfg.printingSec++;
+			cfg.printingSec+=_PrintingSec[headNo];
+			_PrintingSec[headNo] = 0;
 			save=TRUE;
 		}
 		_timePrinting[headNo] = time;
 	}
-
-	/*
-	#ifdef DEBUG
-		save=TRUE;
-		cfg.dropletsPrinted = 123456;
-		cfg.printingSec=123;
-	#endif	*/
 
 	if (save)
 	{
