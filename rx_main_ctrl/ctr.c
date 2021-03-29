@@ -136,18 +136,25 @@ void ctr_tick(void)
 //--- ctr_add -------------------------------------------
 void ctr_add(int mm)
 {
-    int encoderOffset=0; 
-	if (rx_def_is_tx(RX_Config.printer.type)) encoderOffset=RX_Spooler.maxOffsetPx;
-    _jobLen += mm;
-    if ((_jobLen*1000 >= encoderOffset))
-    {
-        if ((_jobLen * 1000 - encoderOffset) <= mm * 1000)
-        {
-            mm = (_jobLen - (encoderOffset)/1000);
-        }
-		RX_PrinterStatus.counterTotal	+= mm;
-		RX_PrinterStatus.counterAct		+= mm;
-    }  
+	if (rx_def_is_tx(RX_Config.printer.type)) // for tx, do not count offset
+	{
+		int encoderOffset = RX_Spooler.maxOffsetPx;
+		_jobLen += mm;
+		if (_jobLen >= encoderOffset / 1000)
+		{
+			if ((_jobLen - encoderOffset/1000) <= mm)
+			{
+				mm = (_jobLen - (encoderOffset)/1000);
+			}
+			RX_PrinterStatus.counterTotal	+= mm;
+			RX_PrinterStatus.counterAct		+= mm;
+		}
+	}
+	else
+	{
+		RX_PrinterStatus.counterTotal += mm;
+		RX_PrinterStatus.counterAct += mm;
+	}
 }
 
 //--- ctr_reset_jobLen ---------------
