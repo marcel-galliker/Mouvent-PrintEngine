@@ -443,6 +443,7 @@ void step_rob_stop(void)
 	}
 }
 
+//--- step_empty_waste ----------------------------------------
 void step_empty_waste(int time)
 {
     switch (_StepperType)

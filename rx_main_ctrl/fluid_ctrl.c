@@ -398,17 +398,11 @@ void fluid_tick(void)
 					
 		state[i].canisterEmpty = (_FluidStatus[i].canisterErr >= LOG_TYPE_ERROR_CONT);
         if (RX_Config.inkSupplyCnt % ink_per_Robot == 0)
-        {
             state[i].act_pos_y = -1 * RX_StepperStatus.posY[i / ink_per_Robot];
-        }
         else
-        {
             state[i].act_pos_y = -1 * RX_StepperStatus.posY[(i+1) / ink_per_Robot];
         }
         
-
-	}
-	
 	RX_PrinterStatus.tempReady = maxTempReady;
 
 	memset(_HeadStateCnt,		0, sizeof(_HeadStateCnt));
@@ -779,12 +773,16 @@ static void _control(int fluidNo)
 													break;
                                                 }
                                                 
-												plc_to_purge_pos();
-												 if (RX_Config.printer.type == printer_test_table_seon)
+
+												if (RX_Config.printer.type == printer_test_table_seon)
                                                 {
                                                     drive_move_waste();
                                                 }
-												_send_ctrlMode(no, ctrl_purge_step2, TRUE);																										
+												if (!RX_PrinterStatus.scanner_off)
+												{
+													plc_to_purge_pos();
+													_send_ctrlMode(no, ctrl_purge_step2, TRUE);
+												}																										
 											}
 											break;
 								
@@ -1028,6 +1026,10 @@ static void _control_flush(void)
                                 {
                                     fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
                                 }
+								else
+								{
+									_FluidCtrlMode = ctrl_off;
+								}
 								break; // send to all
 		default: break;		
 		}
@@ -1262,7 +1264,6 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				if (!rx_def_is_scanning(RX_Config.printer.type))
 				{
 					if (i==no) cmd.ctrlMode = ctrlMode;
-					//else	   cmd.ctrlMode = ctrl_off;
 				}
 				_Flushed |= (0x1<<i);
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
