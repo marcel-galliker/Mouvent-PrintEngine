@@ -185,7 +185,7 @@ int main(int argc, char** argv)
 //	nios_init();
 	ctrl_init();
 	motor_init();
-	
+
 	if (arg_simu) Error(WARN, 0, "SIMULATION");
 	
 	switch (RX_StepperCfg.printerType)

@@ -109,11 +109,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			RxGlobals.SetupAssist.ScanStop();
 		}
 
-		//--- Move_Clicked -------------------------------------------
-		private void WebMove_Clicked(object sender,RoutedEventArgs e)
-		{
-			RxGlobals.SetupAssist.WebMove();
-		}
 		//--- Stop_Clicked -------------------------------------------
 		private void WebStop_Clicked(object sender,RoutedEventArgs e)
 		{

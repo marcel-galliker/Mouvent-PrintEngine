@@ -172,7 +172,8 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 									cmd.steps	   = (INT32)((double)pmsg->steps/_microns2steps);
 									if (pmsg->speed) cmd.speed = pmsg->speed;
 									else			 cmd.speed = 200;
-									cmd.acc		   = 100;
+									if (pmsg->acc)   cmd.acc   = pmsg->acc;
+									else			 cmd.acc   = 100;
 									cmd.current	   = 300;
 									sok_send(&_SaSocket, &cmd);
 								}

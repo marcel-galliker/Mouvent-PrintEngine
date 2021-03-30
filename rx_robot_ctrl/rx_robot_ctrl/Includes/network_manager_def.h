@@ -1,0 +1,14 @@
+#ifndef INCLUDES_NETWORK_MANAGER_DEF_H_
+#define INCLUDES_NETWORK_MANAGER_DEF_H_
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#define PORT_UDP_BOOT_SVR		7004
+#define PORT_UDP_BOOT_CLNT		7005
+
+#define PORT_UDP_BOOTLOADER		7018
+#define PORT_UDP_COMMUNICATION	7017
+
+
+#endif /* INCLUDES_NETWORK_MANAGER_DEF_H_ */
