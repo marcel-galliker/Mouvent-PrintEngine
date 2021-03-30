@@ -309,8 +309,7 @@ static void _send_head_info(void)
 			len = 0;
 			len += sprintf(&str[len], "%s\n", RX_TestImage.testMessage);
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
-			
-			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3((UINT32)RX_HBStatus[headNo/MAX_HEADS_BOARD].head[headNo%MAX_HEADS_BOARD].printed_ml));
+			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3(pstat->printed_ml	));
 			len += sprintf(&str[len], "s# %d-%02d\n", pinfo->serialNo/100, pinfo->serialNo%100);
 			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n", pinfo->voltage, pinfo->straightness, pinfo->uniformity);
 			len += sprintf(&str[len], "bad");
@@ -996,14 +995,6 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only)
 			{
 				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) pc_abort_printing();
-				return REPLY_OK;
-			}
-			else if (RX_Config.printer.type==printer_test_table)
-			{
-			//	if (arg_simuPLC) pc_abort_printing();
-
-				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) 
-					pc_abort_printing(); // curing!
 				return REPLY_OK;
 			}
 			else

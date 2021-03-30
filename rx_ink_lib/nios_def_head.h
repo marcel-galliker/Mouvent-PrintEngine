@@ -59,11 +59,13 @@ typedef struct
 	INT16	_densityValue[MAX_DENSITY_VALUES];	// 0x4b..0x62
 	UINT8	_densityValueCRC;					// 0x63
 	UINT8	_voltage;							// 0x64: Firepulse voltage
-	UINT8	_voltageCRC;						// 0x65
+	UINT8	_voltageCRC;							// 0x65
 	UINT64	dropletsPrinted;					// 0x66..0x6d
 	UINT8	dropletsPrintedCRC;					// 0x6e
 	SRobInfo	robot;
-	UINT8	filler[12];
+	UINT32	printingSec;
+    UINT8	printingSecCRC;
+	UINT8	filler[7];
 } SHeadEEpromMvt;	// size must be 0x80!!
 
 typedef struct // size must be a multiple of 32!

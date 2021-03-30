@@ -24,7 +24,9 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<int>( 4,  "Purge"));
                 _List.Add(new RxEnum<int>( 5,  "Wipe"));
                 _List.Add(new RxEnum<int>( 6,  "Manual"));
-                _List.Add(new RxEnum<int>( 7,  "Stopped"));
+                _List.Add(new RxEnum<int>( 7,  "Standstill"));
+                _List.Add(new RxEnum<int>( 8,  "Fill Cap"));
+                _List.Add(new RxEnum<int>( 9,  "Stop"));
             }
         }
 

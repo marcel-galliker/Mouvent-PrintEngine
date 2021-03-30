@@ -113,6 +113,7 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
 //			TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  in_print=%d  up=%d", i, _status[i].info.ref_done, _status[i].info.moving, _status[i].info.z_in_print, _status[i].info.z_in_ref);
 			info.ref_done		&= _status[i].info.ref_done;
 			info.moving			|= _status[i].info.moving;
+			info.curing			|= _status[i].info.curing;
 			info.z_in_ref		&= _status[i].info.z_in_ref;
 			info.z_in_print		&= _status[i].info.z_in_print;
 			info.z_in_cap		&= _status[i].info.z_in_cap;
@@ -136,6 +137,8 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
         RX_StepperStatus.posZ_back = _status[no].posZ_back;
 	}
 	
+	if (RX_StepperStatus.info.curing && !info.curing) pc_abort_printing();
+
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
 	RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
 

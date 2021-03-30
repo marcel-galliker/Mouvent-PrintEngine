@@ -607,7 +607,8 @@ int  tt_start_printing(void)
 		par.scanCnt = _PQItem.scans*_PQItem.copies;
 		if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_DENSITY || RX_TestImage.testImage==PQ_TEST_ENCODER) par.yStep  += 2500;
 	}
-	
+	par.scanCnt += 1; // special for CLEAF Test Table
+
 	sok_send_2(&_step_Socket[0], CMD_TT_SCAN, sizeof(par), &par);
 	
 	return REPLY_OK;

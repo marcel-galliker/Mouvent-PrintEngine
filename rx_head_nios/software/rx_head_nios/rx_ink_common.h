@@ -307,6 +307,7 @@ char *value_str(int val);
 char *value_str1(int val);
 char *value_str3(int val);
 char *value_str_temp(int val);
+char *value_str_time(int sec);
 char *value_str_u(int val);
 char *value_str_screw(INT16 val);
 int str_to_screw(const char *str);

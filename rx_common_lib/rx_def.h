@@ -845,9 +845,10 @@ typedef struct SHeadStat
 	FLOAT			dropVolume;	// in pl
 	UINT32			pumpSpeed;
 	UINT32			pumpFeedback;
-	UINT32			printingSeconds;
-	UINT64			printedDroplets;
-	UINT64			printed_ml;
+	UINT32			condPrintingSec;
+//	UINT64			printedDroplets;
+	UINT32			printed_ml;
+//	UINT32			printed_sec;
 
 	INT32			presIn_0out;
 	EnFluidCtrlMode	ctrlMode;
@@ -1131,8 +1132,8 @@ typedef struct SInkSupplyInfo
 		struct
 		{
 			UINT32 connected : 1;		// 0x00000001
-			UINT32 bleedValve : 1;		// 0x00000002
-			UINT32 cusionValve : 1;		// 0x00000004
+			UINT32 info_1 : 1;			// 0x00000002
+			UINT32 info_2 : 1;			// 0x00000004
 			UINT32 flushed : 1;			// 0x00000008
 			UINT32 condTempReady : 1;	// 0x00000010
 			UINT32 heaterTempReady : 1;	// 0x00000020
@@ -1218,9 +1219,12 @@ typedef struct SInkSupplyStat
 	
 	INT32	cylinderPresSet;	//  Pressure intermediate Tank Set
 	INT32	cylinderPres;		//  Pressure intermediate Tank
+	INT32	cylinderPresDiff;
 	INT32	cylinderSetpoint;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
 	INT32	flushTime;
+	UINT8	airValve;
+	UINT8	bleedValve;
 	INT32	purge_putty_ON;
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;	

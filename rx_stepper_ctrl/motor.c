@@ -323,12 +323,12 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		cnt=0;
         if (rising_steps >= microsteps)
         {
-            // Set rising ramp parameters
-            move[cnt].cc0_256 = (UINT32)speed * FIX_POINT_SPEED;
-            move[cnt].a_256 = accel;
-            move[cnt].steps = rising_steps / microsteps;
-            move[cnt].amp = Tval_Current_to_Par(par->current_acc);
-            cnt++;
+			// Set rising ramp parameters
+			move[cnt].cc0_256 = (UINT32) speed*FIX_POINT_SPEED;
+			move[cnt].a_256   = accel;
+			move[cnt].steps   = rising_steps/microsteps;
+			move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
+			cnt++;
         }
 		
 		// Set linear movement parameters 
@@ -354,15 +354,14 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 			move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
 			cnt++;
 		}
-
         if (falling_steps >= microsteps)
         {
-            // Set falling ramp parameters
-            move[cnt].cc0_256 = min_speed;
-            move[cnt].a_256 = -accel;
-            move[cnt].steps = falling_steps / microsteps;
-            move[cnt].amp = Tval_Current_to_Par(par->current_acc);
-            cnt++;
+			// Set falling ramp parameters
+			move[cnt].cc0_256 = min_speed;
+			move[cnt].a_256   = -accel;
+			move[cnt].steps   = falling_steps/microsteps;
+			move[cnt].amp	  = Tval_Current_to_Par(par->current_acc);
+			cnt++;
         }
 
 		// Set acc current after move done
@@ -397,20 +396,20 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 
         if (rising_steps >= microsteps)
         {
-            // Set rising ramp parameters
-            move[0].cc0_256 = (UINT32)(v_max * FIX_POINT_SPEED);
-            move[0].a_256 = accel;
-            move[0].steps = rising_steps / microsteps;
-            move[0].amp = Tval_Current_to_Par(par->current_acc);
-        }
+			// Set rising ramp parameters
+			move[0].cc0_256 = (UINT32)(v_max * FIX_POINT_SPEED);
+			move[0].a_256   = accel;
+			move[0].steps   = rising_steps/microsteps;
+			move[0].amp		= Tval_Current_to_Par(par->current_acc);
+}
 
         if (falling_steps >= microsteps)
         {
-            // Set falling ramp parameters
-            move[1].cc0_256 = min_speed;
-            move[1].a_256 = -accel;
-            move[1].steps = falling_steps / microsteps;
-            move[1].amp = Tval_Current_to_Par(par->current_acc);
+			// Set falling ramp parameters
+			move[1].cc0_256 = min_speed;
+			move[1].a_256   = -accel;
+			move[1].steps   = falling_steps/microsteps;
+			move[1].amp		= Tval_Current_to_Par(par->current_acc);
         }
 
 		// Set acc current after move done

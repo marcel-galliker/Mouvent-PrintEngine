@@ -5,7 +5,7 @@
 
 // EEPROM Settings API
 #define EE_ADDR_PUMPTIME            0x00
-#define EE_ADDR_04          		0x04
+#define EE_ADDR_SERIAL_NO          	0x04
 #define EE_ADDR_PIN_FACTORY_OFFSET  0x08
 #define EE_ADDR_PIN_USER_OFFSET     0x0c
 #define EE_ADDR_POUT_FACTORY_OFFSET 0x10

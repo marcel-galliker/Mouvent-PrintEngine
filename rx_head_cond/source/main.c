@@ -160,7 +160,6 @@ int32_t main(void)
 	Gpio1pin_Put(GPIO1PIN_P80,0); 		// SolenoidR OFF
 	Gpio1pin_Put(GPIO1PIN_P33,0); 		// Heater OFF
 
-	temp_init();
 	comm_init(0);
 	uart_init(115200);
 
@@ -169,6 +168,7 @@ int32_t main(void)
     RX_Status.pcb_rev = _get_pcb_revision();
  //   DBG_PRINTF("RX_Conditioner#%c\n", RX_Status.pcb_rev);
 	       
+	temp_init();
 	pres_init();
     pump_init();
 		
@@ -262,11 +262,12 @@ static char _get_pcb_revision()
         case 'h':
             Gpio1pin_InitIn(GPIO1PIN_P00, Gpio1pin_InitPullup(0u));
             // P23 as analog input
-            SetPinFunc_AN05();        
+            SetPinFunc_AN05();
             Gpio1pin_InitOut(GPIO1PIN_P80, Gpio1pin_InitVal(0u)); 
             break;
 
 		case 'n':
+			SetPinFunc_AN05();
 			Gpio1pin_InitOut(GPIO1PIN_P60, Gpio1pin_InitVal(0u));
             Gpio1pin_InitIn (GPIO1PIN_P00, Gpio1pin_InitPullup(0u));
 			Gpio1pin_InitIn (GPIO1PIN_P35, Gpio1pin_InitVal( 0u ) ); // SensorPowerFault
@@ -319,7 +320,7 @@ void RxMessage_Handler(void)
 		ctr_save();
 	}
 	RX_Status.cmdConfirm.resetPumpTime = RX_Config.cmd.resetPumpTime;
-
+	
 	//--- pump watchdog ------------------------
 	pump_watchdog();
 }

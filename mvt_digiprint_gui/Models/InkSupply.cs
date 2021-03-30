@@ -105,7 +105,7 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CylinderPresSet, value); }
         }
 
-        //--- Property PresIntTank ---------------------------------------
+        //--- Property CylinderPres ---------------------------------------
         private Int32 _CylinderPres;
         public Int32 CylinderPres
         {
@@ -113,8 +113,16 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CylinderPres, value); }
         }
 
-        //--- Property PresIntTank ---------------------------------------
-        private Int32 _CylinderSetpoint;
+		//--- Property CylinderPresDiff ---------------------------------------
+		private int _CylinderPresDiff;
+		public int CylinderPresDiff
+		{
+			get { return _CylinderPresDiff; }
+			set { SetProperty(ref _CylinderPresDiff,value); }
+		}
+
+		//--- Property PresIntTank ---------------------------------------
+		private Int32 _CylinderSetpoint;
         public Int32 CylinderSetpoint
         {
             get { return _CylinderSetpoint; }
@@ -234,19 +242,19 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property BleedValve ---------------------------------------
-        private string _BleedValve;
-        public string BleedValve
+        private int _BleedValve;
+        public int BleedValve
         {
             get { return _BleedValve; }
             set { SetProperty(ref _BleedValve, value); }
         }
 
         //--- Property AirCusionValve ---------------------------------------
-        private string _AirCusionValve;
-        public string AirCusionValve
+        private int _AirValve;
+        public int AirValve
         {
-            get { return _AirCusionValve; }
-            set { SetProperty(ref _AirCusionValve, value); }
+            get { return _AirValve; }
+            set { SetProperty(ref _AirValve, value); }
         }
         
         //--- Property CtrlMode ---------------------------------------
@@ -384,6 +392,7 @@ namespace RX_DigiPrint.Models
 
             CylinderPresSet  = msg.cylinderPresSet;
             CylinderPres     = msg.cylinderPres;
+            CylinderPresDiff = msg.cylinderPresDiff;
             CylinderSetpoint = msg.cylinderSetpoint;
             PresLung        = msg.presLung;
             CondPresOut     = msg.condPresOut;
@@ -391,6 +400,8 @@ namespace RX_DigiPrint.Models
             CondPumpSpeed   = msg.condPumpSpeed;
             CondTemp        = msg.condTemp;
             FlushTime       = msg.flushTime;
+            AirValve        = msg.airValve;
+            BleedValve      = msg.bleedValve;
             Temp            = msg.temp;
             PumpSpeedSet    = msg.pumpSpeedSet;
             PumpSpeed       = msg.pumpSpeed;
@@ -401,14 +412,11 @@ namespace RX_DigiPrint.Models
             BarCode         = msg.barcode.Replace("; ", "\n");
 
             Connected       = (msg.info & 0x00000001)!=0;
-            BleedValve      = ((msg.info & 0x00000002)==0)? "--":"ON";
-            AirCusionValve  = ((msg.info & 0x00000004)==0)? "--":"ON";
             Flushed         = (msg.info & 0x00000008)!=0;
             CondTempReady   = ((msg.info & 0x00000010)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             TempReady       = ((msg.info & 0x00000020)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             FlowFactorOk    = ((msg.info & 0x00000040)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             Warn            = !TempReady || !CondTempReady || !FlowFactorOk;
-
             
             if (Err!=0)    UpdateStateBrush(Rx.BrushError);
             else if (Warn) UpdateStateBrush(Rx.BrushWarn);

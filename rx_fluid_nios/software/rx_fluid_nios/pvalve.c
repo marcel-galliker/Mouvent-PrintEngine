@@ -79,6 +79,49 @@ void pvalve_init(void)
 	}
 }
 
+//--- Measurement result: Flow characteristic curve ------------
+static int _voltage2flow_open[] =
+		{
+		//  mv		flow
+			1880,	//	0	  0%
+			1920,	//	1
+			1970,	//  2
+			2010,	//  3
+			2050,	//  4
+			2075,	//  5
+			2100,	//  6
+			2150,	//  7
+			2200,	//  8
+			2260,	//	9
+			2300,	// 10
+			2350,	// 11
+			2450,	// 12
+			2500,	// 13
+			2700,	// 14
+			3300,	// 15	100%
+		};
+static int _voltage2flow_close[] =
+		{
+		//  mv		flow
+			2090,	//	0	  0%
+			2150,	//	1
+			2180,	//  2
+			2200,	//  3
+			2240,	//  4
+			2250,	//  5
+			2280,	//  6
+			2350,	//  7
+			2380,	//  8
+			2400,	//	9
+			2440,	// 10
+			2480,	// 11
+			2560,	// 12
+			2650,	// 13
+			2860,	// 14
+			3300,	// 15	100%
+		};
+
+
 //--- _set_valve --------------------------------------
 static int _set_valve(int isNo, int reg, int value)
 {
@@ -87,12 +130,27 @@ static int _set_valve(int isNo, int reg, int value)
 
 	if (!_Active[isNo]) 		return REPLY_ERROR;
 
-	int i2c = _I2CBase[isNo];
+	/*
 	int dac_data = MAX_VAL*value/100;
 
 	if (dac_data<0) 	dac_data=0;
 	if (dac_data>4095)	dac_data=MAX_VAL;
+	*/
 
+	static int _actval=0;
+	int dac_data;
+
+	if (value<10) 		dac_data=0;
+	else if (value>90)	dac_data=MAX_VAL;
+	else
+	{
+		int i=16*value/100;
+		if (value>_actval) dac_data = _voltage2flow_open [i]*MAX_VAL/5000;
+		else 			   dac_data = _voltage2flow_close[i]*MAX_VAL/5000;
+	}
+	_actval = value;
+
+	int i2c = _I2CBase[isNo];
 	I2C_start(i2c, ADDR_DAC60502, WRITE);
 	I2C_write(i2c, reg, !LAST_BYTE);
 	I2C_write(i2c, (dac_data >> 4),  !LAST_BYTE);

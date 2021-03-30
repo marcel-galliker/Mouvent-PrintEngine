@@ -530,7 +530,8 @@ static int _write(int chip, BYTE cmdcode, UINT16 addr, BYTE len, void *data)
 	int idx1 = (_FifoInIdx + 1) % FIFO_SIZE;
 	if (idx1 == _FifoOutIdx) 
 	{
-		TrPrintfL(TRUE, "FIFO Overfilled\n"); 
+		if (!(_ErrorFlags&0x80000000)) TrPrintfL(TRUE, "FIFO Overfilled\n"); 
+		_ErrorFlags |=0x80000000; 
 		return REPLY_ERROR;
 	}
 		

@@ -114,6 +114,7 @@ static void _main_menu(void)
 	if (_cond)
 	{
 		term_printf("P<n>: Set pump to 40%\n");		
+		term_printf("#<n><number>: Set SerialNo of conditioner<n>\n");	
 	}
 	if (_mvteeprom)
 	{
@@ -477,7 +478,8 @@ void putty_display_nios_status(int nios, int status)
 			term_printf("Cooler:        PCB missing\n");
 		}
 
-		term_printf("printed: [l]    "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str(RX_HBStatus->head[no[i]].printed_ml)); term_printf("\n");
+		term_printf("printed: [l]    "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str3(RX_HBStatus->head[no[i]].printed_ml)); term_printf("\n");
+		term_printf("printed: [time] "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_time(RX_HBStatus->head[no[i]].eeprom_mvt.printingSec)); term_printf("\n");
 		term_printf("Temp Head:      "); for (i=0; i<MAX_HEADS_BOARD; i++) term_printf("  %14s", value_str_temp(RX_NiosStat.head_temp[no[i]])); term_printf("\n");
 		term_printf("Cluster:  No: %06d", RX_HBStatus->clusterNo);
 		{
@@ -587,6 +589,7 @@ void putty_display_cond_status(int status)
 			memcpy(&line[16*i+(14-l)], str, l);
 		}
 		term_printf("%s\n", line);		
+		term_printf("SerialNo:        "); PRINTF(MAX_HEADS_BOARD)("         %06d ", _NiosMem->stat.cond[no[i]].serialNo); term_printf("\n");	
 		term_printf("alive:           "); PRINTF(MAX_HEADS_BOARD)("         %06d ", RX_NiosStat.cond[no[i]].alive); term_printf("\n");
 
 		term_printf("error:            ");
