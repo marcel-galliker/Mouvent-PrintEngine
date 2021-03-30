@@ -231,10 +231,10 @@
     <ClInclude Include="robot_client.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\rx_robot_ctrl\common\rx_robot_def.h">
+    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_def.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\rx_robot_ctrl\common\rx_robot_tcpip.h">
+    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_tcpip.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

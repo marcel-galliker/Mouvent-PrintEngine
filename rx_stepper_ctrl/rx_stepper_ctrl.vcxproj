@@ -116,7 +116,7 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Debug-soc.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\arm-linux-gnueabihf;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\backward;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include-fixed;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include\arm-linux-gnueabihf;..\rx_ink_lib;..\rx_common_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\arm-linux-gnueabihf;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\backward;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include-fixed;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include\arm-linux-gnueabihf;..\rx_ink_lib;..\rx_common_lib;..\rx_robot_ctrl\includes;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
@@ -213,8 +213,8 @@
     <ClCompile Include="version.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\rx_robot_ctrl\common\rx_robot_def.h" />
-    <ClInclude Include="..\rx_robot_ctrl\common\rx_robot_tcpip.h" />
+    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_def.h" />
+    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_tcpip.h" />
     <ClInclude Include="args.h" />
     <ClInclude Include="cleaf.h" />
     <ClInclude Include="comm.h" />

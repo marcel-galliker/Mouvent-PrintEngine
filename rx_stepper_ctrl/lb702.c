@@ -443,8 +443,11 @@ int lb702_menu(void)
 	}
     else if (_Menu == 2)
         lbrob_menu(_Help);
-    else
-        robi_lb702_menu(_Help);
+    else 
+	{
+		if (rc_isConnected()) rc_menu(_Help);
+        else                  robi_lb702_menu(_Help);
+	}
 
 	term_printf(">");
 	term_flush();
