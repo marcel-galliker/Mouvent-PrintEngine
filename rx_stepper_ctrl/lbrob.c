@@ -25,6 +25,7 @@
 #include "robi_def.h"
 #include "lb702.h"
 #include "robi_lb702.h"
+#include "robot_client.h"
 
 #define MOTOR_X_0               4
 
@@ -230,6 +231,8 @@ void lbrob_init(void)
     motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
 
     robi_lb702_init();
+    rc_init();
+    rc_config(RX_StepperCfg.boardNo);
 }
 
 //--- lbrob_main ------------------------------------------------------------------
@@ -247,6 +250,7 @@ void lbrob_main(int ticks, int menu)
 
     motor_main(ticks, menu);
     robi_lb702_main(ticks, menu);
+    rc_main(ticks, menu);
 
     _handle_ink_pump_back();
     _handle_waste_pump();

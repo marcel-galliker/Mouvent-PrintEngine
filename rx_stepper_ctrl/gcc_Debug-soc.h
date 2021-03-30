@@ -129,7 +129,7 @@
 #define __LFRACT_IBIT__ 0
 #endif
 #ifndef __GNUC_PATCHLEVEL__
-#define __GNUC_PATCHLEVEL__ 1
+#define __GNUC_PATCHLEVEL__ 3
 #endif
 #ifndef __LFRACT_MAX__
 #define __LFRACT_MAX__ 0X7FFFFFFFP-31LR
@@ -233,8 +233,8 @@
 #ifndef __USACCUM_IBIT__
 #define __USACCUM_IBIT__ 8
 #endif
-#ifndef __USER_lbrob_PREFIX__
-#define __USER_lbrob_PREFIX__ 
+#ifndef __USER_LABEL_PREFIX__
+#define __USER_LABEL_PREFIX__ 
 #endif
 #ifndef __STDC_HOSTED__
 #define __STDC_HOSTED__ 1
@@ -299,11 +299,17 @@
 #ifndef __gnu_linux__
 #define __gnu_linux__ 1
 #endif
+#ifndef __ARM_PCS_VFP
+#define __ARM_PCS_VFP 1
+#endif
 #ifndef __LDBL_HAS_QUIET_NAN__
 #define __LDBL_HAS_QUIET_NAN__ 1
 #endif
 #ifndef __ULACCUM_IBIT__
 #define __ULACCUM_IBIT__ 32
+#endif
+#ifndef _REENTRANT
+#define _REENTRANT 1
 #endif
 #ifndef __UACCUM_EPSILON__
 #define __UACCUM_EPSILON__ 0x1P-16UK
@@ -376,9 +382,6 @@
 #ifndef __INT_LEAST32_MAX__
 #define __INT_LEAST32_MAX__ 2147483647
 #endif
-#ifndef __ARM_PCS
-#define __ARM_PCS 1
-#endif
 #ifndef __DEC32_MIN__
 #define __DEC32_MIN__ 1E-95DF
 #endif
@@ -432,6 +435,9 @@
 #endif
 #ifndef __ULLACCUM_MIN__
 #define __ULLACCUM_MIN__ 0.0ULLK
+#endif
+#ifndef __GCC_HAVE_DWARF2_CFI_ASM
+#define __GCC_HAVE_DWARF2_CFI_ASM 1
 #endif
 #ifndef __GXX_ABI_VERSION
 #define __GXX_ABI_VERSION 1002
@@ -506,7 +512,7 @@
 #define __FLT_MANT_DIG__ 24
 #endif
 #ifndef __VERSION__
-#define __VERSION__ "4.7.1 20120402 (prerelease)"
+#define __VERSION__ "4.7.3 20130226 (prerelease)"
 #endif
 #ifndef __ULLFRACT_FBIT__
 #define __ULLFRACT_FBIT__ 64
@@ -531,6 +537,9 @@
 #endif
 #ifndef __USFRACT_MIN__
 #define __USFRACT_MIN__ 0.0UHR
+#endif
+#ifndef soc
+#define soc 1
 #endif
 #ifndef __ULLACCUM_IBIT__
 #define __ULLACCUM_IBIT__ 32
@@ -573,6 +582,9 @@
 #endif
 #ifndef __UDQ_FBIT__
 #define __UDQ_FBIT__ 64
+#endif
+#ifndef DEBUG
+#define DEBUG 1
 #endif
 #ifndef __INT8_TYPE__
 #define __INT8_TYPE__ signed char
@@ -1039,27 +1051,29 @@
 #endif
 
 // --- Include directories begin --- //
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\arm-linux-gnueabihf
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\backward
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include-fixed
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include\arm-linux-gnueabihf
+//../rx_ink_lib
 //../rx_common_lib
+//../rx_robot_ctrl/includes
 // --- Include directories end --- //
 
 
 // --- Library directories begin --- //
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\lib\gcc\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\lib\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\lib\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\lib\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\lib\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\lib\arm-linux-gnueabihf\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\lib\arm-linux-gnueabihf\
 // --- Library directories begin --- //
 
 #pragma clang diagnostic pop

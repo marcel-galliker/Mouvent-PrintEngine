@@ -23,6 +23,7 @@
 #include "lb702.h"
 #include "stepper_ctrl.h"
 #include "robi_def.h"
+#include "robot_client.h"
 #include "robi_lb702.h"
 
 
@@ -76,7 +77,7 @@ static int		_Menu=1;
 static UINT32	_ErrorFlags=0;
 static int		_lift = TRUE;
 static int		_rob = TRUE;
-static int		_robi = TRUE;
+static int		_robClient = TRUE;
 
 //--- prototypes --------------------------------------------
 static void _lb702_motor_z_test(int steps);
@@ -371,7 +372,7 @@ static void _lb702_handle_menu(char *str)
 		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
         case 'L': _lift = !_lift; break;
         case 'C': _rob = !_rob; break;
-        case 'A': _robi = !_robi; break;
+        case 'A': _robClient = !_robClient; break;
 		}
 	}			
 }
@@ -387,7 +388,11 @@ int lb702_menu(void)
     if (RX_StepperStatus.robot_used)
     {
         if (_rob)	lbrob_display_status();
-        if(_robi)	robi_lb702_display_status();
+		if (_robClient)	
+		{
+			if (rc_isConnected()) rc_display_status();
+			else robi_lb702_display_status();
+		}
     }
 
     if (_Menu == 1)
@@ -422,7 +427,7 @@ int lb702_menu(void)
                 term_printf("C: hide ROBOT Menu  ");
             else
                 term_printf("C: show ROBOT Menu  ");
-            if (_robi)
+            if (_robClient)
                 term_printf("A: hide ROBI Menu\n");
             else
                 term_printf("A: show ROBI Menu\n");

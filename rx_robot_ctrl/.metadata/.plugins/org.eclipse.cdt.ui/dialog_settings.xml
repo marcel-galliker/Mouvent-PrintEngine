@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="Default C source template" key="LastUsedSourceTemplate"/>
+	<item value="Default C header template" key="LastUsedHeaderTemplate"/>
+	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
+		<item value="234" key="size.height"/>
+		<item value="577" key="size.width"/>
+	</section>
+	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
+	</section>
+	<section name="PDOMSearchPage">
+		<item value="false" key="caseSensitive"/>
+		<item value="227191" key="searchFlags"/>
+		<list key="previousPatterns">
+			<item value="MII_BMCR_FULLDUPLEX"/>
+			<item value="MII_ADVERTISE"/>
+			<item value="MII_LPA_100BASE4"/>
+			<item value="MII_SCSR_SPEED_10"/>
+			<item value="configTOTAL_HEAP_SIZE"/>
+			<item value="PBUF_POOL_BUFSIZE"/>
+			<item value="PBUF_POOL_SIZE"/>
+			<item value="_motorStatus"/>
+			<item value="TCPIP"/>
+			<item value="configMAX_PRIORITIES"/>
+			<item value="INCLUDE_vTaskSuspend"/>
+			<item value="DEBUG_PRINTF"/>
+			<item value="includetinyprintfh"/>
+			<item value="define__TFP_PRINTF__"/>
+			<item value="UART_REDIRECT"/>
+			<item value="sys_check_timeouts"/>
+			<item value="NET_USE_EEPROM"/>
+		</list>
+	</section>
+	<section name="NewClassWizardPage">
+	</section>
+	<section name="RenameInformationPopup">
+	</section>
+	<section name="CRenameRefactoringInputPage">
+	</section>
+	<section name="OptionalMessageDialog.hide.">
+		<item value="0" key="askReindex.detail"/>
+	</section>
+	<section name="completion_proposal_size">
+	</section>
+</section>

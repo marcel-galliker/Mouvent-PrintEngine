@@ -129,7 +129,7 @@
 #define __LFRACT_IBIT__ 0
 #endif
 #ifndef __GNUC_PATCHLEVEL__
-#define __GNUC_PATCHLEVEL__ 1
+#define __GNUC_PATCHLEVEL__ 3
 #endif
 #ifndef __LFRACT_MAX__
 #define __LFRACT_MAX__ 0X7FFFFFFFP-31LR
@@ -236,8 +236,8 @@
 #ifndef __USACCUM_IBIT__
 #define __USACCUM_IBIT__ 8
 #endif
-#ifndef __USER_lbrob_PREFIX__
-#define __USER_lbrob_PREFIX__ 
+#ifndef __USER_LABEL_PREFIX__
+#define __USER_LABEL_PREFIX__ 
 #endif
 #ifndef __STDC_HOSTED__
 #define __STDC_HOSTED__ 1
@@ -304,6 +304,9 @@
 #endif
 #ifndef RELEASE
 #define RELEASE 1
+#endif
+#ifndef __ARM_PCS_VFP
+#define __ARM_PCS_VFP 1
 #endif
 #ifndef __LDBL_HAS_QUIET_NAN__
 #define __LDBL_HAS_QUIET_NAN__ 1
@@ -384,9 +387,6 @@
 #endif
 #ifndef __INT_LEAST32_MAX__
 #define __INT_LEAST32_MAX__ 2147483647
-#endif
-#ifndef __ARM_PCS
-#define __ARM_PCS 1
 #endif
 #ifndef __DEC32_MIN__
 #define __DEC32_MIN__ 1E-95DF
@@ -518,7 +518,7 @@
 #define __FLT_MANT_DIG__ 24
 #endif
 #ifndef __VERSION__
-#define __VERSION__ "4.7.1 20120402 (prerelease)"
+#define __VERSION__ "4.7.3 20130226 (prerelease)"
 #endif
 #ifndef __ULLFRACT_FBIT__
 #define __ULLFRACT_FBIT__ 64
@@ -1054,27 +1054,30 @@
 #endif
 
 // --- Include directories begin --- //
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed
-//f:\compiler\linaro-tools\arm-linux-gnueabi\include
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\arm-linux-gnueabihf
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\backward
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include-fixed
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include\arm-linux-gnueabihf
+//../rx_ink_lib
 //../rx_common_lib
+//../rx_common_lib/VisualGDBCache
+//../rx_robot_ctrl/includes
 // --- Include directories end --- //
 
 
 // --- Library directories begin --- //
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\
-//f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\lib\gcc\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\lib\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\lib\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\lib\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\lib\arm-linux-gnueabi\
-//f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\lib\arm-linux-gnueabihf\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\lib\
+//f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\lib\arm-linux-gnueabihf\
 // --- Library directories begin --- //
 
 #pragma clang diagnostic pop
