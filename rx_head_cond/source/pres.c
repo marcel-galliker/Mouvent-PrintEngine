@@ -285,7 +285,7 @@ void pres_tick_10ms(void)
 	}
 
 	//--- calculating meniscus and flow factor --------------------------------
-	if (!valid(RX_Status.pressure_in) || !valid(RX_Status.pressure_out) || RX_Status.error&COND_ERR_p_in_too_high)
+	if (!valid(RX_Status.pressure_in) || !valid(RX_Status.pressure_out))
     {
         RX_Status.meniscus = INVALID_VALUE;
 		RX_Status.flowFactor = INVALID_VALUE;

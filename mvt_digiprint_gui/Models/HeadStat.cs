@@ -358,16 +358,24 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _FlowResistance, value); }
         }
 
-        //--- Property PrintingTime ---------------------------------------
-        private string _PrintingTime="***";
-        public string PrintingTime
+        //--- Property CondPrintingTime ---------------------------------------
+        private string _CondPrintingTime="---";
+        public string CondPrintingTime
         {
-            get { return _PrintingTime; }
-            set { SetProperty(ref _PrintingTime, value); }
+            get { return _CondPrintingTime; }
+            set { SetProperty(ref _CondPrintingTime, value); }
         }
 
-        //--- Property CtrlMode ---------------------------------------
-        private EFluidCtrlMode _CtrlMode;
+		//--- Property HeadPrintingTime ---------------------------------------
+		private string _HeadPrintingTime;
+		public string HeadPrintingTime
+		{
+			get { return _HeadPrintingTime; }
+			set { SetProperty(ref _HeadPrintingTime,value); }
+		}
+
+		//--- Property CtrlMode ---------------------------------------
+		private EFluidCtrlMode _CtrlMode;
         public EFluidCtrlMode CtrlMode
         {
             get { return _CtrlMode; }
@@ -492,15 +500,23 @@ namespace RX_DigiPrint.Models
 
             Meniscus_setpoint = item.meniscus_Setpoint;
             PumpFeedback= item.pumpFeedback;
-            if (item.printingSeconds==TcpIp.INVALID_VALUE) PrintingTime="-----";
+			{
+                UInt32 h, m, s;
+                s = item.eeprom_mvt.printedSec;
+                m = s/60; s=s%60;
+                h = m/60; m=m%60;
+                HeadPrintingTime = string.Format("{0}:{1:00}:{2:00}", h, m, s);
+			}
+
+            if (item.condPrintingSec==TcpIp.INVALID_VALUE) CondPrintingTime="-----";
             else
             {
                 UInt32 h, m, s;
-                s = item.printingSeconds%60;
-                m = item.printingSeconds/60;
+                s = item.condPrintingSec%60;
+                m = item.condPrintingSec/60;
                 h = m/60;
                 m = m%60;
-                PrintingTime = string.Format("{0}:{1:00}:{2:00}", h, m, s);
+                CondPrintingTime = string.Format("{0}:{1:00}:{2:00}", h, m, s);
             }
             CtrlMode    = item.ctrlMode;
 

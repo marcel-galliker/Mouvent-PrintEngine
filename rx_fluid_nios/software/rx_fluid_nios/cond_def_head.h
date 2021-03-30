@@ -214,6 +214,7 @@ typedef struct SConditionerCfg_mcu
 	//--- Counters ----------------------------------
 	UINT32	clusterNo;
 	UINT32	clusterTime;
+	UINT32	serialNo;
 } SConditionerCfg_mcu;
 
 typedef struct
@@ -230,6 +231,7 @@ typedef struct SConditionerStat_mcu
 {
 	//Copy of Conditioner Firmware Version
 	SVersion		version;
+	UINT32			serialNo;
 	
 	SCondCmd		cmdConfirm;
 		
@@ -274,7 +276,7 @@ typedef struct SConditionerStat_mcu
 	UINT32			machineMeters;
 	
 	UINT32			logCnt;
-	SCondLogItem	log[6];
+	SCondLogItem	log[4];
     
     char            pcb_rev;            // Hardware revision as lower ASCII char
 }SConditionerStat_mcu;

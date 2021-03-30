@@ -164,6 +164,18 @@ SPID_par _PumpPID =
 							// Value for DAC, 0x0fff = 9.7V => max, 0x0000 => 32mV => min
 };
 
+SPID_par _PumpPID_Test =
+{
+	.Setpoint		= 4095*40/100,
+	.P				= 100,					// 1000
+	.I				= 0,					// 2000
+	.P_start		= 1,
+	.val_min		= 0,   	// 91, => 0.22V start of linear pump function 
+	.val_max		= 4095, // 0xfff, 	//max value for pump DAC voltage
+							// Value for DAC, 0x0fff = 9.7V => max, 0x0000 => 32mV => min
+};
+
+
 INT32 abs(INT32 val)
 {
     if (val < 0) return -val;
@@ -304,6 +316,7 @@ void pump_tick_10ms(void)
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						RX_Status.logCnt = 0;
+						_PumpPID_Test.val=0;
 						_pump_ticks = 0;
 						if (RX_Status.mode > ctrl_off) ctr_save();
 									
@@ -361,7 +374,7 @@ void pump_tick_10ms(void)
 							if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
 							pid_reset(&_PumpPID);
 							RX_Status.pressure_in_max=INVALID_VALUE;
-							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink);
+							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink | COND_ERR_p_in_too_high);
 							_meniscus_err_cnt=0;
 							_no_ink_err_cnt  =0;		
 						//	_TimeFlowResistancestablePRINT = 0;							
@@ -379,7 +392,18 @@ void pump_tick_10ms(void)
 						
 		case ctrl_test: _set_valve(VALVE_INK);
 						max_pressure = MBAR_500;
-						_set_pump_speed(_PumpPID.val_max*40/100);
+					//	_set_pump_speed(_PumpPID.val_max*40/100);
+						//--- Regulation ---
+						{
+							INT32  diff;
+							INT32  max=_PumpPID_Test.Setpoint*11/10;
+							diff=10*_PumpPID_Test.Setpoint - 10*RX_Status.pump_measured*10000/_PumpPID_Test.val_max; 
+							_PumpPID_Test.val += diff/1000;
+							if (_PumpPID_Test.val<_PumpPID_Test.val_min) _PumpPID_Test.val=_PumpPID_Test.val_min;
+							if (_PumpPID_Test.val>max) _PumpPID_Test.val=max;
+						}
+						_set_pump_speed(_PumpPID_Test.val);
+						
 						RX_Status.mode = RX_Config.mode; 
 						break;
 						
@@ -744,6 +768,7 @@ void pump_tick_10ms(void)
 		case ctrl_flush_weekend:
 		case ctrl_flush_week:
 						turn_off_pump(); // opens FLUSH valve
+						_set_valve(VALVE_FLUSH);
 						max_pressure 	= MBAR_500;
 						RX_Status.mode 	= RX_Config.mode;
                         break;
@@ -864,7 +889,7 @@ static void _set_valve(int state)
 		case VALVE_INK:		RX_Status.info.valve_flush 	= FALSE;
 							RX_Status.info.valve_ink	= TRUE;
 							break;
-		default:			RX_Status.info.valve_flush 	= TRUE;
+		default:			RX_Status.info.valve_flush 	= FALSE;
 							RX_Status.info.valve_ink	= FALSE;
 	}
 	if(RX_Status.pcb_rev>='n')

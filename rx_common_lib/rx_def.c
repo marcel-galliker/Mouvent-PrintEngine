@@ -138,12 +138,14 @@ void RX_ColorNameInit (int inkSupplyNo, ERectoVerso	rectoVerso, char *fileName, 
 //--- RX_ColorNameLong ---------------------
 const char* RX_ColorNameLong(int code)
 {
+	if (code >= SIZEOF(RX_ColorName)) return "INVALID ADRESS";
 	return RX_ColorName[code].name;
 }
 
 //--- RX_ColorShortName ------------------------------------------
 const char* RX_ColorNameShort(int inkSupplyNo)
 {
+	if (inkSupplyNo >= SIZEOF(RX_ColorName)) return "INVALID ADRESS";
 	return _ColorShortName[inkSupplyNo];
 }
 

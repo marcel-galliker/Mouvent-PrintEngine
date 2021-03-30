@@ -220,8 +220,6 @@ typedef struct
 	ENiosInkSupplyErr	error;
 
 	EnFluidCtrlMode	ctrl_state;
-
-	UINT32	sensorID;
 	
 	UINT32	inkPumpSpeed_set;
 	UINT32	inkPumpSpeed_measured;
@@ -229,6 +227,7 @@ typedef struct
 	
 	INT32   IS_Pressure_Actual;
 	INT32   IS_Pressure_Setpoint;
+	INT32	IS_Pressure_Diff;
 	INT32   COND_Pressure_Actual;
 	INT32   COND_Pressure_Setpoint;
 	INT32	PIDsetpoint_Output;
