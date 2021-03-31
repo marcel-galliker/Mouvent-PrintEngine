@@ -32,6 +32,7 @@
 #define SPI_FIFO_ENABLED		(true)
 #define SPI_FIFO_TRIGGER_LEVEL	(1)
 
+#pragma pack(1)
 typedef struct SpiTxDatagram {
 	uint8_t addr;		// 7 bit address + 1bit RW
 	uint32_t data;		// 32 bit data
@@ -41,6 +42,7 @@ typedef struct SpiRxDatagram {
 	uint8_t status;		// 8 bit status
 	uint32_t data;		// 32 bit data
 } SpiRxDatagram_t;
+#pragma pack()
 
 static MotorStatus_t _motorStatus[MOTOR_COUNT];
 static MotorConfig_t _motorConfigs[MOTOR_COUNT];
