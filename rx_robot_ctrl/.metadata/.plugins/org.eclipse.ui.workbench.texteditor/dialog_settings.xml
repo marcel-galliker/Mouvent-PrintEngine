@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="SpiTxDatagram_t" key="selection"/>
+		<item value="move_motors" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="move_motors"/>
+			<item value="move"/>
 			<item value="SpiTxDatagram_t"/>
 			<item value="spi_read_register"/>
 			<item value="SpiTxDatagram"/>
 			<item value="spi_mode_3"/>
 			<item value="SPI_CLOCK_DIVIDER"/>
 			<item value="TMC_XTARGET_REG"/>
-			<item value="motorTargetPosition"/>
-			<item value="update_motor"/>
 		</list>
 		<list key="replacehistory">
 		</list>

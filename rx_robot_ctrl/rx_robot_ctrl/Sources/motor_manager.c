@@ -234,6 +234,15 @@ static void move_motors(RobotMotorsMoveCommand_t* moveCommand)
 		gpio_manager_stop_motor(motorCount);	// Pause to start them in sync later
 		spi_write_register(TMC_XTARGET_REG, moveCommand->targetPosition[motorCount], motorCount);
 	}
+
+	// Start motors sync
+	for(int motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
+	{
+		uint8_t motorSet = (moveCommand->motors >> motorCount) & 1U;
+
+		if(motorSet == true)
+			gpio_manager_start_motor(motorCount);
+	}
 }
 
 static void stop_motors(RobotMotorsStopCommand_t* stopCommand)
