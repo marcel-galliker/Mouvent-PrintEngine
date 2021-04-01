@@ -868,7 +868,8 @@ static int _print_next(void)
 					{
 						int img_offset=_Item.pageMargin + _Item.pageWidth;
 						int bar_width=RX_Spooler.barWidthPx*25400/1200;
-						int clearBlockUsed=(_Item.id.copy >= _Item.copies) || (_Item.firstPage!=_Item.lastPage) || (_Item.pageMargin!=_PageMargin_Next);
+						int new_margin = _PageMargin_Next; // save the value as it could be changed by another thread
+						int clearBlockUsed = (_Item.id.copy >= _Item.copies) || (_Item.firstPage != _Item.lastPage) || (_Item.pageMargin != new_margin);
 						if (img_offset>bar_width && RX_Config.printer.type!=printer_LH702) img_offset = bar_width;
 						if (_ChangeJob==1)
 						{	
@@ -885,7 +886,7 @@ static int _print_next(void)
 						item.lengthUnit = PQ_LENGTH_UNDEF;
 						if (_Item.variable) label_send_data(&_Item.id, _Item.copies);
 						spool_print_file(&_Item.id, _DataPath, img_offset, 0, &item, clearBlockUsed);
-						if (RX_Config.printer.type == printer_LH702) _Item.pageMargin = _PageMargin_Next;
+						_Item.pageMargin = new_margin;
 					}
 					
 					if (RX_Config.printer.type==printer_LH702 && _NextItem==NULL)

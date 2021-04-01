@@ -1112,6 +1112,7 @@ int  fpga_image	(SFpgaImageCmd *msg)
 		}
 		
 		idx = (idx+1) % IMAGE_LIST_SIZE;
+		_Img[head][idx].blkCnt = -1;
 		if (idx==Fpga.data->imgOutIdx[head][1]) 
 		{
 			fpga_trace_registers("Image-Buffer-Overflow", TRUE);
@@ -1220,29 +1221,32 @@ static void _fpga_check_fp_errors(int printDone)
 				{
 					int err=FALSE;
                     char id[64];
-					SPageId *pid = &_PageId[RX_HBStatus[0].head[head].printGoCnt&MAX_PAGES];
-                    sprintf(id, "(id=%d, page=%d, copy=%d, scan=%d)", pid->id, pid->page, pid->copy, pid->scan);
+					int idx = RX_HBStatus[0].head[head].printGoCnt % MAX_PAGES;
+					SPageId *pid = &_PageId[idx];
+					int printing = (_Img[head][idx].blkCnt != 1); // else ignore the error as head is not printing
+					sprintf(id, "(id=%d, page=%d, copy=%d, scan=%d)", pid->id, pid->page, pid->copy, pid->scan);
 					switch(n)
 					{
 					case 0: 	fpga_trace_registers("img_line_err_0", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: 1st Data Block missing: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
+								if (printing) Error(ERR_ABORT, 0, "Head[%d]: 1st Data Block missing: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
 								err=TRUE;
 								break;
 					case 1: 	fpga_trace_registers("img_line_err_1", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: img-info missing: imgIn=%d, PG=%d LastPrinted: %s cnt=%d", head, RX_HBStatus[0].head[head].imgInCnt+1, RX_HBStatus[0].head[head].printGoCnt+1, _PrintDoneId, Fpga.error->img_line_err[n][head]);
+								if (printing) Error(ERR_ABORT, 0, "Head[%d]: img-info missing: imgIn=%d, PG=%d LastPrinted: %s cnt=%d idx=%d blkCnt=%d", head, RX_HBStatus[0].head[head].imgInCnt + 1, RX_HBStatus[0].head[head].printGoCnt + 1, _PrintDoneId, Fpga.error->img_line_err[n][head], idx , _Img[head][idx].blkCnt);
 							//	rx_sleep(100);
 							//	Error(ERR_ABORT, 0, "Head[%d]: 1st img-line missing due to no img-info: cnt=%d, imgIn=%d, PG=%d", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt);
 								err=TRUE;
 								break;
 					case 2: 	fpga_trace_registers("img_line_err_2", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: not used: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
+								if (printing) Error(ERR_ABORT, 0, "Head[%d]: not used: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
 								err=TRUE;
 								break;
 					case 3: 	fpga_trace_registers("img_line_err_3", TRUE);
-								Error(ERR_ABORT, 0, "Head[%d]: Data Block missing: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
+								if (printing) Error(ERR_ABORT, 0, "Head[%d]: Data Block missing: cnt=%d, imgIn=%d, PG=%d %s", head, Fpga.error->img_line_err[n][head], RX_HBStatus[0].head[head].imgInCnt, RX_HBStatus[0].head[head].printGoCnt, id);
 								err=TRUE;
 								break;	
 					}
+
 					if (err)
 					{
 						Error(LOG, 0, "Head[%d]: imgInCnt=%d, imgInIdx=%d, buf=%d, imgOutIdx=%d/%d, PrintGO=%d, PrintDONE=%d",
