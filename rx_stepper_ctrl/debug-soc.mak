@@ -13,7 +13,7 @@ OBJCOPY := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-objcopy.exe
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG linux soc
-INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_robot_ctrl/includes
+INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib
 LIBRARY_DIRS := 
 LIBRARY_NAMES := 
 ADDITIONAL_LINKER_INPUTS := 

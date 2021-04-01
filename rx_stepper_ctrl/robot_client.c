@@ -281,25 +281,24 @@ void rc_display_status(void)
 	term_printf("Memory position: %d\n",	_RobotStatus.bootloader.progMemPos);
 	term_printf("Memory blocks used: %d\n", _RobotStatus.bootloader.progMemBlocksUsed);
 	term_printf("Programm size: %d\n",		_RobotStatus.bootloader.progSize);
-	
+	term_printf("\n");
+
 	// GPIO information
-	term_printf("\nInputs:");
+	term_printf("Inputs:    ");
 	for (i = 0; i < NUMBER_OF_INPUTS; i++)
 	{
-		if ((i % 4) == 0)
-			term_printf(" ");
-		
-		term_printf("%d", (_RobotStatus.gpio.inputs >> (NUMBER_OF_INPUTS - i - 1)) & 1);
+		if ((i % 4) == 0) term_printf(" ");
+		if (_RobotStatus.gpio.inputs & (1<<(NUMBER_OF_INPUTS - i - 1))) term_printf("*");
+		else	                                                        term_printf("_");
 	}
 	term_printf("\n");
 	
-	term_printf("Outputs: ");
+	term_printf("Outputs:   ");
 	for (i = 0; i < NUMBER_OF_OUTPUTS; i++)
 	{
-		if ((i % 4) == 0)
-			term_printf(" ");
-		
-		term_printf("%d", (_RobotStatus.gpio.outputs >> (NUMBER_OF_OUTPUTS - i - 1)) & 1);
+		if ((i % 4) == 0) term_printf(" ");
+		if (_RobotStatus.gpio.outputs & (1<<(NUMBER_OF_OUTPUTS - i - 1))) term_printf("*");
+		else	                                                          term_printf("_");
 	}
 	term_printf("\n");
 	
@@ -314,6 +313,7 @@ void rc_display_status(void)
 	term_printf("\nMotors\tPos\t\tTarget Pos\tEnc Pos\t\tIsMoving\tIsStalled\tIsConfigured\n");
 	for (i=0; i<MOTOR_COUNT; i++)
 	{
+		term_printf("%d-", i);
 		switch(i)
 		{
         case MOTOR_XY_0:	term_printf("XY0"); break;
