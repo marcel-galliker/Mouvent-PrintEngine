@@ -433,7 +433,7 @@ namespace RX_DigiPrint.Models
         }
         
         //--- Property Speed ---------------------------------------
-        private int _Speed;
+        private int _Speed = 30;
         public int Speed
         {
             get { return _Speed; }
@@ -649,7 +649,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property PrintGoMode ---------------------------------------
-        private TcpIp.EPrintGoMode _PrintGoMode;
+        private TcpIp.EPrintGoMode _PrintGoMode = TcpIp.EPrintGoMode.PG_MODE_GAP;
         public TcpIp.EPrintGoMode PrintGoMode
         {
             get { return _PrintGoMode; }

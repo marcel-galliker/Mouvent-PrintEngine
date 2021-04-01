@@ -354,6 +354,13 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 	memcpy(&pPlcPar->dots, pItem->dots, sizeof(pPlcPar->dots));
 	pPlcPar->bidir	= (pItem->scanMode==PQ_SCAN_BIDIR);
 	pPlcPar->speed	= pItem->speed;
+	if (pPlcPar->speed == 0)
+	{
+		pPlcPar->speed = 30;
+		Error(WARN, 0, "No speed set, set Speed to %d m/min", pPlcPar->speed);
+	}
+
+
 	if (RX_Config.printer.type==printer_cleaf)
 	{
 		int flexo = lc_get_value_by_name_UINT32(UnitID ".PAR_FLEXO_CONFIGURATION", &flexo);
@@ -363,6 +370,8 @@ static void _plc_set_par(SPrintQueueItem *pItem, SPlcPar *pPlcPar)
 			Error(WARN, 0, "Set Speed to %d because flexo used", pPlcPar->speed);
 		}
 	}
+	TrPrintfL(TRUE, "Print Speed=%d m/min", pPlcPar->speed);
+
 	_StepDist = 43.328 * RX_Config.headsPerColor;
 	
 	if (!RX_Config.printer.overlap)
