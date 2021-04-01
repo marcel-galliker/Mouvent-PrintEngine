@@ -167,6 +167,7 @@ class Network:
         devs = [x.attrib for x in root.findall("item") if x.attrib['DevTypeStr'] in self.protocols.keys()]
         if not devs:
             raise ValueError(f"no {', '.join(self.protocols.keys())} in network.cfg")
+        devs.sort(key=lambda d:int(d["DevNo"])) # sort by dev no to ensure the first item in list is DevNo=0
 
         # create all the boards
         allboards = []

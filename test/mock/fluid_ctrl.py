@@ -90,8 +90,9 @@ class Board(network.AbstractBoard):
         self.error = 0
         self.config = {}
         self.config["REP_FLUID_STAT"] = Message("REP_FLUID_STAT").empty() 
-        self.config["REP_SCALES_STAT"] = Message("REP_SCALES_STAT").empty()
-        self.config["REP_SCALES_STAT"]["val"] = 18*[10000,]
+        if self.no==0:
+            self.config["REP_SCALES_STAT"] = Message("REP_SCALES_STAT").empty()
+            self.config["REP_SCALES_STAT"]["val"] = 18*[10000,]
 
         for i in range(4):
             self.config["REP_FLUID_STAT"]["stat"][i]["canisterLevel"] = 10000
