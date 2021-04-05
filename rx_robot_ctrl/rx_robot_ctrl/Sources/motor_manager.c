@@ -287,7 +287,10 @@ static void check_encoder(uint8_t motor)
 	int32_t positionDifference = abs(_motorStatus[motor].motorPosition - _motorStatus[motor].motorEncoderPosition);
 
 	if(positionDifference > _encoderTolerance[motor])
+	{
 		_motorStatus[motor].isStalled = true;
+		stop_motor(motor);
+	}
 }
 
 static void check_stop_bits(uint8_t motor)
