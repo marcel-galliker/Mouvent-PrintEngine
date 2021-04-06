@@ -30,6 +30,10 @@ namespace RX_DigiPrint.Models
             while (_MyList.Count < cnt) _MyList.Add(new ClusterStat());
         }
 
+        public int Number
+        {
+            get { return _MyList.Count; }
+        }
 
         //--- SetItem -----------------------------
         public void SetItem(TcpIp.SHeadBoardStat item)

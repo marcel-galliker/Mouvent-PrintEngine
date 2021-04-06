@@ -98,7 +98,7 @@ namespace RX_DigiPrint.Services
 
             addData(System.Reflection.Assembly.GetExecutingAssembly().GetName(), "Version", "Printer.Version", "Software version", "", new VersionConverter());
 
-            if (RxGlobals.RxInterface.GuiConnected && RxGlobals.InkSupply.List.Count > 0 && RxGlobals.ClusterStat.List.Count > 0)
+            if (RxGlobals.RxInterface.GuiConnected && RxGlobals.InkSupply.List.Count > 0 && RxGlobals.ClusterStat.List.Count > 0 && RxGlobals.PrinterStatus.CounterTotal >=0)
             {
                 addData(RxGlobals.PrinterStatus, "CounterTotal", "Printer.Statistics.TotalMetersPrinted", "Total distance printed", "meter");
 
@@ -122,6 +122,8 @@ namespace RX_DigiPrint.Services
                         }
                     }
                 }
+
+                addData(RxGlobals.ClusterStat, "Number", "Printer.ClustersNumber", "Number of clusters", "");
 
                 foreach (ClusterStat board in RxGlobals.ClusterStat.List)
                 {

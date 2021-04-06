@@ -59,6 +59,35 @@ namespace RX_Common
             });
         }
 
+        /// <summary>
+        /// GetProperty Interlocked on double to ensure atomic access
+        /// </summary>
+        /// <param name="property">ref to the double property to read</param>
+        /// <returns>value of the property</returns>
+        public double GetProperty(ref double property)
+        {
+            return Interlocked.CompareExchange(ref property, 0, 0);
+        }
+
+        /// <summary>
+        /// SetProperty Interlocked (for double) and call PropertyChanged
+        /// </summary>
+        /// <param name="property">ref to the property (double) </param>
+        /// <param name="val">new value</param>
+        /// <param name="propName">property name to pass to PropertyChanged (if exists)</param>
+        /// <returns>True if property changed</returns>
+        public bool SetProperty(ref double property, double val, [CallerMemberName] String propName = null)
+        {
+            if (Interlocked.CompareExchange(ref property, val, val) != val)
+            {
+                Interlocked.Exchange(ref property, val);
+                if (PropertyChanged != null)
+                    Invoke(() => PropertyChanged(this, new PropertyChangedEventArgs(propName)));
+                return true;
+            }
+            return false;
+        }
+
         //--- SetProperty -------------------------------------------------------
         public bool SetProperty<type>(ref type property, type val, [CallerMemberName]String propName = null)
         {

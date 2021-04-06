@@ -177,7 +177,7 @@ namespace RX_DigiPrint.Models
         private double _ActSpeed;
         public double ActSpeed
         {
-            get { return _ActSpeed; }
+            get { return GetProperty(ref _ActSpeed); }
             set { SetProperty(ref _ActSpeed, value); }
         }
 
@@ -185,15 +185,15 @@ namespace RX_DigiPrint.Models
         private double _CounterAct;
         public double CounterAct
         {
-            get { return _CounterAct; }
+            get { return GetProperty(ref _CounterAct); }
             set { SetProperty(ref _CounterAct, value); }
         }
 
         //--- Property CounterTotal ---------------------------------------
-        private double _CounterTotal;
+        private double _CounterTotal = -1;
         public double CounterTotal
         {
-            get { return _CounterTotal; }
+            get { return GetProperty(ref _CounterTotal); }
             set { SetProperty(ref _CounterTotal, value); }
         }
         
