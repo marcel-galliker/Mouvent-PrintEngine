@@ -17,6 +17,8 @@
 #include "rx_threads.h"
 #include "rx_robot_def.h"
 #include "rx_robot_tcpip.h"
+#include "rx_trace.h"
+#include "version.h"
 #include "robot_client.h"
 
 //--- Modlue Globals -----------------------------------------------------------------
@@ -39,8 +41,9 @@ static void _configure_z_motor(void);
 
 
 static void _rc_stop(int motors);
-static void _rc_motor_moveBy(int motor, int speed, int steps);
-static void _rc_motor_moveToStop(int motor, int speed, int input);
+static void _rc_reset(int motor);
+static void _rc_motor_moveBy(int motor, int steps);
+static void _rc_motor_moveToStop(int motor, int input);
 static void _rc_motor_moveToRef(int motor, int direction);
 
 
@@ -128,6 +131,7 @@ static void _config_motors(void)
             case MOTOR_SCREW:	_configure_screw_motor();	break;
             case MOTOR_Z:		_configure_z_motor();		break;
 			}
+			_rc_reset(motor);
 			_MotorInit |= (1<<motor);
 			return;
 		}
@@ -267,7 +271,7 @@ void rc_display_status(void)
 {
 	int i;
 	
-	term_printf("Robot ---------------------------------");
+	term_printf("Robot %s ---------------------------------", version);
 	
 	// Connection information
 //	term_printf("\nConnection Status: %d\n", _isConnected);
@@ -277,25 +281,24 @@ void rc_display_status(void)
 	term_printf("Memory position: %d\n",	_RobotStatus.bootloader.progMemPos);
 	term_printf("Memory blocks used: %d\n", _RobotStatus.bootloader.progMemBlocksUsed);
 	term_printf("Programm size: %d\n",		_RobotStatus.bootloader.progSize);
-	
+	term_printf("\n");
+
 	// GPIO information
-	term_printf("\nInputs:");
+	term_printf("Inputs:    ");
 	for (i = 0; i < NUMBER_OF_INPUTS; i++)
 	{
-		if ((i % 4) == 0)
-			term_printf(" ");
-		
-		term_printf("%d", (_RobotStatus.gpio.inputs >> (NUMBER_OF_INPUTS - i - 1)) & 1);
+		if ((i % 4) == 0) term_printf(" ");
+		if (_RobotStatus.gpio.inputs & (1<<(NUMBER_OF_INPUTS - i - 1))) term_printf("*");
+		else	                                                        term_printf("_");
 	}
 	term_printf("\n");
 	
-	term_printf("Outputs: ");
+	term_printf("Outputs:   ");
 	for (i = 0; i < NUMBER_OF_OUTPUTS; i++)
 	{
-		if ((i % 4) == 0)
-			term_printf(" ");
-		
-		term_printf("%d", (_RobotStatus.gpio.outputs >> (NUMBER_OF_OUTPUTS - i - 1)) & 1);
+		if ((i % 4) == 0) term_printf(" ");
+		if (_RobotStatus.gpio.outputs & (1<<(NUMBER_OF_OUTPUTS - i - 1))) term_printf("*");
+		else	                                                          term_printf("_");
 	}
 	term_printf("\n");
 	
@@ -310,6 +313,7 @@ void rc_display_status(void)
 	term_printf("\nMotors\tPos\t\tTarget Pos\tEnc Pos\t\tIsMoving\tIsStalled\tIsConfigured\n");
 	for (i=0; i<MOTOR_COUNT; i++)
 	{
+		term_printf("%d-", i);
 		switch(i)
 		{
         case MOTOR_XY_0:	term_printf("XY0"); break;
@@ -339,8 +343,18 @@ static void _rc_stop(int motors)
 	sok_send(&_RC_Socket, &cmd);
 }
 
+//--- _rc_reset --------------------------------
+static void _rc_reset(int motor)
+{
+	SRobotMotorsResetCmd cmd;
+	cmd.header.msgLen = sizeof(cmd);
+	cmd.header.msgId  = CMD_MOTORS_RESET;
+	cmd.motors = 1<<motor;
+	sok_send(&_RC_Socket, &cmd);
+}
+
 //--- _rc_motor_moveBy --------------------------
-static void _rc_motor_moveBy(int motor, int speed, int steps)
+static void _rc_motor_moveBy(int motor, int steps)
 {
 	SRobotMotorsMoveCmd cmd;
 	memset(&cmd, 0, sizeof(cmd));
@@ -353,7 +367,7 @@ static void _rc_motor_moveBy(int motor, int speed, int steps)
 }
 
 //--- _rc_motor_moveToStop --------------------------------
-static void _rc_motor_moveToStop(int motor, int speed, int stopInput)
+static void _rc_motor_moveToStop(int motor, int stopInput)
 {
 	SRobotMotorsMoveCmd cmd;
 	memset(&cmd, 0, sizeof(cmd));
@@ -369,19 +383,12 @@ static void _rc_motor_moveToStop(int motor, int speed, int stopInput)
 //--- _rc_motor_moveToRef ----------------------------------
 static void _rc_motor_moveToRef(int motor, int direction)
 {
-	int speed;
-	if (direction) speed=100;
-	else speed=-100;
-
 	switch(motor)
 	{
-		switch(motor)
-		{
-        case MOTOR_XY_0:	_rc_motor_moveToStop(motor, speed, 2*motor+direction);	break;
-        case MOTOR_XY_1:	_rc_motor_moveToStop(motor, speed, 2*motor+direction);	break;
-        case MOTOR_SCREW:	_rc_motor_moveToStop(motor, speed, 2*motor+direction);	break;
-        case MOTOR_Z:		_rc_motor_moveToStop(motor, speed, 2*motor+direction);	break;
-		}
+    case MOTOR_XY_0:	_rc_motor_moveToStop(motor, 2*motor+direction);	break;
+    case MOTOR_XY_1:	_rc_motor_moveToStop(motor, 2*motor+direction);	break;
+    case MOTOR_SCREW:	_rc_motor_moveToStop(motor, 2*motor+direction);	break;
+    case MOTOR_Z:		_rc_motor_moveToStop(motor, 2*motor+direction);	break;
 	}
 }
 
@@ -419,17 +426,13 @@ void rc_menu(int help)
 //--- rc_handle_menu ----------------------------------------
 void rc_handle_menu(char *str)
 {
-	int no;
-
-    if (robi_is_init() == FALSE)
-		return;
-	
-	no = str[1]-'0';
+	int no = str[1]-'0';
 	switch (str[0])
 	{
 	case 's':	_rc_stop(0x0f); break;
-    case 'm':	_rc_motor_moveBy(no, 100, atoi(&str[2]));	break;
-    case 'r':	_rc_motor_moveToRef(no, atoi(&str[2]));		break;
+    case 'm':	_rc_motor_moveBy(no, atoi(&str[2]));	break;
+    case 'r':	_rc_reset(no); break;
+					//_rc_motor_moveToRef(no, atoi(&str[2]));		break;
     default:
         break;
 	}

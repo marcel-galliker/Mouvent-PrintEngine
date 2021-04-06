@@ -1065,7 +1065,6 @@
 //../rx_ink_lib
 //../rx_common_lib
 //../rx_common_lib/VisualGDBCache
-//../rx_robot_ctrl/includes
 // --- Include directories end --- //
 
 

@@ -42,7 +42,6 @@
  */
 
 #include "netif_arch.h"
-#include "net.h"
 
 // Use TCP_MSS instead of hardcoded 1500
 // Note that TCP_MSS can be lowered for RAM purposes
@@ -145,9 +144,6 @@ err_t arch_ft900_init(struct netif *netif)
 	/* Call Ethenet hardware driver initialisation routine. */
 	ethernet_init(netif->hwaddr);
 
-	// Disable 100mbit
-	ethernet_mii_write(MII_ADVERTISE, MII_ACR_CSMA | MII_ACR_10HALF | MII_ACR_10FULL);
-
 	// Enable options for the ethernet interface.
 	ethernet_rx_enable(1);
 	ethernet_tx_enable(1);
@@ -157,12 +153,12 @@ err_t arch_ft900_init(struct netif *netif)
 
 	/* Setup LED 0 to be the TX LED */
 	gpio_function(4, pad_enet_led0);
-	//ethernet_led_mode(0, ethernet_led_mode_tx);
-	ethernet_led_mode(0, ethernet_led_mode_spd);
+	ethernet_led_mode(0, ethernet_led_mode_tx);
+	//ethernet_led_mode(0, ethernet_led_mode_link);
 	/* Setup LED 1 to be the RX LED */
 	gpio_function(5, pad_enet_led1);
-	//ethernet_led_mode(1, ethernet_led_mode_rx);
-	ethernet_led_mode(1, ethernet_led_mode_fdx);
+	ethernet_led_mode(1, ethernet_led_mode_rx);
+	//ethernet_led_mode(1, ethernet_led_mode_spd);
 
 	/* Configure hardware interrupts. */
 	interrupt_attach(interrupt_ethernet, (uint8_t)interrupt_ethernet, arch_ft900_ethernet_ISR);

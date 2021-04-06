@@ -467,7 +467,10 @@ int lb702_menu(void)
 				  else if (_Menu == 2)
 				      lbrob_handle_menu(str);
 				  else
-				      robi_lb702_handle_menu(str);
+				  {
+						if (rc_isConnected()) rc_handle_menu(str);
+						else                  robi_lb702_handle_menu(str);
+				  }
 				  break;
 		}		
 	}

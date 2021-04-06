@@ -14,12 +14,6 @@
 
 #include "rx_sok.h"
 
-#define MOTOR_Y_LEFT	0
-#define MOTOR_Y_RIGHT	1
-#define MOTOR_Y_BITS	0x03
-#define MOTOR_Z			2
-#define MOTOR_Z_BITS	0x04
-
 //--- test table I/O -----------------------------------
 
 #define TT_CAP_UP_IN			0x00000001	//	in00

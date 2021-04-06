@@ -24,7 +24,15 @@
 #include "stepper_ctrl.h"
 #include "test_table.h"
 
+
 //--- defines ----------------------------------------------
+
+#define MOTOR_Y_LEFT	0
+#define MOTOR_Y_RIGHT	1
+#define MOTOR_Y_BITS	0x03
+#define MOTOR_Z			2
+#define MOTOR_Z_BITS	0x04
+
 #define POSY_LOAD		  1000
 #define POSY_PRINT		250000
 #define POSY_TABLE		145000

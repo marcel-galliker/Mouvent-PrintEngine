@@ -32,6 +32,7 @@
 #define SPI_FIFO_ENABLED		(true)
 #define SPI_FIFO_TRIGGER_LEVEL	(1)
 
+#pragma pack(1)
 typedef struct SpiTxDatagram {
 	uint8_t addr;		// 7 bit address + 1bit RW
 	uint32_t data;		// 32 bit data
@@ -41,6 +42,7 @@ typedef struct SpiRxDatagram {
 	uint8_t status;		// 8 bit status
 	uint32_t data;		// 32 bit data
 } SpiRxDatagram_t;
+#pragma pack()
 
 static MotorStatus_t _motorStatus[MOTOR_COUNT];
 static MotorConfig_t _motorConfigs[MOTOR_COUNT];
@@ -232,6 +234,15 @@ static void move_motors(RobotMotorsMoveCommand_t* moveCommand)
 		gpio_manager_stop_motor(motorCount);	// Pause to start them in sync later
 		spi_write_register(TMC_XTARGET_REG, moveCommand->targetPosition[motorCount], motorCount);
 	}
+
+	// Start motors sync
+	for(int motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
+	{
+		uint8_t motorSet = (moveCommand->motors >> motorCount) & 1U;
+
+		if(motorSet == true)
+			gpio_manager_start_motor(motorCount);
+	}
 }
 
 static void stop_motors(RobotMotorsStopCommand_t* stopCommand)
@@ -276,7 +287,10 @@ static void check_encoder(uint8_t motor)
 	int32_t positionDifference = abs(_motorStatus[motor].motorPosition - _motorStatus[motor].motorEncoderPosition);
 
 	if(positionDifference > _encoderTolerance[motor])
+	{
 		_motorStatus[motor].isStalled = true;
+		stop_motor(motor);
+	}
 }
 
 static void check_stop_bits(uint8_t motor)
