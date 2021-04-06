@@ -102,6 +102,7 @@ static void init_outputs(void);
 static void toggle_watchdog(void);
 static void update_outputs(void);
 static void update_inputs(void);
+static int  update_input(int no);
 static void gpio_manager_set_outputs(uint8_t outputs);
 static void gpio_manager_handle_message(void* message);
 
@@ -147,8 +148,7 @@ bool gpio_manager_get_input(uint8_t input)
 {
 	if(input > NUMBER_OF_INPUTS)
 		return 0;
-
-	return gpio_read(_inputs[input]);
+	return update_input(input);
 }
 
 void gpio_manager_enable_motor(uint8_t motor)
@@ -356,23 +356,30 @@ static void update_outputs(void)
 
 static void update_inputs(void)
 {
-	static uint8_t count;
-	static uint8_t val;
-
+	int count;
 	for(count = 0; count < _inputCount; count++)
 	{
-		val = gpio_read(_inputs[count]);
+		update_input(count);
+	}
+}
+
+static int update_input(int no)
+{
+	uint8_t val;
+
+	val = gpio_read(_inputs[no]);
 
 #ifdef INVERTED_INPUTS
-		val = !val;
+	val = !val;
 #endif
 
-		if(val != ((_gpioStatus.inputs >> count) & 1))
-		{
-			_gpioStatus.inputEdges[count] += 1;
-			_gpioStatus.inputs ^= 1 << count;
-		}
+	if(val != (_gpioStatus.inputs & (1 << no)))
+	{
+		_gpioStatus.inputEdges[no] += 1;
+		if (val) _gpioStatus.inputs |=  (1 << no);
+		else	 _gpioStatus.inputs &= ~(1 << no);
 	}
+	return (val!=0);
 }
 
 static void gpio_manager_set_outputs(uint8_t outputs)

@@ -11,6 +11,7 @@
 
 /* Defines */
 
+
 // Command masks
 #define COMMAND_TYPE_MASK		(0xFF000000)
 

@@ -241,7 +241,10 @@ static void move_motors(RobotMotorsMoveCommand_t* moveCommand)
 		uint8_t motorSet = (moveCommand->motors >> motorCount) & 1U;
 
 		if(motorSet == true)
+		{
 			gpio_manager_start_motor(motorCount);
+			_motorStatus[motorCount].moveStartCnt++;
+		}
 	}
 }
 
@@ -303,6 +306,7 @@ static void check_stop_bits(uint8_t motor)
 		uint8_t used = (_stopBits[motor] >> inputCount) & 1;
 		if(used == false)
 			continue;
+
 
 		uint8_t isSet = gpio_manager_get_input(inputCount);
 		if(isSet == _stopBitLevels[motor])
@@ -433,12 +437,17 @@ static void update_status(uint8_t status, uint8_t motor)
 
 	if((_motorStatus[motor].status & TMC_STATUS_STANDSTILL_FLAG) && (_motorStatus[motor].isMoving == true))
 	{
+		_motorStatus[motor].moveDoneCnt = _motorStatus[motor].moveStartCnt;
 		_motorStatus[motor].isMoving = false;
 		_encoderTolerance[motor] = 0;
 		_stopBits[motor] = 0;
 		_stopBitLevels[motor] = 0;
 		gpio_manager_disable_motor(motor);
+	//	status_manager_send_status();
 	}
 	else if(!(_motorStatus[motor].status & TMC_STATUS_STANDSTILL_FLAG))
+	{
 		_motorStatus[motor].isMoving = true;
+	//	status_manager_send_status();
+	}
 }

@@ -21,30 +21,65 @@
 #include "version.h"
 #include "robot_client.h"
 
+//--- defines -----------------------------------------------------
+// Inputs
+#define ENDSTOP_SCREW_ROTATION	0
+#define	ENDSTOP_Z_DOWN			1
+#define ENDSTOP_Z_UP			2
+#define ENDSTOP_Y_AXIS			3
+#define ENDSTOP_GARAGE			4
+#define ENDSTOP_X_AXIS			5
+
+#define ROB_IN(in) (_RobotStatus.gpio.inputs & 1<<(in))
+
+// Outputs
+#define OUTPUT_Z_UP		1
+#define OUTPUT_Z_DOWN	0
+
+
+#define STEPS_PER_REV				51200
+#define DISTANCE_UM_PER_REV			36000   // mirco meters per revolution
+
+#define SCREW_CURRENT_HIGH			(0b00000000000000010001110000000000)
+#define SCREW_CURRENT_LOW			(0b00000000000000010001001100000000)
+#define Z_CURRENT_UP				(0b00000000000000010000101000000000)
+#define Z_CURRENT_DOWN				(0b00000000000000010000111000000000)
+
 //--- Modlue Globals -----------------------------------------------------------------
 static char _IpAddr[32]="";
 RX_SOCKET	_RC_Socket = INVALID_SOCKET;
 HANDLE					_RobotHdl;
 static SRobotStatusMsg	_RobotStatus;
 static int				_MotorInit;
+static SMotorConfig		_MotorCfg[MOTOR_COUNT];
+static int				_MotorIsMoving[MOTOR_COUNT];
+
+static int				_RC_State;
+
+#define RC_STATE_REF	1000
 
 //--- Prototypes ------------------------------------------------------
 static void* _robot_ctrl_thread(void* lpParameter);
 static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *ppar);
 static int _connection_closed(RX_SOCKET socket, const char *peerName);
 
-static void _config_motors(void);
+static int  _config_motors(void);
 
 static void _configure_xy_motor(uint8_t motor);
 static void _configure_screw_motor(void);
 static void _configure_z_motor(void);
-
+static void _send_MotorCfg(int motor);
 
 static void _rc_stop(int motors);
 static void _rc_reset(int motor);
 static void _rc_motor_moveBy(int motor, int steps);
-static void _rc_motor_moveToStop(int motor, int input);
-static void _rc_motor_moveToRef(int motor, int direction);
+static void _rc_motor_moveToStop(int motor, int steps, int input);
+static void _rc_moveto_xy_stop(int x, int y, int stop);
+
+static void _rc_state_machine(void);
+
+static int _steps_2_micron(int steps);
+static int _micron_2_steps(int micron);
 
 
 //--- rc_init ----------------------------------------------------
@@ -74,8 +109,8 @@ void rc_main(int ticks, int menu)
 	{
 		if (menu)
 		{
-			
 		}
+//		if (_RC_State) _rc_state_machine();
 	}
 }
 
@@ -83,16 +118,17 @@ void rc_main(int ticks, int menu)
 static void* _robot_ctrl_thread(void* lpParameter)
 {
 	int errNo;
+	TrPrintfL(TRUE, "_robot_ctrl_thread started");
 	while(TRUE)
 	{
+		TrPrintfL(TRUE, "_robot_ctrl_thread _RC_Socket=%d, _IpAddr=>>%s<<", _RC_Socket, _IpAddr);
 		if (_RC_Socket!=INVALID_SOCKET)
 		{
-		//	sok_send_2(&_RC_Socket, CMD_STATUS_GET, 0, NULL);
-
 			SMsgHdr msg;
 			msg.msgId = CMD_STATUS_GET;
 			msg.msgLen = sizeof(msg);
 			sok_send(&_RC_Socket, &msg);
+			TrPrintfL(TRUE, "sent CMD_STATUS_GET");
 		}
 		else if (_IpAddr[0])
 		{
@@ -116,13 +152,13 @@ static int _connection_closed(RX_SOCKET socket, const char *peerName)
 }
 
 //--- _config_motors -------------------
-static void _config_motors(void)
+static int _config_motors(void)
 {
 	int motor;
 	for (motor=0; motor<MOTOR_COUNT; motor++)
 	{
 		if (!_RobotStatus.motors[motor].isConfigured) _MotorInit &= ~(1<<motor);
-		if ((_MotorInit & (1<<motor)) == 0) 
+		if (!(_MotorInit & (1<<motor))) 
 		{
 			switch(motor)
 			{
@@ -133,9 +169,10 @@ static void _config_motors(void)
 			}
 			_rc_reset(motor);
 			_MotorInit |= (1<<motor);
-			return;
+			return FALSE;
 		}
 	}
+	return TRUE;
 }
 
 //--- _handle_robot_ctrl_msg --------------------------------------------------------
@@ -144,16 +181,101 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 	SMsgHdr			*phdr = (SMsgHdr*)msg;
 	switch(phdr->msgId)
 	{
-    case CMD_STATUS_GET:	memcpy(&_RobotStatus, msg, sizeof(_RobotStatus));
-							_config_motors();
+    case CMD_STATUS_GET:	TrPrintfL(TRUE, "got CMD_STATUS_GET MoveStartCnt=%d, MoveDoneCnt=%d, isMoving=%d", 
+								_RobotStatus.motors[MOTOR_Z].moveStartCnt, _RobotStatus.motors[MOTOR_Z].moveDoneCnt, _RobotStatus.motors[MOTOR_Z].isMoving);
+							memcpy(&_RobotStatus, msg, sizeof(_RobotStatus));
+							_rc_state_machine();
 							break;
 
 	default:				Error(WARN, 0, "Got unknown messageId=0x%08x", phdr->msgId);
 	}
+	return REPLY_OK;
 }
 
-//--- configure_xy_motor -------------------------------------
-static void _configure_xy_motor(uint8_t motor)
+//---- rx_reference -----------------------
+int	rx_reference(void)
+{
+	int motor;
+	for (motor=0; motor<MOTOR_COUNT; motor++)
+	{
+		_rc_stop(motor);
+	}
+	_MotorInit = 0;
+	_RC_State = RC_STATE_REF;
+	_rc_state_machine();
+	return REPLY_OK;
+}
+
+//--- _steps_2_micron ----------------------------------------------------------------
+static int _steps_2_micron(int steps)
+{
+    int micron;
+    micron = (int)(0.5 + ((double )steps * DISTANCE_UM_PER_REV / STEPS_PER_REV));
+    return micron;
+}
+
+//--- _micron_2_steps --------------------------------------------------------------
+static int _micron_2_steps(int micron)
+{
+    int steps;
+    steps = (int)(0.5 + ((double )micron * STEPS_PER_REV / DISTANCE_UM_PER_REV));
+    return steps;
+}
+
+//--- _rc_state_machine --------------------------------
+static void _rc_state_machine(void)
+{
+	static int _time=0;
+	if (!_config_motors()) return;
+
+    RX_StepperStatus.screw_posX = (_steps_2_micron(_RobotStatus.motors[MOTOR_XY_1].motorEncPos + _RobotStatus.motors[MOTOR_XY_0].motorEncPos))/2;
+    RX_StepperStatus.screw_posY = (_steps_2_micron(_RobotStatus.motors[MOTOR_XY_1].motorEncPos - _RobotStatus.motors[MOTOR_XY_0].motorEncPos))/2;
+
+	switch(_RC_State)
+	{        
+		case 0:					break;
+	
+		case RC_STATE_REF:		// move Z to bottom
+								_time=0;
+								if (!ROB_IN(ENDSTOP_Z_DOWN))
+									_rc_motor_moveToStop(MOTOR_Z, -1000000, ENDSTOP_Z_DOWN);
+								else _time=rx_get_ticks()+10000;
+								_RC_State++;
+								break;
+
+		case RC_STATE_REF+1:	// z at bottom
+								if (ROB_IN(ENDSTOP_Z_DOWN))
+								{
+									if (!_time) _time=rx_get_ticks()+100;
+									if (rx_get_ticks()>_time)
+									{
+										_rc_reset(MOTOR_Z);
+										_rc_moveto_xy_stop(RX_StepperStatus.screw_posX, -1000000, ENDSTOP_Y_AXIS);
+										_time=0;
+										_RC_State++;
+									}
+								}
+								else if (!_RobotStatus.motors[MOTOR_Z].isMoving) 
+								{
+                                    Error(ERR_CONT, 0, "Z-Axis down sensor not found");
+									_RC_State=0;
+								}
+								break;
+
+		case RC_STATE_REF+2:	if (ROB_IN(ENDSTOP_Y_AXIS))
+								{
+									if (!_time) _time=rx_get_ticks()+100;
+									_rc_moveto_xy_stop(-1000000, RX_StepperStatus.screw_posY, ENDSTOP_X_AXIS);
+									_RC_State++;
+								}
+								break;
+		default:
+								break;
+	}
+}
+
+//--- _send_MotorCfg ----------------------------
+static void _send_MotorCfg(int motor)
 {
 	SRobotMotorSetCfgCmd configCommand;
 	memset(&configCommand, 0, sizeof(configCommand));
@@ -162,108 +284,188 @@ static void _configure_xy_motor(uint8_t motor)
 	configCommand.header.msgLen = sizeof(configCommand);
 	
 	configCommand.motor = motor;
-	
-	configCommand.config.gconf = 0;
-	configCommand.config.swmode = 0x03;
-	configCommand.config.iholdirun = 0x11300;
-	configCommand.config.tpowerdown = 0;
-	configCommand.config.tpwmthrs = 0;
-	configCommand.config.rampmode = 0;
-	configCommand.config.vmax = 26844;
-	configCommand.config.v1 = 0;
-	configCommand.config.amax = 440;
-	configCommand.config.dmax = 440;
-	configCommand.config.a1 = 440;
-	configCommand.config.d1 = 440;
-	configCommand.config.vstart = 0;
-	configCommand.config.vstop = 10;
-	configCommand.config.tzerowait = 0;
-	configCommand.config.vdcmin = 0;
-	configCommand.config.chopconf = 0x30375;
-	configCommand.config.coolconf = 0;
-	configCommand.config.pwmconf = 0;
-	configCommand.config.tcoolthrs = 0;
-	configCommand.config.thigh = 0;
-	configCommand.config.encmode = 0x400;
-	configCommand.config.encconst = 0x307CB;
+	memcpy(&configCommand.config, &_MotorCfg[motor], sizeof(configCommand.config));	
 	
 	sok_send(&_RC_Socket, &configCommand);
 }
 
+//--- configure_xy_motor -------------------------------------
+static void _configure_xy_motor(uint8_t motor)
+{
+	_MotorCfg[motor].gconf = 0;
+	_MotorCfg[motor].swmode = 0x03;
+	_MotorCfg[motor].iholdirun = 0x11300;
+	_MotorCfg[motor].tpowerdown = 0;
+	_MotorCfg[motor].tpwmthrs = 0;
+	_MotorCfg[motor].rampmode = 0;
+	_MotorCfg[motor].vmax = 26844;
+	_MotorCfg[motor].v1 = 0;
+	_MotorCfg[motor].amax = 440;
+	_MotorCfg[motor].dmax = 440;
+	_MotorCfg[motor].a1 = 440;
+	_MotorCfg[motor].d1 = 440;
+	_MotorCfg[motor].vstart = 0;
+	_MotorCfg[motor].vstop = 10;
+	_MotorCfg[motor].tzerowait = 0;
+	_MotorCfg[motor].vdcmin = 0;
+	_MotorCfg[motor].chopconf = 0x30375;
+	_MotorCfg[motor].coolconf = 0;
+	_MotorCfg[motor].pwmconf = 0;
+	_MotorCfg[motor].tcoolthrs = 0;
+	_MotorCfg[motor].thigh = 0;
+	_MotorCfg[motor].encmode = 0x400;
+	_MotorCfg[motor].encconst = 0x307CB;
+
+	_send_MotorCfg(motor);
+}
+
 //--- configure_screw_motor ------------------------
 static void _configure_screw_motor(void)
-{
-	SRobotMotorSetCfgCmd configCommand;
-	memset(&configCommand, 0, sizeof(configCommand));
+{		
+	_MotorCfg[MOTOR_SCREW].gconf = 0;
+	_MotorCfg[MOTOR_SCREW].swmode = 0x03;
+//	_MotorCfg[MOTOR_SCREW].iholdirun = 0x11300;
+	_MotorCfg[MOTOR_SCREW].iholdirun = SCREW_CURRENT_LOW;
+	_MotorCfg[MOTOR_SCREW].tpowerdown = 0;
+	_MotorCfg[MOTOR_SCREW].tpwmthrs = 0;
+	_MotorCfg[MOTOR_SCREW].rampmode = 0;
+	_MotorCfg[MOTOR_SCREW].vmax = 178957;
+	_MotorCfg[MOTOR_SCREW].v1 = 0;
+	_MotorCfg[MOTOR_SCREW].amax = 2932;
+	_MotorCfg[MOTOR_SCREW].dmax = 2932;
+	_MotorCfg[MOTOR_SCREW].a1 = 2932;
+	_MotorCfg[MOTOR_SCREW].d1 = 2932;
+	_MotorCfg[MOTOR_SCREW].vstart = 0;
+	_MotorCfg[MOTOR_SCREW].vstop = 10;
+	_MotorCfg[MOTOR_SCREW].tzerowait = 0;
+	_MotorCfg[MOTOR_SCREW].vdcmin = 0;
+	_MotorCfg[MOTOR_SCREW].chopconf = 0x101F5;
+	_MotorCfg[MOTOR_SCREW].coolconf = 0;
+	_MotorCfg[MOTOR_SCREW].pwmconf = 0;
+	_MotorCfg[MOTOR_SCREW].tcoolthrs = 0;
+	_MotorCfg[MOTOR_SCREW].thigh = 0;
+	_MotorCfg[MOTOR_SCREW].encmode = 0;
+	_MotorCfg[MOTOR_SCREW].encconst = 0;
 	
-	configCommand.header.msgId = CMD_MOTOR_SET_CONFIG;
-	configCommand.header.msgLen = sizeof(configCommand);
-	
-	configCommand.motor = MOTOR_SCREW;
-	
-	configCommand.config.gconf = 0;
-	configCommand.config.swmode = 0x03;
-	configCommand.config.iholdirun = 0x11300;
-	configCommand.config.tpowerdown = 0;
-	configCommand.config.tpwmthrs = 0;
-	configCommand.config.rampmode = 0;
-	configCommand.config.vmax = 178957;
-	configCommand.config.v1 = 0;
-	configCommand.config.amax = 2932;
-	configCommand.config.dmax = 2932;
-	configCommand.config.a1 = 2932;
-	configCommand.config.d1 = 2932;
-	configCommand.config.vstart = 0;
-	configCommand.config.vstop = 10;
-	configCommand.config.tzerowait = 0;
-	configCommand.config.vdcmin = 0;
-	configCommand.config.chopconf = 0x101F5;
-	configCommand.config.coolconf = 0;
-	configCommand.config.pwmconf = 0;
-	configCommand.config.tcoolthrs = 0;
-	configCommand.config.thigh = 0;
-	configCommand.config.encmode = 0;
-	configCommand.config.encconst = 0;
-	
-	sok_send(&_RC_Socket, &configCommand);
+	_send_MotorCfg(MOTOR_SCREW);
 }
 
 //--- configure_z_motor ---------------------
 static void _configure_z_motor(void)
 {
-	SRobotMotorSetCfgCmd configCommand;
-	memset(&configCommand, 0, sizeof(configCommand));
+	_MotorCfg[MOTOR_Z].gconf = 0;
+	_MotorCfg[MOTOR_Z].swmode = 0x03;
+//	_MotorCfg[MOTOR_Z].iholdirun = 0x10A00;
+	_MotorCfg[MOTOR_Z].iholdirun = Z_CURRENT_UP;
+	_MotorCfg[MOTOR_Z].tpowerdown = 0;
+	_MotorCfg[MOTOR_Z].tpwmthrs = 0;
+	_MotorCfg[MOTOR_Z].rampmode = 0;
+	_MotorCfg[MOTOR_Z].vmax = 322122;
+	_MotorCfg[MOTOR_Z].v1 = 0;
+	_MotorCfg[MOTOR_Z].amax = 5277;
+	_MotorCfg[MOTOR_Z].dmax = 5277;
+	_MotorCfg[MOTOR_Z].a1 = 5277;
+	_MotorCfg[MOTOR_Z].d1 = 5277;
+	_MotorCfg[MOTOR_Z].vstart = 0;
+	_MotorCfg[MOTOR_Z].vstop = 10;
+	_MotorCfg[MOTOR_Z].tzerowait = 0;
+	_MotorCfg[MOTOR_Z].vdcmin = 0;
+	_MotorCfg[MOTOR_Z].chopconf = 0x30475;
+	_MotorCfg[MOTOR_Z].coolconf = 0;
+	_MotorCfg[MOTOR_Z].pwmconf = 0;
+	_MotorCfg[MOTOR_Z].tcoolthrs = 0;
+	_MotorCfg[MOTOR_Z].thigh = 0;
+	_MotorCfg[MOTOR_Z].encmode = 0;
+	_MotorCfg[MOTOR_Z].encconst = 0;
+		
+	_send_MotorCfg(MOTOR_Z);
+}
+
+//--- rc_stop --------------------------------
+static void _rc_stop(int motors)
+{
+	SRobotMotorsStopCmd cmd;
+	cmd.header.msgLen = sizeof(cmd);
+	cmd.header.msgId  = CMD_MOTORS_STOP;
+	cmd.motors = motors;
+	sok_send(&_RC_Socket, &cmd);
+}
+
+//--- _rc_reset --------------------------------
+static void _rc_reset(int motor)
+{
+	SRobotMotorsResetCmd cmd;
+	cmd.header.msgLen = sizeof(cmd);
+	cmd.header.msgId  = CMD_MOTORS_RESET;
+	cmd.motors		  = 1<<motor;
+	sok_send(&_RC_Socket, &cmd);
+	_MotorIsMoving[motor]=FALSE;
+}
+
+//--- _rc_motor_moveBy --------------------------
+static void _rc_motor_moveBy(int motor, int steps)
+{
+	SRobotMotorsMoveCmd cmd;
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.header.msgLen	 = sizeof(cmd);
+	cmd.header.msgId	 = CMD_MOTORS_MOVE;
+	cmd.motors			 = 1<<motor;
+	cmd.targetPos[motor] = _RobotStatus.motors[motor].motorTargetPos+steps;
+	if (_MotorCfg[motor].encmode) cmd.encoderTol[motor]= 100;
+
+	sok_send(&_RC_Socket, &cmd);
+}
+
+//--- _rc_motor_moveToStop --------------------------------
+static void _rc_motor_moveToStop(int motor, int steps, int stopInput)
+{
+	SRobotMotorsMoveCmd cmd;
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.header.msgLen = sizeof(cmd);
+	cmd.header.msgId  = CMD_MOTORS_MOVE;
+	cmd.motors		  = 1<<motor;
+	cmd.targetPos[motor] =  steps;
+	cmd.stopBits[motor]  = 1<<stopInput;
+	cmd.stopBitLevels[motor] = 1;
+	sok_send(&_RC_Socket, &cmd);	
+}
+
+//--- rc_moveto_xy -------------------------------------------
+void	rc_moveto_xy(int x, int y)
+{
+	_rc_moveto_xy_stop(x, y, -1);
+}
+
+//--- _rc_moveto_xy_stop -----------------------------------
+void _rc_moveto_xy_stop(int x, int y, int stop)
+{
+	int dx = x-RX_StepperStatus.screw_posX;
+	int dy = y-RX_StepperStatus.screw_posY;
+
+	// x
+//	move_motor(_motorStatus[MOTOR_XY_0].motorPosition + motorSteps, MOTOR_XY_0);
+//	move_motor(_motorStatus[MOTOR_XY_1].motorPosition + motorSteps, MOTOR_XY_1);
+//	_rc_motor_moveBy(MOTOR_XY_0, dx);
+//	_rc_motor_moveBy(MOTOR_XY_1, dx);
+
+	// y
+//	move_motor(_motorStatus[MOTOR_XY_1].motorPosition + motorSteps, MOTOR_XY_1);
+//	move_motor(_motorStatus[MOTOR_XY_0].motorPosition - motorSteps, MOTOR_XY_0);
+//	_rc_motor_moveBy(MOTOR_XY_0, -dy);
+//	_rc_motor_moveBy(MOTOR_XY_1,  dy);
 	
-	configCommand.header.msgId = CMD_MOTOR_SET_CONFIG;
-	configCommand.header.msgLen = sizeof(configCommand);
-	
-	configCommand.motor = MOTOR_Z;
-	
-	configCommand.config.gconf = 0;
-	configCommand.config.swmode = 0x03;
-	configCommand.config.iholdirun = 0x10A00;
-	configCommand.config.tpowerdown = 0;
-	configCommand.config.tpwmthrs = 0;
-	configCommand.config.rampmode = 0;
-	configCommand.config.vmax = 322122;
-	configCommand.config.v1 = 0;
-	configCommand.config.amax = 5277;
-	configCommand.config.dmax = 5277;
-	configCommand.config.a1 = 5277;
-	configCommand.config.d1 = 5277;
-	configCommand.config.vstart = 0;
-	configCommand.config.vstop = 10;
-	configCommand.config.tzerowait = 0;
-	configCommand.config.vdcmin = 0;
-	configCommand.config.chopconf = 0x30475;
-	configCommand.config.coolconf = 0;
-	configCommand.config.pwmconf = 0;
-	configCommand.config.tcoolthrs = 0;
-	configCommand.config.thigh = 0;
-	configCommand.config.encmode = 0;
-	configCommand.config.encconst = 0;
-	
-	sok_send(&_RC_Socket, &configCommand);
+	SRobotMotorsMoveCmd cmd;
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.header.msgLen	 = sizeof(cmd);
+	cmd.header.msgId	 = CMD_MOTORS_MOVE;
+	cmd.motors			|= 1<<MOTOR_XY_0;
+	cmd.targetPos[MOTOR_XY_0] = _RobotStatus.motors[MOTOR_XY_0].motorTargetPos+dx-dy;
+	cmd.motors			|= 1<<MOTOR_XY_1;
+	cmd.targetPos[MOTOR_XY_1] = _RobotStatus.motors[MOTOR_XY_1].motorTargetPos+dx+dy;
+
+	if (stop>=0) cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
+
+	sok_send(&_RC_Socket, &cmd);
 }
 
 //--- rc_display_status -----------------------------------
@@ -277,11 +479,7 @@ void rc_display_status(void)
 //	term_printf("\nConnection Status: %d\n", _isConnected);
 	
 	// Bootloader information
-	term_printf("\nBootloader Status: %d\n", _RobotStatus.bootloader.status);
-	term_printf("Memory position: %d\n",	_RobotStatus.bootloader.progMemPos);
-	term_printf("Memory blocks used: %d\n", _RobotStatus.bootloader.progMemBlocksUsed);
-	term_printf("Programm size: %d\n",		_RobotStatus.bootloader.progSize);
-	term_printf("\n");
+	term_printf("\nBootloader: Status=%d,  addr=%d, blocks=%d, size=%d\n", _RobotStatus.bootloader.status, _RobotStatus.bootloader.progMemPos, _RobotStatus.bootloader.progMemBlocksUsed, _RobotStatus.bootloader.progSize);
 
 	// GPIO information
 	term_printf("Inputs:    ");
@@ -308,9 +506,9 @@ void rc_display_status(void)
 		term_printf("%04d ", _RobotStatus.gpio.inputEdges[(NUMBER_OF_INPUTS - i - 1)]);
 	}
 	term_printf("\n");
-	
+
 	// Motor information
-	term_printf("\nMotors\tPos\t\tTarget Pos\tEnc Pos\t\tIsMoving\tIsStalled\tIsConfigured\n");
+	term_printf("Motors\tPos\t\tTarget Pos\tEnc Pos\t\tIsMoving\tIsStalled\tIsConfigured\n");
 	for (i=0; i<MOTOR_COUNT; i++)
 	{
 		term_printf("%d-", i);
@@ -330,66 +528,14 @@ void rc_display_status(void)
 		_RobotStatus.motors[i].isConfigured);
 	}
 	
+	term_printf("\n");
+    term_printf("State Machine: \t\t %d\n", _RC_State);
+    term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
+    term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
+
+	term_printf("\n");
+	
 	term_flush();
-}
-
-//--- rc_stop --------------------------------
-static void _rc_stop(int motors)
-{
-	SRobotMotorsStopCmd cmd;
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_MOTORS_STOP;
-	cmd.motors = motors;
-	sok_send(&_RC_Socket, &cmd);
-}
-
-//--- _rc_reset --------------------------------
-static void _rc_reset(int motor)
-{
-	SRobotMotorsResetCmd cmd;
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_MOTORS_RESET;
-	cmd.motors = 1<<motor;
-	sok_send(&_RC_Socket, &cmd);
-}
-
-//--- _rc_motor_moveBy --------------------------
-static void _rc_motor_moveBy(int motor, int steps)
-{
-	SRobotMotorsMoveCmd cmd;
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_MOTORS_MOVE;
-	cmd.motors = 1<<motor;
-	cmd.targetPos[motor] = _RobotStatus.motors[motor].motorTargetPos+steps;
-
-	sok_send(&_RC_Socket, &cmd);
-}
-
-//--- _rc_motor_moveToStop --------------------------------
-static void _rc_motor_moveToStop(int motor, int stopInput)
-{
-	SRobotMotorsMoveCmd cmd;
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_MOTORS_MOVE;
-	cmd.motors			 = 1<<motor;
-	cmd.targetPos[motor] = 1000000;
-	cmd.stopBits[motor]  = 1<<stopInput;
-	cmd.stopBitLevels[motor] = 1;
-	sok_send(&_RC_Socket, &cmd);	
-}
-
-//--- _rc_motor_moveToRef ----------------------------------
-static void _rc_motor_moveToRef(int motor, int direction)
-{
-	switch(motor)
-	{
-    case MOTOR_XY_0:	_rc_motor_moveToStop(motor, 2*motor+direction);	break;
-    case MOTOR_XY_1:	_rc_motor_moveToStop(motor, 2*motor+direction);	break;
-    case MOTOR_SCREW:	_rc_motor_moveToStop(motor, 2*motor+direction);	break;
-    case MOTOR_Z:		_rc_motor_moveToStop(motor, 2*motor+direction);	break;
-	}
 }
 
 //--- rc_menu ----------------------------------------------
@@ -400,8 +546,8 @@ void rc_menu(int help)
 		term_printf("Robot MENU ------------------------- (3)\n");
 		term_printf("s: STOP\n");
 		term_printf("o<num><value>: set output <num> to value <value>\n");
-//		term_printf("R: Reference\n");
-		term_printf("r<n><0/1>: move Motor<n> to stop\n");
+		term_printf("R: Reference\n");
+		term_printf("r<n>: reset Motor<n>\n");
 		term_printf("m<n><steps>: move Motor<n> by <steps>\n");
 //		term_printf("v<micron>: Move x axis <micron>um\n");
 //		term_printf("w<micron>: Move y axis <micron>um\n");
@@ -429,10 +575,10 @@ void rc_handle_menu(char *str)
 	int no = str[1]-'0';
 	switch (str[0])
 	{
-	case 's':	_rc_stop(0x0f); break;
-    case 'm':	_rc_motor_moveBy(no, atoi(&str[2]));	break;
     case 'r':	_rc_reset(no); break;
-					//_rc_motor_moveToRef(no, atoi(&str[2]));		break;
+	case 's':	_rc_stop(0x0f); break;
+    case 'R':	rx_reference(); break;
+    case 'm':	_rc_motor_moveBy(no, atoi(&str[2]));	break;
     default:
         break;
 	}

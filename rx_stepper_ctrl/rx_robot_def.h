@@ -151,6 +151,8 @@ typedef struct MotorStatus
 	uint8_t isStalled;
 	uint8_t isConfigured;
 	uint8_t status;
+	uint8_t	moveStartCnt;
+	uint8_t moveDoneCnt;
 } SMotorStatus;
 
 typedef struct MotorConfig
