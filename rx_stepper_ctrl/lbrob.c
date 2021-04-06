@@ -285,7 +285,7 @@ void lbrob_main(int ticks, int menu)
 
     if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
     {
-		if (_CapIsWet || RX_StepperStatus.info.vacuum_running)
+		if (_CapIsWet)
 		{
 			val = 0;
 			lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
@@ -835,7 +835,7 @@ static void _lbrob_do_reference()
         motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
     }
 	else
-        motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, _micron_2_steps(3000));
+        _lbrob_move_to_pos(CMD_ROB_REFERENCE, _micron_2_steps(3000), FALSE);
 }
 
 //--- lbrob_handle_ctrl_msg -----------------------------------
