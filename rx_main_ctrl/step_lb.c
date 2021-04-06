@@ -309,7 +309,15 @@ static int _set_screw_pos(int stepperNo)
 {
     SScrewPositions pos;
     memset(&pos, 0, sizeof(pos));
-    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, stepperNo, &pos, READ);
+    char strNo[12];
+    char str[80];
+    sprintf(strNo, "%d", stepperNo);
+    strcpy(str, PATH_USER FILENAME_SCREW_POS_START);
+
+    strcat(str, strNo);
+    strcat(str, FILENAME_SCREW_POS_END);
+
+    setup_screw_positions(str, stepperNo, &pos, READ);
     for (int printbar=0; printbar<2; printbar++)
     {
         for (int head=0; head<RX_Config.headsPerColor; head++)
@@ -326,7 +334,14 @@ static int _set_screw_pos(int stepperNo)
 //--- steplb_set_ScrewPos -----------------------------------------
 int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
 {
-    setup_screw_positions(PATH_USER FILENAME_SCREW_POS , no, ppos, WRITE);
+    char strNo[12];
+    char str[80];
+    sprintf(strNo, "%d", no);
+    strcpy(str, PATH_USER FILENAME_SCREW_POS_START);
+
+    strcat(str, strNo);
+    strcat(str, FILENAME_SCREW_POS_END);
+    setup_screw_positions(str, no, ppos, WRITE);
     for (int printbar=0; printbar<2; printbar++)
     {
         for (int head=0; head<RX_Config.headsPerColor; head++)

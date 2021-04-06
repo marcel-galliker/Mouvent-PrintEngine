@@ -285,7 +285,7 @@ void lbrob_main(int ticks, int menu)
 
     if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
     {
-		if (_CapIsWet || RX_StepperStatus.info.vacuum_running)
+		if (_CapIsWet)
 		{
 			val = 0;
 			lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
@@ -803,7 +803,7 @@ static void _lbrob_move_to_pos(int cmd, int pos, int wipe_state)
             _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
         motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, pos);
     }
-    else if ((_CapIsWet || RX_StepperStatus.info.vacuum_running) && !moving_forward)
+    else if (_CapIsWet && !moving_forward)
     {
         _vacuum_on();
         motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, pos);
