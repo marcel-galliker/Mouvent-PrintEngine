@@ -1732,24 +1732,24 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 			{
 				_set_air_valve(isNo, PV_OPEN);
 			}
-		else if (pvalve_active(isNo)) // proportional valve
-		{
-			int value=10*(pRX_Status->ink_supply[isNo].IS_Pressure_Actual - _InkSupply[isNo].pid_Pump.Setpoint);
-			pvalve_set_air(isNo, value);
-		}
-		else // simple on/off valve
-		{
-			if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > _InkSupply[isNo].pid_Pump.Setpoint)
+			else if (pvalve_active(isNo)) // proportional valve
 			{
-				if (set_valve) _set_air_valve(isNo, PV_OPEN);
-				else _set_air_valve(isNo, PV_OPEN);
+				int value=10*(pRX_Status->ink_supply[isNo].IS_Pressure_Actual - _InkSupply[isNo].pid_Pump.Setpoint);
+				pvalve_set_air(isNo, value);
 			}
-			else
+			else // simple on/off valve
 			{
-				if (set_valve) _set_air_valve(isNo, PV_CLOSED);
+				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > _InkSupply[isNo].pid_Pump.Setpoint)
+				{
+					if (set_valve) _set_air_valve(isNo, PV_OPEN);
+					else _set_air_valve(isNo, PV_OPEN);
+				}
+				else
+				{
+					if (set_valve) _set_air_valve(isNo, PV_CLOSED);
+				}
 			}
 		}
-	}
 
 		_trace_pump_ctrl(pressure_target);
 }
