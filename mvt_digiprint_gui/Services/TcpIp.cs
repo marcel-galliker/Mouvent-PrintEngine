@@ -668,6 +668,8 @@ namespace RX_DigiPrint.Services
             PG_MODE_MARK_FILTER,
             PG_MODE_MARK_VRT,   // rint mark to PG (IN[1])
             PG_MODE_MARK_INV,   // rint mark to PG (IN[0]) / INVERSE
+            PG_MODE_MARK_VERSO, // Verso print mark to PG (IN[1])
+            PG_MODE_MARK_VERSO_INV // Verso print mark to PG (IN[1]) / INVERSE
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

@@ -154,8 +154,10 @@ namespace RX_DigiPrint.Views.UserControls
                                         addLineH(ImageX+(Image.ActualWidth+Image.ActualHeight)/2, ImageX2+(Image.ActualWidth+Image.ActualHeight)/2, ImageY+(Image.ActualHeight-Image.ActualWidth)/2, 10, 2);
                                         break;
                     case EPrintGoMode.PG_MODE_MARK:
+                    case EPrintGoMode.PG_MODE_MARK_VERSO:
                     case EPrintGoMode.PG_MODE_MARK_FILTER:
                     case EPrintGoMode.PG_MODE_MARK_INV:
+                    case EPrintGoMode.PG_MODE_MARK_VERSO_INV:
                     case EPrintGoMode.PG_MODE_MARK_VRT:
                         double x=ImageX+(Image.ActualWidth+Image.ActualHeight)/2+35;
                         double y=16;

@@ -999,12 +999,23 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 			Error(LOG, 0, "Restart: pos_in=%d, pg_start_pos=%d, Fifo_used=%d, PGMode=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos, Fpga->cfg.pg[pgNo].fifos_used, pcfg->printGoMode);
 			if (Fpga->stat.encIn[0].position>Fpga->stat.encOut[0].pg_start_pos && Fpga->stat.encIn[0].position>500000)
 				Error(ERR_ABORT, 0, "PAUSE: Moving back is too short! pos_in=%d, pg_start_pos=%d", Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].pg_start_pos);
-			if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER || pcfg->printGoMode==PG_MODE_MARK_VRT)
+			switch (pcfg->printGoMode)
 			{
-				Fpga->cfg.encIn[pgNo].reset_pos = 0;
-				Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd-100);	
+				case PG_MODE_MARK:
+				case PG_MODE_MARK_FILTER:
+				case PG_MODE_MARK_VRT:
+				case PG_MODE_MARK_INV:
+				case PG_MODE_MARK_VERSO:
+				case PG_MODE_MARK_VERSO_INV:
+					Fpga->cfg.encIn[pgNo].reset_pos = 0;
+					Fpga->cfg.pg[pgNo].enc_start_pos_fwd = _micron2inc(pcfg->pos_pg_fwd - 100);
+					break;
+				case PG_MODE_LENGTH:
+				case PG_MODE_GAP:
+				default:
+					Fpga->cfg.pg[pgNo].enc_start_pos_fwd = Fpga->stat.encOut[0].pg_start_pos;
+					break;
 			}
-			else Fpga->cfg.pg[pgNo].enc_start_pos_fwd = Fpga->stat.encOut[0].pg_start_pos;
 		}
 		else
 		{
@@ -1027,12 +1038,14 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		{
 			switch(pcfg->printGoMode)
 			{
-			case PG_MODE_MARK:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
-			case PG_MODE_MARK_FILTER:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
-			case PG_MODE_MARK_INV:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=TRUE;  break;
-			case PG_MODE_MARK_VRT:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
-			default:					Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST;
-			}			
+			case PG_MODE_MARK:				Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKREADER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
+			case PG_MODE_MARK_FILTER:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
+			case PG_MODE_MARK_INV:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=0; Fpga->cfg.pg[pgNo].printgo_n=TRUE;  break;
+			case PG_MODE_MARK_VRT:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
+			case PG_MODE_MARK_VERSO:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
+			case PG_MODE_MARK_VERSO_INV:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=TRUE;  break;
+			default:						Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST;
+			}
 		}
 	}
 	
@@ -1433,52 +1446,63 @@ static void _simu_markreader(void)
 {
 	static UINT32 _PM_LastPos=0;
 	static UINT32 _digin_edge_dist;
-	
-	if(RX_EncoderCfg.printGoMode==PG_MODE_MARK || RX_EncoderCfg.printGoMode==PG_MODE_MARK_FILTER || RX_EncoderCfg.printGoMode==PG_MODE_MARK_VRT)
+
+	switch (RX_EncoderCfg.printGoMode)
 	{
-//		FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
-		if (Fpga->cfg.encOut[0].synthetic_freq)
-		{						
-			/*			
-			if (Fpga->stat.encIn[0].digin_edge_dist!=_digin_edge_dist)
+		case PG_MODE_MARK:
+		case PG_MODE_MARK_FILTER:
+		case PG_MODE_MARK_VRT:
+		case PG_MODE_MARK_INV:
+		case PG_MODE_MARK_VERSO:
+		case PG_MODE_MARK_VERSO_INV:
+			//		FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
+			if (Fpga->cfg.encOut[0].synthetic_freq)
 			{
-				TrPrintfL(TRUE, "pos[%d]: digin_edge_dist=%06d", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist);
-				_digin_edge_dist = Fpga->stat.encIn[0].digin_edge_dist;
-			}			
-			*/
-			
-//			if(!Fpga->stat.dig_in_cnt[0])// && !_PM_SimuCnt)
-			if (!_PM_Cnt)
-			{
-				if(_PM_LastPos == 0 && Fpga->stat.encOut[0].position > 1000)
+				/*
+				if (Fpga->stat.encIn[0].digin_edge_dist!=_digin_edge_dist)
 				{
-					TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d)", _PM_Cnt+1, Fpga->stat.encOut[0].position);
-					FpgaQSys->out |= MARKREADER_SIMU_OUT;
-					_PM_SimuCnt++;
-					_PM_LastPos = Fpga->stat.encOut[0].position;				
+					TrPrintfL(TRUE, "pos[%d]: digin_edge_dist=%06d", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist);
+					_digin_edge_dist = Fpga->stat.encIn[0].digin_edge_dist;
 				}
-			} 
+				*/
+
+				//			if(!Fpga->stat.dig_in_cnt[0])// && !_PM_SimuCnt)
+				if (!_PM_Cnt)
+				{
+					if (_PM_LastPos == 0 && Fpga->stat.encOut[0].position > 1000)
+					{
+						TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d)", _PM_Cnt + 1, Fpga->stat.encOut[0].position);
+						FpgaQSys->out |= MARKREADER_SIMU_OUT;
+						_PM_SimuCnt++;
+						_PM_LastPos = Fpga->stat.encOut[0].position;
+					}
+				}
+				else
+				{
+					UINT32 dist = ((Fpga->stat.encOut[0].position - _PM_LastPos) & 0x1ffff);
+					if (_Ignore && dist > (_Ignore + _Window / 2))
+					{
+						TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d, dist=%d, shift_delay_tel=%d) FIFO=%d", _PM_Cnt + 1, Fpga->stat.encOut[0].position, dist, Fpga->cfg.general.shift_delay_tel, FpgaQSys->window_status.fill_level);
+						FpgaQSys->out |= MARKREADER_SIMU_OUT;
+						_PM_SimuCnt++;
+						_PM_LastPos = Fpga->stat.encOut[0].position;
+					}
+					else if (dist > 1000 && (FpgaQSys->out & MARKREADER_SIMU_OUT))
+					{
+						FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
+					}
+				}
+			}
 			else
 			{
-				UINT32 dist = ((Fpga->stat.encOut[0].position - _PM_LastPos) & 0x1ffff); 
-				if(_Ignore && dist > (_Ignore + _Window / 2))
-				{
-					TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d, dist=%d, shift_delay_tel=%d) FIFO=%d", _PM_Cnt+1, Fpga->stat.encOut[0].position, dist, Fpga->cfg.general.shift_delay_tel, FpgaQSys->window_status.fill_level);
-					FpgaQSys->out |= MARKREADER_SIMU_OUT;
-					_PM_SimuCnt++;
-					_PM_LastPos = Fpga->stat.encOut[0].position;		
-				}
-				else if(dist>1000 && (FpgaQSys->out & MARKREADER_SIMU_OUT))
-				{
-					FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
-				}				
+				_digin_edge_dist = 0;
+				_PM_LastPos = 0;
 			}
-		} 
-		else
-		{
-			_digin_edge_dist = 0;
-			_PM_LastPos		 = 0;
-		}			
+			break;
+		case PG_MODE_LENGTH:
+		case PG_MODE_GAP:
+		default:
+			break;
 	}
 }
 

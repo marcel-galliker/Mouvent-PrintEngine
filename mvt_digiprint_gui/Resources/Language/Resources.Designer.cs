@@ -3733,7 +3733,7 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("Mark", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to MarkI.
         /// </summary>
@@ -3751,7 +3751,27 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("MarkV", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Mark.
+        /// </summary>
+        public static string MarkVerso {
+            get
+            {
+                return ResourceManager.GetString("MarkVerso", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Mark.
+        /// </summary>
+        public static string MarkVersoI {
+            get
+            {
+                return ResourceManager.GetString("MarkVersoI", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Mask Length.
         /// </summary>

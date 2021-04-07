@@ -295,11 +295,25 @@ static int _do_encoder_pg_dist(RX_SOCKET socket, SEncoderPgDist *pmsg)
 	// TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, cnt=%d, dist=%d) time=%d", ++_PgNo, pmsg->cnt, pmsg->dist, time-_time);
 	_time=time;
 	memcpy(&_DistMsg[_PgNo%SIZEOF(_DistMsg)], pmsg, sizeof(SEncoderPgDist));
-	if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER || pmsg->printGoMode==PG_MODE_MARK_VRT) 
-		fpga_set_printmark(pmsg);
-	else
-		fpga_pg_set_dist(&pmsg->id, pmsg->cnt, pmsg->dist);
+
+	switch (pmsg->printGoMode)
+	{
+		case PG_MODE_MARK:
+		case PG_MODE_MARK_FILTER:
+		case PG_MODE_MARK_VRT:
+		case PG_MODE_MARK_INV:
+		case PG_MODE_MARK_VERSO:
+		case PG_MODE_MARK_VERSO_INV:
+			fpga_set_printmark(pmsg);
+			break;
+		case PG_MODE_LENGTH:
+		case PG_MODE_GAP:
+		default:
+			fpga_pg_set_dist(&pmsg->id, pmsg->cnt, pmsg->dist);
+			break;
+	}
 	_PgNo++;
+
 	return REPLY_OK;
 }
 
@@ -318,22 +332,32 @@ static int _do_encoder_pg_restart(RX_SOCKET socket)
 	{
 		pmsg = &_DistMsg[i%SIZEOF(_DistMsg)];
 		TrPrintfL(TRUE, "_do_encoder_pg_dist(no=%d, printGoMode=%d, cnt=%d, dist=%d)", i, pmsg->printGoMode, pmsg->cnt, pmsg->dist);
-		if (pmsg->printGoMode==PG_MODE_MARK || pmsg->printGoMode==PG_MODE_MARK_FILTER || pmsg->printGoMode==PG_MODE_MARK_VRT) 
+		switch (pmsg->printGoMode)
 		{
-			if (i==RX_EncoderStatus.PG_cnt)
-			{
-				SEncoderPgDist msg;
-				memcpy(&msg , pmsg, sizeof(msg));
-				msg.ignore=fpga_get_restart_ignore();
-				msg.window=0;
-				fpga_set_printmark(&msg);	
-			}
-			else 	
-				fpga_set_printmark(pmsg);
+			case PG_MODE_MARK:
+			case PG_MODE_MARK_FILTER:
+			case PG_MODE_MARK_VRT:
+			case PG_MODE_MARK_INV:
+			case PG_MODE_MARK_VERSO:
+			case PG_MODE_MARK_VERSO_INV:
+				if (i == RX_EncoderStatus.PG_cnt)
+				{
+					SEncoderPgDist msg;
+					memcpy(&msg, pmsg, sizeof(msg));
+					msg.ignore = fpga_get_restart_ignore();
+					msg.window = 0;
+					fpga_set_printmark(&msg);
+				}
+				else
+					fpga_set_printmark(pmsg);
+				break;
+			case PG_MODE_LENGTH:
+			case PG_MODE_GAP:
+			default:
+				fpga_pg_set_dist(&pmsg->id, pmsg->cnt, pmsg->dist);
+				break;
 		}
-		else fpga_pg_set_dist(&pmsg->id , pmsg->cnt, pmsg->dist);
 	}
-
 	fpga_enc_config(0, &RX_EncoderCfg, TRUE);
 	fpga_pg_config(INVALID_SOCKET, &RX_EncoderCfg, TRUE);
 	

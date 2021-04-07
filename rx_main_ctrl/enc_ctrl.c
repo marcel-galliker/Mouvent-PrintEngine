@@ -529,7 +529,7 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		
 	//	Error(LOG, 0, "enc_set_pg id=%d, page=%d, copy=%d, scan=%d, dist=%d", pId->id, pId->page, pId->copy, pId->scan, _PrintGo_Dist);						
 
-		_PrintMark_Mode = (pitem->printGoMode==PG_MODE_MARK) || (pitem->printGoMode==PG_MODE_MARK_INV) || (pitem->printGoMode==PG_MODE_MARK_VRT);
+		_PrintMark_Mode = (pitem->printGoMode!=PG_MODE_LENGTH) && (pitem->printGoMode!=PG_MODE_GAP);
 		
 		if (!_PrintMark_Mode) sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
 
@@ -554,6 +554,8 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 			
 		case PG_MODE_MARK:	 
 		case PG_MODE_MARK_INV:	 
+		case PG_MODE_MARK_VERSO:
+		case PG_MODE_MARK_VERSO_INV:	 
 		case PG_MODE_MARK_VRT:		
 							 dist.dist		   = (pitem->printGoDist>0) ? pitem->printGoDist:0;
 							 dist.printGoMode  = PG_MODE_MARK_FILTER;
