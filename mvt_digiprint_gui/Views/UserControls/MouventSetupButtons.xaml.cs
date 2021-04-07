@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.PrintQueueView;
 using System;
@@ -12,14 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RX_DigiPrint.Views.UserControls
 {
@@ -35,67 +29,38 @@ namespace RX_DigiPrint.Views.UserControls
             CMD_JOG_FWD.TouchEnabled = true;
             CMD_JOG_BWD.TouchEnabled = true;
             CMD_WEBIN.DataContext    = RxGlobals.Plc;
-            RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
-            PrinterStatusChanged(null, null);
+            CMD_JOG_BWD.DataContext = RxGlobals.Plc;
+            CMD_JOG_FWD.DataContext = RxGlobals.Plc;
+            Visibility v = Visibility.Collapsed;
+            switch (RxGlobals.PrintSystem.PrinterType)
+            {
+                case EPrinterType.printer_TX801: v = Visibility.Visible; break;
+                case EPrinterType.printer_TX802: v = Visibility.Visible; break;
+                case EPrinterType.printer_TX404: v = Visibility.Visible; break;
+            }
+            Button_Wash.Visibility = v;
+            Button_Glue.Visibility = v;
             RxGlobals.Timer.TimerFct += _Timer;
         }
 
-        EPrintState _printerState = EPrintState.ps_undef;
-        private int _WebInStartTimer=0;
-
-        //--- PrinterStatusChanged --------------------------------------------
-        private void PrinterStatusChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (_WebInStartTimer==0 && RxGlobals.PrinterStatus.PrintState!=_printerState)
-            {
-                if (RxGlobals.PrinterStatus.PrintState != _printerState)
-                {
-                    _printerState = RxGlobals.PrinterStatus.PrintState;
-                    Visibility visible;
-                    Visibility invisible;
-                    if (RxGlobals.PrintSystem.IsScanning)
-                    {
-                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Visible   : Visibility.Collapsed; 
-                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_webin) ? Visibility.Collapsed : Visibility.Visible; 
-                    }
-                    else
-                    {
-                        visible   = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause) ? Visibility.Visible   : Visibility.Collapsed; 
-                        invisible = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause) ? Visibility.Collapsed : Visibility.Visible; 
-                    }
-
-                    CMD_JOG_FWD.Visibility = visible;
-                    CMD_JOG_BWD.Visibility = visible;
-                    CMD_WEBIN.Visibility   = invisible;
-                    if (_WebInStartTimer==0 && CMD_WEBIN.Visibility!=Visibility.Visible) CMD_WEBIN.IsChecked=false;
-                //  CMD_WEBIN.IsEnabled    = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_ready_power);
-                }
-           }
-
-           Visibility v=Visibility.Collapsed;
-           switch (RxGlobals.PrintSystem.PrinterType)
-           {
-               case EPrinterType.printer_TX801: v = Visibility.Visible; break;
-               case EPrinterType.printer_TX802: v = Visibility.Visible; break;
-               case EPrinterType.printer_TX404: v = Visibility.Visible; break;
-           }
-            Button_Wash.Visibility = v;
-            Button_Glue.Visibility = v;
-        }
 
         //--- WebIn_Clicked -------------------------------------------------
         private void WebIn_Clicked(object sender, RoutedEventArgs e)
         {
-            RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_CLEAR_ERROR");
-            CMD_WEBIN.IsChecked = true;
-            _WebInStartTimer = 4;
-            if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
-            else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PAUSE_PRINTING);
+            if (!RxGlobals.Plc.ToWebIn)
+            {
+                RxGlobals.Plc.ToWebIn = true;
+                CMD_WEBIN.IsChecked = true;
+                if (RxGlobals.PrintSystem.IsScanning) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_WEBIN");
+                else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PAUSE_PRINTING);
+            }
         }
 
         //--- _Timer ------------------------------------------------------------------
         private void _Timer(int no)
         {
+            CMD_WEBIN.IsChecked = RxGlobals.Plc.ToWebIn;
+
             string val;
             RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n"
                 + "STA_WEBIN_PREP_FWD" + "\n"
@@ -117,13 +82,6 @@ namespace RX_DigiPrint.Views.UserControls
                 val = RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_WEBIN_PREP_BWD");
                 CMD_JOG_BWD.IsBusy = (val != null) && val.Equals("TRUE");
             }
-
-            int state = Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-            if (_WebInStartTimer>0)
-			{
-                if (--_WebInStartTimer==0 && state==3) WebIn_Clicked(CMD_WEBIN, null);
-			}
-            else if (state==3) CMD_WEBIN.IsChecked=false;
         }
 
         //--- Washing_Clicked -------------------------------------------------

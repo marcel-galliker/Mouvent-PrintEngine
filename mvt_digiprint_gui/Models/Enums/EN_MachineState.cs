@@ -8,30 +8,50 @@ using System.Threading.Tasks;
 
 namespace RX_DigiPrint.Models.Enums
 {
-    public class EN_MachineStateList: IEnumerable
+    public enum MachineStateEnum: int
+    {
+        Undef = 0,
+        Error = 1,
+        BootUp = 2,
+        Stop = 3,
+        Prepare = 4,
+        Pause = 5,
+        Run = 6,
+        Setup = 7,
+        WarmUp = 8,
+        WebIn = 9,
+        Washing = 10,
+        Cleaning = 11,
+        Glue = 12,
+        Referencing = 13,
+        Service = 14,
+        WebOut = 15,
+        Maintenance = 16,
+    }
+public class EN_MachineStateList: IEnumerable
     {
         private static List<RxEnum<int>> _List;
 
         public EN_MachineStateList()
         {
             _List = new List<RxEnum<int>>();
-            _List.Add(new RxEnum<int>( 0, RX_DigiPrint.Resources.Language.Resources.Undef));
-            _List.Add(new RxEnum<int>( 1, RX_DigiPrint.Resources.Language.Resources.Error));
-            _List.Add(new RxEnum<int>( 2, RX_DigiPrint.Resources.Language.Resources.BootUp));
-            _List.Add(new RxEnum<int>( 3, RX_DigiPrint.Resources.Language.Resources.Stop));
-            _List.Add(new RxEnum<int>( 4, RX_DigiPrint.Resources.Language.Resources.Prepare));
-            _List.Add(new RxEnum<int>( 5, RX_DigiPrint.Resources.Language.Resources.Pause));
-            _List.Add(new RxEnum<int>( 6, RX_DigiPrint.Resources.Language.Resources.Run));
-            _List.Add(new RxEnum<int>( 7, RX_DigiPrint.Resources.Language.Resources.Setup));
-            _List.Add(new RxEnum<int>( 8, RX_DigiPrint.Resources.Language.Resources.WarmUp));
-            _List.Add(new RxEnum<int>( 9, RX_DigiPrint.Resources.Language.Resources.WebIn));
-            _List.Add(new RxEnum<int>(10, RX_DigiPrint.Resources.Language.Resources.Washing));
-            _List.Add(new RxEnum<int>(11, RX_DigiPrint.Resources.Language.Resources.Cleaning));
-            _List.Add(new RxEnum<int>(12, RX_DigiPrint.Resources.Language.Resources.Glue));
-            _List.Add(new RxEnum<int>(13, RX_DigiPrint.Resources.Language.Resources.Referencing));
-            _List.Add(new RxEnum<int>(14, RX_DigiPrint.Resources.Language.Resources.Service));
-            _List.Add(new RxEnum<int>(15, RX_DigiPrint.Resources.Language.Resources.WebOut));
-            _List.Add(new RxEnum<int>(16, RX_DigiPrint.Resources.Language.Resources.Maintenance));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Undef, RX_DigiPrint.Resources.Language.Resources.Undef));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Error, RX_DigiPrint.Resources.Language.Resources.Error));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.BootUp, RX_DigiPrint.Resources.Language.Resources.BootUp));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Stop, RX_DigiPrint.Resources.Language.Resources.Stop));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Prepare, RX_DigiPrint.Resources.Language.Resources.Prepare));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Pause, RX_DigiPrint.Resources.Language.Resources.Pause));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Run, RX_DigiPrint.Resources.Language.Resources.Run));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Setup, RX_DigiPrint.Resources.Language.Resources.Setup));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.WarmUp, RX_DigiPrint.Resources.Language.Resources.WarmUp));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.WebIn, RX_DigiPrint.Resources.Language.Resources.WebIn));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Washing, RX_DigiPrint.Resources.Language.Resources.Washing));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Cleaning, RX_DigiPrint.Resources.Language.Resources.Cleaning));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Glue, RX_DigiPrint.Resources.Language.Resources.Glue));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Referencing, RX_DigiPrint.Resources.Language.Resources.Referencing));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Service, RX_DigiPrint.Resources.Language.Resources.Service));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.WebOut, RX_DigiPrint.Resources.Language.Resources.WebOut));
+            _List.Add(new RxEnum<int>((int) MachineStateEnum.Maintenance, RX_DigiPrint.Resources.Language.Resources.Maintenance));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

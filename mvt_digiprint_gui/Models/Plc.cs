@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using RxRexrothGui.Models;
 using RxRexrothGui.Services;
@@ -168,11 +169,12 @@ namespace RX_DigiPrint.Models
                     string[] val = list[n].Split('=');
                     if (val[0].Equals("STA_MACHINE_STATE"))
                     {
-                        int state=Rx.StrToInt32(val[1]);
-                        InReferencing = (state==13);
-                        InWebIn       = (state==9);
-                     //   WebInEnabled  = (state!=4 && state!=6);
-                        WebInEnabled  = (state!=5 && state!=6);
+                        MachineStateEnum state= (MachineStateEnum) Rx.StrToInt32(val[1]);
+                        InReferencing = (state == MachineStateEnum.Referencing);
+                        InWebIn       = (state== MachineStateEnum.WebIn);
+                        WebInEnabled  = (state != MachineStateEnum.Pause && state!= MachineStateEnum.Run && state != MachineStateEnum.Error);
+                        WebInActive = (state == MachineStateEnum.Pause || state == MachineStateEnum.WebIn);
+                        ToWebIn = (state == MachineStateEnum.Prepare);
                     }
                     if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
 
@@ -269,6 +271,9 @@ namespace RX_DigiPrint.Models
             get { return _IsReadyForProduction; }
             set { SetProperty(ref _IsReadyForProduction, value);}
         }
+
+        public bool ToWebIn { get; set; } = false;
+        public bool WebInActive { get; set; } = false;
 
         //--- Property WebInEnabled ---------------------------------------
         private bool _WebInEnabled = false;

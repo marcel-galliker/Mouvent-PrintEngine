@@ -675,7 +675,7 @@ static int _plc_pause_printing(int fromGui)
 int plc_handle_gui_msg(RX_SOCKET socket, void *pmsg, int len)
 {
 	int idx=(_gui_msgInIdx+1) % FIFO_SIZE;
-	if (idx==_gui_msgOutIdx) return Error(WARN, 0, "PLC-GUI-MESSAGE FIFO full");
+	if (idx == _gui_msgOutIdx) return Error(WARN, 0, "PLC-GUI-MESSAGE FIFO full on message %x", ((SMsgHdr *) pmsg)->msgId);
 
 	_gui_msgInIdx = idx;
 	_gui_socket[idx]=socket;
