@@ -102,7 +102,6 @@ static int				_HeadFlowFactorCnt[INK_SUPPLY_CNT];
 
 static INT32			_HeadErr[INK_SUPPLY_CNT+2];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
-// EnFluidCtrlMode			_FluidMode[INK_SUPPLY_CNT];
 
 
 
@@ -813,12 +812,6 @@ static void _control(int fluidNo)
 											{
 											    if (even_number_of_colors)			steplb_rob_fct_start(no / 2, HeadNo + rob_fct_purge_head0);
                                                 else if (!even_number_of_colors)	steplb_rob_fct_start((no+1) / 2, HeadNo + rob_fct_purge_head0);
-                                                if (-1 * RX_StepperStatus.posY[no/2] > j * 43000)
-                                                {
-                                                    j++;
-                                                    ctrl_tick();
-                                                    fluid_tick();
-                                                }
                                             }
                     
 											break;
@@ -1334,7 +1327,7 @@ static void _send_purge_par(int fluidNo, int time, int position_check)
         par.delay_pos_y = 0;
     }
 	par.time  = ctrl_send_purge_par(fluidNo, time, position_check);
-	sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+    sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
     _InitDone |= 0x01 << fluidNo;
 }
 

@@ -218,6 +218,9 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
                 case REP_SET_SCREW_POS:
 									steplb_set_ScrewPos(no, (SScrewPositions*)&phdr[1]);
 									break;
+                case CMD_GET_SCREW_POS:
+									steplb_get_ScrewPos(no);
+									break;
                 case REP_LIFT_CALIBRATE:
 									gui_set_stepper_offsets(no, (SRobotOffsets*)pStat);
 									return REPLY_OK;
