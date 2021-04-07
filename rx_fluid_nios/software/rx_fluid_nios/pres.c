@@ -238,8 +238,8 @@ static void _sensor_read(SSensor *s)
 			{
 				*s->pPressure=INVALID_VALUE;
 				s->error = TRUE;
-				if (s->isNo==PCB)
-					_PowerState = 0;
+			//	if (s->isNo==PCB)
+			//		_PowerState = 0;
 			}
 		}
 		else
