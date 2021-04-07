@@ -45,9 +45,10 @@ class TCPProtocol(network.AbstractTCPProtocol):
         msg.data(self.board.config["REP_FLUID_STAT"])
         self.transport.write(msg.pack())
 
-        msg = Message("REP_SCALES_STAT")
-        msg.data(self.board.config["REP_SCALES_STAT"])
-        self.transport.write(msg.pack())
+        if "REP_SCALES_STAT" in self.board.config:
+            msg = Message("REP_SCALES_STAT")
+            msg.data(self.board.config["REP_SCALES_STAT"])
+            self.transport.write(msg.pack())
 
         
     def mgt_CMD_FLUID_CTRL_MODE(self, msg):
