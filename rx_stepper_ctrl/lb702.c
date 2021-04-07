@@ -390,8 +390,8 @@ int lb702_menu(void)
         if (_rob)	lbrob_display_status();
 		if (_robClient)	
 		{
-			if (rc_isConnected()) rc_display_status();
-			else robi_lb702_display_status();
+			/*if (rc_isConnected()) rc_display_status();
+			else */robi_lb702_display_status();
 		}
     }
 
@@ -445,8 +445,8 @@ int lb702_menu(void)
         lbrob_menu(_Help);
     else 
 	{
-		if (rc_isConnected()) rc_menu(_Help);
-        else                  robi_lb702_menu(_Help);
+		/*if (rc_isConnected()) rc_menu(_Help);
+        else                 */ robi_lb702_menu(_Help);
 	}
 
 	term_printf(">");
@@ -468,8 +468,8 @@ int lb702_menu(void)
 				      lbrob_handle_menu(str);
 				  else
 				  {
-						if (rc_isConnected()) rc_handle_menu(str);
-						else                  robi_lb702_handle_menu(str);
+						/*if (rc_isConnected()) rc_handle_menu(str);
+						else                 */ robi_lb702_handle_menu(str);
 				  }
 				  break;
 		}		

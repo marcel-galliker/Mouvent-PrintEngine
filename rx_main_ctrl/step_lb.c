@@ -307,41 +307,33 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 //--- _set_screw_pos -----------------------------------------
 static int _set_screw_pos(int stepperNo)
 {
-    SScrewPositions pos;
+    SScrewPositions pos[STEPPER_CNT];
     memset(&pos, 0, sizeof(pos));
-    char strNo[12];
-    char str[80];
-    sprintf(strNo, "%d", stepperNo);
-    strcpy(str, PATH_USER FILENAME_SCREW_POS_START);
 
-    strcat(str, strNo);
-    strcat(str, FILENAME_SCREW_POS_END);
-
-    setup_screw_positions(str, stepperNo, &pos, READ);
+    setup_screw_positions(PATH_USER FILENAME_SCREWPOS, pos, READ);
     for (int printbar=0; printbar<2; printbar++)
     {
         for (int head=0; head<RX_Config.headsPerColor; head++)
         {
             int no = _rob_get_printbar(stepperNo, printbar)*RX_Config.headsPerColor+head;
-            pos.printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
-            pos.printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
+            pos[stepperNo].printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
+            pos[stepperNo].printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
         }
     }
-    sok_send_2(&_step_socket[stepperNo], CMD_SET_SCREW_POS, sizeof(pos), &pos);
+    sok_send_2(&_step_socket[stepperNo], CMD_SET_SCREW_POS, sizeof(pos[stepperNo]), &pos[stepperNo]);
     return REPLY_OK;
 }
 
 //--- steplb_set_ScrewPos -----------------------------------------
 int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
 {
-    char strNo[12];
-    char str[80];
-    sprintf(strNo, "%d", no);
-    strcpy(str, PATH_USER FILENAME_SCREW_POS_START);
+    SScrewPositions pos[STEPPER_CNT];
+    memset(&pos, 0, sizeof(pos));
 
-    strcat(str, strNo);
-    strcat(str, FILENAME_SCREW_POS_END);
-    setup_screw_positions(str, no, ppos, WRITE);
+    setup_screw_positions(PATH_USER FILENAME_SCREWPOS, pos, READ);
+    memcpy(&pos[no], ppos, sizeof(pos[no]));
+    
+    setup_screw_positions(PATH_USER FILENAME_SCREWPOS, pos, WRITE);
     for (int printbar=0; printbar<2; printbar++)
     {
         for (int head=0; head<RX_Config.headsPerColor; head++)

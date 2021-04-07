@@ -1283,7 +1283,7 @@ static void _rob_state_machine(void)
             // no break here!
 
         case 2: // move rob to y (move robi and slide simultanious)
-            if (!RX_StepperStatus.screwerinfo.moving && RX_StepperStatus.robinfo.ref_done && (RX_StepperStatus.info.z_in_screw || RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_wash || RX_StepperStatus.info.z_in_cap))
+            if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && RX_StepperStatus.robinfo.ref_done && (RX_StepperStatus.info.z_in_screw || RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_wash || RX_StepperStatus.info.z_in_cap))
             {
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y(%d)", _pos.y);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_pos.y);
@@ -1358,7 +1358,7 @@ static void _rob_state_machine(void)
                     break;
                 }
                 else if (_correction_value>=0)
-                    _correction_value -= 500;
+                    _correction_value = -(_correction_value + 500);
                 else
                     _correction_value = _correction_value * -1;
                 pos = _pos.y+_correction_value;
