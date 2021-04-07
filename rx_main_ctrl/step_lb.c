@@ -149,6 +149,12 @@ static int _rob_get_printbar(int rob, int printbar)
     switch(RX_Config.printer.type)
     {
     case printer_LB702_WB:  return rob*2+printbar;
+	case printer_LB702_UV:  if (RX_Config.colorCnt < 5 || RX_Config.colorCnt >7)
+		                        return rob*2+printbar;
+		                    else if (RX_Config.inkSupplyCnt % 2 == 1)
+								return (2 * rob + printbar - 1 + 4)%RX_Config.colorCnt;
+		                    else
+								return 2 * rob + printbar - 1;
     default:                Error(ERR_CONT, 0, "Not implemented");
                             return printbar;
     }
