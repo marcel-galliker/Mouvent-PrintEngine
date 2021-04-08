@@ -252,19 +252,12 @@ namespace RX_DigiPrint.Views.UserControls
             get { return _Label; }
             set 
             { 
-                if (_Label != value)
+                _Label = value;
+                LABEL.Text=_Label;
+                if (!_Label.Equals(""))
                 {
-                    _Label = value;
-                    LABEL.Text=_Label;
-                    if (_Label.Equals(""))
-                    {
-                        MainGrid.ColumnDefinitions[0].Width=new GridLength(0);
-                    }
-                    else
-                    {
-                        PlcParPanel panel=_find_panel(this);
-                        MainGrid.ColumnDefinitions[0].Width = new GridLength(panel.LabelWidth);
-                    }
+                    PlcParPanel panel=_find_panel(this);
+                    LABEL.Width = panel.LabelWidth;
                 }
             }
         }
