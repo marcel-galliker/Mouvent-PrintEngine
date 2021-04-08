@@ -264,7 +264,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     }
 
     if (_AbortPrinting && RX_StepperStatus.info.z_in_print)
-        steplb_lift_to_up_pos();
+        steplb_lift_to_up_pos_all();
 
     memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
     memcpy(&RX_StepperStatus.robinfo, &robinfo, sizeof(RX_StepperStatus.robinfo));
@@ -372,12 +372,12 @@ int	 steplb_to_print_pos(void)
 //--- steplb_abort_printing -----------------------------------------
 void  steplb_abort_printing(void)
 {
-	if(RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
+	if(RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos_all();
 	else _AbortPrinting = TRUE;
 }
 
-//--- steplb_lift_to_top_pos ---------------------------
-void steplb_lift_to_top_pos(void)
+//--- steplb_lift_to_top_pos_all ---------------------------
+void steplb_lift_to_top_pos_all(void)
 {
     if (_AutoCapTimer == 0 && RX_StepperStatus.info.z_in_cap && _AutoCapMode)
     {
@@ -394,14 +394,27 @@ void steplb_lift_to_top_pos(void)
     }
 }
 
-//--- steplb_lift_in_top_pos --------------
-int	 steplb_lift_in_top_pos(void)
+//--- steplb_lift_to_top_pos -------------------------------------------
+void steplb_lift_to_top_pos(int stepperNo)
+{
+	if (_step_socket[stepperNo] != INVALID_SOCKET)
+		sok_send_2(&_step_socket[stepperNo], CMD_LIFT_REFERENCE, 0, NULL);
+}
+
+//--- steplb_lift_in_top_pos_all --------------
+int	 steplb_lift_in_top_pos_all(void)
 {
 	return RX_StepperStatus.info.z_in_ref;
 }
 
-//--- steplb_lift_to_up_pos ---------------------------
-void steplb_lift_to_up_pos(void)
+//--- steplb_lift_in_top_pos --------------
+int steplb_lift_in_top_pos(int stepperNo)
+{
+    return _Status[stepperNo].info.z_in_ref;
+}
+
+//--- steplb_lift_to_up_pos_all ---------------------------
+void steplb_lift_to_up_pos_all(void)
 {
 	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
@@ -411,21 +424,21 @@ void steplb_lift_to_up_pos(void)
 }
 
 //--- steplb_lift_is_up --------------
-int	 steplb_lift_in_up_pos(void)
+int	 steplb_lift_in_up_pos_all(void)
 {
 	return RX_StepperStatus.info.z_in_ref;
 }
 
-//--- steplb_lift_to_up_pos_individually -------------------
-void steplb_lift_to_up_pos_individually(int no)
+//--- steplb_lift_to_up_pos -------------------
+void steplb_lift_to_up_pos(int no)
 {
 	sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 }
 
-//--- steplb_lift_in_up_pos_individually -------------------
-int	 steplb_lift_in_up_pos_individually(int no)
+//--- steplb_lift_in_up_pos -------------------
+int	 steplb_lift_in_up_pos(int no)
 {
-	if (no == -1) return steplb_lift_in_up_pos();
+	if (no == -1) return steplb_lift_in_up_pos_all();
 	if (_step_socket[no] == INVALID_SOCKET) return TRUE;
 	return _Status[no].info.z_in_ref;
 }
@@ -533,21 +546,28 @@ void steplb_rob_do_reference(void)
 	}
 }
 
-//--- steplb_rob_empty_waste ---------------------------------------
+//--- steplb_rob_empty_waste_all ---------------------------------------
 /*
  * If time <= 0, then a defined time on the Stepperboard will used for the pump time.
  * The pump time can't be decreased , if it gets set a time here and it has already
  * a time left running, it will take the longer time.
  *
  * */
-void steplb_rob_empty_waste(int time)
+void steplb_rob_empty_waste_all(int time_s)
 {
     for (int i = 0; i < STEPPER_CNT; i++)
     {
         if (_step_socket[i] != INVALID_SOCKET)
-            sok_send_2(&_step_socket[i], CMD_ROB_VACUUM, sizeof(time), &time);
+            sok_send_2(&_step_socket[i], CMD_ROB_VACUUM, sizeof(time_s), &time_s);
     }
     
+}
+
+//---steplb_rob_empty_waste -----------------------------------------------
+void steplb_rob_empty_waste(int stepperNo, int time_s)
+{
+	if (_step_socket[stepperNo] != INVALID_SOCKET)
+		sok_send_2(&_step_socket[stepperNo], CMD_ROB_VACUUM, sizeof(time_s), &time_s);
 }
 
 //--- _steplb_rob_do_reference ---------------------------------------------------
@@ -729,11 +749,11 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     if (_Status[no].robinfo.wash_done && _WashStarted[no]) 
                                     {
                                         _RobotCtrlMode[no] = ctrl_wash_step2;
-                                        steplb_lift_to_top_pos();
+                                        steplb_lift_to_top_pos(no);
                                     }
 									break;
 
-        case ctrl_wash_step2:		if (steplb_lift_in_top_pos())
+        case ctrl_wash_step2:		if (steplb_lift_in_top_pos(no))
                                     {
                                         _RobotCtrlMode[no] = ctrl_wash_step3; 
                                     }

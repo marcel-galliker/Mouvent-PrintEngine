@@ -25,14 +25,16 @@ int steplb_get_ScrewPos(int stepperNo);
 int	 steplb_to_print_pos(void);
 void steplb_abort_printing(void);
 
-void steplb_lift_to_top_pos(void);
-int	 steplb_lift_in_top_pos(void);
+void steplb_lift_to_top_pos_all(void);
+void steplb_lift_to_top_pos(int stepperNo);
+int steplb_lift_in_top_pos_all(void);
+int steplb_lift_in_top_pos(int stepperNo);
 
-void steplb_lift_to_up_pos(void);
-int	 steplb_lift_in_up_pos(void);
+void steplb_lift_to_up_pos_all(void);
+int	 steplb_lift_in_up_pos_all(void);
 
-void steplb_lift_to_up_pos_individually(int no);
-int	 steplb_lift_in_up_pos_individually(int fluidNo);
+void steplb_lift_to_up_pos(int no);
+int	 steplb_lift_in_up_pos(int no);
 
 void steplb_lift_to_fct_pos(int no, ERobotFunctions rob_function); 
 int  steplb_lift_in_fct_pos(int no, ERobotFunctions rob_function);
@@ -46,7 +48,8 @@ void steplb_rob_fct_start(int no, ERobotFunctions rob_function);
 int	 steplb_rob_fct_done (int no, ERobotFunctions rob_function);
 
 void steplb_rob_do_reference(void);
-void steplb_rob_empty_waste(int time);
+void steplb_rob_empty_waste_all(int time_s);
+void steplb_rob_empty_waste(int stepperNo, int time_s);
 int  steplb_rob_reference_done(void);
 
 void steplb_rob_stop_all(void);

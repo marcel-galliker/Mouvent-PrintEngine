@@ -311,7 +311,7 @@ void  step_lift_to_top_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
-	case STEPPER_LB:	steplb_lift_to_top_pos(); break;
+	case STEPPER_LB:	steplb_lift_to_top_pos_all(); break;
     case STEPPER_TTS:	steptts_to_top_pos(); break;
 	default:			break;
 	}
@@ -323,7 +323,7 @@ int  step_lift_in_top_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_lift_in_up_pos();
-	case STEPPER_LB:	return steplb_lift_in_top_pos();
+	case STEPPER_LB:	return steplb_lift_in_top_pos_all();
     case STEPPER_TTS:	return steptts_in_top_pos();
 	default:			return TRUE;
 	}
@@ -335,7 +335,7 @@ void  step_lift_to_up_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
-	case STEPPER_LB:	steplb_lift_to_up_pos(); break;
+	case STEPPER_LB:	steplb_lift_to_up_pos_all(); break;
 	default:			break;
 	}
 }
@@ -346,7 +346,7 @@ int  step_lift_in_up_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_lift_in_up_pos();
-	case STEPPER_LB:	return steplb_lift_in_up_pos();
+	case STEPPER_LB:	return steplb_lift_in_up_pos_all();
 	default:			return TRUE;
 	}
 }
@@ -447,12 +447,12 @@ void step_rob_stop(void)
 }
 
 //--- step_empty_waste ----------------------------------------
-void step_empty_waste(int time)
+void step_empty_waste(int time_s)
 {
     switch (_StepperType)
     {
-    case STEPPER_TX:	steptx_rob_empty_waste(time); break;
-	case STEPPER_LB:	steplb_rob_empty_waste(time); break;
+    case STEPPER_TX:	steptx_rob_empty_waste(time_s); break;
+	case STEPPER_LB:	steplb_rob_empty_waste_all(time_s); break;
     default: break;
     }
 }
