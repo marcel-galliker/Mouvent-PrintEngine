@@ -22,5 +22,5 @@ int setup_print_queue(HANDLE file, SPrintQueueItem *item, int *cnt, EN_setup_Act
 
 int setup_config		(const char *filepath, SRxConfig			*pcfg,			  EN_setup_Action  action);
 int setup_fluid_system	(const char *filepath,	UINT32				*pflushed,		  EN_setup_Action  action);
-int setup_screw_positions (const char *filepath, int robot,	SScrewPositions *ppos, EN_setup_Action  action);
+int setup_screw_positions (const char *filepath, SScrewPositions ppos[MAX_STEPPERS], EN_setup_Action  action);
 int setup_vacuum_cleaner(const char* filepath, double *time, EN_setup_Action action);

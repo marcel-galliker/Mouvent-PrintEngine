@@ -38,7 +38,7 @@ static RX_SOCKET		    _step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		    _Status[STEPPER_CNT];
 static int				    _AbortPrinting=FALSE;
-static int                  _WashStarted;
+static int                  _WashStarted[STEPPER_CNT];
 static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 static int                  _ScrewCommandSend[STEPPER_CNT] = {FALSE};
 static int                  _OldVacuum_Cleaner_State = FALSE;
@@ -149,6 +149,12 @@ static int _rob_get_printbar(int rob, int printbar)
     switch(RX_Config.printer.type)
     {
     case printer_LB702_WB:  return rob*2+printbar;
+	case printer_LB702_UV:  if (RX_Config.colorCnt < 5 || RX_Config.colorCnt >7)
+		                        return rob*2+printbar;
+		                    else if (RX_Config.inkSupplyCnt % 2 == 1)
+								return (2 * rob + printbar - 1 + 4)%RX_Config.colorCnt;
+		                    else
+								return 2 * rob + printbar - 1;
     default:                Error(ERR_CONT, 0, "Not implemented");
                             return printbar;
     }
@@ -163,11 +169,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     ERobotInfo robinfo;
 
     SStepperStat oldStatus[STEPPER_CNT];
-
-    for (i = 0; i < STEPPER_CNT; i++)
-    {
-        memcpy(&oldStatus[i], &_Status[i], sizeof(oldStatus[i]));
-    }
+    memcpy(&oldStatus[no], &_Status[no], sizeof(oldStatus[no]));
     memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
     
     _Status[no].no = no;
@@ -184,6 +186,11 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             if (_StatReadCnt[i] == 0) return REPLY_OK;
         }
     }
+
+	if (_Status[no].robot_used && !oldStatus[no].robot_used)
+	{
+		_set_screw_pos(no);
+	}
 
     memset(&info, 0, sizeof(info));
     memset(&robinfo, 0, sizeof(robinfo));
@@ -202,10 +209,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     {
         if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
         {
-            if (_Status[i].robot_used && !oldStatus[i].robot_used)
-            {
-                _set_screw_pos(i);
-            }
+            
 
             info.ref_done &= _Status[i].info.ref_done;
             info.printhead_en &= _Status[i].info.printhead_en;
@@ -307,41 +311,33 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 //--- _set_screw_pos -----------------------------------------
 static int _set_screw_pos(int stepperNo)
 {
-    SScrewPositions pos;
+    SScrewPositions pos[STEPPER_CNT];
     memset(&pos, 0, sizeof(pos));
-    char strNo[12];
-    char str[80];
-    sprintf(strNo, "%d", stepperNo);
-    strcpy(str, PATH_USER FILENAME_SCREW_POS_START);
 
-    strcat(str, strNo);
-    strcat(str, FILENAME_SCREW_POS_END);
-
-    setup_screw_positions(str, stepperNo, &pos, READ);
+    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, READ);
     for (int printbar=0; printbar<2; printbar++)
     {
         for (int head=0; head<RX_Config.headsPerColor; head++)
         {
             int no = _rob_get_printbar(stepperNo, printbar)*RX_Config.headsPerColor+head;
-            pos.printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
-            pos.printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
+            pos[stepperNo].printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
+            pos[stepperNo].printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
         }
     }
-    sok_send_2(&_step_socket[stepperNo], CMD_SET_SCREW_POS, sizeof(pos), &pos);
+    sok_send_2(&_step_socket[stepperNo], CMD_SET_SCREW_POS, sizeof(pos[stepperNo]), &pos[stepperNo]);
     return REPLY_OK;
 }
 
 //--- steplb_set_ScrewPos -----------------------------------------
 int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
 {
-    char strNo[12];
-    char str[80];
-    sprintf(strNo, "%d", no);
-    strcpy(str, PATH_USER FILENAME_SCREW_POS_START);
+    SScrewPositions pos[STEPPER_CNT];
+    memset(&pos, 0, sizeof(pos));
 
-    strcat(str, strNo);
-    strcat(str, FILENAME_SCREW_POS_END);
-    setup_screw_positions(str, no, ppos, WRITE);
+    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, READ);
+    memcpy(&pos[no], ppos, sizeof(pos[no]));
+    
+    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, WRITE);
     for (int printbar=0; printbar<2; printbar++)
     {
         for (int head=0; head<RX_Config.headsPerColor; head++)
@@ -351,6 +347,13 @@ int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
         }
     }
 
+    return REPLY_OK;
+}
+
+//--- steplb_get_ScrewPos ----------------------------------------------
+int steplb_get_ScrewPos(int stepperNo)
+{
+    _set_screw_pos(stepperNo);
     return REPLY_OK;
 }
 
@@ -716,14 +719,14 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         function = rob_fct_wash;
 									    sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
                                         _RobotCtrlMode[no] = ctrl_wash_step1;
-                                        _WashStarted = FALSE;
+                                        _WashStarted[no] = FALSE;
                                     }
                                     else _RobotCtrlMode[no] = ctrl_wash;
                                     
                                     break;
                                     
-        case ctrl_wash_step1:		if (_Status[no].robinfo.moving && !_Status[no].robinfo.wash_done) _WashStarted = TRUE;
-                                    if (_Status[no].robinfo.wash_done && _WashStarted) 
+        case ctrl_wash_step1:		if (_Status[no].robinfo.moving && !_Status[no].robinfo.wash_done) _WashStarted[no] = TRUE;
+                                    if (_Status[no].robinfo.wash_done && _WashStarted[no]) 
                                     {
                                         _RobotCtrlMode[no] = ctrl_wash_step2;
                                         steplb_lift_to_top_pos();
@@ -734,7 +737,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     {
                                         _RobotCtrlMode[no] = ctrl_wash_step3; 
                                     }
-                                    _WashStarted = FALSE;
+                                    _WashStarted[no] = FALSE;
 									break;
                                     
         case ctrl_wash_step3:		_RobotCtrlMode[no] = ctrl_off;

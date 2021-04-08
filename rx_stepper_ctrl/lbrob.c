@@ -1014,6 +1014,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_SEARCH_ALL_SCREWS:
         Error(WARN, 0, "CMD_SEARCH_ALL_SCREWS Starting at printbar 1");
+        ctrl_send_2(CMD_GET_SCREW_POS, 0, NULL);
         _ScrewFunction = CMD_SEARCH_ALL_SCREWS;
         _ScrewPar.printbar=0;
         _ScrewPar.head=-1;
@@ -1025,6 +1026,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_RESET_ALL_SCREWS:
         val = (*(INT32 *)pdata);
         Error(WARN, 0, "CMD_RESET_ALL_SCREWS Starting at printbar 1");
+        ctrl_send_2(CMD_GET_SCREW_POS, 0, NULL);
         _ScrewFunction = CMD_RESET_ALL_SCREWS;
         _ScrewPar.printbar=val;
         _ScrewPar.head=-1;
@@ -1202,13 +1204,16 @@ static void _rob_state_machine(void)
                         memcpy(&_pos, &_ScrewPos.printbar[_ScrewPar.printbar].stitch, sizeof(_pos));
                         if (defaults || _pos.x==0)
                         {
-                            if (_ScrewPar.printbar==0) _pos.x = SCREW_X_LEFT;
+							if (_ScrewPar.printbar == 0)
+								_pos.x = SCREW_X_LEFT;
+							else if (_ScrewPos.printbar[0].stitch.x == 0)
+								_pos.x = SCREW_X_RIGHT;
                             else                       _pos.x = SCREW_X_RIGHT + _ScrewPos.printbar[0].stitch.x - SCREW_X_LEFT;
                             TrPrintfL(TRUE, "Default _pos.x=%d", _pos.x);
                         }
                         if (defaults || _pos.y==0)
                         {
-                            if (_ScrewPar.printbar==0) _pos.y = SCREW_Y_STITCH;
+							if (_ScrewPar.printbar == 0 || _ScrewPos.printbar[0].stitch.y == 0) _pos.y = SCREW_Y_STITCH;
                             else                       _pos.y = _ScrewPos.printbar[0].stitch.y;
                             TrPrintfL(TRUE, "Default _pos.y=%d", _pos.y);
                         }
@@ -1283,7 +1288,7 @@ static void _rob_state_machine(void)
             // no break here!
 
         case 2: // move rob to y (move robi and slide simultanious)
-            if (!RX_StepperStatus.screwerinfo.moving && RX_StepperStatus.robinfo.ref_done && (RX_StepperStatus.info.z_in_screw || RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_wash || RX_StepperStatus.info.z_in_cap))
+            if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && RX_StepperStatus.robinfo.ref_done && (RX_StepperStatus.info.z_in_screw || RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_wash || RX_StepperStatus.info.z_in_cap))
             {
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y(%d)", _pos.y);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_pos.y);
@@ -1358,7 +1363,7 @@ static void _rob_state_machine(void)
                     break;
                 }
                 else if (_correction_value>=0)
-                    _correction_value -= 500;
+                    _correction_value = -(_correction_value + 500);
                 else
                     _correction_value = _correction_value * -1;
                 pos = _pos.y+_correction_value;

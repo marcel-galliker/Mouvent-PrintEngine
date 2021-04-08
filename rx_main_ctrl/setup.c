@@ -279,45 +279,51 @@ int setup_fluid_system	(const char *filepath,	UINT32	*pflushed,	EN_setup_Action 
 	return REPLY_OK;									
 }
 
-int setup_screw_positions (const char *filepath, int robot,	SScrewPositions *ppos, EN_setup_Action  action)
+int setup_screw_positions (const char *filepath, SScrewPositions ppos[MAX_STEPPERS], EN_setup_Action  action)
 {
-    int p, h, a;
+    int p, h, a, i;
     HANDLE file = setup_create();
+
+    if (action == READ) memset(ppos, 0, sizeof(*ppos)*MAX_STEPPERS);
 
     setup_load(file, filepath);
 
     if (setup_chapter(file, "Screw_Positions", -1, action) == REPLY_OK)
     {
-        if (setup_chapter(file, "Robot", robot, action) == REPLY_OK)
+        for (i = 0; i < MAX_STEPPERS; i++)
         {
-            for (p = 0; p < SIZEOF(ppos->printbar) ; p++)
-            {
-                if (setup_chapter(file, "Printbar", p, action) == REPLY_OK)
-                {
-                    setup_int32(file, "Stitch_X", action, &ppos->printbar[p].stitch.x, 0);
-					setup_int32(file, "Stitch_Y", action, &ppos->printbar[p].stitch.y, 0);
-					setup_int32(file, "Stitch_Turns", action, &ppos->printbar[p].stitch.turns, 0);
-					for (h = 0; h < SIZEOF(ppos->printbar[p].head); h++)
-					{
-                        if (setup_chapter(file, "Head", h, action) == REPLY_OK)
-                        {
-                            for (a = 0; a < SIZEOF(ppos->printbar[p].head[h]); a++)
-							{
-                                if (setup_chapter(file, "Axis", a, action) == REPLY_OK)
-                                {
-                                    setup_int32(file, "X", action, &ppos->printbar[p].head[h][a].x, 0);
-									setup_int32(file, "Y", action,&ppos->printbar[p].head[h][a].y, 0);
-									setup_chapter(file, "..", -1, action);
-                                }
-							}
-							setup_chapter(file, "..", -1, action);
-                        }
-					}
-					setup_chapter(file, "..", -1, action);
-                }
-            }
-            setup_chapter(file, "..", -1, action);
+            if (setup_chapter(file, "Robot", i, action) == REPLY_OK)
+			{
+			    for (p = 0; p < SIZEOF(ppos->printbar) ; p++)
+			    {
+                    if (setup_chapter(file, "Printbar", p, action) == REPLY_OK)
+			        {
+                        setup_int32(file, "Stitch_X", action, &ppos[i].printbar[p].stitch.x, 0);
+                        setup_int32(file, "Stitch_Y", action, &ppos[i].printbar[p].stitch.y, 0);
+                        setup_int32(file, "Stitch_Turns", action, &ppos[i].printbar[p].stitch.turns, 0);
+						for (h = 0; h < SIZEOF(ppos->printbar[p].head); h++)
+						{
+                            if (setup_chapter(file, "Head", h, action) == REPLY_OK)
+			                {
+			                    for (a = 0; a < SIZEOF(ppos->printbar[p].head[h]); a++)
+								{
+			                        if (setup_chapter(file, "Axis", a, action) == REPLY_OK)
+			                        {
+			                            setup_int32(file, "X", action, &ppos[i].printbar[p].head[h][a].x, 0);
+										setup_int32(file, "Y", action, &ppos[i].printbar[p].head[h][a].y, 0);
+										setup_chapter(file, "..", -1, action);
+			                        }
+								}
+								setup_chapter(file, "..", -1, action);
+			                }
+						}
+						setup_chapter(file, "..", -1, action);
+			        }
+			    }
+			    setup_chapter(file, "..", -1, action);
+			}
         }
+        
         setup_chapter(file, "..", -1, action);
     }
     else

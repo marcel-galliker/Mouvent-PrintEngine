@@ -386,6 +386,7 @@
 #define REP_SET_SCREW_POS		0x02000705
 #define CMD_RESET_ALL_SCREWS	0x01000706
 #define CMD_ROB_SERVICE			0x01000707
+#define CMD_GET_SCREW_POS		0x01000708
 
 #define CMD_ROB_DRIP_PANS				0x01000721
 // #define CMD_ROB_DRIP_PANS_EN			0x01000722		// Main ask board 0 for positions of drip pans
