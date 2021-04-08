@@ -329,7 +329,7 @@ void CWin10StartupDlg::BackgroundThread(void *par)
 				sprintf(cmd, "md %s", dst_dir);
 				rx_process_execute(cmd, NULL, 0);
 
-				sprintf(cmd, "xcopy \"\\\\%s\\gui\" %s /I /R /Y", _HostName, dst_dir);
+				sprintf(cmd, "xcopy \"\\\\%s\\gui\" %s /I /R /Y /S", _HostName, dst_dir);
 				rx_process_execute(cmd, NULL, 0);
 				pdlg->StartGui();
 			}

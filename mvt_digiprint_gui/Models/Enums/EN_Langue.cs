@@ -34,11 +34,12 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<ELangues>(ELangues.German, "Deutsch"));
                 _List.Add(new RxEnum<ELangues>(ELangues.Spanish, "Español"));
                 _List.Add(new RxEnum<ELangues>(ELangues.Italian, "Italiano"));
+                /* Other Language that are not yet shown... 
                 _List.Add(new RxEnum<ELangues>(ELangues.Dutch, "Nederlands"));
                 _List.Add(new RxEnum<ELangues>(ELangues.Polish, "Polski"));
                 _List.Add(new RxEnum<ELangues>(ELangues.Portuguese, "Português"));
                 _List.Add(new RxEnum<ELangues>(ELangues.Romanian, "Română"));
-
+                */
                 _Culture = new Dictionary<ELangues, CultureInfo>() {
                     {ELangues.English, CultureInfo.GetCultureInfo("en-US") },
                     {ELangues.French, CultureInfo.GetCultureInfo("fr-FR")},

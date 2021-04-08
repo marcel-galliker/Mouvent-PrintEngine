@@ -97,9 +97,6 @@ namespace RX_DigiPrint.Views
 
             _ShowTab(false, TabLH702, AddLocationHint.After);
 
-            RxGlobals.PrinterProperties.Langue = ELangues.English;
-            RxGlobals.PrinterProperties.SetNetworkSettings();
-            RxGlobals.PrinterProperties.Save();
         }
 
         
