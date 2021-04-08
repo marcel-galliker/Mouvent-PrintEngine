@@ -60,6 +60,18 @@ namespace RX_DigiPrint.Views.UserControls
         private void _Timer(int no)
         {
             CMD_WEBIN.IsChecked = RxGlobals.Plc.ToWebIn;
+            if (RxGlobals.Plc.WebInActive)
+            {
+                CMD_WEBIN.Visibility = Visibility.Collapsed;
+                CMD_JOG_BWD.Visibility = Visibility.Visible;
+                CMD_JOG_FWD.Visibility = Visibility.Visible;
+            }
+            else 
+            {
+                CMD_WEBIN.Visibility = Visibility.Visible;
+                CMD_JOG_BWD.Visibility = Visibility.Collapsed;
+                CMD_JOG_FWD.Visibility = Visibility.Collapsed;
+            }
 
             string val;
             RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n"
