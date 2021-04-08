@@ -57,7 +57,8 @@ static int				_PurgeCluster = FALSE;
 static int				_PurgeClusterNo = -1;
 static int				_PurgeHeadNo = -1;
 
-static EnFluidCtrlMode	_EndCtrlMode[INK_SUPPLY_CNT] = {ctrl_off};	
+static EnFluidCtrlMode	_EndCtrlMode[INK_SUPPLY_CNT] = {ctrl_off};
+static int				_Vacuum_Time[INK_SUPPLY_CNT] = {0};
 
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
@@ -810,8 +811,16 @@ static void _control(int fluidNo)
                                             }
 											else if (lbrob && _PurgeCtrlMode != ctrl_purge4ever)
 											{
-											    if (even_number_of_colors)			steplb_rob_fct_start(no / 2, HeadNo + rob_fct_purge_head0);
-                                                else if (!even_number_of_colors)	steplb_rob_fct_start((no+1) / 2, HeadNo + rob_fct_purge_head0);
+											    if (even_number_of_colors)
+												{
+													steplb_rob_fct_start(no / 2, HeadNo + rob_fct_purge_head0);
+													if (_Vacuum_Time[no]) steplb_rob_empty_waste(no / 2, _Vacuum_Time[no]);
+												}
+												else if (!even_number_of_colors)
+												{
+													steplb_rob_fct_start((no + 1) / 2, HeadNo + rob_fct_purge_head0);
+													if (_Vacuum_Time[no]) steplb_rob_empty_waste((no + 1) / 2, _Vacuum_Time[no]);
+												}
                                             }
                     
 											break;
@@ -1327,7 +1336,8 @@ static void _send_purge_par(int fluidNo, int time, int position_check)
         par.delay_pos_y = 0;
     }
 	par.time  = ctrl_send_purge_par(fluidNo, time, position_check);
-    sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
+    if (RX_StepperStatus.robot_used) _Vacuum_Time[fluidNo] = par.time;
+	sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
     _InitDone |= 0x01 << fluidNo;
 }
 

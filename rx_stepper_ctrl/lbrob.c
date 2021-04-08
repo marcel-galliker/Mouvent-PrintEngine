@@ -96,7 +96,7 @@
 #define HEAD_WIDTH              43000
 
 #define MAX_STEPS_STITCH    (30 * 6)  // 30 turns with 6 steps each turn
-#define MAX_STEPS_ANGLE     (18 * 6)  // 15 turns with 6 steps each turn
+#define MAX_STEPS_ANGLE     (16 * 6)  // 16 turns with 6 steps each turn
 #define OVERTURN            (2*6)     // 2 turns
 #define LOOSE_TURN          (6/2)     // half turn for reserve, that the mechanical end should never be reached anymore
 
