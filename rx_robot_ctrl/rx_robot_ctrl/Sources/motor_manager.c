@@ -137,18 +137,18 @@ static void motor_manager_task(void *pvParameters)
 			}
 		}
 
-		for(uint8_t motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
-		{
-			if(_motorStatus[motorCount].isConfigured != true)
-				continue;
+			for(uint8_t motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
+			{
+				if(_motorStatus[motorCount].isConfigured != true)
+					continue;
 
-			update_motor(motorCount);
-			check_encoder(motorCount);
-			check_stop_bits(motorCount);
-		}
+				update_motor(motorCount);
+				check_encoder(motorCount);
+				check_stop_bits(motorCount);
+			}
 
 		vTaskDelayUntil(&lastWakeTime, frequency);
-	}
+		}
 }
 
 static void handle_motor_message(void* message)
@@ -272,6 +272,7 @@ static void reset_motors(RobotMotorsResetCommand_t* resetCommand)
 			reset_motor(motorCount);
 		}
 	}
+	status_manager_send_status();
 }
 
 static void update_motor(uint8_t motor)
@@ -435,7 +436,8 @@ static void update_status(uint8_t status, uint8_t motor)
 {
 	_motorStatus[motor].status = status;
 
-	if((_motorStatus[motor].status & TMC_STATUS_STANDSTILL_FLAG) && (_motorStatus[motor].isMoving == true))
+	int isMoving = !(_motorStatus[motor].status & TMC_STATUS_STANDSTILL_FLAG);
+	if(_motorStatus[motor].isMoving && !isMoving)
 	{
 		_motorStatus[motor].moveDoneCnt = _motorStatus[motor].moveStartCnt;
 		_motorStatus[motor].isMoving = false;
@@ -443,11 +445,11 @@ static void update_status(uint8_t status, uint8_t motor)
 		_stopBits[motor] = 0;
 		_stopBitLevels[motor] = 0;
 		gpio_manager_disable_motor(motor);
-	//	status_manager_send_status();
+		status_manager_send_status();
 	}
-	else if(!(_motorStatus[motor].status & TMC_STATUS_STANDSTILL_FLAG))
+	else if(!_motorStatus[motor].isMoving && isMoving)
 	{
 		_motorStatus[motor].isMoving = true;
-	//	status_manager_send_status();
+		status_manager_send_status();
 	}
 }
