@@ -1061,7 +1061,6 @@
 //f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include\arm-linux-gnueabihf
 //../rx_ink_lib
 //../rx_common_lib
-//../rx_robot_ctrl/includes
 // --- Include directories end --- //
 
 

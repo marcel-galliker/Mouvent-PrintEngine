@@ -17,6 +17,7 @@
 #include "rx_threads.h"
 #include "rx_robot_def.h"
 #include "rx_robot_tcpip.h"
+#include "rx_term.h"
 #include "rx_trace.h"
 #include "version.h"
 #include "robot_client.h"
@@ -39,11 +40,13 @@
 
 #define STEPS_PER_REV				51200
 #define DISTANCE_UM_PER_REV			36000   // mirco meters per revolution
+#define MOTOR_X_GARAGE_POS			28500
 
 #define SCREW_CURRENT_HIGH			(0b00000000000000010001110000000000)
 #define SCREW_CURRENT_LOW			(0b00000000000000010001001100000000)
 #define Z_CURRENT_UP				(0b00000000000000010000101000000000)
 #define Z_CURRENT_DOWN				(0b00000000000000010000111000000000)
+
 
 //--- Modlue Globals -----------------------------------------------------------------
 static char _IpAddr[32]="";
@@ -72,9 +75,9 @@ static void _send_MotorCfg(int motor);
 
 static void _rc_stop(int motors);
 static void _rc_reset(int motor);
-static void _rc_motor_moveBy(int motor, int steps);
-static void _rc_motor_moveToStop(int motor, int steps, int input);
-static void _rc_moveto_xy_stop(int x, int y, int stop);
+static int  _rc_motor_moveBy(int motor, int steps, const char *file, int line);
+static int  _rc_motor_moveToStop(int motor, int steps, int input, const char *file, int line);
+static int  _rc_moveto_xy_stop(int x, int y, int stop, const char *file, int line);
 
 static void _rc_state_machine(void);
 
@@ -192,8 +195,8 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 	return REPLY_OK;
 }
 
-//---- rx_reference -----------------------
-int	rx_reference(void)
+//---- rc_reference -----------------------
+void rc_reference(void)
 {
 	int motor;
 	for (motor=0; motor<MOTOR_COUNT; motor++)
@@ -203,7 +206,6 @@ int	rx_reference(void)
 	_MotorInit = 0;
 	_RC_State = RC_STATE_REF;
 	_rc_state_machine();
-	return REPLY_OK;
 }
 
 //--- _steps_2_micron ----------------------------------------------------------------
@@ -225,35 +227,28 @@ static int _micron_2_steps(int micron)
 //--- _rc_state_machine --------------------------------
 static void _rc_state_machine(void)
 {
-	static int _time=0;
 	if (!_config_motors()) return;
 
     RX_StepperStatus.screw_posX = (_steps_2_micron(_RobotStatus.motors[MOTOR_XY_1].motorEncPos + _RobotStatus.motors[MOTOR_XY_0].motorEncPos))/2;
     RX_StepperStatus.screw_posY = (_steps_2_micron(_RobotStatus.motors[MOTOR_XY_1].motorEncPos - _RobotStatus.motors[MOTOR_XY_0].motorEncPos))/2;
+	RX_StepperStatus.screw_posZ = (_RobotStatus.motors[MOTOR_Z].motorPos);
 
 	switch(_RC_State)
 	{        
 		case 0:					break;
 	
 		case RC_STATE_REF:		// move Z to bottom
-								_time=0;
 								if (!ROB_IN(ENDSTOP_Z_DOWN))
-									_rc_motor_moveToStop(MOTOR_Z, -1000000, ENDSTOP_Z_DOWN);
-								else _time=rx_get_ticks()+10000;
+									_rc_motor_moveToStop(MOTOR_Z, -1000000, ENDSTOP_Z_DOWN, _FL_);
 								_RC_State++;
 								break;
 
 		case RC_STATE_REF+1:	// z at bottom
 								if (ROB_IN(ENDSTOP_Z_DOWN))
 								{
-									if (!_time) _time=rx_get_ticks()+100;
-									if (rx_get_ticks()>_time)
-									{
-										_rc_reset(MOTOR_Z);
-										_rc_moveto_xy_stop(RX_StepperStatus.screw_posX, -1000000, ENDSTOP_Y_AXIS);
-										_time=0;
-										_RC_State++;
-									}
+									_rc_motor_moveToStop(MOTOR_SCREW, 1000, ENDSTOP_SCREW_ROTATION, _FL_);
+									_rc_moveto_xy_stop(RX_StepperStatus.screw_posX, -1000000, ENDSTOP_Y_AXIS, _FL_);
+									_RC_State++;
 								}
 								else if (!_RobotStatus.motors[MOTOR_Z].isMoving) 
 								{
@@ -262,14 +257,62 @@ static void _rc_state_machine(void)
 								}
 								break;
 
-		case RC_STATE_REF+2:	if (ROB_IN(ENDSTOP_Y_AXIS))
+		case RC_STATE_REF+2:	// Y in end sensor (out)
+								if (ROB_IN(ENDSTOP_Y_AXIS))
 								{
-									if (!_time) _time=rx_get_ticks()+100;
-									_rc_moveto_xy_stop(-1000000, RX_StepperStatus.screw_posY, ENDSTOP_X_AXIS);
+									_rc_moveto_xy_stop(-1000000, RX_StepperStatus.screw_posY, ENDSTOP_X_AXIS, _FL_);
 									_RC_State++;
 								}
+								else if (!_RobotStatus.motors[MOTOR_XY_0].isMoving || !_RobotStatus.motors[MOTOR_XY_1].isMoving) 
+								{
+                                    Error(ERR_CONT, 0, "Y-Axis end sensor not found");
+									_RC_State=0;
+								}
 								break;
-		default:
+
+		case RC_STATE_REF+3:	// X in end sensor
+								if (ROB_IN(ENDSTOP_X_AXIS))
+								{
+									rc_moveto_xy(RX_StepperStatus.screw_posX-MOTOR_X_GARAGE_POS, RX_StepperStatus.screw_posY, _FL_);
+									_RC_State++;
+								}
+								else if (!_RobotStatus.motors[MOTOR_XY_0].isMoving || !_RobotStatus.motors[MOTOR_XY_1].isMoving) 
+								{
+                                    Error(ERR_CONT, 0, "X-Axis end sensor not found");
+									_RC_State=0;
+								}
+								break;
+
+		case RC_STATE_REF+4:	// X in garage-pos
+								if (!_RobotStatus.motors[MOTOR_XY_0].isMoving && !_RobotStatus.motors[MOTOR_XY_1].isMoving)
+								{
+									if (_RobotStatus.motors[MOTOR_XY_0].isStalled || _RobotStatus.motors[MOTOR_XY_1].isStalled)
+									{
+										Error(ERR_CONT, 0, "X-Axis blocked");
+										_RC_State=0;
+									}
+									else 
+									{
+										_rc_moveto_xy_stop(RX_StepperStatus.screw_posX, -100000, ENDSTOP_GARAGE, _FL_);
+										_RC_State++;
+									}
+								}
+								break;
+
+		case RC_STATE_REF+5:	// Y in garage sensor
+								if (ROB_IN(ENDSTOP_GARAGE))
+								{
+									Error(LOG, 0, "Reference done");
+									_RC_State=0;
+								}
+								else if (!_RobotStatus.motors[MOTOR_XY_0].isMoving || !_RobotStatus.motors[MOTOR_XY_1].isMoving) 
+								{
+                                    Error(ERR_CONT, 0, "Y-Axis garage sensor not found");
+									_RC_State=0;
+								}
+								break;		
+		
+		default:				Error(WARN, 0, "rc_state_machine: State %d not implemented", _RC_State);
 								break;
 	}
 }
@@ -403,8 +446,11 @@ static void _rc_reset(int motor)
 }
 
 //--- _rc_motor_moveBy --------------------------
-static void _rc_motor_moveBy(int motor, int steps)
+static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
 {
+	if (_RobotStatus.motors[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isMoving", motor);
+	if (_RobotStatus.motors[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isStalled", motor);
+
 	SRobotMotorsMoveCmd cmd;
 	memset(&cmd, 0, sizeof(cmd));
 	cmd.header.msgLen	 = sizeof(cmd);
@@ -414,31 +460,44 @@ static void _rc_motor_moveBy(int motor, int steps)
 	if (_MotorCfg[motor].encmode) cmd.encoderTol[motor]= 100;
 
 	sok_send(&_RC_Socket, &cmd);
+
+	return REPLY_OK;
 }
 
 //--- _rc_motor_moveToStop --------------------------------
-static void _rc_motor_moveToStop(int motor, int steps, int stopInput)
+static int _rc_motor_moveToStop(int motor, int steps, int stopInput, const char *file, int line)
 {
+	if (_RobotStatus.motors[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
+	if (_RobotStatus.motors[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
+
 	SRobotMotorsMoveCmd cmd;
 	memset(&cmd, 0, sizeof(cmd));
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_MOTORS_MOVE;
-	cmd.motors		  = 1<<motor;
-	cmd.targetPos[motor] =  steps;
-	cmd.stopBits[motor]  = 1<<stopInput;
+	cmd.header.msgLen		 = sizeof(cmd);
+	cmd.header.msgId		 = CMD_MOTORS_MOVE;
+	cmd.motors				 = 1<<motor;
+	cmd.targetPos[motor]	 =  steps;
+	cmd.stopBits[motor]		 = 1<<stopInput;
 	cmd.stopBitLevels[motor] = 1;
-	sok_send(&_RC_Socket, &cmd);	
+	sok_send(&_RC_Socket, &cmd);
+
+	return REPLY_OK;
 }
 
 //--- rc_moveto_xy -------------------------------------------
-void	rc_moveto_xy(int x, int y)
+int rc_moveto_xy(int x, int y, const char *file, int line)
 {
-	_rc_moveto_xy_stop(x, y, -1);
+	return _rc_moveto_xy_stop(x, y, -1, file, line);
 }
 
 //--- _rc_moveto_xy_stop -----------------------------------
-void _rc_moveto_xy_stop(int x, int y, int stop)
+int _rc_moveto_xy_stop(int x, int y, int stop, const char *file, int line)
 {
+	for (int motor=MOTOR_XY_0; motor<=MOTOR_XY_1; motor++)
+	{
+		if (_RobotStatus.motors[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_moveto_xy_stop: Motor[%d].isMoving", motor);
+		if (_RobotStatus.motors[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_moveto_xy_stop: Motor[%d].isStalled", motor);
+	}
+
 	int dx = x-RX_StepperStatus.screw_posX;
 	int dy = y-RX_StepperStatus.screw_posY;
 
@@ -466,7 +525,22 @@ void _rc_moveto_xy_stop(int x, int y, int stop)
 	if (stop>=0) cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
 
 	sok_send(&_RC_Socket, &cmd);
+
+	return REPLY_OK;
 }
+
+//--- rc_move_top --------------------------------------
+int  rc_move_top(const char *file, int line)
+{
+	return _rc_motor_moveToStop(MOTOR_Z, 1000000, ENDSTOP_Z_UP, _FL_);	
+}
+
+//--- rc_move_bottom ---------------------------------------
+int  rc_move_bottom(const char *file, int line)
+{
+	return _rc_motor_moveToStop(MOTOR_Z, -1000000, ENDSTOP_Z_DOWN, _FL_);	
+}
+
 
 //--- rc_display_status -----------------------------------
 void rc_display_status(void)
@@ -549,6 +623,11 @@ void rc_menu(int help)
 		term_printf("R: Reference\n");
 		term_printf("r<n>: reset Motor<n>\n");
 		term_printf("m<n><steps>: move Motor<n> by <steps>\n");
+		term_printf("x<steps>: move X-Position by <steps>\n");
+		term_printf("y<steps>: move Y-Position by <steps>\n");
+		term_printf("z<steps>: move Z-Position by <steps>\n");
+		term_printf("t: move Z to top\n");
+		term_printf("b: move Z to botton\n");
 //		term_printf("v<micron>: Move x axis <micron>um\n");
 //		term_printf("w<micron>: Move y axis <micron>um\n");
 //		term_printf("t<steps>: Turn screw <steps>\n");
@@ -577,8 +656,13 @@ void rc_handle_menu(char *str)
 	{
     case 'r':	_rc_reset(no); break;
 	case 's':	_rc_stop(0x0f); break;
-    case 'R':	rx_reference(); break;
-    case 'm':	_rc_motor_moveBy(no, atoi(&str[2]));	break;
+    case 'R':	rc_reference(); break;
+    case 'm':	_rc_motor_moveBy(no, atoi(&str[2]), _FL_);	break;
+    case 'x':	rc_moveto_xy(RX_StepperStatus.screw_posX+atoi(&str[1]), RX_StepperStatus.screw_posY				 , _FL_); break;
+    case 'y':	rc_moveto_xy(RX_StepperStatus.screw_posX,				RX_StepperStatus.screw_posY+atoi(&str[1]), _FL_); break;
+    case 'z':	_rc_motor_moveBy(MOTOR_Z, atoi(&str[1]), _FL_);		break;
+    case 'b':	rc_move_bottom(_FL_); break;
+    case 't':	rc_move_top(_FL_); break;
     default:
         break;
 	}

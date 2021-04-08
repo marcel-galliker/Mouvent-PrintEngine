@@ -1642,6 +1642,7 @@ typedef struct SStepperStat
 
     INT32		screw_posX;
     INT32		screw_posY;
+	INT32		screw_posZ;
 	
 	INT32		adjustmentProgress;
 	UINT32		alive[2];

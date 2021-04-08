@@ -22,11 +22,11 @@ void rc_handle_menu(char *str);
 int	rc_isConnected(void);
 
 void rc_reference(void);
-void rc_moveto_xy(int x, int y);
-void rc_move_done(void);
-void rc_move_top(void);
-void rc_move_bottom(void);
-void rc_move_up(void);
-void rc_turn(int steps); 
+int  rc_moveto_xy(int x, int y, const char *file, int line);
+int  rc_moveto_z(int z, const char *file, int line);
+int  rc_move_top(const char *file, int line);
+int  rc_move_bottom(const char *file, int line);
+int  rc_move_up(const char *file, int line);
+int  rc_turn(int steps, const char *file, int line); 
 
 
