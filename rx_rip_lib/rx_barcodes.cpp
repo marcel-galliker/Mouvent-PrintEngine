@@ -136,7 +136,8 @@ HBarCode* bc_init_box(SBarcodeBox *pBox, int boxNo, int resx, int resy)
 			}
 			else BCSetPrintText	(pBarCode->pTBarCode, FALSE, 0);
 
-			ret=BCSetCDMethod  (pBarCode->pTBarCode, (e_CDMethod)pBox->check);
+			// do not set the check as the default value *is* correct
+			//ret=BCSetCDMethod  (pBarCode->pTBarCode, (e_CDMethod)pBox->check);
 		
 			//--- ratio string ---
 			if (pBox->stretch>1)
@@ -547,6 +548,7 @@ ERRCODE CALLBACK _custom_draw_row(VOID* customData, t_BarCode* barcode, HDC draw
 }
 
 //--- _custom_draw_text --------------------------------------------------------------------------------
+// work only with monospaced font and write the text BELOW only
 ERRCODE CALLBACK _custom_draw_text(VOID *customData, HDC drawDC, LPLOGFONTA font, DOUBLE x, DOUBLE y, e_BCAlign alignment, LPCSTR text, INT numberOfCharacters, LPRECTD drawArea, LONG textIndex)
 {
 	SBarCode	*pBarCode = (SBarCode*)customData;
@@ -554,49 +556,56 @@ ERRCODE CALLBACK _custom_draw_text(VOID *customData, HDC drawDC, LPLOGFONTA font
 	int			i;
 	int			black=TRUE;
 	UINT16		wStr[64];
-//	char		test[64];
+	int align;
 
 	for (i=0; i<numberOfCharacters && i<SIZEOF(wStr)-1; i++)
 	{
-//		test[i] = (UCHAR)text[textIndex+i];
 		wStr[i] = (UCHAR)text[textIndex+i];
 	}
-//	test[i]=0;
 	wStr[i]=0;
 	
-//	printf("_custom_draw_text font:(lfFaceName=\"%s\", lfHeight=%d), x=%f, y=%f, text=\"%s\"\n", font->lfFaceName, font->lfHeight, x, y, test);
-
 	if (pBarCode->font==NULL) pBarCode->font=ft_load_font(font->lfFaceName);
 
 	pBarCode->fontHeightPx = ft_height(pBarCode->font, font->lfHeight);
 
-//	x = pBarCode->rect_draw.right+x*3.8;
-//	y = pBarCode->rect_draw.top-y*7.2;
+	// compute the start of the text depending on alignement
+	switch (alignment)
+	{
+	case eAlLeft:
+		align = 0;
+		break;
+	case eAlRight:
+		align = ft_char_width(pBarCode->font) * numberOfCharacters;
+		break;
+	default: // center
+		align = ft_char_width(pBarCode->font) * numberOfCharacters / 2;
+		break;
+	}
 
+	// a pixel is 0.26mm so we use this to compute the place of text
+	// the text is *always* at the "bottom" of the barecode
 	switch(pBarCode->orient)
 	{
 	case deg90:  x = pBarCode->rect_draw.right-pBarCode->fontHeightPx;
-				 y = pBarCode->rect_draw.bottom+y*3.8;
+				 y = pBarCode->rect_draw.bottom+y/0.26;
 //				 if (x>pBarCode->rect_draw.left+pBarCode->fontHeightPx) x-=pBarCode->fontHeightPx;
-				 ft_text_out(pBmp, (int)x, (int)y+ft_char_width(pBarCode->font)*numberOfCharacters/2, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
+				 ft_text_out(pBmp, (int)x, (int)y+align, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
 				 break;
-
-	case deg180: // if (y<pBarCode->rect_draw.top+pBarCode->fontHeightPx) y+=pBarCode->fontHeightPx;
-				 x=pBarCode->rect_draw.right+x*3.8;
+				 
+	case deg180: 
+				 x=pBarCode->rect_draw.right+x/0.26;
 				 y=pBarCode->rect_draw.top+pBarCode->fontHeightPx;
-				 ft_text_out(pBmp, (int)x+ft_char_width(pBarCode->font)*numberOfCharacters/2, (int)y, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
+				 ft_text_out(pBmp, (int)x+align, (int)y, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
 				 break;
 				 
-	case deg270: x = pBarCode->rect_draw.left+pBarCode->fontHeightPx;//+x*7.2;
-				 y = pBarCode->rect_draw.top+y*3.8;
-//				 if (x<pBarCode->rect_draw.left+pBarCode->fontHeightPx) x+=pBarCode->fontHeightPx;
-				 ft_text_out(pBmp, (int)x, (int)y-ft_char_width(pBarCode->font)*numberOfCharacters/2, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
+	case deg270: x = pBarCode->rect_draw.left+pBarCode->fontHeightPx;
+				 y = pBarCode->rect_draw.top+y/0.26;
+				 ft_text_out(pBmp, (int)x, (int)y-align, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
 				 break;
 				 
-	default:	 x=pBarCode->rect_draw.left+x*3.8; 
+	default:	 x=pBarCode->rect_draw.left+x/0.26; 
 				 y=pBarCode->rect_draw.bottom-pBarCode->fontHeightPx;
-				 // if (y>pBarCode->rect_draw.top+pBarCode->fontHeightPx) y-=pBarCode->fontHeightPx;
-				 ft_text_out(pBmp, (int)x-ft_char_width(pBarCode->font)*numberOfCharacters/2, (int)y, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
+				 ft_text_out(pBmp, (int)x-align, (int)y, pBarCode->font, font->lfHeight, font->lfOrientation, wStr, numberOfCharacters, black);
 	}
 	return ErrOk;	
 }

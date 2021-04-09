@@ -238,7 +238,7 @@ int rip_load_layout(void *doc, char *tempPath, SLayoutDef *pLayout)
 			prop->Attribute("Font",			pLayout->box[i].bc.font, SIZEOF(pLayout->box[i].bc.font), "");
 			prop->Attribute("FntSize",		&pLayout->box[i].bc.fontSize, 10);
 			prop->Attribute("FntAbove",		&pLayout->box[i].bc.fontAbove, false);
-			prop->Attribute("FntDist",		&pLayout->box[i].bc.fontDist, 50);
+			prop->Attribute("FntDist",		&pLayout->box[i].bc.fontDist, pLayout->box[i].bc.fontSize/64); // default distance depending on font size
 			break;
 		}
 	}
@@ -707,15 +707,13 @@ int rip_set_layout(SLayoutDef *pLayout, SRipBmpInfo *pInfo)
 			if (*pBox->bc.font)
 			{
 				bcBox->above	= pBox->bc.fontAbove;
+				bcBox->font.lfHeight = pBox->bc.fontSize ; // in 64th pf point already
 				if (pBox->hdr.orientation==900 || pBox->hdr.orientation==2700)
 				{
-					bcBox->font.lfHeight	= pBox->bc.fontSize*64;
 					bcBox->dist				= pBox->bc.fontDist*100*dpiX/dpiY;
 				}
 				else 
 				{
-//					bcBox->font.lfHeight	= -pBox->bc.fontSize*dpiY/112;
-					bcBox->font.lfHeight	= pBox->bc.fontSize*64;
 					bcBox->dist				= pBox->bc.fontDist*100;
 				}
 				bcBox->font.lfEscapement		= bcBox->orientation;

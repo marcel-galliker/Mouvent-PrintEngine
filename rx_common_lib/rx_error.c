@@ -330,9 +330,17 @@ static int error(EDevice device, int no, ELogItemType type, const char *file, in
 
 	if (!sInit)
 	{
-		printf("ERROR not initialized\n");
-		return REPLY_ERROR;
-	};
+#ifdef WIN32 // on win32 rip_lib is a dll... it allows to see rip error in spooler windows
+		err_init(0, 100);
+		if (!sInit)
+		{
+#endif // WIN32
+			printf("ERROR not initialized\n");
+			return REPLY_ERROR;
+#ifdef WIN32
+		}
+#endif // WIN32
+	}
 
 	rx_mutex_lock(sMutex);
 
