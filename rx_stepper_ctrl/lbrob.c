@@ -278,7 +278,6 @@ void lbrob_main(int ticks, int menu)
 
     if (!RX_StepperStatus.robinfo.ref_done)
     {
-        RX_StepperStatus.screwerinfo.screws_found = FALSE;
         _HeadScrewPos = FALSE;
     }
     
@@ -855,7 +854,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _ScrewTime = 0;
         _CapIsWet = TRUE;
         RX_StepperStatus.robinfo.ref_done = FALSE;
-        RX_StepperStatus.screwerinfo.screw_reset = FALSE;
         int val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
@@ -1185,8 +1183,6 @@ static void _rob_state_machine(void)
             _RobStateMachine_Step = 0;
             return;
         }
-
-        RX_StepperStatus.screwerinfo.screw_reset = FALSE;
 
         TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
 
