@@ -26,6 +26,7 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>
@@ -66,6 +67,7 @@
                 <CheckBox x:Name="Button_DripPansREF" Grid.Row="11" Grid.Column="1" Content="Carriage REF"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPansREF_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
                 <CheckBox x:Name="Button_Fill" Grid.Row="12" Content="Fill 5sec"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapFill_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
                 <CheckBox x:Name="Button_Empty" Grid.Row="12" Grid.Column="1" Content="Empty 2min"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapEmpty_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
+                <CheckBox x:Name="Button_Robot_Zeroing" Grid.Row="13" Grid.Column="1" Content="Zeroing Screws" Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="RobotZeroing_clicked" IsEnabled="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
 
                 <Grid x:Name="Leds_DripPans" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="10">
                     <StackPanel Orientation="Horizontal">

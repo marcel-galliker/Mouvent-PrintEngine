@@ -1173,6 +1173,8 @@ static void _rob_state_machine(void)
     static int _correction_value;
     int pos, distance = 0;
     int _turns = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].turns;
+
+    RX_StepperStatus.screwerinfo.screwed_successfully = FALSE;
     
     if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
@@ -1468,6 +1470,7 @@ static void _rob_state_machine(void)
             _ScrewTime = 0;
             _RobStateMachine_Step = 0; // wait for next command
             RX_StepperStatus.screw_count++;
+            RX_StepperStatus.screwerinfo.screwed_successfully = TRUE;
             break;
 
         //--------------- next screw ---------------

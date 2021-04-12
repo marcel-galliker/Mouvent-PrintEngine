@@ -129,6 +129,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_LIFT_REFERENCE:
 			case CMD_ROB_REFERENCE:
             case CMD_ROB_SERVICE:
+            case CMD_RESET_ALL_SCREWS:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
@@ -878,6 +879,44 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
             }
         }
     }
+}
+
+//--- steplb_screw_in_Buffer ---------------------------------------------------------
+int steplb_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
+{
+	int stepperNo, printbarNo;
+
+	if (RX_Config.inkSupplyCnt % 2 == 0)
+		stepperNo = headAdjustment->printbarNo / 2;
+	else
+		stepperNo = (headAdjustment->printbarNo + 1) / 2;
+
+	if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
+		printbarNo = headAdjustment->printbarNo % 2;
+	else
+		printbarNo = (headAdjustment->printbarNo + 1) % 2;
+
+	for (int i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperNo]); i++)
+	{
+		if (_HeadAdjustmentBuffer[stepperNo][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperNo][i].headNo == headAdjustment->headNo && _HeadAdjustmentBuffer[stepperNo][i].printbarNo == headAdjustment->printbarNo)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+//--- steplb_get_StepperStatus ---------------------------------------------------------
+SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
+{
+	int stepperNo;
+
+	if (RX_Config.inkSupplyCnt % 2 == 0)
+		stepperNo = headAdjustment->printbarNo / 2;
+	else
+		stepperNo = (headAdjustment->printbarNo + 1) / 2;
+
+	return _Status[stepperNo];
 }
 
 //--- _check_screwer --------------------------------------------------
