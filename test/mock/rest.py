@@ -30,7 +30,10 @@ def create_app(boards):
         root_dir = os.path.dirname(os.path.realpath(__file__))
 
         app.router.add_get('/', handler.root)
-        app.router.add_static('/UI/', path=os.path.join(root_dir, "UI"))
+        try:
+            app.router.add_static('/UI/', path=os.path.join(root_dir, "UI"))
+        except ValueError: # on standalone mock this folder does not exists
+            app.router.add_static('/UI/', path=os.path.join(root_dir, "../../UI"))
 
         app.router.add_get('/{dev}', handler.board_list)
         app.router.add_get(r'/{dev}/{number:\d+}', handler.get_board)
