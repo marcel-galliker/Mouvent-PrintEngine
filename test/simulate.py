@@ -11,6 +11,7 @@ if not os.path.exists("D:/radex/user/config.cfg"):
     shutil.copy2("test/conf/user.config", "D:/radex/user")
     shutil.copy2("test/conf/network.cfg", "D:/radex/user")
 shutil.copytree("test/conf/waveform", "D:/radex/waveform", dirs_exist_ok=True)
+shutil.copytree("test/bin/spooler", "D:/radex/bin/spooler", dirs_exist_ok=True)
 
 gui = subprocess.Popen([r"bin\gui\RX_DigiPrint.exe"],
                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

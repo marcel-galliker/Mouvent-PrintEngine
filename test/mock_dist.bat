@@ -3,6 +3,7 @@ python setup.py py2exe
 xcopy /I /S /Y conf dist\test\conf
 xcopy /I /S /Y ..\bin\gui dist\bin\gui
 xcopy /I /S /Y ..\bin\win dist\bin\win
+xcopy /I /S /Y ..\bin\spooler dist\bin\spooler
 
 xcopy /I /S /Y mock\UI dist\UI
 

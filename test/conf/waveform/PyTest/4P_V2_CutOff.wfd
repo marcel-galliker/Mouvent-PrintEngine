@@ -1,0 +1,24 @@
+<WaveForm>
+  <Ink Name="4P_V2_CutOff" ColorCode="34" Description="4P_JP_V1_corr" ColorRGB="#FFFFFFFF" Temp="38" TempMax="41" TempChiller="0" GreyLevel="8 14 13 15 " MaxFreq="70113" Meniscus="240" Viscosity="0" DropSpeed="0" DropletVolume="0" FlushTime="0 0 0" PrintingSpeed="0 0 0 0 0 0" />
+  <item Position="0" Voltage="0" />
+  <item Position="26" Voltage="14" />
+  <item Position="218" Voltage="14" />
+  <item Position="244" Voltage="1" />
+  <item Position="436" Voltage="1" />
+  <item Position="506" Voltage="21" />
+  <item Position="679" Voltage="21" />
+  <item Position="724" Voltage="0" />
+  <item Position="916" Voltage="0" />
+  <item Position="942" Voltage="14" />
+  <item Position="1134" Voltage="14" />
+  <item Position="1160" Voltage="0" />
+  <item Position="1333" Voltage="0" />
+  <item Position="1403" Voltage="30" />
+  <item Position="1550" Voltage="30" />
+  <item Position="1620" Voltage="0" />
+  <item Position="1745" Voltage="0" />
+  <item Position="1765" Voltage="10" />
+  <item Position="1825" Voltage="10" />
+  <item Position="1845" Voltage="0" />
+  <check>C347BD470F3B774191D7DAE0C70A64E1666014EA</check>
+</WaveForm>
