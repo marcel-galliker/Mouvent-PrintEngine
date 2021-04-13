@@ -14,6 +14,7 @@ using System.Threading;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
+using System.Windows.Controls;
 
 namespace RX_DigiPrint.Views.Settings
 {
@@ -73,13 +74,19 @@ namespace RX_DigiPrint.Views.Settings
         void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("UserType")) _UserTypeChanged();
-
         }
 
         private EUserType _UserType = EUserType.usr_undef;
         private void _UserTypeChanged()
         {
-            if (RxGlobals.User.UserType != _UserType) CB_Langue.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_mouvent;
+            PrinterSection.SetValue(Grid.ColumnSpanProperty, RxGlobals.User.UserType >= EUserType.usr_maintenance ? 1 : 2);
+            FactoryNework.Visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
+            WlanButton.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
+            WinScpButton.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
+            NetworkCommands.SetValue(Grid.ColumnSpanProperty, RxGlobals.User.UserType >= EUserType.usr_engineer ? 1 : 2); 
+            WindowsCommands.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
+            if (RxGlobals.User.UserType != _UserType) IpAddress.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_engineer;
+            if (RxGlobals.User.UserType != _UserType) FactoryNework.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_engineer;
         }
 
         private void Confirm_Click(object sender, RoutedEventArgs e)
@@ -124,6 +131,7 @@ namespace RX_DigiPrint.Views.Settings
 
         private static string GetVersionAttribute(string key)
         {
+        
             string result;
             if (GetAssemblyAttribute<AssemblyInformationalVersionAttribute>()
                .InformationalVersion.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)

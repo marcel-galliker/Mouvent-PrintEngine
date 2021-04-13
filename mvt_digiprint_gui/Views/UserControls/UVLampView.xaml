@@ -22,11 +22,11 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding SoftwareVersion}"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{ Binding Path=SoftVers, Mode=OneWay }"/>
+                <TextBlock x:Name="SoftwareVersion" Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding SoftwareVersion}"/>
+                <TextBlock x:Name="SoftwareVersionValue" Grid.Row="0" Grid.Column="1" Text="{ Binding Path=SoftVers, Mode=OneWay }"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding SystemTime}"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{ Binding Path=SystemOpTime, Mode=OneWay }"/>
+                <TextBlock x:Name="SystemTime" Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding SystemTime}"/>
+                <TextBlock x:Name="SystemTimeValue" Grid.Row="1" Grid.Column="1" Text="{ Binding Path=SystemOpTime, Mode=OneWay }"/>
 
                 <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Fill="{StaticResource RX.Warn}" Visibility="{Binding Path=LampOK, Converter={StaticResource BoolToInVisible_Converter}}"/>
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding LampTime}"/>

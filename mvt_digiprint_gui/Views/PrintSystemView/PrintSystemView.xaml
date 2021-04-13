@@ -55,7 +55,7 @@
             <StackPanel>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="10">
                     <!-- Print System ___________________________________________________________________________________________-->
-                    <Grid x:Name="PrintSystemPanel" >
+                    <Grid>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto"/>
@@ -86,10 +86,10 @@
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <rxView:PrintSystemGrid Visibility="{Binding ExpandSettingsPanel, Converter={StaticResource BoolToVisible_Converter}}" Grid.Column="1" Margin="10,0,0,0"/>
-                                <rxView:OffsetsGrid x:Name="OffsetsGrid" Visibility="{Binding ExpandSettingsPanel, Converter={StaticResource BoolToVisible_Converter}}" Grid.Column="2" Margin="10,0,0,0"/>
-                                <Grid x:Name="StepperGrid" Grid.Column="3" Visibility="{Binding ExpandSettingsPanel, Converter={StaticResource BoolToVisible_Converter}}"/>
-                                <rxView:EncoderView x:Name="EncoderGrid" Visibility="{Binding ExpandSettingsPanel, Converter={StaticResource BoolToVisible_Converter}}" Grid.Column="4"/>
+                                <rxView:PrintSystemGrid x:Name="PrintSystemGrid" Grid.Column="1" Margin="10,0,0,0"/>
+                                <rxView:OffsetsGrid x:Name="OffsetsGrid" Visibility="Collapsed" Grid.Column="2" Margin="10,0,0,0"/>
+                                <Grid x:Name="StepperGrid" Grid.Column="3"/>
+                                <rxView:EncoderView x:Name="EncoderGrid" Grid.Column="4"/>
                                 <Grid Grid.Column="5" Margin="10,0,0,0">
                                     <Grid.Visibility>
                                         <MultiBinding Converter="{StaticResource BooleanAndToVisibleConverter}" UpdateSourceTrigger="PropertyChanged">

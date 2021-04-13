@@ -42,7 +42,7 @@ namespace RX_DigiPrint.Views.TexView
 
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Visibility visibility  =  (RxGlobals.User.UserType >= EUserType.usr_supervisor) ? Visibility.Visible : Visibility.Collapsed; 
+            Visibility visibility  =  (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed; 
             DeleteButton.Visibility = visibility;
         }
 

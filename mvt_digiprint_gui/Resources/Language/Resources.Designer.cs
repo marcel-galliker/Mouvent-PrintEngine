@@ -6249,24 +6249,6 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Supervisor.
-        /// </summary>
-        public static string Supervisor {
-            get {
-                return ResourceManager.GetString("Supervisor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Supervisors.
-        /// </summary>
-        public static string Supervisors {
-            get {
-                return ResourceManager.GetString("Supervisors", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Support Commands.
         /// </summary>
         public static string SupportCommands {
@@ -6654,6 +6636,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string User {
+            get {
+                return ResourceManager.GetString("User", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User Account.
         /// </summary>
         public static string UserAccount {
@@ -6668,6 +6659,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string UserName {
             get {
                 return ResourceManager.GetString("UserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users.
+        /// </summary>
+        public static string Users {
+            get {
+                return ResourceManager.GetString("Users", resourceCulture);
             }
         }
         

@@ -18,6 +18,8 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -29,8 +31,13 @@
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding TemperatureHead}"/>
         <TextBlock Grid.Row="3" Grid.Column="1" Text="°C"/>
-        
-        <Grid Grid.Row="4" Grid.ColumnSpan="2" x:Name="ServiceGrid" >
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding TemperatureConditioner}"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Text="°C"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding PrintingTime}"/>
+
+        <Grid Grid.Row="6" Grid.ColumnSpan="2" x:Name="ServiceGrid" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250"/>
                 <ColumnDefinition Width="50"/>
@@ -45,37 +52,30 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding TemperatureConditioner}"/>
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="°C"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding FirepulseVoltage}"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="%"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding FirepulseVoltage}"/>
-            <TextBlock Grid.Row="1" Grid.Column="1" Text="%"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding PressureInlet}"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="mbar"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding PressureInlet}"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding PressureOutlet}"/>
             <TextBlock Grid.Row="2" Grid.Column="1" Text="mbar"/>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding PressureOutlet}"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding Meniscus}"/>
             <TextBlock Grid.Row="3" Grid.Column="1" Text="mbar"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding Meniscus}"/>
-            <TextBlock Grid.Row="4" Grid.Column="1" Text="mbar"/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding PumpSpeed}"/>
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="ml/min"/>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding PumpSpeed}"/>
-            <TextBlock Grid.Row="5" Grid.Column="1" Text="ml/min"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding FlowFactor}"/>
+            <TextBlock Grid.Row="5" Grid.Column="1" Text="&lt;200"/>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="{mvt:LocalizedBinding FlowFactor}"/>
-            <TextBlock Grid.Row="6" Grid.Column="1" Text="&lt;200"/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="{mvt:LocalizedBinding Valve}"/>
 
-            <TextBlock Grid.Row="7" Grid.Column="0" Text="{mvt:LocalizedBinding Valve}"/>
-
-            <TextBlock Grid.Row="8" Grid.Column="0" Text="{mvt:LocalizedBinding PrintingTime}"/>
-
-            <TextBlock Grid.Row="9" Grid.Column="0" Text="{mvt:LocalizedBinding ImageInCnt}"/>
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="{mvt:LocalizedBinding ImageInCnt}"/>
         </Grid>
 
         <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="13">

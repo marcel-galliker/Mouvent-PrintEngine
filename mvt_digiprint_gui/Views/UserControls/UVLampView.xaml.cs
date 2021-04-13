@@ -1,4 +1,6 @@
 ﻿using RX_DigiPrint.Helpers;
+using RX_DigiPrint.Models;
+using RX_DigiPrint.Services;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -94,6 +96,9 @@ namespace RX_DigiPrint.Views.UserControls
             Task.Run(() => GetLampStatus());
 
             SetTimer();
+
+            RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            User_PropertyChanged(null, null);
         }
 
         public void ResetLampBtn_Click(object sender, RoutedEventArgs e)
@@ -182,6 +187,17 @@ namespace RX_DigiPrint.Views.UserControls
             {
                 view.GetLampStatus();
             }
+        }
+
+        //--- User_PropertyChanged ----------------------------------
+        private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
+            SoftwareVersion.Visibility = visibility;
+            SoftwareVersionValue.Visibility = visibility;
+            SystemTime.Visibility = visibility;
+            SystemTimeValue.Visibility = visibility;
+            ResetLampBtn.Visibility = visibility;
         }
     }
 }

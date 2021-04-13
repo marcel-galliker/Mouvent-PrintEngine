@@ -57,12 +57,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- User_PropertyChanged --------------------------------------
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Visibility visibility  = (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
+            Visibility visibility  = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed; 
             ServiceGrid.Visibility = visibility;
             Line_Calibrate.Visibility = visibility;
             // Button_Calibrate.Visibility = visibility;
-            InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_service);
-            CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_service);
+            InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
+            CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
         }
 
         //--- UserControl_Loaded -----------------------------------------------

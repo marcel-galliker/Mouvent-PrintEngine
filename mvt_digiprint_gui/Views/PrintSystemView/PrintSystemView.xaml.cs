@@ -32,8 +32,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- User_PropertyChanged --------------------------------------
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Visibility visibility       =  (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed; 
-            PrintSystemPanel.Visibility = visibility;
+            PrintSystemGrid.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer && _PrintSystem.ExpandSettingsPanel) ? Visibility.Visible : Visibility.Collapsed;
+            StepperGrid.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer && _PrintSystem.ExpandSettingsPanel) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- _PrintSystem_PropertyChanged -----------------------------------------------
@@ -154,7 +154,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 EncoderGrid.Margin = new Thickness(0);
             }
-
+            PrintSystemGrid.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer && _PrintSystem.ExpandSettingsPanel) ? Visibility.Visible : Visibility.Collapsed;
+            StepperGrid.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer && _PrintSystem.ExpandSettingsPanel) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         // Indicates if the "All" button should be visible in the Purge dialog.

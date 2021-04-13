@@ -43,7 +43,7 @@
                 </Grid.RowDefinitions>
 
                 <rx_uc:PlcParPanel Grid.Row="0" Grid.Column="0" UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel">
-                    <rx_uc:PlcParCtrl ID="STA_VERSION" Label="{mvt:LocalizedBinding Version}" LabelWidth="120"/>
+                    <rx_uc:PlcParCtrl x:Name="PlcVersion" ID="STA_VERSION" Label="{mvt:LocalizedBinding Version}" LabelWidth="120"/>
                 </rx_uc:PlcParPanel>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Display"/>

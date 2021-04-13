@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Services;
 using RX_DigiPrint.Views.UserControls;
 using System;
 using System.Windows;
@@ -20,6 +21,9 @@ namespace RX_DigiPrint.Views.LB702WBView
             RB_Main.IsChecked = true;
             Device_selected(0);
             Machine.DeviceSelected += Device_selected;
+
+            RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            User_PropertyChanged(null, null);
         }
 
         //--- Device_selected -------------------------------------
@@ -48,6 +52,14 @@ namespace RX_DigiPrint.Views.LB702WBView
             ParMain.CoatingUnitSeparation.Visibility = ParMain.CoatingUnit.Visibility;
             ParMain.PrintUnitSeparation.Visibility = ParMain.PrintUnit.Visibility;
             ParMain.FlexoUnitSeparation.Visibility = ParMain.FlexoUnit.Visibility;
+        }
+
+        //--- User_PropertyChanged ----------------------------------
+        private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
+            RB_Log.Visibility = visibility;
+            RB_Plc.Visibility = visibility;
         }
     }
 }

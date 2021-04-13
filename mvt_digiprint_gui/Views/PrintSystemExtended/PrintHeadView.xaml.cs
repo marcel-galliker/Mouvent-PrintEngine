@@ -103,7 +103,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             HeadStat stat = DataContext as HeadStat;
             if (stat == null) return;
 
-            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only || RxGlobals.User.UserType == EUserType.usr_mouvent)
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only || RxGlobals.User.UserType == EUserType.usr_engineer)
                 Button_Print.Visibility = Button_Off.Visibility = Visibility.Visible;
             else Button_Print.Visibility = Button_Off.Visibility = Visibility.Collapsed;
 

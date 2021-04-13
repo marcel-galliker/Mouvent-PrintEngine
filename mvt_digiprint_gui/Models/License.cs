@@ -52,7 +52,7 @@ namespace RX_DigiPrint.Models
         {
             get 
             { 
-                return EUserType.usr_mouvent;
+                return EUserType.usr_engineer;
             }
 
             set { SetProperty(ref _ServiceLevel, value); }

@@ -1,6 +1,7 @@
 ﻿using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace RX_DigiPrint.Views.UserControls
@@ -13,6 +14,9 @@ namespace RX_DigiPrint.Views.UserControls
         public PlcStatus()
         {
             InitializeComponent();
+
+            RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            User_PropertyChanged(null, null);
         }
 
         private void PLC_INFO_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
@@ -42,6 +46,13 @@ namespace RX_DigiPrint.Views.UserControls
                 ModulBusConfig.Text = RxGlobals.Plc.Info.modulBusConfig.Replace("; ", "\n").Replace(';', '\n');      
                 ModulHwDetails.Text = RxGlobals.Plc.Info.modulHwDetails.Replace("; ", "\n").Replace(';', '\n');
             }
+        }
+
+        //--- User_PropertyChanged ----------------------------------
+        private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
+            PlcVersion.Visibility = visibility;
         }
     }
 }

@@ -2259,8 +2259,8 @@ No Splices in the machine?</value>
   <data name="Semicolon" xml:space="preserve">
     <value>Semicolon</value>
   </data>
-  <data name="Supervisor" xml:space="preserve">
-    <value>Supervisor</value>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
   </data>
   <data name="Tab" xml:space="preserve">
     <value>Tab</value>
@@ -2295,8 +2295,8 @@ No Splices in the machine?</value>
   <data name="QRCode" xml:space="preserve">
     <value>QRCode</value>
   </data>
-  <data name="Supervisors" xml:space="preserve">
-    <value>Supervisors</value>
+  <data name="Users" xml:space="preserve">
+    <value>Users</value>
   </data>
   <data name="UserName" xml:space="preserve">
     <value>Username</value>

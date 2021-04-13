@@ -39,12 +39,12 @@ namespace RX_DigiPrint.Services
 
     public enum EUserType : byte
     {
-       	usr_undef,	    // 00
-	    usr_operator,	// 01
-	    usr_supervisor,	// 02
-	    usr_service,	// 03	
-        usr_mouvent,    // 04
-        usr_end         // 05
+       	usr_undef,	        // 00
+	    usr_operator,	    // 01
+	    usr_maintenance,	// 02
+	    usr_service,	    // 03	
+        usr_engineer,       // 04
+        usr_end             // 05
     };
 
     public enum EPQState : byte

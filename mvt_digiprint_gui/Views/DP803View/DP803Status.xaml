@@ -10,7 +10,6 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Status}">
         <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="Panel">
-            <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="{mvt:LocalizedBinding Version}"/>
             <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="{mvt:LocalizedBinding MachineState}" x:Name="CB_MainState" Type="ComboStr"/>
        <!--     <rx_uc:PlcParCtrl ID="STA_TEACH_WRINKLE_SENSOR"         Label="Wrinkle OK"   Type="ComboStr" x:Name="CB_WrinkleSensor" /> -->
 

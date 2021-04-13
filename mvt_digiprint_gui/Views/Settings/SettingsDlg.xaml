@@ -32,22 +32,23 @@
         </Grid.ColumnDefinitions>
 
         <!-- Printer Section __________________________________________-->
-        <GroupBox Grid.Row="0" Grid.Column="0" Header="{mvt:LocalizedBinding Printer}" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
+        <GroupBox x:Name="PrinterSection" Grid.Row="0" Grid.Column="0" Header="{mvt:LocalizedBinding Printer}" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
+            <StackPanel Margin="5" HorizontalAlignment="Center">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" MinWidth="120"/>
+                        <ColumnDefinition Width="auto" MinWidth="120"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="{mvt:LocalizedBinding IpAddress}"  HorizontalAlignment="Right"/>
-                <rx:MvtTextBox   Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding IP_Address}"/>
-                <TextBlock      Grid.Row="1" Grid.Column="0" Margin="5" Text="{mvt:LocalizedBinding Units}" HorizontalAlignment="Right"/>
-                <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1" Margin="5"
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="{mvt:LocalizedBinding IpAddress}"  HorizontalAlignment="Right"/>
+                    <rx:MvtTextBox x:Name="IpAddress" Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding IP_Address}"/>
+                    <TextBlock      Grid.Row="1" Grid.Column="0" Margin="5" Text="{mvt:LocalizedBinding Units}" HorizontalAlignment="Right"/>
+                    <igWPF:XamComboEditor Grid.Row="1" Grid.Column="1" Margin="5"
                             x:Name="CB_Units"
                             HorizontalAlignment="Stretch"
                             Value="{Binding Units}"
@@ -55,14 +56,15 @@
                             ValuePath="Value" 
                             DropDownResizeMode="None"
                             />
-                <TextBlock Grid.Row="2" Grid.Column="0" Margin="5" Text="🌎" HorizontalAlignment="Right"/>
-                <mvt:RxComboBox x:Name="CB_Langue" Grid.Row="2" Grid.Column="1" Margin="5"  
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="5" Text="🌎" HorizontalAlignment="Right"/>
+                    <mvt:RxComboBox x:Name="CB_Langue" Grid.Row="2" Grid.Column="1" Margin="5"  
                           SelectedValue="{Binding Langue}">
-                </mvt:RxComboBox>
-            </Grid>
+                    </mvt:RxComboBox>
+                </Grid>
+            </StackPanel>
         </GroupBox>
 
-        <GroupBox Grid.Row="0" Grid.Column="1" Header="{mvt:LocalizedBinding FactoryNetwork}" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
+        <GroupBox x:Name="FactoryNework" Grid.Row="0" Grid.Column="1" Header="{mvt:LocalizedBinding FactoryNetwork}" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -92,7 +94,7 @@
         </GroupBox>
 
         <!-- Commands Grid ___________________________________________________________________-->
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="{mvt:LocalizedBinding SupportCommands}" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
+        <GroupBox x:Name="NetworkCommands" Grid.Row="1" Grid.Column="0" Header="{mvt:LocalizedBinding SupportCommands}" Style="{StaticResource MvtGroupBox}" Margin="10,10,0,0">
             <StackPanel Margin="5" HorizontalAlignment="Center">
 
                 <Button Click="Wlan_Clicked" x:Name="WlanButton" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
@@ -118,7 +120,7 @@
                     </Grid>
                 </Button>
 
-                <Button Click="WinSCP_Clicked" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
+                <Button x:Name="WinScpButton" Click="WinSCP_Clicked" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
                     <Grid >
                         <Image Source="..\..\Resources\Bitmaps\WinSCP.ico" HorizontalAlignment="Left" Height="20" Margin="5,1"/>
                         <TextBlock Text="WinSCP" Margin="30,0,0,0" Padding="10,0"/>
@@ -127,7 +129,7 @@
             </StackPanel>
         </GroupBox>
 
-        <GroupBox Grid.Row="1" Grid.Column="1" Header="{mvt:LocalizedBinding WindowsCommands}" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
+        <GroupBox x:Name="WindowsCommands" Grid.Row="1" Grid.Column="1" Header="{mvt:LocalizedBinding WindowsCommands}" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
             <StackPanel HorizontalAlignment="Center" >
                 <Button Content="{mvt:LocalizedBinding RestartMain}"   Click="RestartMain_Clicked" Margin="0, 10, 0, 10" Style="{StaticResource Mouvent.StandardButton}"/>
                 <Button Content="{mvt:LocalizedBinding RestartGui}"    Click="RestartGUI_Clicked" Margin="0, 0, 0, 10"  Style="{StaticResource Mouvent.StandardButton}"/>

@@ -12,7 +12,6 @@
     <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Status}">
         <Grid Grid.Row="0">
             <rx_uc:PlcParPanel UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel">
-                <rx_uc:PlcParCtrl ID="STA_VERSION"                      Label="{mvt:LocalizedBinding Version}"/>
                 <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="{mvt:LocalizedBinding MachineState}" x:Name="CB_MainState" Type="ComboStr"/>
 
                 <rx_uc:PlcParCtrl ID="STA_WINDER_DIAMETER_1"            Label="{mvt:LocalizedBinding UnwinderØ}"                   Format="f"/>

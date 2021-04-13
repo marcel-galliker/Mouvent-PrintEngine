@@ -35,6 +35,8 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -91,10 +93,12 @@
             <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <Grid  Margin="2,0,2,0" Grid.Row="4" x:Name="ServiceGrid" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
+        <TextBlock Grid.Row="4"  Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding TempCond,  Converter={StaticResource HeadVal_ConverterTemp}}"  />
+
+        <TextBlock  Grid.Row="5" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
+
+        <Grid  Margin="2,0,2,0" Grid.Row="6" x:Name="ServiceGrid" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
             <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -105,42 +109,41 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0"  Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding TempCond,  Converter={StaticResource HeadVal_ConverterTemp}}"  />
-            <common:RxNumBox Grid.Row="1" HorizontalContentAlignment="Right" x:Name="FpVoltage" TextChanged="FpVoltage_TextChanged" IsInt="True" Min="0" Max="120"/>
+            <common:RxNumBox Grid.Row="0" HorizontalContentAlignment="Right" x:Name="FpVoltage" TextChanged="FpVoltage_TextChanged" IsInt="True" Min="0" Max="120"/>
 
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresIn,  Converter={StaticResource HeadVal_Converter10}}"   />
                 <TextBlock Text=" (" VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding PresIn_str}" VerticalAlignment="Center"/>
                 <TextBlock  Margin="0,0,2,0"  Text=")" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresOut,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding PresOut_diff, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
            
-            <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding Meniscus_setpoint, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
           
-            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PumpFeedback, Converter={StaticResource HeadVal_Converter10}}" />
                 <TextBlock Text=" ("/>
                 <TextBlock Text="{Binding PumpSpeed, Converter={StaticResource HeadVal_Converter}}" />
                 <TextBlock  Margin="0,0,2,0" Text="%)"/>
             </StackPanel>
 
-            <Rectangle  Grid.Row="6" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
-            <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor, Converter={StaticResource HeadVal_Converter}}" />
-            <TextBlock  Grid.Row="7" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
-            <TextBlock  Grid.Row="8" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
-            <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Rectangle  Grid.Row="5" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
+            <TextBlock  Grid.Row="5" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor, Converter={StaticResource HeadVal_Converter}}" />
+            <TextBlock  Grid.Row="6" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Valve, Converter={StaticResource HeadValve_Converter}}" />
+            
+            <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding ImgInCnt}" />
                 <TextBlock Text=" ("/>
                 <TextBlock Text="{Binding ImgBuf}"/>

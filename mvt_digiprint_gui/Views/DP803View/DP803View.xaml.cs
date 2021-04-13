@@ -32,6 +32,9 @@ namespace RX_DigiPrint.Views.DP803View
             this.DataContext = this;
             RB_Main.IsChecked=true;
             PlcNotConnected.DataContext = RxGlobals.Plc;
+
+            RxGlobals.User.PropertyChanged += User_PropertyChanged;
+            User_PropertyChanged(null, null);
         }
         
         //--- Save_Clicked --------------------------------------------------
@@ -44,6 +47,14 @@ namespace RX_DigiPrint.Views.DP803View
         private void Reload_Clicked(object sender, RoutedEventArgs e)
         {
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_PLC_LOAD_PAR);
+        }
+
+        //--- User_PropertyChanged ----------------------------------
+        private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
+            RB_Log.Visibility = visibility;
+            RB_Plc.Visibility = visibility;
         }
     }
 }

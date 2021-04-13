@@ -123,6 +123,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
            
@@ -230,10 +231,16 @@
                 <TextBlock Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <Grid x:Name="ServiceGrid" Grid.Row="7"  Margin="2,0,2,0">
+            <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding CylinderPres,      Converter={StaticResource HeadVal_Converter}}" />
+                <TextBlock Text=" ("/>
+                <TextBlock Text="{Binding CylinderSetpoint,      Converter={StaticResource HeadVal_Converter}}"/>
+                <TextBlock Margin="0,0,2,0"  Text=")"/>
+            </StackPanel>
+
+            <Grid x:Name="ServiceGrid" Grid.Row="8"  Margin="2,0,2,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0"/>
-                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
@@ -254,19 +261,13 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding CylinderPres,      Converter={StaticResource HeadVal_Converter}}" />
-                    <TextBlock Text=" ("/>
-                    <TextBlock Text="{Binding CylinderSetpoint,      Converter={StaticResource HeadVal_Converter}}"/>
-                    <TextBlock Margin="0,0,2,0"  Text=")"/>
-                </StackPanel>
-                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding PumpSpeed,      Converter={StaticResource HeadVal_Converter}}" />
                     <TextBlock Text=" ("/>
                     <TextBlock Text="{Binding PumpSpeedSet,      Converter={StaticResource HeadVal_Converter}}"/>
                     <TextBlock Margin="0,0,2,0"  Text=")"/>
                 </StackPanel>
-                <TextBlock  Margin="0,0,2,0"  Grid.Row="5" HorizontalAlignment="Right" Text="{Binding BleedValve}" />
-                <TextBlock  Margin="0,0,2,0"  Grid.Row="6" HorizontalAlignment="Right" Text="{Binding AirCusionValve}" />
+                <TextBlock  Margin="0,0,2,0"  Grid.Row="4" HorizontalAlignment="Right" Text="{Binding BleedValve}" />
+                <TextBlock  Margin="0,0,2,0"  Grid.Row="5" HorizontalAlignment="Right" Text="{Binding AirCusionValve}" />
             </Grid>
 
             <!-- NO Connection _______________________________________________________________________-->

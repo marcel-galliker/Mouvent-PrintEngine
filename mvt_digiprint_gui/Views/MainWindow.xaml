@@ -161,7 +161,7 @@
             <TabItem x:Name="TabSupervisors">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabSupervisors}">
-                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Supervisors}"/>
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Users}"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>

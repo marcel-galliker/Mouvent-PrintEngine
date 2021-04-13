@@ -34,11 +34,11 @@ namespace RX_DigiPrint.Views.UserControls
             GroupBox.Header = _InkSupply.InkType.Name;
             Level.Enabled = false;
             Button_Cancel.Focus();
-            if (RxGlobals.User.UserType<EUserType.usr_supervisor)
+            if (RxGlobals.User.UserType<EUserType.usr_maintenance)
             {
                 Tara_button.Visibility = Init_Button.Visibility = Visibility.Collapsed;
             }
-            if (RxGlobals.User.UserType<EUserType.usr_mouvent)
+            if (RxGlobals.User.UserType<EUserType.usr_engineer)
             {
                 Calibrate_button.Visibility = Visibility.Collapsed;
             }

@@ -133,7 +133,7 @@ namespace RX_DigiPrint.Helpers
             supervisors.Add(newSup);
             this.WriteSupervisors(supervisors);
 
-            OnNewMessage(name + " was added as supervisor");
+            OnNewMessage(name + " was added as maintenance user");
             return true;
         }
 
@@ -155,7 +155,7 @@ namespace RX_DigiPrint.Helpers
                 if (s.Username == name)
                 {
                     supervisors.Remove(s);
-                    OnNewMessage(name + " was removed from supervisor list");
+                    OnNewMessage(name + " was removed from maintenance user list");
                     return this.WriteSupervisors(supervisors);
                 }
             }
@@ -267,7 +267,7 @@ namespace RX_DigiPrint.Helpers
             if (testMvt.Verify(pin))
             {
                 level = User_Level.Mouvent;
-                OnNewMessage("Mouvent user has logged in");
+                OnNewMessage("Engineer has logged in");
                 return true;
             }
 
@@ -381,7 +381,7 @@ namespace RX_DigiPrint.Helpers
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("Problem writing supervisors");
+                    MessageBox.Show("Problem writing maintenance users");
                     Console.WriteLine(e.Message);
                     return false;
                 }
