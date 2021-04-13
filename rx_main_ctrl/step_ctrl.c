@@ -688,3 +688,15 @@ int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
         break;
     }
 }
+
+//--- step_get_stitch_position ---------------------------------------------
+int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        return steplb_get_stitch_position((SHeadAdjustmentMsg *)headAdjustment);
+    default:
+        break;
+    }
+}
