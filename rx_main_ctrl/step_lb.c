@@ -49,6 +49,7 @@ static int                  _AutoCapTimer = 0;
 
 
 static int				    _StatReadCnt[STEPPER_CNT];
+static int                  _ScrewCnt[STEPPER_CNT] = {0};
 
 static EnFluidCtrlMode	    _RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
@@ -848,7 +849,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         return;
     }
     
-    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw))
+    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw) && _Status[stepperno].screw_count >= _ScrewCnt[stepperno])
     {
         _set_screw_pos(stepperno);
         _HeadAdjustment[stepperno] = *headAdjustment;
@@ -856,6 +857,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
             headAdjustment->printbarNo %= 2;
         else
             headAdjustment->printbarNo = (headAdjustment->printbarNo + 1) % 2;
+        _ScrewCnt[stepperno] = _Status[stepperno].screw_count + 1;
         sok_send(&_step_socket[stepperno], headAdjustment);
     }   
     else

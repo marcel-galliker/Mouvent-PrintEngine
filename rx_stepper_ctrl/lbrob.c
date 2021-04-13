@@ -850,6 +850,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
         _CmdRunning_Lift = 0;
         _CmdRunning = 0;
+        if (_RobStateMachine_Step) RX_StepperStatus.screw_count++;
         _RobStateMachine_Step = 0;
         _ScrewTime = 0;
         _CapIsWet = TRUE;
@@ -1183,6 +1184,7 @@ static void _rob_state_machine(void)
             Error(ERR_CONT, 0, "Robot stuck in searching screw step %d at screw (printbar %d, head %d, axis %d)", _RobStateMachine_Step, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
             _ScrewTime = 0;
             _RobStateMachine_Step = 0;
+            RX_StepperStatus.screw_count++;
             return;
         }
 
@@ -1358,6 +1360,7 @@ static void _rob_state_machine(void)
                 {
                     Error(ERR_CONT, 0, "Screw (printbar %d, head %d, axis %d) not found", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
                     _RobStateMachine_Step = 0;
+                    RX_StepperStatus.screw_count++;
                     break;
                 }
                 else if (_correction_value>=0)
@@ -1529,6 +1532,7 @@ static void _rob_state_machine(void)
         
         case 1002:
             _RobStateMachine_Step=0;
+            RX_StepperStatus.screw_count++;
             break;
         }
     }
