@@ -63,6 +63,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 	{
 		if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET)
 		{
+			TrPrintfL(TRUE, "LIFT: %s : cmd = 0x%8x", __func__, cmd);
 			switch(cmd)
 			{
 			case CMD_TT_STOP:

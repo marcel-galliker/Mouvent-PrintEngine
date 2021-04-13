@@ -1113,24 +1113,28 @@ static void _do_cmd_stepper_test (RX_SOCKET socket, SStepperMotorTest *pmsg)
 //--- _do_start_printing ---------------------------------------------
 static void _do_start_printing	(RX_SOCKET socket)
 {
+	TrPrintfL(TRUE, "%s called", __func__);
 	pc_start_printing();
 }
 
 //--- _do_stop_printing ---------------------------------------------
 static void _do_stop_printing	(RX_SOCKET socket)
 {
+	TrPrintfL(TRUE, "%s called", __func__);
 	pc_stop_printing(TRUE);
 }
 
 //--- _do_abort_printing ---------------------------------------------
 static void _do_abort_printing	(RX_SOCKET socket)
 {
+	TrPrintfL(TRUE, "%s called", __func__);
 	pc_abort_printing();
 }
 
 //--- _do_pause_printing ---------------------------------------------
 static void _do_pause_printing	(RX_SOCKET socket)
 {
+	TrPrintfL(TRUE, "%s called", __func__);
 	pc_pause_printing(TRUE);
 }
 
