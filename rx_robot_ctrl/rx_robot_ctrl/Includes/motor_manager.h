@@ -1,14 +1,12 @@
-#ifndef INCLUDES_MOTOR_MANAGER_H_
-#define INCLUDES_MOTOR_MANAGER_H_
+#pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "communication_def.h"
+#include "../../includes/rx_robot_def.h"
 
 bool motor_manager_start(void);
 bool motor_manager_is_initalized(void);
-MotorStatus_t* motor_manager_get_status(void);
-
-
-#endif /* INCLUDES_MOTOR_MANAGER_H_ */
+SMotorStatus* motor_manager_get_status(void);
+void motor_handle_message(void* message);
+void motor_main(void);

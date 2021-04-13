@@ -461,7 +461,7 @@ int lb702_menu(void)
 		case '1': _Menu = 1; break;
 		case '2': _Menu = 2; break;
 		case '3': _Menu = 3; break;
-		case 'x': return FALSE;
+//		case 'x': return FALSE;
 		default:  if (_Menu == 1)
 				      _lb702_handle_menu(str);
 				  else if (_Menu == 2)

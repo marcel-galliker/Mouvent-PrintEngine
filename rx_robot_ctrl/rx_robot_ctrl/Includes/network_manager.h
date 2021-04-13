@@ -25,8 +25,5 @@ void network_manager_send(void* message, uint32_t size);
 
 QueueHandle_t network_manager_get_boot_message_queue(void);
 QueueHandle_t network_manager_get_bootloader_message_queue(void);
-QueueHandle_t network_manager_get_status_message_queue(void);
-QueueHandle_t network_manager_get_gpio_message_queue(void);
-QueueHandle_t network_manager_get_motor_message_queue(void);
 
 #endif /* INCLUDES_NETWORK_MANAGER_H_ */

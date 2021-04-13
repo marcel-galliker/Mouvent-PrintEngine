@@ -1,8 +1,9 @@
-#ifndef INCLUDES_BOOTLOADER_MANAGER_DEF_H_
-#define INCLUDES_BOOTLOADER_MANAGER_DEF_H_
+#pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "rx_robot_tcpip.h"
 
 /* Defines */
 
@@ -12,9 +13,9 @@
 /* ENUM definitons */
 
 typedef enum {
-	UNINITIALIZED,
-	WAITING_FOR_DATA,
-	WAITING_FOR_CONFIRM
+	UNINITIALIZED_,
+	WAITING_FOR_DATA_,
+	WAITING_FOR_CONFIRM_
 } BootloaderStatus;
 
 /* Data structures */
@@ -27,6 +28,17 @@ typedef struct {
 	uint32_t progSize;
 } BootloaderStatus_t;
 
-#pragma pack()
+typedef struct BootloaderStartCommand
+{
+	SMsgHdr header;
+	uint32_t size;
+	uint32_t checksum; // Not used yet
+} BootloaderStartCommand_t;
 
-#endif /* INCLUDES_BOOTLOADER_MANAGER_DEF_H_ */
+typedef struct BootloaderDataCommand
+{
+	SMsgHdr header;
+	uint8_t data[BOOTLOADER_DATA_FRAME_SIZE];
+	uint32_t length;
+} BootloaderDataCommand_t;
+#pragma pack()

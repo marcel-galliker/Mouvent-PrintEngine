@@ -1,5 +1,4 @@
 #include "gpio_manager.h"
-#include "gpio_manager_def.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,13 +8,8 @@
 
 #include <ft900.h>
 
-#include "tinyprintf.h"
-
-#include <FreeRTOS.h>
-#include <task.h>
-#include <queue.h>
-
-#include "communication_def.h"
+#include "rx_robot_def.h"
+#include "rx_robot_tcpip.h"
 #include "network_manager.h"
 #include "status_manager.h"
 
@@ -31,45 +25,54 @@
 #define TASK_GPIO_STACK_SIZE		(500)
 #define TASK_GPIO_PRIORITY			(9)
 
-/* Static variables */
 
-// Task handles
-static TaskHandle_t _gpioManagerTask;
+// GPIO pins
+#define MOTOR_SD_MODE	23
+
+#define GPIO_SPIM_CLK	27
+#define GPIO_SPIM_MISO	30
+#define GPIO_SPIM_MOSI	29
+#define GPIO_SPIM_SS0	28
+#define GPIO_SPIM_SS1	33
+#define GPIO_SPIM_SS2	34
+#define GPIO_SPIM_SS3	35
+
+#define WATCHDOG_IO		66
 
 // I/O arrays
 static uint8_t _outputs[] = {
-		OUTPUT_0,
-		OUTPUT_1,
-		OUTPUT_2,
-		OUTPUT_3
+		57, 	// OUTPUT 0
+		61,		// OUTPUT 1
+		62,		// OUTPUT 2
+		65		// OUTPUT 3
 };
 
 static uint8_t _inputs[] = {
-		INPUT_0,
-		INPUT_1,
-		INPUT_2,
-		INPUT_3,
-		INPUT_4,
-		INPUT_5,
-		INPUT_6,
+	53,	// INPUT_0
+	54,	// INPUT_1
+	56,	// INPUT_2
+	52,	// INPUT_3
+	55,	// INPUT_4
+	11,	// INPUT_5
+	10	// INPUT_6
 };
 
 static uint8_t _stepperMotors[] = {
-		MOTOR0_EN,
-		MOTOR1_EN,
-		MOTOR2_EN,
-		MOTOR3_EN
+ 	50,	// MOTOR0_EN
+ 	48,	// MOTOR1_EN
+	46,	// MOTOR2_EN
+ 	18	// MOTOR3_EN
 };
 
 static uint8_t _referenceOutputs[] = {
-		MOTOR0_L_REF,
-		MOTOR1_L_REF,
-		MOTOR2_L_REF,
-		MOTOR3_L_REF,
-		MOTOR0_R_REF,
-		MOTOR1_R_REF,
-		MOTOR2_R_REF,
-		MOTOR3_R_REF
+		31,	// MOTOR0_L_REF
+		40,	// MOTOR1_L_REF
+		25,	// MOTOR2_L_REF
+		19,	// MOTOR3_L_REF
+		26,	// MOTOR0_R_REF
+		41,	// MOTOR1_R_REF
+		24,	// MOTOR2_R_REF
+		20,	// MOTOR3_R_REF
 };
 
 // I/O array sizes
@@ -78,18 +81,10 @@ static const uint8_t _inputCount = (sizeof(_inputs) / sizeof(_inputs[0]));
 static const uint8_t _motorCount = (sizeof(_stepperMotors) / sizeof(_stepperMotors[0]));
 static const uint8_t _refCount = (sizeof(_referenceOutputs) / sizeof(_referenceOutputs[0]));
 
-// Status variable
-static GpioStatus_t _gpioStatus;
-
 // Status Flags
 static bool _isInitialized = false;
 
-static QueueHandle_t _gpioMessageQueue;
-
 /* Prototypes */
-
-// Tasks
-static void gpio_manager_task(void *pvParameters);
 
 // Initialization functions
 static void init_voltage_watchdog(void);
@@ -104,30 +99,18 @@ static void update_outputs(void);
 static void update_inputs(void);
 static int  update_input(int no);
 static void gpio_manager_set_outputs(uint8_t outputs);
-static void gpio_manager_handle_message(void* message);
+static void _gpio_manager_reset_edgeCnt(uint8_t inputs);
 
 
-bool gpio_manager_start(void) {
-	memset(&_gpioStatus, 0, sizeof(_gpioStatus));
-
-	_gpioMessageQueue = network_manager_get_gpio_message_queue();
-
-	if(_gpioMessageQueue == NULL)
-		chip_reboot();
-
+bool gpio_manager_start(void)
+{
 	init_voltage_watchdog();
 	init_motor_gpios();
 	init_spi_gpios();
 	init_inputs();
 	init_outputs();
 
-	xTaskCreate(gpio_manager_task,
-				"GPIO",
-				TASK_GPIO_STACK_SIZE,
-				NULL,
-				TASK_GPIO_PRIORITY,
-				&_gpioManagerTask);
-
+	_isInitialized = true;
 	return true;
 }
 
@@ -138,107 +121,67 @@ bool gpio_manager_is_initalized(void)
 
 void gpio_manager_set_output(uint8_t output, bool value)
 {
-	if(output >= NUMBER_OF_OUTPUTS)
-		return;
-
-	gpio_write(_outputs[output], value);
+	if(output < OUTPUT_CNT) gpio_write(_outputs[output], value);
 }
 
 bool gpio_manager_get_input(uint8_t input)
 {
-	if(input > NUMBER_OF_INPUTS)
-		return 0;
-	return update_input(input);
+	if(input < INPUT_CNT)
+		return update_input(input);
+	else return 0;
 }
 
 void gpio_manager_enable_motor(uint8_t motor)
 {
-	if(motor > MOTOR_COUNT)
-		return;
-
-	gpio_write(_stepperMotors[motor], false);
+	if(motor<MOTOR_CNT) gpio_write(_stepperMotors[motor], false);
 }
 
 void gpio_manager_disable_motor(uint8_t motor)
 {
-	if(motor > MOTOR_COUNT)
-		return;
-
-	gpio_write(_stepperMotors[motor], true);
+	if(motor<MOTOR_CNT) gpio_write(_stepperMotors[motor], true);
 }
 
 void gpio_manager_start_motor(uint8_t motor)
 {
-	if(motor > MOTOR_COUNT)
-		return;
-
-	gpio_write(_referenceOutputs[motor], false);
-	gpio_write(_referenceOutputs[motor + _motorCount], false);
+	if(motor<MOTOR_CNT)
+	{
+		gpio_write(_referenceOutputs[motor], false);
+		gpio_write(_referenceOutputs[motor + _motorCount], false);
+	}
 }
 
 void gpio_manager_stop_motor(uint8_t motor)
 {
-	if(motor > MOTOR_COUNT)
-		return;
-
-	gpio_write(_referenceOutputs[motor], true);
-	gpio_write(_referenceOutputs[motor + _motorCount], true);
-}
-
-GpioStatus_t* gpio_manager_get_status(void)
-{
-	return &_gpioStatus;
-}
-
-static void gpio_manager_handle_message(void* message)
-{
-	RobotMessageHeader_t* header = (RobotMessageHeader_t*)message;
-	GpioSetCommand_t* gpioSetCommand = NULL;
-
-	if(_isInitialized == false)
-		return;
-
-	switch(header->messageId)
+	if(motor < MOTOR_CNT)
 	{
-	case CMD_GPIO_SET:
-		gpioSetCommand = (GpioSetCommand_t*)header;
-		gpio_manager_set_outputs(gpioSetCommand->outputs);
-		break;
-
-	default:
-		break;
+		gpio_write(_referenceOutputs[motor], true);
+		gpio_write(_referenceOutputs[motor + _motorCount], true);
 	}
 }
 
-static void gpio_manager_task(void *pvParameters) {
-	static TickType_t lastWakeTime;
-	static const TickType_t frequency = GPIO_UPDATE_INTERVAL / portTICK_PERIOD_MS;
+void gpio_handle_message(void* message)
+{
+	SGpioSetCmd* cmd = (SGpioSetCmd*)message;
 
-	while(network_manager_is_initialized() == false){
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-	}
-
-	while(true)
+	if(_isInitialized)
 	{
-		toggle_watchdog();
-		update_outputs();
-		update_inputs();
+		switch(cmd->header.msgId)
+		{
+		case CMD_GPIO_SET:		gpio_manager_set_outputs(cmd->outputs);		break;
+		case CMD_GPIO_RESET:	_gpio_manager_reset_edgeCnt(cmd->outputs);	break;
 
-		if(_gpioMessageQueue != NULL)
-			{
-				void* message = NULL;
-				if(xQueueReceive(_gpioMessageQueue, &message, 0) == pdPASS)
-				{
-					gpio_manager_handle_message(message);
-					// Free the memory that was allocated by the network manager to hold the command
-					vPortFree(message);
-
-					status_manager_send_status();
-				}
-			}
-
-		vTaskDelayUntil(&lastWakeTime, frequency);
+		default:
+			break;
+		}
 	}
+}
+
+//--- gpio_main ----------------------------------------
+void gpio_main(void)
+{
+	toggle_watchdog();
+	update_outputs();
+	update_inputs();
 }
 
 static void init_voltage_watchdog(void)
@@ -305,15 +248,13 @@ static void init_inputs(void)
 {
 	uint8_t count;
 
-	memset(_gpioStatus.inputEdges, 0, sizeof(_gpioStatus.inputEdges));
-
-	gpio_function(INPUT_0, pad_gpio53);
-	gpio_function(INPUT_1, pad_gpio54);
-	gpio_function(INPUT_2, pad_gpio56);
-	gpio_function(INPUT_3, pad_gpio52);
-	gpio_function(INPUT_4, pad_gpio55);
-	gpio_function(INPUT_5, pad_gpio11);
-	gpio_function(INPUT_6, pad_gpio10);
+	gpio_function(_inputs[0], pad_gpio53);
+	gpio_function(_inputs[1], pad_gpio54);
+	gpio_function(_inputs[2], pad_gpio56);
+	gpio_function(_inputs[3], pad_gpio52);
+	gpio_function(_inputs[4], pad_gpio55);
+	gpio_function(_inputs[5], pad_gpio11);
+	gpio_function(_inputs[6], pad_gpio10);
 
 	for(count = 0; count < _inputCount; count++)
 	{
@@ -350,7 +291,7 @@ static void update_outputs(void)
 	for(count = 0; count < _outputCount; count++)
 	{
 		val = gpio_read(_outputs[count]);
-		_gpioStatus.outputs = (_gpioStatus.outputs & ~(1 << count)) | (val << count);
+		RX_RobotStatus.gpio.outputs = (RX_RobotStatus.gpio.outputs & ~(1 << count)) | (val << count);
 	}
 }
 
@@ -373,12 +314,13 @@ static int update_input(int no)
 	val = !val;
 #endif
 
-	if(val != (_gpioStatus.inputs & (1 << no)))
+	if(val && !(RX_RobotStatus.gpio.inputs & (1 << no)))
 	{
-		_gpioStatus.inputEdges[no] += 1;
-		if (val) _gpioStatus.inputs |=  (1 << no);
-		else	 _gpioStatus.inputs &= ~(1 << no);
+		RX_RobotStatus.gpio.inputEdges[no]++;
 	}
+
+	if (val) RX_RobotStatus.gpio.inputs |=  (1 << no);
+	else	 RX_RobotStatus.gpio.inputs &= ~(1 << no);
 	return (val!=0);
 }
 
@@ -388,5 +330,14 @@ static void gpio_manager_set_outputs(uint8_t outputs)
 	{
 		uint8_t bit = (outputs >> i) & 1U;
 		gpio_write(_outputs[i], bit);
+	}
+}
+
+static void _gpio_manager_reset_edgeCnt(uint8_t inputs)
+{
+	int in;
+	for(in = 0; in < _inputCount; in++)
+	{
+		if (inputs & (1<<in)) RX_RobotStatus.gpio.inputEdges[in]=0;
 	}
 }

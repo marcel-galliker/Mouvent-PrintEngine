@@ -20,9 +20,13 @@
 #include "task.h"
 #include "queue.h"
 
+#include "rx_robot_tcpip.h"
+
 #include "gpio_manager.h"
 #include "status_manager.h"
-#include "communication_def.h"
+#include "motor_manager.h"
+
+#include "rx_trace.h"
 
 /* Number of pending request on server's listening port. */
 #define SERVER_LISTEN_BACKLOG_SIZE      5
@@ -55,15 +59,9 @@
 
 #define RX_BOOT_MESSAGE_QUEUE_LENGTH	8
 #define BOOTLOADER_MESSAGE_QUEUE_LENGTH	8
-#define STATUS_MESSAGE_QUEUE_LENGTH		8
-#define GPIO_MESSAGE_QUEUE_LENGTH		8
-#define MOTOR_MESSAGE_QUEUE_LENGTH		8
 
 #define RX_BOOT_MESSAGE_QUEUE_SIZE		sizeof(void*)
 #define BOOTLOADER_MESSAGE_QUEUE_SIZE	sizeof(void*)
-#define STATUS_MESSAGE_QUEUE_SIZE		sizeof(void*)
-#define GPIO_MESSAGE_QUEUE_SIZE			sizeof(void*)
-#define MOTOR_MESSAGE_QUEUE_SIZE		sizeof(void*)
 
 static ip_addr_t _broadcastIpAddress = {BROADCAST_ADDRESS};
 
@@ -74,6 +72,7 @@ static ip_addr_t _netMask = 			{IP_SUBNET_MASK};
 
 static TaskHandle_t _networkManagerTask;
 static TaskHandle_t _networkManagerConnectionTask;
+#define NETWORK_UPDATE_INTERVAL	(10)
 
 static bool _isInitialized = false;
 
@@ -91,16 +90,13 @@ static struct sockaddr_in __attribute__ ((aligned (4))) _rxBootClientAddress;
 
 static QueueHandle_t _rxBootMessageQueue;
 static QueueHandle_t _bootloaderMessageQueue;
-static QueueHandle_t _statusMessageQueue;
-static QueueHandle_t _gpioMessageQueue;
-static QueueHandle_t _motorMessageQueue;
 
 static void network_manager_task(void *pvParameters);
 static void network_manager_connection_task(void *pvParameters);
 static void network_manager_ethif_status_cb(int netif_up, int link_up, int packet_available);
-static void network_manager_process_broadcast_interface(void);
-static void network_manager_process_bootloader_interface(void);
-static void network_manager_process_command_interface(void);
+static int  network_manager_process_broadcast_interface(void);
+static int  network_manager_process_bootloader_interface(void);
+static int  network_manager_process_command_interface(void);
 
 bool network_manager_start(void) {
 	sys_enable(sys_device_ethernet);
@@ -120,11 +116,8 @@ bool network_manager_start(void) {
 			&_networkManagerTask) != pdTRUE) {
 	}
 
-	_rxBootMessageQueue = xQueueCreate(RX_BOOT_MESSAGE_QUEUE_LENGTH, RX_BOOT_MESSAGE_QUEUE_SIZE);
+	_rxBootMessageQueue 	= xQueueCreate(RX_BOOT_MESSAGE_QUEUE_LENGTH, 	RX_BOOT_MESSAGE_QUEUE_SIZE);
 	_bootloaderMessageQueue = xQueueCreate(BOOTLOADER_MESSAGE_QUEUE_LENGTH, BOOTLOADER_MESSAGE_QUEUE_SIZE);
-	_statusMessageQueue = xQueueCreate(STATUS_MESSAGE_QUEUE_LENGTH, STATUS_MESSAGE_QUEUE_SIZE);
-	_gpioMessageQueue = xQueueCreate(GPIO_MESSAGE_QUEUE_LENGTH, GPIO_MESSAGE_QUEUE_SIZE);
-	_motorMessageQueue = xQueueCreate(MOTOR_MESSAGE_QUEUE_LENGTH, MOTOR_MESSAGE_QUEUE_SIZE);
 
 	return true;
 }
@@ -137,21 +130,6 @@ QueueHandle_t network_manager_get_boot_message_queue(void)
 QueueHandle_t network_manager_get_bootloader_message_queue(void)
 {
 	return _bootloaderMessageQueue;
-}
-
-QueueHandle_t network_manager_get_status_message_queue(void)
-{
-	return _statusMessageQueue;
-}
-
-QueueHandle_t network_manager_get_gpio_message_queue(void)
-{
-	return _gpioMessageQueue;
-}
-
-QueueHandle_t network_manager_get_motor_message_queue(void)
-{
-	return _motorMessageQueue;
 }
 
 void network_manager_change_ip(ip_addr_t* newIpAddress)
@@ -195,7 +173,9 @@ void network_manager_send(void* message, uint32_t size)
 	if(_communicationClientAddress.sin_addr.s_addr == 0)
 		return;
 
+	taskENTER_CRITICAL();
 	sendto(_communicationSocket, message, size, MSG_DONTWAIT, (struct sockaddr *)&_communicationClientAddress, sizeof(_communicationClientAddress));
+	taskEXIT_CRITICAL();
 }
 
 bool network_manager_is_initialized(void)
@@ -203,7 +183,8 @@ bool network_manager_is_initialized(void)
 	return _isInitialized;
 }
 
-static void network_manager_task(void *pvParameters) {
+static void network_manager_task(void *pvParameters)
+{
     uint32_t ulNotifiedValue;
 
     (void) pvParameters;
@@ -291,11 +272,18 @@ static void network_manager_task(void *pvParameters) {
         _isInitialized = true;
 
 
+    	TickType_t lastWakeTime;
+    	TickType_t frequency = 10 / portTICK_PERIOD_MS;
+        lastWakeTime = xTaskGetTickCount();
         while(1)
         {
-        	network_manager_process_broadcast_interface();
-        	network_manager_process_command_interface();
-        	network_manager_process_bootloader_interface();
+        	int cnt=0;
+        	gpio_main();
+        	motor_main();
+        	cnt += network_manager_process_command_interface();
+        	cnt += network_manager_process_broadcast_interface();
+        	cnt += network_manager_process_bootloader_interface();
+        	if (cnt==0) vTaskDelayUntil(&lastWakeTime, frequency);
         }
 
         close(_rxBootSocket);
@@ -346,7 +334,7 @@ static void network_manager_ethif_status_cb(int netif_up, int link_up, int packe
     }
 }
 
-static void network_manager_process_bootloader_interface(void)
+static int network_manager_process_bootloader_interface(void)
 {
 	static uint8_t udpData[BOOTLOADER_INTERFACE_MAX_PKG_SIZE] = {0};
 	static int32_t size_rx;
@@ -364,10 +352,12 @@ static void network_manager_process_bootloader_interface(void)
 		// or it will be freed by the receiving end that handles the message.
 		if(xQueueSend(_bootloaderMessageQueue, &message, (TickType_t)0) != pdPASS)
 			free(message);
+		return 1;
 	}
+	return 0;
 }
 
-static void network_manager_process_broadcast_interface(void)
+static int network_manager_process_broadcast_interface(void)
 {
 	static uint8_t udpData[BROADCAST_INTERFACE_MAX_PKG_SIZE] = {0};
 	static int32_t size_rx;
@@ -385,45 +375,34 @@ static void network_manager_process_broadcast_interface(void)
 		// or it will be freed by the receiving end that handles the message.
 		if(xQueueSend(_rxBootMessageQueue, &message, (TickType_t)0) != pdPASS)
 			free(message);
+		return 1;
 	}
+	return 0;
 }
 
-static void network_manager_process_command_interface(void)
+static int network_manager_process_command_interface(void)
 {
 	static uint8_t udpData[COMMUNICATION_INTERFACE_MAX_PKG_SIZE] = {0};
-	volatile static int32_t size_rx;
+	SMsgHdr *phdr = (SMsgHdr*)udpData;
+	volatile static int32_t msgLen;
 
 	socklen_t len = sizeof(_communicationClientAddress);
-	size_rx = recvfrom(_communicationSocket, udpData, sizeof(udpData), MSG_DONTWAIT, (struct sockaddr *)&_communicationClientAddress, &len);
+	msgLen = recvfrom(_communicationSocket, udpData, sizeof(udpData), MSG_DONTWAIT, (struct sockaddr *)&_communicationClientAddress, &len);
 
-	if((size_rx > 0) && (size_rx < COMMUNICATION_INTERFACE_MAX_PKG_SIZE))
+	if(msgLen > 0)
 	{
-		void* message = pvPortMalloc(size_rx);
-
-		memcpy(message, udpData, size_rx);
-
-		RobotMessageHeader_t* header = (RobotMessageHeader_t*)message;
-
-		switch((header->messageId & COMMAND_TYPE_MASK))
+		if (phdr->msgLen==msgLen)
 		{
-		case STATUS_COMMAND_MASK:
-			if(xQueueSend(_statusMessageQueue, &message, (TickType_t)0) != pdPASS)
-				vPortFree(message);
-			break;
-
-		case GPIO_COMMAND_MASK:
-			if(xQueueSend(_gpioMessageQueue, &message, (TickType_t)0) != pdPASS)
-				vPortFree(message);
-			break;
-
-		case MOTOR_COMMAND_MASK:
-			if(xQueueSend(_motorMessageQueue, &message, (TickType_t)0) != pdPASS)
-				vPortFree(message);
-			break;
-
-		default:
-			free(message);
-			break;
+			switch((phdr->msgId & COMMAND_TYPE_MASK))
+			{
+			case STATUS_COMMAND_MASK:	status_handle_message(udpData); break;
+			case GPIO_COMMAND_MASK:		gpio_handle_message(udpData); 	break;
+			case MOTOR_COMMAND_MASK: 	motor_handle_message(udpData);	break;
+			default: break;
+			}
+			return 1;
 		}
+		else return 0;
 	}
+	return 0;
 }

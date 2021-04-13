@@ -2,6 +2,15 @@
 <project>
 	<configuration id="com.ftdichip.build.config.ft900.debug.freertos.506498793" name="FT900_Debug">
 		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+			<provider id="org.eclipse.cdt.ui.UserLanguageSettingsProvider">
+				<language id="org.eclipse.cdt.core.gcc">
+					<resource project-relative-path="">
+						<entry kind="macro" name="ROBOT" value="">
+							<flag value="BUILTIN"/>
+						</entry>
+					</resource>
+				</language>
+			</provider>
 			<provider id="com.ftdichip.managedbuild.gnu.cross.ft90x.CrossGCCBuiltinSpecsDetector">
 				<language id="org.eclipse.cdt.core.gcc">
 					<entry kind="includePath" name="C:/Program Files (x86)/Bridgetek/FT9xx Toolchain/Toolchain/tools/lib/gcc/ft32-elf/8.0.0/include">

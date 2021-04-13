@@ -1,5 +1,6 @@
 #include "bootloader_manager.h"
 #include "bootloader_manager_def.h"
+#include "rx_robot_tcpip.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,7 +15,6 @@
 #include "task.h"
 #include "queue.h"
 
-#include "communication_def.h"
 #include "network_manager.h"
 #include "status_manager.h"
 
@@ -37,9 +37,6 @@ static TaskHandle_t _bootloaderManagerTask;
 
 // Bootloader message queue
 static QueueHandle_t _bootloaderMessageQueue;
-
-// Status variable
-static BootloaderStatus_t _bootloaderStatus;
 
 // Status Flags
 static bool _isInitialized = false;
@@ -83,10 +80,6 @@ bool bootloader_manager_is_initalized(void) {
 	return _isInitialized;
 }
 
-BootloaderStatus_t* bootloader_manager_get_status(void) {
-	return &_bootloaderStatus;
-}
-
 static void bootloader_manager_task(void *pvParameters)
 {
 	while(true)
@@ -106,9 +99,9 @@ static void bootloader_manager_task(void *pvParameters)
 
 static void bootloader_manager_handle_command(void* msg)
 {
-	RobotMessageHeader_t* header = (RobotMessageHeader_t*)msg;
+	SMsgHdr* header = (SMsgHdr*)msg;
 
-	switch(header->messageId)
+	switch(header->msgId)
 	{
 	case CMD_BOOTLOADER_START:
 		bootloader_manager_init((BootloaderStartCommand_t*)msg);
@@ -129,12 +122,12 @@ static void bootloader_manager_handle_command(void* msg)
 
 static void bootloader_manager_reset(void)
 {
-	memset(&_bootloaderStatus, 0, sizeof(_bootloaderStatus));
+	memset(&RX_RobotStatus.bootloader, 0, sizeof(RX_RobotStatus.bootloader));
 }
 
 static void bootloader_manager_init(BootloaderStartCommand_t* command)
 {
-	if(_bootloaderStatus.status != UNINITIALIZED)
+	if(RX_RobotStatus.bootloader.status != UNINITIALIZED)
 		bootloader_manager_recover();
 
 	bootloader_manager_reset();
@@ -146,64 +139,64 @@ static void bootloader_manager_init(BootloaderStartCommand_t* command)
 	flash_chip_erase();
 	taskEXIT_CRITICAL();
 
-	_bootloaderStatus.progSize = command->size;
-	_bootloaderStatus.status = WAITING_FOR_DATA;
+	RX_RobotStatus.bootloader.progSize = command->size;
+	RX_RobotStatus.bootloader.status = WAITING_FOR_DATA;
 }
 
 static void bootloader_manger_handle_data(BootloaderDataCommand_t* command)
 {
-	uint32_t lengthIfWritten = ((_bootloaderStatus.progMemBlocksUsed * PROG_BUFFER_SIZE) + command->length + _bootloaderStatus.progMemPos);
+	uint32_t lengthIfWritten = ((RX_RobotStatus.bootloader.progMemBlocksUsed * PROG_BUFFER_SIZE) + command->length + RX_RobotStatus.bootloader.progMemPos);
 
-	if(_bootloaderStatus.status == UNINITIALIZED)
+	if(RX_RobotStatus.bootloader.status == UNINITIALIZED)
 		return;
 
-	if(_bootloaderStatus.status != WAITING_FOR_DATA)
+	if(RX_RobotStatus.bootloader.status != WAITING_FOR_DATA)
 	{
 		bootloader_manager_reset();
 		bootloader_manager_recover();
 		return;
 	}
 
-	if(lengthIfWritten > _bootloaderStatus.progSize)
+	if(lengthIfWritten > RX_RobotStatus.bootloader.progSize)
 	{
 		bootloader_manager_reset();
 		bootloader_manager_recover();
 		return;
 	}
 
-	if((_bootloaderStatus.progMemPos + command->length) > PROG_BUFFER_SIZE)
+	if((RX_RobotStatus.bootloader.progMemPos + command->length) > PROG_BUFFER_SIZE)
 	{
 		bootloader_manager_reset();
 		bootloader_manager_recover();
 		return;
 	}
 
-	memcpy(&progMemBlock[_bootloaderStatus.progMemPos], command->data, command->length);
-	_bootloaderStatus.progMemPos += command->length;
+	memcpy(&progMemBlock[RX_RobotStatus.bootloader.progMemPos], command->data, command->length);
+	RX_RobotStatus.bootloader.progMemPos += command->length;
 
-	if((PROG_BUFFER_SIZE == _bootloaderStatus.progMemPos) ||
-	   (lengthIfWritten == _bootloaderStatus.progSize))
+	if((PROG_BUFFER_SIZE == RX_RobotStatus.bootloader.progMemPos) ||
+	   (lengthIfWritten == RX_RobotStatus.bootloader.progSize))
 	{
-		uint32_t flashPosition = _bootloaderStatus.progMemBlocksUsed * FLASH_SECTOR_SIZE;
+		uint32_t flashPosition = RX_RobotStatus.bootloader.progMemBlocksUsed * FLASH_SECTOR_SIZE;
 
 		taskENTER_CRITICAL();
 		memcpy_dat2flash(flashPosition, progMemBlock, PROG_BUFFER_SIZE);
 		taskEXIT_CRITICAL();
 
-		_bootloaderStatus.progMemBlocksUsed++;
-		_bootloaderStatus.progMemPos = 0;
+		RX_RobotStatus.bootloader.progMemBlocksUsed++;
+		RX_RobotStatus.bootloader.progMemPos = 0;
 	}
 
-	if(lengthIfWritten == _bootloaderStatus.progSize)
-		_bootloaderStatus.status = WAITING_FOR_CONFIRM;
+	if(lengthIfWritten == RX_RobotStatus.bootloader.progSize)
+		RX_RobotStatus.bootloader.status = WAITING_FOR_CONFIRM;
 }
 
 static void bootloader_manager_confirm(void)
 {
-	if(_bootloaderStatus.status == UNINITIALIZED)
+	if(RX_RobotStatus.bootloader.status == UNINITIALIZED)
 		return;
 
-	if(_bootloaderStatus.status != WAITING_FOR_CONFIRM)
+	if(RX_RobotStatus.bootloader.status != WAITING_FOR_CONFIRM)
 	{
 		bootloader_manager_reset();
 		bootloader_manager_recover();
