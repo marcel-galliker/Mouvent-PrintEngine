@@ -236,6 +236,16 @@ void fluid_set_config(void)
 	switch (RX_Config.printer.type)
 	{
 	case printer_LB701:
+							_FluidToScales[0] = SCALE(1, 1);			  // Cyan
+							_FluidToScales[1] = SCALE(1, 2);			  // Magenta
+							_FluidToScales[2] = SCALE(1, 3);			  // Yellow
+							_FluidToScales[3] = SCALE(1, 4);			  // Black
+							_FluidToScales[4] = SCALE(2, 1);			  // White
+							_FluidToScales[5] = SCALE(2, 2);			  // Orange
+							_FluidToScales[6] = SCALE(2, 3);			  // Violet
+							_FluidToScales[INK_SUPPLY_CNT] = SCALE(1, 5); // flush
+							break;
+
 	case printer_LB702_UV:	
 	case printer_LB703_UV:	
 	case printer_LH702:
