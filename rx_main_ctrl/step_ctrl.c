@@ -652,6 +652,7 @@ void step_error_reset(void)
 	for (int i=0; i<SIZEOF(_step_Socket); i++) sok_send_2(&_step_Socket[i], CMD_ERROR_RESET, 0, NULL);
 }
 
+//--- step_adjust_heads ---------------------------------------------------------
 void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
     switch (_StepperType)
@@ -659,6 +660,42 @@ void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     case STEPPER_LB:
         steplb_adjust_heads(socket, (SHeadAdjustmentMsg*) headAdjustment);
         break;
+    default:
+        break;
+    }
+}
+
+//--- step_get_StepperStatus ---------------------------------------------
+SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        return steplb_get_StepperStatus((SHeadAdjustmentMsg *)headAdjustment);
+    default:
+        break;
+    }
+}
+
+//--- step_screw_in_Buffer ------------------------------------------
+int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        return steplb_screw_in_Buffer((SHeadAdjustmentMsg *)headAdjustment);
+    default:
+        break;
+    }
+}
+
+//--- step_get_stitch_position ---------------------------------------------
+int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        return steplb_get_stitch_position((SHeadAdjustmentMsg *)headAdjustment);
     default:
         break;
     }

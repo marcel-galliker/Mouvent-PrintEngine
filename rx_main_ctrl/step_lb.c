@@ -40,7 +40,6 @@ static SStepperStat		    _Status[STEPPER_CNT];
 static int				    _AbortPrinting=FALSE;
 static int                  _WashStarted[STEPPER_CNT];
 static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
-static int                  _ScrewCommandSend[STEPPER_CNT] = {FALSE};
 static int                  _OldVacuum_Cleaner_State = FALSE;
 static double                _Vacuum_Cleaner_Time = 0;
 static int                  _AutoCapMode = FALSE;
@@ -49,6 +48,7 @@ static int                  _AutoCapTimer = 0;
 
 
 static int				    _StatReadCnt[STEPPER_CNT];
+static int                  _ScrewCnt[STEPPER_CNT] = {0};
 
 static EnFluidCtrlMode	    _RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
@@ -58,7 +58,7 @@ static SHeadAdjustmentMsg   _HeadAdjustmentBuffer[STEPPER_CNT][MAX_HEAD_DIST];
 
 static void _steplb_rob_do_reference(int no);
 
-static void _check_screwer(void);
+static void _check_screwer(int stepperNo);
 static void _check_fluid_back_pump(void);
 static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no);
 static int  _rob_get_printbar(int rob, int printbar);
@@ -129,6 +129,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_LIFT_REFERENCE:
 			case CMD_ROB_REFERENCE:
             case CMD_ROB_SERVICE:
+            case CMD_RESET_ALL_SCREWS:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
@@ -300,9 +301,9 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         _AutoCapMode = FALSE;
     }
 
+    _check_screwer(no);
     if (no == 0)
     {
-        _check_screwer();
         _check_fluid_back_pump();
     }
     return REPLY_OK;
@@ -847,7 +848,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         return;
     }
     
-    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw))
+    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw) && _Status[stepperno].screw_count >= _ScrewCnt[stepperno])
     {
         _set_screw_pos(stepperno);
         _HeadAdjustment[stepperno] = *headAdjustment;
@@ -855,6 +856,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
             headAdjustment->printbarNo %= 2;
         else
             headAdjustment->printbarNo = (headAdjustment->printbarNo + 1) % 2;
+        _ScrewCnt[stepperno] = _Status[stepperno].screw_count + 1;
         sok_send(&_step_socket[stepperno], headAdjustment);
     }   
     else
@@ -880,37 +882,87 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     }
 }
 
-//--- _check_screwer --------------------------------------------------
-static void _check_screwer(void)
+//--- steplb_screw_in_Buffer ---------------------------------------------------------
+int steplb_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
 {
-    int i, j;
+	int stepperNo, printbarNo;
+
+	if (RX_Config.inkSupplyCnt % 2 == 0)
+		stepperNo = headAdjustment->printbarNo / 2;
+	else
+		stepperNo = (headAdjustment->printbarNo + 1) / 2;
+
+	if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
+		printbarNo = headAdjustment->printbarNo % 2;
+	else
+		printbarNo = (headAdjustment->printbarNo + 1) % 2;
+
+	for (int i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperNo]); i++)
+	{
+		if (_HeadAdjustmentBuffer[stepperNo][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperNo][i].headNo == headAdjustment->headNo && _HeadAdjustmentBuffer[stepperNo][i].printbarNo == headAdjustment->printbarNo)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+//--- steplb_get_StepperStatus ---------------------------------------------------------
+SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
+{
+	int stepperNo;
+
+	if (RX_Config.inkSupplyCnt % 2 == 0)
+		stepperNo = headAdjustment->printbarNo / 2;
+	else
+		stepperNo = (headAdjustment->printbarNo + 1) / 2;
+
+	return _Status[stepperNo];
+}
+
+//--- steplb_get_stitch_position --------------------------------------------
+int steplb_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
+{
+	SScrewPositions pos[STEPPER_CNT];
+	int stepperNo, printbarNo = 0;
+	memset(&pos, 0, sizeof(pos));
+
+	setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, READ);
+
+	if (RX_Config.inkSupplyCnt % 2 == 0)
+		stepperNo = headAdjustment->printbarNo / 2;
+	else
+		stepperNo = (headAdjustment->printbarNo + 1) / 2;
+
+	if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
+		printbarNo = headAdjustment->printbarNo % 2;
+	else
+		printbarNo = (headAdjustment->printbarNo + 1) % 2;
+
+	return pos[stepperNo].printbar[printbarNo].stitch.turns;
+}
+
+//--- _check_screwer --------------------------------------------------
+static void _check_screwer(int stepperNo)
+{
+    int j;
 
     SHeadAdjustmentMsg headAdjustment;
-    for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
+    for (j = 1; j < SIZEOF(_HeadAdjustmentBuffer[stepperNo]); j++)
     {
-        for (j = 1; j < SIZEOF(_HeadAdjustmentBuffer[i]); j++)
+        if (_HeadAdjustmentBuffer[stepperNo][j-1].printbarNo == -1 && _HeadAdjustmentBuffer[stepperNo][j].printbarNo != -1)
         {
-            if (_HeadAdjustmentBuffer[i][j-1].printbarNo == -1 && _HeadAdjustmentBuffer[i][j].printbarNo != -1)
-            {
-                _HeadAdjustmentBuffer[i][j - 1] = _HeadAdjustmentBuffer[i][j];
-                _HeadAdjustmentBuffer[i][j].printbarNo = -1;
-            }
-        } 
-    }
-    
-    for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer); i++)
-    {
-        if (_ScrewCommandSend[i] == TRUE && _Status[i].screwerinfo.screwer_ready == FALSE)
-            _ScrewCommandSend[i] = FALSE;
-        
-        if (_HeadAdjustmentBuffer[i][0].printbarNo != -1 && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[i] == ctrl_off || _RobotCtrlMode[i] == ctrl_undef) &&
-                _Status[i].info.z_in_screw && _Status[i].info.ref_done && _Status[i].screwerinfo.screwer_ready && _ScrewCommandSend[i] == FALSE)
-        {
-            headAdjustment = _HeadAdjustmentBuffer[i][0];
-            _HeadAdjustmentBuffer[i][0].printbarNo = -1;
-             steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
-            _ScrewCommandSend[i] = TRUE;
+            _HeadAdjustmentBuffer[stepperNo][j - 1] = _HeadAdjustmentBuffer[stepperNo][j];
+            _HeadAdjustmentBuffer[stepperNo][j].printbarNo = -1;
         }
+    }
+
+    if (_HeadAdjustmentBuffer[stepperNo][0].printbarNo != -1 && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[stepperNo] == ctrl_off || _RobotCtrlMode[stepperNo] == ctrl_undef) &&
+            _Status[stepperNo].info.z_in_screw && _Status[stepperNo].info.ref_done && _Status[stepperNo].screwerinfo.screwer_ready && _Status[stepperNo].screw_count >= _ScrewCnt[stepperNo])
+    {
+        headAdjustment = _HeadAdjustmentBuffer[stepperNo][0];
+        _HeadAdjustmentBuffer[stepperNo][0].printbarNo = -1;
+         steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
     }
 }
 

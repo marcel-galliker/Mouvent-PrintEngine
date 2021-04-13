@@ -278,7 +278,6 @@ void lbrob_main(int ticks, int menu)
 
     if (!RX_StepperStatus.robinfo.ref_done)
     {
-        RX_StepperStatus.screwerinfo.screws_found = FALSE;
         _HeadScrewPos = FALSE;
     }
     
@@ -851,11 +850,11 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
         _CmdRunning_Lift = 0;
         _CmdRunning = 0;
+        if (_RobStateMachine_Step) RX_StepperStatus.screw_count++;
         _RobStateMachine_Step = 0;
         _ScrewTime = 0;
         _CapIsWet = TRUE;
         RX_StepperStatus.robinfo.ref_done = FALSE;
-        RX_StepperStatus.screwerinfo.screw_reset = FALSE;
         int val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
@@ -1175,6 +1174,8 @@ static void _rob_state_machine(void)
     static int _correction_value;
     int pos, distance = 0;
     int _turns = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].turns;
+
+    RX_StepperStatus.screwerinfo.screwed_successfully = FALSE;
     
     if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
     {
@@ -1183,10 +1184,9 @@ static void _rob_state_machine(void)
             Error(ERR_CONT, 0, "Robot stuck in searching screw step %d at screw (printbar %d, head %d, axis %d)", _RobStateMachine_Step, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
             _ScrewTime = 0;
             _RobStateMachine_Step = 0;
+            RX_StepperStatus.screw_count++;
             return;
         }
-
-        RX_StepperStatus.screwerinfo.screw_reset = FALSE;
 
         TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
 
@@ -1360,6 +1360,7 @@ static void _rob_state_machine(void)
                 {
                     Error(ERR_CONT, 0, "Screw (printbar %d, head %d, axis %d) not found", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
                     _RobStateMachine_Step = 0;
+                    RX_StepperStatus.screw_count++;
                     break;
                 }
                 else if (_correction_value>=0)
@@ -1472,6 +1473,7 @@ static void _rob_state_machine(void)
             _ScrewTime = 0;
             _RobStateMachine_Step = 0; // wait for next command
             RX_StepperStatus.screw_count++;
+            RX_StepperStatus.screwerinfo.screwed_successfully = TRUE;
             break;
 
         //--------------- next screw ---------------
@@ -1530,6 +1532,7 @@ static void _rob_state_machine(void)
         
         case 1002:
             _RobStateMachine_Step=0;
+            RX_StepperStatus.screw_count++;
             break;
         }
     }

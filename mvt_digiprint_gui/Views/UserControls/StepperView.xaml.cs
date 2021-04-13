@@ -129,6 +129,7 @@ namespace RX_DigiPrint.Views.UserControls
                     Button_Vacuum.Visibility    = visible;
                     Button_RefRobot.Visibility  = visible;
                     Button_Service.Visibility   = visible;
+                    Button_Robot_Zeroing.Visibility = visible;
 
                 }
                 else
@@ -153,6 +154,7 @@ namespace RX_DigiPrint.Views.UserControls
             Button_Vacuum.Visibility = visible;
             Button_RefRobot.Visibility = visible;
             Button_Service.Visibility = visible;
+            Button_Robot_Zeroing.Visibility = visible;
         }
 
         //--- _button_active -----------------------------
@@ -346,6 +348,12 @@ namespace RX_DigiPrint.Views.UserControls
         {
             _button_active(sender as CheckBox);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROB_SERVICE);
+        }
+
+        private void RobotZeroing_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_RESET_ALL_SCREWS);
         }
     }
 }

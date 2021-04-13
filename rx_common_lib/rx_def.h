@@ -1528,16 +1528,16 @@ typedef struct EScrewerInfo
     UINT32 z_in_up : 1;					//	0x00000080
     UINT32 r_info_8 : 1;				//	0x00000100
     UINT32 r_info_9 : 1;				//	0x00000200
-    UINT32 screws_found : 1;			//	0x00000400
-    UINT32 unused_screwed : 1;			//	0x00000800
+    UINT32 r_info_10 : 1;				//	0x00000400
+    UINT32 screwed_successfully : 1;	//	0x00000800
     UINT32 screwer_blocked_left : 1;	//	0x00001000
     UINT32 screwer_blocked_right : 1;   //	0x00002000
     UINT32 screwer_ready : 1;			//  0x00004000
     UINT32 r_info_15 : 1;				//	0x00008000
     UINT32 r_info_16 : 1;				//	0x00010000
     UINT32 r_info_17 : 1;				//	0x00020000
-    UINT32 screw_out_of_range : 1;		//	0x00040000
-    UINT32 screw_reset : 1;				//	0x00080000
+    UINT32 r_info_18 : 1;				//	0x00040000
+    UINT32 r_info_19 : 1;				//	0x00080000
     UINT32 r_info_20 : 1;				//	0x00100000
     UINT32 r_info_21 : 1;				//	0x00200000
     UINT32 r_info_22 : 1;				//	0x00400000
@@ -1646,7 +1646,6 @@ typedef struct SStepperStat
 	INT32		adjustmentProgress;
 	UINT32		alive[2];
     INT32		screw_count;
-    INT32		screwNr_reset;
 
     INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];
