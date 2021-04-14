@@ -25,6 +25,7 @@
 #include "gpio_manager.h"
 #include "status_manager.h"
 #include "motor_manager.h"
+#include "bootloader_manager.h"
 
 #include "rx_trace.h"
 
@@ -76,7 +77,6 @@ static TaskHandle_t _networkManagerConnectionTask;
 
 static bool _isInitialized = false;
 
-static int32_t _bootloaderSocket = -1;
 static int32_t _communicationSocket = -1;
 static int32_t _rxBootSocket = -1;
 
@@ -95,7 +95,6 @@ static void network_manager_task(void *pvParameters);
 static void network_manager_connection_task(void *pvParameters);
 static void network_manager_ethif_status_cb(int netif_up, int link_up, int packet_available);
 static int  network_manager_process_broadcast_interface(void);
-static int  network_manager_process_bootloader_interface(void);
 static int  network_manager_process_command_interface(void);
 
 bool network_manager_start(void) {
@@ -245,16 +244,6 @@ static void network_manager_task(void *pvParameters)
         _bootloaderServerAddress.sin_port = htons(PORT_UDP_BOOTLOADER);
         _bootloaderServerAddress.sin_addr.s_addr = ip4_addr_get_u32(&_wildcardIpAddress);
 
-        if ((_bootloaderSocket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-		{
-			chip_reboot();
-		}
-
-		if (bind(_bootloaderSocket, (struct sockaddr *) &_bootloaderServerAddress, sizeof(_bootloaderServerAddress)) < 0)
-		{
-			chip_reboot();
-		}
-
         _communicationServerAddress.sin_family = AF_INET;
         _communicationServerAddress.sin_port = htons(PORT_UDP_COMMUNICATION);
         _communicationServerAddress.sin_addr.s_addr = ip4_addr_get_u32(&_wildcardIpAddress);
@@ -282,12 +271,11 @@ static void network_manager_task(void *pvParameters)
         	motor_main();
         	cnt += network_manager_process_command_interface();
         	cnt += network_manager_process_broadcast_interface();
-        	cnt += network_manager_process_bootloader_interface();
+        	bootloader_manager_main();
         	if (cnt==0) vTaskDelayUntil(&lastWakeTime, frequency);
         }
 
         close(_rxBootSocket);
-        close(_bootloaderSocket);
         close(_communicationSocket);
     }
 }
@@ -318,7 +306,6 @@ static void network_manager_connection_task(void *pvParameters)
     }
 }
 
-
 static void network_manager_ethif_status_cb(int netif_up, int link_up, int packet_available) {
     if (netif_up) {
         xTaskNotify(_networkManagerTask,TASK_NOTIFY_NETIF_UP,eSetBits);
@@ -332,29 +319,6 @@ static void network_manager_ethif_status_cb(int netif_up, int link_up, int packe
     else {
         xTaskNotify(_networkManagerTask,TASK_NOTIFY_LINK_DOWN,eSetBits);
     }
-}
-
-static int network_manager_process_bootloader_interface(void)
-{
-	static uint8_t udpData[BOOTLOADER_INTERFACE_MAX_PKG_SIZE] = {0};
-	static int32_t size_rx;
-
-	socklen_t len = sizeof(_bootloaderClientAddress);
-	size_rx = recvfrom(_bootloaderSocket, udpData, sizeof(udpData), MSG_DONTWAIT, (struct sockaddr *)&_bootloaderClientAddress, &len);
-
-	if((size_rx > 0) && (size_rx < BOOTLOADER_INTERFACE_MAX_PKG_SIZE))
-	{
-		void* message = pvPortMalloc(size_rx);
-		memcpy(message, udpData, size_rx);
-
-		// The pointer will be copied into the message q, that's why the reference of message is passed
-		// After that call, message can go out of scope, it will either be freed inside the if if the message q is full
-		// or it will be freed by the receiving end that handles the message.
-		if(xQueueSend(_bootloaderMessageQueue, &message, (TickType_t)0) != pdPASS)
-			free(message);
-		return 1;
-	}
-	return 0;
 }
 
 static int network_manager_process_broadcast_interface(void)
@@ -395,14 +359,14 @@ static int network_manager_process_command_interface(void)
 		{
 			switch((phdr->msgId & COMMAND_TYPE_MASK))
 			{
-			case STATUS_COMMAND_MASK:	status_handle_message(udpData); break;
-			case GPIO_COMMAND_MASK:		gpio_handle_message(udpData); 	break;
-			case MOTOR_COMMAND_MASK: 	motor_handle_message(udpData);	break;
-			default: break;
+			case STATUS_COMMAND_MASK:		status_handle_message(udpData); break;
+			case GPIO_COMMAND_MASK:			gpio_handle_message(udpData); 	break;
+			case MOTOR_COMMAND_MASK: 		motor_handle_message(udpData);	break;
+			case BOOTLOADER_COMMAND_MASK: 	bootloader_manager_handle_command(udpData);	break;
+			default:	break;
 			}
 			return 1;
 		}
-		else return 0;
 	}
 	return 0;
 }

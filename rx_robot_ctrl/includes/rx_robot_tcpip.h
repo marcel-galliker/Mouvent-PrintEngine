@@ -6,7 +6,9 @@
 #include "rx_robot_def.h"
 
 #ifndef __FT900__
-	#include "tcp_ip.h"#endif
+	#include "tcp_ip.h"
+#endif
+
 // Network defines
 #define PORT_UDP_BOOT_SVR		7004
 #define PORT_UDP_BOOT_CLNT		7005
@@ -29,7 +31,10 @@
 // Bootloader commands
 #define CMD_BOOTLOADER_START	(BOOTLOADER_COMMAND_MASK | 0x00000001)
 #define CMD_BOOTLOADER_DATA		(BOOTLOADER_COMMAND_MASK | 0x00000002)
-#define CMD_BOOTLOADER_CONFIRM	(BOOTLOADER_COMMAND_MASK | 0x00000003)
+#define CMD_BOOTLOADER_END		(BOOTLOADER_COMMAND_MASK | 0x00000003)
+#define CMD_BOOTLOADER_ABORT	(BOOTLOADER_COMMAND_MASK | 0x00000004)
+#define CMD_BOOTLOADER_REBOOT	(BOOTLOADER_COMMAND_MASK | 0x00000005)
+
 
 // GPIO commands
 #define CMD_GPIO_SET			(GPIO_COMMAND_MASK | 0x00000001)
@@ -52,6 +57,8 @@
 	#define UINT8  uint8_t
 	#define UINT32 uint32_t
 	#define INT32  int32_t
+	#define TRUE	true
+	#define FALSE	false
 
 	typedef struct SMsgHdr
 	{
@@ -69,13 +76,13 @@ typedef struct SGpioSetCmd
 typedef struct SRobotStatusMsg
 {
 	SMsgHdr header;
-	UINT32				alive;
-	SBootloaderStatus bootloader;
-	SGpioStatus gpio;
+	char version[32];
+	UINT32		 alive;
+	SGpioStatus	 gpio;
 	SMotorStatus motor[MOTOR_CNT];
 } SRobotStatusMsg;
 
-typedef struct
+typedef struct SRobotTraceMsg
 {
 	SMsgHdr header;
 	char	message[256];
@@ -110,5 +117,27 @@ typedef struct SRobotMotorsResetCmd
 	SMsgHdr header;
 	UINT8 motors;
 } SRobotMotorsResetCmd;
+
+//--- BOOTLOADER -------------------------------------------------------------------
+typedef struct SBootloaderStartCmd
+{
+	SMsgHdr header;
+	uint32_t size;
+} SBootloaderStartCmd;
+
+typedef struct SBootloaderDataRequestCmd
+{
+	SMsgHdr header;
+	UINT32	filePos;
+} SBootloaderDataRequestCmd;
+
+#define BOOTLOADER_DATA_FRAME_SIZE	64
+typedef struct SBootloaderDataCmd
+{
+	SMsgHdr header;
+	UINT32	filePos;
+	UINT8	data[BOOTLOADER_DATA_FRAME_SIZE];
+	UINT32  length;
+} SBootloaderDataCmd;
 
 #pragma pack()

@@ -86,6 +86,7 @@ void rx_def_init();
 #define FIELNAME_STEPPER_RBF	"rx_stepper_rbf"
 #define FIELNAME_STEPPER_NIOS	"rx_stepper_nios"
 #define FILENAME_SPOOLER_CTRL	"rx_spooler_ctrl"
+#define FILENAME_ROBOT_CTRL		"rx_robot_ctrl"
 #define FILENAME_LOG			"log.log"
 #define FILENAME_NETWORK		"network.cfg"
 #define FILENAME_PQ				"print_queue.xml"

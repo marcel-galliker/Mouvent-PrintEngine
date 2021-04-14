@@ -9,6 +9,7 @@
 
 #include "rx_robot_tcpip.h"
 #include "network_manager.h"
+#include "version.h"
 
 
 /* Defines */
@@ -24,6 +25,7 @@ bool status_manager_start(void)
 {
 	RX_RobotStatus.header.msgId  = CMD_STATUS_GET;
 	RX_RobotStatus.header.msgLen = sizeof(RX_RobotStatus);
+	memcpy(RX_RobotStatus.version, version, sizeof(RX_RobotStatus.version));
 	return true;
 }
 

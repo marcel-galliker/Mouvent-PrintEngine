@@ -17,21 +17,6 @@
 
 #pragma pack(1)
 
-// Bootloader
-
-typedef enum {
-	UNINITIALIZED,
-	WAITING_FOR_DATA,
-	WAITING_FOR_CONFIRM
-} EBootloaderStatus;
-
-typedef struct {
-	EBootloaderStatus status;
-	uint32_t progMemPos;
-	uint32_t progMemBlocksUsed;
-	uint32_t progSize;
-} SBootloaderStatus;
-
 // GPIO
 typedef struct {
 	uint8_t inputs;

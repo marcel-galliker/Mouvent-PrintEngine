@@ -39,6 +39,13 @@
 									<listOptionValue builtIn="false" value="../../includes"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.std.2102630527" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+								<option id="com.ftdichip.compiler.ft900.debug.freertos.option.defsym.1546215987" name="Defined symbols (-D)" superClass="com.ftdichip.compiler.ft900.debug.freertos.option.defsym" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__FT900__"/>
+									<listOptionValue builtIn="false" value="FT32_PORT"/>
+									<listOptionValue builtIn="false" value="FT32_PORT_HEAP=4"/>
+									<listOptionValue builtIn="false" value="FT32_FREERTOS"/>
+									<listOptionValue builtIn="false" value="DEBUG"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1238074104" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1629065084" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
@@ -60,7 +67,7 @@
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1956144717" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1525899211" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
 							<tool id="com.ftdichip.assembler.ft900.debug.freertos.1311495989" name="FT9xx GCC Assembler" superClass="com.ftdichip.assembler.ft900.debug.freertos">
-								<option id="gnu.both.asm.option.include.paths.1757298676" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
+								<option id="gnu.both.asm.option.include.paths.1757298676" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1468344911" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1160174916" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
@@ -103,17 +110,30 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.ftdichip.build.config.ft900.release.freertos.1498851195" name="FT900_Release" parent="com.ftdichip.build.config.ft900.release.freertos">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.ftdichip.build.config.ft900.release.freertos.1498851195" name="FT900_Release" parent="com.ftdichip.build.config.ft900.release.freertos" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="Update version and generate version.c" prebuildStep="../../../VersionUpdate.exe ../Sources/version.c">
 					<folderInfo id="com.ftdichip.build.config.ft900.release.freertos.1498851195." name="/" resourcePath="">
 						<toolChain id="com.ftdichip.toolchain.ft900.release.freertos.275410736" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.release.freertos">
-							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.630450856" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash"/>
-							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1135273702" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize" value="true" valueType="boolean"/>
-							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1320203123" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path" value="C:/Program Files (x86)/Bridgetek/FT9xx Toolchain/Toolchain/tools/bin" valueType="string"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.630450856" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1135273702" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1320203123" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="C:/Program Files (x86)/Bridgetek/FT9xx Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x.352266787" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/rx_robot_ctrl}/FT900_Release" id="com.ftdichip.managedbuild.gnu.cross.ft90x.builder.560528045" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.ftdichip.compiler.ft900.release.freertos.2090555160" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.release.freertos">
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.804500770" name="Optimization Level" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1135967300" name="Debug Level" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="com.ftdichip.compiler.ft900.release.freertos.option.include.paths.2145702851" name="Include paths (-I)" superClass="com.ftdichip.compiler.ft900.release.freertos.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${FT90X_TOOLCHAIN}/hardware/include&quot;"/>
+									<listOptionValue builtIn="false" value="../../includes"/>
+									<listOptionValue builtIn="false" value="&quot;../Includes&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib/tinyprintf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib/fatfs&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib/FreeRTOS/Source/portable/GCC/FT32&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib/FreeRTOS/Demo/FT32_GCC&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib/FreeRTOS/Source/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib/lwip/src/arch&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../lib/lwip/src/include&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.184019552" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1288869746" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">

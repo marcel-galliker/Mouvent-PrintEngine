@@ -61,12 +61,19 @@
 //--- Modlue Globals -----------------------------------------------------------------
 static char _IpAddr[32]="";
 RX_SOCKET	_RC_Socket = INVALID_SOCKET;
+
 HANDLE					_RobotHdl;
 static SRobotStatusMsg	_RobotStatus;
 static int				_StatusReqCnt;
 static int				_MotorInit;
 static SMotorConfig		_MotorCfg[MOTOR_CNT];
 static UINT8			_MoveId[MOTOR_CNT];
+
+static SVersion			_BinVersion;
+static SVersion			_FileVersion;
+static FILE				*_BinaryFile;
+static UINT32			_FilePos;
+static UINT32			_FileSize;
 
 static int				_RC_State;
 
@@ -92,10 +99,15 @@ static int  _rc_motor_moveToStop(int motor, int steps, int input, const char *fi
 static int  _rc_moveto_xy_stop(int x, int y, int stop, const char *file, int line);
 
 static void _rc_state_machine(void);
+static void _check_version(void);
 
 static int _steps_2_micron(int steps);
 static int _micron_2_steps(int micron);
 
+
+static void _download_start(void);
+static void _download_data(SBootloaderDataRequestCmd *req);
+static void _download_end(void);
 
 //--- rc_init ----------------------------------------------------
 void rc_init(void)
@@ -205,8 +217,12 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
     case CMD_STATUS_GET:	memcpy(&_RobotStatus, msg, sizeof(_RobotStatus));
 						//	TrPrintfL(TRUE, "got CMD_STATUS_GET moveIdStarted=%d, moveIdDone=%d, isMoving=%d, isStalled=%d", 
 						//		_RobotStatus.motor[MOTOR_Z].moveIdStarted, _RobotStatus.motor[MOTOR_Z].moveIdDone, _RobotStatus.motor[MOTOR_Z].isMoving, _RobotStatus.motor[MOTOR_Z].isStalled);
+							_check_version();
 							_rc_state_machine();
 							break;
+
+    case CMD_BOOTLOADER_DATA: _download_data((SBootloaderDataRequestCmd*) msg); break;
+    case CMD_BOOTLOADER_END:  _download_end(); break;	
 
     case CMD_TRACE:			TrPrintfL(TRUE, "ROBO: %s", ptrace->message);
 							break;
@@ -241,6 +257,103 @@ static int _micron_2_steps(int micron)
     int steps;
     steps = (int)(0.5 + ((double )micron * STEPS_PER_REV / DISTANCE_UM_PER_REV));
     return steps;
+}
+
+//--- _get_file_version ---------------------------
+static int _get_file_version(char *path, SVersion *pversion)
+{
+	FILE	*file;
+	char	str[64];
+
+	//--- read from bin file ----------------
+	file = fopen(path, "rb");
+	if (!file)
+	{
+		Error(ERR_CONT, 0, "read file error >>%s<<", path);
+		term_printf("read file error >>%s<<\n", path); 
+		term_flush();
+		return REPLY_ERROR;
+	}
+	fseek(file, 0, SEEK_END);
+	long fsize = ftell(file);
+
+	fseek(file, fsize-sizeof(str)+1, SEEK_SET);
+	memset(str, 0, sizeof(str));
+	fread(str, 1, sizeof(str)-1, file);
+	//---  get file version ---------------
+	for (int i=0; i<sizeof(str); i++)
+	{
+		if (sscanf(&str[i], "Version=%lu.%lu.%lu.%lu", &pversion->major, &pversion->minor, &pversion->revision, &pversion->build)==4)
+			return REPLY_OK;			
+	}
+	fclose(file);
+	return REPLY_ERROR;
+}
+
+//--- _check_version ----------------------------
+static void _check_version(void)
+{
+	static char _versionStr[32]="";
+	if (strcmp(_RobotStatus.version, _versionStr))
+	{
+		TrPrintf(TRUE, "new Version %s", _RobotStatus.version);
+		memcpy(_versionStr, _RobotStatus.version, sizeof(_versionStr));
+		//---  get file version ---------------
+		sscanf(_versionStr, "%lu.%lu.%lu.%lu", &_BinVersion.major, &_BinVersion.minor, &_BinVersion.revision, &_BinVersion.build);
+		if (_get_file_version(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, &_FileVersion)==REPLY_OK)	
+		{
+			int test=memcmp(&_BinVersion, &_FileVersion, sizeof(SVersion));
+			if (memcmp(&_BinVersion, &_FileVersion, sizeof(SVersion)))
+				_download_start();
+		}
+	}
+}
+
+//--- _download_start ------------------------------------
+static void _download_start(void)
+{
+	TrPrintfL(TRUE, "_download_start");
+	_BinaryFile = fopen(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, "rb");
+	if (_BinaryFile)
+	{
+		fseek(_BinaryFile, 0, SEEK_END);
+		SBootloaderStartCmd cmd;
+		cmd.header.msgId  = CMD_BOOTLOADER_START;
+		cmd.header.msgLen = sizeof(cmd);
+		cmd.size		  = _FileSize = ftell(_BinaryFile);
+		sok_send(&_RC_Socket, &cmd);
+	}			
+}
+
+//--- _download_data --------------------------
+static void _download_data(SBootloaderDataRequestCmd *req)
+{
+//	TrPrintfL(TRUE, "_download_data (filePos=0x%x) blk=%d, rest=%d", req->filePos, req->filePos/BOOTLOADER_DATA_FRAME_SIZE, req->filePos%BOOTLOADER_DATA_FRAME_SIZE);
+	if (_BinaryFile)
+	{
+		SBootloaderDataCmd cmd;
+		cmd.header.msgId = CMD_BOOTLOADER_DATA;
+		cmd.header.msgLen= sizeof(cmd); 
+		cmd.filePos		 = _FilePos = req->filePos;
+		fseek(_BinaryFile, req->filePos, SEEK_SET);
+		cmd.length=fread(cmd.data, 1, sizeof(cmd.data), _BinaryFile);
+		sok_send(&_RC_Socket, &cmd);
+	}
+}
+
+//--- _download_end ------------------------
+static void _download_end(void)
+{
+	TrPrintfL(TRUE, "_download_end");
+	if (_BinaryFile)
+	{
+		fclose(_BinaryFile);
+		_BinaryFile = NULL;
+		SMsgHdr cmd;
+		cmd.msgId = CMD_BOOTLOADER_REBOOT;
+		cmd.msgLen= sizeof(cmd); 
+		sok_send(&_RC_Socket, &cmd);
+	}
 }
 
 //--- _rc_state_machine --------------------------------
@@ -617,79 +730,82 @@ void rc_display_status(void)
 {
 	int i;
 	
-	term_printf("Robot v %s --- socket=%d ----- StatusReq=%d ----- alive=%d ----- ", version, _RC_Socket, _StatusReqCnt, _RobotStatus.alive);
+	term_printf("Robot v %s --- socket=%d ----- StatusReq=%d ----- alive=%d ----- \n", _RobotStatus.version, _RC_Socket, _StatusReqCnt, _RobotStatus.alive);
 	
 	// Connection information
 //	term_printf("\nConnection Status: %d\n", _isConnected);
 	
-	// Bootloader information
-	term_printf("\nBootloader: Status=%d,  addr=%d, blocks=%d, size=%d\n", _RobotStatus.bootloader.status, _RobotStatus.bootloader.progMemPos, _RobotStatus.bootloader.progMemBlocksUsed, _RobotStatus.bootloader.progSize);
-
-	// GPIO information
-	term_printf("Inputs:    ");
-	for (i = 0; i < INPUT_CNT; i++)
+	if (_BinaryFile) 
 	{
-		if ((i % 4) == 0) term_printf(" ");
-		if (_RobotStatus.gpio.inputs & (1<<i)) term_printf("*");
-		else	                               term_printf("_");
+		term_printf("Downloading: v=%d.%d.%d.%d %d/%d\n", _FileVersion.major, _FileVersion.minor, _FileVersion.revision, _FileVersion.build, _FilePos, _FileSize);
 	}
-
-	term_printf("       IN: screw[%d]=%c down[%d]=%c up[%d]=%c y[%d]=%c garage[%d]=%c x[%d]=%c\n", 
-		IN_SCREW_EDGE, _level(ROB_IN(IN_SCREW_EDGE)),
-		IN_Z_DOWN,	_level(ROB_IN(IN_Z_DOWN)), 
-		IN_Z_UP,	_level(ROB_IN(IN_Z_UP)), 
-		IN_Y_END, _level(ROB_IN(IN_Y_END)), 
-		IN_GARAGE, _level(ROB_IN(IN_GARAGE)), 
-		IN_X_END, _level(ROB_IN(IN_X_END)) 
-		);
-	term_printf("\n");
-
-	term_printf("Outputs:   ");
-	for (i = 0; i < OUTPUT_CNT; i++)
+	else
 	{
-		if ((i % 4) == 0) term_printf(" ");
-		if (_RobotStatus.gpio.outputs & (1<<i)) term_printf("*");
-		else	                                term_printf("_");
-	}
-	term_printf("\n");
-	
-	term_printf("Edge Count: ");
-	for (i = 0; i <INPUT_CNT; i++)
-	{
-		term_printf("%04d ", _RobotStatus.gpio.inputEdges[i]);
-	}
-	term_printf("\n");
-
-	// Motor information
-	term_printf("Motors\tPos\t\tTarget Pos\tEnc Pos\t\tIsMoving\tIsStalled\tIsConfigure\tstarted\tdone\n");
-	for (i=0; i<MOTOR_CNT; i++)
-	{
-		term_printf("%d-", i);
-		switch(i)
+		// GPIO information
+		term_printf("Inputs:    ");
+		for (i = 0; i < INPUT_CNT; i++)
 		{
-        case MOTOR_XY_0:	term_printf("XY0"); break;
-        case MOTOR_XY_1:	term_printf("XY1"); break;
-        case MOTOR_Z:		term_printf("Z"); break;
-        case MOTOR_SCREW:	term_printf("Screw"); break;
+			if ((i % 4) == 0) term_printf(" ");
+			if (_RobotStatus.gpio.inputs & (1<<i)) term_printf("*");
+			else	                               term_printf("_");
 		}
-		term_printf("\t%010d\t%010d\t%010d\t  %1d\t\t  %1d\t\t  %1d\t\t%d\t%d\n", 
-		_RobotStatus.motor[i].motorPos, 
-		_RobotStatus.motor[i].targetPos, 
-		_RobotStatus.motor[i].encPos, 
-		_RobotStatus.motor[i].isMoving, 
-		_RobotStatus.motor[i].isStalled, 
-		_RobotStatus.motor[i].isConfigured,
-		_RobotStatus.motor[i].moveIdStarted,
-		_RobotStatus.motor[i].moveIdDone);
-	}
-	
-	term_printf("\n");
-    term_printf("State Machine: \t\t %d\n", _RC_State);
-    term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
-    term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
 
-	term_printf("\n");
+		term_printf("       IN: screw[%d]=%c down[%d]=%c up[%d]=%c y[%d]=%c garage[%d]=%c x[%d]=%c", 
+			IN_SCREW_EDGE, _level(ROB_IN(IN_SCREW_EDGE)),
+			IN_Z_DOWN,	_level(ROB_IN(IN_Z_DOWN)), 
+			IN_Z_UP,	_level(ROB_IN(IN_Z_UP)), 
+			IN_Y_END, _level(ROB_IN(IN_Y_END)), 
+			IN_GARAGE, _level(ROB_IN(IN_GARAGE)), 
+			IN_X_END, _level(ROB_IN(IN_X_END)) 
+			);
+		term_printf("\n");
+
+		term_printf("Outputs:   ");
+		for (i = 0; i < OUTPUT_CNT; i++)
+		{
+			if ((i % 4) == 0) term_printf(" ");
+			if (_RobotStatus.gpio.outputs & (1<<i)) term_printf("*");
+			else	                                term_printf("_");
+		}
+		term_printf("\n");
 	
+		term_printf("Edge Count: ");
+		for (i = 0; i <INPUT_CNT; i++)
+		{
+			term_printf("%04d ", _RobotStatus.gpio.inputEdges[i]);
+		}
+		term_printf("\n");
+
+		// Motor information
+		term_printf("Motors\tPos\t\tTarget Pos\tEnc Pos\t\tIsMoving\tIsStalled\tIsConfigure\tstarted\tdone\n");
+		for (i=0; i<MOTOR_CNT; i++)
+		{
+			term_printf("%d-", i);
+			switch(i)
+			{
+			case MOTOR_XY_0:	term_printf("XY0"); break;
+			case MOTOR_XY_1:	term_printf("XY1"); break;
+			case MOTOR_Z:		term_printf("Z"); break;
+			case MOTOR_SCREW:	term_printf("Screw"); break;
+			}
+			term_printf("\t%010d\t%010d\t%010d\t  %1d\t\t  %1d\t\t  %1d\t\t%d\t%d\n", 
+			_RobotStatus.motor[i].motorPos, 
+			_RobotStatus.motor[i].targetPos, 
+			_RobotStatus.motor[i].encPos, 
+			_RobotStatus.motor[i].isMoving, 
+			_RobotStatus.motor[i].isStalled, 
+			_RobotStatus.motor[i].isConfigured,
+			_RobotStatus.motor[i].moveIdStarted,
+			_RobotStatus.motor[i].moveIdDone);
+		}
+	
+		term_printf("\n");
+		term_printf("State Machine: \t\t %d\n", _RC_State);
+		term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
+		term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
+
+		term_printf("\n");
+	}	
 	term_flush();
 }
 
