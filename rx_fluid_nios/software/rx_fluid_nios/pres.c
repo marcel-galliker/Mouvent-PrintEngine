@@ -237,8 +237,9 @@ static void _sensor_read(SSensor *s)
 			{
 				*s->pPressure=INVALID_VALUE;
 				s->error = TRUE;
-				if (s->isNo==PCB)
-					_PowerState = 0;
+			//	--- this gave problems at Dropwatcher in Cheseaux, AirPressure sensor was not working properly
+			//	if (s->isNo==PCB)
+			//		_PowerState = 0;
 		}
 		}
 		else
