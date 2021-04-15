@@ -595,7 +595,7 @@ static int _steps_2_micron(int steps)
 //--- _lbrob_display_status --------------------------------------------------------
 void lbrob_display_status(void)
 {
-    term_printf("LB ROB ---------------------------------\n");
+    term_printf("LB Clean ---------------------------------\n");
     if (RX_StepperStatus.robot_used)
     {
         term_printf("moving: \t\t %d \t cmd: %08x\n", RX_StepperStatus.robinfo.moving, _CmdRunning);
@@ -608,7 +608,7 @@ void lbrob_display_status(void)
         term_printf("Wipe-Speed: \t\t %d\n", RX_StepperCfg.wipe_speed);
         term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
         term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);
-        term_printf("Scrwe-Count: \t\t %d\n", RX_StepperStatus.screw_count);
+        term_printf("Screw-Count: \t\t %d\n", RX_StepperStatus.screw_count);
         term_printf("\n");
     }
     else
