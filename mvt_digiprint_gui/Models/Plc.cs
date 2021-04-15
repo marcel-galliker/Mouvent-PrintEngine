@@ -172,9 +172,15 @@ namespace RX_DigiPrint.Models
                         MachineStateEnum state= (MachineStateEnum) Rx.StrToInt32(val[1]);
                         InReferencing = (state == MachineStateEnum.Referencing);
                         InWebIn       = (state== MachineStateEnum.WebIn);
-                        WebInEnabled  = (state != MachineStateEnum.Pause && state!= MachineStateEnum.Run && state != MachineStateEnum.Error);
-                        WebInActive = (state == MachineStateEnum.Pause || state == MachineStateEnum.WebIn);
-                        ToWebIn = (state == MachineStateEnum.Prepare);
+                        WebInEnabled  = (state != MachineStateEnum.Prepare && state != MachineStateEnum.Pause && state!= MachineStateEnum.Run && state != MachineStateEnum.Error);
+                        if (WebInActive && state != MachineStateEnum.Pause)
+                            WebInActive = false;
+                        if (ToWebIn && state == MachineStateEnum.Error) ToWebIn = false;
+                        if (ToWebIn && state == MachineStateEnum.Pause)
+                        {
+                            WebInActive = true;
+                            ToWebIn = false;
+                        }
                     }
                     if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
 
