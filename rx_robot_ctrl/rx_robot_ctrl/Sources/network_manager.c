@@ -55,7 +55,6 @@
 
 #define BROADCAST_INTERFACE_MAX_PKG_SIZE		256
 #define BOOTLOADER_INTERFACE_MAX_PKG_SIZE 		512
-#define COMMUNICATION_INTERFACE_MAX_PKG_SIZE	512
 
 #define RX_BOOT_MESSAGE_QUEUE_LENGTH	8
 #define BOOTLOADER_MESSAGE_QUEUE_LENGTH	8
@@ -345,9 +344,9 @@ static int network_manager_process_broadcast_interface(void)
 
 static int network_manager_process_command_interface(void)
 {
-	static uint8_t udpData[COMMUNICATION_INTERFACE_MAX_PKG_SIZE] = {0};
+	static uint8_t udpData[sizeof(SBootloaderDataCmd)+10];
 	SMsgHdr *phdr = (SMsgHdr*)udpData;
-	volatile static int32_t msgLen;
+	int32_t msgLen;
 
 	socklen_t len = sizeof(_communicationClientAddress);
 	msgLen = recvfrom(_communicationSocket, udpData, sizeof(udpData), MSG_DONTWAIT, (struct sockaddr *)&_communicationClientAddress, &len);
@@ -366,6 +365,7 @@ static int network_manager_process_command_interface(void)
 			}
 			return 1;
 		}
+		else TrPrintf(TRUE, "Received invalid message, msgLen=%d, hdr.msgLen=%d, hdr.msgId=0x%08x", msgLen, phdr->msgLen, phdr->msgId);
 	}
 	return 0;
 }

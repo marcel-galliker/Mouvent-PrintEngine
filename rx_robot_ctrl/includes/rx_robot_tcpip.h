@@ -133,13 +133,13 @@ typedef struct SBootloaderDataRequestCmd
 	UINT32	filePos;
 } SBootloaderDataRequestCmd;
 
-#define BOOTLOADER_DATA_FRAME_SIZE	64
+#define BOOTLOADER_DATA_FRAME_SIZE	1024
 typedef struct SBootloaderDataCmd
 {
 	SMsgHdr header;
 	UINT32	filePos;
-	UINT8	data[BOOTLOADER_DATA_FRAME_SIZE];
 	UINT32  length;
+	UINT8	data[BOOTLOADER_DATA_FRAME_SIZE];
 } SBootloaderDataCmd;
 
 typedef struct SBootloaderSerialNoCmd
