@@ -12,18 +12,16 @@
 
 #include "network_manager.h"
 #include "status_manager.h"
+#include "robot_flash.h"
 #include "rx_trace.h"
 
 /* Defines */
 
+// #define FLASH_TEST
+
 // Task settings
 #define TASK_BOOTLOADER_STACK_SIZE		(500)
 #define TASK_BOOTLOADER_PRIORITY		(8)
-
-// Flash size = 1 Block * 64 Sectors * 4096 Bytes
-#define FLASH_SECTOR_SIZE	(4096)
-#define FLASH_SECTOR_CNT	(64)
-#define FLASH_SIZE			(FLASH_SECTOR_CNT*FLASH_SECTOR_SIZE)
 
 #define DATA_TIMEOUT		100
 
@@ -44,8 +42,11 @@ static void _download_start(SBootloaderStartCmd* command);
 static void _download_data(SBootloaderDataCmd* command);
 static void _download_recover(void);
 static void _request_data(UINT32 filePos);
+static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 
-static void _flash_test(int from, int to);
+#ifdef FLASH_TEST
+	static void _flash_test(int from, int to);
+#endif
 
 bool bootloader_manager_start(void)
 {
@@ -61,22 +62,11 @@ void bootloader_manager_handle_command(void* msg)
 
 	switch(header->msgId)
 	{
-	case CMD_BOOTLOADER_START:
-		_download_start((SBootloaderStartCmd*)msg);
-		break;
-
-	case CMD_BOOTLOADER_DATA:
-		_download_data((SBootloaderDataCmd*)msg);
-		break;
-
-	case CMD_BOOTLOADER_ABORT:
-		_download_recover();
-		break;
-
-	case CMD_BOOTLOADER_REBOOT:
-		chip_reboot();
-		break;
-
+	case CMD_BOOTLOADER_START:		_download_start((SBootloaderStartCmd*)msg);	break;
+	case CMD_BOOTLOADER_DATA:		_download_data((SBootloaderDataCmd*)msg);	break;
+	case CMD_BOOTLOADER_ABORT:		_download_recover();						break;
+	case CMD_BOOTLOADER_REBOOT:		chip_reboot();								break;
+	case CMD_BOOTLOADER_SERIALNO:	_set_serialNo((SBootloaderSerialNoCmd*)msg); break;
 	default:
 		break;
 	}
@@ -107,6 +97,7 @@ void bootloader_manager_main(void)
 	}
 }
 
+#ifdef FLASH_TEST
 static void _flash_test(int from, int to)
 {
 	UINT32 *addr = (UINT32*)_FlashBuf;
@@ -143,6 +134,7 @@ static void _flash_test(int from, int to)
 	}
 	TrPrintf(TRUE, "_flash_test done");
 }
+#endif
 
 static void _download_reset(void)
 {
@@ -160,9 +152,10 @@ static void _download_start(SBootloaderStartCmd* cmd)
 	{
 		_FileSize = cmd->size;
 
-	//	_flash_test(0, _FileSize/FLASH_SECTOR_SIZE+1);
-	//	_flash_test(0, FLASH_SECTOR_CNT);
-
+		#ifdef FLASH_TEST
+		_flash_test(0, _FileSize/FLASH_SECTOR_SIZE+1);
+	//	_flash_test(0, FLASH_SECTOR_CNT-1);
+		#endif
 		_request_data(_FilePos);
 	}
 }
@@ -217,4 +210,14 @@ static void _download_recover(void)
 	flash_revert();
 	_download_reset();
 	taskEXIT_CRITICAL();
+}
+
+//--- _set_serialNo -----------------
+static void _set_serialNo(SBootloaderSerialNoCmd *pmsg)
+{
+	if (pmsg->serialNo!=flash_read_serialNo())
+	{
+		flash_write_serialNo(pmsg->serialNo);
+		chip_reboot();
+	}
 }

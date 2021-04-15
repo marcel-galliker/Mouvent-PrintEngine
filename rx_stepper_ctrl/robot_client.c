@@ -108,6 +108,7 @@ static int _micron_2_steps(int micron);
 static void _download_start(void);
 static void _download_data(SBootloaderDataRequestCmd *req);
 static void _download_end(void);
+static void _setSerialNo(UINT16 no);
 
 //--- rc_init ----------------------------------------------------
 void rc_init(void)
@@ -354,6 +355,16 @@ static void _download_end(void)
 		cmd.msgLen= sizeof(cmd); 
 		sok_send(&_RC_Socket, &cmd);
 	}
+}
+
+//--- _setSerialNo ---------------------------------------
+static void _setSerialNo(UINT16 no)
+{
+	SBootloaderSerialNoCmd cmd;
+	cmd.header.msgId = CMD_BOOTLOADER_SERIALNO;
+	cmd.header.msgLen= sizeof(cmd);
+	cmd.serialNo     = no;
+	sok_send(&_RC_Socket, &cmd);
 }
 
 //--- _rc_state_machine --------------------------------
@@ -730,7 +741,7 @@ void rc_display_status(void)
 {
 	int i;
 	
-	term_printf("Robot v %s --- socket=%d ----- StatusReq=%d ----- alive=%d ----- \n", _RobotStatus.version, _RC_Socket, _StatusReqCnt, _RobotStatus.alive);
+	term_printf("Robot #%d --- v %s --- socket=%d ----- StatusReq=%d ----- alive=%d ----- \n", _RobotStatus.serialNo, _RobotStatus.version, _RC_Socket, _StatusReqCnt, _RobotStatus.alive);
 	
 	// Connection information
 //	term_printf("\nConnection Status: %d\n", _isConnected);
@@ -803,9 +814,8 @@ void rc_display_status(void)
 		term_printf("State Machine: \t\t %d\n", _RC_State);
 		term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
 		term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
-
-		term_printf("\n");
 	}	
+	term_printf("\n");
 	term_flush();
 }
 
@@ -849,21 +859,26 @@ void rc_menu(int help)
 //--- rc_handle_menu ----------------------------------------
 void rc_handle_menu(char *str)
 {
-	int no = str[1]-'0';
-	switch (str[0])
+	int no;
+	if (no=str_start(str, "serialno"))
+		_setSerialNo(atoi(&str[no]));
+	else
 	{
-    case 'r':	_rc_reset_motors(1<<no); break;
-	case 's':	_rc_stop(0x0f); break;
-    case 'R':	rc_reference(); break;
-    case 'm':	_rc_motor_moveBy(no, atoi(&str[2]), _FL_);	break;
-    case 'x':	rc_moveto_xy(RX_StepperStatus.screw_posX+atoi(&str[1]), RX_StepperStatus.screw_posY				 , _FL_); break;
-    case 'y':	rc_moveto_xy(RX_StepperStatus.screw_posX,				RX_StepperStatus.screw_posY+atoi(&str[1]), _FL_); break;
-    case 'z':	_rc_motor_moveBy(MOTOR_Z, atoi(&str[1]), _FL_);		break;
-    case 'd':	rc_move_bottom(_FL_); break;
-    case 'u':	rc_move_top(_FL_); break;
-    case 't':	_rc_motor_moveBy(MOTOR_SCREW, 10000000, _FL_); break;
-
-    default:
-        break;
+		no = str[1]-'0';
+		switch (str[0])
+		{
+		case 'r':	_rc_reset_motors(1<<no); break;
+		case 's':	_rc_stop(0x0f); break;
+		case 'R':	rc_reference(); break;
+		case 'm':	_rc_motor_moveBy(no, atoi(&str[2]), _FL_);	break;
+		case 'x':	rc_moveto_xy(RX_StepperStatus.screw_posX+atoi(&str[1]), RX_StepperStatus.screw_posY				 , _FL_); break;
+		case 'y':	rc_moveto_xy(RX_StepperStatus.screw_posX,				RX_StepperStatus.screw_posY+atoi(&str[1]), _FL_); break;
+		case 'z':	_rc_motor_moveBy(MOTOR_Z, atoi(&str[1]), _FL_);		break;
+		case 'd':	rc_move_bottom(_FL_); break;
+		case 'u':	rc_move_top(_FL_); break;
+		case 't':	_rc_motor_moveBy(MOTOR_SCREW, 10000000, _FL_); break;
+		default:
+			break;
+		}
 	}
 }

@@ -384,7 +384,6 @@ static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor)
 	if(_isInitialized == false)
 		return;
 
-
 	if(motor >= MOTOR_CNT)
 		return;
 

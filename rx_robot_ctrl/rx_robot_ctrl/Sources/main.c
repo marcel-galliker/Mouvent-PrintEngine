@@ -12,6 +12,7 @@
 #include "task.h"
 
 #include "gpio_manager.h"
+#include "robot_flash.h"
 #include "network_manager.h"
 #include "rx_boot.h"
 #include "rx_trace.h"
@@ -41,6 +42,7 @@ int main(void)
 
     init_printf(NULL, myputc);
 
+    flash_init();
     network_manager_start();
     gpio_manager_start();
     motor_manager_start();

@@ -44,6 +44,7 @@ void status_handle_message(void* message)
 //--- status_manager_send_status ------------------------------------
 void status_manager_send_status(void)
 {
+	RX_RobotStatus.serialNo = flash_read_serialNo();
 	RX_RobotStatus.alive++;
 
 	network_manager_send(&RX_RobotStatus, sizeof(RX_RobotStatus));

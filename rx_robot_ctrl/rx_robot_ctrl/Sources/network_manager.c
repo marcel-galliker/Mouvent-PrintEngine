@@ -1,5 +1,4 @@
 #include "network_manager.h"
-#include "network_manager_def.h"
 
 #include <stdbool.h>
 #include <stdint.h>

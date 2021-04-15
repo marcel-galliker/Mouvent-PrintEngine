@@ -19,10 +19,10 @@
 // Command masks
 #define COMMAND_TYPE_MASK		(0xFF000000)
 
-#define STATUS_COMMAND_MASK		(0x10000000)
-#define BOOTLOADER_COMMAND_MASK (0x20000000)
-#define GPIO_COMMAND_MASK		(0x40000000)
-#define MOTOR_COMMAND_MASK		(0x80000000)
+#define STATUS_COMMAND_MASK		(0x01000000)
+#define BOOTLOADER_COMMAND_MASK (0x02000000)
+#define GPIO_COMMAND_MASK		(0x04000000)
+#define MOTOR_COMMAND_MASK		(0x08000000)
 
 // Status commands
 #define CMD_STATUS_GET			(STATUS_COMMAND_MASK | 0x00000001)
@@ -34,7 +34,7 @@
 #define CMD_BOOTLOADER_END		(BOOTLOADER_COMMAND_MASK | 0x00000003)
 #define CMD_BOOTLOADER_ABORT	(BOOTLOADER_COMMAND_MASK | 0x00000004)
 #define CMD_BOOTLOADER_REBOOT	(BOOTLOADER_COMMAND_MASK | 0x00000005)
-
+#define CMD_BOOTLOADER_SERIALNO	(BOOTLOADER_COMMAND_MASK | 0x00000006)
 
 // GPIO commands
 #define CMD_GPIO_SET			(GPIO_COMMAND_MASK | 0x00000001)
@@ -55,6 +55,7 @@
 #ifdef __FT900__
 
 	#define UINT8  uint8_t
+	#define UINT16 uint16_t
 	#define UINT32 uint32_t
 	#define INT32  int32_t
 	#define TRUE	true
@@ -76,7 +77,8 @@ typedef struct SGpioSetCmd
 typedef struct SRobotStatusMsg
 {
 	SMsgHdr header;
-	char version[32];
+	char		 version[32];
+	UINT16		 serialNo;
 	UINT32		 alive;
 	SGpioStatus	 gpio;
 	SMotorStatus motor[MOTOR_CNT];
@@ -139,5 +141,11 @@ typedef struct SBootloaderDataCmd
 	UINT8	data[BOOTLOADER_DATA_FRAME_SIZE];
 	UINT32  length;
 } SBootloaderDataCmd;
+
+typedef struct SBootloaderSerialNoCmd
+{
+	SMsgHdr header;
+	UINT16	serialNo;
+} SBootloaderSerialNoCmd;
 
 #pragma pack()
