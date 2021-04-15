@@ -61,6 +61,8 @@
 //--- Modlue Globals -----------------------------------------------------------------
 static char _IpAddr[32]="";
 RX_SOCKET	_RC_Socket = INVALID_SOCKET;
+static int	_Connected = FALSE;
+static int	_Timeout;
 
 HANDLE					_RobotHdl;
 static SRobotStatusMsg	_RobotStatus;
@@ -157,6 +159,12 @@ static void* _robot_ctrl_thread(void* lpParameter)
 			msg.msgLen = sizeof(msg);
 			sok_send(&_RC_Socket, &msg);
 			_StatusReqCnt++;
+			if (_Connected && _Timeout && (--_Timeout)==0)
+			{
+				Error(ERR_CONT, 0, "Connection to robot lost");
+				_Connected=FALSE;
+				_MotorInit = 0;
+			}
 		//	TrPrintfL(TRUE, "sent CMD_STATUS_GET");
 		}
 		else if (_IpAddr[0] && sok_ping(_IpAddr)==REPLY_OK)
@@ -213,6 +221,10 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 {
 	SMsgHdr			*phdr   = (SMsgHdr*)msg;
 	SRobotTraceMsg  *ptrace = (SRobotTraceMsg*)msg;
+
+	_Connected  = TRUE;
+	_Timeout	= 2;
+
 	switch(phdr->msgId)
 	{
     case CMD_STATUS_GET:	memcpy(&_RobotStatus, msg, sizeof(_RobotStatus));
@@ -741,7 +753,7 @@ void rc_display_status(void)
 {
 	int i;
 	
-	term_printf("Robot #%d --- v %s --- socket=%d ----- StatusReq=%d ----- alive=%d ----- \n", _RobotStatus.serialNo, _RobotStatus.version, _RC_Socket, _StatusReqCnt, _RobotStatus.alive);
+	term_printf("Robot #%d --- v %s --- socket=%d ----- StatusReq=%d ----- alive=%d ----- connected=%d ----- \n", _RobotStatus.serialNo, _RobotStatus.version, _RC_Socket, _StatusReqCnt, _RobotStatus.alive, _Connected);
 	
 	// Connection information
 //	term_printf("\nConnection Status: %d\n", _isConnected);

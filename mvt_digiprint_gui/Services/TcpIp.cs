@@ -1311,6 +1311,7 @@ namespace RX_DigiPrint.Services
 
             public Int32        screw_posX;
             public Int32        screw_posY;
+            public Int32		screw_posZ;
 
             public Int32        adjustmentProgress;
 
