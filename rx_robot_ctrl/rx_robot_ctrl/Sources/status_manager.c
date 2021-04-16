@@ -10,6 +10,7 @@
 #include "rx_robot_tcpip.h"
 #include "network_manager.h"
 #include "version.h"
+#include "robot_flash.h"
 
 
 /* Defines */

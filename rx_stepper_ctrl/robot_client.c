@@ -627,7 +627,7 @@ static void _rc_reset_edgeCtr(int inputs)
 {
 	SGpioSetCmd cmd;
 	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_GPIO_RESET;
+	cmd.header.msgId  = CMD_GPIO_IN_RESET;
 	cmd.outputs		  = inputs;
 	sok_send(&_RC_Socket, &cmd);
 	TrPrintfL(TRUE, "sent CMD_GPIO_RESET");
