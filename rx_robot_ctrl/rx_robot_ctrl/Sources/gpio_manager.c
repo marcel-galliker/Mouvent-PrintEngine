@@ -123,15 +123,11 @@ bool gpio_manager_get_input(uint8_t input)
 	else return 0;
 }
 
-void gpio_manager_enable_motor(uint8_t motor)
+void gpio_manager_enable_motor(uint8_t motor, int enable)
 {
-	if(motor<MOTOR_CNT) gpio_write(_motorDisable[motor], false);
+	if(motor<MOTOR_CNT) gpio_write(_motorDisable[motor], !enable);
 }
 
-void gpio_manager_disable_motor(uint8_t motor)
-{
-	if(motor<MOTOR_CNT) gpio_write(_motorDisable[motor], true);
-}
 
 void gpio_manager_start_motor(uint8_t motor)
 {

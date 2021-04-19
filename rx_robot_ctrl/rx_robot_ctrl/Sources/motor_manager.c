@@ -120,7 +120,7 @@ static void reset_motors(SRobotMotorsResetCmd* resetCommand);
 static void update_motor(uint8_t motor);
 static void check_encoder(uint8_t motor);
 static void check_stop_bits(uint8_t motor);
-static void stop_motor(uint8_t motor);
+static void _stop_motor(uint8_t motor, int line);
 static void reset_motor(uint8_t motor);
 static int32_t spi_read_register(uint8_t reg, uint8_t motor);
 static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor);
@@ -218,15 +218,17 @@ static void move_motors(SRobotMotorsMoveCmd* cmd)
 {
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		if ((cmd->motors & (1<<motor)) && !RX_RobotStatus.motor[motor].isMoving)
+		if (cmd->motors & (1<<motor))
 		{
-			TrPrintf(true, "Move Motor[%d] to %d", motor, cmd->targetPos[motor]);
+			TrPrintf(true, "Move Motor[%d].id=%d to %d (pos=%d enc=%d diff=%d)", motor, cmd->moveId[motor], cmd->targetPos[motor],
+					RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
+					RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
 
 			_encoderTolerance[motor] = cmd->encoderTol[motor];
 			_stopBits[motor]		 = cmd->stopBits[motor];
 			_stopBitLevels[motor] 	 = cmd->stopBitLevels[motor];
 
-			gpio_manager_enable_motor(motor);
+			gpio_manager_enable_motor(motor, TRUE);
 			gpio_manager_stop_motor(motor);	// Pause to start them in sync later
 			spi_write_register(TMC_XTARGET_REG, cmd->targetPos[motor], motor);
 		}
@@ -235,7 +237,7 @@ static void move_motors(SRobotMotorsMoveCmd* cmd)
 	// Start motors sync
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		if ((cmd->motors & (1<<motor)) && !RX_RobotStatus.motor[motor].isMoving)
+		if (cmd->motors & (1<<motor))
 		{
 			gpio_manager_start_motor(motor);
 			RX_RobotStatus.motor[motor].moveIdStarted=cmd->moveId[motor];
@@ -247,7 +249,7 @@ static void stop_motors(SRobotMotorsStopCmd* cmd)
 {
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		if(cmd->motors & (1<<motor)) stop_motor(motor);
+		if(cmd->motors & (1<<motor)) _stop_motor(motor, __LINE__);
 	}
 }
 
@@ -270,10 +272,15 @@ static void update_motor(uint8_t motor)
 
 static void check_encoder(uint8_t motor)
 {
-	if(_encoderTolerance[motor] && (abs(RX_RobotStatus.motor[motor].motorPos - RX_RobotStatus.motor[motor].encPos) > _encoderTolerance[motor]))
+	if(RX_RobotStatus.motor[motor].moveIdStarted!=RX_RobotStatus.motor[motor].moveIdDone
+	&& _encoderTolerance[motor]
+	&& (abs(RX_RobotStatus.motor[motor].motorPos - RX_RobotStatus.motor[motor].encPos) > _encoderTolerance[motor]))
 	{
 		RX_RobotStatus.motor[motor].isStalled = true;
-		stop_motor(motor);
+		_stop_motor(motor, __LINE__);
+		TrPrintf(TRUE, "Motor[%d].Id=%d stalled (pos=%d enc=%d diff=%d)", motor, RX_RobotStatus.motor[motor].moveIdStarted,
+				RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
+				RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
 	}
 }
 
@@ -289,7 +296,7 @@ static void check_stop_bits(uint8_t motor)
 				if(isSet == _stopBitLevels[motor])
 				{
 					_stopBits[motor] &= ~(1<<in); // stop only once
-					stop_motor(motor);
+					_stop_motor(motor, __LINE__);
 					TrPrintf(true, "Motor[%d].in[%d]=%d: STOP", motor, in, isSet);
 					return;
 				}
@@ -298,7 +305,7 @@ static void check_stop_bits(uint8_t motor)
 	}
 }
 
-static void stop_motor(uint8_t motor)
+static void _stop_motor(uint8_t motor, int line)
 {
 	if(motor >= MOTOR_CNT)
 		return;
@@ -336,7 +343,9 @@ static void reset_motor(uint8_t motor)
 	RX_RobotStatus.motor[motor].isStalled = false;
 
 	gpio_manager_start_motor(motor);
-	gpio_manager_disable_motor(motor);
+	gpio_manager_enable_motor(motor, FALSE);
+
+	TrPrintf(TRUE, "reset_motor[%d]", motor);
 }
 
 static int32_t spi_read_register(uint8_t reg, uint8_t motor)
@@ -415,7 +424,7 @@ static void update_status(uint8_t status, uint8_t motor)
 		_encoderTolerance[motor] = 0;
 		_stopBits[motor] = 0;
 		_stopBitLevels[motor] = 0;
-		gpio_manager_disable_motor(motor);
+		gpio_manager_enable_motor(motor, FALSE);
 		status_manager_send_status();
 	}
 	else if(!RX_RobotStatus.motor[motor].isMoving && isMoving)

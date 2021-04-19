@@ -29,16 +29,16 @@
 
 // Status Flags
 static bool _isInitialized = false;
-static UINT32		_FileSize;
-static UINT32		_FilePos;
+static UINT32		_FileSize=0;
+static UINT32		_FilePos=0;
 static UINT8  		_FlashBuf[FLASH_SECTOR_SIZE]={0};
 static TickType_t	_Timeout=0;
 
 /* Prototypes */
 
-static void _download_reset(void);
 static void _download_start(SBootloaderStartCmd* command);
 static void _download_data(SBootloaderDataCmd* command);
+static void _downlaod_reboot(void);
 static void _request_data(UINT32 filePos);
 static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 
@@ -48,8 +48,6 @@ static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 
 bool bootloader_manager_start(void)
 {
-	_download_reset();
-
 	_isInitialized = true;
 	return true;
 }
@@ -60,9 +58,9 @@ void bootloader_manager_handle_command(void* msg)
 
 	switch(header->msgId)
 	{
-	case CMD_BOOTLOADER_START:		_download_start((SBootloaderStartCmd*)msg);	break;
-	case CMD_BOOTLOADER_DATA:		_download_data((SBootloaderDataCmd*)msg);	break;
-	case CMD_BOOTLOADER_REBOOT:		chip_reboot();								break;
+	case CMD_BOOTLOADER_START:		_download_start((SBootloaderStartCmd*)msg);	 break;
+	case CMD_BOOTLOADER_DATA:		_download_data((SBootloaderDataCmd*)msg);	 break;
+	case CMD_BOOTLOADER_REBOOT:		_downlaod_reboot();						     break;
 	case CMD_BOOTLOADER_SERIALNO:	_set_serialNo((SBootloaderSerialNoCmd*)msg); break;
 	default:
 		break;
@@ -72,13 +70,9 @@ void bootloader_manager_handle_command(void* msg)
 //--- bootloader_manager_main --------------------------------
 void bootloader_manager_main(void)
 {
-	if (_FileSize && _Timeout)
+	if (_FileSize && _Timeout && xTaskGetTickCount()>_Timeout)
 	{
-		TickType_t time = xTaskGetTickCount();
-		if (time>_Timeout)
-		{
-			_request_data(_FilePos);
-		}
+		_request_data(_FilePos);
 	}
 }
 
@@ -121,17 +115,12 @@ static void _flash_test(int from, int to)
 }
 #endif
 
-static void _download_reset(void)
-{
-	_FileSize=0;
-	_FilePos=0;
-	memset(_FlashBuf, 0, sizeof(_FlashBuf));
-}
-
 static void _download_start(SBootloaderStartCmd* cmd)
 {
 	TrPrintf(true, "Download Start");
-	_download_reset();
+	_FileSize=0;
+	_FilePos=0;
+	memset(_FlashBuf, 0, sizeof(_FlashBuf));
 
 	if(cmd->size <= FLASH_SIZE)
 	{
@@ -188,12 +177,18 @@ static void _download_data(SBootloaderDataCmd* cmd)
 	}
 }
 
+//--- _downlaod_reboot --------------------------------------------
+static void _downlaod_reboot(void)
+{
+	if (_FilePos>=_FileSize) chip_reboot();
+}
+
 //--- _set_serialNo -----------------
 static void _set_serialNo(SBootloaderSerialNoCmd *pmsg)
 {
 	if (pmsg->serialNo!=flash_read_serialNo())
 	{
 		flash_write_serialNo(pmsg->serialNo);
-		chip_reboot();
+		if (_FileSize==0) chip_reboot();
 	}
 }
