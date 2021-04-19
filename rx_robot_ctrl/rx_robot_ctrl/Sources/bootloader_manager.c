@@ -33,14 +33,12 @@ static UINT32		_FileSize;
 static UINT32		_FilePos;
 static UINT8  		_FlashBuf[FLASH_SECTOR_SIZE]={0};
 static TickType_t	_Timeout=0;
-static int			_RequestTries=0;
 
 /* Prototypes */
 
 static void _download_reset(void);
 static void _download_start(SBootloaderStartCmd* command);
 static void _download_data(SBootloaderDataCmd* command);
-static void _download_recover(void);
 static void _request_data(UINT32 filePos);
 static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 
@@ -64,7 +62,6 @@ void bootloader_manager_handle_command(void* msg)
 	{
 	case CMD_BOOTLOADER_START:		_download_start((SBootloaderStartCmd*)msg);	break;
 	case CMD_BOOTLOADER_DATA:		_download_data((SBootloaderDataCmd*)msg);	break;
-	case CMD_BOOTLOADER_ABORT:		_download_recover();						break;
 	case CMD_BOOTLOADER_REBOOT:		chip_reboot();								break;
 	case CMD_BOOTLOADER_SERIALNO:	_set_serialNo((SBootloaderSerialNoCmd*)msg); break;
 	default:
@@ -80,19 +77,7 @@ void bootloader_manager_main(void)
 		TickType_t time = xTaskGetTickCount();
 		if (time>_Timeout)
 		{
-			if (++_RequestTries<5)
-			{
-				_request_data(_FilePos);
-			}
-			else
-			{
-				TrPrintf(true, "Download Timeout");
-				_download_recover();
-				SMsgHdr cmd;
-				cmd.msgId = CMD_BOOTLOADER_END;
-				cmd.msgLen= sizeof(cmd);
-				network_manager_send(&cmd, sizeof(cmd));
-			}
+			_request_data(_FilePos);
 		}
 	}
 }
@@ -180,7 +165,6 @@ static void _download_data(SBootloaderDataCmd* cmd)
 		memcpy(&_FlashBuf[_FilePos%FLASH_SECTOR_SIZE], cmd->data, cmd->length);
 		sector = _FilePos/FLASH_SECTOR_SIZE;
 		_FilePos += cmd->length;
-		_RequestTries = 0;
 		if (_FilePos>=_FileSize || (_FilePos%FLASH_SECTOR_SIZE)==0)
 		{
 			TrPrintf(true, "Write Flash block %d", sector);
@@ -202,14 +186,6 @@ static void _download_data(SBootloaderDataCmd* cmd)
 		}
 		_request_data(_FilePos);
 	}
-}
-
-static void _download_recover(void)
-{
-	taskENTER_CRITICAL();
-	flash_revert();
-	_download_reset();
-	taskEXIT_CRITICAL();
 }
 
 //--- _set_serialNo -----------------
