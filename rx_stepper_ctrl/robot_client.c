@@ -429,23 +429,39 @@ static void _rc_state_machine(void)
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);
 									if (ROB_IN(IN_Y_END))
 									{
-										_rc_moveto_xy_stop(-150000, RX_StepperStatus.screw_posY, IN_X_END, _FL_);
+										if (ROB_IN(IN_X_END))
+										{
+											TrPrintfL(TRUE, "Move from X-sensor");
+											_rc_reset_motors(MOTORS_XY);
+											rc_moveto_xy(RX_StepperStatus.screw_posX+5000, RX_StepperStatus.screw_posY, _FL_);
+										}
 										_RC_State++;
 									}
 									else _rc_error(_FL_, "Y-Axis end sensor not found");
 								}													
 								break;
 
-		case RC_STATE_REF+3:	// X in end sensor
+		case RC_STATE_REF+3:	if (_rc_move_xy_done())  
+								{
+									TrPrintfL(TRUE, "RC_STATE_REF+3: x-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_X_END), 
+										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
+										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);
+									_rc_moveto_xy_stop(-150000, RX_StepperStatus.screw_posY, IN_X_END, _FL_);
+									_RC_State++;
+								}
+								break;
+
+		case RC_STATE_REF+4:	// X in end sensor
 								if (_rc_move_xy_done())  
 								{
-									TrPrintfL(TRUE, "RC_STATE_REF+3: y-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_Y_END), 
+									TrPrintfL(TRUE, "RC_STATE_REF+4: y-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_Y_END), 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);	
 									if (ROB_IN(IN_X_END))
 									{
-										rx_sleep(100);
+										rx_sleep(50);
 										_rc_reset_motors(MOTORS_XY);
+										rx_sleep(50);
 										rc_moveto_xy(MOTOR_X_GARAGE_POS, 0, _FL_);
 										_RC_State++;
 									}
@@ -453,15 +469,16 @@ static void _rc_state_machine(void)
 								}
 								break;
 
-		case RC_STATE_REF+4:	// X in garage-pos
+		case RC_STATE_REF+5:	// X in garage-pos
 								if (_rc_move_xy_done())  
 								{
-									TrPrintfL(TRUE, "RC_STATE_REF+4: y-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_Y_END), 
+									TrPrintfL(TRUE, "RC_STATE_REF+5: y-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_Y_END), 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);	
 									if (_RobotStatus.motor[MOTOR_XY_0].isStalled || _RobotStatus.motor[MOTOR_XY_1].isStalled)
 									{
 										_rc_error(_FL_, "X-Axis blocked");
+										_RC_State=RC_STATE_REF+3;
 									}
 									else 
 									{
@@ -471,10 +488,10 @@ static void _rc_state_machine(void)
 								}
 								break;
 
-		case RC_STATE_REF+5:	// Y in garage sensor
+		case RC_STATE_REF+6:	// Y in garage sensor
 								if (_rc_move_xy_done())  								
 								{									
-									TrPrintfL(TRUE, "RC_STATE_REF+5: y-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_Y_END), 
+									TrPrintfL(TRUE, "RC_STATE_REF+6: y-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_Y_END), 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);	
 									if (ROB_IN(IN_GARAGE))					

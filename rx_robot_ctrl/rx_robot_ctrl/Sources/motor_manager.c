@@ -120,7 +120,7 @@ static void reset_motors(SRobotMotorsResetCmd* resetCommand);
 static void update_motor(uint8_t motor);
 static void check_encoder(uint8_t motor);
 static void check_stop_bits(uint8_t motor);
-static void _stop_motor(uint8_t motor, int line);
+static void _stop_motor(uint8_t motor);
 static void reset_motor(uint8_t motor);
 static int32_t spi_read_register(uint8_t reg, uint8_t motor);
 static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor);
@@ -249,7 +249,7 @@ static void stop_motors(SRobotMotorsStopCmd* cmd)
 {
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		if(cmd->motors & (1<<motor)) _stop_motor(motor, __LINE__);
+		if(cmd->motors & (1<<motor)) _stop_motor(motor);
 	}
 }
 
@@ -277,8 +277,8 @@ static void check_encoder(uint8_t motor)
 	&& (abs(RX_RobotStatus.motor[motor].motorPos - RX_RobotStatus.motor[motor].encPos) > _encoderTolerance[motor]))
 	{
 		RX_RobotStatus.motor[motor].isStalled = true;
-		_stop_motor(motor, __LINE__);
-		TrPrintf(TRUE, "Motor[%d].Id=%d stalled (pos=%d enc=%d diff=%d)", motor, RX_RobotStatus.motor[motor].moveIdStarted,
+		_stop_motor(motor);
+		TrPrintf(TRUE, "Motor[%d].MoveId=%d: stalled (pos=%d enc=%d diff=%d)", motor, RX_RobotStatus.motor[motor].moveIdStarted,
 				RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
 				RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
 	}
@@ -296,8 +296,8 @@ static void check_stop_bits(uint8_t motor)
 				if(isSet == _stopBitLevels[motor])
 				{
 					_stopBits[motor] &= ~(1<<in); // stop only once
-					_stop_motor(motor, __LINE__);
-					TrPrintf(true, "Motor[%d].in[%d]=%d: STOP", motor, in, isSet);
+					_stop_motor(motor);
+					TrPrintf(true, "Motor[%d]. moveId=%d: STOP by in[%d]=%d", motor, RX_RobotStatus.motor[motor].moveIdStarted, in, isSet);
 					return;
 				}
 			}
@@ -305,7 +305,7 @@ static void check_stop_bits(uint8_t motor)
 	}
 }
 
-static void _stop_motor(uint8_t motor, int line)
+static void _stop_motor(uint8_t motor)
 {
 	if(motor >= MOTOR_CNT)
 		return;
@@ -344,8 +344,6 @@ static void reset_motor(uint8_t motor)
 
 	gpio_manager_start_motor(motor);
 	gpio_manager_enable_motor(motor, FALSE);
-
-	TrPrintf(TRUE, "reset_motor[%d]", motor);
 }
 
 static int32_t spi_read_register(uint8_t reg, uint8_t motor)
