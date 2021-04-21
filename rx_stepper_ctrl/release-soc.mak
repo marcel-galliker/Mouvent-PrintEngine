@@ -13,7 +13,7 @@ OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-objcopy.exe
 
 #Additional flags
 PREPROCESSOR_MACROS := NDEBUG RELEASE linux soc
-INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_common_lib/VisualGDBCache
+INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_common_lib/VisualGDBCache ../rx_robot_ctrl/includes
 LIBRARY_DIRS := 
 LIBRARY_NAMES := 
 ADDITIONAL_LINKER_INPUTS := 
