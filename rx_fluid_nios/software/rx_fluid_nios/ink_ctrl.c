@@ -1184,7 +1184,7 @@ void ink_tick_10ms(void)
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure,PUMP_CTRL_MODE_DEFAULT);
 				_InkSupply[isNo].purgeTime = 0;
 				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step3;
+					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
 			case ctrl_purge_step4:
@@ -1204,12 +1204,12 @@ void ink_tick_10ms(void)
 					_InkSupply[isNo].purgePressure = 0;
 					_set_pump_speed(isNo, 0);
 				    _set_air_valve(isNo, PV_OPEN);
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step4;
+					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				}
 				break;
 
 			case ctrl_purge_step5:
-					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_purge_step5;
+					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
 			// --- FILL --------------------------------------------------
