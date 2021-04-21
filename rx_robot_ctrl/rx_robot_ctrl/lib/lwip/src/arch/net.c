@@ -52,6 +52,7 @@
 #endif
 #include <ft900_eth.h>
 
+#include "robot_flash.h"
 
 
 //#define NET_DEBUG
@@ -404,12 +405,14 @@ err_t net_init(ip_addr_t ip,
     i2cm_init(I2CM_NORMAL_SPEED, 100000);
     sys_i2c_swop(0);
 #else // NET_USE_EEPROM
+
+    uint16_t serialNo = flash_read_serialNo();
     my_netif.hwaddr[0] = 0x00;
     my_netif.hwaddr[1] = 0x07;
     my_netif.hwaddr[2] = 0xed;
-    my_netif.hwaddr[3] = 0x06; //0x08;
-    my_netif.hwaddr[4] = 0x01; //0x00;
-    my_netif.hwaddr[5] = 0xeb; //0x00;
+    my_netif.hwaddr[3] = 0x08;
+    my_netif.hwaddr[4] = (serialNo & 0xff00)>>8;
+    my_netif.hwaddr[5] = serialNo & 0xff;
 #endif // NET_USE_EEPROM
 
     NET_DEBUG_PRINTF("MAC = %02x:%02x:%02x:%02x:%02x:%02x\r\n",

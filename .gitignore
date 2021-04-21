@@ -90,3 +90,11 @@ version.c
 /bin/gui/*.dll
 /bin/gui/*.ppk
 /printed/*.bmp
+/rx_robot_ctrl/.metadata/.plugins/org.eclipse.cdt.core/rx_robot_ctrl.1617095275381.pdom
+/rx_robot_ctrl/.metadata/.plugins/org.eclipse.debug.core/.launches/FT9XX RUN.launch
+/rx_robot_ctrl/.metadata/.plugins/org.eclipse.debug.ui/dialog_settings.xml
+/rx_robot_ctrl/.metadata/.plugins/org.eclipse.debug.ui/launchConfigurationHistory.xml
+/rx_robot_ctrl/.metadata/.plugins/org.eclipse.e4.workbench/workbench.xmi
+/rx_robot_ctrl/.metadata/.plugins/org.eclipse.ui.workbench.texteditor/dialog_settings.xml
+/rx_robot_ctrl/.metadata/.plugins/org.eclipse.debug.core/.launches/*.launch
+/rx_robot_ctrl/.metadata/version.ini

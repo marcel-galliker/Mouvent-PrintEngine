@@ -143,7 +143,7 @@ static void _do_boot_info(RX_SOCKET socket, struct sockaddr *sender, SBootInfoMs
 		
 	if (*cmd.ipAddr==0)
 	{
-		printf("net_get_ip_addr(%s[%d]): ERROR\n", msg->item.deviceTypeStr, msg->item.deviceNo);			
+		printf("net_get_ip_addr(%s[%d]): ERROR\n", msg->item.deviceTypeStr, msg->item.deviceNo);
 		return;
 	}
 	

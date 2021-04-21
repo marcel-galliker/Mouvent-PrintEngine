@@ -12,8 +12,10 @@
 #include "task.h"
 
 #include "gpio_manager.h"
+#include "robot_flash.h"
 #include "network_manager.h"
 #include "rx_boot.h"
+#include "rx_trace.h"
 #include "status_manager.h"
 #include "bootloader_manager.h"
 #include "motor_manager.h"
@@ -36,8 +38,11 @@ int main(void)
     sys_reset_all();
     interrupt_disable_globally();
 
+    TrEnable(true);
+
     init_printf(NULL, myputc);
 
+    flash_init();
     network_manager_start();
     gpio_manager_start();
     motor_manager_start();

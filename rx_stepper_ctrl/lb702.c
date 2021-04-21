@@ -390,17 +390,17 @@ int lb702_menu(void)
         if (_rob)	lbrob_display_status();
 		if (_robClient)	
 		{
-			/*if (rc_isConnected()) rc_display_status();
-			else */robi_lb702_display_status();
+			if (rc_isConnected()) rc_display_status();
+			else robi_lb702_display_status();
 		}
     }
 
     if (_Menu == 1)
         term_printf("LB 702 MENU -------------------------\n");
     else if (_Menu == 2)
-        term_printf("ROBOT MENU --------------------------\n");
+        term_printf("CLEAN MENU --------------------------\n");
     else
-        term_printf("ROBI MENU --------------------------\n");
+        term_printf("ROBOT MENU --------------------------\n");
 	
 	if (_Menu==1)
 	{
@@ -424,29 +424,29 @@ int lb702_menu(void)
             else
                 term_printf("L: show LB702 Menu  ");
             if (_rob)
-                term_printf("C: hide ROBOT Menu  ");
+                term_printf("C: hide CLEAN Menu  ");
             else
-                term_printf("C: show ROBOT Menu  ");
+                term_printf("C: show CLEAN Menu  ");
             if (_robClient)
-                term_printf("A: hide ROBI Menu\n");
+                term_printf("A: hide ROBOT Menu\n");
             else
-                term_printf("A: show ROBI Menu\n");
+                term_printf("A: show ROBOT Menu\n");
             term_printf("x: exit\n");
             
 		}
 		else
 		{
 			term_printf("?: help\n");
-			term_printf("2: ROBOT menu\n"); 
-            term_printf("3: ROBI menu\n");
+			term_printf("2: CLEAN menu\n"); 
+            term_printf("3: ROBOT menu\n");
 		}
 	}
     else if (_Menu == 2)
         lbrob_menu(_Help);
     else 
 	{
-		/*if (rc_isConnected()) rc_menu(_Help);
-        else                 */ robi_lb702_menu(_Help);
+		if (rc_isConnected()) rc_menu(_Help);
+        else                  robi_lb702_menu(_Help);
 	}
 
 	term_printf(">");
@@ -461,15 +461,15 @@ int lb702_menu(void)
 		case '1': _Menu = 1; break;
 		case '2': _Menu = 2; break;
 		case '3': _Menu = 3; break;
-		case 'x': return FALSE;
+//		case 'x': return FALSE;
 		default:  if (_Menu == 1)
 				      _lb702_handle_menu(str);
 				  else if (_Menu == 2)
 				      lbrob_handle_menu(str);
 				  else
 				  {
-						/*if (rc_isConnected()) rc_handle_menu(str);
-						else                 */ robi_lb702_handle_menu(str);
+						if (rc_isConnected()) rc_handle_menu(str);
+						else                  robi_lb702_handle_menu(str);
 				  }
 				  break;
 		}		

@@ -1,5 +1,5 @@
 #include "bootloader_manager.h"
-#include "bootloader_manager_def.h"
+#include "rx_robot_tcpip.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -7,215 +7,188 @@
 #include <stdlib.h>
 
 #include <ft900.h>
-
-#include "tinyprintf.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
 
-#include "communication_def.h"
 #include "network_manager.h"
 #include "status_manager.h"
+#include "robot_flash.h"
+#include "rx_trace.h"
 
 /* Defines */
+
+// #define FLASH_TEST
 
 // Task settings
 #define TASK_BOOTLOADER_STACK_SIZE		(500)
 #define TASK_BOOTLOADER_PRIORITY		(8)
 
-// Flash size
-#define FLASH_WRITE_POS 		(0)
-#define FLASH_SECTOR_SIZE		(4096)
-#define FLASH_SECTOR_COUNT		(64)
-#define PROG_BUFFER_SIZE		(FLASH_SECTOR_SIZE)
+#define DATA_TIMEOUT		100
 
 /* Static variables */
 
-// Task handles
-static TaskHandle_t _bootloaderManagerTask;
-
-// Bootloader message queue
-static QueueHandle_t _bootloaderMessageQueue;
-
-// Status variable
-static BootloaderStatus_t _bootloaderStatus;
-
 // Status Flags
 static bool _isInitialized = false;
-
-static uint8_t progMemBlock[PROG_BUFFER_SIZE] = {0};
+static UINT32		_FileSize=0;
+static UINT32		_FilePos=0;
+static UINT8  		_FlashBuf[FLASH_SECTOR_SIZE]={0};
+static TickType_t	_Timeout=0;
 
 /* Prototypes */
 
-static void bootloader_manager_task(void *pvParameters);
-static void bootloader_manager_handle_command(void* msg);
-static void bootloader_manager_reset(void);
-static void bootloader_manager_init(BootloaderStartCommand_t* command);
-static void bootloader_manger_handle_data(BootloaderDataCommand_t* command);
-static void bootloader_manager_confirm(void);
-static void bootloader_manager_recover(void);
+static void _download_start(SBootloaderStartCmd* command);
+static void _download_data(SBootloaderDataCmd* command);
+static void _downlaod_reboot(void);
+static void _request_data(UINT32 filePos);
+static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 
+#ifdef FLASH_TEST
+	static void _flash_test(int from, int to);
+#endif
 
-bool bootloader_manager_start(void) {
-	// TODO: Check if network is initalized
-
-	_bootloaderMessageQueue = network_manager_get_bootloader_message_queue();
-
-	if(_bootloaderMessageQueue == NULL)
-		chip_reboot();
-
-	bootloader_manager_reset();
-
-	xTaskCreate(bootloader_manager_task,
-			"Bootloader",
-			TASK_BOOTLOADER_STACK_SIZE,
-			NULL,
-			TASK_BOOTLOADER_PRIORITY,
-			&_bootloaderManagerTask);
-
+bool bootloader_manager_start(void)
+{
 	_isInitialized = true;
-
 	return true;
 }
 
-bool bootloader_manager_is_initalized(void) {
-	return _isInitialized;
-}
-
-BootloaderStatus_t* bootloader_manager_get_status(void) {
-	return &_bootloaderStatus;
-}
-
-static void bootloader_manager_task(void *pvParameters)
+void bootloader_manager_handle_command(void* msg)
 {
-	while(true)
+	SMsgHdr* header = (SMsgHdr*)msg;
+
+	switch(header->msgId)
 	{
-		if(_bootloaderMessageQueue != NULL)
-		{
-			void* message = NULL;
-			if(xQueueReceive(_bootloaderMessageQueue, &message, portMAX_DELAY) == pdPASS)
-			{
-				bootloader_manager_handle_command(message);
-				vPortFree(message);
-				status_manager_send_status();
-			}
-		}
-	}
-}
-
-static void bootloader_manager_handle_command(void* msg)
-{
-	RobotMessageHeader_t* header = (RobotMessageHeader_t*)msg;
-
-	switch(header->messageId)
-	{
-	case CMD_BOOTLOADER_START:
-		bootloader_manager_init((BootloaderStartCommand_t*)msg);
-		break;
-
-	case CMD_BOOTLOADER_DATA:
-		bootloader_manger_handle_data((BootloaderDataCommand_t*)msg);
-		break;
-
-	case CMD_BOOTLOADER_CONFIRM:
-		bootloader_manager_confirm();
-		break;
-
+	case CMD_BOOTLOADER_START:		_download_start((SBootloaderStartCmd*)msg);	 break;
+	case CMD_BOOTLOADER_DATA:		_download_data((SBootloaderDataCmd*)msg);	 break;
+	case CMD_BOOTLOADER_REBOOT:		_downlaod_reboot();						     break;
+	case CMD_BOOTLOADER_SERIALNO:	_set_serialNo((SBootloaderSerialNoCmd*)msg); break;
 	default:
 		break;
 	}
 }
 
-static void bootloader_manager_reset(void)
+//--- bootloader_manager_main --------------------------------
+void bootloader_manager_main(void)
 {
-	memset(&_bootloaderStatus, 0, sizeof(_bootloaderStatus));
+	if (_FileSize && _Timeout && xTaskGetTickCount()>_Timeout)
+	{
+		_request_data(_FilePos);
+	}
 }
 
-static void bootloader_manager_init(BootloaderStartCommand_t* command)
+#ifdef FLASH_TEST
+static void _flash_test(int from, int to)
 {
-	if(_bootloaderStatus.status != UNINITIALIZED)
-		bootloader_manager_recover();
+	UINT32 *addr = (UINT32*)_FlashBuf;
+	TrPrintf(TRUE, "_flash_test (from=%d, to=%d", from, to);
 
-	bootloader_manager_reset();
+	//--- write addresses --------------------
+	for (int block=from; block<to; block++)
+	{
+		for (int i=0; i<1024; i++)
+		{
+			addr[i] = block*1024+i;
+		}
+		flash_sector_erase(block);
+		memcpy_dat2flash(block*FLASH_SECTOR_SIZE, _FlashBuf, FLASH_SECTOR_SIZE);
+	}
 
-	if(command->size > (FLASH_SECTOR_SIZE * FLASH_SECTOR_COUNT))
-		return;
+	//--- read addresses
+	for (int block=from; block<to; block++)
+	{
+		memcpy_flash2dat(_FlashBuf, block*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
+		int val;
+		int ok=TRUE;
+		for (int i=0; i<1024; i++)
+		{
+			val=block*1024+i;
+			if (addr[i]!=val)
+			{
+				ok=FALSE;
+			//	TrPrintf(TRUE, "Error Data[%d]=%d", addr[i], (block*1024+i));
+			}
+		}
+		if (ok) TrPrintf(TRUE, "Flash Block[%02d]: OK", block);
+		else    TrPrintf(TRUE, "Flash Block[%02d]: ERROR", block);
+	}
+	TrPrintf(TRUE, "_flash_test done");
+}
+#endif
 
-	taskENTER_CRITICAL();
-	flash_chip_erase();
-	taskEXIT_CRITICAL();
+static void _download_start(SBootloaderStartCmd* cmd)
+{
+	TrPrintf(true, "Download Start");
+	_FileSize=0;
+	_FilePos=0;
+	memset(_FlashBuf, 0, sizeof(_FlashBuf));
 
-	_bootloaderStatus.progSize = command->size;
-	_bootloaderStatus.status = WAITING_FOR_DATA;
+	if(cmd->size <= FLASH_SIZE)
+	{
+		_FileSize = cmd->size;
+
+		#ifdef FLASH_TEST
+		_flash_test(0, _FileSize/FLASH_SECTOR_SIZE+1);
+	//	_flash_test(0, FLASH_SECTOR_CNT-1);
+		#endif
+		_request_data(_FilePos);
+	}
 }
 
-static void bootloader_manger_handle_data(BootloaderDataCommand_t* command)
+static void _request_data(UINT32 filePos)
 {
-	uint32_t lengthIfWritten = ((_bootloaderStatus.progMemBlocksUsed * PROG_BUFFER_SIZE) + command->length + _bootloaderStatus.progMemPos);
-
-	if(_bootloaderStatus.status == UNINITIALIZED)
-		return;
-
-	if(_bootloaderStatus.status != WAITING_FOR_DATA)
-	{
-		bootloader_manager_reset();
-		bootloader_manager_recover();
-		return;
-	}
-
-	if(lengthIfWritten > _bootloaderStatus.progSize)
-	{
-		bootloader_manager_reset();
-		bootloader_manager_recover();
-		return;
-	}
-
-	if((_bootloaderStatus.progMemPos + command->length) > PROG_BUFFER_SIZE)
-	{
-		bootloader_manager_reset();
-		bootloader_manager_recover();
-		return;
-	}
-
-	memcpy(&progMemBlock[_bootloaderStatus.progMemPos], command->data, command->length);
-	_bootloaderStatus.progMemPos += command->length;
-
-	if((PROG_BUFFER_SIZE == _bootloaderStatus.progMemPos) ||
-	   (lengthIfWritten == _bootloaderStatus.progSize))
-	{
-		uint32_t flashPosition = _bootloaderStatus.progMemBlocksUsed * FLASH_SECTOR_SIZE;
-
-		taskENTER_CRITICAL();
-		memcpy_dat2flash(flashPosition, progMemBlock, PROG_BUFFER_SIZE);
-		taskEXIT_CRITICAL();
-
-		_bootloaderStatus.progMemBlocksUsed++;
-		_bootloaderStatus.progMemPos = 0;
-	}
-
-	if(lengthIfWritten == _bootloaderStatus.progSize)
-		_bootloaderStatus.status = WAITING_FOR_CONFIRM;
+	SBootloaderDataRequestCmd cmd;
+	cmd.header.msgId = CMD_BOOTLOADER_DATA;
+	cmd.header.msgLen= sizeof(cmd);
+	cmd.filePos 	 = _FilePos;
+	network_manager_send(&cmd, sizeof(cmd));
+	_Timeout = xTaskGetTickCount()+DATA_TIMEOUT;
 }
 
-static void bootloader_manager_confirm(void)
+static void _download_data(SBootloaderDataCmd* cmd)
 {
-	if(_bootloaderStatus.status == UNINITIALIZED)
-		return;
+	int sector;
+	_Timeout = 0;
 
-	if(_bootloaderStatus.status != WAITING_FOR_CONFIRM)
+	if (_FileSize && cmd->filePos+cmd->length<FLASH_SIZE && cmd->filePos==_FilePos)
 	{
-		bootloader_manager_reset();
-		bootloader_manager_recover();
-		return;
+		memcpy(&_FlashBuf[_FilePos%FLASH_SECTOR_SIZE], cmd->data, cmd->length);
+		sector = _FilePos/FLASH_SECTOR_SIZE;
+		_FilePos += cmd->length;
+		if (_FilePos>=_FileSize || (_FilePos%FLASH_SECTOR_SIZE)==0)
+		{
+			TrPrintf(true, "Write Flash block %d", sector);
+			taskENTER_CRITICAL();
+			flash_sector_erase(sector);
+			memcpy_dat2flash(sector*FLASH_SECTOR_SIZE, _FlashBuf, FLASH_SECTOR_SIZE);
+			memset(_FlashBuf, 0, sizeof(_FlashBuf));
+			taskEXIT_CRITICAL();
+			TrPrintf(true, "Flash block %d Written", sector);
+			if (_FilePos>=_FileSize)
+			{
+				TrPrintf(true, "Download End");
+				SMsgHdr cmd;
+				cmd.msgId = CMD_BOOTLOADER_END;
+				cmd.msgLen= sizeof(cmd);
+				network_manager_send(&cmd, sizeof(cmd));
+				return;
+			}
+		}
+		_request_data(_FilePos);
 	}
-
-	chip_reboot();
 }
 
-static void bootloader_manager_recover(void)
+//--- _downlaod_reboot --------------------------------------------
+static void _downlaod_reboot(void)
 {
-	taskENTER_CRITICAL();
-	flash_revert();
-	taskEXIT_CRITICAL();
+	if (_FilePos>=_FileSize) chip_reboot();
+}
+
+//--- _set_serialNo -----------------
+static void _set_serialNo(SBootloaderSerialNoCmd *pmsg)
+{
+	if (pmsg->serialNo!=flash_read_serialNo())
+	{
+		flash_write_serialNo(pmsg->serialNo);
+		if (_FileSize==0) chip_reboot();
+	}
 }

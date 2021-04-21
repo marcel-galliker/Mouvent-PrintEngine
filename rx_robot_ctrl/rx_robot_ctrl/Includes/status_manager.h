@@ -4,9 +4,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "rx_robot_tcpip.h"
+
+extern SRobotStatusMsg RX_RobotStatus;
+
 bool status_manager_start(void);
-bool status_manager_is_initalized(void);
-void status_manager_handle_message(void* message);
+void status_handle_message(void* message);
 void status_manager_send_status(void);
 
 #endif /* INCLUDES_STATUS_MANAGER_H_ */

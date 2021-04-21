@@ -106,7 +106,7 @@ void fpga_init()
 	Fpga.encoder = (SFpgaEncoder*)	rx_fpga_map_page(_MemId, ADDR_FPGA_ENCODER, sizeof(SFpgaEncoder)*ENCODER_CNT, 0x0030*ENCODER_CNT);		
 #endif
 
-	TrPrintfL(TRUE, "Version: %lu.%lu.%lu.%lu\n", Fpga.stat->version.major, Fpga.stat->version.minor, Fpga.stat->version.revision, Fpga.stat->version.build);
+	TrPrintfL(TRUE, "Version FPGA: %lu.%lu.%lu.%lu\n", Fpga.stat->version.major, Fpga.stat->version.minor, Fpga.stat->version.revision, Fpga.stat->version.build);
 
 	RX_StepperStatus.fpgaVersion.major	   = Fpga.stat->version.major;
 	RX_StepperStatus.fpgaVersion.minor	   = Fpga.stat->version.minor;
@@ -187,7 +187,7 @@ void fpga_display_status(void)
 
 	term_printf("\n");
 	term_printf("--- FPGA Status -----------------------------------\n");
-	term_printf("Version: %d.%d.%d.%d\n",	Fpga.stat->version.major, Fpga.stat->version.minor,Fpga.stat->version.revision,Fpga.stat->version.build);
+	term_printf("Version FPGA: %d.%d.%d.%d\n",	Fpga.stat->version.major, Fpga.stat->version.minor,Fpga.stat->version.revision,Fpga.stat->version.build);
 	term_printf("Temp:    %dC\n",			VAL_TO_TEMP(Fpga.stat->temp));
 	v = VAL_TO_MV(Fpga.stat->voltage_3v3);
 	term_printf("Power Supply: % 3d.%03dV(3.3)\n", v/1000, v%1000);

@@ -1,5 +1,6 @@
 #include "motor_manager.h"
-#include "motor_manager_def.h"
+#include "rx_robot_def.h"
+#include "rx_robot_tcpip.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,16 +10,76 @@
 
 #include <ft900.h>
 
-#include "tinyprintf.h"
-
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-
-#include "communication_def.h"
 #include "network_manager.h"
 #include "status_manager.h"
 #include "gpio_manager.h"
+#include "rx_trace.h"
+
+#define TMC_RAMPSTAT_POS_REACHED_FLAG	0x80
+#define TMC_RAMPSTAT_STOP_SG_FLAG		0x40
+
+#define TMC_STATUS_RESET_FLAG				0X01
+#define TMC_STATUS_DRIVER_ERROR_FLAG		0x02
+#define TMC_STATUS_SG_FLAG					0x04
+#define TMC_STATUS_STANDSTILL_FLAG			0x08
+#define TMC_STATUS_VELOCITY_REACHED_FLAG	0x10
+#define TMC_STATUS_POSITION_REACHED_FLAG	0x20
+
+#define TMC_GCONF_REG			0x00
+#define TMC_GSTAT_REG			0x01
+#define TMC_IFCNT_REG			0x02
+#define TMC_SLAVECONF_REG		0x03
+#define TMC_IOIN_REG			0x04
+#define TMC_OUTPUT_REG			0x04
+#define TMC_XCOMPARE_REG		0x05
+#define TMC_IHOLDIRUN_REG		0x10
+#define TMC_TPOWERDOWN_REG		0x11
+#define TMC_TSTEP_REG			0x12
+#define TMC_TPWMTHRS_REG		0x13
+#define TMC_TCOOLTHRS_REG		0x14
+#define TMC_THIGH_REG			0x15
+#define TMC_RAMPMODE_REG		0x20
+#define TMC_XACTUAL_REG			0x21
+#define TMC_VACTUAL_REG			0x22
+#define TMC_VSTART_REG			0x23
+#define TMC_A1_REG				0x24
+#define TMC_V1_REG				0x25
+#define TMC_AMAX_REG			0x26
+#define TMC_VMAX_REG			0x27
+#define TMC_DMAX_REG			0x28
+#define TMC_D1_REG				0x2A
+#define TMC_VSTOP_REG			0x2B
+#define TMC_TZEROWAIT_REG		0x2C
+#define TMC_XTARGET_REG			0x2D
+#define TMC_VDCMIN_REG			0x33
+#define TMC_SWMODE_REG			0x34
+#define TMC_RAMPSTAT_REG		0x35
+#define TMC_XLATCH_REG			0x36
+#define TMC_ENCMODE_REG			0x38
+#define TMC_XENC_REG			0x39
+#define TMC_ENCCONST_REG		0x3A
+#define TMC_ENCSTATUS_REG		0x3B
+#define TMC_ENCLATCH_REG		0x3C
+#define TMC_MSLUT0_REG			0x60
+#define TMC_MSLUT1_REG			0x61
+#define TMC_MSLUT2_REG			0x62
+#define TMC_MSLUT3_REG			0x63
+#define TMC_MSLUT4_REG			0x64
+#define TMC_MSLUT5_REG			0x65
+#define TMC_MSLUT6_REG			0x66
+#define TMC_MSLUT7_REG			0x67
+#define TMC_MSLUTSEL_REG		0x68
+#define TMC_MSLUTSTART_REG		0x69
+#define TMC_MSCNT_REG			0x6A
+#define TMC_MSCURACT_REG		0x6B
+#define TMC_CHOPCONF_REG		0x6C
+#define TMC_COOLCONF_REG		0x6D
+#define TMC_DCCTRL_REG			0x6E
+#define TMC_DRVSTATUS_REG		0x6F
+#define TMC_PWMCONF_REG			0x70
+#define TMC_PWMSCALE_REG		0x71
+#define TMC_ENCMCTRL_REG		0x72
+#define TMC_LOSTTEPS_REG		0x73
 
 // Motor settings
 #define MOTOR_UPDATE_INTERVAL	(10)
@@ -44,30 +105,22 @@ typedef struct SpiRxDatagram {
 } SpiRxDatagram_t;
 #pragma pack()
 
-static MotorStatus_t _motorStatus[MOTOR_COUNT];
-static MotorConfig_t _motorConfigs[MOTOR_COUNT];
-static uint32_t _encoderTolerance[MOTOR_COUNT];
-static uint8_t _stopBits[MOTOR_COUNT];
-static uint8_t _stopBitLevels[MOTOR_COUNT];
-
-// Task handles
-static TaskHandle_t _motorManagerTask;
+static SMotorConfig _motorConfigs[MOTOR_CNT];
+static uint32_t _encoderTolerance[MOTOR_CNT];
+static uint8_t _stopBits[MOTOR_CNT];
+static uint8_t _stopBitLevels[MOTOR_CNT];
 
 // Status Flags
 static bool _isInitialized = false;
 
-static QueueHandle_t _motorMessageQueue;
-
-static void motor_manager_task(void *pvParameters);
-static void handle_motor_message(void* message);
-static void set_config(RobotMotorSetConfigCommand_t* config);
-static void move_motors(RobotMotorsMoveCommand_t* moveCommand);
-static void stop_motors(RobotMotorsStopCommand_t* stopCommand);
-static void reset_motors(RobotMotorsResetCommand_t* resetCommand);
+static void set_config(SRobotMotorSetCfgCmd* config);
+static void move_motors(SRobotMotorsMoveCmd* moveCommand);
+static void stop_motors(SRobotMotorsStopCmd* stopCommand);
+static void reset_motors(SRobotMotorsResetCmd* resetCommand);
 static void update_motor(uint8_t motor);
 static void check_encoder(uint8_t motor);
 static void check_stop_bits(uint8_t motor);
-static void stop_motor(uint8_t motor);
+static void _stop_motor(uint8_t motor);
 static void reset_motor(uint8_t motor);
 static int32_t spi_read_register(uint8_t reg, uint8_t motor);
 static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor);
@@ -75,28 +128,17 @@ static void update_status(uint8_t status, uint8_t motor);
 
 bool motor_manager_start(void)
 {
-	memset(&_motorStatus, 0, sizeof(_motorStatus));
 	memset(&_motorConfigs, 0, sizeof(_motorConfigs));
 	memset(&_encoderTolerance, 0, sizeof(_encoderTolerance));
 	memset(&_stopBits, 0, sizeof(_stopBits));
 	memset(&_stopBitLevels, 0, sizeof(_stopBitLevels));
-
-	_motorMessageQueue = network_manager_get_motor_message_queue();
-	if(_motorMessageQueue == NULL)
-		chip_reboot();
 
 	spi_init(SPIM, spi_dir_master, spi_mode_3, SPI_CLOCK_DIVIDER);
 	spi_option(SPIM, spi_option_fifo_size, SPI_FIFO_SIZE);
 	spi_option(SPIM, spi_option_fifo, SPI_FIFO_ENABLED);
 	spi_option(SPIM, spi_option_fifo_receive_trigger, SPI_FIFO_TRIGGER_LEVEL);
 
-	xTaskCreate(motor_manager_task,
-				"Motors",
-				TASK_MOTOR_STACK_SIZE,
-				NULL,
-				TASK_MOTOR_PRIORITY,
-				&_motorManagerTask);
-
+	_isInitialized = true;
 	return true;
 }
 
@@ -105,87 +147,45 @@ bool motor_manager_is_initalized(void)
 	return _isInitialized;
 }
 
-MotorStatus_t* motor_manager_get_status(void)
+//--- motor_handle_message ----------------------------------------------------------------------
+void motor_handle_message(void* message)
 {
-	return _motorStatus;
-}
+	SMsgHdr* hdr = (SMsgHdr*)message;
 
-static void motor_manager_task(void *pvParameters)
-{
-	static TickType_t lastWakeTime;
-	static const TickType_t frequency = MOTOR_UPDATE_INTERVAL / portTICK_PERIOD_MS;
-
-	while(network_manager_is_initialized() == false){
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-	}
-
-	_isInitialized = true;
-
-	lastWakeTime = xTaskGetTickCount();
-
-	while(true)
+	if(_isInitialized)
 	{
-		if(_motorMessageQueue != NULL)
+		switch(hdr->msgId)
 		{
-			void* message = NULL;
-			if(xQueueReceive(_motorMessageQueue, &message, 0) == pdPASS)
-			{
-				handle_motor_message(message);
-				vPortFree(message);
-
-				status_manager_send_status();
-			}
+		case CMD_MOTOR_SET_CONFIG: 	set_config((SRobotMotorSetCfgCmd*)message); break;
+		case CMD_MOTORS_MOVE:		move_motors((SRobotMotorsMoveCmd*)message);	break;
+		case CMD_MOTORS_STOP:		stop_motors((SRobotMotorsStopCmd*)message);	break;
+		case CMD_MOTORS_RESET:		reset_motors((SRobotMotorsResetCmd*)message);	break;
+		default:
+			break;
 		}
-
-		for(uint8_t motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
-		{
-			if(_motorStatus[motorCount].isConfigured != true)
-				continue;
-
-			update_motor(motorCount);
-			check_encoder(motorCount);
-			check_stop_bits(motorCount);
-		}
-
-		vTaskDelayUntil(&lastWakeTime, frequency);
 	}
 }
 
-static void handle_motor_message(void* message)
+//--- motor_main ---------------------------------------------------------------
+void motor_main(void)
 {
-	RobotMessageHeader_t* header = (RobotMessageHeader_t*)message;
+	for(uint8_t motor=0; motor < MOTOR_CNT; motor++)
+	{
+		if(RX_RobotStatus.motor[motor].isConfigured)
+		{
+			update_motor(motor);
+			check_encoder(motor);
+			check_stop_bits(motor);
+		}
+	}
+}
 
-	if(_isInitialized == false)
+static void set_config(SRobotMotorSetCfgCmd* configCommand)
+{
+	if(configCommand->motor >= MOTOR_CNT)
 		return;
 
-	switch(header->messageId)
-	{
-	case CMD_MOTOR_SET_CONFIG:
-		set_config((RobotMotorSetConfigCommand_t*)message);
-		break;
-
-	case CMD_MOTORS_MOVE:
-		move_motors((RobotMotorsMoveCommand_t*)message);
-		break;
-
-	case CMD_MOTORS_STOP:
-		stop_motors((RobotMotorsStopCommand_t*)message);
-		break;
-
-	case CMD_MOTORS_RESET:
-		reset_motors((RobotMotorsResetCommand_t*)message);
-		break;
-	default:
-		break;
-	}
-}
-
-static void set_config(RobotMotorSetConfigCommand_t* configCommand)
-{
-	if(configCommand->motor >= MOTOR_COUNT)
-		return;
-
-	memcpy(&_motorConfigs[configCommand->motor], &configCommand->config, sizeof(MotorConfig_t));
+	memcpy(&_motorConfigs[configCommand->motor], &configCommand->config, sizeof(SMotorConfig));
 
 	spi_write_register(TMC_GCONF_REG, configCommand->config.gconf, configCommand->motor);
 	spi_write_register(TMC_SWMODE_REG, configCommand->config.swmode, configCommand->motor);
@@ -211,111 +211,103 @@ static void set_config(RobotMotorSetConfigCommand_t* configCommand)
 	spi_write_register(TMC_ENCMODE_REG, configCommand->config.encmode, configCommand->motor);
 	spi_write_register(TMC_ENCCONST_REG, configCommand->config.encconst, configCommand->motor);
 	reset_motor(configCommand->motor);
-	_motorStatus[configCommand->motor].isConfigured = true;
+	RX_RobotStatus.motor[configCommand->motor].isConfigured = true;
 }
 
-static void move_motors(RobotMotorsMoveCommand_t* moveCommand)
+static void move_motors(SRobotMotorsMoveCmd* cmd)
 {
-	for(int motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
+	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		uint8_t motorSet = (moveCommand->motors >> motorCount) & 1U;
+		if (cmd->motors & (1<<motor))
+		{
+			TrPrintf(true, "Move Motor[%d].id=%d to %d (pos=%d enc=%d diff=%d)", motor, cmd->moveId[motor], cmd->targetPos[motor],
+					RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
+					RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
 
-		if(motorSet == false)
-			continue;
+			_encoderTolerance[motor] = cmd->encoderTol[motor];
+			_stopBits[motor]		 = cmd->stopBits[motor];
+			_stopBitLevels[motor] 	 = cmd->stopBitLevels[motor];
 
-		if(_motorStatus[motorCount].isMoving == true)
-			continue;
-
-		_encoderTolerance[motorCount] = moveCommand->encoderTolerance[motorCount];
-		_stopBits[motorCount] = moveCommand->stopBits[motorCount];
-		_stopBitLevels[motorCount] = moveCommand->stopBitLevels[motorCount];
-
-		gpio_manager_enable_motor(motorCount);
-		gpio_manager_stop_motor(motorCount);	// Pause to start them in sync later
-		spi_write_register(TMC_XTARGET_REG, moveCommand->targetPosition[motorCount], motorCount);
+			gpio_manager_enable_motor(motor, TRUE);
+			gpio_manager_stop_motor(motor);	// Pause to start them in sync later
+			spi_write_register(TMC_XTARGET_REG, cmd->targetPos[motor], motor);
+		}
 	}
 
 	// Start motors sync
-	for(int motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
+	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		uint8_t motorSet = (moveCommand->motors >> motorCount) & 1U;
-
-		if(motorSet == true)
-			gpio_manager_start_motor(motorCount);
-	}
-}
-
-static void stop_motors(RobotMotorsStopCommand_t* stopCommand)
-{
-	for(int motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
-	{
-		uint8_t motorSet = (stopCommand->motors >> motorCount) & 1U;
-
-		if(motorSet == true)
+		if (cmd->motors & (1<<motor))
 		{
-			stop_motor(motorCount);
+			gpio_manager_start_motor(motor);
+			RX_RobotStatus.motor[motor].moveIdStarted=cmd->moveId[motor];
 		}
 	}
 }
 
-static void reset_motors(RobotMotorsResetCommand_t* resetCommand)
+static void stop_motors(SRobotMotorsStopCmd* cmd)
 {
-	for(int motorCount = 0; motorCount < MOTOR_COUNT; motorCount++)
+	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		uint8_t motorSet = (resetCommand->motors >> motorCount) & 1U;
-
-		if(motorSet == true)
-		{
-			reset_motor(motorCount);
-		}
+		if(cmd->motors & (1<<motor)) _stop_motor(motor);
 	}
+}
+
+static void reset_motors(SRobotMotorsResetCmd* cmd)
+{
+	for(int motor = 0; motor < MOTOR_CNT; motor++)
+	{
+		if(cmd->motors & (1<<motor)) reset_motor(motor);
+	}
+	status_manager_send_status();
 }
 
 static void update_motor(uint8_t motor)
 {
-	_motorStatus[motor].motorPosition = spi_read_register(TMC_XACTUAL_REG, motor);
-	_motorStatus[motor].motorEncoderPosition = spi_read_register(TMC_XENC_REG, motor);
-	_motorStatus[motor].motorTargetPosition = spi_read_register(TMC_XTARGET_REG, motor);
-	_motorStatus[motor].motorVelocity = spi_read_register(TMC_VACTUAL_REG, motor);
+	RX_RobotStatus.motor[motor].motorPos  = spi_read_register(TMC_XACTUAL_REG, motor);
+	RX_RobotStatus.motor[motor].encPos	  = spi_read_register(TMC_XENC_REG, motor);
+	RX_RobotStatus.motor[motor].targetPos = spi_read_register(TMC_XTARGET_REG, motor);
+	RX_RobotStatus.motor[motor].speed	  = spi_read_register(TMC_VACTUAL_REG, motor);
 }
 
 static void check_encoder(uint8_t motor)
 {
-	if(_encoderTolerance[motor] == 0)
-		return;
-
-	int32_t positionDifference = abs(_motorStatus[motor].motorPosition - _motorStatus[motor].motorEncoderPosition);
-
-	if(positionDifference > _encoderTolerance[motor])
+	if(RX_RobotStatus.motor[motor].moveIdStarted!=RX_RobotStatus.motor[motor].moveIdDone
+	&& _encoderTolerance[motor]
+	&& (abs(RX_RobotStatus.motor[motor].motorPos - RX_RobotStatus.motor[motor].encPos) > _encoderTolerance[motor]))
 	{
-		_motorStatus[motor].isStalled = true;
-		stop_motor(motor);
+		RX_RobotStatus.motor[motor].isStalled = true;
+		_stop_motor(motor);
+		TrPrintf(TRUE, "Motor[%d].MoveId=%d: stalled (pos=%d enc=%d diff=%d)", motor, RX_RobotStatus.motor[motor].moveIdStarted,
+				RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
+				RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
 	}
 }
 
 static void check_stop_bits(uint8_t motor)
 {
-	if(_motorStatus[motor].isMoving != true)
-		return;
-
-	for(int inputCount = 0; inputCount < NUMBER_OF_INPUTS; inputCount++)
+	if(RX_RobotStatus.motor[motor].isMoving && _stopBits[motor])
 	{
-		uint8_t used = (_stopBits[motor] >> inputCount) & 1;
-		if(used == false)
-			continue;
-
-		uint8_t isSet = gpio_manager_get_input(inputCount);
-		if(isSet == _stopBitLevels[motor])
+		for(int in = 0; in < INPUT_CNT; in++)
 		{
-			stop_motor(motor);
-			return;
+			if (_stopBits[motor] & (1<<in))
+			{
+				uint8_t isSet = gpio_manager_get_input(in);
+				if(isSet == _stopBitLevels[motor])
+				{
+					_stopBits[motor] &= ~(1<<in); // stop only once
+					_stop_motor(motor);
+					TrPrintf(true, "Motor[%d]. moveId=%d: STOP by in[%d]=%d", motor, RX_RobotStatus.motor[motor].moveIdStarted, in, isSet);
+					return;
+				}
+			}
 		}
 	}
 }
 
-static void stop_motor(uint8_t motor)
+static void _stop_motor(uint8_t motor)
 {
-	if(motor >= MOTOR_COUNT)
+	if(motor >= MOTOR_CNT)
 		return;
 
 	gpio_manager_stop_motor(motor);
@@ -330,14 +322,14 @@ static void stop_motor(uint8_t motor)
 
 static void reset_motor(uint8_t motor)
 {
-	if(motor >= MOTOR_COUNT)
+	if(motor >= MOTOR_CNT)
 			return;
 
 	gpio_manager_stop_motor(motor);
 
-	_motorStatus[motor].motorTargetPosition = 0;
-	_motorStatus[motor].motorPosition = 0;
-	_motorStatus[motor].motorEncoderPosition = 0;
+	RX_RobotStatus.motor[motor].targetPos = 0;
+	RX_RobotStatus.motor[motor].motorPos  = 0;
+	RX_RobotStatus.motor[motor].encPos 	  = 0;
 
 	spi_write_register(TMC_XTARGET_REG, 0, motor);
 	spi_write_register(TMC_XACTUAL_REG, 0, motor);
@@ -347,11 +339,11 @@ static void reset_motor(uint8_t motor)
 	_stopBits[motor] = 0;
 	_stopBitLevels[motor] = 0;
 
-	_motorStatus[motor].isMoving = false;
-	_motorStatus[motor].isStalled = false;
+	RX_RobotStatus.motor[motor].isMoving = false;
+	RX_RobotStatus.motor[motor].isStalled = false;
 
 	gpio_manager_start_motor(motor);
-	gpio_manager_disable_motor(motor);
+	gpio_manager_enable_motor(motor, FALSE);
 }
 
 static int32_t spi_read_register(uint8_t reg, uint8_t motor)
@@ -360,12 +352,10 @@ static int32_t spi_read_register(uint8_t reg, uint8_t motor)
 	SpiTxDatagram_t txDatagram;
 	SpiRxDatagram_t rxDatagram;
 
-	taskENTER_CRITICAL();
-
 	if(_isInitialized == false)
 		return 0;
 
-	if(motor >= MOTOR_COUNT)
+	if(motor >= MOTOR_CNT)
 		return 0;
 
 	// Zero structs
@@ -390,8 +380,6 @@ static int32_t spi_read_register(uint8_t reg, uint8_t motor)
 
 	update_status(rxDatagram.status, motor);
 
-	taskEXIT_CRITICAL();
-
 	return data;
 }
 
@@ -400,13 +388,10 @@ static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor)
 	SpiTxDatagram_t txDatagram;
 	SpiRxDatagram_t rxDatagram;
 
-	taskENTER_CRITICAL();
-
 	if(_isInitialized == false)
 		return;
 
-
-	if(motor >= MOTOR_COUNT)
+	if(motor >= MOTOR_CNT)
 		return;
 
 	// Zero structs
@@ -423,22 +408,26 @@ static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor)
 	spi_close(SPIM, motor);
 
 	update_status(rxDatagram.status, motor);
-
-	taskEXIT_CRITICAL();
 }
 
 static void update_status(uint8_t status, uint8_t motor)
 {
-	_motorStatus[motor].status = status;
+	RX_RobotStatus.motor[motor].status = status;
 
-	if((_motorStatus[motor].status & TMC_STATUS_STANDSTILL_FLAG) && (_motorStatus[motor].isMoving == true))
+	int isMoving = !(RX_RobotStatus.motor[motor].status & TMC_STATUS_STANDSTILL_FLAG);
+	if(RX_RobotStatus.motor[motor].isMoving && !isMoving)
 	{
-		_motorStatus[motor].isMoving = false;
+		RX_RobotStatus.motor[motor].moveIdDone = RX_RobotStatus.motor[motor].moveIdStarted;
+		RX_RobotStatus.motor[motor].isMoving = false;
 		_encoderTolerance[motor] = 0;
 		_stopBits[motor] = 0;
 		_stopBitLevels[motor] = 0;
-		gpio_manager_disable_motor(motor);
+		gpio_manager_enable_motor(motor, FALSE);
+		status_manager_send_status();
 	}
-	else if(!(_motorStatus[motor].status & TMC_STATUS_STANDSTILL_FLAG))
-		_motorStatus[motor].isMoving = true;
+	else if(!RX_RobotStatus.motor[motor].isMoving && isMoving)
+	{
+		RX_RobotStatus.motor[motor].isMoving = true;
+		status_manager_send_status();
+	}
 }
