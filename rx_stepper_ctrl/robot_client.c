@@ -58,6 +58,8 @@
 #define Z_CURRENT_UP				(0b00000000000000010000101000000000)
 #define Z_CURRENT_DOWN				(0b00000000000000010000111000000000)
 
+#define LOW		0
+#define HIGH	1
 
 //--- Modlue Globals -----------------------------------------------------------------
 static char _IpAddr[32]="";
@@ -100,7 +102,7 @@ static void _rc_error(const char *file, int line, char *msg);
 static void _rc_reset_motors(int motors);
 static void _rc_reset_edgeCtr(int inputs);
 static int  _rc_motor_moveBy(int motor, int steps, const char *file, int line);
-static int  _rc_motor_moveToStop(int motor, int steps, int input, const char *file, int line);
+static int  _rc_motor_moveToStop(int motor, int steps, int input, int level, const char *file, int line);
 static int  _rc_moveto_xy_stop(int x, int y, int stop, const char *file, int line);
 static int	_rc_move_xy_done(void);
 
@@ -410,9 +412,8 @@ static void _rc_state_machine(void)
 								TrPrintfL(TRUE, "RC_STATE_REF+1: down=%d, moving=%d, start=%d, done=%d", ROB_IN(IN_Z_DOWN), _RobotStatus.motor[MOTOR_Z].isMoving, _RobotStatus.motor[MOTOR_Z].moveIdStarted, _RobotStatus.motor[MOTOR_Z].moveIdDone);
 								if (ROB_IN(IN_Z_DOWN))
 								{
-								//	_rc_motor_moveToStop(MOTOR_SCREW, 1000, IN_SCREW_EDGE, _FL_);
+									_rc_motor_moveToStop(MOTOR_SCREW, 100000, IN_SCREW_EDGE, LOW, _FL_);
 									_rc_moveto_xy_stop(RX_StepperStatus.screw_posX, 1000000, IN_Y_END, _FL_);
-								//	_rc_moveto_xy_stop(RX_StepperStatus.screw_posX, 1000000, -1, _FL_);
 									_RC_State++;
 								}
 								else if (_RobotStatus.motor[MOTOR_Z].moveIdDone == _MoveId[MOTOR_Z]) 
@@ -446,6 +447,7 @@ static void _rc_state_machine(void)
 									TrPrintfL(TRUE, "RC_STATE_REF+3: x-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_X_END), 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);
+									_rc_motor_moveToStop(MOTOR_SCREW, 100000, IN_SCREW_EDGE, HIGH, _FL_);
 									_rc_moveto_xy_stop(-150000, RX_StepperStatus.screw_posY, IN_X_END, _FL_);
 									_RC_State++;
 								}
@@ -685,7 +687,7 @@ static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
 }
 
 //--- _rc_motor_moveToStop --------------------------------
-static int _rc_motor_moveToStop(int motor, int steps, int stopInput, const char *file, int line)
+static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, const char *file, int line)
 {
 	if (_RobotStatus.motor[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
 	if (_RobotStatus.motor[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
@@ -697,7 +699,7 @@ static int _rc_motor_moveToStop(int motor, int steps, int stopInput, const char 
 	cmd.motors				 = 1<<motor;
 	cmd.targetPos[motor]	 =  steps;
 	cmd.stopBits[motor]		 = 1<<stopInput;
-	cmd.stopBitLevels[motor] = 1;
+	cmd.stopBitLevels[motor] = level;
 	cmd.moveId[motor]		 = ++_MoveId[motor];
 	
 	TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE[%d].moveIdStarted=%d", motor, _MoveId[motor]);
@@ -714,7 +716,7 @@ int rc_moveto_xy(int x, int y, const char *file, int line)
 }
 
 //--- _rc_moveto_xy_stop -----------------------------------
-int _rc_moveto_xy_stop(int x, int y, int stop, const char *file, int line)
+static int _rc_moveto_xy_stop(int x, int y, int stop, const char *file, int line)
 {
 	for (int motor=MOTOR_XY_0; motor<=MOTOR_XY_1; motor++)
 	{
@@ -775,13 +777,13 @@ static int	_rc_move_xy_done(void)
 //--- rc_move_top --------------------------------------
 int  rc_move_top(const char *file, int line)
 {
-	return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, _FL_);	
+	return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, HIGH, _FL_);	
 }
 
 //--- rc_move_bottom ---------------------------------------
 int  rc_move_bottom(const char *file, int line)
 {
-	return _rc_motor_moveToStop(MOTOR_Z, MAX_LENGTH_Z, IN_Z_DOWN, _FL_);	
+	return _rc_motor_moveToStop(MOTOR_Z, MAX_LENGTH_Z, IN_Z_DOWN, HIGH, _FL_);	
 }
 
 static char _level(int l)
