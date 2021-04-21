@@ -7,7 +7,6 @@ bin\fluid\rx_fluid_ctrl
 bin\fluid\rx_fluid_nios
 bin\fluid\rx_fluid_rbf
 bin\gui
-bin\gui\rx_rip_lib_x64.dll
 bin\gui\BitMiracle.LibTiff.NET.dll
 bin\gui\ControlzEx.dll
 bin\gui\DirectShowLib-2005.dll
@@ -24,6 +23,7 @@ bin\gui\InfragisticsWPF4.Olap.v17.2.dll
 bin\gui\InfragisticsWPF4.v17.2.dll
 bin\gui\InTheHand.Net.Personal.dll
 bin\gui\itextsharp.dll
+bin\gui\LearnedOCR.xml
 bin\gui\MahApps.Metro.dll
 bin\gui\MahApps.Metro.IconPacks.BoxIcons.dll
 bin\gui\MahApps.Metro.IconPacks.Core.dll
@@ -95,6 +95,7 @@ bin\rexroth\accounts.xml
 bin\rx_boot_lx
 bin\rx_boot_soc
 bin\spooler
+bin\spooler\SA_Alignment.tif
 bin\spooler\TA.dat
 bin\spooler\libcudart.so.10.2
 bin\spooler\prEnvSettings.xml
@@ -118,6 +119,7 @@ bin\spooler\scanning_8.tif
 bin\spooler\Telex-Regular-License.txt
 bin\spooler\Telex-Regular.ttf
 bin\stepper
+bin\stepper\rx_robot_ctrl
 bin\stepper\rx_stepper_ctrl
 bin\stepper\rx_stepper_rbf
 bin\win
