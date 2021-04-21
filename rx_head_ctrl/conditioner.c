@@ -50,6 +50,8 @@ SVersion			_FileVersion;
 static int			_UpdateClusterTimer;
 static int			_ErrorDelay=0;
 
+static int			_Recovery_Freq = 0;
+
 static int _JetSequenceFrequency[128] = {0};
 static int _JetSequenceDropSize[128] = {0};
 static int _JetSequencePressure[128] = {0};
@@ -396,7 +398,7 @@ static void _update_counters(void)
 				
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
-		if (_NiosStat->cond[condNo].mode==ctrl_print) printing = TRUE;
+		if (_NiosStat->cond[condNo].mode==ctrl_print || (_NiosStat->cond[condNo].mode >= ctrl_recovery_start && _NiosStat->cond[condNo].mode <= ctrl_recovery_step2)) printing = TRUE;
 		if (_NiosStat->cond[condNo].clusterTime   > RX_HBStatus->clusterTime)   RX_HBStatus->clusterTime   = _NiosStat->cond[condNo].clusterTime;
 	}
 	if (printing) RX_HBStatus->clusterTime++;
@@ -610,6 +612,8 @@ int _cond_load(const char *exepath)
 	return ret;
 }
 
+#define RECOVERY_HIGH_FREQ 11000
+#define RECOVERY_LOW_FREQ 400
 //--- cond_ctrlMode -----------------------------------------
 void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 {
@@ -625,6 +629,9 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 	else if (_NiosMem!=NULL) _NiosMem->cfg.cond[headNo].mode = ctrlMode;		
 
 	_CtrlMode[headNo] = ctrlMode;
+    
+    if (_CtrlMode[headNo] == ctrl_recovery_step1 || _CtrlMode[headNo] == ctrl_recovery_step2)		do_jetting(_Recovery_Freq);
+    else if (_CtrlMode[headNo] == ctrl_recovery_step3)	fpga_enc_config(0);
 }
 
 //--- cond_ctrlMode2 --------------------------------------------------------------------
@@ -892,4 +899,10 @@ static void _read_jet_sequence(void)
         fclose(csv);
         return;
     }
+}
+
+//--- set_recovery_freq ---------------------------------------
+void set_recovery_freq(int freq_hz)
+{
+    _Recovery_Freq = freq_hz;
 }

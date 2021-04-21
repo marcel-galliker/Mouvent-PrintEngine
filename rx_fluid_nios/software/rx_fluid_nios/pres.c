@@ -144,7 +144,7 @@ static void _sensors_init(void)
 		else                      _Sensor[i].addr = _is_sensor_25 (&_Sensor[i]) ? ADDR_SENSOR_2_5_BAR : ADDR_SENSOR_1_0_BAR;
 
 		if (_Sensor[i].addr == ADDR_SENSOR_2_5_BAR)
-	{
+		{
 				trprintf("Sensor[%d] is 2.5 bar\n", i);
 				_Sensor[i].addr=ADDR_SENSOR_2_5_BAR;
 		}
@@ -152,11 +152,11 @@ static void _sensors_init(void)
 		{
 			trprintf("Sensor[%d] is 1.0 bar\n", i);
 			_Sensor[i].addr = ADDR_SENSOR_1_0_BAR;
-				}
-		_sensor_reset(&_Sensor[i]);
-			}
-	trprintf("Initialized\n");
 		}
+		_sensor_reset(&_Sensor[i]);
+	}
+	trprintf("Initialized\n");
+}
 
 //--- ink_set_is_sensor_power --------------------------------
 static void _is_sensor_power(int isNo, int state)
@@ -311,6 +311,11 @@ void pres_reset_min_max(int isNo)
 int  pres_valid(int i)
 {
 	return _Sensor[i].buf_valid;
+}
+//--- is_Sensor_25 -------------------------------------
+int is_Sensor_25(int isNo)
+{
+	return _Sensor[isNo].addr == ADDR_SENSOR_2_5_BAR;
 }
 
 //--- pres_tick_10ms ------------------

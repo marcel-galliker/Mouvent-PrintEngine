@@ -189,7 +189,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void PurgeHard_Clicked  (object sender, RoutedEventArgs e) {_command("Purge", EFluidCtrlMode.ctrl_purge_hard);   }
 
         private void Purge4Ever_Clicked(object sender, RoutedEventArgs e) { _command("Purge", EFluidCtrlMode.ctrl_purge4ever);   }
- //       private void Drain_Clicked      (object sender, RoutedEventArgs e) {_command(EFluidCtrlMode.ctrl_drain);        }
+        //       private void Drain_Clicked      (object sender, RoutedEventArgs e) {_command(EFluidCtrlMode.ctrl_drain);        }
         private void Flush_Clicked      (object sender, RoutedEventArgs e) {_command("Flush", EFluidCtrlMode.ctrl_flush_night);   }
         private void Wipe_Clicked       (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_wipe);             }
         private void ToggleMeniscus_Clicked(object sender, RoutedEventArgs e){_command(null, EFluidCtrlMode.ctrl_toggle_meniscus);}

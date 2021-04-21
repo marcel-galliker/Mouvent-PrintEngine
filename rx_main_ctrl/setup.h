@@ -24,3 +24,4 @@ int setup_config		(const char *filepath, SRxConfig			*pcfg,			  EN_setup_Action 
 int setup_fluid_system	(const char *filepath,	UINT32				*pflushed,		  EN_setup_Action  action);
 int setup_screw_positions (const char *filepath, SScrewPositions ppos[MAX_STEPPERS], EN_setup_Action  action);
 int setup_vacuum_cleaner(const char* filepath, double *time, EN_setup_Action action);
+int setup_recovery(const char *filepath, SRecoveryFct *data, EN_setup_Action  action);

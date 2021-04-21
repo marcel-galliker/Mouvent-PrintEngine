@@ -142,6 +142,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 if (RxGlobals.StepperStatus[i].RobotUsed) visible = Visibility.Visible;
             }
             Button_PurgeWash.Visibility = visible;
+
+            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide) ? Visibility.Visible : Visibility.Collapsed;
+            Button_Recovery.Visibility = visible;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
@@ -297,6 +300,15 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command("Purge4Ever", EFluidCtrlMode.ctrl_purge4ever, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+            }
+        }
+
+        private void Recovery_Clicked(object sender, RoutedEventArgs e)
+        {
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Recover", "Recover " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            {
+                _command("Recovery", EFluidCtrlMode.ctrl_recovery_start, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
         }
 

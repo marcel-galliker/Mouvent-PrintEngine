@@ -68,6 +68,9 @@
 #define		TIME_BLEED_LINE_TIMEOUT90	9000
 
 #define 	MAX_POS_VARIANCE			2000		// um
+#define		RECOVERY_FLOW				30			// ml
+#define 	RECOVERY_PRESSURE			2500
+#define		RECOVERY_PRESSURE_OLD		1100
 
 // -- END NEW
 
@@ -121,6 +124,7 @@ static int _OldPumpSpeed[NIOS_INK_SUPPLY_CNT] = {0};
 static int _FillPressure=0;
 
 static int _Purge4Ever[NIOS_INK_SUPPLY_CNT] = {FALSE};
+static int _Recovery_Pressure = 0;
 
 INT32 _PumpBeforeOFF;
 INT32 _PumpOFFTime;
@@ -1350,6 +1354,82 @@ void ink_tick_10ms(void)
 				}
 				break;
 				*/
+			case ctrl_recovery_start:
+
+						_set_bleed_valve(isNo, PV_CLOSED);
+						_set_air_valve(isNo, PV_CLOSED);
+						_set_flush_pump(isNo, FALSE);
+						_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
+						_PumpOFFTime = 0;
+						_ShutdownPrint[isNo] = 1;
+
+						// ----- NEW : Ramp start-up pressure  -------
+						if (pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode) {
+							if (pRX_Config->ink_supply[isNo].cylinderPresSet > 10)
+								_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet / 5;// start with low setpoint
+							else _PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet;
+							_StartModePRINT[isNo] = 0;
+							pres_reset_min_max(isNo);
+						}
+						else _StartModePRINT[isNo]++;
+						/* no break */
+			case ctrl_recovery_step1:
+			case ctrl_recovery_step2:
+
+						if ((_PressureSetpoint[isNo] != pRX_Status->ink_supply[isNo].cylinderPresSet) && (_StartModePRINT[isNo] > 500)) {
+							if (_StartModePRINT[isNo] > 504) {
+								if (_PressureSetpoint[isNo] < pRX_Status->ink_supply[isNo].cylinderPresSet) _PressureSetpoint[isNo]++;
+								else _PressureSetpoint[isNo]--;
+								_StartModePRINT[isNo] = 500;
+							}
+						}
+						pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+
+						// --- Detect filter clogged -------
+						if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual != INVALID_VALUE && pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900) {
+							_FilterCloggedTime[isNo]++;
+							if (_FilterCloggedTime[isNo] > 6000)// 1 minute over 900 mbars
+								pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
+						}
+						else _FilterCloggedTime[isNo] = 0;
+						_pump_ctrl(isNo, RECOVERY_FLOW, PUMP_CTRL_MODE_PRINT);
+						break;
+						
+			case ctrl_recovery_step3:
+						if (is_Sensor_25(isNo))
+							_Recovery_Pressure = RECOVERY_PRESSURE;
+						else
+							_Recovery_Pressure = RECOVERY_PRESSURE_OLD;
+						_init_purge(isNo, PRESSURE_HARD_PURGE);
+						_Recovery_Pressure = 0;
+						break;
+						
+			case ctrl_recovery_step4:
+						_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
+						pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+						break;
+						
+			case ctrl_recovery_step5:
+						_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
+						_InkSupply[isNo].purgeTime = 0;
+						if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
+							pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+						break;
+						
+					case ctrl_recovery_step6:
+						if (_InkSupply[isNo].purgeTime < pRX_Config->ink_supply[isNo].purgeTime) {
+							_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
+							_set_bleed_valve(isNo, PV_CLOSED);
+							_InkSupply[isNo].purgeTime += cycleTime;
+						}
+						else
+						{
+							_InkSupply[isNo].purgePressure = 0;
+							_set_pump_speed(isNo, 0);
+							_set_air_valve(isNo, PV_OPEN);
+							pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+						}
+						break;
 
 			default:
 				if (pRX_Config->ink_supply[isNo].ctrl_mode>=ctrl_wipe && pRX_Config->ink_supply[isNo].ctrl_mode<ctrl_fill)
@@ -1480,6 +1560,11 @@ static void _init_purge(int isNo, int pressure)
 		if(pRX_Config->ink_supply[isNo].purge_putty_pressure)
 		{
 			_InkSupply[isNo].purgePressure = pRX_Config->ink_supply[isNo].purge_putty_pressure;
+		}
+		else if (_Recovery_Pressure)
+		{
+			_InkSupply[isNo].purgePressure = _Recovery_Pressure;
+			_Recovery_Pressure = 0;
 		}
 		else
 		{

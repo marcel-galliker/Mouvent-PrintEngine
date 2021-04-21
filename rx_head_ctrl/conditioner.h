@@ -51,4 +51,4 @@ void cond_start_preslog (void);
 ELogItemType cond_err_level		(void);
 
 void cond_start_log(void);
-    
+void set_recovery_freq(int freq_hz);

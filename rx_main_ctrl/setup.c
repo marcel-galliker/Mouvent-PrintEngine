@@ -352,3 +352,45 @@ int setup_vacuum_cleaner(const char* filepath, double *time, EN_setup_Action act
     setup_destroy(file);
     return REPLY_OK;
 }
+
+int setup_recovery(const char *filepath, SRecoveryFct *data, EN_setup_Action  action)
+{
+    int i;
+    HANDLE file = setup_create();
+    if (!rx_file_exists(filepath)) action = WRITE;
+
+    setup_load(file, filepath);
+
+	if (setup_chapter(file, "RecoveryData", -1, action) == REPLY_OK)
+	{
+
+		for (i = 0; i < SIZEOF(data->freq_hz); i++)
+		{
+			if (setup_chapter(file, "PrintingFreq", i, action) == REPLY_OK)
+			{
+				setup_int32(file, "Hz", action, &data->freq_hz[i], 0);
+				setup_chapter(file, "..", -1, action);
+			}
+		}
+
+		for (i = 0; i < SIZEOF(data->printing_time_min); i++)
+		{
+			if (setup_chapter(file, "PrintingTime", i, action) == REPLY_OK)
+			{
+				setup_int32(file, "Min", action, &data->printing_time_min[i], 0);
+				setup_chapter(file, "..", -1, action);
+			}
+		}
+
+		if (setup_chapter(file, "PurgeTime", -1, action) == REPLY_OK)
+		{
+			setup_int32(file, "Sec", action, &data->purge_time_s, 0);
+			setup_chapter(file, "..", -1, action);
+		}
+	}
+    
+    if (action == WRITE) setup_save(file, filepath);
+    setup_destroy(file);
+    return REPLY_OK;
+    
+}

@@ -41,6 +41,8 @@
 #define 	TIME_PURGE					3000	// [ms]
 #define 	TIME_HARD_PURGE				10000	// [ms]
 
+#define		TIME_PURGE_DELAY			5000	// [ms]
+
 //--- statics ----------------------------------------
 
 static int				_FluidThreadRunning=FALSE;
@@ -66,7 +68,7 @@ static void* _fluid_thread(void *par);
 static int _handle_fluid_ctrl_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *ppar);
 static int _connection_closed		(RX_SOCKET socket, const char *peerName);
 static void _send_ctrlMode			(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
-static void _send_purge_par			(int fluidNo, int time, int position_check);
+static void _send_purge_par			(int fluidNo, int time, int position_check, int delay_time_ms);
 
 static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat);
 static void _do_scales_stat(int fluidNo, SScalesStatMsg   *pstat);
@@ -103,6 +105,7 @@ static int				_HeadFlowFactorCnt[INK_SUPPLY_CNT];
 
 static INT32			_HeadErr[INK_SUPPLY_CNT+2];
 static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
+static SRecoveryFct		_RecoveryData = { 0 };
 
 
 
@@ -137,7 +140,14 @@ int	fluid_init(void)
 		_FluidThreadRunning = TRUE;
 		rx_thread_start(_fluid_thread, NULL, 0, "_fluid_thread");	
 	}
-	return REPLY_OK;
+
+    memset(&_RecoveryData, 0, sizeof(_RecoveryData));
+    setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
+    
+    // To adjust the file to the size of _RecoveryData
+    setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, WRITE);
+
+    return REPLY_OK;
 }
 
 //--- fluid_init_flushed ----------------------------------------------------------------
@@ -614,6 +624,7 @@ static void _control(int fluidNo)
 	static int	_txrob;
     static int j = 0;
     static UINT32 _flushedNeeded = 0x00;
+	static int _RecoveryTime = 0;
 	int i;
     for (i = 0; i < RX_Config.inkSupplyCnt; i++)
     {
@@ -705,13 +716,13 @@ static void _control(int fluidNo)
 											if (pstat->purge_putty_ON) time=0;
 											switch(pstat->ctrlMode)
 											{
-											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE, TRUE); _txrob=FALSE; break;
-											case ctrl_purge:			_send_purge_par(no, TIME_PURGE, TRUE);	  _txrob=FALSE; break;
-											case ctrl_purge_hard_wipe:	_send_purge_par(no, time, TRUE); break;
-											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, FALSE); break;
-                                            case ctrl_purge_hard_wash:	_send_purge_par(no, time, FALSE); break;
-											case ctrl_purge_hard:		_send_purge_par(no, time, TRUE); _txrob=FALSE; break;
-                                            case ctrl_purge4ever:		_send_purge_par(no, 0, FALSE); 
+											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE, TRUE, TIME_PURGE_DELAY); _txrob=FALSE; break;
+											case ctrl_purge:			_send_purge_par(no, TIME_PURGE, TRUE, TIME_PURGE_DELAY);	  _txrob=FALSE; break;
+											case ctrl_purge_hard_wipe:	_send_purge_par(no, time, TRUE, TIME_PURGE_DELAY); break;
+											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, FALSE, TIME_PURGE_DELAY); break;
+                                            case ctrl_purge_hard_wash:	_send_purge_par(no, time, FALSE, TIME_PURGE_DELAY); break;
+											case ctrl_purge_hard:		_send_purge_par(no, time, TRUE, TIME_PURGE_DELAY); _txrob=FALSE; break;
+                                            case ctrl_purge4ever:		_send_purge_par(no, 0, FALSE, TIME_PURGE_DELAY); 
 																		machine_set_capping_timer(FALSE); break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
@@ -949,7 +960,35 @@ static void _control(int fluidNo)
 											{
 											    _send_ctrlMode(no, _EndCtrlMode[no], TRUE);
 											}
-                                            break;                             
+                                            break;
+
+			   case ctrl_recovery_start:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
+											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
+											_send_ctrlMode(no, ctrl_recovery_step1, TRUE); break;
+			   case ctrl_recovery_step1:	if (!_RecoveryTime)	_RecoveryTime = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
+											if (rx_get_ticks() >= _RecoveryTime)
+											{
+                                                ctrl_set_recovery_freq(_RecoveryData.freq_hz[1]);
+												_RecoveryTime = 0;
+												_send_ctrlMode(no, ctrl_recovery_step2, TRUE); break;
+											}
+											break;
+
+			   case ctrl_recovery_step2:	if (!_RecoveryTime)	_RecoveryTime = rx_get_ticks() + _RecoveryData.printing_time_min[1] * 60 * 1000;
+											if (rx_get_ticks() >= _RecoveryTime)
+											{
+												_RecoveryTime = 0;
+												_send_ctrlMode(no, ctrl_recovery_step3, TRUE); break;
+											}
+											break;
+
+			   case ctrl_recovery_step3:	_send_purge_par(no, _RecoveryData.purge_time_s*1000, FALSE, _RecoveryData.purge_time_s*1000); 
+											_send_ctrlMode(no, ctrl_recovery_step4, TRUE); break;
+											break;
+
+			   case ctrl_recovery_step4:	_send_ctrlMode(no, ctrl_recovery_step5, TRUE); break;
+			   case ctrl_recovery_step5:	_send_ctrlMode(no, ctrl_recovery_step6, TRUE); break;
+			   case ctrl_recovery_step6:	_send_ctrlMode(no, ctrl_off, TRUE); break;
 
                 //--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
@@ -1318,7 +1357,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 }
 
 //--- _send_purge_par -------------------------------------------------
-static void _send_purge_par(int fluidNo, int time, int position_check)
+static void _send_purge_par(int fluidNo, int time, int position_check, int delay_time_ms)
 {
 #define HEAD_WIDTH 43000
 	SPurgePar par;
@@ -1335,7 +1374,7 @@ static void _send_purge_par(int fluidNo, int time, int position_check)
     {
         par.delay_pos_y = 0;
     }
-	par.time  = ctrl_send_purge_par(fluidNo, time, position_check);
+	par.time  = ctrl_send_purge_par(fluidNo, time, position_check, delay_time_ms);
     if (RX_StepperStatus.robot_used) _Vacuum_Time[fluidNo] = par.time;
 	sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
     _InitDone |= 0x01 << fluidNo;

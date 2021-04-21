@@ -142,9 +142,10 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 	static int time[MSG_BUF_SIZE];
     void *pdata = &phdr[1];
     SValue *data;
+    int *freq;
 
 
-	// these functions mustn't use any FPGA Register !!!!
+    // these functions mustn't use any FPGA Register !!!!
 	switch (phdr->msgId)
 	{
 	case 0:				return REPLY_OK;
@@ -163,7 +164,12 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
         cond_resetPumpTime(2);
         cond_resetPumpTime(3);
         break;
-	default:		{
+        
+    case CMD_SET_RECOVERY_FREQ:
+        freq = (int *)pdata;
+        set_recovery_freq(*freq);
+        break;
+    default:		{
 						// ALL messages that use FPGA Registers
 						int idx = (_MsgBufIn + 1) % MSG_BUF_SIZE;
 						if (idx == _MsgBufOut) 

@@ -960,7 +960,7 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 }
 
 //--- ctrl_send_purge_par ----------------------------------------------
-int ctrl_send_purge_par(int fluidNo, int time, int position_check)
+int ctrl_send_purge_par(int fluidNo, int time, int position_check, int delay_time_ms)
 {
 #define HEAD_WIDTH	43000
 	int head;
@@ -978,7 +978,7 @@ int ctrl_send_purge_par(int fluidNo, int time, int position_check)
     if ((RX_StepperStatus.robot_used && position_check) || time == 0)
         delay_time = 0;
     else
-        delay_time = 5000;
+        delay_time = delay_time_ms;
 
     int timeTotal = 0;
     par.delay_pos_y = 0;
@@ -1284,6 +1284,17 @@ void ctrl_reset_cond(void)
     {
         if (_HeadCtrl[i].socket != INVALID_SOCKET)
             sok_send_2(&_HeadCtrl[i].socket, CMD_RESET_COND, 0, NULL);
+    }
+    
+}
+
+//--- ctrl_set_recovery_freq -----------------------------------------
+void ctrl_set_recovery_freq(int freq_hz)
+{
+    for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
+    {
+        if (_HeadCtrl[i].socket != INVALID_SOCKET)
+            sok_send_2(&_HeadCtrl[i].socket, CMD_SET_RECOVERY_FREQ, sizeof(freq_hz), &freq_hz);
     }
     
 }

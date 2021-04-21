@@ -95,6 +95,7 @@ void rx_def_init();
 #define FILENAME_VACUUM_TIME	"vacuumTime.xml"
 #define FILENAME_FLUID_STATE	"fluid.xml"
 #define FILENAME_HEADS_FLUSHED	"heads_flushed.xml"
+#define FILENAME_RECOVERY		"recovery.xml"
 #define FILENAME_PLC_CFG		"plc.cfg"
 #define FILENAME_PLC_PAR		"plc.par"
 #define FILENAME_MATERIAL		"material.xml"
@@ -1112,7 +1113,14 @@ typedef struct SHeadStateLight
 	INT32			canisterEmpty;
     INT32			act_pos_y;
 } SHeadStateLight;
-			
+
+typedef struct SRecoveryFct
+{
+    INT32 freq_hz[2];
+    INT32 printing_time_min[2];
+    INT32 purge_time_s;
+} SRecoveryFct;
+
 typedef struct SFluidStateLight
 {
 	INT32			cylinderPressure;

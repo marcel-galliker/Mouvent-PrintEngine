@@ -846,6 +846,86 @@ void pump_tick_10ms(void)
 						||  (RX_Config.mode==ctrl_fill_step5 && RX_Status.pressure_in!=INVALID_VALUE && RX_Status.pressure_in>0)) 
 							RX_Status.mode = RX_Config.mode;
 						break;
+						
+		case ctrl_recovery_start:
+						if (RX_Config.mode != RX_Status.mode)
+						{
+							_PumpPID.P 			= DEFAULT_P;
+							_PumpPID.I 			= DEFAULT_I;
+							
+							// Calculate the P reduced factor depending of number of heads per color
+							// NbHeads = 1 or 4 : P_start = 2 (P divide by 2)
+							// NbHeads = 8 : P_start = 3
+							// NbHeads = 12 : P_Start = 4
+							if(RX_Config.headsPerColor < 8) _PumpPID.P_start	= 2;
+							if(RX_Config.headsPerColor == 8) _PumpPID.P_start	= 3;
+							else _PumpPID.P_start	= 4;
+							_Start_PID = START_PID_P_REDUCED;
+							_PumpPID.start_integrator = 0;
+							// Meniscus setpoint in WF (if 0, setpoint=default)
+							_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+							if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
+							pid_reset(&_PumpPID);
+							RX_Status.pressure_in_max=INVALID_VALUE;
+							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink | COND_ERR_p_in_too_high);
+							_meniscus_err_cnt=0;
+							_no_ink_err_cnt  =0;		
+						//	_TimeFlowResistancestablePRINT = 0;							
+						}
+						/* no break */
+						
+		case ctrl_recovery_step1:
+		case ctrl_recovery_step2:	
+						temp_ctrl_on(TRUE);
+						_set_valve(VALVE_INK);
+                        max_pressure = MBAR_500;
+						_ShutdownPrint = 1;
+       
+						_pump_pid(TRUE);
+						
+						RX_Status.mode = RX_Config.mode; 		
+            break;
+				
+		case ctrl_recovery_step3:
+						temp_ctrl_on(FALSE);
+						turn_off_pump();
+						RX_Status.pressure_in_max=INVALID_VALUE;
+						max_pressure = MBAR_500;
+						pid_reset(&_PumpPID);
+						RX_Status.mode = RX_Config.mode;
+						_Purge4Ever = ctrl_purge4ever == RX_Config.mode;
+						break;
+		
+		case ctrl_recovery_step4:
+		case ctrl_recovery_step5:
+						temp_ctrl_on(FALSE);
+						turn_off_pump();
+						_presure_in_max();
+						max_pressure = MBAR_500;
+						_PurgeDelay = 0;
+						_PurgeTime  = 0;
+            RX_Status.mode = RX_Config.mode;
+						break;
+		
+		case ctrl_recovery_step6:
+						_presure_in_max();
+						if ((RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) && RX_Config.purgeDelayPos_y) || 
+							(_PurgeTime>RX_Config.purgeTime && !_Purge4Ever) || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
+						{
+							if (RX_Config.purgeDelayPos_y == 0)_PurgeDelay += cycle_time;
+							temp_ctrl_on(FALSE);
+							_set_valve(VALVE_OFF);
+						}
+						else
+						{
+							_PurgeTime+=cycle_time;
+							temp_ctrl_on(TRUE);
+							_set_valve(VALVE_INK);
+						}
+						_set_pump_speed(0);
+						max_pressure = MBAR_500;
+						RX_Status.mode = RX_Config.mode;
+						break;
         				
 		
 		default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)
