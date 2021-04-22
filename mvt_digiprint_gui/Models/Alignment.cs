@@ -11,7 +11,6 @@ namespace RX_DigiPrint.Models
     public class Alignment : RxBindable
     {
         public const int kMaxColors = 16; // max number of ink supplies
-        public const int kHeadsPerCluster = 4;
 
         public int NumberOfClusters { get; set; }
 
@@ -307,9 +306,9 @@ namespace RX_DigiPrint.Models
                 {
                     for (int c = 0; c < NumberOfClusters; c++)
                     {
-                        for (int h = 0; h < kHeadsPerCluster; h++)
+                        for (int h = 0; h < Constants.kHeadsPerCluster; h++)
                         {
-                            int globalHeadNumber = c * kHeadsPerCluster + h;
+                            int globalHeadNumber = c * Constants.kHeadsPerCluster + h;
                             int inkSupplyNumber = globalHeadNumber / RxGlobals.PrintSystem.HeadsPerInkCylinder; // global ink supply number
                             int inkSupplyHeadNumber = globalHeadNumber % RxGlobals.PrintSystem.HeadsPerInkCylinder; // local head number in ink supply
 

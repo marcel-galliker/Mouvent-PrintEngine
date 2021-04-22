@@ -1,3 +1,4 @@
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
@@ -82,5 +83,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
         }
 
+        //--- Center_Clicked ---------------------------------------------
+        private void Center_Clicked(object sender, RoutedEventArgs e)
+        {
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            item.PageMargin = (Constants.kHeadsPerCluster * RxGlobals.ClusterStat.Number * Constants.HeadWidth - item.PageWidth) / 2;
+        }
     }
 }

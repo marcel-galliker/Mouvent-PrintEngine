@@ -2673,4 +2673,7 @@ No Splices in the machine?</value>
   <data name="WARN 32" xml:space="preserve">
     <value>WARN 32:</value>
   </data>
+  <data name="Center" xml:space="preserve">
+    <value>Center</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_Common;
 using RX_DigiPrint.Helpers;
@@ -36,8 +37,6 @@ namespace RX_DigiPrint.Views.Alignment
         }
 
         private float LastAngleValue { get; set; }
-        
-        private const int kHeadsPerCluster = 4;
 
         private RX_DigiPrint.Models.Alignment _Alignment = RxGlobals.Alignment;
 
@@ -80,16 +79,16 @@ namespace RX_DigiPrint.Views.Alignment
         {
             List<Button> printHeadColorButtons = new List<Button>{ PrintHeadColor0, PrintHeadColor1, PrintHeadColor2, PrintHeadColor3 };
             SolidColorBrush brush = Brushes.WhiteSmoke;
-            for (int h = 0; h < kHeadsPerCluster; h++)
+            for (int h = 0; h < Constants.kHeadsPerCluster; h++)
             {
                 int globalHeadNumber = 0;
                 if (RxGlobals.PrintSystem.IsTx)
                 {
-                    globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
+                    globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h;
                 }
                 else
                 {
-                    globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
+                    globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h;
                 }
                 Button button = printHeadColorButtons[h];
                 if (RxGlobals.PrintSystem.IsTx) button = printHeadColorButtons[3 - h];
@@ -157,9 +156,9 @@ namespace RX_DigiPrint.Views.Alignment
             int globalHeadNumber = -1;
             if (RxGlobals.PrintSystem.IsTx)
             {
-                tag = (kHeadsPerCluster - 1) - tag;
+                tag = (Constants.kHeadsPerCluster - 1) - tag;
             }
-            globalHeadNumber = ClusterNumber * kHeadsPerCluster + tag;
+            globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + tag;
             int inkCylinderNumber = globalHeadNumber / RxGlobals.PrintSystem.HeadsPerInkCylinder;
 
             if (_Alignment.RobotIsConnected)
@@ -215,9 +214,9 @@ namespace RX_DigiPrint.Views.Alignment
             int globalHeadNumber = -1;
             if (RxGlobals.PrintSystem.IsTx)
             {
-                tag = (kHeadsPerCluster - 1) - tag;
+                tag = (Constants.kHeadsPerCluster - 1) - tag;
             }
-            globalHeadNumber = ClusterNumber * kHeadsPerCluster + tag;
+            globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + tag;
             int inkCylinderNumber = globalHeadNumber / RxGlobals.PrintSystem.HeadsPerInkCylinder;
 
             if (_Alignment.RobotIsConnected)
@@ -261,9 +260,9 @@ namespace RX_DigiPrint.Views.Alignment
             int globalHeadNumber = -1;
             if (RxGlobals.PrintSystem.IsTx)
             {
-                tag = (kHeadsPerCluster - 1) - tag;
+                tag = (Constants.kHeadsPerCluster - 1) - tag;
             }
-            globalHeadNumber = ClusterNumber * kHeadsPerCluster + tag;
+            globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + tag;
             RxGlobals.DisabledJets.SetHeadNumber(globalHeadNumber);
             RxGlobals.DisabledJets.Changed = false;
             RxGlobals.Density.SetHeadNumber(globalHeadNumber);
@@ -309,9 +308,9 @@ namespace RX_DigiPrint.Views.Alignment
             int h = tag;
             if (RxGlobals.PrintSystem.IsTx)
             {
-                h = (kHeadsPerCluster - 1) - h;
+                h = (Constants.kHeadsPerCluster - 1) - h;
             }
-            globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
+            globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h;
 
             SoftwareValueCorrection.SoftwareValueType type = SoftwareValueCorrection.SoftwareValueType.TypeRegister;
             SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue, globalHeadNumber);
@@ -363,9 +362,9 @@ namespace RX_DigiPrint.Views.Alignment
             int h = tag;
             if (RxGlobals.PrintSystem.IsTx)
             {
-                h = (kHeadsPerCluster - 1) - h;
+                h = (Constants.kHeadsPerCluster - 1) - h;
             }
-            globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
+            globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h;
             
             SoftwareValueCorrection.SoftwareValueType type =  SoftwareValueCorrection.SoftwareValueType.TypeRegisterBackwards;
             SoftwareValueCorrectionView wnd = new SoftwareValueCorrectionView(type, correctionValue, globalHeadNumber);
@@ -492,10 +491,10 @@ namespace RX_DigiPrint.Views.Alignment
                 if (RxGlobals.PrintSystem.IsTx)
                 {
                     //int remainder = (4 - ((RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.HeadsPerColor) % 4)) % 4;
-                    //globalHeadNumber = ClusterNumber * kHeadsPerCluster + h - remainder;
-                    h = (kHeadsPerCluster - 1) - h;
+                    //globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h - remainder;
+                    h = (Constants.kHeadsPerCluster - 1) - h;
                 }
-                globalHeadNumber = ClusterNumber * kHeadsPerCluster + h;
+                globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h;
                 
 
                 if (globalHeadNumber >= 0)

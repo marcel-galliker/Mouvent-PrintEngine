@@ -388,10 +388,10 @@ namespace RX_DigiPrint.Models
             ShowColorOffset.Clear();
             double dist;
             double distBack;
-            for (int h = 0; h < Alignment.kHeadsPerCluster; h++)
+            for (int h = 0; h < Constants.kHeadsPerCluster; h++)
             {
                 int globalHeadNumber = 0;
-                globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
+                globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h;
 
                 dist = RxGlobals.PrintSystem.HeadDist[globalHeadNumber];
                 distBack = RxGlobals.PrintSystem.HeadDistBack[globalHeadNumber];
@@ -489,7 +489,7 @@ namespace RX_DigiPrint.Models
             }
 
             HasVisibleColorOffsetCorrectionValue = false;
-            for (int i = 0; i < Alignment.kHeadsPerCluster; i++)
+            for (int i = 0; i < Constants.kHeadsPerCluster; i++)
             {
                 if (ShowColorOffset[i].Value == true)
                 {
@@ -501,10 +501,10 @@ namespace RX_DigiPrint.Models
 
         public void SaveCorrectionValues()
         {
-            for (int h = 0; h < Alignment.kHeadsPerCluster; h++)
+            for (int h = 0; h < Constants.kHeadsPerCluster; h++)
             {
                 int globalHeadNumber = 0;
-                globalHeadNumber = ClusterNumber * Alignment.kHeadsPerCluster + h;
+                globalHeadNumber = ClusterNumber * Constants.kHeadsPerCluster + h;
                 if (globalHeadNumber >= 0)
                 {
                     int inkSupplyNumber = globalHeadNumber / RxGlobals.PrintSystem.HeadsPerInkCylinder;
@@ -591,7 +591,7 @@ namespace RX_DigiPrint.Models
             BackwardRegisterCorrectionValues.Clear();
             ColorOffsetCorrectionValues.Clear();
 
-            for (int i = 0; i < Alignment.kHeadsPerCluster; i++)
+            for (int i = 0; i < Constants.kHeadsPerCluster; i++)
             {
                 AngleCorrectionValues.Add(new AngleCorrectionValue() { Correction = 0.0 });
                 StitchCorrectionValues.Add(new StitchCorrectionValue() { Correction = 0.0 });
