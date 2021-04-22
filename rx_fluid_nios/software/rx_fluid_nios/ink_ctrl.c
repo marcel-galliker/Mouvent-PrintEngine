@@ -1197,7 +1197,7 @@ void ink_tick_10ms(void)
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, PV_CLOSED);
 				}
-				else if (_InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime || _Purge4Ever[isNo])
+				else if ((pRX_Config->ink_supply[isNo].purgeTime == 0 && pRX_Config->ink_supply[isNo].delay_pos_y == 0) || _InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime || _Purge4Ever[isNo])
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, PV_CLOSED);
