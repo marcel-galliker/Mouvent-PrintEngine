@@ -68,9 +68,10 @@
 #define		TIME_BLEED_LINE_TIMEOUT90	9000
 
 #define 	MAX_POS_VARIANCE			2000		// um
-#define		RECOVERY_FLOW				30			// ml
+#define		RECOVERY_FLOW				60			// mbar/10
 #define 	RECOVERY_PRESSURE			2500
 #define		RECOVERY_PRESSURE_OLD		1100
+#define		RECOVERY_PRESSURE_END		100
 
 // -- END NEW
 
@@ -1432,10 +1433,15 @@ void ink_tick_10ms(void)
 						}
 						break;
 
+			case ctrl_recovery_step7:
+						if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= RECOVERY_PRESSURE_END)
+							pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+						break;
+
 			default:
 				if (pRX_Config->ink_supply[isNo].ctrl_mode>=ctrl_wipe && pRX_Config->ink_supply[isNo].ctrl_mode<ctrl_fill)
 				{
-					_set_air_valve(isNo, TRUE);
+					_set_air_valve(isNo, PV_OPEN);
 					_set_pump_speed(isNo, 0);
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				}

@@ -358,7 +358,7 @@ void nios_set_is_cfg(SInkSupplyCfg *pcfg)
 		_Cfg->ink_supply[no].present         = (pcfg->ink.fileName[0]!=0);
 		if (pcfg->cylinderPresSet<=INK_PRESSURE_MAX) _Cfg->ink_supply[no].cylinderPresSet = pcfg->cylinderPresSet;
 		
-        if (_Cfg->ink_supply[no].ctrl_mode >= ctrl_recovery_start && _Cfg->ink_supply[no].ctrl_mode <= ctrl_recovery_step6)
+        if (_Cfg->ink_supply[no].ctrl_mode >= ctrl_recovery_start && _Cfg->ink_supply[no].ctrl_mode <= ctrl_recovery_step7)
         {
             _Cfg->ink_supply[no].meniscusSet = RECOVERY_MENISCUS;
             _Cfg->ink_supply[no].heaterTemp = RECOVERY_TEMP * 1000;

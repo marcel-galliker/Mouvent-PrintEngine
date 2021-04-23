@@ -624,7 +624,7 @@ static void _control(int fluidNo)
 	static int	_txrob;
     static int j = 0;
     static UINT32 _flushedNeeded = 0x00;
-	static int _RecoveryTime = 0;
+	static int _RecoveryTime[INK_SUPPLY_CNT] = { 0 };
 	int i;
     for (i = 0; i < RX_Config.inkSupplyCnt; i++)
     {
@@ -964,20 +964,21 @@ static void _control(int fluidNo)
 
 			   case ctrl_recovery_start:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
 											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
+											_RecoveryTime[no] = 0;
 											_send_ctrlMode(no, ctrl_recovery_step1, TRUE); break;
-			   case ctrl_recovery_step1:	if (!_RecoveryTime)	_RecoveryTime = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
-											if (rx_get_ticks() >= _RecoveryTime)
+			   case ctrl_recovery_step1:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
+											if (rx_get_ticks() >= _RecoveryTime[no])
 											{
                                                 ctrl_set_recovery_freq(_RecoveryData.freq_hz[1]);
-												_RecoveryTime = 0;
+												_RecoveryTime[no] = 0;
 												_send_ctrlMode(no, ctrl_recovery_step2, TRUE); break;
 											}
 											break;
 
-			   case ctrl_recovery_step2:	if (!_RecoveryTime)	_RecoveryTime = rx_get_ticks() + _RecoveryData.printing_time_min[1] * 60 * 1000;
-											if (rx_get_ticks() >= _RecoveryTime)
+			   case ctrl_recovery_step2:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[1] * 60 * 1000;
+											if (rx_get_ticks() >= _RecoveryTime[no])
 											{
-												_RecoveryTime = 0;
+												_RecoveryTime[no] = 0;
 												_send_ctrlMode(no, ctrl_recovery_step3, TRUE); break;
 											}
 											break;
@@ -988,7 +989,8 @@ static void _control(int fluidNo)
 
 			   case ctrl_recovery_step4:	_send_ctrlMode(no, ctrl_recovery_step5, TRUE); break;
 			   case ctrl_recovery_step5:	_send_ctrlMode(no, ctrl_recovery_step6, TRUE); break;
-			   case ctrl_recovery_step6:	_send_ctrlMode(no, ctrl_off, TRUE); break;
+               case ctrl_recovery_step6:	_send_ctrlMode(no, ctrl_recovery_step7, TRUE); break;
+			   case ctrl_recovery_step7:	_send_ctrlMode(no, ctrl_off, TRUE); break;
 
                 //--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;

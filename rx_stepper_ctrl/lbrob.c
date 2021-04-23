@@ -53,7 +53,7 @@
 #define VACUUM_PUMP_TIME        25000       // ms
 #define WASTE_PUMP_TIME         30000       // ms
 
-#define DISTANCE_PER_TURN       9           // um
+#define DISTANCE_PER_TURN       11          // um
 #define STEPS_PER_TURN          6           // steps
 
 #define MAX_WAIT_TIME_SLEDGE    100000  // ms

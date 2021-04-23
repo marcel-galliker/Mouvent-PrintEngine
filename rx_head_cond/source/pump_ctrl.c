@@ -926,7 +926,10 @@ void pump_tick_10ms(void)
 						max_pressure = MBAR_500;
 						RX_Status.mode = RX_Config.mode;
 						break;
-        				
+						
+		case ctrl_recovery_step7:
+        				RX_Status.mode = RX_Config.mode;
+						break;		
 		
 		default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)
 						{						
