@@ -256,7 +256,6 @@ void ink_tick_10ms(void)
 	INT32 isNo;
 	INT32 i;
 	INT32 empty_pressure = 800; // 100 * pRX_Config->headsPerColor;
-	INT32 tmp;
 
 	_LungVacc = DEGASSING_VACCUUM_WB;
 
@@ -1194,13 +1193,12 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_purge_step4:
-				tmp = pRX_Config->ink_supply[isNo].delay_pos_y;
-				if (tmp && pRX_Config->ink_supply[isNo].act_pos_y <= (pRX_Config->ink_supply[isNo].delay_pos_y - MAX_POS_VARIANCE))
+				if (pRX_Config->ink_supply[isNo].delay_pos_y && pRX_Config->ink_supply[isNo].act_pos_y <= (pRX_Config->ink_supply[isNo].delay_pos_y - MAX_POS_VARIANCE))
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, PV_CLOSED);
 				}
-				else if (tmp == 0 && (pRX_Config->ink_supply[isNo].purgeTime == 0 || _InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime || _Purge4Ever[isNo]))
+				else if (pRX_Config->ink_supply[isNo].purgeTime == 0 || _InkSupply[isNo].purgeTime<pRX_Config->ink_supply[isNo].purgeTime || _Purge4Ever[isNo])
 				{
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, PV_CLOSED);
