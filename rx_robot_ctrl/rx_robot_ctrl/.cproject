@@ -17,9 +17,9 @@
 				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.ftdichip.build.config.ft900.debug.freertos.506498793" name="FT900_Debug" parent="com.ftdichip.build.config.ft900.debug.freertos">
 					<folderInfo id="com.ftdichip.build.config.ft900.debug.freertos.506498793." name="/" resourcePath="">
 						<toolChain id="com.ftdichip.toolchain.ft900.debug.freertos.2063302738" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.freertos">
-							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.763616439" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash"/>
-							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.2055439549" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize" value="true" valueType="boolean"/>
-							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.844051986" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path" value="C:/Program Files (x86)/Bridgetek/FT9xx Toolchain/Toolchain/tools/bin" valueType="string"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.763616439" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.2055439549" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.844051986" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="C:/Program Files (x86)/Bridgetek/FT9xx Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x.1257653837" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/rx_robot_ctrl}/FT900_Debug" id="com.ftdichip.managedbuild.gnu.cross.ft90x.builder.1845965739" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.ftdichip.compiler.ft900.debug.freertos.1747901355" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.debug.freertos">
@@ -59,7 +59,8 @@
 								<option id="com.ftdichip.linker.option.ldOther.ft900.debug.freertos.1287886527" name="Other options (-Xlinker [option])" superClass="com.ftdichip.linker.option.ldOther.ft900.debug.freertos" useByScannerDiscovery="false" valueType="stringList">
 									<listOptionValue builtIn="false" value="-dT &quot;../ld/freertos.ld&quot;"/>
 								</option>
-								<option id="gnu.c.link.option.strip.1411547384" name="Omit all symbol information (-s)" superClass="gnu.c.link.option.strip" value="true" valueType="boolean"/>
+								<option id="gnu.c.link.option.strip.1411547384" name="Omit all symbol information (-s)" superClass="gnu.c.link.option.strip" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.linker.option.ldFlags.21091743" name="Linker flags" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.linker.option.ldFlags" useByScannerDiscovery="false" value="-Wl,--gc-sections -Wl,--entry=_start" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.222664574" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -68,7 +69,7 @@
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1956144717" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1525899211" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
 							<tool id="com.ftdichip.assembler.ft900.debug.freertos.1311495989" name="FT9xx GCC Assembler" superClass="com.ftdichip.assembler.ft900.debug.freertos">
-								<option id="gnu.both.asm.option.include.paths.1757298676" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
+								<option id="gnu.both.asm.option.include.paths.1757298676" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" useByScannerDiscovery="false"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1468344911" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1160174916" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
@@ -133,6 +134,7 @@
 									<listOptionValue builtIn="false" value="-dT &quot;../ld/freertos.ld&quot;"/>
 								</option>
 								<option id="gnu.c.link.option.strip.2131065521" name="Omit all symbol information (-s)" superClass="gnu.c.link.option.strip" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.linker.option.ldFlags.1862571295" name="Linker flags" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.linker.option.ldFlags" useByScannerDiscovery="false" value="-Wl,--gc-sections -Wl,-Map=rx_robot_ctrl.map,--entry=_start" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.4241964" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
