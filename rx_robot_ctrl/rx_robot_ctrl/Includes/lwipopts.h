@@ -101,13 +101,13 @@
  * Enable Internet Group Management Protocol
  * IP multicast support is used in this application.
  */
-#define LWIP_IGMP                  0
+#define LWIP_IGMP                  1
 
 /* LWIP_ICMP
  * Enable Internet Control Message Protocol
  * Allow support for ICMP which includes ping.
  */
-#define LWIP_ICMP                  0
+#define LWIP_ICMP                  1
 
 /* LWIP_SNMP
  * Disable Simple Network Management Protocol
@@ -143,7 +143,7 @@
 
 #define LWIP_COMPAT_SOCKETS        (NO_SYS==0)
 #define LWIP_PROVIDE_ERRNO         1
-#define LWIP_SO_SNDTIMEO           0
+#define LWIP_SO_SNDTIMEO           1
 #define LWIP_SO_RCVTIMEO           1
 #define LWIP_SO_RCVBUF             0
 
@@ -362,7 +362,7 @@
 #define PBUF_LINK_HLEN          20
 
 /* ---------- TCP options ---------- */
-#define LWIP_TCP                0
+#define LWIP_TCP                1
 #define TCP_TTL                 255
 
 /* Controls if TCP should queue segments that arrive out of
@@ -440,14 +440,14 @@
 /* ---------- DHCP options ---------- */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. */
-#define LWIP_DHCP               0
+#define LWIP_DHCP               1
 
 /* 1 if you want to want DHCP to wait for link to be up
    before starting. */
-#define LWIP_DHCP_CHECK_LINK_UP 0
+#define LWIP_DHCP_CHECK_LINK_UP 1
 /* 1 if you want to do an ARP check on the offered address
    (recommended). */
-#define DHCP_DOES_ARP_CHECK		0
+#define DHCP_DOES_ARP_CHECK		1
 /* 1 if you want to send a hostname to the DHCP server.
    (recommended). */
 #define LWIP_NETIF_HOSTNAME     1

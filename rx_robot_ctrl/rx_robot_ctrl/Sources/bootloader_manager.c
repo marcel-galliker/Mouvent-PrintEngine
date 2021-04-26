@@ -19,21 +19,26 @@
 
 // #define FLASH_TEST
 
+// Task settings
+#define TASK_BOOTLOADER_STACK_SIZE		(500)
+#define TASK_BOOTLOADER_PRIORITY		(8)
+
 #define DATA_TIMEOUT		100
 
 /* Static variables */
 
 // Status Flags
+static bool _isInitialized = false;
 static UINT32		_FileSize=0;
 static UINT32		_FilePos=0;
-static UINT8*		_FlashBuf;
+static UINT8  		_FlashBuf[FLASH_SECTOR_SIZE]={0};
 static TickType_t	_Timeout=0;
 
 /* Prototypes */
 
 static void _download_start(SBootloaderStartCmd* command);
 static void _download_data(SBootloaderDataCmd* command);
-static void _download_reboot(void);
+static void _downlaod_reboot(void);
 static void _request_data(UINT32 filePos);
 static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 
@@ -43,8 +48,7 @@ static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 
 bool bootloader_manager_start(void)
 {
-	_FlashBuf = malloc(FLASH_SECTOR_SIZE);
-	memset(_FlashBuf, 0, FLASH_SECTOR_SIZE);
+	_isInitialized = true;
 	return true;
 }
 
@@ -56,7 +60,7 @@ void bootloader_manager_handle_command(void* msg)
 	{
 	case CMD_BOOTLOADER_START:		_download_start((SBootloaderStartCmd*)msg);	 break;
 	case CMD_BOOTLOADER_DATA:		_download_data((SBootloaderDataCmd*)msg);	 break;
-	case CMD_BOOTLOADER_REBOOT:		_download_reboot();						     break;
+	case CMD_BOOTLOADER_REBOOT:		_downlaod_reboot();						     break;
 	case CMD_BOOTLOADER_SERIALNO:	_set_serialNo((SBootloaderSerialNoCmd*)msg); break;
 	default:
 		break;
@@ -116,7 +120,7 @@ static void _download_start(SBootloaderStartCmd* cmd)
 	TrPrintf(true, "Download Start");
 	_FileSize=0;
 	_FilePos=0;
-	memset(_FlashBuf, 0, FLASH_SECTOR_SIZE);
+	memset(_FlashBuf, 0, sizeof(_FlashBuf));
 
 	if(cmd->size <= FLASH_SIZE)
 	{
@@ -152,13 +156,13 @@ static void _download_data(SBootloaderDataCmd* cmd)
 		_FilePos += cmd->length;
 		if (_FilePos>=_FileSize || (_FilePos%FLASH_SECTOR_SIZE)==0)
 		{
-			TrPrintf(true, "Write Flash sector %d", sector);
+			TrPrintf(true, "Write Flash block %d", sector);
 			taskENTER_CRITICAL();
 			flash_sector_erase(sector);
 			memcpy_dat2flash(sector*FLASH_SECTOR_SIZE, _FlashBuf, FLASH_SECTOR_SIZE);
-			memset(_FlashBuf, 0, FLASH_SECTOR_SIZE);
+			memset(_FlashBuf, 0, sizeof(_FlashBuf));
 			taskEXIT_CRITICAL();
-			TrPrintf(true, "Flash sector %d Written", sector);
+			TrPrintf(true, "Flash block %d Written", sector);
 			if (_FilePos>=_FileSize)
 			{
 				TrPrintf(true, "Download End");
@@ -173,8 +177,8 @@ static void _download_data(SBootloaderDataCmd* cmd)
 	}
 }
 
-//--- _download_reboot --------------------------------------------
-static void _download_reboot(void)
+//--- _downlaod_reboot --------------------------------------------
+static void _downlaod_reboot(void)
 {
 	if (_FilePos>=_FileSize) chip_reboot();
 }

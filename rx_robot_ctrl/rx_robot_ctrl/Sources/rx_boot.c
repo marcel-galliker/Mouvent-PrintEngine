@@ -9,12 +9,14 @@
 
 #include <ft900.h>
 
+#include "tinyprintf.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 
 #include "net.h"
 
-#include "robot_flash.h"
 #include "network_manager.h"
 
 /* Defines */
@@ -24,7 +26,7 @@
 
 // Robot device information
 #define DEVICE_ROBOT			0x08
-#define DEVICE_NAME				"Robot"
+#define DEVICE_STRING			"Robot"
 
 // UDP boot commands
 #define CMD_BOOT_INFO_REQ		0x11000001
@@ -38,65 +40,134 @@
 // MAC serial number mask
 #define MAC_NO_MASK				0x0000ffff00000000
 
+// Task settings
+#define TASK_BOOT_STACK_SIZE		(500)
+#define TASK_BOOT_PRIORITY			(6)
+
+#define TASK_BROADCAST_STACK_SIZE	(500)
+#define TASK_BROADCAST_PRIORITY		(6)
+
 
 /* Static variables */
 
+static QueueHandle_t _rxBootMessageQueue;
 
+// Task handles
+static TaskHandle_t _rxBootTask;
+static TaskHandle_t _rxBootBroadcastTask;
+
+// Broadcast status and device name
 static NetworkItem_t 	_item;
+static const uint8_t 	_deviceName[] = DEVICE_STRING;
 
 // Status flags
 static bool _isAddressConfirmed = false;
 
+static bool _isbroadcastInitalized = false;
 static bool _isInitialized = false;
-
-static TickType_t _BroadcastTime;
 
 
 /* Prototypes */
+static void rx_boot_task(void *pvParameters);
+static void rx_boot_broadcast_task(void *pvParameters);
 static void rx_boot_send_info(uint32_t id);
+static void rx_boot_handle_command(void* msg);
 
-bool rx_boot_start(void)
-{
+
+bool rx_boot_start(void) {
+	// TODO: Check if network is initalized
+
+	_rxBootMessageQueue = network_manager_get_boot_message_queue();
+
+	if(_rxBootMessageQueue == NULL)
+		chip_reboot();
+
+	xTaskCreate(rx_boot_task,
+			"Boot",
+			TASK_BOOT_STACK_SIZE,
+			NULL,
+			TASK_BOOT_PRIORITY,
+			&_rxBootTask);
+
+	xTaskCreate(rx_boot_broadcast_task,
+			"Broadcast",
+			TASK_BROADCAST_STACK_SIZE,
+			NULL,
+			TASK_BROADCAST_PRIORITY,
+			&_rxBootBroadcastTask);
+
+	return true;
+}
+
+bool rx_boot_is_initalized(void) {
+	return (_isInitialized && _isbroadcastInitalized);
+}
+
+static void rx_boot_task(void *pvParameters) {
+	_isInitialized = true;
+
+	while(true)
+	{
+		if(_rxBootMessageQueue != NULL)
+		{
+			void* message = NULL;
+			if(xQueueReceive(_rxBootMessageQueue, &message, portMAX_DELAY) == pdPASS)
+			{
+				rx_boot_handle_command(message);
+				vPortFree(message);
+			}
+		}
+	}
+}
+
+static void rx_boot_broadcast_task(void *pvParameters) {
+	static TickType_t lastWakeTime;
+	static const TickType_t frequency = BROADCAST_INTERVAL / portTICK_PERIOD_MS;
+
+	// TODO: Find a better way to implement this (maybe task signals)
+	while(network_manager_is_initialized() == false){
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+	}
+
 	// Set Device name and get mac address
-	memcpy(_item.deviceTypeStr, DEVICE_NAME, sizeof(_item.deviceTypeStr));
+	memset(&_item, 0, sizeof(_item));
+	memcpy(_item.deviceTypeStr, _deviceName, sizeof(_deviceName));
 	_item.deviceType = DEVICE_ROBOT;
 	memcpy(&_item.macAddr, net_get_mac(), NETIF_MAX_HWADDR_LEN);
 
 	// Get serial number from MAC
-	sprintf((char *)_item.serialNo, "%d", flash_read_serialNo());
+	sprintf((char *)_item.serialNo, "%d", (int)(__bswap64(_item.macAddr & MAC_NO_MASK) >> 16));
 
 	// Get ip address
 	ip_addr_t ip = net_get_ip();
 	ipaddr_ntoa_r(&ip, (char *)_item.ipAddr, sizeof(_item.ipAddr));
 
-	_BroadcastTime = xTaskGetTickCount();
+	_isbroadcastInitalized = true;
 
-	_isInitialized = true;
-	return true;
-}
+	lastWakeTime = xTaskGetTickCount();
 
-int rx_boot_main(TickType_t tick)
-{
-	if (_isInitialized && network_manager_is_initialized() && !_isAddressConfirmed && tick>_BroadcastTime)
+	while(true)
 	{
-		rx_boot_send_info(REP_BOOT_INFO);
-		_BroadcastTime = tick+BROADCAST_INTERVAL;
-		return 1;
+		if(!_isAddressConfirmed)
+		{
+			rx_boot_send_info(REP_BOOT_INFO);
+		}
+
+		vTaskDelayUntil(&lastWakeTime, frequency);
 	}
-	return 0;
 }
 
 static void rx_boot_send_info(uint32_t id)
 {
-	BootInfoMsg_t message;
+	static BootInfoMsg_t message;
+
 	// Broadcast current network status
 	message.id = id;
 	memcpy(&message.item, &_item, sizeof(message.item));
-	
 	network_manager_broadcast(&message, sizeof(message));
 }
 
-void rx_boot_handle_command(void* msg)
+static void rx_boot_handle_command(void* msg)
 {
 	BootAddrSetCmd_t* commandData = NULL;
 	uint32_t *command = (uint32_t *)msg;

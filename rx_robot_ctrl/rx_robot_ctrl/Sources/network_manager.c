@@ -25,7 +25,6 @@
 #include "status_manager.h"
 #include "motor_manager.h"
 #include "bootloader_manager.h"
-#include "rx_boot.h"
 
 #include "rx_trace.h"
 
@@ -75,8 +74,6 @@ static TaskHandle_t _networkManagerConnectionTask;
 #define NETWORK_UPDATE_INTERVAL	(10)
 
 static bool _isInitialized = false;
-static int		_udpDataSize;
-static uint8_t *_udpData;
 
 static int32_t _communicationSocket = -1;
 static int32_t _rxBootSocket = -1;
@@ -88,6 +85,9 @@ static struct sockaddr_in __attribute__ ((aligned (4))) _rxBootServerAddress;
 static struct sockaddr_in __attribute__ ((aligned (4))) _bootloaderClientAddress;
 static struct sockaddr_in __attribute__ ((aligned (4))) _communicationClientAddress;
 static struct sockaddr_in __attribute__ ((aligned (4))) _rxBootClientAddress;
+
+static QueueHandle_t _rxBootMessageQueue;
+static QueueHandle_t _bootloaderMessageQueue;
 
 static void network_manager_task(void *pvParameters);
 static void network_manager_connection_task(void *pvParameters);
@@ -105,9 +105,6 @@ bool network_manager_start(void) {
 	memset(&_bootloaderClientAddress, 0, sizeof(_bootloaderClientAddress));
 	memset(&_communicationClientAddress, 0, sizeof(_communicationClientAddress));
 
-	_udpDataSize = sizeof(SBootloaderDataCmd)+16;
-	_udpData 	 = malloc(_udpDataSize);
-
 	if (xTaskCreate(network_manager_task,
 			"Network",
 			TASK_SERVER_STACK_SIZE,
@@ -116,7 +113,20 @@ bool network_manager_start(void) {
 			&_networkManagerTask) != pdTRUE) {
 	}
 
+	_rxBootMessageQueue 	= xQueueCreate(RX_BOOT_MESSAGE_QUEUE_LENGTH, 	RX_BOOT_MESSAGE_QUEUE_SIZE);
+	_bootloaderMessageQueue = xQueueCreate(BOOTLOADER_MESSAGE_QUEUE_LENGTH, BOOTLOADER_MESSAGE_QUEUE_SIZE);
+
 	return true;
+}
+
+QueueHandle_t network_manager_get_boot_message_queue(void)
+{
+	return _rxBootMessageQueue;
+}
+
+QueueHandle_t network_manager_get_bootloader_message_queue(void)
+{
+	return _bootloaderMessageQueue;
 }
 
 void network_manager_change_ip(ip_addr_t* newIpAddress)
@@ -255,13 +265,11 @@ static void network_manager_task(void *pvParameters)
         while(1)
         {
         	int cnt=0;
-        	TickType_t tick = xTaskGetTickCount();
         	gpio_main();
         	motor_main();
         	cnt += network_manager_process_command_interface();
         	cnt += network_manager_process_broadcast_interface();
         	bootloader_manager_main();
-        	rx_boot_main(tick);
         	if (cnt==0) vTaskDelayUntil(&lastWakeTime, frequency);
         }
 
@@ -313,25 +321,35 @@ static void network_manager_ethif_status_cb(int netif_up, int link_up, int packe
 
 static int network_manager_process_broadcast_interface(void)
 {
-	int32_t size_rx;
+	static uint8_t udpData[BROADCAST_INTERFACE_MAX_PKG_SIZE] = {0};
+	static int32_t size_rx;
 
 	socklen_t len = sizeof(_rxBootClientAddress);
-	size_rx = recvfrom(_rxBootSocket, _udpData, _udpDataSize, MSG_DONTWAIT, (struct sockaddr *)&_rxBootClientAddress, &len);
+	size_rx = recvfrom(_rxBootSocket, udpData, sizeof(udpData), MSG_DONTWAIT, (struct sockaddr *)&_rxBootClientAddress, &len);
 
-	if(size_rx > 0)
+	if((size_rx > 0) && (size_rx < BROADCAST_INTERFACE_MAX_PKG_SIZE))
 	{
-		rx_boot_handle_command(_udpData);
+		void* message = pvPortMalloc(size_rx);
+		memcpy(message, udpData, size_rx);
+
+		// The pointer will be copied into the message q, that's why the reference of message is passed
+		// After that call, message can go out of scope, it will either be freed inside the if if the message q is full
+		// or it will be freed by the receiving end that handles the message.
+		if(xQueueSend(_rxBootMessageQueue, &message, (TickType_t)0) != pdPASS)
+			free(message);
+		return 1;
 	}
 	return 0;
 }
 
 static int network_manager_process_command_interface(void)
 {
-	SMsgHdr *phdr = (SMsgHdr*)_udpData;
+	static uint8_t udpData[sizeof(SBootloaderDataCmd)+10];
+	SMsgHdr *phdr = (SMsgHdr*)udpData;
 	int32_t msgLen;
 
 	socklen_t len = sizeof(_communicationClientAddress);
-	msgLen = recvfrom(_communicationSocket, _udpData, _udpDataSize, MSG_DONTWAIT, (struct sockaddr *)&_communicationClientAddress, &len);
+	msgLen = recvfrom(_communicationSocket, udpData, sizeof(udpData), MSG_DONTWAIT, (struct sockaddr *)&_communicationClientAddress, &len);
 
 	if(msgLen > 0)
 	{
@@ -339,10 +357,10 @@ static int network_manager_process_command_interface(void)
 		{
 			switch((phdr->msgId & COMMAND_TYPE_MASK))
 			{
-			case STATUS_COMMAND_MASK:		status_handle_message(_udpData); 			break;
-			case GPIO_COMMAND_MASK:			gpio_handle_message(_udpData); 				break;
-			case MOTOR_COMMAND_MASK: 		motor_handle_message(_udpData);				break;
-			case BOOTLOADER_COMMAND_MASK: 	bootloader_manager_handle_command(_udpData);break;
+			case STATUS_COMMAND_MASK:		status_handle_message(udpData); break;
+			case GPIO_COMMAND_MASK:			gpio_handle_message(udpData); 	break;
+			case MOTOR_COMMAND_MASK: 		motor_handle_message(udpData);	break;
+			case BOOTLOADER_COMMAND_MASK: 	bootloader_manager_handle_command(udpData);	break;
 			default:	break;
 			}
 			return 1;
