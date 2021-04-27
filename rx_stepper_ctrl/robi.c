@@ -141,6 +141,8 @@ void robi_main(int ticks, int menu)
 
     if (RX_RobiStatus.zPos == POS_DOWN) _ZNotReachedDown = FALSE;
     if (RX_RobiStatus.zPos == POS_UP)   _ZNotReachedUp = FALSE;
+    RX_StepperStatus.screwerinfo.z_in_down = RX_RobiStatus.zPos == POS_DOWN;
+    RX_StepperStatus.screwerinfo.z_in_up = RX_RobiStatus.zPos == POS_UP;
     
 }
 
