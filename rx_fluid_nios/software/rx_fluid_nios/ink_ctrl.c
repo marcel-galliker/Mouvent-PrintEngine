@@ -68,7 +68,6 @@
 #define		TIME_BLEED_LINE_TIMEOUT90	9000
 
 #define 	MAX_POS_VARIANCE			2000		// um
-#define		RECOVERY_FLOW				60			// mbar/10
 #define 	RECOVERY_PRESSURE			2500
 #define		RECOVERY_PRESSURE_OLD		1100
 #define		RECOVERY_PRESSURE_END		50
@@ -1394,7 +1393,7 @@ void ink_tick_10ms(void)
 								pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 						}
 						else _FilterCloggedTime[isNo] = 0;
-						_pump_ctrl(isNo, RECOVERY_FLOW, PUMP_CTRL_MODE_PRINT);
+						_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
 						break;
 						
 			case ctrl_recovery_step3:
@@ -1586,15 +1585,15 @@ static void _init_purge(int isNo, int pressure)
 			    {
 				case printer_TX801 :
 				case printer_TX802 :
-				    case printer_TX404 :
-									    _InkSupply[isNo].purgePressure = 100 + 100*pRX_Config->headsPerColor + pressure; break;
-				    default : 			_InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
-			}
-		}
+				case printer_TX404 :
+									_InkSupply[isNo].purgePressure = 100 + 100*pRX_Config->headsPerColor + pressure; break;
+				default : 			_InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
+			    }
+		    }
 
-		if (_InkSupply[isNo].purgePressure > MAX_PRESSURE_FLUID)
-			_InkSupply[isNo].purgePressure = MAX_PRESSURE_FLUID;
-	}
+		    if (_InkSupply[isNo].purgePressure > MAX_PRESSURE_FLUID)
+		    	_InkSupply[isNo].purgePressure = MAX_PRESSURE_FLUID;
+		}
 		pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	=  _InkSupply[isNo].purgePressure;
 	}
 	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
@@ -1668,9 +1667,9 @@ void _set_air_valve(int isNo, int state)
 {
 	if (!pvalve_active(isNo) && state) state=PV_OPEN;
 	if (state != pRX_Status->ink_supply[isNo].airValve)
-{
-		if (pvalve_set_air(isNo, state))
 	{
+		if (pvalve_set_air(isNo, state))
+		{
 			UINT16 val = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT);
 			if (state) val |= AIR_CUSSION_OUT(isNo);
 			else	   val &= ~AIR_CUSSION_OUT(isNo);
