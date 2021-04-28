@@ -630,8 +630,8 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 
 	_CtrlMode[headNo] = ctrlMode;
     
-    if (_CtrlMode[headNo] == ctrl_recovery_step1 || _CtrlMode[headNo] == ctrl_recovery_step2)		do_jetting(_Recovery_Freq);
-    else if (_CtrlMode[headNo] == ctrl_recovery_step3)	fpga_enc_config(0);
+    if (_CtrlMode[headNo] == ctrl_recovery_step3 || _CtrlMode[headNo] == ctrl_recovery_step4)		do_jetting(_Recovery_Freq);
+    else if (_CtrlMode[headNo] == ctrl_recovery_step5 || _CtrlMode[headNo] == ctrl_off)				fpga_enc_config(0);
 }
 
 //--- cond_ctrlMode2 --------------------------------------------------------------------

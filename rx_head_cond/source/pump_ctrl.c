@@ -848,6 +848,7 @@ void pump_tick_10ms(void)
 						break;
 						
 		case ctrl_recovery_start:
+		
 						if (RX_Config.mode != RX_Status.mode)
 						{
 							_PumpPID.P 			= DEFAULT_P;
@@ -873,12 +874,13 @@ void pump_tick_10ms(void)
 						//	_TimeFlowResistancestablePRINT = 0;							
 						}
 						/* no break */
-						
-		case ctrl_recovery_step1:
-		case ctrl_recovery_step2:	
+		case ctrl_recovery_step1:				
+		case ctrl_recovery_step2:
+		case ctrl_recovery_step3:
+		case ctrl_recovery_step4:	
 						temp_ctrl_on(TRUE);
 						_set_valve(VALVE_INK);
-                        max_pressure = MBAR_500;
+            max_pressure = MBAR_500;
 						_ShutdownPrint = 1;
        
 						_pump_pid(TRUE);
@@ -886,7 +888,7 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode; 		
             break;
 				
-		case ctrl_recovery_step3:
+		case ctrl_recovery_step5:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						RX_Status.pressure_in_max=INVALID_VALUE;
@@ -896,8 +898,8 @@ void pump_tick_10ms(void)
 						_Purge4Ever = ctrl_purge4ever == RX_Config.mode;
 						break;
 		
-		case ctrl_recovery_step4:
-		case ctrl_recovery_step5:
+		case ctrl_recovery_step6:
+		case ctrl_recovery_step7:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						_presure_in_max();
@@ -907,7 +909,7 @@ void pump_tick_10ms(void)
             RX_Status.mode = RX_Config.mode;
 						break;
 		
-		case ctrl_recovery_step6:
+		case ctrl_recovery_step8:
 						_presure_in_max();
 						if ((RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) && RX_Config.purgeDelayPos_y) || 
 							(_PurgeTime>RX_Config.purgeTime && !_Purge4Ever) || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
@@ -927,8 +929,8 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode;
 						break;
 						
-		case ctrl_recovery_step7:
-        				RX_Status.mode = RX_Config.mode;
+		case ctrl_recovery_step9:
+        		RX_Status.mode = RX_Config.mode;
 						break;		
 		
 		default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)

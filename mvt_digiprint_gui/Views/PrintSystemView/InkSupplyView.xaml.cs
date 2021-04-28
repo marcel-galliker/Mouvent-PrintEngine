@@ -143,7 +143,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             Button_PurgeWash.Visibility = visible;
 
-            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide) ? Visibility.Visible : Visibility.Collapsed;
+            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || visible == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
             Button_Recovery.Visibility = visible;
         }
 

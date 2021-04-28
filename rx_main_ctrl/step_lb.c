@@ -690,7 +690,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done && !_Status[no].robinfo.moving)
 									{
 										steplb_rob_to_fct_pos(no, rob_fct_cap);
-                                        if (_AutoCapMode)   _RobotCtrlMode[no] = ctrl_cap_step3;
+                                        if (_AutoCapMode || RX_Config.printer.type == printer_LB702_UV)   _RobotCtrlMode[no] = ctrl_cap_step3;
                                         else                _RobotCtrlMode[no] = ctrl_cap_step2;
 									}
                                     _risingEdge[no] = FALSE;
@@ -705,7 +705,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         _risingEdge[no] = TRUE;
 									break;
 		
-		case ctrl_cap_step3:		if (steplb_rob_fct_done(no, rob_fct_cap) || (steplb_rob_in_fct_pos(no, rob_fct_cap) && _risingEdge[no] && _AutoCapMode))
+		case ctrl_cap_step3:		if (steplb_rob_fct_done(no, rob_fct_cap) || (steplb_rob_in_fct_pos(no, rob_fct_cap) && _risingEdge[no] && (_AutoCapMode || RX_Config.printer.type == printer_LB702_UV)))
 									{
 										steplb_lift_to_fct_pos(no, rob_fct_cap);
 										_RobotCtrlMode[no] = ctrl_cap_step4;
