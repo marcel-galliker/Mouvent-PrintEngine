@@ -187,8 +187,9 @@ namespace RX_DigiPrint.Views
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803
                 ||    RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf;
+            bool dw = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_Dropwatcher;
            
-            bool pq = (lb||tx); // &&  RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702;
+            bool pq = (lb || tx || dw); // &&  RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_LH702;
 
            PrinterTypeChangedEventArgs eventArgs = new PrinterTypeChangedEventArgs();
            eventArgs.Textile = tx;
@@ -259,6 +260,7 @@ namespace RX_DigiPrint.Views
 
                     case EPrinterType.printer_test_slide:
                     case EPrinterType.printer_test_slide_only:
+                    case EPrinterType.printer_test_slide_HB:
                     case EPrinterType.printer_test_table:
                         MachineName.Text="Test Table";
                         TabMachine.Content = new TestTableView.TestTableView();
@@ -267,6 +269,9 @@ namespace RX_DigiPrint.Views
                     case EPrinterType.printer_test_table_seon:
                         MachineName.Text="Test Table Seon";
                         TabMachine.Content = new TestTableSeonView.TestTableSeonView();
+                        break;
+
+                    case EPrinterType.printer_Dropwatcher:
                         break;
 
                     case EPrinterType.printer_cleaf:
@@ -288,6 +293,11 @@ namespace RX_DigiPrint.Views
                     _ShowTab(RxGlobals.PrintSystem.LH702_simulation, TabMachine, AddLocationHint.After);
                     _ShowTab(true, TabLH702, AddLocationHint.After);
 				}
+                else if (type==EPrinterType.printer_Dropwatcher)
+                {
+                    _ShowTab(false, TabMachine, AddLocationHint.After);
+                    _ShowTab(false, TabLH702, AddLocationHint.After);
+                }
                 else
 				{
                     _ShowTab(true , TabMachine, AddLocationHint.After);

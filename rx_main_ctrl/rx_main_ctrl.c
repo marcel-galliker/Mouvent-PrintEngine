@@ -227,8 +227,8 @@ int main(int argc, char* argv[])
 	pq_init();
 	pq_load(PATH_USER FILENAME_PQ);
 	pc_init();
+    enc_init();
 	machine_init();
-	enc_init();
 	fluid_init();
 	step_init();
 	chiller_init();

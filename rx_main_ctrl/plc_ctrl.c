@@ -196,7 +196,7 @@ int	plc_init(void)
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
 	if ((RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")) ||
-		(RX_Config.printer.type==printer_test_table_seon && str_start(RX_Hostname, "Roman"))) 
+		RX_Config.printer.type==printer_test_table_seon || RX_Config.printer.type==printer_Dropwatcher) 
 		_SimuPLC = TRUE;
 	
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");

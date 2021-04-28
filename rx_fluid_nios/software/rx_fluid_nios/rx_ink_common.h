@@ -129,24 +129,29 @@ typedef struct SVersion
 //--- printer ------------------------------------
 typedef enum EPrinterType
 {
-	printer_undef,				// 0: not defined
-	printer_test_table,			// 1:
-	printer_test_slide,			// 2:
-	printer_test_slide_only,	// 3:
-	printer_test_table_seon,	// 4:
+    printer_undef,           // 0: not defined
+    printer_test_table,      // 1:
+    printer_test_slide,      // 2:
+    printer_test_slide_only, // 3:
+    printer_test_table_seon, // 4:
+    printer_test_slide_HB,   // 5:
 
-	//--- web printers ------------------------------
-	printer_LB701=1000,			// 1000: 
-	printer_LB702_UV,			// 1001:
-	printer_LB702_WB,			// 1002:
-	printer_LH702,				// 1003:
-	
-	printer_DP803=1100,			// 1100:
-	 
-	//--- scanning printers --------------------------
-	printer_TX801     = 2000,		// 2000: Fashionn stanrard output
-	printer_TX802,					// 2001: Fashion high outpput
-	printer_TX404,					// 2002: 
+    //--- web printers ------------------------------
+    printer_LB701 = 1000, // 1000:
+    printer_LB702_UV,     // 1001:
+    printer_LB702_WB,     // 1002:
+    printer_LH702,        // 1003:
+
+    printer_DP803 = 1100, // 1100:
+
+    //--- scanning printers --------------------------
+    printer_TX801 = 2000, // 2000: Fashionn stanrard output
+    printer_TX802,        // 2001: Fashion high outpput
+    printer_TX404,        // 2002:
+
+    printer_CB612 = 3001,
+    
+    printer_Dropwatcher = 4000,			// 4000:
 
 	//--- special projects ----------------
 	printer_cleaf = 10000,		// 10000: Cleaf machine

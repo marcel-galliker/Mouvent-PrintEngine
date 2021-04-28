@@ -72,7 +72,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                                                     MainGrid.RowDefinitions[3].Height = new GridLength(0);  
                                                     break;
 
-                // printer_undef, printer_test_table, printer_test_slide, printer_test_slide_only
+                // printer_undef, printer_test_table, printer_test_slide, printer_test_slide_only, printer_test_slide_HB
                 default:                            MainGrid.RowDefinitions[0].Height = GridLength.Auto;
                                                     MainGrid.RowDefinitions[1].Height = GridLength.Auto;  
                                                     MainGrid.RowDefinitions[2].Height = GridLength.Auto;  

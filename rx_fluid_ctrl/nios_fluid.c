@@ -386,20 +386,22 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 
 	switch(pcfg->printerType)
 	{
-	case printer_LB701:		_HeaterUsed=TRUE; break;
-	case printer_LB702_UV:	_HeaterUsed=TRUE; break;
-	case printer_LH702:		_HeaterUsed=TRUE; break;
-    case printer_test_table:_HeaterUsed = (_MaxTemp>36); break;
-	case printer_cleaf:		_HeaterUsed=TRUE;
-							if (printerType!=printer_cleaf)
-							{
-								sprintf(str, "%d.%d.%d.%d", _Stat->FpgaVersion.major, _Stat->FpgaVersion.minor, _Stat->FpgaVersion.revision, _Stat->FpgaVersion.build);
-								if ((strcmp(str, CHECK_VERSION_FPGA))		
-								||  (fpga_qsys_id() != CHECK_QSYS_ID)
-								||  (fpga_qsys_timestamp()!=CHECK_TIMESTAMP))
-									Error(ERR_ABORT, 0, "Cleaf Project needs FPGA Version=>>%s<<, QSysID=%d, Timestamp=%d", CHECK_VERSION_FPGA, CHECK_QSYS_ID, CHECK_TIMESTAMP);
-							}
-							break;
+	case printer_LB701:			_HeaterUsed=TRUE; break;
+	case printer_LB702_UV:		_HeaterUsed=TRUE; break;
+	case printer_LH702:			_HeaterUsed=TRUE; break;
+    case printer_test_slide_HB:	_HeaterUsed=TRUE; break;
+    case printer_Dropwatcher:	_HeaterUsed=TRUE; break;
+    case printer_test_table:	_HeaterUsed = (_MaxTemp>36); break;
+	case printer_cleaf:			_HeaterUsed=TRUE;
+								if (printerType!=printer_cleaf)
+								{
+									sprintf(str, "%d.%d.%d.%d", _Stat->FpgaVersion.major, _Stat->FpgaVersion.minor, _Stat->FpgaVersion.revision, _Stat->FpgaVersion.build);
+									if ((strcmp(str, CHECK_VERSION_FPGA))		
+									||  (fpga_qsys_id() != CHECK_QSYS_ID)
+									||  (fpga_qsys_timestamp()!=CHECK_TIMESTAMP))
+										Error(ERR_ABORT, 0, "Cleaf Project needs FPGA Version=>>%s<<, QSysID=%d, Timestamp=%d", CHECK_VERSION_FPGA, CHECK_QSYS_ID, CHECK_TIMESTAMP);
+								}
+								break;
 		
 	default: _HeaterUsed=FALSE;			
 	}

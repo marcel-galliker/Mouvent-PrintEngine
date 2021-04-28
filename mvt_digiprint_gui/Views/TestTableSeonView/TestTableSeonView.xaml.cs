@@ -185,6 +185,7 @@ namespace RX_DigiPrint.Views.TestTableSeonView
             // sol: is this okay? Otherwise, the settings for the first print queue item are reset in Save_Clicked!!!
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide ||
                 RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only ||
+                RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB ||
                 RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table)
             {
                 Save_Clicked(this, null);

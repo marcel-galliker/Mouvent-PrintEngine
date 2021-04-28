@@ -533,7 +533,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 
 	if (pCfg->printerType >= printer_LB701 &&  pCfg->printerType<printer_cleaf)
 	{
-		if (_LinuxDeployment<26) Error(ERR_ABORT, 0, "LinuxDeloyment V%d, must be 26 or higher", _LinuxDeployment);	
+		if (_LinuxDeployment<26) Error(ERR_ABORT, 0, "LinuxDeployment V%d, must be 26 or higher", _LinuxDeployment);	
 	}
 	
 	if (pCfg->printerType==printer_TX801 || pCfg->printerType==printer_TX802 

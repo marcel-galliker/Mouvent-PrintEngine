@@ -48,7 +48,8 @@ namespace RX_DigiPrint.Models
         {       
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table 
             ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide_only
-            ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide)
+            ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide
+            || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB)
             {
                 _addToList      (_Queue,   item, top);
                 return;

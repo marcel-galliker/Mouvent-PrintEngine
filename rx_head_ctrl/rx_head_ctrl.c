@@ -117,7 +117,7 @@ void handle_menu(char *str)
 				  nios_fixed_grey_levels(greyLevel, 3);	break;
 		case 'g': fpga_manual_pg();							break;
 		case 'h':	freq=atoi(&str[1]);
-					if (freq && !_WaveFormLoaded)
+					if (freq && !_WaveFormLoaded && RX_HBConfig.printerType != printer_Dropwatcher)
 					{						
 					  _do_waveform("test.wfd");
 					  Error(WARN, 0, "SPECIAL HW TEST");

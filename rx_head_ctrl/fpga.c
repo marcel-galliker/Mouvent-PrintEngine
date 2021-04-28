@@ -1979,7 +1979,7 @@ static int _check_encoder_tel_freq(void)
 {
 	static UINT32 _enc_tel_cnt=0;
 	static int   _cnt=0;
-	if (FpgaCfg.encoder->cmd & ENC_ENABLE)
+	if (FpgaCfg.encoder->cmd & ENC_ENABLE && RX_HBConfig.printerType != printer_Dropwatcher)
 	{
 		_EncoderTelFreq = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
 		if (_EncoderTelFreq_delay>0) 
@@ -2010,7 +2010,7 @@ static int _check_encoder(void)
 	static UINT32	_enc_tel_cnt=12345;
 	static BYTE		_enc_crc[SIZEOF(Fpga.error->encoder)];
 	
-	if(RX_HBConfig.present==dev_on && FpgaCfg.encoder->cmd & ENC_ENABLE)
+	if(RX_HBConfig.present==dev_on && FpgaCfg.encoder->cmd & ENC_ENABLE && RX_HBConfig.printerType != printer_Dropwatcher)
 	{
 		if (nios_is_firepulse_on())
 		{

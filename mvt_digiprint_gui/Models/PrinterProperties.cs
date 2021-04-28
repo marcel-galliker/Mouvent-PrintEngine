@@ -197,7 +197,8 @@ namespace RX_DigiPrint.Models
                     switch (RxGlobals.PrintSystem.PrinterType)
                     {
                         case EPrinterType.printer_test_slide:       SetProperty(ref _Host_Name, "TestSlide"); break; 
-                        case EPrinterType.printer_test_slide_only:  SetProperty(ref _Host_Name, "TestSlide"); break; 
+                        case EPrinterType.printer_test_slide_only:  SetProperty(ref _Host_Name, "TestSlide"); break;
+                        case EPrinterType.printer_test_slide_HB:    SetProperty(ref _Host_Name, "TestSlide"); break;
                         case EPrinterType.printer_test_table:       SetProperty(ref _Host_Name, "TestTable"); break; 
                         case EPrinterType.printer_LB701:            SetProperty(ref _Host_Name, "LB701-xxxx"); break; 
                         case EPrinterType.printer_LB702_UV:         SetProperty(ref _Host_Name, "LB702-xxxx"); break; 
@@ -206,6 +207,7 @@ namespace RX_DigiPrint.Models
                         case EPrinterType.printer_TX801:            SetProperty(ref _Host_Name, "TX801-xxxx"); break; 
                         case EPrinterType.printer_TX802:            SetProperty(ref _Host_Name, "TX802-xxxx"); break;
                         case EPrinterType.printer_TX404:            SetProperty(ref _Host_Name, "TX404-xxxx"); break;
+                        case EPrinterType.printer_Dropwatcher:      SetProperty(ref _Host_Name, "Dropwatcher"); break;
                         case EPrinterType.printer_cleaf:            SetProperty(ref _Host_Name, "PRINTER-xxxx"); break; 
                     }
                 }
