@@ -745,7 +745,10 @@ void cond_heater_test(int temp)
 void cond_toggle_meniscus_check(void)
 {
     for (int i = 0; i < MAX_HEADS_BOARD; i++)
+    {
         _NiosMem->cfg.cond[i].cmd.disable_meniscus_check = !_NiosMem->cfg.cond[i].cmd.disable_meniscus_check;
+        RX_HBStatus[i].info.meniscus = _NiosMem->cfg.cond[i].cmd.disable_meniscus_check;
+    }
 }
 
 //--- cond_start_log --------------------------------------------------------------

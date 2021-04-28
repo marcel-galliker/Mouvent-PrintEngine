@@ -117,9 +117,15 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_Purge4Ever.Visibility = visible;
 
             //--- printer_test_table_seon -----------------------------------------------------------
-            visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible   : Visibility.Collapsed;
-            collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible;
+            visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide 
+                        || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB) ? 
+                        Visibility.Visible   : Visibility.Collapsed;
+            collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide 
+                        || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB) ? 
+                        Visibility.Collapsed : Visibility.Visible;
             Button_ToggleMeniscus.Visibility = visible;
+            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible : Visibility.Collapsed;
+            collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible;
             Cooler_Pres.Visibility = visible;
             Cooler_Temp.Visibility = visible;
             ClusterNo.Visibility = visible;
