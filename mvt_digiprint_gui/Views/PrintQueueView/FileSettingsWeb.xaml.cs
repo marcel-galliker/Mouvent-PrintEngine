@@ -87,7 +87,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void Center_Clicked(object sender, RoutedEventArgs e)
         {
             PrintQueueItem item = DataContext as PrintQueueItem;
-            item.PageMargin = (Constants.kHeadsPerCluster * RxGlobals.ClusterStat.Number * Constants.HeadWidth - item.PageWidth) / 2;
+            item.PageMargin = (RxGlobals.PrintSystem.HeadsPerColor * Constants.HeadWidth - item.PageWidth) / 2;
         }
     }
 }
