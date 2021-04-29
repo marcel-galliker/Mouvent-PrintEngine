@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +28,9 @@ namespace RX_DigiPrint.Views.SupervisorsView
             InitializeComponent();
             MvtUserLevelManager ulm = new MvtUserLevelManager(SettingsDlg.GetVersion(), RxGlobals.PrinterProperties.Host_Name);
             MvtTOTP codes = ulm.GetSupervisorCode(username);
-            SupervisorCodes.NavigateToString(String.Format("<html><body><div style=\"text-align:center\"><img src='{0}' width=\"300\" height=\"300\"/><br>{1}</div></body></html>", codes.GetQRCode(), codes.GetManualCode()));
+            
+            QRCode.Source = codes.QRImgSrc();
+            ManualCode.Text = codes.GetManualCode();
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)

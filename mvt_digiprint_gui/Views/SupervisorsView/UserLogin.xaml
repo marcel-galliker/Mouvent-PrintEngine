@@ -56,7 +56,7 @@
                 <TextBox x:Name="UserPin4" Style="{StaticResource PinTextBlock}"/>
                 <TextBox x:Name="UserPin5" Style="{StaticResource PinTextBlock}"/>
             </StackPanel>
-            <Label x:Name="AuthenticationStatus" Visibility="Collapsed" Content="{mvt:LocalizedBinding AuthenticationFailed}" Foreground="Red" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <Label x:Name="AuthenticationStatus" Visibility="Hidden" Content="{mvt:LocalizedBinding AuthenticationFailed}" Foreground="Red" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </StackPanel>
 
 

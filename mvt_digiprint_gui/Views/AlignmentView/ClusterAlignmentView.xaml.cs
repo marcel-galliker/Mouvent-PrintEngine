@@ -7,7 +7,6 @@ using System.Windows.Media;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_Common;
-using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Views.AlignmentView.DisabledJets;
 using RX_DigiPrint.Views.AlignmentView;
 

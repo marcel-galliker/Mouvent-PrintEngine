@@ -89,3 +89,4 @@ version.c
 /bin/gui/*.dll
 /bin/gui/*.ppk
 /printed/*.bmp
+Stored_Data/

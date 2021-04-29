@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Google.Authenticator;
 
 namespace RX_DigiPrint.Helpers
@@ -80,6 +81,39 @@ namespace RX_DigiPrint.Helpers
 		{
 			TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
 			return tfa.GetCurrentPIN(secret);
+		}
+
+		public System.Windows.Media.ImageSource QRImgSrc()
+		{
+			// Remove info data from the beginning of the qr code ("data:image/png;base64,")
+			string base64 = setupInfo.QrCodeSetupImageUrl.Split(',')[1];
+			byte[] bytes = Convert.FromBase64String(base64);
+			using (MemoryStream ms = new MemoryStream(bytes))
+			{
+				using (System.Drawing.Image image = System.Drawing.Image.FromStream(ms))
+				{
+					try
+					{
+						if (image != null)
+						{
+							var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+							bitmap.BeginInit();
+							System.IO.MemoryStream memoryStream = new System.IO.MemoryStream();
+							image.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+							memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+							bitmap.StreamSource = memoryStream;
+							bitmap.EndInit();
+							return bitmap;
+						}
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e.Message);
+					}
+				}
+			}
+
+			return null;
 		}
 	}
 }

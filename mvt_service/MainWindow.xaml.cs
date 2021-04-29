@@ -42,7 +42,6 @@ namespace mvt_service
             pinTimer.Elapsed += this.PinRefresh;
             pinTimer.AutoReset = true;
             pinTimer.Start();
-            
         }
 
         private void CodeCreationButton_Click(object sender, RoutedEventArgs e)
@@ -53,9 +52,8 @@ namespace mvt_service
 
                 PinInfo.Text = PIN_INFO_TEXT + VersionTB.Text;
                 PinValue.Text = codes.GetPin();
-
-                webView.NavigateToString(String.Format("<html><body><div style=\"text-align:center\"><img src='{0}' width=\"300\" height=\"300\"/><br>{1}</div></body></html>",
-                    codes.GetQRCode(), codes.GetManualCode()));
+                QRCode.Source = codes.QRImgSrc();
+                ManualKey.Text = codes.GetManualCode();
             }
         }
 

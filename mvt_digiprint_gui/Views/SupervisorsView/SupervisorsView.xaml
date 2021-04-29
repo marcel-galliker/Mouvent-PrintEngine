@@ -6,7 +6,6 @@
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             xmlns:Controls="clr-namespace:Microsoft.Toolkit.Wpf.UI.Controls;assembly=Microsoft.Toolkit.Wpf.UI.Controls.WebView"
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:ig="http://schemas.infragistics.com/xaml"
              xmlns:igDP="http://infragistics.com/DataPresenter"
@@ -77,59 +76,6 @@
                 <ig:TextColumn Key="Username" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding UserName}" Width="auto"/>
                 <ig:TextColumn Key="Validity" TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Valid}" Width="*"/>
             </ig:XamGrid.Columns>
-
         </ig:XamGrid>
-        <!--<igDP:XamDataGrid
-            x:Name="SupervisorsGrid"
-            Grid.Row="1"
-            Grid.Column="0"
-            BorderBrush="Transparent"
-            Style="{DynamicResource XamDataGrid-WideScroll-Style}"
-            SelectedItemsChanged="SupervisorsGrid_SelectedItemsChanged"
-            Margin="10">
-            <igDP:XamDataGrid.Resources>
-                --><!--<local:Base64ToImageConverter x:Key="Base64ToImageConverterKey"/>
-                <Style TargetType="{x:Type igDP:CellValuePresenter}" x:Key="CodeQRCell">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type igDP:CellValuePresenter}">
-                                <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
-                                     The source of the image is the CodeQR field in Supervisor class, the converter is here to trasfrom it to be displayable 
-                                    <Image Margin="{TemplateBinding Padding}"
-                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"                                          
-                                        Source="{Binding Path=DataItem.CodeQR, Converter={StaticResource Base64ToImageConverterKey}}"/>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>-->
-                <!--<Style TargetType="{x:Type igDP:LabelPresenter}">
-                    <Setter Property="Background" Value="Black"/>
-                    <Setter Property="Foreground" Value="White"/>
-                    <Setter Property="LabelHighlight" Value="DarkOrange"/>
-                </Style>--><!--
-            </igDP:XamDataGrid.Resources>
-            <igDP:XamDataGrid.FieldLayoutSettings>
-                <igDP:FieldLayoutSettings AutoGenerateFields="False" HighlightAlternateRecords="True" SelectionTypeRecord="Single"/>
-            </igDP:XamDataGrid.FieldLayoutSettings>
-            <igDP:XamDataGrid.FieldSettings>
-                <igDP:FieldSettings AllowEdit="false" CellClickAction="SelectRecord" CellPresenterStyle="{DynamicResource XamDataGridCellControlStyle}" LabelPresenterStyle="{DynamicResource XamDataGridHeaderStyle}"/>
-            </igDP:XamDataGrid.FieldSettings>
-            <igDP:XamDataGrid.FieldLayouts>
-                <igDP:FieldLayout Key="supervisorLayout">
-                    <igDP:FieldLayout.Fields>
-                        <igDP:Field Name="Username" Label="Username" />
-                        <igDP:Field Name="Validity" Label="Valid until"/>
-                        --><!--<igDP:Field Name="CodeQR" Label="QR Code">
-                            <igDP:Field.Settings>
-                                <igDP:FieldSettings CellMinWidth="250" CellWidth="250"
-                                        CellValuePresenterStyle="{StaticResource CodeQRCell}" />
-                            </igDP:Field.Settings>
-                        </igDP:Field>--><!--
-                    </igDP:FieldLayout.Fields>
-                </igDP:FieldLayout>
-            </igDP:XamDataGrid.FieldLayouts>
-        </igDP:XamDataGrid>-->
     </Grid>
 </UserControl>

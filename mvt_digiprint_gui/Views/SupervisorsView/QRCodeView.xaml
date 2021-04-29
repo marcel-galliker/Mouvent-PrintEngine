@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Controls="clr-namespace:Microsoft.Toolkit.Wpf.UI.Controls;assembly=Microsoft.Toolkit.Wpf.UI.Controls.WebView"
         xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:RX_DigiPrint.Views"
@@ -23,10 +22,12 @@
             <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
-        <Controls:WebView x:Name="SupervisorCodes" Grid.Column="1" Grid.Row="1" MinWidth="600" MinHeight="400"/>
-        <common:MvtButton  x:Name="Close" Grid.Row="2" Grid.Column="1" Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Close_Click">
+        <Image x:Name="QRCode" Grid.Column="1" Grid.Row="1" MinWidth="300" MinHeight="200" MaxWidth="500" MaxHeight="350"/>
+        <TextBlock x:Name="ManualCode" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <common:MvtButton  x:Name="Close" Grid.Row="3" Grid.Column="1" Margin="15" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeM}" Click="Close_Click">
             <iconPacks:PackIconMaterial x:Name="CloseIcon" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="20" Height="20" 
                                             Kind="Close"></iconPacks:PackIconMaterial>
         </common:MvtButton>
