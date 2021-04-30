@@ -783,7 +783,6 @@ static void _control(int fluidNo)
 														steplb_rob_to_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0);
 													break;
                                                 }
-                                                
 
 												if (RX_Config.printer.type == printer_test_table_seon)
                                                 {
@@ -977,7 +976,7 @@ static void _control(int fluidNo)
                 case ctrl_recovery_step1:	if (!lbrob || (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever))
 												|| (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1) / 2, rob_fct_purge4ever)))
 											{
-												if (lbrob)
+												if (lbrob || (RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))
                                                 {
                                                     if (even_number_of_colors)	steplb_lift_to_fct_pos(no/2, rob_fct_cap);
                                                     else						steplb_lift_to_fct_pos((no+1)/2, rob_fct_cap);
@@ -985,9 +984,10 @@ static void _control(int fluidNo)
                                                 _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
                                             }
 
-                case ctrl_recovery_step2:	
-                                            
-                                            if (!lbrob || (lbrob && even_number_of_colors && steplb_lift_in_fct_pos(no / 2, rob_fct_cap)) 
+                case ctrl_recovery_step2:	if ((!lbrob && !(RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))		// not LB-machine
+												|| (!lbrob && RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB		// LB machine without Robot	
+												&& ((even_number_of_colors && steplb_lift_in_fct_pos(no / 2, rob_fct_cap)) || (!even_number_of_colors && steplb_lift_in_fct_pos((no+1) / 2, rob_fct_cap))))
+												|| (lbrob && even_number_of_colors && steplb_lift_in_fct_pos(no / 2, rob_fct_cap))							// LB machine with Robot
 												|| (lbrob && !even_number_of_colors && steplb_lift_in_fct_pos((no+1) / 2, rob_fct_cap)))
 											{   
                                                 setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);

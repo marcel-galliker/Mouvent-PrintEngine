@@ -76,6 +76,23 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        private bool _FluidInRecovery()
+        {
+            bool robot_used = true;
+            for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
+            {
+                robot_used = robot_used && (RxGlobals.StepperStatus[i].RobotUsed || !RxGlobals.StepperStatus[i].Connected);
+            }
+
+            if (robot_used) return false;
+
+            for (int i = 0; i < RxGlobals.InkSupply.List.Count(); i++)
+            {
+                if (RxGlobals.InkSupply.List[i].CtrlMode >= EFluidCtrlMode.ctrl_recovery_start && RxGlobals.InkSupply.List[i].CtrlMode <= EFluidCtrlMode.ctrl_recovery_step9) return true;
+            }
+            return false;
+        }
+
         //--- RequestVar ------------------------------------------------------
         private string[] _varList = new string[256];
         private int      _varListLen=0;
@@ -176,7 +193,7 @@ namespace RX_DigiPrint.Models
                         InReferencing = (state==EnPlcState.plc_referencing);
                         InWebIn       = (state==EnPlcState.plc_webin);
                      // WebInEnabled  = (state!=EnPlcState.plc_prepare && state!=EnPlcState.plc_run);
-                        WebInEnabled  = (state!=EnPlcState.plc_pause && state!=EnPlcState.plc_run);
+                        WebInEnabled  = (state!=EnPlcState.plc_pause && state!=EnPlcState.plc_run && !_FluidInRecovery());
                         /*
                         if (RxGlobals.SetupAssist.WebMoveDone!=null && _oldState==EnPlcState.plc_run 
                             && (state==EnPlcState.plc_stop || state==EnPlcState.plc_pause))

@@ -63,6 +63,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
             // Button_Calibrate.Visibility = visibility;
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_service);
             CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_service);
+
+            visibility = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB || RxGlobals.PrintSystem.IsLb)
+                && RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
+            Button_Recovery.Visibility = visibility;
         }
 
         //--- UserControl_Loaded -----------------------------------------------
@@ -143,7 +147,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             Button_PurgeWash.Visibility = visible;
 
-            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType== EPrinterType.printer_test_slide_HB || visible == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+            visible = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType== EPrinterType.printer_test_slide_HB || RxGlobals.PrintSystem.IsLb) 
+                && RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
             Button_Recovery.Visibility = visible;
         }
 
@@ -305,7 +310,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
         private void Recovery_Clicked(object sender, RoutedEventArgs e)
         {
-            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Recover", "Recover " + _InkSupply.InkType.Name + " ?");
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Recover", "Recover " + _InkSupply.InkType.Name + "?");
             if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command("Recovery", EFluidCtrlMode.ctrl_recovery_start, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
