@@ -398,7 +398,7 @@ static void _update_counters(void)
 				
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
-		if (_NiosStat->cond[condNo].mode==ctrl_print || (_NiosStat->cond[condNo].mode >= ctrl_recovery_start && _NiosStat->cond[condNo].mode <= ctrl_recovery_step2)) printing = TRUE;
+		if (_NiosStat->cond[condNo].mode==ctrl_print || (_NiosStat->cond[condNo].mode >= ctrl_recovery_start && _NiosStat->cond[condNo].mode <= ctrl_recovery_step4)) printing = TRUE;
 		if (_NiosStat->cond[condNo].clusterTime   > RX_HBStatus->clusterTime)   RX_HBStatus->clusterTime   = _NiosStat->cond[condNo].clusterTime;
 	}
 	if (printing) RX_HBStatus->clusterTime++;
