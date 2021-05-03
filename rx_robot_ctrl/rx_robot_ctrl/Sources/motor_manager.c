@@ -142,11 +142,6 @@ bool motor_manager_start(void)
 	return true;
 }
 
-bool motor_manager_is_initalized(void)
-{
-	return _isInitialized;
-}
-
 //--- motor_handle_message ----------------------------------------------------------------------
 void motor_handle_message(void* message)
 {
@@ -230,6 +225,11 @@ static void move_motors(SRobotMotorsMoveCmd* cmd)
 
 			gpio_manager_enable_motor(motor, TRUE);
 			gpio_manager_stop_motor(motor);	// Pause to start them in sync later
+			if (_encoderTolerance[motor]) // reset encoder check
+			{
+				int pos = spi_read_register(TMC_XENC_REG, motor);
+				spi_write_register(TMC_XACTUAL_REG, pos, motor);
+			}
 			spi_write_register(TMC_XTARGET_REG, cmd->targetPos[motor], motor);
 		}
 	}
@@ -274,6 +274,7 @@ static void check_encoder(uint8_t motor)
 {
 	if(RX_RobotStatus.motor[motor].moveIdStarted!=RX_RobotStatus.motor[motor].moveIdDone
 	&& _encoderTolerance[motor]
+	&& !RX_RobotStatus.motor[motor].isStalled
 	&& (abs(RX_RobotStatus.motor[motor].motorPos - RX_RobotStatus.motor[motor].encPos) > _encoderTolerance[motor]))
 	{
 		RX_RobotStatus.motor[motor].isStalled = true;

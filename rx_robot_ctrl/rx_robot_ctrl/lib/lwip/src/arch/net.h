@@ -122,8 +122,11 @@ void net_set_link_up();
 void net_set_link_down();
 uint8_t net_is_up();
 
+#ifdef NET_USE_EEPROM
 int8_t net_get_eeprom(struct eeprom_net_config *getval);
 int8_t net_update_eeprom(struct eeprom_net_config *setval);
+#endif
+
 uint8_t net_get_dhcp();
 uint8_t *net_get_mac();
 ip_addr_t net_get_ip();
