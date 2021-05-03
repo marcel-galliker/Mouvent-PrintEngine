@@ -684,8 +684,6 @@ static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
 	cmd.targetPos[motor] = _RobotStatus.motor[motor].targetPos+steps;
 	if (_MotorCfg[motor].encmode) cmd.encoderTol[motor]= ENCODER_TOL;
 	cmd.moveId[motor] = ++_MoveId[motor];
-    if (motor == 2) 
-        Error(LOG, 0, "Send Screw Command");
     sok_send(&_RC_Socket, &cmd);
 	
 	TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE");
@@ -771,7 +769,6 @@ static int _rc_moveto_xy_stop(int x, int y, int stop, const char *file, int line
 		cmd.stopBitLevels[MOTOR_XY_0] = cmd.stopBitLevels[MOTOR_XY_1] = 1;
 	}
 	else cmd.encoderTol[MOTOR_XY_0] = cmd.encoderTol[MOTOR_XY_1] = 2*ENCODER_TOL;
-    Error(LOG, 0, "Send Command");
     sok_send(&_RC_Socket, &cmd);
 	
     TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE_XY moveIdStarted=%d %d",_MoveId[MOTOR_XY_0], _MoveId[MOTOR_XY_1]);
@@ -794,7 +791,7 @@ static int _rc_move_screw_done(void)
 //--- rc_move_top --------------------------------------
 int  rc_move_top(const char *file, int line)
 {
-	return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, HIGH, _FL_);	
+    return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, HIGH, _FL_);	
 }
 
 //--- rc_move_bottom ---------------------------------------
