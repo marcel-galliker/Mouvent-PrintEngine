@@ -29,6 +29,14 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property RefDone ---------------------------------------
+        private bool _Connected;
+        public bool Connected
+        {
+            get { return _Connected; }
+            set { SetProperty(ref _Connected, value); }
+        }
+
+        //--- Property RefDone ---------------------------------------
         private bool _RefDone;
         public bool RefDone
         {
@@ -492,6 +500,7 @@ namespace RX_DigiPrint.Models
         //--- Update -----------------------------------
         public void Update(TcpIp.SStepperStat msg)
         {
+            Connected = true;
             RefDone     = (msg.info & 0x00000001)!=0;
             RobotRefDone = (msg.robinfo & 0x00000001) != 0;
             Moving      = (msg.info & 0x00000002)!=0;

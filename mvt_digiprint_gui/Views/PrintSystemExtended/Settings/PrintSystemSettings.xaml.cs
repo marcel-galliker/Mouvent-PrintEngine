@@ -245,7 +245,9 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             {
                 case EPrinterType.printer_test_slide:
                 case EPrinterType.printer_test_slide_only:
+                case EPrinterType.printer_test_slide_HB:
                 case EPrinterType.printer_test_table:
+                case EPrinterType.printer_Dropwatcher:
                     RxGlobals.Stepper.RefHeight = StepperValues.RefHeight;
                     RxGlobals.Stepper.WipeHeight = StepperValues.WipeHeight;
                     RxGlobals.Stepper.CapHeight = StepperValues.CapHeight;

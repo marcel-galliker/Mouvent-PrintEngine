@@ -183,7 +183,7 @@ static void _nios_check_errors(void)
 	int isNo;
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
 	{
-		if ((_Stat->ink_supply[isNo].ctrl_state==ctrl_print || (_Stat->ink_supply[isNo].ctrl_state >= ctrl_recovery_start && _Stat->ink_supply[isNo].ctrl_state <= ctrl_recovery_step2)) && _Stat->ink_supply[isNo].IS_Pressure_Actual==INVALID_VALUE)			 
+		if ((_Stat->ink_supply[isNo].ctrl_state==ctrl_print || (_Stat->ink_supply[isNo].ctrl_state >= ctrl_recovery_start && _Stat->ink_supply[isNo].ctrl_state <= ctrl_recovery_step4)) && _Stat->ink_supply[isNo].IS_Pressure_Actual==INVALID_VALUE)			 
 			ErrorFlag(ERR_ABORT, (UINT32*)&_Error[isNo], err_ink_tank_pressure, 0, "InkSupply[%d-%s] Ink Tank pressure sensor not working", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
 			ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_overpressure, 0, "InkSupply[%d-%s] Ink Tank overpressure", isNo+1, RX_ColorNameShort(isNo));
@@ -386,20 +386,22 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 
 	switch(pcfg->printerType)
 	{
-	case printer_LB701:		_HeaterUsed=TRUE; break;
-	case printer_LB702_UV:	_HeaterUsed=TRUE; break;
-	case printer_LH702:		_HeaterUsed=TRUE; break;
-    case printer_test_table:_HeaterUsed = (_MaxTemp>36); break;
-	case printer_cleaf:		_HeaterUsed=TRUE;
-							if (printerType!=printer_cleaf)
-							{
-								sprintf(str, "%d.%d.%d.%d", _Stat->FpgaVersion.major, _Stat->FpgaVersion.minor, _Stat->FpgaVersion.revision, _Stat->FpgaVersion.build);
-								if ((strcmp(str, CHECK_VERSION_FPGA))		
-								||  (fpga_qsys_id() != CHECK_QSYS_ID)
-								||  (fpga_qsys_timestamp()!=CHECK_TIMESTAMP))
-									Error(ERR_ABORT, 0, "Cleaf Project needs FPGA Version=>>%s<<, QSysID=%d, Timestamp=%d", CHECK_VERSION_FPGA, CHECK_QSYS_ID, CHECK_TIMESTAMP);
-							}
-							break;
+	case printer_LB701:			_HeaterUsed=TRUE; break;
+	case printer_LB702_UV:		_HeaterUsed=TRUE; break;
+	case printer_LH702:			_HeaterUsed=TRUE; break;
+    case printer_test_slide_HB:	_HeaterUsed=TRUE; break;
+    case printer_Dropwatcher:	_HeaterUsed=TRUE; break;
+    case printer_test_table:	_HeaterUsed = (_MaxTemp>36); break;
+	case printer_cleaf:			_HeaterUsed=TRUE;
+								if (printerType!=printer_cleaf)
+								{
+									sprintf(str, "%d.%d.%d.%d", _Stat->FpgaVersion.major, _Stat->FpgaVersion.minor, _Stat->FpgaVersion.revision, _Stat->FpgaVersion.build);
+									if ((strcmp(str, CHECK_VERSION_FPGA))		
+									||  (fpga_qsys_id() != CHECK_QSYS_ID)
+									||  (fpga_qsys_timestamp()!=CHECK_TIMESTAMP))
+										Error(ERR_ABORT, 0, "Cleaf Project needs FPGA Version=>>%s<<, QSysID=%d, Timestamp=%d", CHECK_VERSION_FPGA, CHECK_QSYS_ID, CHECK_TIMESTAMP);
+								}
+								break;
 		
 	default: _HeaterUsed=FALSE;			
 	}

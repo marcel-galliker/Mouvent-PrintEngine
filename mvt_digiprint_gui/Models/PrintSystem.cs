@@ -75,10 +75,12 @@ namespace RX_DigiPrint.Models
 	            case EPrinterType.printer_test_table:	    return true;
 	            case EPrinterType.printer_test_slide:	    return true;
                 case EPrinterType.printer_test_slide_only:  return true;
+                case EPrinterType.printer_test_slide_HB:    return true;
                 case EPrinterType.printer_TX801:			return true;
 	            case EPrinterType.printer_TX802:			return true;
 	            case EPrinterType.printer_TX404:            return true;
 	            case EPrinterType.printer_test_table_seon:  return true;
+                case EPrinterType.printer_Dropwatcher:      return true;
                 default: return false;
 	            }
             }
@@ -137,11 +139,13 @@ namespace RX_DigiPrint.Models
             { 
                 switch(_PrinterType)
 	            {
+                case EPrinterType.printer_test_slide_HB:    return true;
 	            case EPrinterType.printer_test_table:	    return true;
                 case EPrinterType.printer_cleaf:            return true;
                 case EPrinterType.printer_LB701:			return true;
 	            case EPrinterType.printer_LB702_UV:			return true;
 	            case EPrinterType.printer_LH702:			return true;
+                case EPrinterType.printer_Dropwatcher:      return true;
 	            default:                                    return false;
 	            }
             }

@@ -224,6 +224,8 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 			
 		case printer_test_slide:		break;
 		case printer_test_slide_only:	break;
+		case printer_test_slide_HB:		break;
+        case printer_Dropwatcher:		break;
 			
 		case printer_LB701:				lb701_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 		case printer_LB702_UV:
@@ -264,6 +266,8 @@ static void _do_config(SStepperCfg *pcfg)
 	{
 	case printer_test_slide:		break;
 	case printer_test_slide_only:	break;
+	case printer_test_slide_HB:		break;
+    case printer_Dropwatcher:		break;
 	case printer_test_table:	tt_init(); break;
     case printer_test_table_seon:	if (RX_StepperCfg.boardNo == 0)
 									    tts_lift_init();

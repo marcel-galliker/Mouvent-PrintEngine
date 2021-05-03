@@ -707,7 +707,7 @@ static int _print_next(void)
 		}
 		if (*_Item.filepath) 
 		{
-			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only)
+			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only || RX_Config.printer.type == printer_test_slide_HB)
 			{
 				_Item.scansPrinted	= 0;
 				_Item.start.copy	= 0;
@@ -992,7 +992,7 @@ int pc_print_done(int headNo, SPrintDoneMsg *pmsg)
 		{
 			RX_PrinterStatus.printedCnt++;
 
-			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only)
+			if (RX_Config.printer.type==printer_test_slide || RX_Config.printer.type==printer_test_slide_only || RX_Config.printer.type == printer_test_slide_HB)
 			{
 				if (RX_PrinterStatus.sentCnt==RX_PrinterStatus.printedCnt) pc_abort_printing();
 				return REPLY_OK;

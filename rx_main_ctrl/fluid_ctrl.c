@@ -783,7 +783,6 @@ static void _control(int fluidNo)
 														steplb_rob_to_fct_pos((no+1)/2, HeadNo + rob_fct_purge_head0);
 													break;
                                                 }
-                                                
 
 												if (RX_Config.printer.type == printer_test_table_seon)
                                                 {
@@ -950,47 +949,81 @@ static void _control(int fluidNo)
 				case ctrl_print:			_PurgeAll=FALSE;
 											break;
                                             
-               case ctrl_vacuum_step4:		if (RX_StepperStatus.robot_used)
+				case ctrl_vacuum_step4:		if (RX_StepperStatus.robot_used)
 											{
 											    _send_ctrlMode(no, _EndCtrlMode[no], TRUE);
 											}
                                             break;
                                             
-               case ctrl_wipe_step3:		if (RX_StepperStatus.robot_used)
+				case ctrl_wipe_step3:		if (RX_StepperStatus.robot_used)
 											{
 											    _send_ctrlMode(no, _EndCtrlMode[no], TRUE);
 											}
                                             break;
+                                            
+                case ctrl_recovery_start:	if (lbrob && even_number_of_colors)
+											{
+                                                if (!steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever))
+													steplb_rob_to_fct_pos(no / 2, rob_fct_purge4ever);
+											}
+											else if (lbrob && !even_number_of_colors) 
+                                            {
+                                                if (!steplb_rob_in_fct_pos((no +1) / 2, rob_fct_purge4ever))
+													steplb_rob_to_fct_pos((no + 1) / 2, rob_fct_purge4ever);
+                                            }
+                                            _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+                                            
+                case ctrl_recovery_step1:	if (!lbrob || (lbrob && even_number_of_colors && steplb_rob_in_fct_pos(no / 2, rob_fct_purge4ever))
+												|| (lbrob && !even_number_of_colors && steplb_rob_in_fct_pos((no+1) / 2, rob_fct_purge4ever)))
+											{
+												if (lbrob || (RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))
+                                                {
+                                                    if (even_number_of_colors)	steplb_lift_to_fct_pos(no/2, rob_fct_cap);
+                                                    else						steplb_lift_to_fct_pos((no+1)/2, rob_fct_cap);
+                                                }
+                                                _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+                                            }
 
-			   case ctrl_recovery_start:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
-											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
-											_RecoveryTime[no] = 0;
-											_send_ctrlMode(no, ctrl_recovery_step1, TRUE); break;
-			   case ctrl_recovery_step1:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
+                case ctrl_recovery_step2:	if ((!lbrob && !(RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))		// not LB-machine
+												|| (!lbrob && RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB		// LB machine without Robot	
+												&& ((even_number_of_colors && steplb_lift_in_fct_pos(no / 2, rob_fct_cap)) || (!even_number_of_colors && steplb_lift_in_fct_pos((no+1) / 2, rob_fct_cap))))
+												|| (lbrob && even_number_of_colors && steplb_lift_in_fct_pos(no / 2, rob_fct_cap))							// LB machine with Robot
+												|| (lbrob && !even_number_of_colors && steplb_lift_in_fct_pos((no+1) / 2, rob_fct_cap)))
+											{   
+                                                setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
+												ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
+												_RecoveryTime[no] = 0;
+                                                steplb_pump_back_fluid(no, TRUE);
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+											}
+                                            break;
+
+                case ctrl_recovery_step3:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
 											if (rx_get_ticks() >= _RecoveryTime[no])
 											{
                                                 ctrl_set_recovery_freq(_RecoveryData.freq_hz[1]);
 												_RecoveryTime[no] = 0;
-												_send_ctrlMode(no, ctrl_recovery_step2, TRUE); break;
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 											}
 											break;
 
-			   case ctrl_recovery_step2:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[1] * 60 * 1000;
+				case ctrl_recovery_step4:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[1] * 60 * 1000;
 											if (rx_get_ticks() >= _RecoveryTime[no])
 											{
 												_RecoveryTime[no] = 0;
-												_send_ctrlMode(no, ctrl_recovery_step3, TRUE); break;
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 											}
 											break;
 
-			   case ctrl_recovery_step3:	_send_purge_par(no, _RecoveryData.purge_time_s*1000, FALSE, _RecoveryData.purge_time_s*1000); 
-											_send_ctrlMode(no, ctrl_recovery_step4, TRUE); break;
+				case ctrl_recovery_step5:	_send_purge_par(no, _RecoveryData.purge_time_s*1000, FALSE, _RecoveryData.purge_time_s*1000); 
+											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 											break;
 
-			   case ctrl_recovery_step4:	_send_ctrlMode(no, ctrl_recovery_step5, TRUE); break;
-			   case ctrl_recovery_step5:	_send_ctrlMode(no, ctrl_recovery_step6, TRUE); break;
-               case ctrl_recovery_step6:	_send_ctrlMode(no, ctrl_recovery_step7, TRUE); break;
-			   case ctrl_recovery_step7:	_send_ctrlMode(no, ctrl_off, TRUE); break;
+				case ctrl_recovery_step6:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+				case ctrl_recovery_step7:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+				case ctrl_recovery_step8:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+				case ctrl_recovery_step9:	if (lbrob) steplb_pump_back_fluid(no, FALSE);
+											_send_ctrlMode(no, ctrl_off, TRUE); break;
 
                 //--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;

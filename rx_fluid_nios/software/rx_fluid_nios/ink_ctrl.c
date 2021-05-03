@@ -68,7 +68,6 @@
 #define		TIME_BLEED_LINE_TIMEOUT90	9000
 
 #define 	MAX_POS_VARIANCE			2000		// um
-#define		RECOVERY_FLOW				60			// mbar/10
 #define 	RECOVERY_PRESSURE			2500
 #define		RECOVERY_PRESSURE_OLD		1100
 #define		RECOVERY_PRESSURE_END		50
@@ -1375,8 +1374,11 @@ void ink_tick_10ms(void)
 						}
 						else _StartModePRINT[isNo]++;
 						/* no break */
+
 			case ctrl_recovery_step1:
 			case ctrl_recovery_step2:
+			case ctrl_recovery_step3:
+			case ctrl_recovery_step4:
 
 						if ((_PressureSetpoint[isNo] != pRX_Status->ink_supply[isNo].cylinderPresSet) && (_StartModePRINT[isNo] > 500)) {
 							if (_StartModePRINT[isNo] > 504) {
@@ -1394,10 +1396,10 @@ void ink_tick_10ms(void)
 								pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 						}
 						else _FilterCloggedTime[isNo] = 0;
-						_pump_ctrl(isNo, RECOVERY_FLOW, PUMP_CTRL_MODE_PRINT);
+						_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
 						break;
 						
-			case ctrl_recovery_step3:
+			case ctrl_recovery_step5:
 						if (is_Sensor_25(isNo))
 							_Recovery_Pressure = RECOVERY_PRESSURE;
 						else
@@ -1406,19 +1408,19 @@ void ink_tick_10ms(void)
 						_Recovery_Pressure = 0;
 						break;
 						
-			case ctrl_recovery_step4:
+			case ctrl_recovery_step6:
 						_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 						pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 						break;
 						
-			case ctrl_recovery_step5:
+			case ctrl_recovery_step7:
 						_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 						_InkSupply[isNo].purgeTime = 0;
 						if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
 							pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 						break;
 						
-			case ctrl_recovery_step6:
+			case ctrl_recovery_step8:
 						if (_InkSupply[isNo].purgeTime < pRX_Config->ink_supply[isNo].purgeTime) {
 							_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 							_set_bleed_valve(isNo, PV_CLOSED);
@@ -1433,7 +1435,8 @@ void ink_tick_10ms(void)
 						}
 						break;
 
-			case ctrl_recovery_step7:
+			case ctrl_recovery_step9:
+						_set_air_valve(isNo, PV_OPEN);
 						if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= RECOVERY_PRESSURE_END)
 							pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 						break;
@@ -1586,15 +1589,15 @@ static void _init_purge(int isNo, int pressure)
 			    {
 				case printer_TX801 :
 				case printer_TX802 :
-				    case printer_TX404 :
-									    _InkSupply[isNo].purgePressure = 100 + 100*pRX_Config->headsPerColor + pressure; break;
-				    default : 			_InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
-			}
-		}
+				case printer_TX404 :
+									_InkSupply[isNo].purgePressure = 100 + 100*pRX_Config->headsPerColor + pressure; break;
+				default : 			_InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
+			    }
+		    }
 
-		if (_InkSupply[isNo].purgePressure > MAX_PRESSURE_FLUID)
-			_InkSupply[isNo].purgePressure = MAX_PRESSURE_FLUID;
-	}
+		    if (_InkSupply[isNo].purgePressure > MAX_PRESSURE_FLUID)
+		    	_InkSupply[isNo].purgePressure = MAX_PRESSURE_FLUID;
+		}
 		pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	=  _InkSupply[isNo].purgePressure;
 	}
 	pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
@@ -1668,9 +1671,9 @@ void _set_air_valve(int isNo, int state)
 {
 	if (!pvalve_active(isNo) && state) state=PV_OPEN;
 	if (state != pRX_Status->ink_supply[isNo].airValve)
-{
-		if (pvalve_set_air(isNo, state))
 	{
+		if (pvalve_set_air(isNo, state))
+		{
 			UINT16 val = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT);
 			if (state) val |= AIR_CUSSION_OUT(isNo);
 			else	   val &= ~AIR_CUSSION_OUT(isNo);

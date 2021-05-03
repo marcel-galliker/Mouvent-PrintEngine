@@ -126,7 +126,7 @@ int	 chiller_init(void)
 #ifdef linux
 	rx_thread_start(_chiller_thread, NULL, 0, "_chiller_thread");		
 #endif
-	return REPLY_OK;
+    return REPLY_OK;
 }
 
 //--- chiller_set_temp -----------------------------------------

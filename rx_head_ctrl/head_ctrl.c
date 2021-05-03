@@ -415,6 +415,12 @@ static int _rep_head_stat(RX_SOCKET socket)
 //--- _do_print_abort ---------------------------------------------------
 static int _do_print_abort(RX_SOCKET socket)
 {
+    int recovery_mode = FALSE;
+    for (int headNo = 0; headNo < SIZEOF(RX_HBStatus[0].head); headNo++)
+    {
+        if (RX_HBStatus[0].head[headNo].ctrlMode >= ctrl_recovery_start && RX_HBStatus[0].head[headNo].ctrlMode <= ctrl_recovery_step9) return REPLY_OK;
+    }
+    
 	_Printing=FALSE;
 	fpga_abort();
 	return REPLY_OK;	

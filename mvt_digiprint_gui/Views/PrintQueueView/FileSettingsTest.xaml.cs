@@ -44,7 +44,8 @@ namespace RX_DigiPrint.Views.PrintQueueView
             ScanModeIsShown = CB_ScanMode.Visibility == Visibility.Visible;
 
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide
-            || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only)
+            || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only
+            || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB)
             {
                 SpeedRow.Height = new GridLength(0);
                 SpeedIsShown = false;

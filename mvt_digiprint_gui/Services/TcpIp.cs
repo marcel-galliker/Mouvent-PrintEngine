@@ -98,6 +98,7 @@ namespace RX_DigiPrint.Services
         printer_test_slide,         // 2:
         printer_test_slide_only,    // 3:
         printer_test_table_seon,    // 4:
+        printer_test_slide_HB,      // 5:
 
         //--- web printers ------------------------------
         printer_LB701    =1000,	    // 1000: 
@@ -113,6 +114,8 @@ namespace RX_DigiPrint.Services
         printer_TX404,                  // 2002:
 
         printer_CB612 = 3001,
+
+        printer_Dropwatcher = 4000,
 
 	    //--- special projects ----------------
 	    printer_cleaf = 10000,		// 10000: Cleaf machine	
@@ -253,6 +256,8 @@ namespace RX_DigiPrint.Services
         ctrl_recovery_step5,            // 0x505:
         ctrl_recovery_step6,            // 0x506:
         ctrl_recovery_step7,            // 0x507:
+        ctrl_recovery_step8,            // 0x508:
+        ctrl_recovery_step9,            // 0x509:
 
         ctrl_test_watchdog = 0x10000,
 	    ctrl_test,				// 0x10001

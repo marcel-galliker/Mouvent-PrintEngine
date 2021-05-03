@@ -47,6 +47,8 @@ static void set_interface(void)
 	{
 	case printer_test_slide:		_MInterface=mi_none;	break;
 	case printer_test_slide_only:	_MInterface=mi_none;	break;
+	case printer_test_slide_HB:		_MInterface=mi_none;	break;
+    case printer_Dropwatcher:		_MInterface=mi_none;	break;
 	case printer_test_table:		_MInterface=mi_tt;		break;
 	case printer_test_table_seon:	_MInterface=mi_tts;		break;
 	case printer_cleaf:				_MInterface=mi_plc;		break;

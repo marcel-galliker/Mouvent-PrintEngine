@@ -123,6 +123,7 @@ void enc_init(void)
 		_EncoderThreadRunning = TRUE;
 		rx_thread_start(_enc_thread, NULL, 0, "_enc_thread");
 	}
+    if (RX_Config.printer.type == printer_Dropwatcher) arg_simuEncoder = TRUE;
 }
 
 //--- enc_end -------------------------------------
@@ -213,6 +214,8 @@ int	 enc_set_config(int restart)
 								break;
 	case printer_test_slide:	
 	case printer_test_slide_only:
+	case printer_test_slide_HB:
+    case printer_Dropwatcher:
 								_Encoder[0].webOffset_mm=150; break;
 //	case printer_test_table:	if (RX_Config.inkSupplyCnt<=4) _Encoder[0].webOffset_mm=200;	// CLEAF
 //								else						   _Encoder[0].webOffset_mm=110;	// Bobst
@@ -309,6 +312,8 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 			
 	case printer_test_slide: 
 	case printer_test_slide_only:
+	case printer_test_slide_HB:
+    case printer_Dropwatcher:
 								msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = 0;
 								break;
 			

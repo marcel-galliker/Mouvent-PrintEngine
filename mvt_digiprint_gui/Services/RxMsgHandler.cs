@@ -288,13 +288,11 @@ namespace RX_DigiPrint.Services
             {
                 RxGlobals.HeadStat.SetConnected((int)msg.stat.boardNo, (msg.stat.info&1)!=0);
                 RxGlobals.ClusterStat.SetItem(msg.stat);
-                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
-                {
-                    RxGlobals.HeadStat.Meniscus_disabled((int)msg.stat.boardNo, (msg.stat.info & 4) != 0);
-                    RxGlobals.HeadStat.Cooler_Pressure((int)msg.stat.boardNo, msg.stat.flow);
-                    RxGlobals.HeadStat.Cooler_Temp((int)msg.stat.boardNo, msg.stat.cooler_temp);
-                    RxGlobals.HeadStat.ClusterNo((int)msg.stat.boardNo, msg.stat.clusterNo);
-                }
+
+                RxGlobals.HeadStat.Meniscus_disabled((int)msg.stat.boardNo, (msg.stat.info & 4) != 0);
+                RxGlobals.HeadStat.Cooler_Pressure((int)msg.stat.boardNo, msg.stat.flow);
+                RxGlobals.HeadStat.Cooler_Temp((int)msg.stat.boardNo, msg.stat.cooler_temp);
+                RxGlobals.HeadStat.ClusterNo((int)msg.stat.boardNo, msg.stat.clusterNo);
                 
 
                 int i, no;
