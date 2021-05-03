@@ -706,8 +706,6 @@ static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, 
 	cmd.stopBits[motor]		 = 1<<stopInput;
 	cmd.stopBitLevels[motor] = level;
 	cmd.moveId[motor]		 = ++_MoveId[motor];
-    if (motor == 2) 
-        Error(LOG, 0, "Send Screw Command");
 	
 	TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE[%d].moveIdStarted=%d", motor, _MoveId[motor]);
 
