@@ -1,0 +1,43 @@
+network:
+    version: 2
+    renderer: networkd
+    ethernets:
+        em1:
+            dhcp4: true
+            optional: true
+        em2:
+            addresses:
+               - 192.168.200.1/24
+               - 172.16.6.118/16
+        p1p1:
+            addresses:
+               - 192.168.201.1/24
+            mtu: 9000
+        p1p2:
+            addresses:
+               - 192.168.202.1/24
+            mtu: 9000
+        p1p3:
+            addresses:
+               - 192.168.203.1/24
+            mtu: 9000
+        p1p4:
+            addresses:
+               - 192.168.204.1/24
+            mtu: 9000
+        p2p1:
+            addresses:
+               - 192.168.205.1/24
+            mtu: 9000
+        p2p2:
+            addresses:
+               - 192.168.206.1/24
+            mtu: 9000
+        p2p3:
+            addresses:
+               - 192.168.207.1/24
+            mtu: 9000
+        p2p4:
+            addresses:
+               - 192.168.208.1/24
+            mtu: 9000
