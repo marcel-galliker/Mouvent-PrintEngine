@@ -1,14 +1,13 @@
-#include "status_manager.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include <ft900.h>
+#include <status.h>
 
 #include "rx_robot_tcpip.h"
-#include "network_manager.h"
+#include "network.h"
 #include "version.h"
 #include "robot_flash.h"
 
@@ -22,7 +21,7 @@ SRobotStatusMsg RX_RobotStatus;
 
 /* Prototypes */
 
-bool status_manager_start(void)
+bool status_start(void)
 {
 	RX_RobotStatus.header.msgId  = CMD_STATUS_GET;
 	RX_RobotStatus.header.msgLen = sizeof(RX_RobotStatus);
@@ -37,17 +36,17 @@ void status_handle_message(void* message)
 
 	switch(header->msgId)
 	{
-	case CMD_STATUS_GET:	status_manager_send_status();	break;
+	case CMD_STATUS_GET:	status_send();	break;
 	default:	break;
 	}
 }
 
-//--- status_manager_send_status ------------------------------------
-void status_manager_send_status(void)
+//--- status_send ------------------------------------
+void status_send(void)
 {
 	RX_RobotStatus.serialNo = flash_read_serialNo();
 	RX_RobotStatus.alive++;
 
-	network_manager_send(&RX_RobotStatus, sizeof(RX_RobotStatus));
+	network_send(&RX_RobotStatus, sizeof(RX_RobotStatus));
 }
 

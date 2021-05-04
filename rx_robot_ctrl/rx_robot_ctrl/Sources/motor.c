@@ -1,4 +1,3 @@
-#include "motor_manager.h"
 #include "rx_robot_def.h"
 #include "rx_robot_tcpip.h"
 
@@ -9,10 +8,11 @@
 #include "sys/types.h"
 
 #include <ft900.h>
+#include <gpio.h>
+#include <motor.h>
+#include <status.h>
 
-#include "network_manager.h"
-#include "status_manager.h"
-#include "gpio_manager.h"
+#include "network.h"
 #include "rx_trace.h"
 
 #define TMC_RAMPSTAT_POS_REACHED_FLAG	0x80
@@ -113,20 +113,20 @@ static uint8_t _stopBitLevels[MOTOR_CNT];
 // Status Flags
 static bool _isInitialized = false;
 
-static void set_config(SRobotMotorSetCfgCmd* config);
-static void move_motors(SRobotMotorsMoveCmd* moveCommand);
-static void stop_motors(SRobotMotorsStopCmd* stopCommand);
-static void reset_motors(SRobotMotorsResetCmd* resetCommand);
-static void update_motor(uint8_t motor);
-static void check_encoder(uint8_t motor);
-static void check_stop_bits(uint8_t motor);
+static void _set_config(SRobotMotorSetCfgCmd* config);
+static void _move_motors(SRobotMotorsMoveCmd* moveCommand);
+static void _stop_motors(SRobotMotorsStopCmd* stopCommand);
+static void _reset_motors(SRobotMotorsResetCmd* resetCommand);
+static void _update_motor(uint8_t motor);
+static void _check_encoder(uint8_t motor);
+static void _check_stop_bits(uint8_t motor);
 static void _stop_motor(uint8_t motor);
-static void reset_motor(uint8_t motor);
-static int32_t spi_read_register(uint8_t reg, uint8_t motor);
-static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor);
-static void update_status(uint8_t status, uint8_t motor);
+static void _reset_motor(uint8_t motor);
+static int32_t _spi_read_register(uint8_t reg, uint8_t motor);
+static void _spi_write_register(uint8_t reg, uint32_t data, uint8_t motor);
+static void _update_status(uint8_t status, uint8_t motor);
 
-bool motor_manager_start(void)
+bool motor_start(void)
 {
 	memset(&_motorConfigs, 0, sizeof(_motorConfigs));
 	memset(&_encoderTolerance, 0, sizeof(_encoderTolerance));
@@ -151,10 +151,10 @@ void motor_handle_message(void* message)
 	{
 		switch(hdr->msgId)
 		{
-		case CMD_MOTOR_SET_CONFIG: 	set_config((SRobotMotorSetCfgCmd*)message); break;
-		case CMD_MOTORS_MOVE:		move_motors((SRobotMotorsMoveCmd*)message);	break;
-		case CMD_MOTORS_STOP:		stop_motors((SRobotMotorsStopCmd*)message);	break;
-		case CMD_MOTORS_RESET:		reset_motors((SRobotMotorsResetCmd*)message);	break;
+		case CMD_MOTOR_SET_CONFIG: 	_set_config((SRobotMotorSetCfgCmd*)message); break;
+		case CMD_MOTORS_MOVE:		_move_motors((SRobotMotorsMoveCmd*)message);	break;
+		case CMD_MOTORS_STOP:		_stop_motors((SRobotMotorsStopCmd*)message);	break;
+		case CMD_MOTORS_RESET:		_reset_motors((SRobotMotorsResetCmd*)message);	break;
 		default:
 			break;
 		}
@@ -168,69 +168,75 @@ void motor_main(void)
 	{
 		if(RX_RobotStatus.motor[motor].isConfigured)
 		{
-			update_motor(motor);
-			check_encoder(motor);
-			check_stop_bits(motor);
+			_update_motor(motor);
+			_check_encoder(motor);
+			_check_stop_bits(motor);
 		}
 	}
 }
 
-static void set_config(SRobotMotorSetCfgCmd* configCommand)
+//--- _set_config -----------------------------------------------------------
+static void _set_config(SRobotMotorSetCfgCmd* configCommand)
 {
 	if(configCommand->motor >= MOTOR_CNT)
 		return;
+	int motor=configCommand->motor;
+	SMotorConfig *pact = &_motorConfigs[motor];
+	SMotorConfig *pcfg = &configCommand->config;
 
-	memcpy(&_motorConfigs[configCommand->motor], &configCommand->config, sizeof(SMotorConfig));
+	if (pact->gconf 	!= pcfg->gconf) 	_spi_write_register(TMC_GCONF_REG, 		pcfg->gconf, 	 motor);
+	if (pact->swmode 	!= pcfg->swmode) 	_spi_write_register(TMC_SWMODE_REG,		pcfg->swmode, 	 motor);
+	if (pact->iholdirun != pcfg->iholdirun) _spi_write_register(TMC_IHOLDIRUN_REG, 	pcfg->iholdirun, motor);
+	if (pact->tpowerdown!= pcfg->tpowerdown)_spi_write_register(TMC_TPOWERDOWN_REG, 	pcfg->tpowerdown,motor);
+	if (pact->tpwmthrs 	!= pcfg->tpwmthrs) 	_spi_write_register(TMC_TPWMTHRS_REG, 	pcfg->tpwmthrs,  motor);
+	if (pact->rampmode 	!= pcfg->rampmode) 	_spi_write_register(TMC_RAMPMODE_REG, 	pcfg->rampmode,  motor);
+	if (pact->vmax 		!= pcfg->vmax) 		_spi_write_register(TMC_VMAX_REG, 		pcfg->vmax, 	 motor);
+	if (pact->v1 		!= pcfg->v1) 		_spi_write_register(TMC_V1_REG, 			pcfg->v1, 		 motor);
+	if (pact->amax 		!= pcfg->amax) 		_spi_write_register(TMC_AMAX_REG, 		pcfg->amax, 	 motor);
+	if (pact->dmax 		!= pcfg->dmax) 		_spi_write_register(TMC_DMAX_REG, 		pcfg->dmax, 	 motor);
+	if (pact->a1 		!= pcfg->a1) 		_spi_write_register(TMC_A1_REG, 			pcfg->a1, 		 motor);
+	if (pact->d1 		!= pcfg->d1) 		_spi_write_register(TMC_D1_REG, 			pcfg->d1, 		 motor);
+	if (pact->vstart 	!= pcfg->vstart) 	_spi_write_register(TMC_VSTART_REG, 		pcfg->vstart, 	 motor);
+	if (pact->vstop 	!= pcfg->vstop) 	_spi_write_register(TMC_VSTOP_REG, 		pcfg->vstop, 	 motor);
+	if (pact->tzerowait != pcfg->tzerowait) _spi_write_register(TMC_TZEROWAIT_REG, 	pcfg->tzerowait, motor);
+	if (pact->vdcmin 	!= pcfg->vdcmin) 	_spi_write_register(TMC_VDCMIN_REG, 		pcfg->vdcmin, 	 motor);
+	if (pact->chopconf 	!= pcfg->chopconf) 	_spi_write_register(TMC_CHOPCONF_REG, 	pcfg->chopconf,  motor);
+	if (pact->coolconf 	!= pcfg->coolconf) 	_spi_write_register(TMC_COOLCONF_REG, 	pcfg->coolconf,  motor);
+	if (pact->pwmconf 	!= pcfg->pwmconf) 	_spi_write_register(TMC_PWMCONF_REG, 	pcfg->pwmconf, 	 motor);
+	if (pact->tcoolthrs != pcfg->tcoolthrs) _spi_write_register(TMC_TCOOLTHRS_REG, 	pcfg->tcoolthrs, motor);
+	if (pact->thigh 	!= pcfg->thigh) 	_spi_write_register(TMC_THIGH_REG, 		pcfg->thigh, 	 motor);
+	if (pact->encmode 	!= pcfg->encmode) 	_spi_write_register(TMC_ENCMODE_REG, 	pcfg->encmode, 	 motor);
+	if (pact->encconst 	!= pcfg->encconst) 	_spi_write_register(TMC_ENCCONST_REG, 	pcfg->encconst,  motor);
 
-	spi_write_register(TMC_GCONF_REG, configCommand->config.gconf, configCommand->motor);
-	spi_write_register(TMC_SWMODE_REG, configCommand->config.swmode, configCommand->motor);
-	spi_write_register(TMC_IHOLDIRUN_REG, configCommand->config.iholdirun, configCommand->motor);
-	spi_write_register(TMC_TPOWERDOWN_REG, configCommand->config.tpowerdown, configCommand->motor);
-	spi_write_register(TMC_TPWMTHRS_REG, configCommand->config.tpwmthrs, configCommand->motor);
-	spi_write_register(TMC_RAMPMODE_REG, configCommand->config.rampmode, configCommand->motor);
-	spi_write_register(TMC_VMAX_REG, configCommand->config.vmax, configCommand->motor);
-	spi_write_register(TMC_V1_REG, configCommand->config.v1, configCommand->motor);
-	spi_write_register(TMC_AMAX_REG, configCommand->config.amax, configCommand->motor);
-	spi_write_register(TMC_DMAX_REG, configCommand->config.dmax, configCommand->motor);
-	spi_write_register(TMC_A1_REG, configCommand->config.a1, configCommand->motor);
-	spi_write_register(TMC_D1_REG, configCommand->config.d1, configCommand->motor);
-	spi_write_register(TMC_VSTART_REG, configCommand->config.vstart, configCommand->motor);
-	spi_write_register(TMC_VSTOP_REG, configCommand->config.vstop, configCommand->motor);
-	spi_write_register(TMC_TZEROWAIT_REG, configCommand->config.tzerowait, configCommand->motor);
-	spi_write_register(TMC_VDCMIN_REG, configCommand->config.vdcmin, configCommand->motor);
-	spi_write_register(TMC_CHOPCONF_REG, configCommand->config.chopconf, configCommand->motor);
-	spi_write_register(TMC_COOLCONF_REG, configCommand->config.coolconf, configCommand->motor);
-	spi_write_register(TMC_PWMCONF_REG, configCommand->config.pwmconf, configCommand->motor);
-	spi_write_register(TMC_TCOOLTHRS_REG, configCommand->config.tcoolthrs, configCommand->motor);
-	spi_write_register(TMC_THIGH_REG, configCommand->config.thigh, configCommand->motor);
-	spi_write_register(TMC_ENCMODE_REG, configCommand->config.encmode, configCommand->motor);
-	spi_write_register(TMC_ENCCONST_REG, configCommand->config.encconst, configCommand->motor);
-	reset_motor(configCommand->motor);
-	RX_RobotStatus.motor[configCommand->motor].isConfigured = true;
+	memcpy(&_motorConfigs[motor], &configCommand->config, sizeof(SMotorConfig));
+
+	_reset_motor(motor);
+	RX_RobotStatus.motor[motor].isConfigured = true;
 }
 
-static void move_motors(SRobotMotorsMoveCmd* cmd)
+static void _move_motors(SRobotMotorsMoveCmd* cmd)
 {
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
 		if (cmd->motors & (1<<motor))
 		{
-			TrPrintf(true, "Move Motor[%d].id=%d to %d (pos=%d enc=%d diff=%d)", motor, cmd->moveId[motor], cmd->targetPos[motor],
-					RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
-					RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
-
 			_encoderTolerance[motor] = cmd->encoderTol[motor];
 			_stopBits[motor]		 = cmd->stopBits[motor];
 			_stopBitLevels[motor] 	 = cmd->stopBitLevels[motor];
 
-			gpio_manager_enable_motor(motor, TRUE);
-			gpio_manager_stop_motor(motor);	// Pause to start them in sync later
+			gpio_enable_motor(motor, TRUE);
+			gpio_stop_motor(motor);	// Pause to start them in sync later
 			if (_encoderTolerance[motor]) // reset encoder check
 			{
-				int pos = spi_read_register(TMC_XENC_REG, motor);
-				spi_write_register(TMC_XACTUAL_REG, pos, motor);
+				int pos = _spi_read_register(TMC_XENC_REG, motor);
+				_spi_write_register(TMC_XACTUAL_REG, pos, motor);
 			}
-			spi_write_register(TMC_XTARGET_REG, cmd->targetPos[motor], motor);
+			_spi_write_register(TMC_XTARGET_REG, cmd->targetPos[motor], motor);
+
+			_update_motor(motor);
+			TrPrintf(true, "Move Motor[%d].id=%d to %d (pos=%d enc=%d diff=%d)", motor, cmd->moveId[motor], cmd->targetPos[motor],
+					RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
+					RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
 		}
 	}
 
@@ -239,13 +245,13 @@ static void move_motors(SRobotMotorsMoveCmd* cmd)
 	{
 		if (cmd->motors & (1<<motor))
 		{
-			gpio_manager_start_motor(motor);
+			gpio_start_motor(motor);
 			RX_RobotStatus.motor[motor].moveIdStarted=cmd->moveId[motor];
 		}
 	}
 }
 
-static void stop_motors(SRobotMotorsStopCmd* cmd)
+static void _stop_motors(SRobotMotorsStopCmd* cmd)
 {
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
@@ -253,24 +259,24 @@ static void stop_motors(SRobotMotorsStopCmd* cmd)
 	}
 }
 
-static void reset_motors(SRobotMotorsResetCmd* cmd)
+static void _reset_motors(SRobotMotorsResetCmd* cmd)
 {
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
-		if(cmd->motors & (1<<motor)) reset_motor(motor);
+		if(cmd->motors & (1<<motor)) _reset_motor(motor);
 	}
-	status_manager_send_status();
+	status_send();
 }
 
-static void update_motor(uint8_t motor)
+static void _update_motor(uint8_t motor)
 {
-	RX_RobotStatus.motor[motor].motorPos  = spi_read_register(TMC_XACTUAL_REG, motor);
-	RX_RobotStatus.motor[motor].encPos	  = spi_read_register(TMC_XENC_REG, motor);
-	RX_RobotStatus.motor[motor].targetPos = spi_read_register(TMC_XTARGET_REG, motor);
-	RX_RobotStatus.motor[motor].speed	  = spi_read_register(TMC_VACTUAL_REG, motor);
+	RX_RobotStatus.motor[motor].motorPos  = _spi_read_register(TMC_XACTUAL_REG, motor);
+	RX_RobotStatus.motor[motor].encPos	  = _spi_read_register(TMC_XENC_REG, motor);
+	RX_RobotStatus.motor[motor].targetPos = _spi_read_register(TMC_XTARGET_REG, motor);
+	RX_RobotStatus.motor[motor].speed	  = _spi_read_register(TMC_VACTUAL_REG, motor);
 }
 
-static void check_encoder(uint8_t motor)
+static void _check_encoder(uint8_t motor)
 {
 	if(RX_RobotStatus.motor[motor].moveIdStarted!=RX_RobotStatus.motor[motor].moveIdDone
 	&& _encoderTolerance[motor]
@@ -285,7 +291,7 @@ static void check_encoder(uint8_t motor)
 	}
 }
 
-static void check_stop_bits(uint8_t motor)
+static void _check_stop_bits(uint8_t motor)
 {
 	if(RX_RobotStatus.motor[motor].isMoving && _stopBits[motor])
 	{
@@ -293,7 +299,7 @@ static void check_stop_bits(uint8_t motor)
 		{
 			if (_stopBits[motor] & (1<<in))
 			{
-				uint8_t isSet = gpio_manager_get_input(in);
+				uint8_t isSet = gpio_get_input(in);
 				if(isSet == _stopBitLevels[motor])
 				{
 					_stopBits[motor] &= ~(1<<in); // stop only once
@@ -311,30 +317,30 @@ static void _stop_motor(uint8_t motor)
 	if(motor >= MOTOR_CNT)
 		return;
 
-	gpio_manager_stop_motor(motor);
+	gpio_stop_motor(motor);
 
-	int32_t motorPosition = spi_read_register(TMC_XACTUAL_REG, motor);
+	int32_t motorPosition = _spi_read_register(TMC_XACTUAL_REG, motor);
 
-	spi_write_register(TMC_XTARGET_REG, motorPosition, motor);
-	spi_write_register(TMC_XACTUAL_REG, motorPosition, motor);
+	_spi_write_register(TMC_XTARGET_REG, motorPosition, motor);
+	_spi_write_register(TMC_XACTUAL_REG, motorPosition, motor);
 
-	gpio_manager_start_motor(motor);
+	gpio_start_motor(motor);
 }
 
-static void reset_motor(uint8_t motor)
+static void _reset_motor(uint8_t motor)
 {
 	if(motor >= MOTOR_CNT)
 			return;
 
-	gpio_manager_stop_motor(motor);
+	gpio_stop_motor(motor);
 
 	RX_RobotStatus.motor[motor].targetPos = 0;
 	RX_RobotStatus.motor[motor].motorPos  = 0;
 	RX_RobotStatus.motor[motor].encPos 	  = 0;
 
-	spi_write_register(TMC_XTARGET_REG, 0, motor);
-	spi_write_register(TMC_XACTUAL_REG, 0, motor);
-	spi_write_register(TMC_XENC_REG, 0, motor);
+	_spi_write_register(TMC_XTARGET_REG, 0, motor);
+	_spi_write_register(TMC_XACTUAL_REG, 0, motor);
+	_spi_write_register(TMC_XENC_REG, 0, motor);
 
 	_encoderTolerance[motor] = 0;
 	_stopBits[motor] = 0;
@@ -343,11 +349,11 @@ static void reset_motor(uint8_t motor)
 	RX_RobotStatus.motor[motor].isMoving = false;
 	RX_RobotStatus.motor[motor].isStalled = false;
 
-	gpio_manager_start_motor(motor);
-	gpio_manager_enable_motor(motor, FALSE);
+	gpio_start_motor(motor);
+	gpio_enable_motor(motor, FALSE);
 }
 
-static int32_t spi_read_register(uint8_t reg, uint8_t motor)
+static int32_t _spi_read_register(uint8_t reg, uint8_t motor)
 {
 	int32_t data;
 	SpiTxDatagram_t txDatagram;
@@ -371,7 +377,7 @@ static int32_t spi_read_register(uint8_t reg, uint8_t motor)
 	spi_xchangen(SPIM, (uint8_t *)&rxDatagram, (uint8_t *)&txDatagram, sizeof(rxDatagram));
 	spi_close(SPIM, motor);
 
-	update_status(rxDatagram.status, motor);
+	_update_status(rxDatagram.status, motor);
 
 	spi_open(SPIM, motor);
 	spi_xchangen(SPIM, (uint8_t *)&rxDatagram, (uint8_t *)&txDatagram, sizeof(rxDatagram));
@@ -379,12 +385,12 @@ static int32_t spi_read_register(uint8_t reg, uint8_t motor)
 
 	data = __bswap32(rxDatagram.data);
 
-	update_status(rxDatagram.status, motor);
+	_update_status(rxDatagram.status, motor);
 
 	return data;
 }
 
-static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor)
+static void _spi_write_register(uint8_t reg, uint32_t data, uint8_t motor)
 {
 	SpiTxDatagram_t txDatagram;
 	SpiRxDatagram_t rxDatagram;
@@ -408,10 +414,10 @@ static void spi_write_register(uint8_t reg, uint32_t data, uint8_t motor)
 	spi_xchangen(SPIM, (uint8_t *)&rxDatagram, (uint8_t *)&txDatagram, sizeof(rxDatagram));
 	spi_close(SPIM, motor);
 
-	update_status(rxDatagram.status, motor);
+	_update_status(rxDatagram.status, motor);
 }
 
-static void update_status(uint8_t status, uint8_t motor)
+static void _update_status(uint8_t status, uint8_t motor)
 {
 	RX_RobotStatus.motor[motor].status = status;
 
@@ -423,12 +429,12 @@ static void update_status(uint8_t status, uint8_t motor)
 		_encoderTolerance[motor] = 0;
 		_stopBits[motor] = 0;
 		_stopBitLevels[motor] = 0;
-		gpio_manager_enable_motor(motor, FALSE);
-		status_manager_send_status();
+		gpio_enable_motor(motor, FALSE);
+		status_send();
 	}
 	else if(!RX_RobotStatus.motor[motor].isMoving && isMoving)
 	{
 		RX_RobotStatus.motor[motor].isMoving = true;
-		status_manager_send_status();
+		status_send();
 	}
 }

@@ -101,7 +101,7 @@
  * Enable Internet Group Management Protocol
  * IP multicast support is used in this application.
  */
-#define LWIP_IGMP                  1
+#define LWIP_IGMP                  0
 
 /* LWIP_ICMP
  * Enable Internet Control Message Protocol
@@ -143,7 +143,7 @@
 
 #define LWIP_COMPAT_SOCKETS        (NO_SYS==0)
 #define LWIP_PROVIDE_ERRNO         1
-#define LWIP_SO_SNDTIMEO           1
+#define LWIP_SO_SNDTIMEO           0
 #define LWIP_SO_RCVTIMEO           1
 #define LWIP_SO_RCVBUF             0
 
@@ -362,7 +362,7 @@
 #define PBUF_LINK_HLEN          20
 
 /* ---------- TCP options ---------- */
-#define LWIP_TCP                1
+#define LWIP_TCP                0
 #define TCP_TTL                 255
 
 /* Controls if TCP should queue segments that arrive out of
@@ -406,7 +406,7 @@
  *
  * Default 0.
  */
-#define ARP_QUEUEING                    1
+#define ARP_QUEUEING                    0 // 1
 
 /* LWIP_BROADCAST_PING==1: respond to broadcast pings (default is unicast only) */
 #define LWIP_BROADCAST_PING     1
@@ -422,9 +422,9 @@
 
 /* IP reassembly and segmentation.These are orthogonal even
  * if they both deal with IP fragments */
-#define IP_REASSEMBLY           1
-#define IP_REASS_MAX_PBUFS      10
-#define IP_FRAG                 1
+#define IP_REASSEMBLY           0 // 1
+#define IP_REASS_MAX_PBUFS      0 // 10
+#define IP_FRAG                 0 // 1
 
 /**
  * MEMP_NUM_REASSDATA: the number of IP packets simultaneously queued for
@@ -440,14 +440,14 @@
 /* ---------- DHCP options ---------- */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. */
-#define LWIP_DHCP               1
+#define LWIP_DHCP               0
 
 /* 1 if you want to want DHCP to wait for link to be up
    before starting. */
-#define LWIP_DHCP_CHECK_LINK_UP 1
+#define LWIP_DHCP_CHECK_LINK_UP 0
 /* 1 if you want to do an ARP check on the offered address
    (recommended). */
-#define DHCP_DOES_ARP_CHECK		1
+#define DHCP_DOES_ARP_CHECK		0
 /* 1 if you want to send a hostname to the DHCP server.
    (recommended). */
 #define LWIP_NETIF_HOSTNAME     1
@@ -504,7 +504,7 @@
 #define LWIP_CHECKSUM_ON_COPY   0
 
 /* ---------- mDNS options ---------- */
-#define LWIP_NUM_NETIF_CLIENT_DATA  1
+#define LWIP_NUM_NETIF_CLIENT_DATA  0
 
 #if (NO_SYS==0)
 /**

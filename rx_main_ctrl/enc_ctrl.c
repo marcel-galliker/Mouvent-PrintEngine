@@ -374,8 +374,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	
 //	_WakeupLen = 0;
 //	if (wakeupLen) Error(LOG, 0, "Set WakeupLen for Lazy jets: %d strokes", wakeupLen);
-	
-		
+			
 	msg.speed_mmin  = pitem->speed;
 	_IncPerMeter    = msg.incPerMeter;
 

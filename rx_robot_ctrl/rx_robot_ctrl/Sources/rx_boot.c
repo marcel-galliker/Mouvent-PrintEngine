@@ -17,7 +17,7 @@
 
 #include "net.h"
 
-#include "network_manager.h"
+#include "network.h"
 
 /* Defines */
 
@@ -63,10 +63,6 @@ static const uint8_t 	_deviceName[] = DEVICE_STRING;
 // Status flags
 static bool _isAddressConfirmed = false;
 
-static bool _isbroadcastInitalized = false;
-static bool _isInitialized = false;
-
-
 /* Prototypes */
 static void rx_boot_task(void *pvParameters);
 static void rx_boot_broadcast_task(void *pvParameters);
@@ -77,7 +73,7 @@ static void rx_boot_handle_command(void* msg);
 bool rx_boot_start(void) {
 	// TODO: Check if network is initalized
 
-	_rxBootMessageQueue = network_manager_get_boot_message_queue();
+	_rxBootMessageQueue = network_get_boot_message_queue();
 
 	if(_rxBootMessageQueue == NULL)
 		chip_reboot();
@@ -99,13 +95,7 @@ bool rx_boot_start(void) {
 	return true;
 }
 
-bool rx_boot_is_initalized(void) {
-	return (_isInitialized && _isbroadcastInitalized);
-}
-
 static void rx_boot_task(void *pvParameters) {
-	_isInitialized = true;
-
 	while(true)
 	{
 		if(_rxBootMessageQueue != NULL)
@@ -125,7 +115,7 @@ static void rx_boot_broadcast_task(void *pvParameters) {
 	static const TickType_t frequency = BROADCAST_INTERVAL / portTICK_PERIOD_MS;
 
 	// TODO: Find a better way to implement this (maybe task signals)
-	while(network_manager_is_initialized() == false){
+	while(network_is_initialized() == false){
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
 
@@ -141,8 +131,6 @@ static void rx_boot_broadcast_task(void *pvParameters) {
 	// Get ip address
 	ip_addr_t ip = net_get_ip();
 	ipaddr_ntoa_r(&ip, (char *)_item.ipAddr, sizeof(_item.ipAddr));
-
-	_isbroadcastInitalized = true;
 
 	lastWakeTime = xTaskGetTickCount();
 
@@ -164,7 +152,7 @@ static void rx_boot_send_info(uint32_t id)
 	// Broadcast current network status
 	message.id = id;
 	memcpy(&message.item, &_item, sizeof(message.item));
-	network_manager_broadcast(&message, sizeof(message));
+	network_broadcast(&message, sizeof(message));
 }
 
 static void rx_boot_handle_command(void* msg)
@@ -193,7 +181,7 @@ static void rx_boot_handle_command(void* msg)
 			ipaddr_aton((const char*)commandData->ipAddr, &newIp);
 
 			// Change IP address
-			network_manager_change_ip(&newIp);
+			network_change_ip(&newIp);
 
 			// Update NetworkItem with new IP
 			ip_addr_t ip = net_get_ip();

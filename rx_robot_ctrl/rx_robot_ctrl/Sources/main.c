@@ -1,3 +1,7 @@
+#include <gpio.h>
+#include <motor.h>
+#include <network.h>
+#include <status.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -11,14 +15,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "gpio_manager.h"
+#include "motor.h"
 #include "robot_flash.h"
-#include "network_manager.h"
 #include "rx_boot.h"
 #include "rx_trace.h"
-#include "status_manager.h"
-#include "bootloader_manager.h"
-#include "motor_manager.h"
+#include "bootloader.h"
 
 // ignore debug statements
 #define DEBUG_PRINTF(...)
@@ -43,12 +44,12 @@ int main(void)
     init_printf(NULL, myputc);
 
     flash_init();
-    network_manager_start();
-    gpio_manager_start();
-    motor_manager_start();
+    network_start();
+    gpio_start();
+    motor_start();
     rx_boot_start();
-    status_manager_start();
-    bootloader_manager_start();
+    status_start();
+    bootloader_start();
 
     vTaskStartScheduler();
 

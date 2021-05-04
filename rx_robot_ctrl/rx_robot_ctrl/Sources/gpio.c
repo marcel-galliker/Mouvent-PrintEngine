@@ -1,5 +1,3 @@
-#include "gpio_manager.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -7,11 +5,12 @@
 #include "sys/types.h"
 
 #include <ft900.h>
+#include <gpio.h>
+#include <network.h>
+#include <status.h>
 
 #include "rx_robot_def.h"
 #include "rx_robot_tcpip.h"
-#include "network_manager.h"
-#include "status_manager.h"
 
 /* Defines */
 
@@ -72,10 +71,6 @@ static const uint8_t _motorStopRight[MOTOR_CNT] = {
 		20,	// MOTOR3_R_REF
 };
 
-
-// Status Flags
-static bool _isInitialized = false;
-
 /* Prototypes */
 
 // Initialization functions
@@ -90,11 +85,11 @@ static void _toggle_watchdog(void);
 static void _update_outputs(void);
 static void _update_inputs(void);
 static int  _update_input(int no);
-static void _gpio_manager_set_outputs(uint8_t outputs, int value);
-static void _gpio_manager_reset_edgeCnt(uint8_t inputs);
+static void _gpio_set_outputs(uint8_t outputs, int value);
+static void _gpio_reset_edgeCnt(uint8_t inputs);
 
 
-bool gpio_manager_start(void)
+bool gpio_start(void)
 {
 	_init_voltage_watchdog();
 	_init_motor_gpios();
@@ -102,34 +97,28 @@ bool gpio_manager_start(void)
 	_init_inputs();
 	_init_outputs();
 
-	_isInitialized = true;
 	return true;
 }
 
-bool gpio_manager_is_initalized(void)
-{
-	return _isInitialized;
-}
-
-void gpio_manager_set_output(uint8_t output, bool value)
+void gpio_set_output(uint8_t output, bool value)
 {
 	if(output < OUTPUT_CNT) gpio_write(_outputs[output], value);
 }
 
-bool gpio_manager_get_input(uint8_t input)
+bool gpio_get_input(uint8_t input)
 {
 	if(input < INPUT_CNT)
 		return _update_input(input);
 	else return 0;
 }
 
-void gpio_manager_enable_motor(uint8_t motor, int enable)
+void gpio_enable_motor(uint8_t motor, int enable)
 {
 	if(motor<MOTOR_CNT) gpio_write(_motorDisable[motor], !enable);
 }
 
 
-void gpio_manager_start_motor(uint8_t motor)
+void gpio_start_motor(uint8_t motor)
 {
 	if(motor<MOTOR_CNT)
 	{
@@ -138,7 +127,7 @@ void gpio_manager_start_motor(uint8_t motor)
 	}
 }
 
-void gpio_manager_stop_motor(uint8_t motor)
+void gpio_stop_motor(uint8_t motor)
 {
 	if(motor < MOTOR_CNT)
 	{
@@ -151,17 +140,14 @@ void gpio_handle_message(void* message)
 {
 	SGpioSetCmd* cmd = (SGpioSetCmd*)message;
 
-	if(_isInitialized)
+	switch(cmd->header.msgId)
 	{
-		switch(cmd->header.msgId)
-		{
-		case CMD_GPIO_OUT_SETLOW:	_gpio_manager_set_outputs(cmd->outputs, 0);	break;
-		case CMD_GPIO_OUT_SETHIGH:	_gpio_manager_set_outputs(cmd->outputs, 1);	break;
-		case CMD_GPIO_IN_RESET:		_gpio_manager_reset_edgeCnt(cmd->outputs);	break;
+	case CMD_GPIO_OUT_SETLOW:	_gpio_set_outputs(cmd->outputs, 0);	break;
+	case CMD_GPIO_OUT_SETHIGH:	_gpio_set_outputs(cmd->outputs, 1);	break;
+	case CMD_GPIO_IN_RESET:		_gpio_reset_edgeCnt(cmd->outputs);	break;
 
-		default:
-			break;
-		}
+	default:
+		break;
 	}
 }
 
@@ -305,7 +291,7 @@ static int _update_input(int no)
 	return (val!=0);
 }
 
-static void _gpio_manager_set_outputs(uint8_t outputs, int value)
+static void _gpio_set_outputs(uint8_t outputs, int value)
 {
 	for(int out = 0; out < OUTPUT_CNT; out++)
 	{
@@ -313,7 +299,7 @@ static void _gpio_manager_set_outputs(uint8_t outputs, int value)
 	}
 }
 
-static void _gpio_manager_reset_edgeCnt(uint8_t inputs)
+static void _gpio_reset_edgeCnt(uint8_t inputs)
 {
 	for(int in = 0; in < INPUT_CNT; in++)
 	{

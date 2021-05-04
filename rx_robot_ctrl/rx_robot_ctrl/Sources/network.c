@@ -1,4 +1,4 @@
-#include "network_manager.h"
+#include "network.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -7,6 +7,9 @@
 #include "sys/types.h"
 
 #include <ft900.h>
+#include <gpio.h>
+#include <motor.h>
+#include <status.h>
 
 #include "tinyprintf.h"
 
@@ -21,10 +24,7 @@
 
 #include "rx_robot_tcpip.h"
 
-#include "gpio_manager.h"
-#include "status_manager.h"
-#include "motor_manager.h"
-#include "bootloader_manager.h"
+#include "bootloader.h"
 
 #include "rx_trace.h"
 
@@ -89,13 +89,13 @@ static struct sockaddr_in __attribute__ ((aligned (4))) _rxBootClientAddress;
 static QueueHandle_t _rxBootMessageQueue;
 static QueueHandle_t _bootloaderMessageQueue;
 
-static void network_manager_task(void *pvParameters);
-static void network_manager_connection_task(void *pvParameters);
-static void network_manager_ethif_status_cb(int netif_up, int link_up, int packet_available);
-static int  network_manager_process_broadcast_interface(void);
-static int  network_manager_process_command_interface(void);
+static void network_task(void *pvParameters);
+static void network_connection_task(void *pvParameters);
+static void network_ethif_status_cb(int netif_up, int link_up, int packet_available);
+static int  network_process_broadcast_interface(void);
+static int  network_process_command_interface(void);
 
-bool network_manager_start(void) {
+bool network_start(void) {
 	sys_enable(sys_device_ethernet);
 
 	memset(&_rxBootServerAddress, 0, sizeof(_rxBootServerAddress));
@@ -105,7 +105,7 @@ bool network_manager_start(void) {
 	memset(&_bootloaderClientAddress, 0, sizeof(_bootloaderClientAddress));
 	memset(&_communicationClientAddress, 0, sizeof(_communicationClientAddress));
 
-	if (xTaskCreate(network_manager_task,
+	if (xTaskCreate(network_task,
 			"Network",
 			TASK_SERVER_STACK_SIZE,
 			NULL,
@@ -119,24 +119,24 @@ bool network_manager_start(void) {
 	return true;
 }
 
-QueueHandle_t network_manager_get_boot_message_queue(void)
+QueueHandle_t network_get_boot_message_queue(void)
 {
 	return _rxBootMessageQueue;
 }
 
-QueueHandle_t network_manager_get_bootloader_message_queue(void)
+QueueHandle_t network_get_bootloader_message_queue(void)
 {
 	return _bootloaderMessageQueue;
 }
 
-void network_manager_change_ip(ip_addr_t* newIpAddress)
+void network_change_ip(ip_addr_t* newIpAddress)
 {
 	_ipAddress = *newIpAddress;
 	struct netif* networkInterface = net_get_netif();
 	netif_set_addr(networkInterface, &_ipAddress, &_netMask, &_gatewayAddress);
 }
 
-void network_manager_broadcast(void *message, uint32_t size)
+void network_broadcast(void *message, uint32_t size)
 {
 	static bool isBroadcastAddressInit;
 	static struct sockaddr_in broadcastAddress;
@@ -159,7 +159,7 @@ void network_manager_broadcast(void *message, uint32_t size)
 	sendto(_rxBootSocket, message, size, MSG_DONTWAIT, (struct sockaddr *)&broadcastAddress, sizeof(broadcastAddress));
 }
 
-void network_manager_send(void* message, uint32_t size)
+void network_send(void* message, uint32_t size)
 {
 	if(_isInitialized == false)
 		return;
@@ -175,12 +175,12 @@ void network_manager_send(void* message, uint32_t size)
 	taskEXIT_CRITICAL();
 }
 
-bool network_manager_is_initialized(void)
+bool network_is_initialized(void)
 {
 	return _isInitialized;
 }
 
-static void network_manager_task(void *pvParameters)
+static void network_task(void *pvParameters)
 {
     uint32_t ulNotifiedValue;
 
@@ -188,7 +188,7 @@ static void network_manager_task(void *pvParameters)
 
     /* Initialise Ethernet module and LwIP service. */
     net_init(_ipAddress, _gatewayAddress, _netMask, USE_DHCP, "Robot",
-    		network_manager_ethif_status_cb);
+    		network_ethif_status_cb);
 
     /* Wait till network interface is up (IP address is valid in the case of DHCP) */
     while (xTaskNotifyWait( pdFALSE,    /* Don't clear bits on entry. */
@@ -197,7 +197,7 @@ static void network_manager_task(void *pvParameters)
             portMAX_DELAY ) == false)
         ;
 
-    xTaskCreate(network_manager_connection_task,
+    xTaskCreate(network_connection_task,
             "Connection",
             TASK_STATS_STACK_SIZE,
             NULL,
@@ -267,9 +267,9 @@ static void network_manager_task(void *pvParameters)
         	int cnt=0;
         	gpio_main();
         	motor_main();
-        	cnt += network_manager_process_command_interface();
-        	cnt += network_manager_process_broadcast_interface();
-        	bootloader_manager_main();
+        	cnt += network_process_command_interface();
+        	cnt += network_process_broadcast_interface();
+        	bootloader_main();
         	if (cnt==0) vTaskDelayUntil(&lastWakeTime, frequency);
         }
 
@@ -278,7 +278,7 @@ static void network_manager_task(void *pvParameters)
     }
 }
 
-static void network_manager_connection_task(void *pvParameters)
+static void network_connection_task(void *pvParameters)
 {
     while (1)
     {
@@ -304,7 +304,7 @@ static void network_manager_connection_task(void *pvParameters)
     }
 }
 
-static void network_manager_ethif_status_cb(int netif_up, int link_up, int packet_available) {
+static void network_ethif_status_cb(int netif_up, int link_up, int packet_available) {
     if (netif_up) {
         xTaskNotify(_networkManagerTask,TASK_NOTIFY_NETIF_UP,eSetBits);
     }
@@ -319,7 +319,7 @@ static void network_manager_ethif_status_cb(int netif_up, int link_up, int packe
     }
 }
 
-static int network_manager_process_broadcast_interface(void)
+static int network_process_broadcast_interface(void)
 {
 	static uint8_t udpData[BROADCAST_INTERFACE_MAX_PKG_SIZE] = {0};
 	static int32_t size_rx;
@@ -342,7 +342,7 @@ static int network_manager_process_broadcast_interface(void)
 	return 0;
 }
 
-static int network_manager_process_command_interface(void)
+static int network_process_command_interface(void)
 {
 	static uint8_t udpData[sizeof(SBootloaderDataCmd)+10];
 	SMsgHdr *phdr = (SMsgHdr*)udpData;
@@ -360,7 +360,7 @@ static int network_manager_process_command_interface(void)
 			case STATUS_COMMAND_MASK:		status_handle_message(udpData); break;
 			case GPIO_COMMAND_MASK:			gpio_handle_message(udpData); 	break;
 			case MOTOR_COMMAND_MASK: 		motor_handle_message(udpData);	break;
-			case BOOTLOADER_COMMAND_MASK: 	bootloader_manager_handle_command(udpData);	break;
+			case BOOTLOADER_COMMAND_MASK: 	bootloader_handle_command(udpData);	break;
 			default:	break;
 			}
 			return 1;

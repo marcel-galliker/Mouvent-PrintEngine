@@ -1,4 +1,4 @@
-#include "bootloader_manager.h"
+#include "bootloader.h"
 #include "rx_robot_tcpip.h"
 
 #include <stdbool.h>
@@ -7,11 +7,11 @@
 #include <stdlib.h>
 
 #include <ft900.h>
+#include <status.h>
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "network_manager.h"
-#include "status_manager.h"
+#include "network.h"
 #include "robot_flash.h"
 #include "rx_trace.h"
 
@@ -46,13 +46,13 @@ static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
 	static void _flash_test(int from, int to);
 #endif
 
-bool bootloader_manager_start(void)
+bool bootloader_start(void)
 {
 	_isInitialized = true;
 	return true;
 }
 
-void bootloader_manager_handle_command(void* msg)
+void bootloader_handle_command(void* msg)
 {
 	SMsgHdr* header = (SMsgHdr*)msg;
 
@@ -67,8 +67,8 @@ void bootloader_manager_handle_command(void* msg)
 	}
 }
 
-//--- bootloader_manager_main --------------------------------
-void bootloader_manager_main(void)
+//--- bootloader_main --------------------------------
+void bootloader_main(void)
 {
 	if (_FileSize && _Timeout && xTaskGetTickCount()>_Timeout)
 	{
@@ -140,7 +140,7 @@ static void _request_data(UINT32 filePos)
 	cmd.header.msgId = CMD_BOOTLOADER_DATA;
 	cmd.header.msgLen= sizeof(cmd);
 	cmd.filePos 	 = _FilePos;
-	network_manager_send(&cmd, sizeof(cmd));
+	network_send(&cmd, sizeof(cmd));
 	_Timeout = xTaskGetTickCount()+DATA_TIMEOUT;
 }
 
@@ -169,7 +169,7 @@ static void _download_data(SBootloaderDataCmd* cmd)
 				SMsgHdr cmd;
 				cmd.msgId = CMD_BOOTLOADER_END;
 				cmd.msgLen= sizeof(cmd);
-				network_manager_send(&cmd, sizeof(cmd));
+				network_send(&cmd, sizeof(cmd));
 				return;
 			}
 		}

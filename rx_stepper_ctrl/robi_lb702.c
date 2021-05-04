@@ -786,7 +786,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 RX_StepperStatus.screwerinfo.moving = TRUE;
                 rx_sleep(50);
                 if (rc_isConnected())
-                    rc_moveto_xy(pos, RX_StepperStatus.screw_posY, _FL_);
+                    rc_moveto_x(pos, _FL_);
                 else
                 {
                     micron = pos - RX_StepperStatus.screw_posX;
@@ -831,7 +831,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 RX_StepperStatus.screwerinfo.moving = TRUE;
                 rx_sleep(100);
                 if (rc_isConnected())
-                    rc_moveto_xy(RX_StepperStatus.screw_posX, pos, _FL_);
+                    rc_moveto_y(pos, _FL_);
                 else
                 {
                     micron = pos - RX_StepperStatus.screw_posY;
@@ -873,7 +873,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 pos = 0;
                 rx_sleep(50);
                 if (rc_isConnected())
-                    rc_moveto_xy(RX_StepperStatus.screw_posX, pos, _FL_);
+                    rc_moveto_y(pos, _FL_);
                 else
                 {
                     micron = pos - RX_StepperStatus.screw_posY;

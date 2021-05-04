@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "network_manager.h"
+#include "network.h"
 #include "rx_robot_tcpip.h"
 #include "rx_trace.h"
 
@@ -29,6 +29,6 @@ void TrPrintf(int trace, const char *format, ...)
 		len += vsnprintf(msg.message+len, sizeof(msg.message)-len-1, format, ap);
 		va_end(ap);
 		msg.header.msgLen = sizeof(msg.header)+len+1;
-		network_manager_send(&msg, msg.header.msgLen);
+		network_send(&msg, msg.header.msgLen);
 	}
 } // end TrPrintf
