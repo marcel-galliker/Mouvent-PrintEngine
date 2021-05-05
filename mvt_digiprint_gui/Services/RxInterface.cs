@@ -152,44 +152,30 @@ namespace RX_DigiPrint.Services
 
             while (_Running)
             {
-                //--- connecting -------------------------------------------
-                _Client = new TcpClient();
-    
-             //   Console.WriteLine("*** TcpIpThread started {0}", DateTime.Now);
+
+                //   Console.WriteLine("*** TcpIpThread started {0}", DateTime.Now);
 
                 while (_Running && !Connected)
                 {
-                    try 
+                    try
                     {
-                        _Client.Connect(Address, TcpIp.PORT_GUI); 
+                        //--- connecting -------------------------------------------
+                        _Client = new TcpClient();
+                        _Client.Connect(Address, TcpIp.PORT_GUI);
+                        LocalAddress = _Client.Client.LocalEndPoint.ToString();
+                        _Stream = _Client.GetStream();
+                        Connected = true;
+                        break;
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e.Message);
-                        continue;
+                        Thread.Sleep(10);
                     };
-
-            //        Console.WriteLine("*** Connected {0}", DateTime.Now);
-
-                    Connected = true;
-            //        log.AddItem(new LogItem() { Error = 1010, Message = "Connected to Server" });
                 }
-                if (Connected && _Client.Client!=null)
-                {
-                    LocalAddress = _Client.Client.LocalEndPoint.ToString();
 
-                    while(true)
-                    { 
-                        try
-                        {
-                            _Stream = _Client.GetStream();
-                            break;
-                        }
-                        catch(Exception e)
-                        {
-                            Console.WriteLine("Exception {0}", e.Message);
-                        }
-                    }
+                if (_Client.Client != null)
+                {
                     msgHandler.Restart();
 
                     SendCommand(TcpIp.CMD_GET_INK_DEF);
