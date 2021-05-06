@@ -530,13 +530,8 @@ static void _headboard_config(int colorCnt, int headsPerColor, int ethPortCnt)
 				if (rx_def_is_lb(RX_Config.printer.type))
 				{
                     offset = 0;
-				//	if (RX_TestImage.testImage==PQ_TEST_JETS)				offset = 210000*inkSupply;
-				//	if (RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT)		offset = 350000*inkSupply;
-				//	if (RX_TestImage.testImage==PQ_TEST_JET_NUMBERS)		offset = 150000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_ENCODER)			offset = 265000*inkSupply;
 					if (RX_TestImage.testImage==PQ_TEST_ANGLE_SEPARATED)	offset =  50000*inkSupply;
-					if (RX_TestImage.testImage==PQ_TEST_DENSITY && rx_def_is_tx(RX_Config.printer.type)) 
-						offset = 150000*inkSupply;
 					pBoard->head[i].dist	 += offset;	// recto
 					pBoard->head[i].distBack += offset;	// verso				
 				}

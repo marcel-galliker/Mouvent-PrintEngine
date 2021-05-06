@@ -145,7 +145,7 @@ const char* RX_ColorNameLong(int code)
 //--- RX_ColorShortName ------------------------------------------
 const char* RX_ColorNameShort(int inkSupplyNo)
 {
-	if (inkSupplyNo >= SIZEOF(RX_ColorName)) return "INVALID ADRESS";
+    if (inkSupplyNo >= SIZEOF(_ColorShortName)) return "INVALID ADRESS";
 	return _ColorShortName[inkSupplyNo];
 }
 
