@@ -216,7 +216,6 @@ static void _set_config(SRobotMotorSetCfgCmd* configCommand)
 
 static void _move_motors(SRobotMotorsMoveCmd* cmd)
 {
-	int send=FALSE;
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
 		if (cmd->motors & (1<<motor))
@@ -238,17 +237,10 @@ static void _move_motors(SRobotMotorsMoveCmd* cmd)
 			TrPrintf(true, "Move Motor[%d].id=%d to %d (pos=%d enc=%d diff=%d)", motor, cmd->moveId[motor], cmd->targetPos[motor],
 					RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
 					RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
-
-			if (RX_RobotStatus.motor[motor].motorPos==RX_RobotStatus.motor[motor].encPos)
-			{
-				cmd->motors &= ~(1<<motor);
-				RX_RobotStatus.motor[motor].moveIdStarted = cmd->moveId[motor];
-				RX_RobotStatus.motor[motor].moveIdDone	  = cmd->moveId[motor];
-				send=TRUE;
-			}
 		}
 	}
 
+	int send=FALSE;
 	// Start motors sync
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
@@ -256,6 +248,8 @@ static void _move_motors(SRobotMotorsMoveCmd* cmd)
 		{
 			gpio_start_motor(motor);
 			RX_RobotStatus.motor[motor].moveIdStarted=cmd->moveId[motor];
+			RX_RobotStatus.motor[motor].isMoving = true;
+			send=TRUE;
 		}
 	}
 
@@ -433,7 +427,7 @@ static void _update_status(uint8_t status, uint8_t motor)
 	RX_RobotStatus.motor[motor].status = status;
 
 	int isMoving = !(RX_RobotStatus.motor[motor].status & TMC_STATUS_STANDSTILL_FLAG);
-	if(RX_RobotStatus.motor[motor].isMoving && !isMoving)
+	if(RX_RobotStatus.motor[motor].isMoving && !isMoving && RX_RobotStatus.motor[motor].motorPos==RX_RobotStatus.motor[motor].targetPos)
 	{
 		RX_RobotStatus.motor[motor].moveIdDone = RX_RobotStatus.motor[motor].moveIdStarted;
 		RX_RobotStatus.motor[motor].isMoving = false;
@@ -441,11 +435,6 @@ static void _update_status(uint8_t status, uint8_t motor)
 		_stopBits[motor] = 0;
 		_stopBitLevels[motor] = 0;
 		gpio_enable_motor(motor, FALSE);
-		status_send();
-	}
-	else if(!RX_RobotStatus.motor[motor].isMoving && isMoving)
-	{
-		RX_RobotStatus.motor[motor].isMoving = true;
 		status_send();
 	}
 }
