@@ -33,9 +33,9 @@ static int  _get_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y);
 static void _set_pixel1(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
 static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
 
-static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, UCHAR *pCor);
+static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine);
 
-	static int  (*_GetPixel)(UCHAR *pBuffer, int bytesPerLine, int x, int y);
+static int  (*_GetPixel)(UCHAR *pBuffer, int bytesPerLine, int x, int y);
 static void (*_SetPixel)(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
 
 //--- jc_init -----------------------------------------------------------
@@ -122,8 +122,7 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 	int color, n, head, jet, logLen;
 	int pixelPerByte;
 	char logStr[MAX_PATH];
-	SBmpSplitInfo	*pInfo = NULL; 
-	char *pCor;
+	SBmpSplitInfo	*pInfo; 
 
 	_Changed = FALSE;
 
@@ -158,21 +157,10 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 						jet = RX_DisabledJets[color*RX_Spooler.headsPerColor+head][n];
 						if (jet>=0)
 						{
+							
 							if(_Log) logLen += sprintf(&logStr[logLen], "%d ", jet);
 							jet += (pInfo->startBt - pInfo->fillBt) * pixelPerByte + pInfo->jetPx0;
-							if (jet >= 0)
-							{
-								pCor = NULL;
-								if (fromLine) // Special case of test image in stitching zone (as it is different buffer image by head)
-								{
-									// correction should be done in next or previous head according to the good position
-									if (jet < 128 && head != 0 && pItem->splitInfo[RX_Spooler.headNo[color][head-1] - 1].data) 
-										pCor = *pItem->splitInfo[RX_Spooler.headNo[color][head - 1] - 1].data + 2048 / pixelPerByte;
-									else if (jet >= 2048 && head != RX_Spooler.headsPerColor - 1 && pItem->splitInfo[RX_Spooler.headNo[color][head + 1] - 1].data) 
-										pCor = *pItem->splitInfo[RX_Spooler.headNo[color][head + 1] - 1].data - 2048 / pixelPerByte;
-								}
-								_disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine, pCor);
-							}
+							if (jet >= 0) _disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
 						}
 					}
 					if (logLen) Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%s", color, head, logStr);
@@ -218,11 +206,9 @@ static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 }
 
 //--- _disable_jet -----------------------------------------------------
-static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, UCHAR *pCor)
+static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
 {
     int jetMax=bytesPerLine*8/bitsPerPixel;
-	if (! pCor) pCor = pBuffer;
-
 	if (jet>0 && jet<jetMax)
 	{
 		//--- special for "Jet Numbers" Image
@@ -272,8 +258,8 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 				}
 				if (droplets > 0)
 				{
-					org[0] = comp[0] = _GetPixel(pCor, bytesPerLine, jet-1, y);
-					org[1] = comp[1] = _GetPixel(pCor, bytesPerLine, jet + 1, y);
+					org[0] = comp[0] = _GetPixel(pBuffer, bytesPerLine, jet-1, y);
+					org[1] = comp[1] = _GetPixel(pBuffer, bytesPerLine, jet+1, y);
 					max = 2*_MaxDropSize-org[0]-org[1];
 					while (droplets > 0 && max)
 					{
@@ -285,8 +271,8 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 						}
 						side = 1 - side;
 					}
-					if (comp[0] != org[0]) _SetPixel(pCor, bytesPerLine, jet - 1, y, comp[0]);
-					if (comp[1] != org[1]) _SetPixel(pCor, bytesPerLine, jet + 1, y, comp[1]);
+					if (comp[0]!=org[0]) _SetPixel(pBuffer, bytesPerLine, jet-1, y, comp[0]);
+					if (comp[1]!=org[1]) _SetPixel(pBuffer, bytesPerLine, jet+1, y, comp[1]);
 				}
 			}            
         }
