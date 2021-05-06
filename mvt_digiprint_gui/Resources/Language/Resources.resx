@@ -2676,4 +2676,7 @@ No Splices in the machine?</value>
   <data name="Center" xml:space="preserve">
     <value>Center</value>
   </data>
+  <data name="SpliceMode" xml:space="preserve">
+    <value>Splice Mode</value>
+  </data>
 </root>

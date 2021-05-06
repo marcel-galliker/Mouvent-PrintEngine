@@ -381,6 +381,7 @@
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\Enums\EN_EncoderTypeList.cs" />
     <Compile Include="Models\Enums\EN_Langue.cs" />
+    <Compile Include="Models\Enums\EN_OffWarningPause.cs" />
     <Compile Include="Models\FileNameFilter.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />

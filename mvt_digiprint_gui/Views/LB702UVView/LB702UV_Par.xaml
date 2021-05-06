@@ -76,6 +76,7 @@
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
 
                             <!--                    <rx_uc:PlcParCtrl                      ID="PAR_MATERIAL_FLEXIBILITY"            Label="Material Flexibility" MinVal="1" MaxVal="10"/> -->
@@ -85,17 +86,18 @@
                             <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="0" ID="PAR_WEB_WIDTH"                       Label="{mvt:LocalizedBinding WebWidth}"    Unit="mm" UnitWidth="50" Format="1"/>
                             <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="0" ID="PAR_DISTANCE_TO_STOP"                Label="{mvt:LocalizedBinding StopDist}"    Unit="m"  UnitWidth="50" Format="f"/>
                             <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="0" ID="XML_JC_RATIO"                        Label="{mvt:LocalizedBinding JetOvercorrection}" Unit="%"  UnitWidth="50" Format="n"/>
+                            <rx_uc:PlcParCtrl Grid.Row="6" Grid.Column="0" ID="PAR_MODE_SPLICE"                     Label="{mvt:LocalizedBinding SpliceMode}"  Unit="" UnitWidth="50" Type="Combo" Padding="0,0,70,0" Margin="0,2,0,0" x:Name="CB_SpliceMode"/>
 
-                            <rx_uc:PlcTitle Grid.Row="6" Grid.Column="0" Header="{mvt:LocalizedBinding Tension}"/>
-                            <Grid Grid.Row="7" Grid.Column="0"  Loaded="Grid_Loaded">
+                            <rx_uc:PlcTitle Grid.Row="7" Grid.Column="0" Header="{mvt:LocalizedBinding Tension}"/>
+                            <Grid Grid.Row="8" Grid.Column="0"  Loaded="Grid_Loaded">
                                 <rx_uc:PlcParCtrl x:Name="CB_RotUW"    ID="PAR_WIND_DIRECTION_WINDER1" Label="{mvt:LocalizedBinding Unwinder}"     Unit="" UnitWidth="50" Type="ImgCombo" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_1"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="auto" UnitWidth="50" Format="1" />
                             </Grid>
-                            <Grid Grid.Row="8" Grid.Column="0" Loaded="Grid_Loaded">
+                            <Grid Grid.Row="9" Grid.Column="0" Loaded="Grid_Loaded">
                                 <rx_uc:PlcParCtrl x:Name="CB_RotRW"    ID="PAR_WIND_DIRECTION_WINDER2" Label="{mvt:LocalizedBinding Rewinder}"     Unit="" UnitWidth="50" Type="ImgCombo" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_WINDER_TENSION_2"       Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="auto" UnitWidth="50" Format="1" />
                             </Grid>
-                            <Grid Grid.Row="9" Grid.Column="0" Loaded="Grid_Loaded">
+                            <Grid Grid.Row="10" Grid.Column="0" Loaded="Grid_Loaded">
                                 <TextBlock        Text="{mvt:LocalizedBinding NipTension}"/>
                                 <rx_uc:PlcParCtrl                      ID="PAR_NIP_TENSION_1"          Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="auto" UnitWidth="50" Format="1" />
                             </Grid>
@@ -124,10 +126,10 @@
                                 <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto"/>
                             </Grid>
 
-                            <rx_uc:PlcTitle Grid.Row="6" Grid.Column="2" Header="{mvt:LocalizedBinding RollsDiameter}"/>
-                            <rx_uc:PlcParCtrl Grid.Row="7" Grid.Column="2" ID="PAR_COREDIAMETER_IN"  Label="{mvt:LocalizedBinding UnwinderCore}" Unit="mm" UnitWidth="50" Format="1"/>
-                            <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="2" ID="PAR_COREDIAMETER_OUT" Label="{mvt:LocalizedBinding RewinderCore}" Unit="mm" UnitWidth="50" Format="1"/>
-                            <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="2" ID="PAR_MAXDIAMETER_OUT"  Label="{mvt:LocalizedBinding RewinderMax}"  Unit="mm" UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcTitle Grid.Row="7" Grid.Column="2" Header="{mvt:LocalizedBinding RollsDiameter}"/>
+                            <rx_uc:PlcParCtrl Grid.Row="8" Grid.Column="2" ID="PAR_COREDIAMETER_IN"  Label="{mvt:LocalizedBinding UnwinderCore}" Unit="mm" UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcParCtrl Grid.Row="9" Grid.Column="2" ID="PAR_COREDIAMETER_OUT" Label="{mvt:LocalizedBinding RewinderCore}" Unit="mm" UnitWidth="50" Format="1"/>
+                            <rx_uc:PlcParCtrl Grid.Row="10" Grid.Column="2" ID="PAR_MAXDIAMETER_OUT"  Label="{mvt:LocalizedBinding RewinderMax}"  Unit="mm" UnitWidth="50" Format="1"/>
 
                         </Grid>
                     </rx_uc:PlcParPanel>

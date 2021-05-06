@@ -6015,6 +6015,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Splice Mode.
+        /// </summary>
+        public static string SpliceMode {
+            get {
+                return ResourceManager.GetString("SpliceMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Splicing.
         /// </summary>
         public static string Splicing {
