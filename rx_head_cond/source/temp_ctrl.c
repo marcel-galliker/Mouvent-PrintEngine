@@ -32,6 +32,7 @@
 //#define LOG_TEMP    TRUE
 #define TEMP_MAX_LOW_PUMP		50000						// maximal valid conditioner temperature for pump speed < 10%
 #define TEMP_MAX_HIGH_PUMP		70000						// maximal valid conditioner temperature for pump speed > 10%
+#define TEMP_MAX_HIGH_PUMP_V3	80000						// maximal valid conditioner temperature for pump speed > 10%
 #define TEMP_ERROR       		TEMP_MAX_HIGH_PUMP + 5000  	// in 1/1000 °C = 90 °C -> compare to thermistor value directly
 #define TEMP_TOLERANCE			1000
 
@@ -375,11 +376,16 @@ static void _heater_ctrl(UINT32 percent)
     }
 	else		
     {            
+		RX_Status.heater_percent = percent;
         // HW Revision >= 'h' has a second thermistor
-		if (RX_Status.pcb_rev<'n' && (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP))
-			RX_Status.heater_percent = 0;
+		if (RX_Status.pcb_rev<'n')
+		{
+			if (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) RX_Status.heater_percent = 0;
+		}
 		else
-			RX_Status.heater_percent = percent;
+		{
+			if (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP_V3) RX_Status.heater_percent = 0;
+		}
     }
 
     bFM4_GPIO_PDOR3_P3 = (_temp_timer < RX_Status.heater_percent);
