@@ -216,6 +216,7 @@ static void _set_config(SRobotMotorSetCfgCmd* configCommand)
 
 static void _move_motors(SRobotMotorsMoveCmd* cmd)
 {
+	int send=FALSE;
 	for(int motor = 0; motor < MOTOR_CNT; motor++)
 	{
 		if (cmd->motors & (1<<motor))
@@ -237,6 +238,14 @@ static void _move_motors(SRobotMotorsMoveCmd* cmd)
 			TrPrintf(true, "Move Motor[%d].id=%d to %d (pos=%d enc=%d diff=%d)", motor, cmd->moveId[motor], cmd->targetPos[motor],
 					RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
 					RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
+
+			if (RX_RobotStatus.motor[motor].motorPos==RX_RobotStatus.motor[motor].encPos)
+			{
+				cmd->motors &= ~(1<<motor);
+				RX_RobotStatus.motor[motor].moveIdStarted = cmd->moveId[motor];
+				RX_RobotStatus.motor[motor].moveIdDone	  = cmd->moveId[motor];
+				send=TRUE;
+			}
 		}
 	}
 
@@ -249,6 +258,8 @@ static void _move_motors(SRobotMotorsMoveCmd* cmd)
 			RX_RobotStatus.motor[motor].moveIdStarted=cmd->moveId[motor];
 		}
 	}
+
+	if (send) status_send();
 }
 
 static void _stop_motors(SRobotMotorsStopCmd* cmd)
