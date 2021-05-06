@@ -48,7 +48,7 @@
 
 #define STEPS_PER_REV				51200
 #define DISTANCE_UM_PER_REV			36000   // mirco meters per revolutionR
-#define MOTOR_X_GARAGE_POS			19000 //28500
+#define MOTOR_X_GARAGE_POS			21000 //28500
 
 #define SCREW_STEPS					213333
 
@@ -596,7 +596,8 @@ static void _configure_screw_motor(int current)
 	_MotorCfg[MOTOR_SCREW].tpowerdown = 0;
 	_MotorCfg[MOTOR_SCREW].tpwmthrs = 0;
 	_MotorCfg[MOTOR_SCREW].rampmode = 0;
-	_MotorCfg[MOTOR_SCREW].vmax = 178957;
+	//_MotorCfg[MOTOR_SCREW].vmax = 178957;
+    _MotorCfg[MOTOR_SCREW].vmax = 213333;
 	_MotorCfg[MOTOR_SCREW].v1 = 0;
 	_MotorCfg[MOTOR_SCREW].amax = 2932;
 	_MotorCfg[MOTOR_SCREW].dmax = 2932;
@@ -718,8 +719,14 @@ static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
 //--- _rc_motor_moveToStop --------------------------------
 static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, const char *file, int line)
 {
-	if (_RobotStatus.motor[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
-	if (_RobotStatus.motor[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
+	if (_RobotStatus.motor[motor].isMoving)  
+    {
+            return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
+    }
+	if (_RobotStatus.motor[motor].isStalled) 
+    {
+            return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
+    }
 
 	SRobotMotorsMoveCmd cmd;
 	memset(&cmd, 0, sizeof(cmd));
@@ -1026,6 +1033,8 @@ void rc_handle_menu(char *str)
 		case 'm':	_rc_motor_moveBy(no, atoi(&str[2]), _FL_);	break;
 		case 'x':	rc_moveto_x(RX_StepperStatus.screw_posX+atoi(&str[1]), _FL_); break;
 		case 'y':	rc_moveto_y(RX_StepperStatus.screw_posY+atoi(&str[1]), _FL_); break;
+        case 'e':	rc_moveto_x(atoi(&str[1]), _FL_); break;
+        case 'f':	rc_moveto_y(atoi(&str[1]), _FL_); break;
 		case 'z':	_rc_motor_moveBy(MOTOR_Z, atoi(&str[1]), _FL_);		break;		
 		case 'd':	rc_move_bottom(_FL_); break;
 		case 'u':	rc_move_top(_FL_); break;
@@ -1102,7 +1111,7 @@ int rc_move_done(void)
     if (_RC_State) return FALSE;
     for (int i = 0; i < MOTOR_CNT; i++)
     {
-        if (_RobotStatus.motor[i].moveIdDone < _RobotStatus.motor[i].moveIdStarted) return FALSE;
+        if (_RobotStatus.motor[i].moveIdDone < _MoveId[i]) return FALSE;
     }
     return TRUE;
 }

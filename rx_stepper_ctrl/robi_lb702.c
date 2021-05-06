@@ -181,7 +181,7 @@ void robi_lb702_main(int ticks, int menu)
         _CmdStarted = TRUE;
     
 
-    if (_CmdRunning && ((robi_move_done() && !rc_isConnected()) || (rc_move_done() && rc_isConnected())) && (_CmdStarted || (robi_not_started() && !rc_isConnected())))
+    if (_CmdRunning && ((robi_move_done() && !rc_isConnected()) || (rc_move_done() && rc_isConnected())) && (_CmdStarted || robi_not_started() || rc_isConnected()))
     {
         int loc_new_cmd, loc_new_value;
         int val;
@@ -233,7 +233,7 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_MOVE_TO_GARAGE:
-            if (!robi_in_ref() && !!rc_in_ref())
+            if (!robi_in_ref() && !rc_in_ref())
             {
                 Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                 RX_StepperStatus.screwerinfo.ref_done = FALSE;

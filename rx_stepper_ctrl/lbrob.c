@@ -43,8 +43,8 @@
 #define CABLE_PURGE_POS_BACK    -311000     //  um LB702
 #define VACUUM_POS              -400000     //  um LB702
 #define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 ->  HEAD_WIDTH = 43000
-#define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    
-#define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
+#define CABLE_SCREW_POS_FRONT   -501000     //  um LB702    
+#define CABLE_SCREW_POS_BACK    -154208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
 
 #define CURRENT_HOLD            200
 
