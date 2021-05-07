@@ -378,6 +378,7 @@ static void _tx80x_wd_motor_z_test(int steps)
 //--- _txrob_motor_test ---------------------------------
  int tx80x_wd_motor_test(int motorNo, int steps)
 {
+    if (RX_StepperStatus.robinfo.wd_unused) return FALSE;
     if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
     {
         int motors = 1 << motorNo;
