@@ -57,6 +57,7 @@
 
 #define ENCODER_TOL					250
 #define ENCODER_TOL_XY				1000
+#define ENCODER_TOL_SCREW			220000
 
 #define SCREW_CURRENT_HIGH			(0b00000000000000010001110000000000)
 #define SCREW_CURRENT_LOW			(0b00000000000000010001001100000000)
@@ -707,8 +708,17 @@ static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
 	cmd.header.msgId	 = CMD_MOTORS_MOVE;
 	cmd.motors			 = 1<<motor;
 	cmd.targetPos[motor] = _RobotStatus.motor[motor].targetPos+steps;
-	if (_MotorCfg[motor].encmode) 
+	if (_MotorCfg[motor].encmode)
+	{
+        cmd.encoderCheck[motor] = ENC_CHECK_ENC;
 		cmd.encoderTol[motor]= ENCODER_TOL;
+	}
+	if (motor==MOTOR_SCREW)
+	{
+		cmd.encoderCheck[motor] = ENC_CHECK_IN;
+		cmd.edgeCheckIn[motor] = 0;
+		cmd.encoderTol[motor]  = ENCODER_TOL_SCREW;		
+	}
 	cmd.moveId[motor] = ++_MoveId[motor];
     sok_send(&_RC_Socket, &cmd);
 	
@@ -738,7 +748,7 @@ static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, 
 	cmd.stopBits[motor]		 = 1<<stopInput;
 	cmd.stopBitLevels[motor] = level;
 	cmd.moveId[motor]		 = ++_MoveId[motor];
-	
+
 	TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE[%d].moveIdStarted=%d", motor, _MoveId[motor]);
 
 	sok_send(&_RC_Socket, &cmd);
@@ -804,7 +814,11 @@ static int _rc_moveto_x_stop(int x, int stop, const char *file, int line)
 		cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
 		cmd.stopBitLevels[MOTOR_XY_0] = cmd.stopBitLevels[MOTOR_XY_1] = 1;
 	}
-	else cmd.encoderTol[MOTOR_XY_0] = cmd.encoderTol[MOTOR_XY_1] = ENCODER_TOL_XY;
+	else 
+	{
+		cmd.encoderCheck[MOTOR_XY_0] = cmd.encoderCheck[MOTOR_XY_1] = ENC_CHECK_ENC;
+		cmd.encoderTol[MOTOR_XY_0] = cmd.encoderTol[MOTOR_XY_1] = ENCODER_TOL_XY;
+	}
     sok_send(&_RC_Socket, &cmd);
 	
     TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE_XY (%d, %d) moveIdStarted=%d %d", cmd.targetPos[MOTOR_XY_0], cmd.targetPos[MOTOR_XY_1], _MoveId[MOTOR_XY_0], _MoveId[MOTOR_XY_1]);
@@ -857,7 +871,11 @@ static int _rc_moveto_y_stop(int y, int stop, const char *file, int line)
 		cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
 		cmd.stopBitLevels[MOTOR_XY_0] = cmd.stopBitLevels[MOTOR_XY_1] = 1;
 	}
-	else cmd.encoderTol[MOTOR_XY_0] = cmd.encoderTol[MOTOR_XY_1] = ENCODER_TOL_XY;
+	else 
+	{
+        cmd.encoderCheck[MOTOR_XY_0] = cmd.encoderCheck[MOTOR_XY_1] = ENC_CHECK_ENC;
+		cmd.encoderTol[MOTOR_XY_0] = cmd.encoderTol[MOTOR_XY_1] = ENCODER_TOL_XY;
+	}
     sok_send(&_RC_Socket, &cmd);
 	
     TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE_XY (%d, %d) moveIdStarted=%d %d", cmd.targetPos[MOTOR_XY_0], cmd.targetPos[MOTOR_XY_1], _MoveId[MOTOR_XY_0], _MoveId[MOTOR_XY_1]);
