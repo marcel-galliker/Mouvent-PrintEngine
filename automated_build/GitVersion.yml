@@ -7,14 +7,14 @@ increment: None
 
 branches:
   pull-request:
-    tag: alpha
-    increment: None
+    tag: pr
+    increment: Inherit
   master:
-    tag: beta
-    increment: None
+    tag: dev
+    increment: Minor
   release:
     tag: ''
-    increment: None
+    increment: Patch
   feature:
     regex: ^(bugfix|feature)[/-]
-    increment: None
+    increment: Inherit
