@@ -54,6 +54,7 @@
 
 #ifdef __FT900__
 
+	#define INT8   int8_t
 	#define UINT8  uint8_t
 	#define UINT16 uint16_t
 	#define UINT32 uint32_t
@@ -103,8 +104,14 @@ typedef struct SRobotMotorsMoveCmd
 	UINT8  motors;						// bitset
 	UINT8  moveId[MOTOR_CNT];
 	UINT32 targetPos[MOTOR_CNT];
+	UINT8  encoderCheck[MOTOR_CNT];
+		#define	ENC_CHECK_OFF	0	// OFF
+		#define	ENC_CHECK_ENC	1	// using encoder
+		#define	ENC_CHECK_IN	2	// using input
+
 	UINT32 encoderTol[MOTOR_CNT];
-	UINT8  stopBits[MOTOR_CNT];		// bitset per motor
+	INT8   edgeCheckIn[MOTOR_CNT];		// input for edge detection
+	UINT8  stopBits[MOTOR_CNT];			// bitset per motor
 	UINT8  stopBitLevels[MOTOR_CNT];	// one level per motor
 } SRobotMotorsMoveCmd;
 
