@@ -51,6 +51,7 @@
 #define MOTOR_X_GARAGE_POS			21000 //28500
 
 #define SCREW_STEPS					213333
+#define SCREW_SPEED					213333			// steps/sec
 
 #define MAX_LENGTH_Z				5500000//550000
 
@@ -147,7 +148,7 @@ int	rc_isConnected(void)
 //--- rc_main -----------------------------------------------
 void rc_main(int ticks, int menu)
 {
-	if (_RC_Socket!=INVALID_SOCKET)
+    if (_RC_Socket!=INVALID_SOCKET)
 	{
 		if (menu)
 		{
@@ -155,7 +156,7 @@ void rc_main(int ticks, int menu)
         RX_StepperStatus.screwerinfo.z_in_down = ROB_IN(IN_Z_DOWN) ? TRUE : FALSE;
         RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP) ? TRUE : FALSE;
 
-	}
+    }
 }
 
 //--- _robot_ctrl_thread --------------------------------------------------------
@@ -249,7 +250,7 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 							_check_move();
 							_check_version();
 							_rc_state_machine();
-							break;
+                            break;
 
     case CMD_BOOTLOADER_DATA: _download_data((SBootloaderDataRequestCmd*) msg); break;
     case CMD_BOOTLOADER_END:  _download_end(); break;	
@@ -597,7 +598,7 @@ static void _configure_screw_motor(int current)
 	_MotorCfg[MOTOR_SCREW].tpwmthrs = 0;
 	_MotorCfg[MOTOR_SCREW].rampmode = 0;
 	//_MotorCfg[MOTOR_SCREW].vmax = 178957;
-    _MotorCfg[MOTOR_SCREW].vmax = 213333;
+    _MotorCfg[MOTOR_SCREW].vmax = SCREW_SPEED;
 	_MotorCfg[MOTOR_SCREW].v1 = 0;
 	_MotorCfg[MOTOR_SCREW].amax = 2932;
 	_MotorCfg[MOTOR_SCREW].dmax = 2932;
@@ -972,7 +973,8 @@ void rc_display_status(void)
 		term_printf("State Machine: \t\t %d\t%s\n", _RC_State, _RC_Error);
 		term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
 		term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
-	}	
+        term_printf("Screwer Current: \t %d\n", rc_get_screw_current());
+    }	
 	term_printf("\n");
 	term_flush();
 }
