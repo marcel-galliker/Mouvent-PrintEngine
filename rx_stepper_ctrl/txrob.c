@@ -116,6 +116,8 @@
 #define ROT_VAC_OR_WASH_IN	2
 #define ROT_WASH_OR_CAP_IN	3
 
+#define WD_USED_IN			10
+
 // Outputs
 #define VAC_ON				0x001 // 0
 #define MAGNET_OFF			0x002 // 1 Magnet
@@ -237,6 +239,7 @@ static int  _vacuum_in_change(void);
 //--- txrob_init --------------------------------------
 void txrob_init(void)
 {
+    RX_StepperStatus.robinfo.wd_unused = fpga_input(WD_USED_IN);
 	// Init Motors
 	motor_config(MOTOR_ROT,   CURRENT_HOLD_ROT,   ROT_STEPS_PER_REV, ROT_INC_PER_REV, MICROSTEPS);
 	motor_config(MOTOR_SHIFT, CURRENT_HOLD_SHIFT, SHIFT_STEPS_PER_METER, SHIFT_INC_PER_METER, STEPS);
@@ -895,11 +898,11 @@ int txrob_menu(void)
 	static int cnt = 0;
 
 	_txrob_display_status();
-    tx80x_wd_display_status();
-    if (_Menu == 1)	term_printf("TX ROB MENU --------------------------\n");
+    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_display_status();
+    if (_Menu == 1 || RX_StepperStatus.robinfo.wd_unused)	term_printf("TX ROB MENU --------------------------\n");
     else			term_printf("TX WRINKLE DETECTION MENU ------------\n");
 
-    if (_Menu == 1)
+    if (_Menu == 1 || RX_StepperStatus.robinfo.wd_unused)
     {
         if (_Help)
         {
@@ -920,7 +923,7 @@ int txrob_menu(void)
         else
         {
             term_printf("?: help\n");
-            term_printf("2: WRINKLE DETECTION menu\n");
+            if (!RX_StepperStatus.robinfo.wd_unused) term_printf("2: WRINKLE DETECTION menu\n");
         }
     }
     else tx80x_wd_menu(_Help);
@@ -938,7 +941,7 @@ int txrob_menu(void)
         case '2': _Menu = 2; break;
 		case 'x': return FALSE;
         default:
-            if (_Menu == 1) _txrob_handle_menu(str);
+            if (_Menu == 1 || RX_StepperStatus.robinfo.wd_unused) _txrob_handle_menu(str);
             else			tx80x_wd_handle_menu(str);
 		}
 	}
