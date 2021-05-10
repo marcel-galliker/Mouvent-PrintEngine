@@ -41,3 +41,4 @@ int rc_get_screw_current(void);
 int rc_move_started(void);
 int rc_move_done(void);
 int rc_move_xy_error(void);
+void rc_reset_motors(int motors);

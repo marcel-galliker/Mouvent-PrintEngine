@@ -314,7 +314,7 @@ void lb702_main(int ticks, int menu)
             case CMD_LIFT_SCREW:            lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL); break;
             case CMD_LIFT_CAPPING_POS:		lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, NULL); break;
             case CMD_LIFT_WASH_POS:			lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL); break;
-			case CMD_LIFT_REFERENCE: break;
+			case CMD_LIFT_REFERENCE:		_lb702_do_reference();	break;
 			default: Error(ERR_CONT, 0, "LB702_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
 			}
 		}
@@ -480,7 +480,14 @@ int lb702_menu(void)
 //--- _lb702_do_reference ----------------------------------------------------------------
 static void _lb702_do_reference(void)
 {
-	if (RX_StepperStatus.info.ref_done)
+    if (RX_StepperStatus.robot_used && !RX_StepperStatus.screwerinfo.z_in_down)
+    {
+        _CmdRunningRobi = CMD_ROBI_MOVE_Z_DOWN;
+        _NewCmd = CMD_LIFT_REFERENCE;
+        RX_StepperStatus.cmdRunning = 0;
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
+    }
+    else if (RX_StepperStatus.info.ref_done)
 	{
 		int pos = -1*_micron_2_steps(DIST_MECH_REF);
 		_lb702_move_to_pos(CMD_LIFT_REFERENCE, pos, pos);

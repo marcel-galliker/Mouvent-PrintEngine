@@ -58,7 +58,7 @@
 
 #define MAX_WAIT_TIME_SLEDGE    100000  // ms
 #define MAX_WAIT_TIME           40000   // ms
-#define MAX_WAIT_TIME_SCREW     180000  // ms
+#define MAX_WAIT_TIME_SCREW     200000  // ms
 
 // Digital Inputs
 #define CABLE_PULL_REF          2
