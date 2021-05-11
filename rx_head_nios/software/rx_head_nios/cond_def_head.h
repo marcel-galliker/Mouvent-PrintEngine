@@ -198,6 +198,7 @@ typedef struct SConditionerCfg_mcu
 	UINT32 	temp; 					// desired temperature (1/1000 �C)
 	UINT32 	tempMax; 				// desired temperature (1/1000 �C)
 	UINT32	tempHead;				// measured head temperature
+	UINT32	heater_percent_neighbour;		// Heater % neighbour if we need to switch vecaus eof a defected temperature sensor
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
 	UINT16	flowResistance;

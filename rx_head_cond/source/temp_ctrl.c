@@ -576,12 +576,11 @@ void temp_tick_10ms (void)
 		&& (tempHeaterOK)
 		&& (RX_Status.pump_measured * 60 / 1000 < 80) )
     {
-		if (RX_Config.tempHead==INVALID_VALUE)
+		if (RX_Config.tempHead > 100000)
 		{
 			RX_Status.error |= COND_ERR_temp_head_hw;
 			
-			pid_calc(RX_Status.tempIn/100, &_HeatPID);
-			_heater_ctrl(_HeatPID.val);
+			_heater_ctrl(RX_Config.heater_percent_neighbour);
 		}
 		else
 		{

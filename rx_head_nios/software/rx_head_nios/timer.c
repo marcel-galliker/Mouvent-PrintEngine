@@ -113,6 +113,7 @@ static void _do_10ms_timer(void)
 static void _do_250ms_timer(void)
 {
 	volatile UINT16 dummy;
+	int i, Heaters_Average;
 
 	/* First read does start AD conversion, result is only available at second read.
 	 * That's why the code seems one off!
@@ -123,6 +124,82 @@ static void _do_250ms_timer(void)
 	pRX_Status->head_temp[1] = pRX_Config->cond[1].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC6_DATA) & 0x3ff);
 	pRX_Status->head_temp[2] = pRX_Config->cond[2].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC7_DATA) & 0x3ff);
 	pRX_Status->head_temp[3] = pRX_Config->cond[3].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA) & 0x3ff);
+
+	// Management of a bad thermistor measure (INVALID_VALUE)
+	// Make an average of the heater % of all heads
+	// If 1 sensor defected, disable the regulator, and use the average for the heater
+	// Copy temperature measure of the neighbour for Status (dispaly in the GUI)
+	// the head will have a warning to inform about the sensor defected
+
+	// Average of all heater
+	Heaters_Average = 0;
+	for (i = 0; i < 4; i++)
+		Heaters_Average += pRX_Status->cond[i].heater_percent;
+	Heaters_Average /= 4;
+	
+	// Head 1 sensor defected : take head 2, or 3 or 4
+	if (pRX_Config->cond[0].tempHead > 100000)		// > 100°C means problem
+	{
+		i = -1;
+		if (pRX_Config->cond[1].tempHead < 100000) i = 1;
+		else if (pRX_Config->cond[2].tempHead < 100000) i = 2;
+		else if (pRX_Config->cond[3].tempHead < 100000) i = 3;
+		
+		if (i > -1)
+		{
+			pRX_Status->head_temp[0] = pRX_Config->cond[i].tempHead;
+			pRX_Config->cond[0].heater_percent_neighbour = Heaters_Average;
+		}
+		else pRX_Config->cond[0].heater_percent_neighbour = 0;								
+	}
+
+	// Head 2 sensor defected : take head 2, or 1 or 4
+	if (pRX_Config->cond[1].tempHead > 100000)		// > 100°C means problem
+	{
+		i = -1;
+		if (pRX_Config->cond[2].tempHead < 100000) i = 2;
+		else if (pRX_Config->cond[0].tempHead < 100000) i = 0;
+		else if (pRX_Config->cond[3].tempHead < 100000) i = 3;
+		
+		if (i > -1)
+		{
+			pRX_Status->head_temp[1] = pRX_Config->cond[i].tempHead;
+			pRX_Config->cond[1].heater_percent_neighbour = Heaters_Average;
+		}	
+		else pRX_Config->cond[1].heater_percent_neighbour = 0;							
+	}
+
+	// Head 3 sensor defected : take head 4, or 2 or 1
+	if (pRX_Config->cond[2].tempHead > 100000)		// > 100°C means problem
+	{
+		i = -1;
+		if (pRX_Config->cond[3].tempHead < 100000) i = 3;
+		else if (pRX_Config->cond[1].tempHead < 100000) i = 1;
+		else if (pRX_Config->cond[0].tempHead < 100000) i = 0;
+		
+		if (i > -1)
+		{
+			pRX_Status->head_temp[2] = pRX_Config->cond[i].tempHead;
+			pRX_Config->cond[2].heater_percent_neighbour = Heaters_Average;
+		}
+		else pRX_Config->cond[2].heater_percent_neighbour = 0;								
+	}
+
+	// Head 4 sensor defected : take head 3, or 2 or 1
+	if (pRX_Config->cond[2].tempHead > 100000)		// > 100°C means problem
+	{
+		i = -1;
+		if (pRX_Config->cond[2].tempHead < 100000) i = 2;
+		else if (pRX_Config->cond[1].tempHead < 100000) i = 1;
+		else if (pRX_Config->cond[0].tempHead < 100000) i = 0;
+		
+		if (i > -1)
+		{
+			pRX_Status->head_temp[3] = pRX_Config->cond[i].tempHead;
+			pRX_Config->cond[3].heater_percent_neighbour = Heaters_Average;
+		}
+		else pRX_Config->cond[3].heater_percent_neighbour = 0;								
+	}
 
 	// Head Thermistor: NCP03XH103F25RL R0=10k 1% @ T0=25°C
 	// B-Constant 25- 50°C 						[K] = 3380+-0.7%
