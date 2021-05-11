@@ -75,6 +75,7 @@ rx_fluid_nios/software/rx_fluid_nios/mem_init/
 rx_head_nios/software/rx_head_nios/mem_init/
 rx_digiprint_gui/Properties/AssemblyInfo.cs
 mvt_digiprint_gui/Properties/AssemblyInfo.cs
+mvt_service/Properties/AssemblyInfo.cs
 *.sdf
 *.opensdf
 rx_rip_lib.dll
