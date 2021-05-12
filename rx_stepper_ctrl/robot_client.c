@@ -51,7 +51,7 @@
 #define MOTOR_X_GARAGE_POS			21000 //28500
 
 #define SCREW_STEPS					213333
-#define SCREW_SPEED					220000			// steps/sec
+#define SCREW_SPEED					640000			// steps/sec
 
 #define MAX_LENGTH_Z				5500000//550000
 
