@@ -368,7 +368,7 @@ void lbrob_main(int ticks, int menu)
                 }
                 else if (rx_get_ticks() >= _CapFillTime + CAP_FILL_TIME / 2)
                 {
-                    Fpga.par->output |= RO_FLUSH_TO_CAP_RIGHT;
+                    if (RX_StepperCfg.printerType != printer_LB702_UV)   Fpga.par->output |= RO_FLUSH_TO_CAP_RIGHT;
                     Fpga.par->output &= ~RO_FLUSH_TO_CAP_LEFT;
                 }
                 break;
@@ -637,7 +637,7 @@ void lbrob_menu(int help)
         term_printf("f: Find all the screws\n");
         term_printf("a<n>: Go to adjustment position of head 0 - 7\n");
         term_printf("b<n>: Set Speed of Waste pump to <n>%, Actual value %d%\n", _PumpSpeed);
-        term_printf("z: Move all Screws to end position\n");
+        term_printf("z: Move all Screws to middle position\n");
         term_flush();
     }
     else
@@ -972,7 +972,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             case rob_fct_cap:
                 RX_StepperStatus.robinfo.moving = TRUE;
                 Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
-                Fpga.par->output |= RO_FLUSH_TO_CAP_LEFT;
+                if (RX_StepperCfg.printerType != printer_LB702_UV) Fpga.par->output |= RO_FLUSH_TO_CAP_LEFT;
                 Fpga.par->output |= RO_FLUSH_PUMP;
                 _CapFillTime = rx_get_ticks();
                 break;
