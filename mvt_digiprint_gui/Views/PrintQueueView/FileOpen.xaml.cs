@@ -11,6 +11,7 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 
@@ -21,6 +22,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
     /// </summary>
     public partial class FileOpen : UserControl
     {
+
+        public delegate void SelectedChangedDelegate(int value);
+
+        public SelectedChangedDelegate  SelectedChanged;
+
         private static string _root;
         private static string _ActPath;
         private static string _ripped_data = TcpIp.RX_RIPPED_DATA_ROOT.Remove(0,1)+":";
@@ -62,7 +68,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 			RxGlobals.FileNameFilter.PropertyChanged += _FileNameFilter_PropertyChanged;
             DirGrid.StylusSystemGesture += RxXamGrid.RxStylusSystemGesture;
 
-        //  SmallSize.IsChecked     = (_PreviewSize==0);
+        //    SmallSize.IsChecked   = (_PreviewSize==0);
             MidSize.IsChecked       = (_PreviewSize==1);
             LargeSize.IsChecked     = (_PreviewSize==2);
             RippedData.IsChecked    = true;
@@ -92,8 +98,23 @@ namespace RX_DigiPrint.Views.PrintQueueView
 				}
                 DirGrid.ItemsSource=list;
                 _SetRowHeight(_row_height);
-			}
+            }
 		}
+
+        //--- Property Selected ---------------------------------------
+        private int _Selected;
+        public int Selected
+        {
+            get { return _Selected; }
+            set 
+            { 
+                if (value!=_Selected)
+                {
+                    _Selected = value; 
+                    if (SelectedChanged!=null) SelectedChanged(_Selected);
+                }
+            }
+        }        
 
         //--- UserControl_Loaded -------------------------------------------
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -108,7 +129,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
                         DirTree.ActDirChangedEvent += _ActDirChanged;
                         DirTree.ActDir = Properties.Settings.Default.FileOpen_ActDir;
                         DirTreeGrid.Children.Add(DirTree);
-                   //     Refresh();
                     });
                 }).Start();
             }
@@ -141,11 +161,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 Thread.Sleep(100);   // give time to display text
                 RxBindable.Invoke(()=>
                 {
-                        dir = Dir.global_path(dir);
-                        ActDirCtrl.Text = dir;
-                        _dir = new Dir(dir, (bool)RippedData.IsChecked, dir.Equals(_root)).List;
-                        _filter_files(RxGlobals.FileNameFilter.Filter);
-                        MsgRefresh.Visibility = Visibility.Hidden;                
+                    dir = Dir.global_path(dir);
+                    ActDirCtrl.Text = dir;
+                    DirGrid.ItemsSource = _dir = new Dir(dir, (bool)RippedData.IsChecked, dir.Equals(_root)).List;
+                    _filter_files(RxGlobals.FileNameFilter.Filter);
+                    MsgRefresh.Visibility = Visibility.Hidden;
+
+                    if (DirGrid.ColumnLayouts.Count>0)
+                        DirGrid.ColumnLayouts[0].Columns["FileType"].ColumnLayout.ColumnWidth = ColumnWidth.Auto;
                 });
             });
             thread.Start();
@@ -192,11 +215,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void _SetRowHeight(RowHeight height)
         {
             int i;
-            ObservableCollection<DirItem> items = DirGrid.ItemsSource as ObservableCollection<DirItem>;
             _row_height = height;
             for (i=0; i<DirGrid.Rows.Count; i++)
             {
-                if (items[i].IsDirectory) DirGrid.Rows[i].Height = _dir_height;
+                if (_dir[i].IsDirectory) DirGrid.Rows[i].Height = _dir_height;
                 else DirGrid.Rows[i].Height = _row_height;
             }
         }
@@ -288,13 +310,15 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 addJobToQueue(pq);
             }
         }
+
+        //--- _load_runList -----------------------------------------------------
         private void _load_runList(DirItem item)
         {
             XmlTextReader xml;
             string listname = Path.GetFileName(item.FileName);
-            string dir = Path.GetDirectoryName(Dir.local_path(item.FileName)) + Path.DirectorySeparatorChar + listname;
+            string dir =Path.GetDirectoryName(Dir.local_path(item.FileName)) + Path.DirectorySeparatorChar + listname;
             string rjlpath = dir + Path.DirectorySeparatorChar + listname + ".rlj";
-            int itemId = 0;
+            int itemId = 0; 
             if (File.Exists(rjlpath))
             {
                 SortedDictionary<int, Dictionary<string, string>> runListItems = new SortedDictionary<int, Dictionary<string, string>>();
@@ -303,11 +327,11 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 xml = new XmlTextReader(rjlpath);
                 try
                 {
-                    while (xml.Read())
+                    while(xml.Read())
                     {
-                        if (xml.NodeType == XmlNodeType.Element && xml.Name.Equals("RunList"))
+                        if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals("RunList"))
                         {
-                            for (int i = 0; i < xml.AttributeCount; i++)
+                            for  (int i=0; i<xml.AttributeCount; i++)
                             {
                                 xml.MoveToAttribute(i);
                                 if (xml.Name.Equals("no"))
@@ -358,7 +382,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
         private void _item_delete(DirItem item)
         {
             string[] name=item.FileName.Split('\\');
-            if (name.Length>1 && MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, String.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmDelete, name[name.Length-1]),  MessageBoxImage.Question, false))
+            if (name.Length > 1 && MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Delete, String.Format(RX_DigiPrint.Resources.Language.Resources.ConfirmDelete, name[name.Length - 1]), MessageBoxImage.Question, false))
             {
                 PrintQueueItem pq = new PrintQueueItem();     
                 pq.FilePath = item.FileName;
@@ -426,12 +450,40 @@ namespace RX_DigiPrint.Views.PrintQueueView
             if (item!=null) item.PreviewOrientation = (item.PreviewOrientation+90)%360;
         }
 
+        //--- Print -----------------------------------
+        public void Print()
+        {
+            Print_Clicked(null, null);
+        }
+
         //--- Print_Clicked ------------------------------------
         private void Print_Clicked(object sender, RoutedEventArgs e)
         {
-            Button button = sender as Button;
-            DirItem item = button.DataContext as DirItem;
-            _item_clicked(item);
+         //   Button button = sender as Button;
+         //   DirItem item = button.DataContext as DirItem;
+            foreach(Row row in DirGrid.Rows)
+            {
+                DirItem item = row.Data as DirItem;
+                if (item!=null && item.IsSelected)
+                {
+                    _item_clicked(item);
+                    item.IsSelected = false;
+                }
+            }
+            _update_selected_items();
+        }
+
+        //--- Delete --------------------------
+        public void Delete()
+        {
+            foreach(Row row in DirGrid.Rows)
+            {
+                DirItem item=row.Data as DirItem;
+                if (item!=null && !item.IsDirectory && row.Control!=null)
+                {
+                    if (item.IsSelected) _item_delete(item);
+                }
+            }
         }
 
         //--- Delete_Clicked ------------------------------------
@@ -445,26 +497,36 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //---- DirGrid_SelectedRowsCollectionChanged -----------------------------------
         private void DirGrid_SelectedRowsCollectionChanged(object sender, SelectionCollectionChangedEventArgs<SelectedRowsCollection> e)
         {
-            foreach(var row in e.PreviouslySelectedItems)
-            {
-                DirItem item=row.Data as DirItem;
-                Console.WriteLine("Selection Changed: new={0}", row.Index);
-                if (item!=null)
-                {
-                    item.PrintButtonVisibility  = Visibility.Hidden;
-                    item.DeleteButtonVisibility = Visibility.Collapsed;
-                }
-            }
+            /*
             foreach(var row in e.NewSelectedItems)
             {
                 DirItem item=row.Data as DirItem;
-                if (item!=null && !item.IsDirectory)
+                if (item!=null) item.IsSelected = !item.IsSelected;
+            }
+            e.NewSelectedItems.Clear(); // to get an event in click
+            _update_selected_items();
+            */
+        }
+
+        //--- IsSelected_Changed ------------------------------
+        private void IsSelected_Changed(object sender, RoutedEventArgs e)
+        {
+            _update_selected_items();
+        }
+
+        //--- _update_selected_items --------------------------------------------
+        private void _update_selected_items()
+        {
+            int selected=0;
+            foreach(Row row in DirGrid.Rows)
+            {
+                DirItem item=row.Data as DirItem;
+                if (item!=null && !item.IsDirectory && row.Control!=null)
                 {
-                    if (!item.Error) item.PrintButtonVisibility  = Visibility.Visible;
-                    item.DeleteButtonVisibility = (RxGlobals.User.UserType>=EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
-                    DirGrid.ScrollCellIntoView(row.Cells[0]);
+                    if (item.IsSelected) selected++;
                 }
             }
+            Selected = selected;
         }
 
         //--- Refresh -----------------------------------
@@ -472,14 +534,16 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
              MsgRefresh.Visibility = Visibility.Visible;
              RxBindable.Invoke(()=>DirGrid.ItemsSource = null);
+             if (DirTree==null) return;
+
              Thread thread=new Thread(()=>
              {
                 Thread.Sleep(50);   // give time to display text
                 RxBindable.Invoke(()=>
                 {
-                     DirTree.Refresh();
-                     _ActDirChanged(DirTree.ActDir);
-                     MsgRefresh.Visibility = Visibility.Hidden;                
+                    DirTree.Refresh();
+                    _ActDirChanged(DirTree.ActDir);
+                    MsgRefresh.Visibility = Visibility.Hidden;                
                 });
              });
              thread.Start();
@@ -495,13 +559,12 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 int i;
                 int orientation;
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf) orientation=270;
-                else if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702) orientation=90;
                 else orientation=0;
                 for (i=0; i<DirGrid.Rows.Count; i++)
                 {
                     DirItem item = DirGrid.Rows[i].Data as DirItem;
                     if (item!=null) item.PreviewOrientation=orientation;
-                }            
+                }
             }
         }
 
@@ -527,9 +590,5 @@ namespace RX_DigiPrint.Views.PrintQueueView
             }
         }
 
-        public void Print()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

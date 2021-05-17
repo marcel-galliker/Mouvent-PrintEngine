@@ -336,7 +336,7 @@
     <Compile Include="Converters\Or_Converter.cs" />
     <Compile Include="Converters\PagesVisible_Converter.cs" />
     <Compile Include="Converters\PlcLogState_Converter.cs" />
-    <Compile Include="Converters\PrintQueueCheckVisible_Converter.cs" />
+    <Compile Include="Converters\PrintQueueSaveCancelVisible_Converter.cs" />
     <Compile Include="Converters\PuttyVisible_Converter.cs" />
     <Compile Include="Converters\RotateRect_Converter.cs" />
     <Compile Include="Converters\ScanLengt_Converter.cs" />
@@ -667,9 +667,6 @@
     </Compile>
     <Compile Include="Views\PrintQueueView\FileOpen.xaml.cs">
       <DependentUpon>FileOpen.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\PrintQueueView\FileOpen_LB702.xaml.cs">
-      <DependentUpon>FileOpen_LB702.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintQueueView\FileSettingsTest.xaml.cs" />
     <Compile Include="Views\PrintQueueView\PrintQueueAddTest.xaml.cs">
@@ -1291,10 +1288,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PrintQueueView\FileOpen.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\PrintQueueView\FileOpen_LB702.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

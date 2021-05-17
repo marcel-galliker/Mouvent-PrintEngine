@@ -82,7 +82,6 @@
     <converters:PlcLogState_Converter       x:Key="PlcLogState_Converter"/>
     <converters:PlcLogNo_Converter          x:Key="PlcLogNo_Converter"/>
     <converters:PuttyVisible_Converter      x:Key="PuttyVisible_Converter"/>
-    <converters:PrintQueueCheckVisible_Converter      x:Key="PrintQueueCheckVisible_Converter"/>
     <converters:PrintQueueSaveCancelVisible_Converter      x:Key="PrintQueueSaveCancelVisible_Converter"/>
 
     <converters:PuttyDbgVisible_Converter   x:Key="PuttyDbgVisible_Converter"/>

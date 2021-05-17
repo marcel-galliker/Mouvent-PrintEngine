@@ -168,9 +168,7 @@
                                     <CheckBox Grid.Column="1"
                                         IsChecked="{Binding IsSelected}"
                                         VerticalAlignment="Center"
-                                        HorizontalAlignment="Center"
-                                        Visibility="{Binding IsSelected, Converter={StaticResource PrintQueueCheckVisible_Converter}}"
-                                        />
+                                        HorizontalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ig:TemplateColumn.ItemTemplate>
@@ -241,7 +239,6 @@
                 </ig:XamGrid.Columns>
             </ig:XamGrid>
             
-            <!--LB702_UV only:-->
             <pq_views:FileSettingsWeb Margin="0,10,0,0" x:Name="PrintSettings" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right"/>
         </Grid>
 
@@ -346,10 +343,5 @@
 
         </Grid>
         
-        <!-- FILE OPEN ____________________________________________________________-->
-        <!--
-        <pq_views:FileOpen       Grid.Row="1" Grid.RowSpan="3" x:Name="FileOpen"       Visibility="Hidden" IsVisibleChanged="FileOpen_IsVisibleChanged" />
-        <pq_views:FileOpen_LB702 Grid.Row="1" Grid.RowSpan="3" x:Name="FileOpen_LB702" Visibility="Hidden" IsVisibleChanged="FileOpen_IsVisibleChanged" />
-        -->
     </Grid>
 </UserControl>
