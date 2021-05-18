@@ -130,7 +130,8 @@ static void _setSerialNo(UINT16 no);
 void rc_init(void)
 {
 	_MotorInit = 0;
-	_RobotHdl  = rx_thread_start(_robot_ctrl_thread, NULL, 0, "RC_Client");
+    if (!_RobotHdl)
+		_RobotHdl  = rx_thread_start(_robot_ctrl_thread, NULL, 0, "RC_Client");
 }
 
 //--- rc_config ------------------------------------------------

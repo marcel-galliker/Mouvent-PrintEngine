@@ -69,3 +69,5 @@ void steplb_pump_back_fluid(int fluidNo, int state);
 void steplb_set_autocapMode(int state);
 
 void steplb_set_fluid_off(int no);
+
+int steplb_robot_used(int fluidNo);

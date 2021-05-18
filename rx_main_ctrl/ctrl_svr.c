@@ -602,7 +602,7 @@ void ctrl_tick(void)
 					stat[head].cylinderPressureSet = fluid_get_cylinderPresSet(inkSupply);
 					stat[head].fluidErr            = fluid_get_error(inkSupply);
 					stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
-                    if (RX_StepperStatus.robot_used)
+                    if (step_robot_used(inkSupply))
                     {             
                         if (RX_Config.inkSupplyCnt % 2 == 0)
                             stat[head].act_pos_y = -1 * RX_StepperStatus.posY[i / Colors_Per_Stepper];
@@ -761,7 +761,8 @@ void ctrl_empty_PurgeBuffer(int fluidNo)
 //--- ctrl_send_head_fluidCtrlMode --------------------------------------------------------------
 void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int sendToFluid, int fromGui)
 {
-    if ((ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_step6 && ctrlMode != ctrl_purge4ever && _ctrl_check_stepper_in_purgeMode(headNo) && RX_StepperStatus.robot_used && fromGui) || (!_ctrl_stepper_in_purge4ever_pos(headNo) && ctrlMode == ctrl_purge4ever  && _ctrl_check_stepper_in_purgeMode(headNo)))
+    int inkSupply = RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply;
+    if ((ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_step6 && ctrlMode != ctrl_purge4ever && _ctrl_check_stepper_in_purgeMode(headNo) && step_robot_used(inkSupply) && fromGui) || (!_ctrl_stepper_in_purge4ever_pos(headNo) && ctrlMode == ctrl_purge4ever  && _ctrl_check_stepper_in_purgeMode(headNo)))
     {
         int i;
         for (i = 0; i < SIZEOF(_BufferFluidCmd); i++)
@@ -819,7 +820,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 	if (mode==INVALID_VALUE || (mode==ctrl_off && ctrlMode==ctrl_off)) return;
 	if (fromGui) 
 	{
-		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1 && !RX_StepperStatus.robot_used)
+		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1 && !step_robot_used(inkSupply))
 			fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrl_off, TRUE);
 		_SingleHead = headNo;
         if (ctrlMode == ctrl_off) fluid_purgeCluster(headNo / 4, FALSE);
@@ -872,7 +873,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 
         //if (_ctrl_check_stepper_in_purgeMode(headNo/RX_Config.headsPerColor)) sendToFluid = FALSE;
 
-		if (sendToFluid) fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrlMode, FALSE);
+        if (sendToFluid) fluid_send_ctrlMode(inkSupply, ctrlMode, FALSE);
 	}
 }	
 
@@ -975,7 +976,7 @@ int ctrl_send_purge_par(int fluidNo, int time, int position_check, int delay_tim
     else
         delay_pos_y = 0;
 
-    if ((RX_StepperStatus.robot_used && position_check) || time == 0)
+    if ((step_robot_used(fluidNo) && position_check) || time == 0)
         delay_time = 0;
     else
         delay_time = delay_time_ms;
@@ -986,17 +987,17 @@ int ctrl_send_purge_par(int fluidNo, int time, int position_check, int delay_tim
     par.time  = time;
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
-        if (RX_StepperStatus.robot_used && !position_check && head < number_of_heads)
+        if (step_robot_used(fluidNo) && !position_check && head < number_of_heads)
             pcfg = &RX_Config.headBoard[(number_of_heads - 1 - head)/MAX_HEADS_BOARD].head[(number_of_heads- 1 - head)%MAX_HEADS_BOARD];
         else
 			pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
 		if (pcfg->enabled && pcfg->inkSupply==fluidNo)
 		{
-            if (RX_StepperStatus.robot_used && !position_check && head < number_of_heads)
+            if (step_robot_used(fluidNo) && !position_check && head < number_of_heads)
                 par.no = (number_of_heads - 1 - head)%MAX_HEADS_BOARD;
             else
 				par.no = head%HEAD_CNT;
-            if (RX_StepperStatus.robot_used && !position_check && head < number_of_heads)
+            if (step_robot_used(fluidNo) && !position_check && head < number_of_heads)
                 sok_send_2(&_HeadCtrl[(number_of_heads - 1 - head)/MAX_HEADS_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
             else
 				sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);

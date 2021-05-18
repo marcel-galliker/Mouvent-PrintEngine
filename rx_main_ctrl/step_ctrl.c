@@ -50,7 +50,7 @@ static int				_step_ThreadRunning;
 static RX_SOCKET		_step_Socket[STEPPER_CNT];
 static int				_StepperType=STEPPER_STD;
 static SPrintQueueItem	_PQItem;
-static int				_LB_Rob;
+//static int				_LB_Rob;
 	
 //--- prototypes -----------------------
 static void* _step_thread		(void *par);
@@ -63,7 +63,7 @@ int	 step_init(void)
 {	
 	int i;
 	_step_ThreadRunning = TRUE;
-	_LB_Rob = FALSE;
+	//_LB_Rob = FALSE;
 	memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 	//memset(&RX_ClnStatus, 0, sizeof(RX_ClnStatus));
 	for (i=0; i<SIZEOF(_step_Socket); i++)
@@ -202,8 +202,8 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									{
 									case STEPPER_CLEAF: ret = stepc_handle_status		(no, pStat); break;
 									case STEPPER_TX:	ret = steptx_handle_status		(no, pStat); break;
-									case STEPPER_LB:	_LB_Rob |= pStat->robot_used;
-														if (_LB_Rob && !pStat->robot_used) ErrorEx(dev_stepper, no, ERR_CONT, 0, "ROBOT_USED bridge not set");
+									case STEPPER_LB:	//_LB_Rob |= pStat->robot_used;
+														//if (_LB_Rob && !pStat->robot_used) ErrorEx(dev_stepper, no, ERR_CONT, 0, "ROBOT_USED bridge not set");
 														ret = steplb_handle_status		(no, pStat); break;
 									case STEPPER_DP:	ret = stepdp_handle_status		(no, pStat); break;
 									case STEPPER_TEST:	ret = steptest_handle_status	(no, pStat); break;
@@ -699,4 +699,17 @@ int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
     default:
         break;
     }
+}
+
+//--- step_robot_used ----------------------------------
+int step_robot_used(int fluidNo)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        return steplb_robot_used(fluidNo);
+    default:
+        return FALSE;
+    }
+    return FALSE;
 }

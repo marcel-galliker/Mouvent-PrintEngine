@@ -219,13 +219,14 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             info.z_in_print &= _Status[i].info.z_in_print;
             info.z_in_cap &= _Status[i].info.z_in_cap;
             info.z_in_screw |= _Status[i].info.z_in_screw;
-            info.x_in_cap &= _Status[i].info.x_in_cap;
-            info.x_in_ref &= _Status[i].info.x_in_ref;
+            info.x_in_cap &= _Status[i].info.x_in_cap || !_Status[i].robot_used;
+            robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap || !_Status[i].robot_used;
+            info.x_in_ref &= _Status[i].info.x_in_ref ;
             robot_used |= _Status[i].robot_used;
-            robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap;
-            robinfo.ref_done &= _Status[i].robinfo.ref_done;
+            robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap || !_Status[i].robot_used;
+            robinfo.ref_done &= _Status[i].robinfo.ref_done || !_Status[i].robot_used;
             robinfo.moving |= _Status[i].robinfo.moving;
-            robinfo.purge_ready &= _Status[i].robinfo.purge_ready;
+            robinfo.purge_ready &= _Status[i].robinfo.purge_ready || !_Status[i].robot_used;
             RX_StepperStatus.posY[i] = _Status[i].posY[1];
             if (_Status[i].info.moving)
             {
@@ -632,9 +633,11 @@ void steplb_pump_back_fluid(int fluidNo, int state)
     {
         for (int no = 0; no < SIZEOF(_step_socket); no++)
         {
-            if (_step_socket[no] != INVALID_SOCKET && state == FALSE) 
+            if (_step_socket[no] != INVALID_SOCKET && state == FALSE && _Status[no].robot_used)
+            {
                 sok_send_2(&_step_socket[no], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
-            else if (_step_socket[no] != INVALID_SOCKET && state == TRUE)
+            } 
+            else if (_step_socket[no] != INVALID_SOCKET && state == TRUE && _Status[no].robot_used)
             {
                 val = 5;
                 sok_send_2(&_step_socket[no], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
@@ -647,7 +650,8 @@ void steplb_pump_back_fluid(int fluidNo, int state)
             val = ((fluidNo % 2) + 1) * 2;
         else
             val = ((fluidNo % 2) + 1) * 2 - 1;
-        sok_send_2(&_step_socket[fluidNo/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
+        if (_Status[fluidNo/2].robot_used)
+            sok_send_2(&_step_socket[fluidNo/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
     }
     else
     {
@@ -665,7 +669,8 @@ void steplb_pump_back_fluid(int fluidNo, int state)
             else
                 val = 1;
         }
-        sok_send_2(&_step_socket[(fluidNo+1)/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
+        if (_Status[(fluidNo + 1) / 2].robot_used)
+            sok_send_2(&_step_socket[(fluidNo+1)/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
     }
 }
 
@@ -678,12 +683,19 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 
     if (ctrlMode != ctrl_vacuum && ctrlMode != ctrl_vacuum_step1) _time[no] = 0;
     
-	if (_Status[no].robot_used)
+	if (_Status[no].robot_used || ctrlMode == ctrl_cap || ctrlMode == ctrl_cap_step4)
 	{
 		EnFluidCtrlMode	old = _RobotCtrlMode[no];
 		switch (ctrlMode)
 		{
-		case ctrl_cap:				if (!_Status[no].robinfo.ref_done) _steplb_rob_do_reference(no);
+		case ctrl_cap:				if (!_Status[no].robot_used)
+                                    {
+                                        steplb_lift_to_fct_pos(no, rob_fct_cap);
+                                        _RobotCtrlMode[no] = ctrl_cap_step4;
+                                        break;
+                                    }
+                
+                                    if (!_Status[no].robinfo.ref_done) _steplb_rob_do_reference(no);
 									_RobotCtrlMode[no] = ctrl_cap_step1;
                                     break;
 		
@@ -1031,5 +1043,24 @@ void steplb_set_fluid_off(int no)
         _send_ctrlMode(ctrl_off, (no+1) / 2);
         steplb_rob_control(ctrl_off, (no + 1) / 2);
         steplb_rob_stop((no + 1) / 2);
+    }
+}
+
+
+int steplb_robot_used(int fluidNo)
+{
+    switch (RX_Config.printer.type)
+    {
+    case printer_LB702_WB:
+    case printer_LB702_UV:
+        if (RX_Config.inkSupplyCnt % 2 == 0)
+            return (_Status[fluidNo / 2].robot_used);
+        else
+            return (_Status[(fluidNo + 1) / 2].robot_used);
+        break;
+        
+    default:
+        return FALSE;
+        break;
     }
 }

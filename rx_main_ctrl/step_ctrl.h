@@ -73,3 +73,4 @@ void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment);
 int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment);
 int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment);
+int step_robot_used(int fluidNo);

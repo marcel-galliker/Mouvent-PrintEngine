@@ -91,11 +91,11 @@ static int  _incs_2_micron(int incs);
 //--- lb702_init --------------------------------------
 void lb702_init(void)
 {
-#ifdef DEBUG
+/*#ifdef DEBUG
 	RX_StepperStatus.robot_used = (RX_StepperCfg.printerType==printer_LB702_WB);
-#else
+#else*/
 	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
-#endif
+//#endif
 
     motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
@@ -197,7 +197,6 @@ void lb702_main(int ticks, int menu)
 					{
                         _lb702_move_to_pos(_Cmd_New, _PrintPos_New[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_FRONT]);
                         memcpy(_PrintPos_Act, _PrintPos_New, sizeof(_PrintPos_Act));
-                        RX_StepperStatus.cmdRunning = _Cmd_New;
                         _Cmd_New = FALSE;
                     }
 					else
@@ -285,7 +284,6 @@ void lb702_main(int ticks, int menu)
         }
         else
         {
-            RX_StepperStatus.cmdRunning = FALSE;
             RX_StepperStatus.info.z_in_ref = FALSE;
             RX_StepperStatus.info.z_in_up = FALSE;
             RX_StepperStatus.info.z_in_print = FALSE;
@@ -724,6 +722,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_CAPPING_POS, val0, val1);
                                         else
                                         {
+                                            _PrintPos_New[0] = val0;
+                                            _PrintPos_New[1] = val1;
                                             _Cmd_New = msgId;
                                             _lb702_do_reference();
                                         }
