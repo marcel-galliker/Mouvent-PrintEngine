@@ -140,7 +140,7 @@ class TCPProtocol(network.AbstractTCPProtocol):
     def mgt_CMD_GET_BLOCK_USED(self, msg):
         # send response
         msg.msgtype = "REP_GET_BLOCK_USED"
-        msg.blockOutIdx = self.board.blk_end[msg.headNo] + 32 # bigger than block size to avoid mgt of the blockOutIdx
+        msg.blockOutIdx = self.board.blockOutIdx[msg.headNo] 
         if rec_blocks:        
             msg.used = self.board.used.flags(msg.blkNo, msg.blkCnt, self.board.blk_end[msg.headNo], self.board.blkNo0[msg.headNo]) 
         else:
@@ -171,14 +171,9 @@ class UsedFlags(list):
         missing = no // 32 - len(self._flags) + 1
         if missing > 0:
             self._flags.extend(missing * [0])
-    def free(self, blkNo, blkCnt,  end, blk0):
+    def free(self, no):
         "free one blocks"
-        if blkNo + blkCnt < end:
-            self._flags[blkNo//32:blkNo//32+blkCnt//32] = blkCnt//32 * (0,)
-        else:
-            self._flags[blkNo//32:end//32] = (end//32 - blkNo//32) * (0,)
-            self._flags[blk0//32:(blkNo + blkCnt - end)//32] = (blkNo//32 + blkCnt//32 - end//32)  * (0,)
-
+        self._flags[no // 32] &= ~(1 << (no % 32))
     def use(self, no):
         "set a block as used"
         self._spare(no)
@@ -189,16 +184,21 @@ class UsedFlags(list):
         return self._flags[no // 32] & (1 << (no % 32))
     def flags(self, blkNo, blkCnt, end, blk0):
         "return the table of bits according to blocks"
+        # note: no need to round up as all blk cnt are already rounded by spooler!
         if blkNo + blkCnt < end:
-            self._spare(blkNo + blkCnt + 31)
-            return self._flags[blkNo//32:(blkNo+blkCnt+31)//32]
+            self._spare(blkNo + blkCnt)
+            return self._flags[blkNo//32:(blkNo+blkCnt)//32]
         else:
-            self._spare(end + 31)
-            return self._flags[blkNo//32:(end+31)//32]+self._flags[blk0//32:(blkNo + blkCnt - end)//32]
+            self._spare(end)
+            return self._flags[blkNo//32:end//32]+self._flags[blk0//32:(blkNo + blkCnt - end)//32]
 
 
-def save_image(no, blocks, fpga_images, blk_end, blk_No0):
+def save_image(board, fpga_images):
     "save all images printed by a board"
+    no = board.no
+    blocks = board.blocks
+    blk_end = board.blk_end
+    blk_No0 = board.blkNo0
     for fpga in fpga_images:
         filename = f"printed/fake id{fpga.id} c{fpga.copy} p{fpga.page} s{fpga.scan} b{no} h{fpga.head}.bmp"
         logging.info(f"Creating '{filename}' ({fpga.widthPx}x{fpga.lengthPx})...")
@@ -207,10 +207,12 @@ def save_image(no, blocks, fpga_images, blk_end, blk_No0):
             end = blk_end[fpga.head]
             b0 = blk_No0[fpga.head]
             for i in range(fpga.blkNo,fpga.blkNo+fpga.blkCnt):
-                if i < end: 
-                    img.extend(blocks[i])
-                else:
-                    img.extend(blocks[b0+i-end])
+                n0 =  i if i < end else b0+i-end
+                img.extend(blocks[n0])
+                if fpga.clearBlockUsed:
+                    del blocks[n0]
+                    board.used.free(n0)
+            board.blockOutIdx[fpga.head] = fpga.blkNo+fpga.blkCnt
             from PIL import Image
             # the width is align to 256 bits
             align = 256 // fpga.bitPerPixel # so it depends on the bit per pixel
@@ -242,7 +244,6 @@ class Board(network.AbstractBoard):
         self.reset()
         self.config = {"disabled_jets": 4 * [None], "density": 4 * [None], "voltage": 4 * [None]}
 
-
     def add_block(self, no, block):
         "add a received block to the board"
         if not self.abort:
@@ -261,9 +262,6 @@ class Board(network.AbstractBoard):
 
     def print_done(self, msg):
         "finish the print by clearing blocks and sending EVT_PRINT_DONE"
-        for head in self.fpga_images[(msg.id, msg.page, msg.copy, msg.scan)]:
-            if head.clearBlockUsed:
-                self.used.free(head.blkNo, head.blkCnt, self.blk_end[head.head], self.blkNo0[head.head])
         # reuse the same data from the message
         self.pd += 1
         msg.pd = self.pd
@@ -278,6 +276,7 @@ class Board(network.AbstractBoard):
         "reset the board by clearing everythings"
         logging.warning(f"reset board {self.no}")
         self.abort = False
+        self.blockOutIdx = 4 * [2**32-1]
         self.blocks = {}
         self.fpga_images = {}
         self.used = UsedFlags()
@@ -303,9 +302,9 @@ async def process(loop, boards):
         if board.fpga_images:
             img=board.fpga_images[sorted(board.fpga_images.keys())[0]]
             if len(img) == len([x for x in board.activate if x]) and not board.abort:
-                # if done, save bmp in another thread as it could be a long process
+                # if done, async save bmp as it could be a long process
                 if rec_blocks:
-                    fn = functools.partial(save_image, *(board.no, board.blocks, img, board.blk_end, board.blkNo0))
+                    fn = functools.partial(save_image, *(board, img))
                     await loop.run_in_executor(None, fn)
                 board.print_done(img[0])
     
