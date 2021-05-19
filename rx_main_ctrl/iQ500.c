@@ -92,7 +92,7 @@ void iq500_init()
 
     if (RX_Config.iQ500Cfg.hasInspectionCamera)
     {
-        rx_thread_start(iq500_thread, &_IQ500Camera, 0, "_iq500_thread");
+        // rx_thread_start(iq500_thread, &_IQ500Camera, 0, "_iq500_thread");
     }
     else
     {

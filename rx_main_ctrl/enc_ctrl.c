@@ -376,9 +376,15 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	}
 		
 	if (arg_simuEncoder && msg.correction==CORR_ROTATIVE) msg.correction=CORR_OFF;
-	
-//	_WakeupLen = 0;
-//	if (wakeupLen) Error(LOG, 0, "Set WakeupLen for Lazy jets: %d strokes", wakeupLen);
+
+	// Config the delay of the encoder board output 3
+	if (RX_Config.iQ500Cfg.hasInspectionCamera)
+	{
+		msg.printGoOutDist = RX_Config.iQ500Cfg.distanceToCamera * 1000;
+	}
+
+	//	_WakeupLen = 0;
+	//	if (wakeupLen) Error(LOG, 0, "Set WakeupLen for Lazy jets: %d strokes", wakeupLen);
 	
 		
 	msg.speed_mmin  = pitem->speed;

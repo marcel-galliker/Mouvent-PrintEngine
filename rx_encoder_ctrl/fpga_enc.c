@@ -536,8 +536,14 @@ void fpga_abort_printing(void)
 	int i;
 	if (RX_EncoderCfg.printerType==printer_test_table) _UV_Stopping = TRUE;
 	else FpgaQSys->out = 0;
-	for (i=0; i<SIZEOF(Fpga->cfg.encIn); i++) 
-		Fpga->cfg.encIn[i].enable = _Enabled[i] = FALSE;
+
+	if (Fpga->cfg.general.shift_delay == 0)
+	{
+		for (i = 0; i < SIZEOF(Fpga->cfg.encIn); i++)
+		{
+			Fpga->cfg.encIn[i].enable = _Enabled[i] = FALSE;
+		}
+	}
 }
 
 //--- fpga_enc_config ---------------------------------------------------
@@ -980,9 +986,16 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		Fpga->cfg.general.ftc_ratio			= 0;
 	}
 	
-	{	//--- used for DP803 ---
+	{
+		// Configure output number 3 (synchronization with external system)
+		Fpga->cfg.general.min_mark_len = 20000;
 		Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
-		Fpga->cfg.general.shift_delay			= (int)((pcfg->printGoOutDist-Fpga->cfg.general.min_mark_len)/_FirePulseDist);		
+		Fpga->cfg.general.shift_delay = 0;
+		if (pcfg->printGoOutDist > Fpga->cfg.general.min_mark_len)
+		{
+			Fpga->cfg.general.shift_delay = (int)((pcfg->printGoOutDist - Fpga->cfg.general.min_mark_len) / _FirePulseDist);
+		}
+		TrPrintfL(TRUE, "Fpga->cfg.general.shift_delay=%d; shift_delay_pulse_len=%d; min_mark_len=%d; printGoOutDist=%d", Fpga->cfg.general.shift_delay, Fpga->cfg.general.shift_delay_pulse_len, Fpga->cfg.general.min_mark_len, pcfg->printGoOutDist);
 	}
 
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
@@ -1056,7 +1069,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 	test_cfg_done();
 	
 	TrPrintfL(TRUE, "fpga_pg_config end1: marks:%06d ok:%06d filtred=%06d missed=%06d dist=%06d pos=%06d", _PM_Cnt, Fpga->stat.encOut[0].PG_cnt, _PM_Filtered_Cnt, _PM_Missed_Cnt, Fpga->stat.encIn[0].digin_edge_dist, Fpga->stat.encOut[0].position);
-	TrPrintfL(TRUE, "fpga_pg_config end2: enable=%d, pos_in=%d, pos_out=%d, enc_start_pos_fwd=%d, pos_pg_fwd=%d, pg_start_pos=%d, restart=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->stat.encOut [0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->cfg.pg[0].pos_pg_fwd,  Fpga->stat.encOut[0].pg_start_pos, restart);
+	TrPrintfL(TRUE, "fpga_pg_config end2: enable=%d, pos_in=%d, pos_out=%d, enc_start_pos_fwd=%d, pos_pg_fwd=%d, pg_start_pos=%d, restart=%d", Fpga->cfg.encIn[0].enable, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].position, Fpga->cfg.pg[0].enc_start_pos_fwd, Fpga->cfg.pg[0].pos_pg_fwd, Fpga->stat.encOut[0].pg_start_pos, restart);
 
 	return REPLY_OK;
 }
