@@ -11,6 +11,9 @@
 //
 // ****************************************************************************
 
+
+// Motor droiver chip:	https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5130_datasheet_Rev1.17.pdf
+
 #include "rx_common.h"
 #include "rx_error.h"
 #include "rx_sok.h"
@@ -37,7 +40,6 @@
 #define MOTOR_Z			3
 #define MOTORS_ALL		0x0f
 #define MOTORS_XY		((1<<MOTOR_XY_0) | (1<<MOTOR_XY_1))
-#define MOTOR_CNT		4
 
 #define ROB_IN(in) (_RobotStatus.gpio.inputs & 1<<(in))
 
@@ -70,10 +72,13 @@
 static char _IpAddr[32]="";
 RX_SOCKET	_RC_Socket = INVALID_SOCKET;
 static int	_Connected = FALSE;
+static int	_AppRunning = FALSE;
 static int	_Timeout;
 
 HANDLE					_RobotHdl;
 static SRobotStatusMsg	_RobotStatus;
+
+static int				_StatusRecvCnt;
 static int				_StatusReqCnt;
 static int				_MotorInit;
 static SMotorConfig		_MotorCfg[MOTOR_CNT];
@@ -186,11 +191,11 @@ static void* _robot_ctrl_thread(void* lpParameter)
 		}
 		else if (_IpAddr[0] && sok_ping(_IpAddr)==REPLY_OK)
 		{
-			errNo=sok_open_client_2(&_RC_Socket, _IpAddr, PORT_UDP_COMMUNICATION, SOCK_DGRAM, _handle_robot_ctrl_msg, _connection_closed);
+			errNo=sok_open_client_2(&_RC_Socket, _IpAddr, PORT_UDP_CTRL, SOCK_DGRAM, _handle_robot_ctrl_msg, _connection_closed);
 			if (errNo == REPLY_OK)
 			{
 				Error(LOG, 0, "Robot Connected");
-				_config_motors();
+			//	_config_motors();
 			}
 		}
 		rx_sleep(1000);
@@ -245,11 +250,15 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 	switch(phdr->msgId)
 	{
     case CMD_STATUS_GET:	memcpy(&_RobotStatus, msg, sizeof(_RobotStatus));
+							_StatusRecvCnt++;
 						//	TrPrintfL(TRUE, "got CMD_STATUS_GET moveIdStarted=%d, moveIdDone=%d, isMoving=%d, isStalled=%d", 
 						//		_RobotStatus.motor[MOTOR_Z].moveIdStarted, _RobotStatus.motor[MOTOR_Z].moveIdDone, _RobotStatus.motor[MOTOR_Z].isMoving, _RobotStatus.motor[MOTOR_Z].isStalled);
-							_check_move();
 							_check_version();
-							_rc_state_machine();
+							if (_AppRunning)
+							{
+								_check_move();
+								_rc_state_machine();
+							}
 							break;
 
     case CMD_BOOTLOADER_DATA: _download_data((SBootloaderDataRequestCmd*) msg); break;
@@ -347,6 +356,10 @@ static void _check_version(void)
 	{
 		TrPrintf(TRUE, "new Version %s", _RobotStatus.version);
 		memcpy(_versionStr, _RobotStatus.version, sizeof(_versionStr));
+		if (!strcmp(_RobotStatus.version, "0.0.0.0"))
+			_download_start();
+		else _AppRunning = TRUE;
+		/*
 		//---  get file version ---------------
 		sscanf(_versionStr, "%lu.%lu.%lu.%lu", &_BinVersion.major, &_BinVersion.minor, &_BinVersion.revision, &_BinVersion.build);
 		if (_get_file_version(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, &_FileVersion)==REPLY_OK)	
@@ -355,6 +368,7 @@ static void _check_version(void)
 			if (memcmp(&_BinVersion, &_FileVersion, sizeof(SVersion)))
 				_download_start();
 		}
+        */
 	}
 }
 
@@ -408,11 +422,14 @@ static void _download_end(void)
 //--- _setSerialNo ---------------------------------------
 static void _setSerialNo(UINT16 no)
 {
-	SBootloaderSerialNoCmd cmd;
-	cmd.header.msgId = CMD_BOOTLOADER_SERIALNO;
-	cmd.header.msgLen= sizeof(cmd);
-	cmd.serialNo     = no;
-	sok_send(&_RC_Socket, &cmd);
+	if (_AppRunning)
+	{
+	    SBootloaderSerialNoCmd cmd;
+	    cmd.header.msgId = CMD_BOOTLOADER_SERIALNO;
+	    cmd.header.msgLen= sizeof(cmd);
+	    cmd.serialNo     = no;
+	    sok_send(&_RC_Socket, &cmd);
+	}
 }
 
 //--- _rc_state_machine --------------------------------
@@ -543,17 +560,20 @@ static void _rc_state_machine(void)
 //--- _send_MotorCfg ----------------------------
 static void _send_MotorCfg(int motor)
 {
-	SRobotMotorSetCfgCmd configCommand;
-	memset(&configCommand, 0, sizeof(configCommand));
-	
-	configCommand.header.msgId = CMD_MOTOR_SET_CONFIG;
-	configCommand.header.msgLen = sizeof(configCommand);
-	
-	configCommand.motor = motor;
-	memcpy(&configCommand.config, &_MotorCfg[motor], sizeof(configCommand.config));	
-	
-	sok_send(&_RC_Socket, &configCommand);
-	TrPrintfL(TRUE, "sent CMD_MOTOR_SET_CONFIG");
+	if (_AppRunning)
+	{
+	    SRobotMotorSetCfgCmd configCommand;
+	    memset(&configCommand, 0, sizeof(configCommand));
+	    
+	    configCommand.header.msgId = CMD_MOTOR_SET_CONFIG;
+	    configCommand.header.msgLen = sizeof(configCommand);
+	    
+	    configCommand.motor = motor;
+	    memcpy(&configCommand.config, &_MotorCfg[motor], sizeof(configCommand.config));	
+	    
+	    sok_send(&_RC_Socket, &configCommand);
+	    TrPrintfL(TRUE, "sent CMD_MOTOR_SET_CONFIG");
+    }
 }
 
 //--- configure_xy_motor -------------------------------------
@@ -662,89 +682,102 @@ static void _rc_error(const char *file, int line, char *msg)
 //--- rc_stop --------------------------------
 void rc_stop(int motors)
 {
-	SRobotMotorsStopCmd cmd;
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_MOTORS_STOP;
-	cmd.motors = motors;
-	sok_send(&_RC_Socket, &cmd);
-	TrPrintfL(TRUE, "sent CMD_MOTORS_STOP");
+	if (_AppRunning)
+	{
+	    SRobotMotorsStopCmd cmd;
+	    cmd.header.msgLen = sizeof(cmd);
+	    cmd.header.msgId  = CMD_MOTORS_STOP;
+	    cmd.motors = motors;
+	    sok_send(&_RC_Socket, &cmd);
+	    TrPrintfL(TRUE, "sent CMD_MOTORS_STOP");
+	}
 }
 
 //--- _rc_reset_motors --------------------------------
 static void _rc_reset_motors(int motors)
 {
-	SRobotMotorsResetCmd cmd;
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_MOTORS_RESET;
-	cmd.motors		  = motors;
-	sok_send(&_RC_Socket, &cmd);
-	TrPrintfL(TRUE, "sent CMD_MOTORS_RESET");
-	for (int motor=0; motor<MOTOR_CNT; motor++)
-		if (motors & (1<<motor)) _RobotStatus.motor[MOTOR_XY_0].isStalled = FALSE;
+	if (_AppRunning)
+	{
+	    SRobotMotorsResetCmd cmd;
+	    cmd.header.msgLen = sizeof(cmd);
+	    cmd.header.msgId  = CMD_MOTORS_RESET;
+	    cmd.motors		  = motors;
+	    sok_send(&_RC_Socket, &cmd);
+	    TrPrintfL(TRUE, "sent CMD_MOTORS_RESET");
+	    for (int motor=0; motor<MOTOR_CNT; motor++)
+		    if (motors & (1<<motor)) _RobotStatus.motor[MOTOR_XY_0].isStalled = FALSE;
+	}
 }
 
 //--- _rc_reset_edgeCtr ----------------------------
 static void _rc_reset_edgeCtr(int inputs)
 {
-	SGpioSetCmd cmd;
-	cmd.header.msgLen = sizeof(cmd);
-	cmd.header.msgId  = CMD_GPIO_IN_RESET;
-	cmd.outputs		  = inputs;
-	sok_send(&_RC_Socket, &cmd);
-	TrPrintfL(TRUE, "sent CMD_GPIO_RESET");
+	if (_AppRunning)
+	{
+	    SGpioSetCmd cmd;
+	    cmd.header.msgLen = sizeof(cmd);
+	    cmd.header.msgId  = CMD_GPIO_IN_RESET;
+	    cmd.outputs		  = inputs;
+	    sok_send(&_RC_Socket, &cmd);
+	    TrPrintfL(TRUE, "sent CMD_GPIO_RESET");
+	}
 }
 
 //--- _rc_motor_moveBy --------------------------
 static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
 {
-	if (_RobotStatus.motor[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isMoving", motor);
-	if (_RobotStatus.motor[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isStalled", motor);
-
-	SRobotMotorsMoveCmd cmd;
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.header.msgLen	 = sizeof(cmd);
-	cmd.header.msgId	 = CMD_MOTORS_MOVE;
-	cmd.motors			 = 1<<motor;
-	cmd.targetPos[motor] = _RobotStatus.motor[motor].targetPos+steps;
-	if (_MotorCfg[motor].encmode)
+	if (_AppRunning)
 	{
-        cmd.encoderCheck[motor] = ENC_CHECK_ENC;
-		cmd.encoderTol[motor]= ENCODER_TOL;
+	    if (_RobotStatus.motor[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isMoving", motor);
+	    if (_RobotStatus.motor[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isStalled", motor);
+    
+	    SRobotMotorsMoveCmd cmd;
+	    memset(&cmd, 0, sizeof(cmd));
+	    cmd.header.msgLen	 = sizeof(cmd);
+	    cmd.header.msgId	 = CMD_MOTORS_MOVE;
+	    cmd.motors			 = 1<<motor;
+	    cmd.targetPos[motor] = _RobotStatus.motor[motor].targetPos+steps;
+	    if (_MotorCfg[motor].encmode)
+	    {
+            cmd.encoderCheck[motor] = ENC_CHECK_ENC;
+		    cmd.encoderTol[motor]= ENCODER_TOL;
+	    }
+	    if (motor==MOTOR_SCREW)
+	    {
+		    cmd.encoderCheck[motor] = ENC_CHECK_IN;
+		    cmd.edgeCheckIn[motor] = 0;
+		    cmd.encoderTol[motor]  = ENCODER_TOL_SCREW;		
+	    }
+	    cmd.moveId[motor] = ++_MoveId[motor];
+        sok_send(&_RC_Socket, &cmd);
+	    
+	    TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE");
 	}
-	if (motor==MOTOR_SCREW)
-	{
-		cmd.encoderCheck[motor] = ENC_CHECK_IN;
-		cmd.edgeCheckIn[motor] = 0;
-		cmd.encoderTol[motor]  = ENCODER_TOL_SCREW;		
-	}
-	cmd.moveId[motor] = ++_MoveId[motor];
-    sok_send(&_RC_Socket, &cmd);
-	
-	TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE");
-
 	return REPLY_OK;
 }
 
 //--- _rc_motor_moveToStop --------------------------------
 static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, const char *file, int line)
 {
-	if (_RobotStatus.motor[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
-	if (_RobotStatus.motor[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
-
-	SRobotMotorsMoveCmd cmd;
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.header.msgLen		 = sizeof(cmd);
-	cmd.header.msgId		 = CMD_MOTORS_MOVE;
-	cmd.motors				 = 1<<motor;
-	cmd.targetPos[motor]	 =  steps;
-	cmd.stopBits[motor]		 = 1<<stopInput;
-	cmd.stopBitLevels[motor] = level;
-	cmd.moveId[motor]		 = ++_MoveId[motor];
-
-	TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE[%d].moveIdStarted=%d", motor, _MoveId[motor]);
-
-	sok_send(&_RC_Socket, &cmd);
-
+	if (_AppRunning)
+	{
+	    if (_RobotStatus.motor[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
+	    if (_RobotStatus.motor[motor].isStalled) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
+    
+	    SRobotMotorsMoveCmd cmd;
+	    memset(&cmd, 0, sizeof(cmd));
+	    cmd.header.msgLen		 = sizeof(cmd);
+	    cmd.header.msgId		 = CMD_MOTORS_MOVE;
+	    cmd.motors				 = 1<<motor;
+	    cmd.targetPos[motor]	 =  steps;
+	    cmd.stopBits[motor]		 = 1<<stopInput;
+	    cmd.stopBitLevels[motor] = level;
+	    cmd.moveId[motor]		 = ++_MoveId[motor];
+    
+	    TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE[%d].moveIdStarted=%d", motor, _MoveId[motor]);
+    
+	    sok_send(&_RC_Socket, &cmd);
+	}
 	return REPLY_OK;
 }
 
@@ -909,7 +942,7 @@ void rc_display_status(void)
 {
 	int i;
 	
-	term_printf("Robot #%d --- v %s --- socket=%d ----- StatusReq=%d ----- alive=%d ----- connected=%d ----- \n", _RobotStatus.serialNo, _RobotStatus.version, _RC_Socket, _StatusReqCnt, _RobotStatus.alive, _Connected);
+	term_printf("Robot #%d --- v %s --- socket=%d ----- StatusReq=%d/%d ----- alive=%d ----- connected=%d ----- \n", _RobotStatus.serialNo, _RobotStatus.version, _RC_Socket, _StatusReqCnt, _StatusRecvCnt, _RobotStatus.alive, _Connected);
 	
 	// Connection information
 //	term_printf("\nConnection Status: %d\n", _isConnected);
