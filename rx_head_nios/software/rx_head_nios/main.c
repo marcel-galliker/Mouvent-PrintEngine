@@ -101,7 +101,7 @@ void main_rebooting_cond(void) {
 void main_tick_1000ms(void)
 {
 	int condNo;
-
+temp_head
 	if (!bootloader_running())
 	{
 		for (condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)

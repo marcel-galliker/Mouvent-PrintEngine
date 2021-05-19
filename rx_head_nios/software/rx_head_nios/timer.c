@@ -109,20 +109,50 @@ static void _do_10ms_timer(void)
 	}
 }
 
-//--- _do_250ms_timer -------------------------------------
-static void _do_250ms_timer(void)
+//--- _measure_head_temp ---------------------------------------
+static void _measure_head_temp(void)
 {
 	volatile UINT16 dummy;
+	int i;
+	int sum, cnt;
 
 	/* First read does start AD conversion, result is only available at second read.
 	 * That's why the code seems one off!
 	 */
 	dummy = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC4_DATA); // start conversion
 	dummy++; // to ignore warning
-	pRX_Status->head_temp[0] = pRX_Config->cond[0].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC5_DATA) & 0x3ff);
-	pRX_Status->head_temp[1] = pRX_Config->cond[1].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC6_DATA) & 0x3ff);
-	pRX_Status->head_temp[2] = pRX_Config->cond[2].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC7_DATA) & 0x3ff);
-	pRX_Status->head_temp[3] = pRX_Config->cond[3].tempHead = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA) & 0x3ff);
+	pRX_Status->head_temp[0] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC5_DATA) & 0x3ff);
+	pRX_Status->head_temp[1] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC6_DATA) & 0x3ff);
+	pRX_Status->head_temp[2] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC7_DATA) & 0x3ff);
+	pRX_Status->head_temp[3] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA) & 0x3ff);
+
+	//--- compensate not working sensors ----------------
+	for (i=0; i<MAX_HEADS_BOARD; i++)
+	{
+		if (pRX_Status->head_temp[i]==INVALID_VALUE)
+		{
+			sum=0; cnt=0;
+			if (i>0 && pRX_Status->head_temp[i-1]!=INVALID_VALUE)
+			{
+				sum += pRX_Status->head_temp[i-1];
+				cnt++;
+			}
+			if (i<MAX_HEADS_BOARD-1 && pRX_Status->head_temp[i+1]!=INVALID_VALUE)
+			{
+				sum += pRX_Status->head_temp[i+1];
+				cnt++;
+			}
+			if (cnt) pRX_Config->cond[i].tempHead = sum/cnt;
+			else pRX_Config->cond[i].tempHead=INVALID_VALUE;
+		}
+		else pRX_Config->cond[i].tempHead = pRX_Status->head_temp[i];
+	}
+}
+
+//--- _do_250ms_timer -------------------------------------
+static void _do_250ms_timer(void)
+{
+	_measure_head_temp();
 
 	// Head Thermistor: NCP03XH103F25RL R0=10k 1% @ T0=25�C
 	// B-Constant 25- 50�C 						[K] = 3380+-0.7%
