@@ -1,9 +1,6 @@
-#ifndef INCLUDES_RX_BOOT_H_
-#define INCLUDES_RX_BOOT_H_
+#pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "rx_types.h"
 
-bool rx_boot_start(void);
-
-#endif /* INCLUDES_RX_BOOT_H_ */
+int  rx_boot_main(UINT32 tick);
+void rx_boot_handle_msg(void* msg);

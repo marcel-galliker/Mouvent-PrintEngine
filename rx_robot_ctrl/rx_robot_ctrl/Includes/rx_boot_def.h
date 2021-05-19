@@ -1,45 +1,42 @@
-#ifndef INCLUDES_RX_BOOT_DEF_H_
-#define INCLUDES_RX_BOOT_DEF_H_
+#pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "rx_types.h"
 
 #define IP_ADDR_SIZE	32
 
+
 #pragma pack(1)
 
-typedef struct NetworkItem
+typedef struct SNetworkItem
 {
-	int8_t		deviceTypeStr[32];
-	int8_t		serialNo[32];
-	uint64_t	macAddr;
-	uint8_t		deviceType;
-	int8_t		deviceNo;
-	int8_t		ipAddr[32];
-	uint8_t		connected;
-	uint8_t		platform;
-	uint32_t	rfsPort;
-	uint32_t	ports[8];
-} NetworkItem_t;
+	char	deviceTypeStr[32];
+	char	serialNo[32];
+	UINT64	macAddr;
+	UCHAR	deviceType;
+	INT8	deviceNo;
+	char	ipAddr[32];
+	UINT8	connected;
+	UINT8	platform;	// EPlatform
+	UINT32	rfsPort;
+	UINT32	ports[8];
+} SNetworkItem;
 
-typedef struct BootInfoMsg
+typedef struct SBootInfoMsg
 {
-	uint32_t		id;
-	NetworkItem_t	item;
-} BootInfoMsg_t;
+	UINT32			id;
+	SNetworkItem	item;
+} SBootInfoMsg;
 
-typedef struct BootInfoReqCmd
+typedef struct SBootInfoReqCmd
 {
-	uint32_t	cmd;
-} BootInfoReqCmd_t;
+	UINT32	cmd;
+} SBootInfoReqCmd;
 
-typedef struct BootAddrSetCmd
+typedef struct SBootAddrSetCmd
 {
-	uint32_t	id;
-	uint64_t	macAddr;
-	uint8_t		ipAddr[IP_ADDR_SIZE];
-} BootAddrSetCmd_t;
+	UINT32			id;
+	UINT64			macAddr;
+	char			ipAddr[IP_ADDR_SIZE];
+} SBootAddrSetCmd;
 
 #pragma pack(0)
-
-#endif /* INCLUDES_RX_BOOT_DEF_H_ */

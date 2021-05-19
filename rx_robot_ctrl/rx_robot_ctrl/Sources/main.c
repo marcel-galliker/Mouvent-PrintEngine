@@ -1,7 +1,3 @@
-#include <gpio.h>
-#include <motor.h>
-#include <network.h>
-#include <status.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -10,49 +6,44 @@
 
 #include "ft900.h"
 
-#include "tinyprintf.h"
-
-#include "FreeRTOS.h"
-#include "task.h"
-
-#include "motor.h"
+#include "gpio.h"
 #include "robot_flash.h"
+#include "network.h"
 #include "rx_boot.h"
 #include "rx_trace.h"
-#include "bootloader.h"
-
-// ignore debug statements
-#define DEBUG_PRINTF(...)
-
-
-/** tfp_printf putc
- * 	Empty shell for possble debug output.
- *
- *  @param p Parameters
- *  @param c The character to write */
-void myputc(void* p, char c) {
-
-}
+#include "rx_timer.h"
+#include "motor.h"
 
 int main(void)
 {
-    sys_reset_all();
-    interrupt_disable_globally();
+	rx_timer_init();
+	network_init();
+	gpio_init();
+	motor_init();
 
-    TrEnable(true);
+#ifdef WTD_ENABLE
+	if(interrupt_attach(interrupt_wdg, 17, watchdog_ISR) != REPLY_OK) return REPLY_ERROR;
+	sys_enable(sys_device_timer_wdt);
+	wdt_init(wdt_counter_1G_clocks);
+#else
+//	sys_disable(sys_device_timer_wdt);
+#endif
+	interrupt_enable_globally();
 
-    init_printf(NULL, myputc);
+	TrEnable(TRUE);
+	uint32_t tick = 0;
+	uint32_t tick_old = 0;
+	for(;;)
+	{
+		tick = rx_get_ticks();
 
-    flash_init();
-    network_start();
-    gpio_start();
-    motor_start();
-    rx_boot_start();
-    status_start();
-    bootloader_start();
-
-    vTaskStartScheduler();
-
-    for (;;)
-        ;
+		if(tick > tick_old)
+		{
+			network_tick(tick);
+			rx_boot_main(tick);
+			motor_tick(tick);
+			gpio_tick(tick);
+			tick_old = tick;
+		}
+	}
 }

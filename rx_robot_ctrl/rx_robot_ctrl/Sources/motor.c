@@ -10,7 +10,7 @@
 #include <ft900.h>
 #include <gpio.h>
 #include <motor.h>
-#include <status.h>
+#include <ctrl.h>
 
 #include "network.h"
 #include "rx_trace.h"
@@ -117,8 +117,6 @@ static uint8_t  _stopBitLevels[MOTOR_CNT];
 static uint8_t	_stoppedByInput[MOTOR_CNT];
 
 // Status Flags
-static bool _isInitialized = false;
-
 static void _set_config(SRobotMotorSetCfgCmd* config);
 static void _move_motors(SRobotMotorsMoveCmd* moveCommand);
 static void _stop_motors(SRobotMotorsStopCmd* stopCommand);
@@ -132,7 +130,7 @@ static int32_t _spi_read_register(uint8_t reg, uint8_t motor);
 static void _spi_write_register(uint8_t reg, uint32_t data, uint8_t motor);
 static void _update_status(uint8_t status, uint8_t motor);
 
-bool motor_start(void)
+void motor_init(void)
 {
 	memset(_motorConfigs, 0, sizeof(_motorConfigs));
 	memset(_encoderCheck, 0, sizeof(_encoderCheck));
@@ -145,32 +143,27 @@ bool motor_start(void)
 	spi_option(SPIM, spi_option_fifo_size, SPI_FIFO_SIZE);
 	spi_option(SPIM, spi_option_fifo, SPI_FIFO_ENABLED);
 	spi_option(SPIM, spi_option_fifo_receive_trigger, SPI_FIFO_TRIGGER_LEVEL);
-
-	_isInitialized = true;
-	return true;
 }
 
-//--- motor_handle_message ----------------------------------------------------------------------
-void motor_handle_message(void* message)
+//--- motor_handle_msg ----------------------------------------------------------------------
+bool motor_handle_msg(void* message)
 {
 	SMsgHdr* hdr = (SMsgHdr*)message;
 
-	if(_isInitialized)
+	switch(hdr->msgId)
 	{
-		switch(hdr->msgId)
-		{
-		case CMD_MOTOR_SET_CONFIG: 	_set_config((SRobotMotorSetCfgCmd*)message); break;
-		case CMD_MOTORS_MOVE:		_move_motors((SRobotMotorsMoveCmd*)message);	break;
-		case CMD_MOTORS_STOP:		_stop_motors((SRobotMotorsStopCmd*)message);	break;
-		case CMD_MOTORS_RESET:		_reset_motors((SRobotMotorsResetCmd*)message);	break;
-		default:
-			break;
-		}
+	case CMD_MOTOR_SET_CONFIG: 	_set_config((SRobotMotorSetCfgCmd*)message); 	return TRUE;
+	case CMD_MOTORS_MOVE:		_move_motors((SRobotMotorsMoveCmd*)message);	return TRUE;
+	case CMD_MOTORS_STOP:		_stop_motors((SRobotMotorsStopCmd*)message);	return TRUE;
+	case CMD_MOTORS_RESET:		_reset_motors((SRobotMotorsResetCmd*)message);	return TRUE;
+	default:
+		break;
 	}
+	return FALSE;
 }
 
-//--- motor_main ---------------------------------------------------------------
-void motor_main(void)
+//--- motor_tick ---------------------------------------------------------------
+void motor_tick(int tick)
 {
 	for(uint8_t motor=0; motor < MOTOR_CNT; motor++)
 	{
@@ -269,7 +262,7 @@ static void _move_motors(SRobotMotorsMoveCmd* cmd)
 		}
 	}
 
-	if (send) status_send();
+	if (send) ctrl_send_status();
 }
 
 static void _stop_motors(SRobotMotorsStopCmd* cmd)
@@ -286,7 +279,7 @@ static void _reset_motors(SRobotMotorsResetCmd* cmd)
 	{
 		if(cmd->motors & (1<<motor)) _reset_motor(motor);
 	}
-	status_send();
+	ctrl_send_status();
 }
 
 static void _update_motor(uint8_t motor)
@@ -417,9 +410,6 @@ static int32_t _spi_read_register(uint8_t reg, uint8_t motor)
 	SpiTxDatagram_t txDatagram;
 	SpiRxDatagram_t rxDatagram;
 
-	if(_isInitialized == false)
-		return 0;
-
 	if(motor >= MOTOR_CNT)
 		return 0;
 
@@ -452,9 +442,6 @@ static void _spi_write_register(uint8_t reg, uint32_t data, uint8_t motor)
 {
 	SpiTxDatagram_t txDatagram;
 	SpiRxDatagram_t rxDatagram;
-
-	if(_isInitialized == false)
-		return;
 
 	if(motor >= MOTOR_CNT)
 		return;
@@ -491,6 +478,6 @@ static void _update_status(uint8_t status, uint8_t motor)
 		_stopBits[motor] = 0;
 		_stopBitLevels[motor] = 0;
 		gpio_enable_motor(motor, FALSE);
-		status_send();
+		ctrl_send_status();
 	}
 }
