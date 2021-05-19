@@ -220,7 +220,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             info.z_in_cap &= _Status[i].info.z_in_cap;
             info.z_in_screw |= _Status[i].info.z_in_screw;
             info.x_in_cap &= _Status[i].info.x_in_cap || !_Status[i].robot_used;
-            robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap || !_Status[i].robot_used;
             info.x_in_ref &= _Status[i].info.x_in_ref ;
             robot_used |= _Status[i].robot_used;
             robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap || !_Status[i].robot_used;
@@ -389,7 +388,7 @@ void steplb_lift_to_top_pos_all(void)
     {
         for (int no = 0; no < SIZEOF(_step_socket); no++)
         {
-            if (!_Status[no].info.z_in_screw || _Status[no].screwerinfo.screwer_ready || !RX_StepperStatus.robot_used)
+            if (!_Status[no].robot_used)
                 sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
         }
         _AbortPrinting = FALSE;
@@ -690,8 +689,14 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		{
 		case ctrl_cap:				if (!_Status[no].robot_used)
                                     {
-                                        steplb_lift_to_fct_pos(no, rob_fct_cap);
-                                        _RobotCtrlMode[no] = ctrl_cap_step4;
+                                        if (_AutoCapMode)
+                                            _RobotCtrlMode[no] = ctrl_print;
+                                        else
+                                        {
+                                            steplb_lift_to_fct_pos(no, rob_fct_cap);
+                                            _RobotCtrlMode[no] = ctrl_cap_step4;
+                                        }
+                                        
                                         break;
                                     }
                 
@@ -1046,7 +1051,7 @@ void steplb_set_fluid_off(int no)
     }
 }
 
-
+//--- steplb_robot_used --------------------------
 int steplb_robot_used(int fluidNo)
 {
     switch (RX_Config.printer.type)
@@ -1063,4 +1068,14 @@ int steplb_robot_used(int fluidNo)
         return FALSE;
         break;
     }
+    return FALSE;
 }
+
+//--- steplb_stepper_to_fluid ----------------------------------
+int steplb_stepper_to_fluid(int fluidno)
+{
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+        return fluidno / 2;
+    else
+        return (fluidno + 1) / 2;
+}   
