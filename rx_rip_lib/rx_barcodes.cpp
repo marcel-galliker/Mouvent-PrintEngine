@@ -63,11 +63,11 @@ static int		_DpiY;
 static ERRCODE CALLBACK _custom_draw_row (VOID* customData, t_BarCode* barcode, HDC drawDC, HDC targetDC, DOUBLE x, DOUBLE y, DOUBLE width, DOUBLE height);
 static ERRCODE CALLBACK _custom_draw_text(VOID *customData, HDC drawDC, LPLOGFONTA font, DOUBLE x, DOUBLE y, e_BCAlign alignment, LPCSTR text, INT numberOfCharacters, LPRECTD drawArea, LONG textIndex);
 static int _bc_is2D_scaling(e_BarCType type);
-static void _draw_bitmap_2D     (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prect);
-static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize);
-static void _draw_bitmap_1D_090 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize);
-static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize);
-static void _draw_bitmap_1D_270 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize);
+static void _draw_bitmap_2D     (RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prect);
+static void _draw_bitmap_1D_000(RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prec);
+static void _draw_bitmap_1D_090(RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prec);
+static void _draw_bitmap_1D_180(RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prec);
+static void _draw_bitmap_1D_270(RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prec);
 static void _colorize_box			(RX_Bitmap *pBmp, SBarcodeBox *pBox, RX_Bitmap *pColor, RECT *prect);
 
 //---bc_init_box -------------------------------------------
@@ -611,7 +611,7 @@ ERRCODE CALLBACK _custom_draw_text(VOID *customData, HDC drawDC, LPLOGFONTA font
 }
 
 //--- _draw_bitmap_2D ------------------------------------------------
-static void _draw_bitmap_2D (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prect)
+static void _draw_bitmap_2D (RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prect)
 {
 	SBarCode*	pBarCode = (SBarCode*)hBarCode;
 	int			row, x, y, width, widthCode;
@@ -785,10 +785,11 @@ static void _draw_bitmap_2D (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox 
 }
 
 //--- _draw_bitmap_1D_000 ------------------------------------------------
-static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize)
+static void _draw_bitmap_1D_000(RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prect)
 {
 	SBarCode*	pBarCode = (SBarCode*)hBarCode;
 	int			x, y, w;
+	int			maxw = 0;
 	int			boxWidth;
 	int			height, h, h2, fh;
 	int			i, l, lineLen;
@@ -864,6 +865,7 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 						tdata[x>>shift] |= dot[x&mod];
 						mdata[x>>shift] |= dot[x&mod];
 						bdata[x>>shift] |= dot[x&mod];
+						maxw = max(maxw, x);
 					}
 					x += pBox->space[0];
 				}
@@ -872,14 +874,25 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 					l=pBox->bar[0];
 					switch(pBarCode->states)
 					{
-					case 2:	for (i=l; i && x<w; i--, x++) mdata[x>>shift] |= dot[x&mod]; break;
+					case 2:	for (i=l; i && x<w; i--, x++)
+							{
+								mdata[x >> shift] |= dot[x & mod];
+								maxw = max(maxw, x);
+							}
+							break;
 
-					case 3: for (i=l; i && x<w; i--, x++) bdata[x>>shift] |= dot[x&mod]; break;
+					case 3: for (i=l; i && x<w; i--, x++)
+							{
+							bdata[x >> shift] |= dot[x & mod];
+							maxw = max(maxw, x);
+							}
+							break;
 
 					case 4:	for (i=l; i && x<w; i--, x++)
 							{
 								tdata[x>>shift] |= dot[x&mod];
 								mdata[x>>shift] |= dot[x&mod];
+								maxw = max(maxw, x);
 							}
 							break;
 					}
@@ -890,12 +903,16 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 					l=pBox->bar[0];
 					for (i=l; i && x<w; i--, x++)
 					{
-						if (pBarCode->states==3) tdata[x>>shift] |= dot[x&mod];
+						if (pBarCode->states==3)
+						{
+							tdata[x >> shift] |= dot[x & mod];
+						}
 						else
 						{
 							mdata[x>>shift] |= dot[x&mod];
 							bdata[x>>shift] |= dot[x&mod];
-						} 
+						}
+						maxw = max(maxw, x);
 					}
 					x += pBox->space[0];
 				}
@@ -905,6 +922,7 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 					for (i=l; i && x<w; i--, x++)
 					{
 						mdata[x>>shift] |= dot[x&mod];
+						maxw = max(maxw, x);
 					}
 					x += pBox->space[0];
 				}
@@ -928,6 +946,7 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 							if (!addon)  tdata[x>>shift] |= dot[x&mod];
 										 mdata[x>>shift] |= dot[x&mod];
 							if (longBar) bdata[x>>shift] |= dot[x&mod];
+							maxw = max(maxw, x);
 						}
 					}
 				}
@@ -986,7 +1005,7 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 			for (i=height; i>0; --i, dst+=lineLen)
 			{
 				if (dst>bufEnd) break;
-				memcpy(dst, mdata, boxWidth);
+				for (l = boxWidth, d = dst, s = mdata; l; l--) *d++ |= *s++;
 			}
 			for (i=h2; i>0; --i, dst+=lineLen)
 			{
@@ -995,6 +1014,11 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 					*d++ |= *s++;
 			}
 		}
+		prect->left = par_x + pBox->hdr.rect.left;
+		prect->right = par_x + pBox->hdr.rect.left + maxw ;
+		prect->top = par_y + pBox->hdr.rect.top;
+		prect->bottom = par_y + pBox->hdr.rect.bottom + 1;
+
 		free(tdata);
 		free(mdata);
 		free(bdata);
@@ -1004,7 +1028,7 @@ static void _draw_bitmap_1D_000 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 }
 
 //--- _draw_bitmap_1D_090 ------------------------------------------------
-static void _draw_bitmap_1D_090 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize)
+static void _draw_bitmap_1D_090(RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT *prect)
 {
 	SBarCode*	pBarCode = (SBarCode*)hBarCode;
 	int			x, y;
@@ -1152,16 +1176,21 @@ static void _draw_bitmap_1D_090 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 			}
 			src++;
 		}
+		prect->left = par_x + pBox->hdr.rect.left;
+		prect->right = par_x + pBox->hdr.rect.right;
+		prect->top = y;
+		prect->bottom = par_y + pBox->hdr.rect.bottom + 1;
 	}
 
 	pBarCode->row=0;
 }
 
 //--- _draw_bitmap_1D_180 ------------------------------------------------
-static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize)
+static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT* prect)
 {
 	SBarCode*	pBarCode = (SBarCode*)hBarCode;
 	int			x, y, w;
+	int			maxw = 0;
 	int			boxWidth;
 	int			height, h, fh,  h2;
 	int			i, l, lineLen;
@@ -1234,6 +1263,7 @@ static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 						tdata[x>>shift] |= dot[x&mod];
 						mdata[x>>shift] |= dot[x&mod];
 						bdata[x>>shift] |= dot[x&mod];
+						maxw = max(maxw, x);
 					}
 					x -= pBox->space[0];
 				}
@@ -1242,12 +1272,23 @@ static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 					l=pBox->bar[0];
 					switch(pBarCode->states)
 					{
-					case 2:	for (i=l; i && x>=0; i--, x--) mdata[x>>shift] |= dot[x&mod]; break;
-					case 3: for (i=l; i && x>=0; i--, x--) bdata[x>>shift] |= dot[x&mod]; break;
+					case 2:	for (i=l; i && x>=0; i--, x--) 
+							{
+							mdata[x >> shift] |= dot[x & mod];
+							maxw = max(maxw, x);
+							}
+							break;
+					case 3: for (i=l; i && x>=0; i--, x--) 
+							{
+								bdata[x>>shift] |= dot[x&mod];
+								maxw = max(maxw, x);
+							}
+							break;
 					case 4:	for (i=l; i && x>=0; i--, x--)
 							{
 								tdata[x>>shift] |= dot[x&mod];
 								mdata[x>>shift] |= dot[x&mod];
+								maxw = max(maxw, x);
 							}
 							break;
 					}
@@ -1263,7 +1304,8 @@ static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 						{
 							mdata[x>>shift] |= dot[x&mod];
 							bdata[x>>shift] |= dot[x&mod];
-						} 
+						}
+						maxw = max(maxw, x);
 					}
 					x -= pBox->space[0];
 				}
@@ -1273,6 +1315,7 @@ static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 					for (i=l; i && x>=0; i--, x--)
 					{
 						mdata[x>>shift] |= dot[x&mod];
+						maxw = max(maxw, x);
 					}
 					x -= pBox->space[0];
 				}
@@ -1287,6 +1330,7 @@ static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 						if (!addon)  tdata[x>>shift] |= dot[x&mod];
 									 mdata[x>>shift] |= dot[x&mod];
 						if (longBar) bdata[x>>shift] |= dot[x&mod];
+						maxw = max(maxw, x);
 					}
 				}
 				src++;
@@ -1335,7 +1379,8 @@ static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 			}
 			for (i=height; i>0 && y>0; --i, dst-=lineLen, y--)
 			{
-				if (y<pBmp->height) memcpy(dst, mdata, boxWidth);
+				if (y<pBmp->height)
+					for (l = 0, d = dst, s = mdata; l < boxWidth; l++) *d++ |= *s++;
 			}
 			for (i=h2; i>0 && y>0; --i, dst-=lineLen, y--)
 			{
@@ -1347,13 +1392,17 @@ static void _draw_bitmap_1D_180 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 		free(tdata);
 		free(mdata);
 		free(bdata);
+		prect->left = par_x + +pBox->hdr.rect.right - maxw;
+		prect->right = par_x + pBox->hdr.rect.right;
+		prect->top = par_y + pBox->hdr.rect.top;
+		prect->bottom = par_y + pBox->hdr.rect.bottom + 1;
 	}
 
 	pBarCode->row=0;
 }
 
 //--- _draw_bitmap_1D_270 ------------------------------------------------
-static void _draw_bitmap_1D_270 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcodeBox *pBox, HBarCode hBarCode, int dropSize)
+static void _draw_bitmap_1D_270 (RX_Bitmap *pBmp, int par_x, int par_y, const SBarcodeBox *pBox, HBarCode hBarCode, int dropSize, RECT* prect)
 {
 	SBarCode*	pBarCode = (SBarCode*)hBarCode;
 	int			x, y;
@@ -1463,7 +1512,7 @@ static void _draw_bitmap_1D_270 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 		}
 			
 		lineLen = pBmp->lineLen;
-		y		= pBox->hdr.rect.top;
+		y		= par_y + pBox->hdr.rect.top;
 		dst		= &pBmp->buffer[y*lineLen];
 		src		= pBarCode->mdata;
 		adjust  = 0;
@@ -1504,6 +1553,10 @@ static void _draw_bitmap_1D_270 (RX_Bitmap *pBmp, int par_x, int par_y, SBarcode
 			}
 			src++;
 		}
+		prect->left = par_x + pBox->hdr.rect.left;
+		prect->right = par_x + pBox->hdr.rect.right;
+		prect->top = par_y + pBox->hdr.rect.top;
+		prect->bottom = y + 1;
 	}
 
 	pBarCode->row=0;
@@ -1561,24 +1614,20 @@ void bc_draw_bitmap(RX_Bitmap *pBmp, int x0, int y0, SBarcodeBox *pBox, HBarCode
 	if (pBarCode->code_2d) 
 	{
 		_draw_bitmap_2D(pBmp, x0, y0, pBox, hBarCode, dropSize, &rect);
-		if (pColor && pColor->buffer) _colorize_box(pBmp, pBox, pColor, &rect);
 	}
 	else
 	{
 		switch(pBox->orientation)
 		{
-		case deg90:  _draw_bitmap_1D_090(pBmp, x0, y0, pBox, hBarCode, dropSize); break;
-		case deg180: _draw_bitmap_1D_180(pBmp, x0, y0, pBox, hBarCode, dropSize); break;
-		case deg270: _draw_bitmap_1D_270(pBmp, x0, y0, pBox, hBarCode, dropSize); break;
-		default:	 _draw_bitmap_1D_000(pBmp, x0, y0, pBox, hBarCode, dropSize);
-		}
-		if (pColor && pColor->buffer) 
-		{
-			rect.left   = x0+pBox->hdr.rect.left;
-			rect.right  = x0+pBox->hdr.rect.right;
-			rect.top    = y0+pBox->hdr.rect.top;
-			rect.bottom = y0+pBox->hdr.rect.bottom+1;
-			_colorize_box(pBmp, pBox, pColor, &rect);
+		case deg90:
+			_draw_bitmap_1D_090(pBmp, x0, y0, pBox, hBarCode, dropSize, &rect); break;
+		case deg180:
+			_draw_bitmap_1D_180(pBmp, x0, y0, pBox, hBarCode, dropSize, &rect); break;
+		case deg270:
+			_draw_bitmap_1D_270(pBmp, x0, y0, pBox, hBarCode, dropSize, &rect); break;
+		default:
+			_draw_bitmap_1D_000(pBmp, x0, y0, pBox, hBarCode, dropSize, &rect);
 		}
 	}
+	if (pColor && pColor->buffer) _colorize_box(pBmp, pBox, pColor, &rect);
 }
