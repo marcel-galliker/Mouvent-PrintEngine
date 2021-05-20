@@ -1580,7 +1580,7 @@ int  fpga_abort(void)
 		{
 			if(RX_FpgaData.wf_busy_warn[i] && !warn)				
 			{
-				Error(WARN,
+				Error(LOG,
 					0,
 					"Overspeed Counters: %d  %d  %d  %d", 
 					RX_FpgaData.wf_busy_warn[0],
@@ -1593,7 +1593,7 @@ int  fpga_abort(void)
 			if(RX_FpgaError.enc_fp[i].waveform_busy && !err)				
 			{
 				err = TRUE;
-				Error(ERR_CONT,
+				Error(LOG,
 					0,
 					"Overspeed Counters: %d  %d  %d  %d", 
 					RX_FpgaError.enc_fp[i].waveform_busy,
