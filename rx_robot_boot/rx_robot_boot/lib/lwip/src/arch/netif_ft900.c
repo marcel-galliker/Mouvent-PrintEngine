@@ -144,7 +144,7 @@ err_t arch_ft900_init(struct netif *netif)
 	/* Call Ethenet hardware driver initialisation routine. */
 	ethernet_init(netif->hwaddr);
 
-	ethernet_mii_write(MII_ADVERTISE, MII_ACR_CSMA | MII_ACR_10HALF | MII_ACR_10FULL);
+//	ethernet_mii_write(MII_ADVERTISE, MII_ACR_CSMA | MII_ACR_10HALF | MII_ACR_10FULL);
 
 	// Enable options for the ethernet interface.
 	ethernet_rx_enable(1);

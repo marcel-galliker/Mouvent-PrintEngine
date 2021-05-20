@@ -8,7 +8,8 @@
 #define FLASH_SECTOR_CNT	64
 #define FLASH_SIZE			(FLASH_SECTOR_CNT*FLASH_SECTOR_SIZE)
 
-#define FLASH_SECTOR_USER	63
+#define FLASH_SECTOR_APP	25
+#define FLASH_SECTOR_USER	62
 
 //--- methods -----------------------------------------
 
