@@ -54,7 +54,7 @@
 							</tool>
 							<tool id="com.ftdichip.linker.ft900.debug.freertos.1820597995" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.debug.freertos">
 								<option id="com.ftdichip.linker.option.ldOther.ft900.debug.freertos.1287886527" name="Other options (-Xlinker [option])" superClass="com.ftdichip.linker.option.ldOther.ft900.debug.freertos" useByScannerDiscovery="false" valueType="stringList"/>
-								<option id="com.ftdichip.linker.option.nostartfiles.ft900.debug.freertos.1399717984" superClass="com.ftdichip.linker.option.nostartfiles.ft900.debug.freertos" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+								<option id="com.ftdichip.linker.option.nostartfiles.ft900.debug.freertos.1399717984" name="Do not use standard start files (-nostartfiles)" superClass="com.ftdichip.linker.option.nostartfiles.ft900.debug.freertos" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.222664574" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
