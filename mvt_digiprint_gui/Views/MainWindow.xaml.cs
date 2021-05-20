@@ -83,8 +83,6 @@ namespace RX_DigiPrint.Views
             PrintSystemState.DataContext = RxGlobals.PrintSystem;
             TabCtrl.DataContext = this;
 
-            RxGlobals.License.Update();
-            
             RxGlobals.PrinterStatus.ErrorTypeChangedEvent += _ErrorTypeChanged;
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             

@@ -42,7 +42,6 @@ namespace RX_DigiPrint.Views.UserControls
        //   Button_JogBwd.IsEnabled = RxGlobals.Plc.IsReadyForProduction && !RxGlobals.Plc.IsRunning;
        //   Button_Clean.IsEnabled  = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off);
 
-            RxGlobals.BtProdState.send(false);
         }
 
         //--- PrinterStatusChanged ----------------------------------------

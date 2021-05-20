@@ -149,11 +149,6 @@ namespace RX_DigiPrint.Views.UserControls
             }
         }
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            RxGlobals.Bluetooth.ShutDown();
-        }
-
         private void ResetCounters_Click(object sender, RoutedEventArgs e)
         {
             if (RxGlobals.PrinterStatus.PrintState != EPrintState.ps_printing)

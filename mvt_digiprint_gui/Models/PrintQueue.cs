@@ -57,14 +57,12 @@ namespace RX_DigiPrint.Models
             {
                 if (_removeFromList (_Printed, item)) RxBindable.Invoke(() => _Queue.Add(item));
                 else _addToList(_Queue,   item, top);
-                if (_Queue.Count()==1) item.SendBtProdState();
                 if (RxGlobals.LH702_View!=null) RxBindable.Invoke(()=>RxGlobals.LH702_View.PrintQueueChanged());
             }
             else
             { 
                 _removeFromList (_Queue,   item);
                 _updateList     (_Printed, item);
-                item.SendBtProdState();
                 if (RxGlobals.LH702_View!=null) RxBindable.Invoke(()=>RxGlobals.LH702_View.PrintQueueChanged());
             }
         }
@@ -76,7 +74,6 @@ namespace RX_DigiPrint.Models
             {
                 if (item==null) _Queue.Clear();
                 else _removeFromList(_Queue, item);
-                if (_Queue.Count()==0) new PrintQueueItem().SendBtProdState();
                 if (RxGlobals.LH702_View!=null) RxGlobals.LH702_View.PrintQueueChanged();
             });
         }

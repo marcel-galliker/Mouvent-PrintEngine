@@ -249,17 +249,6 @@ namespace RX_DigiPrint.Models
         }
         
 
-        //--- SendToBluetooth ----------------------------------------
-        public void SendToBluetooth()
-        {
-            RxBtDef.SErrorMsg msg = new RxBtDef.SErrorMsg();
-            {
-                msg.device  = DeviceStr;
-                msg.message = Message;
-                msg.type    = (RxBtDef.ELogType)LogType;
-            }
-            RxGlobals.Bluetooth.SendMsg(RxBtDef.BT_EVT_GET_EVT, ref msg);
-        }
         #endregion
     }
 }

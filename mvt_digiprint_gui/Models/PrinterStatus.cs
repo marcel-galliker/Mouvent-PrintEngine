@@ -219,16 +219,6 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- _SetBnState ----------------------------------------------------
-        private void _SetBnState(ref RxBtDef.EButtonState state, bool isEnabled, bool isCheced, double size)
-        {
-            RxBtDef.EButtonState st=0;
-            if (isEnabled)  st |= RxBtDef.EButtonState.isEnabled;
-            if (isCheced)   st |= RxBtDef.EButtonState.isChecked;
-            if (size>32)    st |= RxBtDef.EButtonState.isLarge;
-            SetProperty(ref state, st);
-        }
-
         //--- Image ---------------------------------------
         private static PrinterImage _image;
         public PrinterImage  Image

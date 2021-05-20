@@ -54,7 +54,6 @@ namespace RX_DigiPrint.Models
         //--- Reset ---------------------------------------
         public void Reset()
         {
-            RxGlobals.Bluetooth.SendCommand(RxBtDef.BT_REP_EVT_CONFIRM);
             RxBindable.Invoke(()=>_List.Clear());
             _alternate=false;
         }

@@ -363,7 +363,6 @@
     <Compile Include="Helpers\ObservableCollectionEx.cs" />
     <Compile Include="Helpers\RxComboBox.cs" />
     <Compile Include="Helpers\RxImaging.cs" />
-    <Compile Include="Helpers\Language.cs" />
     <Compile Include="Helpers\RxBitset.cs" />
     <Compile Include="Helpers\RxGridSplitter.cs" />
     <Compile Include="Helpers\RxObservableCollection.cs" />
@@ -484,8 +483,6 @@
     <Compile Include="Models\InkSupply.cs" />
     <Compile Include="Models\InkType.cs" />
     <Compile Include="Models\Label.cs" />
-    <Compile Include="Models\License.cs" />
-    <Compile Include="Models\Maintenance.cs" />
     <Compile Include="Models\Material.cs" />
     <Compile Include="Models\MaterialList.cs" />
     <Compile Include="Models\MaterialXml.cs" />
@@ -497,7 +494,6 @@
     <Compile Include="Models\Plc.cs" />
     <Compile Include="Models\PlcLogItem.cs" />
     <Compile Include="Models\PreviewCash.cs" />
-    <Compile Include="Models\RxBtProdState.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\StepperCfg.cs" />
     <Compile Include="Models\StepperMotor.cs" />
@@ -505,11 +501,6 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\UvLamp.cs" />
     <Compile Include="Models\WlanNetwork.cs" />
-    <Compile Include="Services\RxBluetooth.cs" />
-    <Compile Include="Services\RxBtClient.cs" />
-    <Compile Include="Services\RxBtDef.cs" />
-    <Compile Include="Services\RxBtMsgHandler.cs" />
-    <Compile Include="Services\RxCrypto.cs" />
     <Compile Include="Services\RxFlz.cs" />
     <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml.cs">
       <DependentUpon>SoftwareValueCorrectionView.xaml</DependentUpon>
@@ -772,9 +763,6 @@
     <Compile Include="Views\SupervisorsView\SupervisorsView.xaml.cs">
       <DependentUpon>SupervisorsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UserControls\BluetoothWindow.xaml.cs">
-      <DependentUpon>BluetoothWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\PrintSystemView\ChillerView.xaml.cs">
       <DependentUpon>ChillerView.xaml</DependentUpon>
     </Compile>
@@ -926,9 +914,6 @@
       <DependentUpon>StepperMotorCtrl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\StepperView.xaml.cs" />
-    <Compile Include="Views\UserControls\UserAccount.xaml.cs">
-      <DependentUpon>UserAccount.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\UserControls\UVLampView.xaml.cs">
       <DependentUpon>UVLampView.xaml</DependentUpon>
     </Compile>
@@ -1431,10 +1416,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\UserControls\BluetoothWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\PrintSystemView\ChillerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1623,10 +1604,6 @@
     <Page Include="Views\UserControls\StepperView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\UserControls\UserAccount.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UserControls\UVLampView.xaml">
       <SubType>Designer</SubType>

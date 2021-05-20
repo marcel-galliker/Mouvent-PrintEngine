@@ -24,11 +24,8 @@ namespace RX_DigiPrint.Models
         public static PrinterStatus     PrinterStatus     = new PrinterStatus();
         public static PrintQueue        PrintQueue        = new PrintQueue();
         public static PrintQueueView    PrintQueueView    = null;  
-        public static RxLanguage        Language          = new RxLanguage();
         public static User              User              = new User();
         public static RxInterface       RxInterface       = new RxInterface();
-        public static RxBluetooth       Bluetooth         = new RxBluetooth();
-        public static RxBtProdState     BtProdState       = new RxBtProdState();
         public static StepperCfg        Stepper           = new StepperCfg();
         public static Chiller Chiller = new Chiller();
         public static PrintSystem       PrintSystem       = new PrintSystem();
@@ -56,7 +53,6 @@ namespace RX_DigiPrint.Models
         public static UvLamp            UvLamp            = new UvLamp();
         public static Window            MainWindow;
         public static Window            BluetoothLoginWnd;
-        public static License           License           = new License();
         public static CleafOrder        CleafOrder        = new CleafOrder();
         public static Alignment             Alignment = new Alignment();
         public static AlignmentResources    AlignmentResources = new AlignmentResources();

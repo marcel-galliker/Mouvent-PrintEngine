@@ -113,11 +113,6 @@ namespace RX_DigiPrint.Views.UserControls
                 Button_Power.IsEnabled = true;
             }
 
-            RxGlobals.BtProdState.SetStartBnState(Button_Start.IsEnabled, false, false);
-            // RxGlobals.BtProdState.SetPauseBnState(Button_Pause.IsEnabled, Button_Pause.IsChecked, false);
-            RxGlobals.BtProdState.SetStopBnState (Button_Stop.IsEnabled,  Button_Stop.IsChecked,  false);
-            RxGlobals.BtProdState.SetAbortBnState(Button_Abort.IsEnabled, Button_Abort.IsChecked, false);
-            RxGlobals.BtProdState.send(false);
         }
 
         //--- PrinterStatusChanged ----------------------------------------

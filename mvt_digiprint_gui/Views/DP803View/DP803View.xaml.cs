@@ -24,7 +24,6 @@ namespace RX_DigiPrint.Views.DP803View
 {
     public partial class DP803View : UserControl
     {
-        RxLanguage language = new RxLanguage();
 
         public DP803View()
         {

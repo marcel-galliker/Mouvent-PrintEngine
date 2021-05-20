@@ -73,20 +73,6 @@ namespace RX_DigiPrint.Models
             else    msg.microns = -500;
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_STEPPER_TEST, ref msg);
         }
-        
-        //--- SendBt ----------------------------------------------------
-        public void SendBt(RxBtClient client)
-        {
-            RxBtDef.SBtStepperStatMsg msg = new RxBtDef.SBtStepperStatMsg();
-            msg.no                  = No;
-            msg.status.motorPos     = MotorPos;
-            msg.status.encoderPos   = EncoderPos;
-            msg.status.encoderColor = Rx.ToArgb(EncoderColor);
-            msg.status.endSwitch    = Convert.ToUInt32(EndSwitch);
-            msg.status.state        = State;
-            if (client==null) RxGlobals.Bluetooth.SendMsg(RxBtDef.BT_REP_STEPPER_STATE, ref msg);
-            else              client.SendMsg(RxBtDef.BT_REP_STEPPER_STATE, ref msg);
-        }
 
     }
 }

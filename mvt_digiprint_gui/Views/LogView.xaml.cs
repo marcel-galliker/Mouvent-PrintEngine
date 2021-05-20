@@ -36,20 +36,6 @@ namespace RX_DigiPrint.Views
             RxGlobals.Log.List.CollectionChanged += Log_CollectionChanged;
             LogGrid_SizeChanged(this, null);
 
-            //--- test publish number -------------------------------------------------
-            // needs "System.Deployment" in References
-            if (System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed) 
-            {
-                System.Deployment.Application.ApplicationDeployment ad = System.Deployment.Application.ApplicationDeployment.CurrentDeployment;
-                Version  v = ad.CurrentVersion;
-                Console.WriteLine("Bublish Version: {0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
-            }
-
-            //--- test language -------------------------------------------------------
-            Console.Write(">>{0}<<", RxGlobals.Language.GetString("Test"));
-            Console.WriteLine(">>{0}<<", RxGlobals.Language.GetString("OK"));  
-            Console.WriteLine(">>{0}<<", RxGlobals.Language.GetString("Error", "1"));  
-            //--- END TESTS ----------------------------------------------------------------
         }
 
         //--- Log_CollectionChanged ----------------------------------------------

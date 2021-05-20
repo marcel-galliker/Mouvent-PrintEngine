@@ -106,13 +106,6 @@ namespace RX_DigiPrint.Views.Settings
         }
 
 
-        private void User_Click(object sender, RoutedEventArgs e)
-        {
-            UserAccount userAccount = new UserAccount();
-            userAccount.ShowDialog();
-        }
-        
-
         //--- init ---------------------------------
         private void Init()
         {

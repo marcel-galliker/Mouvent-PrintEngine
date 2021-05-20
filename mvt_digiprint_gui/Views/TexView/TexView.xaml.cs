@@ -24,8 +24,6 @@ namespace RX_DigiPrint.Views.TexView
 {
     public partial class TexView : UserControl
     {
-        RxLanguage language = new RxLanguage();
-
         public TexView()
         {
             InitializeComponent();

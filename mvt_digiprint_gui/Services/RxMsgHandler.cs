@@ -131,7 +131,6 @@ namespace RX_DigiPrint.Services
                 switch(err.hdr.msgId)
                 {
                 case TcpIp.EVT_GET_EVT: RxGlobals.Events.AddItem(item);
-                                        item.SendToBluetooth();
                                         break;
                 case TcpIp.EVT_GET_LOG: RxGlobals.Log.   AddItem(item); break;
                 default: RxGlobals.Events.AddItem(new LogItem("Received unknown MessageId=0x{0:X}", err.hdr.msgId)); break;
@@ -294,7 +293,6 @@ namespace RX_DigiPrint.Services
                 {
                     no = (int)(msg.stat.boardNo*TcpIp.HEAD_CNT)+i;
                     RxGlobals.HeadStat.SetItem(no, msg.stat.head[i], msg.stat.tempFpga, msg.stat.flow);
-                    RxGlobals.HeadStat.List[no].SendBt();
                 }
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SHeadBoardStatMsg"));

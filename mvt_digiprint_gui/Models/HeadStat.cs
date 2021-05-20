@@ -473,46 +473,5 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- SendBt ----------------------------------------------------
-        public void SendBt()
-        {
-            RxBtDef.SBtHeadStatMsg msg = new RxBtDef.SBtHeadStatMsg();
-            msg.no           = HeadNo;
-            msg.status.name  = Name;
-
-            if (HeadNo >= RxGlobals.PrintSystem.ColorCnt*RxGlobals.PrintSystem.HeadsPerColor)
-            {
-                return;
-            }
-
-            int ink = HeadNo / (int)RxGlobals.PrintSystem.HeadsPerColor;
-
-            if (RxGlobals.InkSupply.List[ink].InkType != null)
-            {
-                try
-                {
-                    msg.status.color = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.Color);
-                    msg.status.colorFG = Rx.ToArgb(RxGlobals.InkSupply.List[ink].InkType.ColorFG);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Exception {0}", e.Message);
-                    msg.status.color = Rx.ToArgb(Colors.Black);
-                    msg.status.colorFG = Rx.ToArgb(Colors.White);
-                }
-            }
-            else
-            {
-            //    Console.WriteLine("Error: Tried to access ink type but it is null (ink index="
-            //        + ink.ToString() + ", HeadNo=" + HeadNo.ToString() + ")");
-                msg.status.color = Rx.ToArgb(Colors.Black);
-                msg.status.colorFG = Rx.ToArgb(Colors.White);
-            }
-
-            msg.status.ctrlMode = (RxBtDef.EFluidCtrlMode)CtrlMode;
-            msg.status.temp     = (Int32)TempHead;
-            msg.status.meniscus = Meniscus;
-            RxGlobals.Bluetooth.SendMsg(RxBtDef.BT_REP_HEAD_STATE, ref msg);
-        }       
     }
 }

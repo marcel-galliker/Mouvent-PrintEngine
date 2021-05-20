@@ -84,13 +84,8 @@ namespace RX_Common
                         
                             if (attr!=null)
                             { 
-                                try
-                                {
+                                if (prop.GetSetMethod() != null)
                                     prop.SetValue(this, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(attr));
-                                }
-                                catch(Exception)
-                                { 
-                                }
                             }
                         }
                     }

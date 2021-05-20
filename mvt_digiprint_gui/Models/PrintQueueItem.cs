@@ -1251,22 +1251,5 @@ namespace RX_DigiPrint.Models
             if (msgId==TcpIp.CMD_SET_PRINT_QUEUE) Changed=false;
         }
 
-        //--- SendBtProdState ---------------------------------------
-        public void SendBtProdState()
-        {
-            RxGlobals.BtProdState.State = (RxBtDef.EPQState)State;
-//            RxGlobals.BtProdState.FilePath    = PreviewPath;
-            RxGlobals.BtProdState.FilePath    = FilePath;
-            RxGlobals.BtProdState.Progress    = Progress;
-            RxGlobals.BtProdState.ProgressStr = ProgressStr;
-            if (LengthUnitMM)
-            {
-                if (ScanLength < 10) RxGlobals.BtProdState.CopiesStr = string.Format("{0:n3}m", ScanLength);
-                else RxGlobals.BtProdState.CopiesStr = string.Format("{0:n1}m", ScanLength);
-            }
-            else RxGlobals.BtProdState.CopiesStr = string.Format("{0}cp", Copies);
-
-            RxGlobals.BtProdState.send(true);
-        }
     }
 }

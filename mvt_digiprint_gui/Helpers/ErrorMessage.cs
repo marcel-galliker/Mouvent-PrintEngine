@@ -86,9 +86,10 @@ namespace RX_DigiPrint.Helpers
         //--- TranslateFormatStr --------------------------------------------
         private static string TranslateFormatStr(RX_DigiPrint.Services.TcpIp.SErrorMsg msg)
         {
-            string str = RxGlobals.Language.GetString("Error", msg.errNo.ToString());
-            if (str==null) return msg.formatStr;
-            else return str;
+            string name = "Error" + "." + msg.errNo.ToString();
+            if (TranslationSource.has(name))
+                return TranslationSource.Instance[name];
+            return msg.formatStr;
         }
 
         //---  property Language -----------------------

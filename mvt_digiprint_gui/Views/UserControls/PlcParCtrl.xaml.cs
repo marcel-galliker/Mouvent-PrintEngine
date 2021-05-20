@@ -239,8 +239,6 @@ namespace RX_DigiPrint.Views.UserControls
             set 
             {             
                 _No=value;
-                string cat = _ID.Remove(0, 4);
-                _Value = RxGlobals.Language.GetString(String.Format("{0} {1:00}", cat, _No));
                 Visibility = Visibility.Collapsed;
             }
         }
