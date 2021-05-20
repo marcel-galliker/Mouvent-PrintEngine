@@ -180,6 +180,26 @@ namespace RX_DigiPrint.Views.PrintSystemView
             CmdPopup.IsOpen = false;
         }
 
+        private bool _RobotUsed()
+        {
+            HeadStat stat = DataContext as HeadStat;
+            switch (RxGlobals.PrintSystem.PrinterType)
+            {
+                case EPrinterType.printer_LB702_WB:
+                    if (RxGlobals.PrintSystem.ColorCnt % 2 == 0 && stat != null)
+                    {
+                        if ((stat.InkSupply.No - 1) / 2 < RxGlobals.StepperStatus.Length)
+                            return RxGlobals.StepperStatus[(stat.InkSupply.No - 1) / 2].RobotUsed;
+                        else
+                            return false;
+                    }
+                    break;
+
+                default: return false;
+            }
+            return false;
+        }
+
         //--- Commands ------------------------------------
         private void OFF_Clicked        (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_off);          }
         private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_print);        }

@@ -35,7 +35,7 @@ void step_lift_to_print_pos(void);
 int  step_lift_in_print_pos(void);
 
 void step_lift_to_top_pos(void);
-int  step_lift_in_top_pos(void);
+int  step_lift_in_top_pos(int stepperno);
 
 void step_lift_to_up_pos(void);
 int  step_lift_in_up_pos(void);
@@ -73,3 +73,5 @@ void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment);
 int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment);
 int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment);
+int step_robot_used(int fluidNo);
+int step_stepper_to_fluid(int fluidno);

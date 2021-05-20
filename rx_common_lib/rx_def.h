@@ -146,11 +146,11 @@ void rx_def_init();
 #define ROB_SCREWS_PER_HEAD		2
 
 //--- coordinates: X in web direction, Y in slide direction
-#define SCREW_X_LEFT		-16600		// -17700	// um
-#define SCREW_X_RIGHT		76400		// 75300	// um       // SCREW_X_LEFT + 93000
+#define SCREW_X_LEFT		-18200		// -17700	// um
+#define SCREW_X_RIGHT		74800		// 75300	// um       // SCREW_X_LEFT + 93000
 
-#define SCREW_Y_STITCH		51000 // um
-#define SCREW_Y_ANGLE		34600  // um       // SCREW_Y_STITCH - 16400
+#define SCREW_Y_STITCH		51300 // um
+#define SCREW_Y_ANGLE		34900  // um       // SCREW_Y_STITCH - 16400
 
 //--- simple value ----------------------------------------------	
 typedef struct SValue

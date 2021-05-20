@@ -50,7 +50,6 @@ static int				_step_ThreadRunning;
 static RX_SOCKET		_step_Socket[STEPPER_CNT];
 static int				_StepperType=STEPPER_STD;
 static SPrintQueueItem	_PQItem;
-static int				_LB_Rob;
 	
 //--- prototypes -----------------------
 static void* _step_thread		(void *par);
@@ -63,7 +62,6 @@ int	 step_init(void)
 {	
 	int i;
 	_step_ThreadRunning = TRUE;
-	_LB_Rob = FALSE;
 	memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 	//memset(&RX_ClnStatus, 0, sizeof(RX_ClnStatus));
 	for (i=0; i<SIZEOF(_step_Socket); i++)
@@ -105,7 +103,7 @@ static void* _step_thread(void *par)
 				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _setp_socket_closed)== REPLY_OK)
 				{
 					ErrorEx(dev_stepper, i, LOG, 0, "Connected");
-					_step_set_config(i);
+                    _step_set_config(i);
 					if (i==1 && rx_def_is_tx(RX_Config.printer.type)) 
 					{
 						RX_PrinterStatus.txRobot = TRUE;
@@ -202,16 +200,12 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									{
 									case STEPPER_CLEAF: ret = stepc_handle_status		(no, pStat); break;
 									case STEPPER_TX:	ret = steptx_handle_status		(no, pStat); break;
-									case STEPPER_LB:	_LB_Rob |= pStat->robot_used;
-														if (_LB_Rob && !pStat->robot_used) ErrorEx(dev_stepper, no, ERR_CONT, 0, "ROBOT_USED bridge not set");
-														ret = steplb_handle_status		(no, pStat); break;
+									case STEPPER_LB:	ret = steplb_handle_status		(no, pStat); break;
 									case STEPPER_DP:	ret = stepdp_handle_status		(no, pStat); break;
 									case STEPPER_TEST:	ret = steptest_handle_status	(no, pStat); break;
                                     case STEPPER_TTS:   ret = steptts_handle_status		(no, pStat); break;
 									default:			ret = steps_handle_status		(	 pStat); break;
 									}
-									
-									// fluid_control_robot(_LB_Rob);
 									return ret;
                                    
 
@@ -318,12 +312,12 @@ void  step_lift_to_top_pos(void)
 }
 
 //--- step_lift_in_top_pos ----------------------------------------------
-int  step_lift_in_top_pos(void)
+int  step_lift_in_top_pos(int stepperno)
 {
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_lift_in_up_pos();
-	case STEPPER_LB:	return steplb_lift_in_top_pos_all();
+	case STEPPER_LB:	return steplb_lift_in_top_pos(stepperno);
     case STEPPER_TTS:	return steptts_in_top_pos();
 	default:			return TRUE;
 	}
@@ -531,7 +525,9 @@ static void _step_set_config(int no)
     case STEPPER_TTS:   steptts_init	(no, _step_Socket[no]); break;
 	default: 			steps_init		(    _step_Socket[0]);
 	}
+    Error(LOG, 0, "Send Config to Stepper %d, PrinterType %d", no+1, cfg.printerType);
 	sok_send_2(&_step_Socket[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
+
 }
 
 //--- step_set_config -------------------------------------------------
@@ -555,6 +551,15 @@ int step_set_config(void)
 	for(int i=0; i<SIZEOF(_step_Socket); i++)
 		if (_step_Socket[i]!=INVALID_SOCKET) _step_set_config(i);
 	return REPLY_OK;
+}
+
+//--- step_stepper_to_fluid -----------------------------------
+int step_stepper_to_fluid(int fluidno)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:	return steplb_stepper_to_fluid(fluidno);
+    }
 }
 
 //--- step_set_autocapMode ----------------------------------------------
@@ -699,4 +704,17 @@ int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
     default:
         break;
     }
+}
+
+//--- step_robot_used ----------------------------------
+int step_robot_used(int fluidNo)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        return steplb_robot_used(fluidNo);
+    default:
+        return FALSE;
+    }
+    return FALSE;
 }
