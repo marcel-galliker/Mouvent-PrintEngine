@@ -79,11 +79,12 @@ static void _do_config			(SStepperCfg *pcfg);
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
 {
-	_MsgBufIn  = 0;
+    int errNo;
+    _MsgBufIn  = 0;
 	_MsgBufOut = 0;
-	sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
-
-	err_set_server(_HServer);
+    errNo = sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
+    TrPrintfL(1, "Fehler %d", errNo);
+    err_set_server(_HServer);
 	
 	return REPLY_OK;
 }

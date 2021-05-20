@@ -58,7 +58,7 @@
 
 #define MAX_WAIT_TIME_SLEDGE    100000  // ms
 #define MAX_WAIT_TIME           40000   // ms
-#define MAX_WAIT_TIME_SCREW     180000  // ms
+#define MAX_WAIT_TIME_SCREW     180000  // ms		// with TCP/IP 100000 is enought
 
 // Digital Inputs
 #define CABLE_PULL_REF          2
@@ -368,7 +368,7 @@ void lbrob_main(int ticks, int menu)
                 }
                 else if (rx_get_ticks() >= _CapFillTime + CAP_FILL_TIME / 2)
                 {
-                    Fpga.par->output |= RO_FLUSH_TO_CAP_RIGHT;
+                    if (RX_StepperCfg.printerType != printer_LB702_UV)   Fpga.par->output |= RO_FLUSH_TO_CAP_RIGHT;
                     Fpga.par->output &= ~RO_FLUSH_TO_CAP_LEFT;
                 }
                 break;
@@ -456,7 +456,7 @@ void lbrob_main(int ticks, int menu)
                 _RobFunction = rob_fct_move;
                 _CmdRunning = FALSE;
                 _CmdRunning_old = FALSE;
-                if (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage)
+                if (!RX_StepperStatus.screwerinfo.y_in_ref || (!RX_RobiStatus.isInGarage && !rc_isConnected()))
                 {
                     _CmdRunning_Robi = CMD_ROBI_MOVE_TO_GARAGE;
                     _NewCmd = CMD_ROB_MOVE_POS;
@@ -637,7 +637,7 @@ void lbrob_menu(int help)
         term_printf("f: Find all the screws\n");
         term_printf("a<n>: Go to adjustment position of head 0 - 7\n");
         term_printf("b<n>: Set Speed of Waste pump to <n>%, Actual value %d%\n", _PumpSpeed);
-        term_printf("z: Move all Screws to end position\n");
+        term_printf("z: Move all Screws to middle position\n");
         term_flush();
     }
     else
@@ -776,12 +776,6 @@ void lbrob_handle_menu(char *str)
         if (val < 0) val = 0;
         if (val > 100) val = 100;
         _PumpSpeed = val;
-        break;
-    case 'e':
-        RX_StepperStatus.inkinfo.ink_pump_error_left = !RX_StepperStatus.inkinfo.ink_pump_error_left;
-        break;
-    case 'h':
-        RX_StepperStatus.inkinfo.ink_pump_error_right = !RX_StepperStatus.inkinfo.ink_pump_error_right;
         break;
     }
 }
@@ -972,7 +966,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             case rob_fct_cap:
                 RX_StepperStatus.robinfo.moving = TRUE;
                 Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
-                Fpga.par->output |= RO_FLUSH_TO_CAP_LEFT;
+                if (RX_StepperCfg.printerType != printer_LB702_UV) Fpga.par->output |= RO_FLUSH_TO_CAP_LEFT;
                 Fpga.par->output |= RO_FLUSH_PUMP;
                 _CapFillTime = rx_get_ticks();
                 break;

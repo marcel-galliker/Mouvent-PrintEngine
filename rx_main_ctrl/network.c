@@ -287,7 +287,11 @@ int net_is_registered(EDevice dev, int no)
 int  net_port_listening(EDevice dev, int no, int port)
 {
 	int i, p;
-	for (i=0; i < SIZEOF(_Network.item); i++)
+    if (dev == dev_stepper && no == 1)
+    {
+        i++;
+    }
+    for (i=0; i < SIZEOF(_Network.item); i++)
 	{
 		if (_Network.item[i].deviceType==dev && _Network.item[i].deviceNo==no)
 		{
@@ -295,9 +299,13 @@ int  net_port_listening(EDevice dev, int no, int port)
 			{
 				for (p=0; p<SIZEOF(_Network.item[i].ports); p++)
 				{
-					if (_Network.item[i].ports[p]==0)	 return FALSE;						
-					if (_Network.item[i].ports[p]==port) return TRUE;						
-				}				
+					if (_Network.item[i].ports[p]==0)	 return FALSE;
+                    if (_Network.item[i].ports[p] == port)
+                    {
+                        Error(LOG, 0, "dev = %d, no = %d ,port = %d, ports = %d, i = %d, p = %d", dev, no, port, _Network.item[i].ports[p], i, p);
+                        return TRUE;
+                    }
+                }				
 			}
 		}
 	}

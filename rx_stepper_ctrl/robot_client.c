@@ -693,6 +693,11 @@ void rc_stop(int motors)
 	}
 }
 
+void rc_reset_motors(int motors)
+{
+    _rc_reset_motors(1 << motors);
+}
+
 //--- _rc_reset_motors --------------------------------
 static void _rc_reset_motors(int motors)
 {

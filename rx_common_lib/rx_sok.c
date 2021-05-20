@@ -721,15 +721,20 @@ int sok_start_server(HANDLE *hserver, const char *addr, int port, int type, int 
 	INT32 	init;
 	int 	size;
 	char	name[64];
+    static int tmp = 0;
+    if (tmp == 0) tmp = port;
+    Error(LOG, 0, "Start Server Port: %d, first: %d", port, tmp);
 
-//	if (sok_mutex==NULL) sok_mutex = rx_mutex_create();
+    //	if (sok_mutex==NULL) sok_mutex = rx_mutex_create();
 
 	*hserver = NULL;
+    TrPrintfL(1, "1");
 	if (type != SOCK_STREAM && type != SOCK_DGRAM) return REPLY_ERROR;
 
 	if (type == SOCK_STREAM)	size = sizeof(SServer)+(maxConnections - 1)*sizeof(SCilentThreadPar);
 	else						size = sizeof(SServer);
 	pserver = (SServer*)malloc(size);
+    TrPrintfL(1, "2");
 	if (pserver == NULL) return REPLY_ERROR;
 	memset(pserver, 0, size);
 
@@ -762,21 +767,26 @@ int sok_start_server(HANDLE *hserver, const char *addr, int port, int type, int 
 	pserver->handle_open  = handle_open;
 	pserver->handle_close = handle_close;
 	pserver->socket 	  = socket(AF_INET, type, 0);
+    TrPrintfL(1, "3");
 	if (pserver->socket == INVALID_SOCKET) return _sok_server_error(NULL);
 	
 	sok_sockaddr(&ipAddr, addr,  port);	
 	init=1;
 	//	if (setsockopt(pserver->socket, SOL_SOCKET, SO_DONTROUTE, (char*)&init, sizeof (init)))	return _sok_server_error(pserver->socket);
+    TrPrintfL(1, "4");
 	if (setsockopt (pserver->socket, SOL_SOCKET, SO_REUSEADDR, (char*)&init, sizeof (init)))	return _sok_server_error(pserver);
 
 	if (type == SOCK_STREAM)
 	{
+        TrPrintfL(1, "5");
 		if (setsockopt (pserver->socket, IPPROTO_TCP, TCP_NODELAY,  (char*)&init, sizeof (init)))	return _sok_server_error(pserver);
 	}
+    TrPrintfL(1, "6");
 	if (bind       (pserver->socket, (struct sockaddr *) &ipAddr, sizeof (ipAddr)))				return _sok_server_error(pserver);
 
 	if (type == SOCK_STREAM)
 	{
+        TrPrintfL(1, "7");
 		if (listen(pserver->socket, pserver->maxConnections) == SOCKET_ERROR) return _sok_server_error(pserver);
 		pserver->running = TRUE;
 		sprintf(name, "TCP/IP Server %s:%d", addr, port);
@@ -791,6 +801,7 @@ int sok_start_server(HANDLE *hserver, const char *addr, int port, int type, int 
 		pserver->threadPar[thread].hthread		= rx_thread_start(_client_thread_udp, &pserver->threadPar[thread], 0, name);
 	}
 	*hserver = pserver;
+    TrPrintfL(1, "8");
 	return REPLY_OK;
 }
 
@@ -881,7 +892,8 @@ int sok_open_client(RX_SOCKET *psocket, const char *addr, int port, int type)
 	
 	//--- Get socket ---
 	sok = socket(AF_INET, type, 0);
-	if (sok == INVALID_SOCKET) return sok_error(NULL);
+	if (sok == INVALID_SOCKET) 
+        return sok_error(NULL);
 	
 	time0 = rx_get_ticks();
 	sok_sockaddr(&ipAddr, addr, port);
@@ -891,7 +903,8 @@ int sok_open_client(RX_SOCKET *psocket, const char *addr, int port, int type)
 
 	if (type == SOCK_STREAM)
 	{
-		if (setsockopt(sok, IPPROTO_TCP, TCP_NODELAY, (char*)&init, sizeof (init))) return sok_error(&sok);
+		if (setsockopt(sok, IPPROTO_TCP, TCP_NODELAY, (char*)&init, sizeof (init))) 
+            return sok_error(&sok);
 	}
 	#ifdef linux_NOOOO
 	{
@@ -964,7 +977,8 @@ int sok_open_client(RX_SOCKET *psocket, const char *addr, int port, int type)
 		}
 		*/
 
-		if (connect(sok, (struct sockaddr*)&ipAddr, sizeof (struct sockaddr))) return sok_error(&sok);
+		if (connect(sok, (struct sockaddr*)&ipAddr, sizeof (struct sockaddr))) 
+            return sok_error(&sok);
 
 		/*
 		HANDLE thread;

@@ -4,7 +4,6 @@
 
 #include "rx_common.h"
 #include "rx_threads.h"
-#include "rx_trace.h"
 #include "rx_error.h"
 #include "robi_def.h"
 #include "robi.h"
@@ -65,10 +64,6 @@ volatile static int32_t _txFifoOutIndex;
 static uint32_t _currentVersion;
 
 static HANDLE _sendLock;
-
-static uint32_t _LOG_Command;
-static uint8_t _LOG_Len;
-
 
 //--- robi_init ----------------------------------------------------------------
 void robi_init(void)
@@ -294,9 +289,6 @@ int robi_move_done(void)
 //--- send_command ------------------------------------------------------
 static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 {
-    _LOG_Command = commandCode;
-    _LOG_Len = len;
-    
     SUsbTxMsg *pTxMessage;
     int i;
 
@@ -311,8 +303,6 @@ static int32_t send_command(uint32_t commandCode, uint8_t len, void *data)
 
     _isSync = FALSE;
     _syncMessageId = _msgId;
-
-//    TrPrintfL(TRUE, "robi send_command 0x%08x", commandCode);
 
     pTxMessage = &_txFifo[_txFifoInIndex];
     pTxMessage->command = commandCode;
@@ -385,10 +375,7 @@ static void* receive_thread(void *par)
                                     if (rxMessage.error == MOTOR_TIMEOUTED && RX_RobiStatus.commandRunning[COMMAND0] == MOTOR_MOVE_Z_DOWN)
                                         _ZNotReachedDown = TRUE;
                                     Error(ERR_CONT, 0, "Robi Error. Flag: %x, Message: %s", rxMessage.error, rxMessage.data);
-                                    if (rxMessage.error == COMMUNICATION_INVALID_MESSAGE_LENGTH_ERROR)
-                                        Error(LOG, 0, "Last Command: %x, Len: %d", _LOG_Command, _LOG_Len);
                                     memset(rxMessage.data, 0x00, sizeof(rxMessage.data));
-                                    
                                 }
                             }
                             else

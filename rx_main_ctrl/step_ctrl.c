@@ -54,7 +54,7 @@ static SPrintQueueItem	_PQItem;
 //--- prototypes -----------------------
 static void* _step_thread		(void *par);
 static int   _step_handle_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr	*sender, void *par);
-static int   _setp_socket_closed(RX_SOCKET socket, const char *peerName);
+static int   _step_socket_closed(RX_SOCKET socket, const char *peerName);
 static void  _step_set_config	(int no);
 
 //--- step_init --------------------------------------------------
@@ -91,7 +91,8 @@ void step_tick(void)
 //--- _step_thread ---------------------------------------------
 static void* _step_thread(void *par)
 {
-	while (_step_ThreadRunning)
+    static int tmp = 0;
+    while (_step_ThreadRunning)
 	{
 		int i;
 		char addr[32];
@@ -99,26 +100,30 @@ static void* _step_thread(void *par)
 		{
 			if (_step_Socket[i]==INVALID_SOCKET && net_port_listening(dev_stepper, i, PORT_CTRL_STEPPER))
 			{
-				net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
-				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _setp_socket_closed)== REPLY_OK)
-				{
-					ErrorEx(dev_stepper, i, LOG, 0, "Connected");
+                
+                net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
+                tmp = sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _step_socket_closed);
+                if (tmp == REPLY_OK)
+                {
+                    ErrorEx(dev_stepper, i, LOG, 0, "Connected");
                     _step_set_config(i);
-					if (i==1 && rx_def_is_tx(RX_Config.printer.type)) 
-					{
-						RX_PrinterStatus.txRobot = TRUE;
-						Error(LOG, 0, "Robot connected");
-					}
-				}			
-			}
+                    if (i == 1 && rx_def_is_tx(RX_Config.printer.type))
+                    {
+                        RX_PrinterStatus.txRobot = TRUE;
+                        Error(LOG, 0, "Robot connected");
+                    }
+                }
+                else
+                    Error(ERR_CONT, 0, "Failed to connect %d", tmp);
+            }
 		}
 		rx_sleep(1000);
 	}
 	return NULL;
 }
 
-//--- _setp_socket_closed --------------------------------------------------
-static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
+//--- _step_socket_closed --------------------------------------------------
+static int _step_socket_closed(RX_SOCKET socket, const char *peerName)
 {
 	int i;
 	for (i=0; i<SIZEOF(_step_Socket); i++)

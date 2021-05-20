@@ -950,10 +950,10 @@ static void _control(int fluidNo)
                                                 _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
                                             }
 
-                case ctrl_recovery_step2:	if ((!_lbrob && !(RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))		// not LB-machine
+                case ctrl_recovery_step2:	if ((!_lbrob && !(RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))	// not LB-machine
 												|| (!_lbrob && RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB		// LB machine without Robot	
 												&& (steplb_lift_in_fct_pos(step_stepper_to_fluid(no), rob_fct_cap)))
-												|| (_lbrob && steplb_lift_in_fct_pos(step_stepper_to_fluid(no) / 2, rob_fct_cap)))							// LB machine with Robot
+												|| (_lbrob && steplb_lift_in_fct_pos(step_stepper_to_fluid(no), rob_fct_cap)))								// LB machine with Robot
 											{   
                                                 setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
 												ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
