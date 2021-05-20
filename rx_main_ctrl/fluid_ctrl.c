@@ -913,8 +913,8 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	default:			canisterLow   = 1500;
 						canisterEmpty = 500;
 						canisterHysteresis = 100;
-						wasteHigh	  = 18500;
-						wasteFull	  = 19500;
+						wasteHigh	  = 17000;
+						wasteFull	  = 18000;
 	}
 
 	for (i=0; i<SIZEOF(_FluidStatus)-1; i++) // not for waste!

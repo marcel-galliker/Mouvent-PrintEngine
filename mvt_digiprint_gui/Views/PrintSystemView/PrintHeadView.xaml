@@ -72,7 +72,7 @@
 
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeMicro}"   Click="PurgeMicro_Clicked"  Padding="10" x:Name="Button_PurgeMicro"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeSoft}"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Purge}"         Click="Purge_Clicked"       Padding="10"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Purge}"         Click="Purge_Clicked"       Padding="10" x:Name="Button_Purge" />
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeHard}"    Click="PurgeHard_Clicked"   Padding="10" x:Name="Button_PurgeHard"/>
                    <!-- <Button Content="Flush"         Click="Flush_Clicked"/>     - -->
 

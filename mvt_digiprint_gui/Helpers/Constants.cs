@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RX_DigiPrint.Services;
 
 namespace RX_DigiPrint.Helpers
 {
@@ -15,5 +16,9 @@ namespace RX_DigiPrint.Helpers
         public const int kHeadsPerCluster = 4;
 
         public const double HeadWidth = (25.4 / 1200) * JetsPerHead;
+
+        public const int Waste = TcpIp.InkSupplyCnt + 1;    // Waste cannister number
+
+        public const int WasteMax = 18;     // Waste maximum weight
     }
 }

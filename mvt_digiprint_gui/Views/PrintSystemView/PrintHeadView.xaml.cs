@@ -33,11 +33,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
             _PrinterType_Changed();
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             RxGlobals.Chiller.PropertyChanged += Chiller_PropertyChanged;
+            RxGlobals.InkSupply.List[Constants.Waste].PropertyChanged += InkSupply_PropertyChanged;
             User_PropertyChanged(null, null);
             Chiller_PropertyChanged(null, null);
+            InkSupply_PropertyChanged(null, null);
 
-//          try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_no].ToString();}
-//          catch (Exception) { FpVoltage.Text = "";};
+            //          try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_no].ToString();}
+            //          catch (Exception) { FpVoltage.Text = "";};
         }
 
         //--- UserControl_DataContextChanged -----------------------------------
@@ -115,7 +117,17 @@ namespace RX_DigiPrint.Views.PrintSystemView
 //          Button_Wipe.Visibility  = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
         }
-        
+
+        //--- InkSupply_PropertyChanged ----------------------------------
+        private void InkSupply_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            bool enabled = RxGlobals.InkSupply.List[Constants.Waste].CanisterLevel / 1000 < Constants.WasteMax;
+            Button_PurgeMicro.IsEnabled = enabled;
+            Button_PurgeSoft.IsEnabled = enabled;
+            Button_Purge.IsEnabled = enabled;
+            Button_PurgeHard.IsEnabled = enabled;
+        }
+
         //--- FpVoltage_TextChanged -----------------------------------------
         private void FpVoltage_TextChanged(object sender, TextChangedEventArgs e)
         {

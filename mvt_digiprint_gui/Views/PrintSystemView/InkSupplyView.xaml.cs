@@ -45,7 +45,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             RxGlobals.Chiller.PropertyChanged += Chiller_PropertyChanged;
+            RxGlobals.InkSupply.List[Constants.Waste].PropertyChanged += InkSupply_PropertyChanged;
             User_PropertyChanged(null, null);
+            InkSupply_PropertyChanged(null, null);
         }
 
         //--- Chiller_PropertyChanged ----------------------------------
@@ -63,6 +65,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
             // Button_Calibrate.Visibility = visibility;
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
             CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
+        }
+
+        //--- InkSupply_PropertyChanged ----------------------------------
+        private void InkSupply_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            PurgeButton.IsEnabled = RxGlobals.InkSupply.List[Constants.Waste].CanisterLevel / 1000 < Constants.WasteMax;
         }
 
         //--- UserControl_Loaded -----------------------------------------------
