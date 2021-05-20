@@ -113,7 +113,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
-            visible = _RobotUsed() ? Visibility.Visible : Visibility.Collapsed;
+            visible = (RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
             Button_Purge4Ever.Visibility = visible;
 
             //--- printer_test_table_seon -----------------------------------------------------------

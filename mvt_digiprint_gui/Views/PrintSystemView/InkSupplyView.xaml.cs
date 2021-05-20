@@ -64,10 +64,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_service);
             CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_service);
 
-            visibility = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB || _RobotUsed())
+            visibility = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB || RxGlobals.PrintSystem.IsLb)
                 && RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
             Button_Recovery.Visibility = visibility;
-            Button_Purge4Ever.Visibility = visibility;
         }
 
         //--- UserControl_Loaded -----------------------------------------------
@@ -139,16 +138,18 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (RxGlobals.PrintSystem.HasHeater) SettingsGrid.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Auto);
             else                                 SettingsGrid.RowDefinitions[6].Height = new GridLength(0);
 
-            Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || _RobotUsed()) ? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
-            visible = _RobotUsed() ? Visibility.Visible : Visibility.Collapsed;
+            visible = RxGlobals.StepperStatus[0].RobotUsed ? Visibility.Visible : Visibility.Collapsed;
+            for (i = 0; i < RxGlobals.StepperStatus.Length; i++)
+            {
+                if (RxGlobals.StepperStatus[i].RobotUsed) visible = Visibility.Visible;
+            }
             Button_PurgeWash.Visibility = visible;
-            
 
-            visible = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType== EPrinterType.printer_test_slide_HB || _RobotUsed()) 
+            visible = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType== EPrinterType.printer_test_slide_HB || RxGlobals.PrintSystem.IsLb) 
                 && RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
             Button_Recovery.Visibility = visible;
-            Button_Purge4Ever.Visibility = visible;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
@@ -239,25 +240,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             CmdPopup.IsOpen     = false;
             FlushPopup.IsOpen   = false;
             MsgPopup.IsOpen     = false;
-        }
-
-        private bool _RobotUsed()
-        {
-            switch (RxGlobals.PrintSystem.PrinterType)
-            {
-                case EPrinterType.printer_LB702_WB:
-                    if (RxGlobals.PrintSystem.ColorCnt %2 == 0)
-                    {
-                        if ((_InkSupply.No-1) / 2 < RxGlobals.StepperStatus.Length)
-                            return RxGlobals.StepperStatus[(_InkSupply.No-1) / 2].RobotUsed;
-                        else
-                            return false;
-                    }
-                    break;
-
-                default: return false;
-            }
-            return false;
         }
 
         //--- OnOff_Clicked ----------------------------------------------------------

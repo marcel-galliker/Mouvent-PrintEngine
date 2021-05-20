@@ -14,7 +14,7 @@
 #define PORT_UDP_BOOT_CLNT		7005
 
 #define PORT_UDP_BOOTLOADER		7018
-#define PORT_UDP_COMMUNICATION	7017
+#define PORT_UDP_CTRL			7017
 
 // Command masks
 #define COMMAND_TYPE_MASK		(0xFF000000)
@@ -128,6 +128,13 @@ typedef struct SRobotMotorsResetCmd
 } SRobotMotorsResetCmd;
 
 //--- BOOTLOADER -------------------------------------------------------------------
+
+typedef struct SBootloaderStatusMsg
+{
+	SMsgHdr header;
+	char	version[32];	// must match SRobotStatusMsg !!
+} SBootloaderStatusMsg;
+
 typedef struct SBootloaderStartCmd
 {
 	SMsgHdr header;

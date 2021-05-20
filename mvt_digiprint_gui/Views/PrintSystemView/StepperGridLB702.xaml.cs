@@ -148,11 +148,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             else
             {
                 var stepperValues = DataContext as PrintSystemExtendedView.StepperValues;
-                bool robot_used = false;
-                for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
-                {
-                    if (RxGlobals.StepperStatus[i].RobotUsed) robot_used = true;
-                }
                 if (stepperValues == null)
                 {
                     Console.WriteLine("Error: Cannot acces stepper values");
@@ -164,7 +159,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     _numbox[no, 1].Text = (stepperValues.Robot[no].ref_height_front / 1000.0).ToString();
                     _numbox[no, 2].Text = (stepperValues.Robot[no].cap_height / 1000.0).ToString();
                 }
-                if (robot_used)
+                if (RxGlobals.StepperStatus[0].RobotUsed || CurrentPrinterType == EPrinterType.printer_LB702_WB)
                 {
                     WipingDelay_Height.Height = GridLength.Auto;
                     WipingSpeed_Height.Height = GridLength.Auto;

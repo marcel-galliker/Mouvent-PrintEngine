@@ -52,7 +52,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
-            visible = _RobotUsed() ? Visibility.Visible : Visibility.Collapsed;
+            visible = (RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
             Button_Purge4Ever.Visibility = visible;
         }
 
@@ -132,26 +132,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_FLUID_CTRL_MODE, ref msg);
             }
             CmdPopup.IsOpen = false;
-        }
-
-        private bool _RobotUsed()
-        {
-            HeadStat stat = DataContext as HeadStat;
-            switch (RxGlobals.PrintSystem.PrinterType)
-            {
-                case EPrinterType.printer_LB702_WB:
-                    if (RxGlobals.PrintSystem.ColorCnt % 2 == 0)
-                    {
-                        if ((stat.InkSupply.No - 1) / 2 < RxGlobals.StepperStatus.Length)
-                            return RxGlobals.StepperStatus[(stat.InkSupply.No - 1) / 2].RobotUsed;
-                        else
-                            return false;
-                    }
-                    break;
-
-                default: return false;
-            }
-            return false;
         }
 
         private void OFF_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_off); }

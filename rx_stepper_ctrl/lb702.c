@@ -91,11 +91,11 @@ static int  _incs_2_micron(int incs);
 //--- lb702_init --------------------------------------
 void lb702_init(void)
 {
-/*#ifdef DEBUG
+#ifdef DEBUG
 	RX_StepperStatus.robot_used = (RX_StepperCfg.printerType==printer_LB702_WB);
-#else*/
+#else
 	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
-//#endif
+#endif
 
     motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
 	memset(_CmdName, 0, sizeof(_CmdName));
@@ -197,6 +197,7 @@ void lb702_main(int ticks, int menu)
 					{
                         _lb702_move_to_pos(_Cmd_New, _PrintPos_New[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_FRONT]);
                         memcpy(_PrintPos_Act, _PrintPos_New, sizeof(_PrintPos_Act));
+                        RX_StepperStatus.cmdRunning = _Cmd_New;
                         _Cmd_New = FALSE;
                     }
 					else
@@ -278,12 +279,13 @@ void lb702_main(int ticks, int menu)
             RX_StepperStatus.info.z_in_ref = (cmd == CMD_LIFT_REFERENCE && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_up = (cmd == CMD_LIFT_UP_POS && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_print = (cmd == CMD_LIFT_PRINT_POS && RX_StepperStatus.info.ref_done && !_CmdRunningRobi);
-            RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && ((RX_StepperStatus.screwerinfo.y_in_ref && (RX_RobiStatus.isInGarage || rc_isConnected())) || !RX_StepperStatus.robot_used));
+            RX_StepperStatus.info.z_in_cap = (cmd == CMD_LIFT_CAPPING_POS && RX_StepperStatus.info.ref_done && ((RX_StepperStatus.screwerinfo.y_in_ref && RX_RobiStatus.isInGarage) || !RX_StepperStatus.robot_used));
             RX_StepperStatus.info.z_in_wash = (cmd == CMD_LIFT_WASH_POS && RX_StepperStatus.info.ref_done);
             RX_StepperStatus.info.z_in_screw = (cmd == CMD_LIFT_SCREW && RX_StepperStatus.info.ref_done);
         }
         else
         {
+            RX_StepperStatus.cmdRunning = FALSE;
             RX_StepperStatus.info.z_in_ref = FALSE;
             RX_StepperStatus.info.z_in_up = FALSE;
             RX_StepperStatus.info.z_in_print = FALSE;
@@ -312,7 +314,7 @@ void lb702_main(int ticks, int menu)
             case CMD_LIFT_SCREW:            lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL); break;
             case CMD_LIFT_CAPPING_POS:		lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS, NULL); break;
             case CMD_LIFT_WASH_POS:			lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL); break;
-			case CMD_LIFT_REFERENCE:		_lb702_do_reference();	break;
+			case CMD_LIFT_REFERENCE: break;
 			default: Error(ERR_CONT, 0, "LB702_MAIN: Command 0x%08x not implemented", loc_new_cmd); break;
 			}
 		}
@@ -478,14 +480,7 @@ int lb702_menu(void)
 //--- _lb702_do_reference ----------------------------------------------------------------
 static void _lb702_do_reference(void)
 {
-    if (RX_StepperStatus.robot_used && !RX_StepperStatus.screwerinfo.z_in_down)
-    {
-        _CmdRunningRobi = CMD_ROBI_MOVE_Z_DOWN;
-        _NewCmd = CMD_LIFT_REFERENCE;
-        RX_StepperStatus.cmdRunning = 0;
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
-    }
-    else if (RX_StepperStatus.info.ref_done)
+	if (RX_StepperStatus.info.ref_done)
 	{
 		int pos = -1*_micron_2_steps(DIST_MECH_REF);
 		_lb702_move_to_pos(CMD_LIFT_REFERENCE, pos, pos);
@@ -540,7 +535,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         _PrintPos_New[MOTOR_Z_FRONT] = pos1;
         _lb702_do_reference();
     }
-    else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || (!RX_RobiStatus.isInGarage && !rc_isConnected())) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
+    else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
@@ -555,8 +550,8 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
 		_NewCmd = cmd;
 	}
-    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && (((RX_RobiStatus.isInGarage || rc_isConnected()) && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) || !RX_StepperStatus.robot_used)) ||
-                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && (((RX_RobiStatus.isInGarage || rc_isConnected()) && RX_StepperStatus.screwerinfo.y_in_ref) || !RX_StepperStatus.robot_used)) || 
+    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && ((RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) || !RX_StepperStatus.robot_used)) ||
+                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && ((RX_RobiStatus.isInGarage && RX_StepperStatus.screwerinfo.y_in_ref) || !RX_StepperStatus.robot_used)) || 
 				 (cmd == CMD_LIFT_SCREW && !RX_StepperStatus.screwerinfo.moving) || cmd == CMD_LIFT_REFERENCE)
 	{
         RX_StepperStatus.info.moving = TRUE;
@@ -633,7 +628,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										Error(ERR_ABORT, 0, "Reference Height front/back too differents (> 10mm)");									
 									else if(!RX_StepperStatus.cmdRunning || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
 									{
-                                        if ((!RX_StepperStatus.screwerinfo.y_in_ref || (!RX_RobiStatus.isInGarage && !rc_isConnected())) && RX_StepperStatus.robot_used)
+                                        if ((!RX_StepperStatus.screwerinfo.y_in_ref || !RX_RobiStatus.isInGarage) && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE || !RX_StepperStatus.info.ref_done)
                                             {
@@ -722,8 +717,6 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_CAPPING_POS, val0, val1);
                                         else
                                         {
-                                            _PrintPos_New[0] = val0;
-                                            _PrintPos_New[1] = val1;
                                             _Cmd_New = msgId;
                                             _lb702_do_reference();
                                         }

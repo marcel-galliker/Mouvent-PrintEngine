@@ -157,7 +157,6 @@ int rx_def_is_scanning(EPrinterType printerType)
 	case printer_test_table:		return TRUE;
 	case printer_test_slide:		return TRUE;
 	case printer_test_slide_only:	return TRUE;
-	case printer_test_slide_HB:		return TRUE;
 	case printer_TX801:				return TRUE;
 	case printer_TX802:				return TRUE;
 	case printer_TX404:				return TRUE;
@@ -213,7 +212,6 @@ int rx_def_is_test(EPrinterType printerType)
 	case printer_test_table:		return TRUE;
 	case printer_test_slide:		return TRUE;
 	case printer_test_slide_only:	return TRUE;
-	case printer_test_slide_HB:		return TRUE;
 	default: return FALSE;
 	}
 }
@@ -226,7 +224,6 @@ int rx_def_use_pq(EPrinterType printerType)
 	case printer_test_table:		return FALSE;
 	case printer_test_slide:		return FALSE;
 	case printer_test_slide_only:	return FALSE;
-	case printer_test_slide_HB:		return FALSE;
 	default: return TRUE;
 	}
 }

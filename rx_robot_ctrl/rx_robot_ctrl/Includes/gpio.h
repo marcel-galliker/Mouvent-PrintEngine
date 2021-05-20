@@ -5,9 +5,9 @@
 #include <stdbool.h>
 
 
-bool gpio_start(void);
-void gpio_handle_message(void* message);
-void gpio_main(void);
+bool gpio_init(void);
+bool gpio_handle_msg(void* message);
+void gpio_tick(int tick);
 void gpio_set_output(uint8_t output, bool value);
 bool gpio_get_input(uint8_t input);
 void gpio_enable_motor(uint8_t motor, int enable);

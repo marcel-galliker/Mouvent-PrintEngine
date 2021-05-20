@@ -7,7 +7,7 @@
 #include <ft900.h>
 #include <gpio.h>
 #include <network.h>
-#include <status.h>
+#include <ctrl.h>
 
 #include "rx_robot_def.h"
 #include "rx_robot_tcpip.h"
@@ -89,7 +89,7 @@ static void _gpio_set_outputs(uint8_t outputs, int value);
 static void _gpio_reset_edgeCnt(uint8_t inputs);
 
 
-bool gpio_start(void)
+bool gpio_init(void)
 {
 	_init_voltage_watchdog();
 	_init_motor_gpios();
@@ -136,23 +136,24 @@ void gpio_stop_motor(uint8_t motor)
 	}
 }
 
-void gpio_handle_message(void* message)
+bool gpio_handle_msg(void* message)
 {
 	SGpioSetCmd* cmd = (SGpioSetCmd*)message;
 
 	switch(cmd->header.msgId)
 	{
-	case CMD_GPIO_OUT_SETLOW:	_gpio_set_outputs(cmd->outputs, 0);	break;
-	case CMD_GPIO_OUT_SETHIGH:	_gpio_set_outputs(cmd->outputs, 1);	break;
-	case CMD_GPIO_IN_RESET:		_gpio_reset_edgeCnt(cmd->outputs);	break;
+	case CMD_GPIO_OUT_SETLOW:	_gpio_set_outputs(cmd->outputs, 0);	return TRUE;
+	case CMD_GPIO_OUT_SETHIGH:	_gpio_set_outputs(cmd->outputs, 1);	return TRUE;
+	case CMD_GPIO_IN_RESET:		_gpio_reset_edgeCnt(cmd->outputs);	return TRUE;
 
 	default:
 		break;
 	}
+	return FALSE;
 }
 
-//--- gpio_main ----------------------------------------
-void gpio_main(void)
+//--- gpio_tick ----------------------------------------
+void gpio_tick(int tick)
 {
 	_toggle_watchdog();
 	_update_outputs();
