@@ -424,7 +424,7 @@ void steplb_lift_to_up_pos_all(void)
 	_AbortPrinting = FALSE;
 }
 
-//--- steplb_lift_is_up --------------
+//--- steplb_lift_in_up_pos_all --------------
 int	 steplb_lift_in_up_pos_all(void)
 {
 	return RX_StepperStatus.info.z_in_ref;

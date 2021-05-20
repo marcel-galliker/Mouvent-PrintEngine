@@ -122,8 +122,7 @@ static int _ctrl_deconnected (RX_SOCKET socket, const char *peerName)
 static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
 {
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
-
-//	TrPrintfL(1, "_save_ctrl_msg: Received msgId=0x%08x", phdr->msgId);
+    //	TrPrintfL(1, "_save_ctrl_msg: Received msgId=0x%08x", phdr->msgId);
 
 	if (phdr->msgId==0) return REPLY_OK;
 	if (phdr->msgId == CMD_PING) _do_ping(socket);
@@ -139,7 +138,7 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 			if (len>sizeof(_MsgBuf[0].msg))
                 Error(ERR_ABORT, 0, "Message Buffer Overflow, msgsize=%d, bufsize=%d", len, sizeof(_MsgBuf[0].msg));
 			
-			memcpy(_MsgBuf[_MsgBufIn].msg, pmsg, len);
+            memcpy(_MsgBuf[_MsgBufIn].msg, pmsg, len);
 			_MsgBufIn = idx;
 //			fpga_signal_message();
 		}
@@ -180,8 +179,7 @@ char *ctrl_cmd_name(int cmd)
 int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *sender, void *par)
 {
 	int reply = REPLY_ERROR;
-
-	//--- handle the message --------------
+    //--- handle the message --------------
 	reply = REPLY_OK;
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
 
@@ -259,8 +257,9 @@ static int _do_ping(RX_SOCKET socket)
 static void _do_config(SStepperCfg *pcfg)
 {	
 	memcpy(&RX_StepperCfg, pcfg, sizeof(RX_StepperCfg));
-		
-	RX_StepperStatus.no = RX_StepperCfg.boardNo;
+    Error(LOG, 0, "do config printer Type %d", RX_StepperCfg.printerType);
+
+    RX_StepperStatus.no = RX_StepperCfg.boardNo;
 
 	switch (RX_StepperCfg.printerType)
 	{

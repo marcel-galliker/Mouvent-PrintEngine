@@ -1255,8 +1255,8 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	case printer_TX802:		
 	case printer_TX404:		steptx_set_robCtrlMode(ctrlMode);
 							break;
-	case printer_LB701:
-	case printer_LB702_UV:	break;
+	case printer_LB701:		break;
+	case printer_LB702_UV:	
 	case printer_LB702_WB:	if (ctrlMode == ctrl_cap) steplb_rob_start_cap_all();
                             else if (ctrlMode == ctrl_off && no != -1)
                             {
