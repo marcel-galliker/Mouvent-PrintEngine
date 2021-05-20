@@ -1,5 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Models;
+using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using System;
 using System.Windows;
@@ -36,6 +37,7 @@ namespace RX_DigiPrint.Views.UserControls
             DataContext = RxGlobals.StepperStatus;
             RxGlobals.PrintSystem.PropertyChanged    += PrintSystem_PropertyChanged;
             RxGlobals.Network.List.CollectionChanged += Network_CollectionChanged;
+            RxGlobals.Plc.PropertyChanged += Plc_PropertyChanged;
 
             {
                 _GreenLedImg  = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\LED_GREEN.ico", UriKind.RelativeOrAbsolute));
@@ -119,6 +121,20 @@ namespace RX_DigiPrint.Views.UserControls
                     _LedPrint[stat.No].Source = (stat.CmdRunning==TcpIp.CMD_LIFT_PRINT_POS  )? _GreyLedImg : null;
                     _LedCap  [stat.No].Source = (stat.CmdRunning==TcpIp.CMD_LIFT_CAPPING_POS)? _GreyLedImg : null;
                 }
+            }
+        }
+
+        //--- Plc_PropertyChanged ----------------------------
+        private EN_MachineStateList _machineStates = new EN_MachineStateList();
+        private void Plc_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            try
+            {
+                StepperGrid.IsEnabled = (MachineStateEnum)Convert.ToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE")) != MachineStateEnum.Run;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
