@@ -20,8 +20,6 @@
 // #define FLASH_TEST
 
 #define DATA_TIMEOUT		100
-#define APP_SECTOR			25	//  must correspond the __PMSTART address in the linker file of the application
-#define APP_START			(APP_SECTOR*FLASH_SECTOR_SIZE)
 
 /* Static variables */
 
@@ -163,7 +161,7 @@ static void _download_data(SBootloaderDataCmd* cmd)
 		_FilePos += cmd->length;
 		if (_FilePos>=_FileSize || (_FilePos%FLASH_SECTOR_SIZE)==0)
 		{
-			sector += APP_SECTOR;
+			sector += FLASH_SECTOR_APP;
 			memcpy_dat2pm(sector*FLASH_SECTOR_SIZE, _FlashBuf, FLASH_SECTOR_SIZE);
 			TrPrintf(true, "Flash sector %d Written", sector);
 			memset(_FlashBuf, 0, sizeof(_FlashBuf));
@@ -196,7 +194,7 @@ static void _download_reboot(void)
 		typedef int(*start_fct)	(void);
 
 		start_fct start;
-		start = (start_fct)(APP_SECTOR*FLASH_SECTOR_SIZE+0x008c);
+		start = (start_fct)(FLASH_SECTOR_APP*FLASH_SECTOR_SIZE+0x008c);
 		start();
 	}
 }

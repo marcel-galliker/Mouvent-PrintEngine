@@ -17,6 +17,7 @@
 SRobotStatusMsg RX_RobotStatus;
 
 static void _set_serialNo(SBootloaderSerialNoCmd *pmsg);
+static void _download_reboot(void);
 
 
 //--- ctrl_handle_msg --------------------------------------------------
@@ -39,7 +40,32 @@ static void _set_serialNo(SBootloaderSerialNoCmd *pmsg)
 	if (pmsg->serialNo!=flash_read_serialNo())
 	{
 		flash_write_serialNo(pmsg->serialNo);
-		chip_reboot();
+
+		_download_reboot();
+	}
+}
+
+//--- _download_reboot --------------------------------------------
+static void _download_reboot(void)
+{
+	interrupt_disable_globally();
+	net_set_link_down();
+	arch_ft900_recv_off();
+	sys_disable(sys_device_timer_wdt);
+	sys_disable(sys_device_ethernet);
+
+	//--- starting downloaded binary ------------------
+	//	__asm__ ("jmp 0x1908c"::);
+	{
+		typedef int(*start_fct)	(void);
+
+		start_fct start;
+#ifdef DEBUG
+		start = (start_fct)(0x008c);
+#else
+		start = (start_fct)(FLASH_SECTOR_APP*FLASH_SECTOR_SIZE+0x008c);
+#endif
+		start();
 	}
 }
 

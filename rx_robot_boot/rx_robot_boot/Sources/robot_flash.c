@@ -15,17 +15,22 @@ typedef union SUserData
 } SUserData;
 
 static SUserData _UserData;
+static bool		 _Initialized=FALSE;
 
 //--- flash_init ---------------------
 void flash_init(void)
 {
-	memcpy_flash2dat(&_UserData, FLASH_SECTOR_USER*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
-	/*
-	if (!flash_serialNo_Valid())
+	if (!_Initialized)
 	{
-		_UserData.serialNo = 0;
+		memcpy_flash2dat(&_UserData, FLASH_SECTOR_USER*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
+		/*
+		if (!flash_serialNo_Valid())
+		{
+			_UserData.serialNo = 0;
+		}
+		*/
+		_Initialized = TRUE;
 	}
-	*/
 }
 
 //--- flash_serialNo_Valid -------------------------------
@@ -37,12 +42,14 @@ int	flash_serialNo_Valid(void)
 //--- flash_read_serialNo ----------------------------
 UINT16 	flash_read_serialNo(void)
 {
+	flash_init();
 	return _UserData.serialNo;
 }
 
 //--- flash_write_serialNo ----------------------------
 void 	flash_write_serialNo(UINT16 serialNo)
 {
+	flash_init();
 	_UserData.serialNo    = serialNo;
 	_UserData.serialNoChk = ~serialNo;
 	flash_sector_erase(FLASH_SECTOR_USER);
