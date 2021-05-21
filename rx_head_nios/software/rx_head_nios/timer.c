@@ -121,31 +121,32 @@ static void _measure_head_temp(void)
 	 */
 	dummy = IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC4_DATA); // start conversion
 	dummy++; // to ignore warning
-	pRX_Status->head_temp[0] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC5_DATA) & 0x3ff);
-	pRX_Status->head_temp[1] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC6_DATA) & 0x3ff);
-	pRX_Status->head_temp[2] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC7_DATA) & 0x3ff);
-	pRX_Status->head_temp[3] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA) & 0x3ff);
+	pRX_Status->head_temp_org[0] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC5_DATA) & 0x3ff);
+	pRX_Status->head_temp_org[1] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC6_DATA) & 0x3ff);
+	pRX_Status->head_temp_org[2] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_ADC7_DATA) & 0x3ff);
+	pRX_Status->head_temp_org[3] = convert_head_temp(IORD_16DIRECT(AMC7891_0_BASE,AMC7891_TEMP_DATA) & 0x3ff);
 
 	//--- compensate not working sensors ----------------
 	for (i=0; i<MAX_HEADS_BOARD; i++)
 	{
-		if (pRX_Status->head_temp[i]==INVALID_VALUE)
+		if (pRX_Status->head_temp_org[i]==INVALID_VALUE)
 		{
 			sum=0; cnt=0;
-			if (i>0 && pRX_Status->head_temp[i-1]!=INVALID_VALUE)
+			if (i>0 && pRX_Status->head_temp_org[i-1]!=INVALID_VALUE)
 			{
-				sum += pRX_Status->head_temp[i-1];
+				sum += pRX_Status->head_temp_org[i-1];
 				cnt++;
 			}
-			if (i<MAX_HEADS_BOARD-1 && pRX_Status->head_temp[i+1]!=INVALID_VALUE)
+			if (i<MAX_HEADS_BOARD-1 && pRX_Status->head_temp_org[i+1]!=INVALID_VALUE)
 			{
-				sum += pRX_Status->head_temp[i+1];
+				sum += pRX_Status->head_temp_org[i+1];
 				cnt++;
 			}
 			if (cnt) pRX_Config->cond[i].tempHead = sum/cnt;
 			else pRX_Config->cond[i].tempHead=INVALID_VALUE;
 		}
-		else pRX_Config->cond[i].tempHead = pRX_Status->head_temp[i];
+		else pRX_Config->cond[i].tempHead = pRX_Status->head_temp_org[i];
+		pRX_Status->head_temp[i] = pRX_Config->cond[i].tempHead;
 	}
 }
 

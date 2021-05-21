@@ -2,12 +2,13 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="convert_head_temp" key="selection"/>
+		<item value="head_temp_org" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="head_temp_org"/>
 			<item value="convert_head_temp"/>
 			<item value="_temp_head_table"/>
 			<item value="_seq_read_eeprom"/>
@@ -15,7 +16,6 @@
 			<item value="head_eeprom_read"/>
 			<item value="reboot"/>
 			<item value="head_eeprom"/>
-			<item value="average"/>
 		</list>
 		<list key="replacehistory">
 		</list>
