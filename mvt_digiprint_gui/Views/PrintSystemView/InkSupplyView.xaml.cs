@@ -77,9 +77,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             _InkSupply = DataContext as InkSupply;
-             
-            InkType.DataContext = _InkSupply;
-            _InkSupply.PropertyChanged += OnInkSupplyPropertyChanged;
+            
+            if (_InkSupply != null) { 
+                InkType.DataContext = _InkSupply;
+                _InkSupply.PropertyChanged += OnInkSupplyPropertyChanged;
+            }
             RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             _set_checkbox_style();
             Chiller_PropertyChanged(this, null);

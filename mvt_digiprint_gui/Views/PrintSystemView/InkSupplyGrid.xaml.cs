@@ -51,7 +51,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             for (int i=0; i<TcpIp.InkSupplyCnt; i++)
             { 
                 _InkSupplyView.Add(new InkSupplyView());
-                _InkSupplyView[i].DataContext = _InkSupply.List[i];
+                if (RxGlobals.PrintSystem.IS_Order != null && i < RxGlobals.PrintSystem.IS_Order.Length && RxGlobals.PrintSystem.IS_Order[i] < _InkSupply.List.Count)
+                    _InkSupplyView[i].DataContext = _InkSupply.List[RxGlobals.PrintSystem.IS_Order[i]];
                 InkSupplyStack.Children.Add(_InkSupplyView[i]);
             }
 
@@ -71,7 +72,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- PrintSystem_PropertyChanged ----------------------------------
         private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName.Equals("PrinterType")) _printertype_changed();
+            if (e.PropertyName.Equals("PrinterType") || e.PropertyName.Equals("IS_Order")) _printertype_changed();
         //    if (e.PropertyName.Equals("Reverse")) _assign_inksupply(RxGlobals.PrintSystem.ColorCnt);
         }
 
