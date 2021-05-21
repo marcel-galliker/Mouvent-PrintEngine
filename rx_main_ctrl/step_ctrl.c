@@ -113,8 +113,6 @@ static void* _step_thread(void *par)
                         Error(LOG, 0, "Robot connected");
                     }
                 }
-                else
-                    Error(ERR_CONT, 0, "Failed to connect %d", tmp);
             }
 		}
 		rx_sleep(1000);
@@ -530,7 +528,6 @@ static void _step_set_config(int no)
     case STEPPER_TTS:   steptts_init	(no, _step_Socket[no]); break;
 	default: 			steps_init		(    _step_Socket[0]);
 	}
-    Error(LOG, 0, "Send Config to Stepper %d, PrinterType %d", no+1, cfg.printerType);
 	sok_send_2(&_step_Socket[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
 
 }
