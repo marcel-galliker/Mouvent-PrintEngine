@@ -350,6 +350,8 @@
     <Compile Include="Converters\Percent_Converter.cs" />
     <Compile Include="Converters\UvLampImg_Converter.cs" />
     <Compile Include="Converters\WlanQuality_Converter.cs" />
+    <Compile Include="Devices\ColorConversions.cs" />
+    <Compile Include="Devices\i1Pro3.cs" />
     <Compile Include="External\FastBitmap.cs" />
     <Compile Include="External\QuadDistort.cs" />
     <Compile Include="External\RX-Image.cs" />
@@ -1739,9 +1741,15 @@
     <EmbeddedResource Include="Resources\Language\german.resources" />
     <None Include=".editorconfig" />
     <None Include="app.config" />
+    <Content Include="i1Pro364.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="id_rsa.ppk">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="i1Pro364.lib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

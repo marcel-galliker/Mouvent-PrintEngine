@@ -2,6 +2,7 @@
 using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
+using RX_DigiPrint.Devices;
 using RX_DigiPrint.Views.LB702WBView;
 using RX_DigiPrint.Views.LH702View;
 using RX_DigiPrint.Views.PrintQueueView;
@@ -66,5 +67,6 @@ namespace RX_DigiPrint.Models
         public static RxCam                 Camera          = new RxCam();
         public static SA_Base               SetupAssist     = new SA_Base();
         public static SA_StateMachine       SA_StateMachine = new SA_StateMachine();
+        public static I1Pro3                I1Pro3          = new I1Pro3();
     }
 }
