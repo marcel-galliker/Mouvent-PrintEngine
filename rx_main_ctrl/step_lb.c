@@ -388,8 +388,7 @@ void steplb_lift_to_top_pos_all(void)
     {
         for (int no = 0; no < SIZEOF(_step_socket); no++)
         {
-            if (!_Status[no].robot_used)
-                sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
+            sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
         }
         _AbortPrinting = FALSE;
     }

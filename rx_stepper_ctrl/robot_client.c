@@ -925,6 +925,8 @@ static int _rc_move_screw_done(void)
 //--- rc_move_top --------------------------------------
 int  rc_move_top(const char *file, int line)
 {
+    rc_reset_motors(MOTOR_Z);
+    rx_sleep(200);
     return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, HIGH, _FL_);	
 }
 
