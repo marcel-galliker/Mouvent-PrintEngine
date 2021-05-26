@@ -726,6 +726,7 @@ namespace RX_DigiPrint.Devices
         {
             try
             {
+                if (Handle==IntPtr.Zero) Connect();
                 PrepareMeasure();
                 HandleResult(I1PRO3_Calibrate(Handle));
                 IsWhiteCalibrated = true;
@@ -815,10 +816,7 @@ namespace RX_DigiPrint.Devices
 
         public bool MeasurePoint(ref ColorConversion.SpectroResultStruct Result)
         {
-            if (!IsWhiteCalibrated)
-			{
-                if (!WhiteCalibrate()) return false;
-			}
+            if (!IsWhiteCalibrated) return false;
 
             PrepareMeasure();
 

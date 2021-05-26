@@ -195,9 +195,10 @@ void flz_abort(void)
 }
 
 //--- flz_load_simple ---------------------------------------------------------
-int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pinfo)
+int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pinfo, int invert)
 {
 	UINT32 fileSize;
+	UINT32 len;
 	BYTE *data;
 	BYTE *dst;
 	
@@ -240,7 +241,12 @@ int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 		{										
 			pband	= &bands[b];
 			cmpbuf  = data + pband->offset;
-			dst	   += fastlz_decompress(cmpbuf, (int)pband->bandSize, dst, pband->rows * pFlzInfo->lineLen);
+			len = fastlz_decompress(cmpbuf, (int)pband->bandSize, dst, pband->rows * pFlzInfo->lineLen);
+			if (invert)
+			{
+				for (int i=0; i<len; i++) *dst++ = ~(*dst);
+			}
+			else dst += len;
 		}
 		free(data);
 		dst = *buffer;

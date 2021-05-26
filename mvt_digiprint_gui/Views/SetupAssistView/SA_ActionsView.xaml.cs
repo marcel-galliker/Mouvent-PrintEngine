@@ -31,6 +31,16 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			}
 		}
 
+		//--- Start -------------------------------------------------
+		public void StartDensity()
+		{
+			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
+			{
+				Actions.ItemsSource = RxGlobals.SA_StateMachine.StartDensity();
+			}
+		}
+
+
 		//--- ActionDone --------------------------------------------------------------
 		public void ActionDone()
 		{

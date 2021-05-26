@@ -524,6 +524,16 @@ static int _print_next(void)
 												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
 											 }
 											 break;
+				case PQ_TEST_SA_DENSITY:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "SA_Density.flz");
+											 if (rx_def_is_tx(RX_Config.printer.type))
+											 {
+												 RX_TestImage.scansTotal = RX_TestImage.copies;
+											 }
+											 else if (RX_Config.printer.type==printer_test_table)
+											 {
+												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
+											 }
+											 break;
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
 											 if (rx_def_is_tx(RX_Config.printer.type)) 
 											 {

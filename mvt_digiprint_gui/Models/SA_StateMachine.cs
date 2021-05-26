@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using static rx_CamLib.RxCam;
+using RX_DigiPrint.Devices;
 
 namespace RX_DigiPrint.Models
 {
@@ -15,8 +16,16 @@ namespace RX_DigiPrint.Models
 		private const bool		 _Debug=true;
 
 		public const bool		 _SimuCamera  = false;
-		public const bool		 _SimuMachine = false;
+		public const bool		 _SimuMachine = true;
 
+		private enum ENAssistMode
+		{
+			undef = 0,
+			align = 1,
+			density = 2,
+		};
+
+		private ENAssistMode	 _AssistMode=ENAssistMode.undef;
 		private RxCamFunctions	 _CamFunctions;
 		private List<SA_Action>  _Actions;
 		private int				 _ActionIdx;
@@ -34,6 +43,10 @@ namespace RX_DigiPrint.Models
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
+
+		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
+		private readonly int[]	 _DensitiyDist   = { 42, 42, 108, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 108, 42, 42};
+
 
 		private int				_HeadsPerColor=4;
 
@@ -135,6 +148,8 @@ namespace RX_DigiPrint.Models
 
 			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
+			_AssistMode = ENAssistMode.align;
+
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
 
@@ -149,7 +164,7 @@ namespace RX_DigiPrint.Models
 			{
 				Function = ECamFunction.CamFindLine_Horzizontal,
 				Name="Find Horiz Line",
-				WebMoveDist = 0,
+				WebMoveDist = -5,
 				ScanPos	    = 30.0,
 			});
 
@@ -222,6 +237,106 @@ namespace RX_DigiPrint.Models
 							Name		= String.Format(" {0}-{1}..{2}",  colorName, n+1, n+2),
 							WebMoveDist	= n==0? 7.5 : 0,
 							WebPos		= 82.840,
+						};						
+						_Actions.Add(action);
+					}
+				}
+			}
+
+			_DistStepCnt = 0;
+			_DistCorr    = 0;
+			_ActionIdx	 = 0;
+			_HeadNo		 = 0;
+			_StartAction();
+			return _Actions;
+		}
+
+		//--- _InitActions -----------------------------
+		public List<SA_Action> StartDensity()
+		{
+			int color, n;
+
+			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
+
+			_AssistMode = ENAssistMode.density;
+
+			_Actions = new List<SA_Action>();
+			_Actions.Add(new SA_Action(){Name="Print Image"});
+
+			_Actions.Add(new SA_Action()
+			{
+				Function = ECamFunction.CamFindLines_Vertical,
+				Name="Find 3 Vert Lines",
+				ScanPos	= 30.0,
+			});
+
+			_Actions.Add(new SA_Action()
+			{
+				Function = ECamFunction.CamFindLine_Horzizontal,
+				Name="Find Horiz Line",
+				WebMoveDist = 0,
+				ScanPos	    = 30.0,
+			});
+
+			_Actions.Add(new SA_Action()
+			{
+				Function = ECamFunction.CamFindFirstAngle,
+				Name="Find First Angle",
+				WebMoveDist = 12.0,
+				WebPos		= 12.0,
+				ScanPos	    = 0,
+			});
+
+			if (!_Confirmed)
+			{
+				_Actions.Add(new SA_Action()
+				{
+					Function = ECamFunction.CamConfirmFocus,
+					Name="Confirm",
+				//	WebMoveDist = 12.0,
+					WebMoveDist = 0,
+					WebPos = 12.0
+				});
+			}
+
+			if (!RxGlobals.I1Pro3.IsWhiteCalibrated)
+			{
+				_Actions.Add(new SA_Action()
+				{
+					Function = ECamFunction.Cam_I1_calibrate,
+					Name="White Calibration",
+				//	WebMoveDist = 12.0,
+					WebMoveDist = 0,
+					WebPos = 12.0
+				});
+			}
+
+
+			int dist=0;
+			for (n=0; n<_DensitiyDist.Length; n++)
+			{
+				dist+=_DensitiyDist[n];
+				Console.WriteLine("DsnsityDist cnt={0:F00}, dist={1:F000}, jet={2:F0000}", n, _DensitiyDist[n], dist);
+			}
+
+			//--- measurmentfunctions -----------------------------
+			for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
+			{
+				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
+				if (ink!=null)
+				{
+				//	_HeadsPerColor = RxGlobals.PrintSystem.HeadsPerColor;
+					string colorName = new ColorCode_Str().Convert(ink.ColorCode, null, color*RxGlobals.PrintSystem.InkCylindersPerColor, null).ToString();
+					for (int d=0; d<_DensitiyLevels.Length; d++)
+					{
+						SA_Action action=new SA_Action()
+						{
+							WebMoveDist = (700.0*25.4)/1200,
+							PrintbarNo	= color,
+							StepperNo   = color/2,
+							HeadNo		= n,
+							Function	= ECamFunction.Cam_I1_measure,
+							Name		= String.Format(" {0}-{1}",  colorName, n+1),
 						};						
 						_Actions.Add(action);
 					}
@@ -643,7 +758,10 @@ namespace RX_DigiPrint.Models
             if (InkSupply.AnyFlushed()) return;
 			_CamFunctions.Off();
 			Console.WriteLine("{0}: _TestPrint_start", RxGlobals.Timer.Ticks());
-			item.TestImage	= ETestImage.SA_Alignment;
+			if (_AssistMode==ENAssistMode.density)
+				item.TestImage	= ETestImage.SA_Density;
+			else
+				item.TestImage	= ETestImage.SA_Alignment;
 			item.Dots		= "L";
 			item.Speed		= 50;
 			item.DistToStop = RxGlobals.Settings.SetupAssistCam.DistToStop;

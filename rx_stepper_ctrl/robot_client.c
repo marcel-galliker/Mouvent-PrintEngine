@@ -505,9 +505,9 @@ static void _rc_state_machine(void)
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);	
 									if (ROB_IN(IN_X_END))
 									{
-										rx_sleep(50);
+									//	rx_sleep(50);
 										_rc_reset_motors(MOTORS_XY);
-										rx_sleep(50);
+									//	rx_sleep(50);
 										rc_moveto_x(MOTOR_X_GARAGE_POS, _FL_);
 										_RC_State++;
 									}

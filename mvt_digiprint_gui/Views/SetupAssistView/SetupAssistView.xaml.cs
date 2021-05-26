@@ -51,6 +51,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
 		//	StartButton.IsEnabled = (state==EnPlcState.plc_stop || state==EnPlcState.plc_error)|| RxGlobals.SA_StateMachine.SimuMachine;
 			StartButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
+			StartDensityButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
 		}
 
 		//--- Settings_Clicked -------------------------------------------
@@ -94,6 +95,16 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			SetupActions.Start();
 		}
 
+		//--- StartDensity_Clicked -------------------------------------------
+		private void StartDensity_Clicked(object sender,RoutedEventArgs e)
+		{
+			BTN_CamSettings.IsChecked = false;
+			CamSettings.Hide();
+			SetupActions.StartDensity();
+		}
+
+
+		//--- Done_Clicked ----------------------------------------------
 		private void Done_Clicked(object sender,RoutedEventArgs e)
 		{
 			SetupActions.ActionDone();
