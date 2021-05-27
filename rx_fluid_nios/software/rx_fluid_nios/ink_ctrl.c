@@ -1363,22 +1363,23 @@ void ink_tick_10ms(void)
 						_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
 						_PumpOFFTime = 0;
 						_ShutdownPrint[isNo] = 1;
-
-						// ----- NEW : Ramp start-up pressure  -------
-						if (pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode) {
-							if (pRX_Config->ink_supply[isNo].cylinderPresSet > 10)
-								_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet / 5;// start with low setpoint
-							else _PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet;
-							_StartModePRINT[isNo] = 0;
-							pres_reset_min_max(isNo);
-						}
-						else _StartModePRINT[isNo]++;
 						/* no break */
 
 			case ctrl_recovery_step1:
 			case ctrl_recovery_step2:
 			case ctrl_recovery_step3:
 			case ctrl_recovery_step4:
+
+				// ----- NEW : Ramp start-up pressure  -------
+						if(pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode)
+						{
+							if(pRX_Config->ink_supply[isNo].cylinderPresSet > 10)
+								_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet / 5;	// start with low setpoint
+							else _PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet;
+							_StartModePRINT[isNo] = 0;
+							pres_reset_min_max(isNo);
+						}
+						else _StartModePRINT[isNo]++;
 
 						if ((_PressureSetpoint[isNo] != pRX_Status->ink_supply[isNo].cylinderPresSet) && (_StartModePRINT[isNo] > 500)) {
 							if (_StartModePRINT[isNo] > 504) {
