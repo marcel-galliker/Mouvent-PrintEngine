@@ -220,14 +220,14 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 										else
 										{
 										    txrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										    tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
 										} 
 										break;
         case printer_TX404:				if (RX_StepperCfg.boardNo == step_lift) tx404_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
 										else
 										{
 										    txrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										    tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
 										} 
 										break;
 			
@@ -290,7 +290,7 @@ static void _do_config(SStepperCfg *pcfg)
 								else
 								{
 								    txrob_init();
-								    tx80x_wd_init();
+								    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_init();
 								}
 								break;
 		
@@ -298,7 +298,7 @@ static void _do_config(SStepperCfg *pcfg)
 								else
 								{
 								    txrob_init();
-								    tx80x_wd_init();
+								    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_init();
 								}
 								break;
 		

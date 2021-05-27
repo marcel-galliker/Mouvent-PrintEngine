@@ -279,7 +279,8 @@ typedef struct SNiosStat
 
 	//--- Temp. Sensors -------------------
 	UINT32			headcon_amc_temp;			// Head Connection Board AMC internal Temp. Sensor
-	UINT32			head_temp[MAX_HEADS_BOARD];	// Print Head internal Temp. Sensor
+	UINT32			head_temp_org[MAX_HEADS_BOARD];	// Print Head internal Temp. Sensor
+	UINT32			head_temp[MAX_HEADS_BOARD];		// Print Head internal Temp. Sensor corrected
 
 	//--- cooler ----------------
 	UINT32 			cooler_temp;

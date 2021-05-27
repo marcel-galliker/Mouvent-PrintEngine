@@ -144,7 +144,7 @@ void steptx_lift_to_print_pos(void)
 //--- steptx_lift_in_print_pos ----------------------
 int steptx_lift_in_print_pos(void)
 {
-    return _Status[0].info.z_in_print && (_step_socket[1] == INVALID_SOCKET || _Status[1].robinfo.z_in_print);
+    return _Status[0].info.z_in_print && (_step_socket[1] == INVALID_SOCKET || _Status[1].robinfo.z_in_print || _Status[1].robinfo.wd_unused);
 }
 
 //--- _steptx_lift_to_clean_wait_pos -----------------------------
@@ -184,7 +184,7 @@ int	 steptx_lift_in_up_pos(void)
 //--- steptx_wd_to_up_pos ----------------------------------------------
 void steptx_wd_to_up_pos(void)
 {
-    if (!_Status[1].robinfo.wd_in_up && !_Status[1].robinfo.moving_wd)
+    if (!_Status[1].robinfo.wd_in_up && !_Status[1].robinfo.moving_wd && !_Status[1].robinfo.wd_unused)
         sok_send_2(&_step_socket[1], CMD_LIFT_UP_POS, 0, NULL);
 }
 
