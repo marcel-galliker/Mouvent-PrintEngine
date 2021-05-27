@@ -562,6 +562,7 @@ int step_stepper_to_fluid(int fluidno)
     {
     case STEPPER_LB:	return steplb_stepper_to_fluid(fluidno);
     }
+	return 0;
 }
 
 //--- step_set_autocapMode ----------------------------------------------

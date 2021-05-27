@@ -1613,7 +1613,8 @@ namespace rx_CamLib
             while (pFState != TargetState)
             {
                 Application.DoEvents();
-                hResult = MediaControl.GetState(100, out pFState);
+                if (MediaControl==null) hResult=-1;
+                else hResult = MediaControl.GetState(100, out pFState);
                 if (hResultError(hResult)) return hResult;
             }
 
@@ -1651,7 +1652,8 @@ namespace rx_CamLib
             while (pFState != TargetState)
             {
                 Application.DoEvents();
-                hResult = Filter.GetState(100, out pFState);
+                if (Filter==null) hResult = -1;
+                else hResult = Filter.GetState(100, out pFState);
                 if (hResultError(hResult)) return hResult;
             }
 

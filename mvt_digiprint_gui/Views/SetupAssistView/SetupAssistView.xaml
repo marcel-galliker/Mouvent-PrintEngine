@@ -33,6 +33,10 @@
                 <TextBlock Text="Start" Foreground="White"/>
             </common:MvtButton>
 
+            <common:MvtButton x:Name="StartDensityButton" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="StartDensity_Clicked" Margin="15, 5, 15, 5" >
+                <TextBlock Text="Density" Foreground="White"/>
+            </common:MvtButton>
+
             <common:MvtButton x:Name="BTN_Continue" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Done_Clicked" IsChecked="{Binding CanContinue}" Margin="15, 5, 15, 5" >
                 <TextBlock Text="Done" Foreground="White"/>
             </common:MvtButton>
@@ -94,6 +98,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
             <!--- camara capture _______________________________________________________________-->
@@ -101,7 +106,19 @@
                 <local:SA_CamCapture x:Name="CamCapture" IsVisibleChanged="CamCapture_IsVisibleChanged"/>
             </GroupBox>
 
-            <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal">
+            <GroupBox  Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="700" Header="I1Pro3" Style="{StaticResource MvtGroupBox}" >
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Connect"   Click="I1Pro3_Connect" Width="100" Margin="10"/>
+                    <Button x:Name="BTN_I1Pro3_Calibrate" Content="Calibrate" Click="I1Pro3_Calibrate" Width="100" Margin="10" IsEnabled="True"/>
+                    <Button x:Name="BTN_I1Pro3_Measure"   Content="Measure"   Click="I1Pro3_Measure" Width="100" Margin="10" IsEnabled="False"/>
+                    <Rectangle x:Name="ResultColor" Width="50" Height="50" Stroke="Black" StrokeThickness="1"/>
+                    <TextBlock x:Name="ResultCMYK" Margin="10,0"/>
+                    <TextBlock x:Name="ResultLAB"  Margin="10,0"/>
+                    <TextBlock x:Name="ResultDE"   Margin="10,0"/>
+                </StackPanel>
+            </GroupBox>
+
+            <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal">
                 <GroupBox  HorizontalAlignment="Left" VerticalAlignment="Top" Width="auto" Header="Scanner" Style="{StaticResource MvtGroupBox}" Grid.ColumnSpan="2" Margin="0,0,1,0">
                     <Grid>
                         <Grid.ColumnDefinitions>

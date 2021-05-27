@@ -84,7 +84,7 @@ int ctrl_init()
 	_MsgBufOut = 0;
 
     system("netstat -lt > /tmp/ports_1");
-    
+
     errNo = sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
 	TrPrintfL(1, "Fehler %d", errNo);
 

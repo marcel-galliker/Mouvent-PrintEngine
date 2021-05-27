@@ -542,11 +542,13 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	if (RX_PrinterStatus.testMode)
 	{
 		msg.printMode     = PM_TEST;
-		if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS  || RX_TestImage.testImage==PQ_TEST_DENSITY || RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT))
+		if (RX_Config.printer.type==printer_test_table 
+		&& (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS 
+		|| RX_TestImage.testImage==PQ_TEST_DENSITY || RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT || RX_TestImage.testImage==PQ_TEST_SA_DENSITY))
 		{
 			msg.printMode = PM_TEST_SINGLE_COLOR;
 		}
-		else if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS || RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT) 
+		else if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS || RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT || RX_TestImage.testImage==PQ_TEST_SA_DENSITY) 
 		{
 			msg.printMode = PM_TEST_JETS;
 		}

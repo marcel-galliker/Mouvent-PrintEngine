@@ -1170,7 +1170,9 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 	if (RX_Config.printer.type==printer_test_table && (RX_TestImage.testImage==PQ_TEST_JETS 
 	||  RX_TestImage.testImage==PQ_TEST_JET_NUMBERS 
 	||  RX_TestImage.testImage==PQ_TEST_DENSITY
-	||  RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT))
+	||  RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT
+	||  RX_TestImage.testImage==PQ_TEST_SA_DENSITY
+	))
 	{
 		RX_TestImage.copies = 1;
 		RX_TestImage.scans  = RX_Config.inkSupplyCnt;
@@ -1182,6 +1184,7 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 		||  RX_TestImage.testImage==PQ_TEST_DENSITY
 		||  RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT
 		||  RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT
+		||  RX_TestImage.testImage==PQ_TEST_SA_DENSITY
 		)
 		{
             RX_TestImage.scans=RX_Config.colorCnt;

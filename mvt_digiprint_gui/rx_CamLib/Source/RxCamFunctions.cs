@@ -32,6 +32,8 @@ namespace rx_CamLib
 		CamMeasureAngle,
 		CamMeasureStitch,
 		CamMeasureDist,
+		Cam_I1_calibrate,
+		Cam_I1_measure,
 	};
 
 	public class SMarkPosition : RxBindable

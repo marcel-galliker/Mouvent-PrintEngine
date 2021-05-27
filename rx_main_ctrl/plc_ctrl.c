@@ -491,7 +491,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	TrPrintfL(TRUE, "_plc_send_par");
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
-	_TestPrint = (_StartEncoderItem.testImage==PQ_TEST_SA_ALIGNMENT);
+	_TestPrint = (_StartEncoderItem.testImage==PQ_TEST_SA_ALIGNMENT || _StartEncoderItem.testImage==PQ_TEST_SA_DENSITY);
 	_Speed = _StartEncoderItem.speed;
 	step_set_vent(_Speed);
 //	_SendPause = 1;

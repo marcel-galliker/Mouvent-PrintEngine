@@ -1,0 +1,8 @@
+Convert 8-Bit BMP to FLZ:
+
+- draw BMP in paint
+- save as BMP / 256 Bits
+- open in IrfanView
+- Menu: Image / Concert to Grayscale
+- Menu: Save as ...   TIF, all options on
+- MvtFlzConverter.exe C:\Develop\PrintEngine-Master-1.5-WB\bin\spooler\SA_Density.tif
