@@ -877,7 +877,8 @@ void pump_tick_10ms(void)
 		case ctrl_recovery_step1:				
 		case ctrl_recovery_step2:
 		case ctrl_recovery_step3:
-		case ctrl_recovery_step4:	
+		case ctrl_recovery_step4:
+						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(TRUE);
 						_set_valve(VALVE_INK);
             max_pressure = MBAR_500;
@@ -889,6 +890,7 @@ void pump_tick_10ms(void)
             break;
 				
 		case ctrl_recovery_step5:
+						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						RX_Status.pressure_in_max=INVALID_VALUE;
@@ -900,6 +902,7 @@ void pump_tick_10ms(void)
 		
 		case ctrl_recovery_step6:
 		case ctrl_recovery_step7:
+						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						_presure_in_max();
@@ -910,6 +913,7 @@ void pump_tick_10ms(void)
 						break;
 		
 		case ctrl_recovery_step8:
+						RX_Config.cmd.disable_meniscus_check = TRUE;
 						_presure_in_max();
 						if ((RX_Config.purge_pos_y<(RX_Config.purgeDelayPos_y - MAX_POS_VARIANCE) && RX_Config.purgeDelayPos_y) || 
 							(_PurgeTime>RX_Config.purgeTime && !_Purge4Ever) || (RX_Config.purgeDelayPos_y == 0 && _PurgeDelay < RX_Config.purgeDelayTime))
@@ -930,6 +934,7 @@ void pump_tick_10ms(void)
 						break;
 						
 		case ctrl_recovery_step9:
+						RX_Config.cmd.disable_meniscus_check = FALSE;
         		RX_Status.mode = RX_Config.mode;
 						break;		
 		
