@@ -1,13 +1,11 @@
-﻿using RX_Common;
+using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
 using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 
 namespace RX_DigiPrint.Views.LH702View
@@ -22,8 +20,6 @@ namespace RX_DigiPrint.Views.LH702View
         public LH702_ImgSettings()
         {
             InitializeComponent();
-
-            CB_PrintGoMode.ItemsSource  = new EN_PgModeList();
             RowCopies.Height = new GridLength(0);
         }
 
@@ -41,6 +37,7 @@ namespace RX_DigiPrint.Views.LH702View
         private void _DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             _Item = DataContext as PrintQueueItem;
+            CB_PrintGoMode.ItemsSource = new EN_PgModeList();
         }
 
         //--- Save_Clicked ---------------------------------------------

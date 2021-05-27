@@ -777,11 +777,11 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 							switch(fileType)
 							{
                             case ft_flz: ret = flz_load(id, filepath, filename, printMode, gapPx, 0, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL, (void*)&_PrintList[_InIdx]);
-								if (ret==REPLY_OK) strcpy(_FileTimePath, flz_last_filepath());
-								break;
+										 if (ret==REPLY_OK) strcpy(_FileTimePath, flz_last_filepath());
+										 break;
                             case ft_tif: ret = tif_load_mt(id, filepath, filename, printMode, gapPx, RX_Color, SIZEOF(RX_Color), buffer, &bmpInfo, NULL);
-								strcpy(_FileTimePath, tif_last_filepath());
-								break;
+										 strcpy(_FileTimePath, tif_last_filepath());
+										 break;
                             default: Error(ERR_ABORT, 0, "Filetype not implemented");
 							}
 						}

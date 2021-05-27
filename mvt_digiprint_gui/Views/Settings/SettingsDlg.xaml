@@ -1,4 +1,4 @@
-﻿<rx:CustomWindow x:Class="RX_DigiPrint.Views.Settings.SettingsDlg"
+<rx:CustomWindow x:Class="RX_DigiPrint.Views.Settings.SettingsDlg"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -126,6 +126,14 @@
                         <TextBlock Text="WinSCP" Margin="30,0,0,0" Padding="10,0"/>
                     </Grid>
                 </Button>
+
+                <Button x:Name="UVGeneratorButton" Click="UVGenerator_Clicked" Width="170" Margin="0, 0, 0, 10" Style="{StaticResource Mouvent.StandardButton}">
+                    <Grid Width="170">
+                        <Image Source="..\..\Resources\Bitmaps\UV_Lamp.ico" HorizontalAlignment="Left" Height="20" Margin="5,1"/>
+                        <TextBlock Text="UV Generator" Margin="30,0,0,0" Padding="10,0"/>
+                    </Grid>
+                </Button>
+                
             </StackPanel>
         </GroupBox>
 

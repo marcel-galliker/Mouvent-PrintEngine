@@ -37,7 +37,6 @@ namespace RX_DigiPrint.Views.UserControls
             DataContext = RxGlobals.StepperStatus;
             RxGlobals.PrintSystem.PropertyChanged    += PrintSystem_PropertyChanged;
             RxGlobals.Network.List.CollectionChanged += Network_CollectionChanged;
-            RxGlobals.Plc.PropertyChanged += Plc_PropertyChanged;
 
             {
                 _GreenLedImg  = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\LED_GREEN.ico", UriKind.RelativeOrAbsolute));
@@ -75,6 +74,8 @@ namespace RX_DigiPrint.Views.UserControls
                     StepperGrid.Children.Add(_LedCap[i]);
 
                     RxGlobals.StepperStatus[i].PropertyChanged += Stepper_PropertyChanged;
+
+                    RxGlobals.PrinterStatus.PropertyChanged += PrinterStatus_PropertyChanged;
                 }
             }
             PrinterType_changed();
@@ -124,18 +125,14 @@ namespace RX_DigiPrint.Views.UserControls
             }
         }
 
-        //--- Plc_PropertyChanged ----------------------------
-        private EN_MachineStateList _machineStates = new EN_MachineStateList();
-        private void Plc_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        //--- PrinterStatus_PropertyChanged ---------------------------------------
+        private void PrinterStatus_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            try
-            {
-                StepperGrid.IsEnabled = (MachineStateEnum)Convert.ToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE")) != MachineStateEnum.Run;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            bool isPrinting = RxGlobals.PrinterStatus.PrintState == EPrintState.ps_printing ||
+                              RxGlobals.PrinterStatus.PrintState == EPrintState.ps_stopping ||
+                              RxGlobals.PrinterStatus.PrintState == EPrintState.ps_pause ||
+                              RxGlobals.PrinterStatus.PrintState == EPrintState.ps_goto_pause;
+            StepperGrid.IsEnabled = !isPrinting;
         }
 
         //--- _button_active -----------------------------
@@ -165,7 +162,6 @@ namespace RX_DigiPrint.Views.UserControls
             Leds_DripPans.Visibility      = visibility;
             LaserTX.Visibility            = visibility; 
             LaserVal.Visibility           = visibility;
-            Button_Cap.Visibility         = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf/* || RxGlobals.PrintSystem.IsTx*/) ? Visibility.Collapsed : Visibility.Visible;
 
             visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
             Button_DripPans.Visibility    = visibility;

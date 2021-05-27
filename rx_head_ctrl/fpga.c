@@ -1903,14 +1903,11 @@ static int _check_print_done(void)
 			//--- test print-go/print-done for scanning machines 
 //			if (FpgaCfg.head[2]->encoderNo!=0) // then it a textile machine
 			{
-
 				int diff = RX_HBStatus[0].head[head].printGoCnt-RX_HBStatus[0].head[head].printDoneCnt;
-				
 				if(diff > 3 && !(_PrintDoneError&(1 << head)))
 				{
 					_PrintDoneError |= (1 << head);
-//					Error(ERR_ABORT, 0, "Head[%d]: Print-Done missing, #PrintGo=%d #Print-Done=%d", head, 
-					if(ErrorFlag(ERR_ABORT,
+					if (ErrorFlag(WARN,
 						(UINT32*)&RX_HBStatus[0].err,
 						err_fifo_full_0,
 						0,
@@ -1919,7 +1916,6 @@ static int _check_print_done(void)
 						RX_HBStatus[0].head[head].printGoCnt, 
 						RX_HBStatus[0].head[head].printDoneCnt))
 					{
-					//	_Reload_FPGA = TRUE;
 						fpga_trace_registers("Print-Done-missed", TRUE);													
 					}
 				}
@@ -1934,6 +1930,7 @@ static int _check_print_done(void)
 				}
 				else if (diff<2) _PrintDoneWarning &= ~(1 << head);
 			}
+
 			int time4=rx_get_ticks()-time;
 			if (time4>100) Error(WARN, 0, "_check_print_done[%d], t1=%d, t2=%d, t3=%d, t4=%d", head, time1, time2, time3, time4);
 			

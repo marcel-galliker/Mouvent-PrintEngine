@@ -33,7 +33,8 @@ int  plc_stop_printing(void);
 int  plc_abort_printing(void);
 int  plc_clean(void);
 
-void	plc_load_material(char *name);
+int     plc_list_materials(char materials[64][64]);
+void    plc_load_material(char *name);
 
 int		plc_to_purge_pos(void);
 int		plc_to_wipe_pos(void);

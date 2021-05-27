@@ -356,7 +356,7 @@ namespace RX_DigiPrint.Services
             int len=RxStructConvert.ToStruct(out msg, buf);
             if (len==msg.hdr.msgLen)
             {
-                RxGlobals.PrinterStatus.Upadte(msg);
+                RxGlobals.PrinterStatus.Update(msg);
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SPrinterStatusMsg")); 
         }

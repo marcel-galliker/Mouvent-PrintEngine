@@ -163,5 +163,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             return !RxGlobals.PrintSystem.IsLb || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB;
         }
+
     }
 }

@@ -30,7 +30,6 @@
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
 #include "fluid_ctrl.h"
-#include "lh702_ctrl.h"
 #include "step_ctrl.h"
 #include "step_cleaf.h"
 #include "step_std.h"
@@ -40,6 +39,7 @@
 #include "bmp.h"
 #include "label.h"
 #include "iQ500.h"
+#include "lh702_ctrl.h"
 
 //--- prototypes -----------------------
 static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg);
@@ -128,7 +128,6 @@ static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 		}
 		gui_send_printer_status(&RX_PrinterStatus);
 	}
-	lh702_on_error(type, deviceStr, no, msg);
 }
 	
 //--- pc_start_printing -------------------------------------------------------
@@ -228,6 +227,7 @@ int pc_stop_printing(int userStop)
 	}
 
     iq500_stop_printing();
+	lh702_stop_printing();
     
 	return REPLY_OK;
 }
@@ -329,7 +329,7 @@ static void _send_head_info(void)
 			}
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
-			len += sprintf(&str[len], "Temp=%d.%d°C / Waveform=%s\n", pstat->tempHead / 1000, (pstat->tempHead% 1000) / 100, RX_Config.inkSupply[color].ink.name);
+			len += sprintf(&str[len], "Temp=%d.%dÂ°C / Waveform=%s\n", pstat->tempHead / 1000, (pstat->tempHead% 1000) / 100, RX_Config.inkSupply[color].ink.name);
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{
 				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);
@@ -409,25 +409,26 @@ static int _get_image_size(UINT32 gap)
 //--- _set_src_size ---------------------------------------------------------------
 static void _set_src_size(SPrintQueueItem *pItem, const char *path)
 {
+	UINT32 usedColors=0;
 	UINT32 width, height;
 	UINT8  bitsPerPixel;
-	int ret;
 
-	ret = flz_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
-	if (ret) ret = tif_get_size(path, 0, 0, &width, &height, &bitsPerPixel);
-	if (ret) 
+	if (flz_get_size(path, 0, 0, &width, &height, &bitsPerPixel)==REPLY_OK) usedColors=flz_get_used_colors(path);
+	else if (tif_get_size(path, 0, 0, &width, &height, &bitsPerPixel)==REPLY_OK) usedColors=tif_get_used_colors(path);
+	else 
 	{
 		UINT32 height, memSize;
 		char p[MAX_PATH];
 		bmp_color_path(path, RX_ColorNameShort(0), p);
-		ret = bmp_get_size(p, (UINT32*) &width, &height, &bitsPerPixel, &memSize);
+		if (bmp_get_size(p, (UINT32*) &width, &height, &bitsPerPixel, &memSize)) usedColors = 1<<0;
 	}
-	if (ret==REPLY_OK)
+	if (usedColors)
 	{
 		pItem->srcWidth  = width *25400/1200;
 		pItem->srcHeight = height*25400/1200;
 		pItem->srcBitsPerPixel = bitsPerPixel;
 	}
+	pItem->usedColors=usedColors;
 }
 
 //--- _local_path  -----------------------------------------------------
@@ -637,7 +638,8 @@ static int _print_next(void)
 				_CopiesStart = _Item.copiesPrinted;
 				if (RX_Config.printer.type==printer_DP803 && _Item.lastPage!=_Item.firstPage)
 					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
-
+				
+				_set_src_size(&_Item, _FilePathLocal);
 				if (_Item.srcWidth==0 || _Item.srcHeight==0)
 				{
 					UINT32 width, height;

@@ -1097,6 +1097,36 @@ static void _plc_req_material	(RX_SOCKET socket, char *filename, int cmd)
 	}
 }
 
+int plc_list_materials(char materials[64][64])
+{
+	char name[64];
+	char val[64];
+	char str[64];
+	int nMaterials = 0;
+
+	HANDLE file = setup_create();
+	HANDLE attribute = NULL;
+	sprintf(str, PATH_USER "%s", FILENAME_MATERIAL);
+	setup_load(file, str);
+	while (TRUE)
+	{
+		setup_chapter_next(file, READ, name, sizeof(name));
+		if (!*name) break;
+		while (TRUE)
+		{
+			setup_str_next(file, &attribute, name, sizeof(name), val, sizeof(val));
+			if (!*name) break;
+			if (!strcmp(name, "XML_MATERIAL")) {
+				int l = min(63, strlen(val));
+				strncpy(materials[nMaterials], val, l);
+				materials[nMaterials][l] = 0;
+				nMaterials++;
+			}
+		}
+	}
+	return nMaterials;
+}
+
 //--- plc_load_material -----------------
 void plc_load_material(char *material)
 {

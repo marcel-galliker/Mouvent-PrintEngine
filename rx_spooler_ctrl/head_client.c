@@ -399,7 +399,7 @@ int hc_send_next()
 									
 				}
 			}
-		}		
+		}
 		return REPLY_OK;
 	}
 	return REPLY_ERROR;
@@ -825,7 +825,9 @@ static int _send_to_board(SHBThreadPar *par, int head, int blkNo, int blkCnt)
 				TrPrintfL(_Trace, "All sent: blk0=%d, cnt=%d, scan=%d\n", pinfo->blk0, pinfo->blkCnt, ++scan);
 //				Error(LOG, 0, "Head[%d]: FILE SENT (id=%d, page=%d, copy=%d) last (id=%d, page=%d, copy=%d)", head, pid->id, pid->page, pid->copy, plast->id, plast->page, plast->copy);				
 				memcpy(plast, pid, sizeof(SPageId));
-			}
+			} else
+				TrPrintfL(1, "All sent but same id: id%d copy%d", pid->id, pid->copy);
+
 
 			data_sent(pinfo, head);
 			return REPLY_OK;

@@ -563,17 +563,21 @@ int	 enc_set_pg(SPrintQueueItem *pitem, SPageId *pId)
 		case PG_MODE_MARK_VERSO:
 		case PG_MODE_MARK_VERSO_INV:	 
 		case PG_MODE_MARK_VRT:		
-							 dist.dist		   = (pitem->printGoDist>0) ? pitem->printGoDist:0;
-							 dist.printGoMode  = PG_MODE_MARK_FILTER;
-							 if (!_FirstPG)
-							 {
-								dist.ignore   = pitem->pageHeight*8/10;
-								if (RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702"))
-									dist.window   = pitem->pageHeight/4;	// check only on real machine!
-							 }
-							 sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
-							 _FirstPG = FALSE;
-							 break;
+							dist.dist		   = (pitem->printGoDist>0) ? pitem->printGoDist:0;
+							dist.printGoMode  = PG_MODE_MARK_FILTER;
+							if (pitem->printGoDist != _PrintGo_Dist)
+							{
+								Error(LOG, 0, "Change printGoDist from %d to %d", _PrintGo_Dist, dist.dist);
+							}
+							else if (!_FirstPG && pitem->printGoMode != PG_MODE_MARK_VRT)
+							{
+								dist.ignore = pitem->pageHeight * RX_Config.mark_reader_ignore_size / 100;
+								dist.window = pitem->pageHeight * RX_Config.mark_reader_window_size / 100;
+							}
+							_PrintGo_Dist = pitem->printGoDist;
+							sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_DIST, sizeof(dist), &dist);
+							_FirstPG = FALSE;
+							break;
 			
 		default:			if (pId->id != _ID.id) Error(WARN, 0, "PrintGo-Mode not defined");	
 							_PrintGo_Dist = pitem->pageHeight; 

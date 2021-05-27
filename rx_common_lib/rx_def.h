@@ -98,6 +98,7 @@ void rx_def_init();
 #define FILENAME_SPLICE_PAR		"splicepar.xml"
 #define FILENAME_HEAD_PRESOUT	"head_presout.xml"
 #define FILENAME_COUNTERS		".counters.xml"
+#define FILENAME_COUNTERS_LH702	".counters_lh702.xml"
 
 //--- defines ---------------------------------
 
@@ -367,6 +368,7 @@ typedef struct SPrintQueueItem
 
 	char    dots[4];
 	INT8	wakeup;
+	UINT32	usedColors;
 
 //	UINT16	previewOrientation;
 } SPrintQueueItem;
@@ -564,6 +566,11 @@ typedef struct SPrinterStatus
 	UINT32			actSpeed;
 	INT64			counterAct;	// [mm]
     INT64			counterTotal;	// [mm]
+    INT64			counterLH702[3];	    // [mm]
+		#define CTR_LH702_K			0
+		#define CTR_LH702_COLOR		1
+		#define CTR_LH702_COLOR_W	2
+
 }  SPrinterStatus;
 
 //--- SSpoolerCfg ----------------------------------
@@ -1462,6 +1469,14 @@ typedef struct ETestTableWarn
 	UINT32 warn31 : 1;
 } ETestTableWarn;
 
+typedef enum EErrorHandlingMode
+{
+	err_handling_mode_default = 0,
+	err_handling_mode_message = 1,
+	err_handling_mode_pause = 2,
+	err_handling_mode_stop = 3,
+} EErrorHandlingMode;
+
 //--- SStepperMotor -------------------------------------- 
 typedef struct SStepperMotor
 {
@@ -1625,10 +1640,19 @@ typedef struct SRxConfig
 		INT32			tara[MAX_SCALES];
 		INT32			calib[MAX_SCALES];			
 	} scales;
+    char			master_ip_address[64];
+    UINT32			master_ip_port;
+	char			em2_1_address[64];
+    char			em2_1_mask[64];
 	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
 	INT16			jc_ratio;
-	INT16 densityValue[HEAD_BOARD_CNT][HEAD_CNT][MAX_DENSITY_VALUES];
-	UCHAR voltage[HEAD_BOARD_CNT][HEAD_CNT];
+	INT16			densityValue[HEAD_BOARD_CNT][HEAD_CNT][MAX_DENSITY_VALUES];
+	UCHAR			voltage[HEAD_BOARD_CNT][HEAD_CNT];
+	UINT32			canister_empty_handling_mode;
+	UINT32			lh702_protocol_version;
+	UINT32			print_queue_buffer;
+	UINT32			mark_reader_ignore_size;
+	UINT32			mark_reader_window_size;
 	SiQ500Cfg iQ500Cfg;
 } SRxConfig;
 

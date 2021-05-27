@@ -505,6 +505,9 @@
     <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml.cs">
       <DependentUpon>SoftwareValueCorrectionView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\LH702View\LH702_Counters.xaml.cs">
+      <DependentUpon>LH702_Counters.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SupervisorsView\CalendarValidity.xaml.cs">
       <DependentUpon>CalendarValidity.xaml</DependentUpon>
     </Compile>
@@ -1035,6 +1038,10 @@
     <Page Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LH702View\LH702_Counters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SupervisorsView\CalendarValidity.xaml">
       <SubType>Designer</SubType>

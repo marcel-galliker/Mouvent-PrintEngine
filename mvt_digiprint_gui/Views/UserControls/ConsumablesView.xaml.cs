@@ -1,4 +1,4 @@
-﻿using RX_DigiPrint.Helpers;
+using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
@@ -40,6 +40,7 @@ namespace RX_DigiPrint.Views.UserControls
                 int additionalInkLevels = 0;
                 if (RxGlobals.PrintSystem.IsTx) additionalInkLevels = 1;    // Flush
                 if (RxGlobals.PrintSystem.IsLb) additionalInkLevels = 2;    // Flush + waste
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702) additionalInkLevels = 0;  // Neither flush or waste
                 for (int i=0; i<additionalInkLevels; i++)
                 {
                     InkLevel additionalLevel = new InkLevel(RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt + i]);

@@ -199,6 +199,24 @@ int tif_get_size(const char *path, UINT32 page, UINT32 spacePx, UINT32 *width, U
 	return REPLY_NOT_FOUND;
 }
 
+
+//--- tif_get_used_colors -----------------------------------------------
+UINT32 tif_get_used_colors(const char *path)
+{
+	UINT32 usedColors=0;
+	int color;
+	char filepath[MAX_PATH];
+	
+	for (color = 0; color < MAX_COLORS; color++)
+	{
+		if (!RX_Color[color].lastLine) continue;
+
+		_tif_color_path(path, 0, "", RX_ColorNameShort(color), filepath);
+		if (rx_file_exists(filepath)) usedColors |= 1<<color;
+	}
+	return usedColors;	
+}
+
 //--- tif_get_info --------------------------------------------------------------------------------------
 int tif_get_info(const char *path, STiffInfo *pinfo)
 {
@@ -420,16 +438,20 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			}
 			
 			pinfo->printMode     = printMode;
-			if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
-			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
-			if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
-			if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
-			if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
+			if (ppar->file)
+			{
+				if (!TIFFGetField (ppar->file, TIFFTAG_BITSPERSAMPLE, &pinfo->bitsPerPixel))	return Error(ERR_CONT, 0, "File %s: Could not get bit per sample value", filepath);
+				if (!TIFFGetField (ppar->file, TIFFTAG_IMAGEWIDTH,    &pinfo->srcWidthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image width", filepath);
+				if (!TIFFGetField (ppar->file, TIFFTAG_IMAGELENGTH,   &pinfo->lengthPx))		return Error(ERR_CONT, 0, "File %s: Could not get image height", filepath);
+				if (TIFFGetField (ppar->file, TIFFTAG_XRESOLUTION,   &val))	pinfo->resol.x=(int)val; else pinfo->resol.x=DPI_X;
+				if (TIFFGetField (ppar->file, TIFFTAG_YRESOLUTION,   &val))	pinfo->resol.y=(int)val; else pinfo->resol.y=DPI_Y;
+			}
 
 			pinfo->srcWidthPx	+= spacePx; 
 			pinfo->lineLen		= lineLen = (pinfo->srcWidthPx*pinfo->bitsPerPixel+7)/8;
 			pinfo->dataSize		= pinfo->lineLen*pinfo->lengthPx;
-			pinfo->buffer[c] = &buffer[c];
+			if (ppar->file) pinfo->buffer[c] = &buffer[c];
+			else			pinfo->buffer[c] = NULL;
 			height = pinfo->lengthPx;
 			if (psplit[c].lastLine<height) height=psplit[c].lastLine;
 
@@ -439,6 +461,7 @@ int tif_load(SPageId *id, const char *filedir, const char *filename, int printMo
 			ppar->y_from   = psplit[c].firstLine;
 			ppar->y_to	   = height;
 			ppar->gap	   = spacePx;
+			pinfo->colorCnt++;
 			
 			threadCnt++;
 		}

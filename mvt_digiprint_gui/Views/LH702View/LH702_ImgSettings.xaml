@@ -51,8 +51,9 @@
                     VerticalAlignment="Center"
                     />
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding PrintGo}"/>
-                <rx:RxComboBox x:Name="CB_PrintGoMode"
+                <TextBlock Visibility="Collapsed" Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding PrintGo}"/>
+                <rx:RxComboBox x:Name="CB_PrintGoMode" 
+                    Visibility="Collapsed"
                     Grid.Row="2" Grid.Column="1"
                     SelectedValue="{Binding PrintGoMode}"
                     ImageBox="true"

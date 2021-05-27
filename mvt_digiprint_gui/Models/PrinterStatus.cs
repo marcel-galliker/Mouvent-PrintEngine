@@ -20,8 +20,8 @@ namespace RX_DigiPrint.Models
             
         }
 
-        //--- Upadte -------------------------------------
-        public void Upadte(TcpIp.SPrinterStatusMsg msg)
+        //--- Update -------------------------------------
+        public void Update(TcpIp.SPrinterStatusMsg msg)
         {
             PrintState          = msg.status.printState;
             LogType             = (ELogType)msg.status.error;
@@ -41,6 +41,9 @@ namespace RX_DigiPrint.Models
             ActSpeed            = (double)msg.status.actSpeed;
             CounterAct          = msg.status.counterAct/1000.0;
             CounterTotal        = msg.status.counterTotal/1000.0;
+            CounterLH702_black  = msg.status.counterLH702[0]/1000.0;
+            CounterLH702_color  = msg.status.counterLH702[1]/1000.0;
+            CounterLH702_color_w= msg.status.counterLH702[2]/1000.0;
         }
         
         //--- Printing ------------------------------------
@@ -166,7 +169,6 @@ namespace RX_DigiPrint.Models
                  * */
             }
         }
-
         public UInt32 MaxSpeed(int dropSize)
         {
             if (dropSize>0 && dropSize<=3) return _MaxSpeed[dropSize];
@@ -197,6 +199,30 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CounterTotal, value); }
         }
         
+        //--- Property CounterLH702_black ---------------------------------------
+        private double _CounterLH702_black;
+        public double CounterLH702_black
+        {
+            get { return _CounterLH702_black; }
+            set { SetProperty(ref _CounterLH702_black, value); }
+        }
+
+        //--- Property CounterLH702_color ---------------------------------------
+        private double _CounterLH702_color;
+        public double CounterLH702_color
+        {
+            get { return _CounterLH702_color; }
+            set { SetProperty(ref _CounterLH702_color, value); }
+        }
+
+        //--- Property CounterLH702_color_w ---------------------------------------
+        private double _CounterLH702_color_w;
+        public double CounterLH702_color_w
+        {
+            get { return _CounterLH702_color_w; }
+            set { SetProperty(ref _CounterLH702_color_w, value); }
+        }
+
         //--- Property DataReady ---------------------------------------
         private bool _DataReady;
         public bool DataReady

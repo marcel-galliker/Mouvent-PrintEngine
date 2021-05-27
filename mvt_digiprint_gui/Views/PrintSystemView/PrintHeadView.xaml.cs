@@ -103,6 +103,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();}
                 catch (Exception) { FpVoltage.Text = "";};                
             }
+
+            Button_Wipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- _PrinterType_Changed ----------------------------------------------------

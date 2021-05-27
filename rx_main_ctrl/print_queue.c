@@ -821,7 +821,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 			double step=plc_get_step_dist_mm();
             if (step==0)
                 step=plc_get_step_dist_mm();
-			ctr_add((int)step);
+			ctr_add((int)step, pitem->usedColors);
 			
 			//--- LOG ---
 			{	
@@ -854,7 +854,7 @@ int pq_printed(int headNo, SPageId *pid, int *pageDone, int *jobDone, SPrintQueu
 				_srcHeight = pitem->srcHeight;
 			}
 
-			ctr_add(pitem->srcHeight / 1000);		
+			ctr_add(pitem->srcHeight / 1000, pitem->usedColors);		
 		}
 	
 		if(pitem->state <= PQ_STATE_STOPPING)
@@ -1047,9 +1047,8 @@ int pq_is_ready(void)
 	
 	if(RX_Config.printer.type == printer_LH702)				
 	{
-		TrPrintfL(TRUE, "pq_is_ready: sentCnt=%d, printGoCnt=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printGoCnt);
-		if (RX_PrinterStatus.testMode) return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 64;
-		else						   return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < 5;	// minimize buffer, independent on format!
+		TrPrintfL(TRUE, "pq_is_ready: sentCnt=%d, printGoCnt=%d, printedCnt=%d", RX_PrinterStatus.sentCnt, RX_PrinterStatus.printGoCnt, RX_PrinterStatus.printedCnt);
+		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printGoCnt) < RX_Config.print_queue_buffer;	// minimize buffer, independent on format!
 	}
 	else if(RX_Config.printer.type == printer_cleaf)	return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 16;
 	else if (rx_def_is_tx(RX_Config.printer.type))		return (RX_PrinterStatus.sentCnt-RX_PrinterStatus.printedCnt) < 20;

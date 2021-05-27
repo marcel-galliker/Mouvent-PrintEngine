@@ -95,7 +95,7 @@ namespace RX_DigiPrint.Models
         private bool _CanFlush = false;
         public bool CanFlush
         {
-            get { return _CanFlush; }
+            get { return _CanFlush && RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LH702; }
             set { SetProperty(ref _CanFlush, value); }
         }
 

@@ -84,8 +84,7 @@ typedef struct
 
 static SFluidThreadPar _FluidThreadPar[FLUID_BOARD_CNT];
 
-
-static SInkSupplyStat   _FluidStatus[INK_SUPPLY_CNT+2];
+SInkSupplyStat			FluidStatus[INK_SUPPLY_CNT+2];
 static ELogItemType		_ScalesErr[INK_SUPPLY_CNT+2];
 static INT32			_ScalesStatus[MAX_SCALES];
 static INT32			_FluidToScales[INK_SUPPLY_CNT+2];
@@ -109,7 +108,7 @@ int	fluid_init(void)
 {
 	int i;
 	
-	memset(_FluidStatus,		0, sizeof(_FluidStatus));
+	memset(FluidStatus,			0, sizeof(FluidStatus));
 	memset(_ScalesErr,		    0, sizeof(_ScalesErr));
 	memset(_FluidThreadPar,		0, sizeof(_FluidThreadPar));
 	memset(_HeadStateCnt,		0, sizeof(_HeadStateCnt));
@@ -248,7 +247,6 @@ void fluid_set_config(void)
 
 	case printer_LB702_UV:	
 	case printer_LB703_UV:	
-	case printer_LH702:
 							_FluidToScales[0] = SCALE(1,1);	// Cyan 
 							_FluidToScales[1] = SCALE(1,2);	// Magenta
 							_FluidToScales[2] = SCALE(1,3);	// Yellow 
@@ -258,7 +256,17 @@ void fluid_set_config(void)
 							_FluidToScales[6] = SCALE(2,3);	// Violet
 							_FluidToScales[INK_SUPPLY_CNT]   = SCALE(2,4);	// flush		
 							break;
-		
+
+	case printer_LH702:
+							_FluidToScales[0] = SCALE(1, 1);			  // Cyan
+							_FluidToScales[1] = SCALE(1, 2);			  // Magenta
+							_FluidToScales[2] = SCALE(1, 3);			  // Yellow
+							_FluidToScales[3] = SCALE(1, 4);			  // Black
+							_FluidToScales[4] = SCALE(2, 1);			  // White
+							_FluidToScales[5] = SCALE(2, 2);			  // Orange
+							_FluidToScales[6] = SCALE(2, 3);			  // Violet
+							break;
+
 	case printer_LB702_WB:	_FluidToScales[0] = SCALE(1, 1);// 0;	// Cyan 
 							_FluidToScales[1] = SCALE(1, 2);// 1;	// Magenta
 							_FluidToScales[2] = SCALE(1, 3);// 2;	// Yellow 
@@ -401,18 +409,18 @@ void fluid_tick(void)
 		{
 			state[i].condPumpSpeed = INVALID_VALUE;
 		}
-		if (_HeadStateCnt[i].condPumpSpeed)	_FluidStatus[i].info.cond_flowFactor_ok = _HeadFlowFactorCnt[i]/_HeadStateCnt[i].condPumpSpeed;
-		else _FluidStatus[i].info.cond_flowFactor_ok=FALSE;
+		if (_HeadStateCnt[i].condPumpSpeed)	FluidStatus[i].info.cond_flowFactor_ok = _HeadFlowFactorCnt[i]/_HeadStateCnt[i].condPumpSpeed;
+		else FluidStatus[i].info.cond_flowFactor_ok=FALSE;
 			
 		if  (_HeadStateCnt[i].condPumpFeedback > 0)
 			state[i].condPumpFeedback = _HeadState[i].condPumpFeedback / _HeadStateCnt[i].condPumpFeedback;
 		else 
 			state[i].condPumpFeedback = INVALID_VALUE;
 		
-		if (!chiller_is_running() &&  _FluidStatus[i].ctrlMode>ctrl_off)
+		if (!chiller_is_running() &&  FluidStatus[i].ctrlMode>ctrl_off)
 			_send_ctrlMode(i, ctrl_off, TRUE);
 					
-		state[i].canisterEmpty = (_FluidStatus[i].canisterErr >= LOG_TYPE_ERROR_CONT);
+		state[i].canisterEmpty = (FluidStatus[i].canisterErr >= LOG_TYPE_ERROR_CONT);
 	}
 	
 	RX_PrinterStatus.tempReady = maxTempReady;
@@ -499,9 +507,9 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 		
 	for (int i=0; i<INK_PER_BOARD; i++)
 	{
-		int flowFactor_ok = _FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok;
-		memcpy(&_FluidStatus[fluidNo*INK_PER_BOARD+i], &pstat->stat[i], sizeof(_FluidStatus[i]));
-		_FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok = flowFactor_ok;
+		int flowFactor_ok = FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok;
+		memcpy(&FluidStatus[fluidNo*INK_PER_BOARD+i], &pstat->stat[i], sizeof(FluidStatus[i]));
+		FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok = flowFactor_ok;
 	}
 		
 	if      ((_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
@@ -521,10 +529,10 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	{
 		if (RX_Config.inkSupply[i].inkFileName[0]) 
 		{
-			if (_FluidStatus[i].ctrlMode<=ctrl_off)			stat.inkSupilesOn	= FALSE;
-			if (_FluidStatus[i].ctrlMode>ctrl_off)			stat.inkSupilesOff	= FALSE;
-			if (!_FluidStatus[i].info.condTempReady)        stat.tempReady      = FALSE;
-			if (_FluidStatus[i].ctrlMode == ctrl_print)		stat.NeedDegasser	= TRUE;
+			if (FluidStatus[i].ctrlMode<=ctrl_off)			stat.inkSupilesOn	= FALSE;
+			if (FluidStatus[i].ctrlMode>ctrl_off)			stat.inkSupilesOff	= FALSE;
+			if (!FluidStatus[i].info.condTempReady)			stat.tempReady      = FALSE;
+			if (FluidStatus[i].ctrlMode == ctrl_print)		stat.NeedDegasser	= TRUE;
 		}
 	}
 	if (stat.printState==ps_off) stat.printState = ps_ready_power;
@@ -586,7 +594,7 @@ static int _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode)
 	{
 		if (*RX_Config.inkSupply[i].ink.fileName)
 		{
-			if (_FluidStatus[i].ctrlMode!=ctrlMode) return FALSE;
+			if (FluidStatus[i].ctrlMode!=ctrlMode) return FALSE;
 		}
 	}
 	return TRUE;
@@ -599,7 +607,7 @@ static int _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrl
 	{
 		if (*RX_Config.inkSupply[i].ink.fileName)
 		{
-			if (_FluidStatus[i].ctrlMode != ctrlMode1 && _FluidStatus[i].ctrlMode != ctrlMode2 && _FluidStatus[i].ctrlMode != ctrlMode3) return FALSE;
+			if (FluidStatus[i].ctrlMode != ctrlMode1 && FluidStatus[i].ctrlMode != ctrlMode2 && FluidStatus[i].ctrlMode != ctrlMode3) return FALSE;
 		}
 	}
 	return TRUE;
@@ -628,7 +636,7 @@ static void _control(int fluidNo)
         if (*RX_Config.inkSupply[i].inkFileName) _flushedNeeded |= (0x01 << i);
     }
     int no = fluidNo*INK_PER_BOARD;
-	SInkSupplyStat *pstat = &_FluidStatus[no];
+	SInkSupplyStat *pstat = &FluidStatus[no];
 	int	lbrob = RX_StepperStatus.robot_used; //(RX_Config.printer.type==printer_LB702_UV ||RX_Config.printer.type == printer_LB702_WB);
 	
 	int HeadNo = ctrl_singleHead();
@@ -668,9 +676,12 @@ static void _control(int fluidNo)
 				case ctrl_purge_hard_vacc:	
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no / 2, rob_fct_purge_all);  //steplb_rob_to_wipe_pos(no / 2, HeadNo + rob_fct_purge_head0);
-											else	   step_lift_to_top_pos();
-											
-											_PurgeCtrlMode = pstat->ctrlMode;
+											else if (RX_Config.printer.type != printer_LH702)
+                                            {
+                                                if (!step_lift_in_top_pos()) step_lift_to_top_pos();
+                                            }
+
+                                            _PurgeCtrlMode = pstat->ctrlMode;
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
                                             int time = (RX_Config.printer.type==printer_TX802 || RX_Config.printer.type == printer_TX404)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
 											if (pstat->purge_putty_ON) time=0;
@@ -699,8 +710,9 @@ static void _control(int fluidNo)
 												break;
 											}													
 											break;
-
-                case ctrl_purge_step1:		if ((!lbrob && step_lift_in_top_pos()) || (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
+											
+				case ctrl_purge_step1:		if ((!lbrob && (step_lift_in_top_pos() || (RX_Config.printer.type == printer_LH702))) || 
+                                                (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
 												/*
@@ -894,6 +906,8 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	int canisterHysteresis;
 	int wasteHigh;
 	int wasteFull;
+	EErrorHandlingMode errHandlingMode = err_handling_mode_pause;
+
 	switch (RX_Config.printer.type)
 	{
 	case printer_TX801:
@@ -901,6 +915,13 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	case printer_TX404:	canisterLow   = 1500;
 						canisterEmpty = 500;
 						canisterHysteresis = 100;
+						break;
+
+	case printer_LH702:
+						canisterLow	  = 1500;
+						canisterEmpty = 500;
+						canisterHysteresis = 100;
+						errHandlingMode = err_handling_mode_stop;
 						break;
 
     case printer_cleaf:	canisterLow   = 1500;
@@ -917,80 +938,102 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 						wasteFull	  = 18000;
 	}
 
-	for (i=0; i<SIZEOF(_FluidStatus)-1; i++) // not for waste!
+	if (RX_Config.canister_empty_handling_mode != err_handling_mode_default) 
+	{
+		errHandlingMode = RX_Config.canister_empty_handling_mode;
+	} 
+
+	for (i=0; i<SIZEOF(FluidStatus)-1; i++) // not for waste!
 	{
 		if (i<INK_SUPPLY_CNT)
 		{
-			_FluidStatus[i].info.connected = (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET);
-			_FluidStatus[i].info.flushed   = ((_Flushed & (0x01<<i))!=0);
+			FluidStatus[i].info.connected = (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET);
+			FluidStatus[i].info.flushed   = ((_Flushed & (0x01<<i))!=0);
 		}
 
-		_FluidStatus[i].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, i, _MeasurementNumber, _ScalesStatus[_FluidToScales[i]]);
+		FluidStatus[i].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, i, _MeasurementNumber, _ScalesStatus[_FluidToScales[i]]);
 
 		if(*RX_Config.inkSupply[i].ink.fileName)
 		{
-			if (_FluidStatus[i].canisterLevel <= canisterEmpty || _FluidStatus[i].canisterLevel <= canisterEmpty + canisterHysteresis && _ScalesErr[i] == LOG_TYPE_ERROR_CONT)
+			if (FluidStatus[i].canisterLevel <= canisterEmpty || FluidStatus[i].canisterLevel <= canisterEmpty + canisterHysteresis && _ScalesErr[i] == LOG_TYPE_ERROR_CONT)
 			{
 				if (_ScalesErr[i] != LOG_TYPE_ERROR_CONT)
 				{
 					if (i == INK_SUPPLY_CNT)
 						Error(ERR_CONT, 0, "Flush Canister EMPTY!");
 					else
-						Error(ERR_CONT, 0, "Ink Canister %s EMPTY = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), _FluidStatus[i].canisterLevel, canisterEmpty);
+						Error(ERR_CONT, 0, "Ink Canister %s EMPTY = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), FluidStatus[i].canisterLevel, canisterEmpty);
 					_ScalesErr[i] = LOG_TYPE_ERROR_CONT;
-					if (RX_PrinterStatus.printState == ps_printing) pc_pause_printing(FALSE);
+					if (RX_PrinterStatus.printState == ps_printing) 
+					{
+						switch (errHandlingMode)
+						{
+							case err_handling_mode_pause: pc_pause_printing(FALSE); break;
+							case err_handling_mode_stop: pc_stop_printing(FALSE); break;
+							default: break;
+						}
+					}
 				}
 			}
-			else if (_FluidStatus[i].canisterLevel <= canisterLow || _FluidStatus[i].canisterLevel <= canisterLow + canisterHysteresis && _ScalesErr[i] == LOG_TYPE_WARN)
+			else if (FluidStatus[i].canisterLevel <= canisterLow || FluidStatus[i].canisterLevel <= canisterLow + canisterHysteresis && _ScalesErr[i] == LOG_TYPE_WARN)
 			{
 				if (_ScalesErr[i] != LOG_TYPE_WARN)
 				{
 					if (i == INK_SUPPLY_CNT)
 						Error(WARN, 0, "Flush Canister LOW!");
 					else
-						Error(WARN, 0, "Ink Canister %s LOW = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), _FluidStatus[i].canisterLevel, canisterLow);
+						Error(WARN, 0, "Ink Canister %s LOW = %dg (<%dg)", RX_ColorNameLong(RX_Config.inkSupply[i].ink.colorCode), FluidStatus[i].canisterLevel, canisterLow);
 					_ScalesErr[i] = LOG_TYPE_WARN;
 				}
 			}
-			else if (_FluidStatus[i].canisterLevel > canisterLow && _FluidStatus[i].canisterLevel < 50000 && _ScalesErr[i] != LOG_TYPE_LOG)
+			else if (FluidStatus[i].canisterLevel > canisterLow && FluidStatus[i].canisterLevel < 50000 && _ScalesErr[i] != LOG_TYPE_LOG)
 			{
 				_ScalesErr[i] = LOG_TYPE_LOG;
 			}
 		}
-		_FluidStatus[i].canisterErr = _ScalesErr[i];
+		FluidStatus[i].canisterErr = _ScalesErr[i];
 		
-		dl_get_barcode(i, _FluidStatus[i].scannerSN, _FluidStatus[i].barcode);
-		if (_HeadErr[i]) _FluidStatus[i].err |= err_printhead; 
+		dl_get_barcode(i, FluidStatus[i].scannerSN, FluidStatus[i].barcode);
+		if (_HeadErr[i]) FluidStatus[i].err |= err_printhead; 
 		_HeadErr[i]=0;
 	}
 	
 	// waste
 	
-	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf )
+	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf)
 	{
-		_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, INK_SUPPLY_CNT + 1, _MeasurementNumber, _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]]);
+		FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, INK_SUPPLY_CNT + 1, _MeasurementNumber, _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]]);
 		
-		if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel < 50000)
+		if (FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel < 50000)
 		{
-			if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteFull || _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteFull - canisterHysteresis && _ScalesErr[INK_SUPPLY_CNT + 1] == LOG_TYPE_ERROR_CONT)
+			if (FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteFull || FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteFull - canisterHysteresis && _ScalesErr[INK_SUPPLY_CNT + 1] == LOG_TYPE_ERROR_CONT)
 			{
 				if (_ScalesErr[INK_SUPPLY_CNT + 1] != LOG_TYPE_ERROR_CONT)
 				{
-					Error(ERR_CONT, 0, "Waste Canister FULL = %dg > %dg", _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteFull);
+					Error(ERR_CONT, 0, "Waste Canister FULL = %dg > %dg", FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteFull);
 					_ScalesErr[INK_SUPPLY_CNT + 1] = LOG_TYPE_ERROR_CONT;
+					if (RX_PrinterStatus.printState == ps_printing)
+					{
+						switch (errHandlingMode)
+						{
+							case err_handling_mode_pause: pc_pause_printing(FALSE); break;
+							case err_handling_mode_stop: pc_stop_printing(FALSE); break;
+							default: break;
+						}
+					}
 				}
 			}
-			else if (_FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteHigh || _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteHigh - canisterHysteresis && _ScalesErr[INK_SUPPLY_CNT + 1] == LOG_TYPE_WARN)
+			else if (FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteHigh || FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel >= wasteHigh - canisterHysteresis && _ScalesErr[INK_SUPPLY_CNT + 1] == LOG_TYPE_WARN)
 			{
 				if (_ScalesErr[INK_SUPPLY_CNT + 1] != LOG_TYPE_WARN)
 				{
-					Error(WARN, 0, "Waste Canister HIGH = %dg (> %dg)", _FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteHigh);
+					Error(WARN, 0, "Waste Canister HIGH = %dg (> %dg)", FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel, wasteHigh);
 					_ScalesErr[INK_SUPPLY_CNT + 1] = LOG_TYPE_WARN;
 				}
 			}	
 		}
 		
-		_FluidStatus[INK_SUPPLY_CNT + 1].canisterErr = _ScalesErr[INK_SUPPLY_CNT + 1];
+		FluidStatus[INK_SUPPLY_CNT + 1].canisterErr = _ScalesErr[INK_SUPPLY_CNT + 1];
 	}
 
 	_MeasurementNumber++;
@@ -1001,11 +1044,11 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		msg.hdr.msgId  = REP_FLUID_STAT;
 		msg.hdr.msgLen = sizeof(msg);
 		
-		for (msg.no=0; msg.no<SIZEOF(_FluidStatus); msg.no++)
+		for (msg.no=0; msg.no<SIZEOF(FluidStatus); msg.no++)
 		{
 			if (msg.no<RX_Config.inkSupplyCnt || msg.no>=INK_SUPPLY_CNT)	// send also flush and waste
 			{
-				memcpy(&msg.stat, &_FluidStatus[msg.no], sizeof(msg.stat));
+				memcpy(&msg.stat, &FluidStatus[msg.no], sizeof(msg.stat));
 				gui_send_msg(socket, &msg);					
 			}
 		}		
@@ -1097,7 +1140,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				
 				RX_PrinterStatus.cleaning = (ctrlMode>ctrl_purge_soft) && (ctrlMode<ctrl_fill);
 
-//				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
+//				if (ctrlMode==ctrl_shutdown && FluidStatus[i].ctrlMode<=ctrl_off)   continue;
 					
 //				if (ctrlMode==ctrl_cal_start)
 //				{
@@ -1183,17 +1226,17 @@ void fluid_start_printing(void)
 //--- fluid_get_ctrlMode -------------------------------------------
 EnFluidCtrlMode fluid_get_ctrlMode(int no)
 {
-//	if (_FluidStatus[no].ctrlMode==ctrl_off)
+//	if (FluidStatus[no].ctrlMode==ctrl_off)
 //		TrPrintfL(TRUE, "fluid_get_ctrlMode[%d].off", no);
-	if (no>=0 && no<SIZEOF(_FluidStatus)) return _FluidStatus[no].ctrlMode;
+	if (no>=0 && no<SIZEOF(FluidStatus)) return FluidStatus[no].ctrlMode;
 	return ctrl_undef;
 }
 
 //--- fluid_in_ctrlMode ----------------------------------------
 int  fluid_in_ctrlMode  (int no, EnFluidCtrlMode ctrlMode)
 {
-	if (ctrlMode==ctrl_readyToPrint && _FluidStatus[no].ctrlMode==ctrl_warmup) return TRUE;
-	return (_FluidStatus[no].ctrlMode==ctrlMode);
+	if (ctrlMode==ctrl_readyToPrint && FluidStatus[no].ctrlMode==ctrl_warmup) return TRUE;
+	return (FluidStatus[no].ctrlMode==ctrlMode);
 }
 
 //--- fluid_set_head_state ----------------------------
@@ -1252,9 +1295,9 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 //--- fluid_get_cylinderPresSet ------------------------------------
 INT32 fluid_get_cylinderPresSet (int no)
 {
-	if (no>=0 && no<SIZEOF(_FluidStatus)) 
+	if (no>=0 && no<SIZEOF(FluidStatus)) 
 	{
-		return _FluidStatus[no].cylinderPresSet;			
+		return FluidStatus[no].cylinderPresSet;			
 	}
 	return INVALID_VALUE;
 }
@@ -1262,9 +1305,9 @@ INT32 fluid_get_cylinderPresSet (int no)
 //--- fluid_get_cylinderPres ---------------------------------------
 INT32 fluid_get_cylinderPres(int no)
 {
-	if (no >= 0 && no<SIZEOF(_FluidStatus))
+	if (no >= 0 && no<SIZEOF(FluidStatus))
 	{
-		return _FluidStatus[no].cylinderPres;
+		return FluidStatus[no].cylinderPres;
 	}
 	return INVALID_VALUE;
 }
@@ -1272,9 +1315,9 @@ INT32 fluid_get_cylinderPres(int no)
 //--- fluid_get_cylinderSetpoint ---------------------------------------
 INT32 fluid_get_cylinderSetpoint(int no)
 {
-	if (no >= 0 && no < SIZEOF(_FluidStatus))
+	if (no >= 0 && no < SIZEOF(FluidStatus))
 	{
-		return _FluidStatus[no].cylinderSetpoint;
+		return FluidStatus[no].cylinderSetpoint;
 	}
 	return INVALID_VALUE;
 }
@@ -1282,9 +1325,9 @@ INT32 fluid_get_cylinderSetpoint(int no)
 //--- fluid_get_pumpSpeed ---------------------------------------
 INT32 fluid_get_pumpSpeed(int no)
 {
-	if (no >= 0 && no < SIZEOF(_FluidStatus))
+	if (no >= 0 && no < SIZEOF(FluidStatus))
 	{
-		return _FluidStatus[no].pumpSpeedSet;
+		return FluidStatus[no].pumpSpeedSet;
 	}
 	return INVALID_VALUE;
 }
@@ -1292,9 +1335,9 @@ INT32 fluid_get_pumpSpeed(int no)
 //--- fluid_get_pumpFeedback ---------------------------------------
 INT32 fluid_get_pumpFeedback(int no)
 {
-	if (no >= 0 && no < SIZEOF(_FluidStatus))
+	if (no >= 0 && no < SIZEOF(FluidStatus))
 	{
-		return _FluidStatus[no].pumpSpeed;
+		return FluidStatus[no].pumpSpeed;
 	}
 	return INVALID_VALUE;
 }
@@ -1303,9 +1346,9 @@ INT32 fluid_get_pumpFeedback(int no)
 /*
 INT32 fluid_get_amcTemp(int no)
 {
-	if (no >= 0 && no < SIZEOF(_FluidStatus))
+	if (no >= 0 && no < SIZEOF(FluidStatus))
 	{
-		return _FluidStatus[no].temp;
+		return FluidStatus[no].temp;
 	}
 	return INVALID_VALUE;
 }
@@ -1313,9 +1356,9 @@ INT32 fluid_get_amcTemp(int no)
 //--- fluid_get_error ---------------------------------------
 INT32 fluid_get_error(int no)
 {
-    if (no >= 0 && no < SIZEOF(_FluidStatus))
+    if (no >= 0 && no < SIZEOF(FluidStatus))
     {
-        return _FluidStatus[no].err;
+        return FluidStatus[no].err;
     }
     return INVALID_VALUE;
 }

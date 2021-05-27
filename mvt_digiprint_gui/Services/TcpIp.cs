@@ -736,6 +736,7 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
             public string   dots;
 	        public byte	    wakeup;
+            public UInt32   usedColors;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -866,6 +867,8 @@ namespace RX_DigiPrint.Services
             public UInt32		actSpeed;
             public Int64 counterAct;
             public Int64 counterTotal;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst =3)]
+            public Int64[] counterLH702;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

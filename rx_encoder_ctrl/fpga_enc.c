@@ -1622,6 +1622,7 @@ static void _fpga_display_status(int showCorrection, int showParam)
 //			term_printf("  setp_time_min: "); for (i=0; i<4; i++)   term_printf("%09d  ", Fpga->stat.encIn[i].setp_time_min);	term_printf("\n");
 //			term_printf("  ab_change_err: "); for (i = 0; i < 4; i++) term_printf("%09d  ", Fpga->stat.ab_change_error[i]); term_printf("\n");
 			term_printf("  PM min len:    "); for (i = 0; i < 4; i++) term_printf("%09d  ", Fpga->stat.encIn[i].digin_mark_len_cnt); term_printf("\n");
+			term_printf("  shift_delay:   %09d  shift_delay_tel:  %09d  min_mark_len:  %09d", Fpga->cfg.general.shift_delay, Fpga->cfg.general.shift_delay_tel, Fpga->cfg.general.min_mark_len); term_printf("\n");
 		
 //			term_printf("  lin corr diff: "); for (i = 0; i < 1; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff); term_printf("\n");
 //			term_printf("  lin diff min:  "); for (i = 0; i < 1; i++) term_printf("%09d  ", (INT16)Fpga->stat.encIn[i].enc_diff_min); term_printf("\n");

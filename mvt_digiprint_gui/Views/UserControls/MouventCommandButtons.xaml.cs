@@ -216,8 +216,21 @@ namespace RX_DigiPrint.Views.UserControls
             }
             else // Switch Power Off
             {
-                FlushWindow wnd = new FlushWindow();
-                wnd.Show();
+                bool askForFlush = RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LH702;
+                if (askForFlush) 
+                {
+                    FlushWindow wnd = new FlushWindow();
+                    wnd.Show(); 
+                }
+                else
+                {
+                    if (RX_Common.MvtMessageBox.YesNo("Switch off", "Do you want to switch off clusters ?", MessageBoxImage.Question, false))
+                    {
+                        TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd() { no = -1, ctrlMode = EFluidCtrlMode.ctrl_shutdown };
+                        RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+                        RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
+                    }
+                }
             }
         }
 

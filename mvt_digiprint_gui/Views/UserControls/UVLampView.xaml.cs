@@ -1,5 +1,4 @@
-﻿using RX_DigiPrint.Helpers;
-using RX_DigiPrint.Models;
+﻿using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
 using System.ComponentModel;
@@ -10,7 +9,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms.VisualStyles;
 
 namespace RX_DigiPrint.Views.UserControls
 {
@@ -92,13 +90,19 @@ namespace RX_DigiPrint.Views.UserControls
             this.DataContext = _lampData;
            
             InitializeComponent();
-            
-            Task.Run(() => GetLampStatus());
+            ResetLampBtn.Visibility = Visibility.Collapsed;
+            RxGlobals.User.PropertyChanged += UserPropertyChanged;
 
+            Task.Run(() => GetLampStatus());
             SetTimer();
 
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             User_PropertyChanged(null, null);
+        }
+
+        private void UserPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            ResetLampBtn.Visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public void ResetLampBtn_Click(object sender, RoutedEventArgs e)

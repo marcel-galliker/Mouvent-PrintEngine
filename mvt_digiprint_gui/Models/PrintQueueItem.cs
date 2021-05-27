@@ -310,6 +310,14 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- UsedColors ---------------------------------
+        private UInt32 _UsedColors;
+        public UInt32 UsedColors
+        {
+            get { return _UsedColors; }
+            set { SetProperty(ref _UsedColors, value); }
+        }
+
         //--- do_checks -------------------------------
         private void do_checks()
         {
@@ -1057,6 +1065,7 @@ namespace RX_DigiPrint.Models
             //DropSizes       = msg.dropSizes;
             Wakeup          = msg.wakeup;
             Dots            = msg.dots;
+            UsedColors      = msg.usedColors;
             ScanMode        = (EScanMode)(msg.scanMode);
             if (msg.virtualPasses!=0) Passes = 0x10 | msg.passes;
             else                      Passes = msg.passes;
@@ -1228,6 +1237,11 @@ namespace RX_DigiPrint.Models
                 msg.item.curingPasses   = 0;
                 msg.item.penetrationPasses = 0;
             }
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702)
+            {
+                // This should probably be for all types but we need to check side effects!
+                msg.item.copiesPrinted = CopiesPrinted; 
+            }
             msg.item.speed          = Speed;
             msg.item.collate        = (Byte)Collate;
             msg.item.lengthUnit     = LengthUnit;
@@ -1244,6 +1258,7 @@ namespace RX_DigiPrint.Models
             msg.item.testImage      = (byte)TestImage;
             msg.item.checks         = Convert.ToInt32(PrintChecks);
             msg.item.dots           = Dots;
+            msg.item.usedColors     = UsedColors;
             if (PageNumber != null) PageNumber.ToMsg(ref msg.item.pageNumber);
 
             RxGlobals.RxInterface.SendMsg(msgId, ref msg);

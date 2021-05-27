@@ -1,4 +1,4 @@
-﻿using RX_Common;
+using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Models.Enums;

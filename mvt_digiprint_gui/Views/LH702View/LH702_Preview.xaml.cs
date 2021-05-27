@@ -1,4 +1,4 @@
-﻿using RX_Common;
+using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
@@ -29,6 +29,10 @@ namespace RX_DigiPrint.Views.LH702View
         {
             InitializeComponent();
             RxGlobals.LH702_Preview = this;
+
+            // BFL does not want to see the Next image
+            NextBorder.Visibility = NextImage.Visibility = Visibility.Collapsed;
+            _selected = 1;
         }
 
         //--- Property ImgSettings ---------------------------------------
@@ -60,6 +64,7 @@ namespace RX_DigiPrint.Views.LH702View
 
             set 
             {
+/*
                 NextImage.DataContext = _Next = value;
                 if (_Next==null)
                 {
@@ -68,6 +73,7 @@ namespace RX_DigiPrint.Views.LH702View
                 }
                 else 
                     NextBorder.Visibility = NextImage.Visibility = Visibility.Visible;
+*/
             }
         }
         

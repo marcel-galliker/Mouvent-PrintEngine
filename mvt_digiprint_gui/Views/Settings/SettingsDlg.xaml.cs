@@ -1,4 +1,4 @@
-﻿using RX_DigiPrint.Models;
+using RX_DigiPrint.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -69,6 +69,14 @@ namespace RX_DigiPrint.Views.Settings
             _UserTypeChanged();
 
             Init();
+
+            // Only show the UV generator button for UV machines.
+            if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LB701 &&
+                RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LB702_UV &&
+                RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LH702)
+            {
+                UVGeneratorButton.Visibility = Visibility.Collapsed;
+            }
         }
 
         void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -212,8 +220,14 @@ namespace RX_DigiPrint.Views.Settings
             Rx.StartProcess(ProgramsPath + @"\WinSCP\WinSCP.exe", null);
         }
 
+        //--- WinSCP_Clicked ---------------------------------------------
+        private void UVGenerator_Clicked(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://192.168.200.222");
+        }
+
         //--- RestartMain_Clicked ---------------------------------------------
-        private void RestartMain_Clicked(object sender, RoutedEventArgs e)
+            private void RestartMain_Clicked(object sender, RoutedEventArgs e)
         {
             if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.Restart, RX_DigiPrint.Resources.Language.Resources.RestartingTheMain, MessageBoxImage.Question, false))
             {

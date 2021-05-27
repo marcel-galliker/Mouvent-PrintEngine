@@ -702,7 +702,6 @@ int	   rx_get_maxnumthreads(void *dummy)
 	return rx_core_cnt();
 }
 
-
 //--- rx_sleep ----------------------------------------
 void	rx_sleep(UINT32 ms)
 {

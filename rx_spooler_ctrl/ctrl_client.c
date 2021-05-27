@@ -587,7 +587,7 @@ static int _do_print_file(RX_SOCKET socket, SPrintFileCmd  *pdata)
 			}
 			_FirstFile = FALSE;
 		}
-					
+		
 		memcpy(&_LastFilename, &msg.filename, sizeof(_LastFilename));
 	}
 
