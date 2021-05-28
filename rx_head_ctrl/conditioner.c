@@ -129,8 +129,11 @@ int cond_end(void)
 	if(_NiosMem!=NULL) 
 	{
 		int headNo;
-		for(headNo=0; headNo<MAX_HEADS_BOARD; headNo++)
-			memcpy(&_CfgBackup[headNo],&_NiosMem->cfg.cond[headNo],sizeof(_CfgBackup[headNo]));		
+		for (headNo = 0; headNo < MAX_HEADS_BOARD; headNo++)
+		{
+			cond_ctrlMode(headNo, ctrl_off);
+			memcpy(&_CfgBackup[headNo], &_NiosMem->cfg.cond[headNo], sizeof(_CfgBackup[headNo]));
+		}
 	}
 	else memset(_CfgBackup, 0, sizeof(_CfgBackup));
 	return REPLY_OK;
