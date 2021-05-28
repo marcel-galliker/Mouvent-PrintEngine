@@ -56,6 +56,7 @@ static ELogItemType	_ErrLevel = LOG_TYPE_UNDEF;
 static void _write_log(void);
 static void _cond_copy_status(void);
 static void _cond_preslog(int ticks);
+static void _cond_test_report(int ticks);
 static void	_update_clusterNo(void);
 
 //#define LOG_FLUID
@@ -215,6 +216,80 @@ static void _cond_preslog(int ticks)
 	fprintf(_plog_file, "%d", time);
 	for (i = 0; i < 4; i++) fprintf(_plog_file, ";%d;%d;%d;%d;%d;%d", _NiosStat->cond[i].pressure_in, _NiosStat->cond[i].meniscus, _NiosStat->cond[i].pump_measured, _NiosMem->cfg.cond[i].tempHead / 100, _NiosMem->cfg.cond[i].temp / 100, _NiosStat->cond[i].heater_percent);
 	fprintf(_plog_file, "\n");
+}
+
+//--- _cond_test_report --------------------------------------------------
+static void _cond_test_report(int ticks)
+{
+    int const interval=100;
+
+	static int	_ticks=0;
+    static int	_cnt[MAX_HEADS_BOARD];
+	static SConditionerStat_mcu	_cond[MAX_HEADS_BOARD];
+
+	int head;
+	if (ticks-_ticks>interval)
+	{
+		_ticks = ticks;
+		for (head=0; head<MAX_HEADS_BOARD; head++)
+		{
+			if (_NiosStat->cond[head].mode == ctrl_test)
+			{
+				if (_NiosStat->cond[head].tempIn==INVALID_VALUE 
+				||  _NiosStat->cond[head].tempHeater==INVALID_VALUE 
+				||  _NiosStat->cond[head].pressure_in==INVALID_VALUE 
+				||  _NiosStat->cond[head].pressure_out==INVALID_VALUE 
+				||  _NiosStat->cond[head].meniscus==INVALID_VALUE 
+				)
+				{
+					_cnt[head]=0;
+				}
+				else
+				{
+					_cond[head].tempIn		 += _NiosStat->cond[head].tempIn;
+					_cond[head].tempHeater	 += _NiosStat->cond[head].tempHeater;
+					_cond[head].pressure_in	 += _NiosStat->cond[head].pressure_in;
+					_cond[head].pressure_out += _NiosStat->cond[head].pressure_out;
+					_cond[head].meniscus	 += _NiosStat->cond[head].meniscus;
+					_cnt[head]++;
+				}
+
+				if (_cnt[head]>60000/interval)
+				{
+					int cnt=_cnt[head];
+					_cnt[head]=0;
+					//--- write file -----------------------------
+					{
+						FILE *file;
+						char name[100];
+						sprintf(name, PATH_TEMP "Conditioner-Test-%d.csv", _NiosStat->cond[head].serialNo);
+						file = fopen(name, "w");
+						fprintf(file, "SerialNo:/t%d",			_NiosStat->cond[head].serialNo);
+						fprintf(file, "Printed Liters:/t%s",	value_str3(RX_HBStatus->head[head].printed_ml));
+						fprintf(file, "Printed Time:/t%s",		value_str_time(RX_HBStatus->head[head].eeprom_mvt.printingSec));
+						fprintf(file, "Temp Head:/t%s",			value_str_time(RX_NiosStat.head_temp_org[head]/cnt));
+                        fprintf(file, "Temp Inlet:/t%s",		value_str_temp(_cond[head].tempIn/cnt));
+						fprintf(file, "Temp Heater:/t%s",		value_str_temp(_cond[head].tempHeater/cnt));
+						fprintf(file, "Presure In:/t%s",		value_str1(_cond[head].pressure_in/cnt));
+						fprintf(file, "Presure InDiff:/t%s",	value_str1(RX_HBStatus->head[head].presIn_diff));
+						fprintf(file, "Presure Out:/t%s",		value_str1(_cond[head].pressure_out/cnt));
+						fprintf(file, "Presure OutDiff:/t%s",	value_str1(RX_HBStatus->head[head].presOut_diff));
+						fprintf(file, "Meniscus:/t%s",			value_str1(_cond[head].meniscus));
+						fprintf(file, "Meniscus Diff:/t%s",		value_str1(RX_HBStatus->head[head].meniscus_diff));
+						fprintf(file, "Flow Resistance:/t%s",	value_str(_NiosMem->cfg.cond[head].flowResistance));
+						fprintf(file, "Flowfactor:/t%s",		value_str(RX_HBStatus->head[head].flowFactor));
+						fclose(file);
+					}
+				}
+			}
+			else _cnt[head]=0;
+
+			if (_cnt[head]==0)
+			{
+				memset(&_cond[head], 0, sizeof(_cond[head]));
+			}
+		}
+	}
 }
 
 //--- _set_fluid_off -------------------------------------------
@@ -416,6 +491,7 @@ void cond_main(int ticks, int menu)
 		_ticks=ticks;
 	}	
 	_cond_preslog(ticks);
+	_cond_test_report(ticks);
     
     if (!(ticks%10)) _write_log();
 }
