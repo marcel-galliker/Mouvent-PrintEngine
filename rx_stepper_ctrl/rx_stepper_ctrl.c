@@ -118,6 +118,7 @@ static void _main_loop()
 		case printer_LB702_UV: 		
 		case printer_LB702_WB:		
 		case printer_LH702:			lb702_main(ticks, menu); break;
+        case printer_setup_assist:	sa_main(ticks, menu);	break;
 //		case printer_LBROB:			lbrob_main(ticks, menu); break;
 		case printer_DP803: 		dp803_main(ticks, menu); break;
 			
@@ -151,6 +152,7 @@ static void _main_loop()
 			case printer_LB702_WB:		
 			case printer_LH702:			_AppRunning = lb702_menu(); break;
 
+            case printer_setup_assist:	_AppRunning = sa_menu(); break;
 			case printer_DP803: 		_AppRunning = dp803_menu();	break;
 			
 			default:					_AppRunning = test_menu(); break;				
@@ -219,6 +221,7 @@ int main(int argc, char** argv)
 	case printer_LB702_UV: 		
 	case printer_LB702_WB: 		
 	case printer_LH702:			lb702_init();	break;
+    case printer_setup_assist:	sa_init();		break;
 //	case printer_LBROB:			lbrob_init();	break;
 		
 	case printer_DP803: 		dp803_init();	break;

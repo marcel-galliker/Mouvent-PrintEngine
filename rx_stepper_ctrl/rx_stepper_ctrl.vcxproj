@@ -200,6 +200,7 @@
     <ClCompile Include="robi.c" />
     <ClCompile Include="robot_client.c" />
     <ClCompile Include="rx_stepper_ctrl.c" />
+    <ClCompile Include="sa.c" />
     <ClCompile Include="stepper_ctrl.c" />
     <ClCompile Include="slide.c" />
     <ClCompile Include="test.c" />
@@ -242,6 +243,7 @@
     <ClInclude Include="robi.h" />
     <ClInclude Include="robot_client.h" />
     <ClInclude Include="rob_tcp_ip.h" />
+    <ClInclude Include="sa.h" />
     <ClInclude Include="stepper_ctrl.h" />
     <ClInclude Include="slide.h" />
     <ClInclude Include="test.h" />

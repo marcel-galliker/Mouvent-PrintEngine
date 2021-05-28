@@ -43,6 +43,7 @@ void args_init(int argc, char** argv)
 		else if (!strcmp(argv[i], "-tx404"))	{ RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_TX404;}
         else if (!strcmp(argv[i], "-tts"))      { RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_test_table_seon;}
         else if (!strcmp(argv[i], "-tts_ink"))  { RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_test_table_seon;}
+        else if (!strcmp(argv[i], "-sa"))	    { RX_StepperCfg.boardNo=0; RX_StepperCfg.printerType=printer_setup_assist;}
 		else printf("argument >>%s<< not known\n", argv[i]);	
 	}
 }

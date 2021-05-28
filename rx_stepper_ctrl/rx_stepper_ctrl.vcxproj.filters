@@ -115,6 +115,9 @@
     <ClCompile Include="robot_client.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="sa.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gcc_Debug.h">
@@ -235,6 +238,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_tcpip.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="sa.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

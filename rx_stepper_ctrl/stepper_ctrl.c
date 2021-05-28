@@ -31,6 +31,7 @@
 #include "dp803.h"
 #include "txrob.h"
 #include "slide.h"
+#include "sa.h"
 #include "tcp_ip.h"
 #include "test_table.h"
 #include "cleaf.h"
@@ -245,6 +246,8 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 										else							 lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	
 										break;
 
+        case printer_setup_assist:		sa_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
+
 //		case printer_LBROB:				lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 			
 		case printer_DP803:				dp803_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
@@ -310,10 +313,12 @@ static void _do_config(SStepperCfg *pcfg)
 	case printer_LB702_UV:			
 	case printer_LB702_WB:		
 	case printer_LH702:			lb702_init();	break;
+    case printer_setup_assist:	sa_init(); break;
 //	case printer_LBROB:			lbrob_init();	break;
 		
 	case printer_DP803:			dp803_init();	break;
 		
+
 	default:	Error(ERR_CONT, 0, "PrinterType %d not implemented", RX_StepperCfg.printerType);
 	}						
 }

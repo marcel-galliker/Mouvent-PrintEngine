@@ -143,6 +143,7 @@ typedef enum EPrinterType
     printer_LH702,        // 1003:
 
     printer_DP803 = 1100, // 1100:
+    printer_setup_assist = 1999, // 1999:
 
     //--- scanning printers --------------------------
     printer_TX801 = 2000, // 2000: Fashionn stanrard output
