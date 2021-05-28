@@ -60,6 +60,9 @@ static int  _PrintPos_New = 0;              // in um
 static int  _PrintPos_Act = 0;              // in um
 static int  _WrinkleDetected = 0;
 
+static int  _WD_Front_Up = FALSE;
+static int  _WD_Back_Up = FALSE;
+
 // Motor movement Parameters
 static SMovePar _ParRef;
 static SMovePar _ParDrive;
@@ -121,8 +124,8 @@ void tx80x_wd_main(void)
         RX_StepperStatus.robinfo.z_in_print = FALSE;
     }
 
-    RX_StepperStatus.robinfo.wd_front_up = fpga_input(WD_FRONT_STORED_IN);
-    RX_StepperStatus.robinfo.wd_back_up = fpga_input(WD_BACK_STORED_IN);
+    _WD_Front_Up = fpga_input(WD_FRONT_STORED_IN);
+    _WD_Back_Up = fpga_input(WD_BACK_STORED_IN);
     if (_CmdRunning && motors_move_done(MOTOR_WD_BITS))
     {
         RX_StepperStatus.robinfo.moving_wd = FALSE;
@@ -137,7 +140,7 @@ void tx80x_wd_main(void)
                 }
             }
             motors_reset(MOTOR_WD_BITS);
-            RX_StepperStatus.robinfo.ref_done_wd = ok && RX_StepperStatus.robinfo.wd_front_up && RX_StepperStatus.robinfo.wd_back_up;
+            RX_StepperStatus.robinfo.ref_done_wd = ok && _WD_Front_Up && _WD_Back_Up;
         }
         else
         {
@@ -219,8 +222,8 @@ void tx80x_wd_menu(int help)
 //--- tx80x_wd_display_status -------------------------------------------------------------
 void tx80x_wd_display_status(void)
 {
-    term_printf("Sensor WD-Front:       %d\n", RX_StepperStatus.robinfo.wd_front_up);
-    term_printf("Sensor WD-Back:        %d\n", RX_StepperStatus.robinfo.wd_back_up);
+    term_printf("Sensor WD-Front:       %d\n", _WD_Front_Up);
+    term_printf("Sensor WD-Back:        %d\n", _WD_Back_Up);
     term_printf("Reference WD done:     %d\n", RX_StepperStatus.robinfo.ref_done_wd);
     term_printf("WD-Motor Front pos:    %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WD_FRONT)));
     term_printf("WD-Motor Back pos:     %d\n", TX_REF_HEIGHT_WD - _steps_2_micron(motor_get_step(MOTOR_WD_BACK)));
@@ -375,6 +378,7 @@ static void _tx80x_wd_motor_z_test(int steps)
 //--- _txrob_motor_test ---------------------------------
  int tx80x_wd_motor_test(int motorNo, int steps)
 {
+    if (RX_StepperStatus.robinfo.wd_unused) return FALSE;
     if (motorNo == MOTOR_WD_BACK || motorNo == MOTOR_WD_FRONT)
     {
         int motors = 1 << motorNo;

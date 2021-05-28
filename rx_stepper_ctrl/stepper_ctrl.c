@@ -80,16 +80,16 @@ static void _do_config			(SStepperCfg *pcfg);
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
 {
-    int errNo = 1;
+    int errNo = 0;
     _MsgBufIn  = 0;
 	_MsgBufOut = 0;
-    
-	system("netstat -lt > /tmp/ports_1");
+
+    system("netstat -lt > /tmp/ports_1");
 
     errNo = sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
 	TrPrintfL(1, "Fehler %d", errNo);
 
-	system("netstat -lt > /tmp/ports_2");
+    system("netstat -lt > /tmp/ports_2");
     
     err_set_server(_HServer);
 	
@@ -221,14 +221,14 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 										else
 										{
 										    txrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										    tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
 										} 
 										break;
         case printer_TX404:				if (RX_StepperCfg.boardNo == step_lift) tx404_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
 										else
 										{
 										    txrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										    tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
+										    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
 										} 
 										break;
 			
@@ -273,7 +273,6 @@ static int _do_ping(RX_SOCKET socket)
 static void _do_config(SStepperCfg *pcfg)
 {	
 	memcpy(&RX_StepperCfg, pcfg, sizeof(RX_StepperCfg));
-    Error(LOG, 0, "do config printer Type %d", RX_StepperCfg.printerType);
 
     RX_StepperStatus.no = RX_StepperCfg.boardNo;
 
@@ -294,7 +293,7 @@ static void _do_config(SStepperCfg *pcfg)
 								else
 								{
 								    txrob_init();
-								    tx80x_wd_init();
+								    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_init();
 								}
 								break;
 		
@@ -302,7 +301,7 @@ static void _do_config(SStepperCfg *pcfg)
 								else
 								{
 								    txrob_init();
-								    tx80x_wd_init();
+								    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_init();
 								}
 								break;
 		

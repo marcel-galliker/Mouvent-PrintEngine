@@ -1445,7 +1445,7 @@ typedef struct ETestTableInfo
 	UINT32 info_22			: 1;	//	0x00400000
 	UINT32 info_23			: 1;	//	0x00800000
 	UINT32 scannerEnable	: 1;	//	0x01000000
-	UINT32 info_25			: 1;	//	0x02000000
+	UINT32 wd_unused		: 1;	//	0x02000000
 	UINT32 printhead_en		: 1;    //  0x04000000
 	UINT32 splicing			: 1;	//  0x08000000
 	UINT32 DripPans_InfeedUP			: 1;	//  0x10000000
@@ -1519,10 +1519,10 @@ typedef struct ERobotInfo
 	UINT32 rob_in_cap		: 1;	//	0x01000000
 	UINT32 moving_wd		: 1;	//	0x02000000
 	UINT32 ref_done_wd		: 1;    //  0x04000000
-	UINT32 wd_front_up		: 1;	//  0x08000000
-	UINT32 wd_back_up		: 1;	//  0x10000000
-	UINT32 wrinkle_detected	: 1;	//	0x20000000
-	UINT32 wd_in_up			: 1;	//	0x40000000
+	UINT32 wd_unused		: 1;	//  0x08000000
+    UINT32 wrinkle_detected	: 1;	//  0x10000000
+    UINT32 wd_in_up			: 1;	//	0x20000000
+	UINT32 r_info_30		: 1;	//	0x40000000
     UINT32 x_in_purge4ever	: 1;	//	0x80000000
 } ERobotInfo;
 

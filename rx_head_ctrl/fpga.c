@@ -2098,6 +2098,15 @@ static void _check_errors(void)
 			}
 			_udp_too_long[i] = RX_FpgaError.dup_error[i].too_long;
 		}
+		/*
+		if (RX_FpgaStat.eth_ctr[i].frames_all && RX_FpgaStat.eth_ctr[i].frames_my==0 && !(RX_HBStatus[0].err&(err_fifo_full_0<<i)))
+		{
+			RX_HBStatus[0].err |= (err_fifo_full_0<<i);
+			char addr[64];
+			sok_addr_str((RX_HBConfig.dataAddr[i]&0x00ffffff) | 0x01000000, addr);
+			Error(ERR_ABORT, 0, "UDP[%d]: Connected to switch, but switch has no connection to rx_main_ctrl: %s. Check also for enabled jumbo frames on all involved devices", i, addr);
+		}
+		*/
 	}
 	if (Fpga.error->udp_flush_fifo==0xffff) { _Reload_FPGA = TRUE; if(ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err, err_fifo_full_0, 0, "UDP[%d]: FIFO FLUSH Error", i)) fpga_trace_registers("UDP-FIFO_FLUSH", TRUE); }
 	if (!fpga_is_ready()) return;	

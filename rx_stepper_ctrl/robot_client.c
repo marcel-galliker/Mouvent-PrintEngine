@@ -48,7 +48,7 @@
 
 #define STEPS_PER_REV				51200
 #define DISTANCE_UM_PER_REV			36000   // mirco meters per revolutionR
-#define MOTOR_X_GARAGE_POS			21000 //28500
+#define MOTOR_X_GARAGE_POS			20000 //28500
 
 #define SCREW_STEPS					213333
 #define SCREW_SPEED					640000			// steps/sec
@@ -66,6 +66,8 @@
 
 #define LOW		0
 #define HIGH	1
+
+#define DRIVER_ERROR	0x02	
 
 //--- Modlue Globals -----------------------------------------------------------------
 static char _IpAddr[32]="";
@@ -91,6 +93,8 @@ static UINT32			_FileSize;
 
 static int				_RC_State;
 static char				_RC_Error[MAX_PATH];
+
+static int				_Error_Written[MOTOR_CNT] = {FALSE};
 
 #define RC_STATE_REF	1000
 
@@ -128,6 +132,8 @@ static void _download_start(void);
 static void _download_data(SBootloaderDataRequestCmd *req);
 static void _download_end(void);
 static void _setSerialNo(UINT16 no);
+static void _robot_error_check(void);
+static char *_motor_name(int no);
 
 //--- rc_init ----------------------------------------------------
 void rc_init(void)
@@ -160,8 +166,29 @@ void rc_main(int ticks, int menu)
 		}
         RX_StepperStatus.screwerinfo.z_in_down = ROB_IN(IN_Z_DOWN) ? TRUE : FALSE;
         RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP) ? TRUE : FALSE;
+		_robot_error_check();
+	}
+}
 
+//--- _robot_error_check ---------------------------------------------
+static void _robot_error_check(void)
+{
+	for (int i = 0; i < SIZEOF(_RobotStatus.motor); i++)
+	{
+		if (_RobotStatus.motor[i].status & DRIVER_ERROR && !_Error_Written[i])
+		{
+			Error(ERR_CONT, 0, "Driver Error on Robot-Motor %s", _motor_name(i));
+			_Error_Written[i] = TRUE;
+		}
+		else if (!(_RobotStatus.motor[i].status & DRIVER_ERROR))
+			_Error_Written[i] = FALSE;
     }
+}
+
+//--- robot_clear_error ---------------------------------------------------
+void robot_clear_error()
+{
+	memset(_Error_Written, 0, sizeof(_Error_Written));
 }
 
 //--- _robot_ctrl_thread --------------------------------------------------------
@@ -511,7 +538,11 @@ static void _rc_state_machine(void)
 										rc_moveto_x(MOTOR_X_GARAGE_POS, _FL_);
 										_RC_State++;
 									}
-									else _rc_error(_FL_, "X-Axis end sensor not found");
+									else
+									{
+										_RC_State = 0;
+										_rc_error(_FL_, "X-Axis end sensor not found");
+									}
 								}
 								break;
 
@@ -925,6 +956,8 @@ static int _rc_move_screw_done(void)
 //--- rc_move_top --------------------------------------
 int  rc_move_top(const char *file, int line)
 {
+    rc_reset_motors(MOTOR_Z);
+    rx_sleep(200);
     return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, HIGH, _FL_);	
 }
 
@@ -1175,4 +1208,22 @@ int rc_move_xy_error(void)
 		}
     }
 	return FALSE;
+}
+
+//--- _motor_name ------------------------------
+static char *_motor_name(int no)
+{
+	switch (no)
+	{
+	case MOTOR_XY_1:
+		return "XY-1";
+	case MOTOR_XY_0:
+		return "XY-0";
+	case MOTOR_SCREW:
+		return "Screwer";
+	case MOTOR_Z:
+		return "Z";
+	default:
+		return "";
+	}
 }

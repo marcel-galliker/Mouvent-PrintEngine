@@ -99,7 +99,7 @@ static void _main_loop()
 									else
 									{
 									    txrob_main(ticks, menu);
-									    tx80x_wd_main();
+									    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_main();
 									}
 									break;
 			
@@ -108,7 +108,7 @@ static void _main_loop()
 									else
 									{
 									    txrob_main(ticks, menu);
-									    tx80x_wd_main();
+									    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_main();
 									}
 									break;
 										
@@ -203,14 +203,14 @@ int main(int argc, char** argv)
 								else
 								{
 								    txrob_init();
-								    tx80x_wd_init();
+								    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_init();
 								}
 								break;
      case printer_TX404:			if (RX_StepperCfg.boardNo == 0)	tx404_init();
 								else
 								{
 								    txrob_init();
-								    tx80x_wd_init();
+								    if (!RX_StepperStatus.robinfo.wd_unused) tx80x_wd_init();
 								}
 								break;
 		
