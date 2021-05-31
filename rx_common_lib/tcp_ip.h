@@ -419,10 +419,18 @@
 #define CMD_ROBI_SCREW_TIGHT		0x01000747
 #define CMD_ROBI_SCREW_LOOSE		0x01000748
 #define CMD_ROBI_MOVE_TO_X			0x01000749
-#define CMD_ROBI_MOVE_TO_Y			0x0100075a
-#define CMD_ROBI_MOVE_TO_GARAGE		0x0100075b
+#define CMD_ROBI_MOVE_TO_Y			0x0100074a
+#define CMD_ROBI_MOVE_TO_GARAGE		0x0100074b
 
-#define CMD_ROB_END				0x010007ff
+#define CMD_ROB_END					0x0100077f
+
+// Setup Assistand Commands
+#define CMD_SA_REFERENCE			0x01000780
+#define CMD_SA_STOP					0x01000781
+#define CMD_SA_MOVE_SLEDGE			0x01000782
+#define CMD_SA_MOVE_LIFT_UP			0x01000783
+#define CMD_SA_MOVE_LIFT_DOWN		0x01000784
+
 
 
 //--- Data Spooler -------------------------------------------------
