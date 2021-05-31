@@ -123,20 +123,18 @@ void sa_main(int ticks, int menu)
 			RX_StepperStatus.info.ref_done = FALSE;							
 		}
 
-        if (RX_StepperStatus.cmdRunning == CMD_SA_MOVE_SLEDGE)
+        if (RX_StepperStatus.cmdRunning == CMD_SA_MOVE)
         {
             _SledgePos_Act = _SledgePos_New;
             _SledgePos_New = 0;
         }
 
         RX_StepperStatus.info.x_in_ref    = (RX_StepperStatus.cmdRunning==CMD_SA_REFERENCE && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_up     = (RX_StepperStatus.cmdRunning==CMD_SA_MOVE_LIFT_UP && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_down  = (RX_StepperStatus.cmdRunning==CMD_SA_MOVE_LIFT_DOWN && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_up     = (RX_StepperStatus.cmdRunning==CMD_SA_UP && RX_StepperStatus.info.ref_done);
+		RX_StepperStatus.info.z_in_down  = (RX_StepperStatus.cmdRunning==CMD_SA_DOWN && RX_StepperStatus.info.ref_done);
         
-		if (RX_StepperStatus.info.ref_done && RX_StepperStatus.cmdRunning==CMD_SA_REFERENCE && _SledgePos_New) 
-		{
-			_sa_move_to_pos(CMD_SA_MOVE_SLEDGE,    _SledgePos_New);
-		}
+		if (RX_StepperStatus.info.ref_done && RX_StepperStatus.cmdRunning==CMD_SA_REFERENCE && _SledgePos_New)
+			_sa_move_to_pos(CMD_SA_MOVE,    _SledgePos_New);
 		else
 			RX_StepperStatus.cmdRunning = FALSE;
 	}	
@@ -146,8 +144,7 @@ void sa_main(int ticks, int menu)
 static void _sa_display_status(void)
 {
 	term_printf("SETUP ASSIST ---------------------------------\n");
-	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning);	
-	// term_printf("Head UP Sensor: %d\n",	fpga_input(HEAD_UP_IN));	
+	term_printf("moving:         %d		cmd: %08x\n",	RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning);
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
 	term_printf("z in reference: %d\n",	RX_StepperStatus.info.x_in_ref);
 	term_printf("z in up:        %d\n",	RX_StepperStatus.info.z_in_up);
@@ -187,10 +184,10 @@ int sa_menu(void)
 		case 'R': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_REFERENCE,		NULL); break;
 		case 'r': motor_reset(atoi(&str[1]));									   break;
 		case 'p': pos = atoi(&str[1]);
-                  sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_MOVE_SLEDGE, &pos);
+                  sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_MOVE, &pos);
 				  break;
-		case 'u': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_MOVE_LIFT_UP,		NULL); break;
-		case 'd': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_MOVE_LIFT_DOWN,		NULL); break;
+		case 'u': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_UP,		NULL); break;
+		case 'd': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_DOWN,		NULL); break;
 		case 'z': _sa_motor_z_test(atoi(&str[1])); break;
         case 'o': Fpga.par->output ^= (1 << atoi(&str[1]));	break;
 		case 'm': _sa_motor_test(str[1]-'0', atoi(&str[2])); break;
@@ -219,7 +216,7 @@ static int  _micron_2_steps_sledge(int micron)
 	return (int)(0.5 + STEPS_REV_SLEDGE / DIST_REV_SLEDGE*micron);
 }
 
-//---_micron_2_lift --------------------------------------------------------------
+//---_micron_2_sptes_lift --------------------------------------------------------------
 static int _micron_2_steps_lift(int micron)
 {
     return (int)(0.5 + STEPS_REV_LIFT / DIST_REV_LIFT * micron);
@@ -251,18 +248,18 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									_sa_do_reference();	
 									break;
 
-    case CMD_SA_MOVE_SLEDGE:		strcpy(_CmdName, "CMD_SA_MOVE_SLEDGE");
+    case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SLEDGE");
 									pos   = (*((INT32*)pdata));
 									steps = _micron_2_steps_sledge(pos);
 									if (!RX_StepperStatus.cmdRunning && steps!=_SledgePos_Act)
 									{
                                         _SledgePos_New = steps;
-                                        if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE_SLEDGE, _SledgePos_New);
+                                        if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
 										else								_sa_do_reference();
 									}
 									break;
 
-    case CMD_SA_MOVE_LIFT_UP:		strcpy(_CmdName, "CMD_SA_MOVE_LIFT_UP");
+    case CMD_SA_UP:					strcpy(_CmdName, "CMD_SA_UP");
 									if (!RX_StepperStatus.cmdRunning && !RX_StepperStatus.info.z_in_up)
 									{
                                         RX_StepperStatus.cmdRunning = msgId;
@@ -271,7 +268,7 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                     }
 									break;
 
-    case CMD_SA_MOVE_LIFT_DOWN:		strcpy(_CmdName, "CMD_SA_MOVE_LIFT_DOWN");
+    case CMD_SA_DOWN:				strcpy(_CmdName, "CMD_SA_DOWN");
 									if (!RX_StepperStatus.cmdRunning && !RX_StepperStatus.info.z_in_down)
 									{
                                         RX_StepperStatus.cmdRunning = msgId;
