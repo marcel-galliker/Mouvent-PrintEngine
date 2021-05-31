@@ -264,20 +264,20 @@ static void _cond_test_report(int ticks)
 						char name[100];
 						sprintf(name, PATH_TEMP "Conditioner-Test-%d.csv", _NiosStat->cond[head].serialNo);
 						file = fopen(name, "w");
-						fprintf(file, "SerialNo:/t%d",			_NiosStat->cond[head].serialNo);
-						fprintf(file, "Printed Liters:/t%s",	value_str3(RX_HBStatus->head[head].printed_ml));
-						fprintf(file, "Printed Time:/t%s",		value_str_time(RX_HBStatus->head[head].eeprom_mvt.printingSec));
-						fprintf(file, "Temp Head:/t%s",			value_str_time(RX_NiosStat.head_temp_org[head]/cnt));
-                        fprintf(file, "Temp Inlet:/t%s",		value_str_temp(_cond[head].tempIn/cnt));
-						fprintf(file, "Temp Heater:/t%s",		value_str_temp(_cond[head].tempHeater/cnt));
-						fprintf(file, "Presure In:/t%s",		value_str1(_cond[head].pressure_in/cnt));
-						fprintf(file, "Presure InDiff:/t%s",	value_str1(RX_HBStatus->head[head].presIn_diff));
-						fprintf(file, "Presure Out:/t%s",		value_str1(_cond[head].pressure_out/cnt));
-						fprintf(file, "Presure OutDiff:/t%s",	value_str1(RX_HBStatus->head[head].presOut_diff));
-						fprintf(file, "Meniscus:/t%s",			value_str1(_cond[head].meniscus));
-						fprintf(file, "Meniscus Diff:/t%s",		value_str1(RX_HBStatus->head[head].meniscus_diff));
-						fprintf(file, "Flow Resistance:/t%s",	value_str(_NiosMem->cfg.cond[head].flowResistance));
-						fprintf(file, "Flowfactor:/t%s",		value_str(RX_HBStatus->head[head].flowFactor));
+						fprintf(file, "SerialNo:\t%d\n",		_NiosStat->cond[head].serialNo);
+						fprintf(file, "Printed Liters:\t%s\n",	value_str3(RX_HBStatus->head[head].printed_ml));
+						fprintf(file, "Printed Time:\t%s\n",	value_str_time(RX_HBStatus->head[head].eeprom_mvt.printingSec));
+						fprintf(file, "Temp Head:\t%s\n",		value_str_time(RX_NiosStat.head_temp_org[head]/cnt));
+                        fprintf(file, "Temp Inlet:\t%s\n",		value_str_temp(_cond[head].tempIn/cnt));
+						fprintf(file, "Temp Heater:\t%s\n",		value_str_temp(_cond[head].tempHeater/cnt));
+						fprintf(file, "Presure In:\t%s\n",		value_str1(_cond[head].pressure_in/cnt));
+						fprintf(file, "Presure InDiff:\t%s\n",	value_str1(RX_HBStatus->head[head].presIn_diff));
+						fprintf(file, "Presure Out:\t%s\n",		value_str1(_cond[head].pressure_out/cnt));
+						fprintf(file, "Presure OutDiff:\t%s\n",	value_str1(RX_HBStatus->head[head].presOut_diff));
+						fprintf(file, "Meniscus:\t%s\n",		value_str1(_cond[head].meniscus));
+						fprintf(file, "Meniscus Diff:\t%s\n",	value_str1(RX_HBStatus->head[head].meniscus_diff));
+						fprintf(file, "Flow Resistance:\t%s\n",	value_str(_NiosMem->cfg.cond[head].flowResistance));
+						fprintf(file, "Flowfactor:\t%s\n",		value_str(RX_HBStatus->head[head].flowFactor));
 						fclose(file);
 					}
 				}
