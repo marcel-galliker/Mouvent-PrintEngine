@@ -34,7 +34,7 @@
 #define DIST_REV_SLEDGE		99000.0		// moving distance per revolution [um]
 
 #define STEPS_REV_LIFT		200*STEPS	// steps per motor revolution * 16 times oversampling
-#define DIST_REV_LIFT		1000		// moving distnace per revolution [um]
+#define DIST_REV_LIFT		1000		// moving distance per revolution [um]
 
 //Inputs
 #define SLEDGE_REF			0
@@ -59,7 +59,7 @@ static int	_micron_2_steps_lift(int micron);
 void sa_init(void)
 {
     motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
-    motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, 0, 0, STEPS);
+    motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
 
     memset(_CmdName, 0, sizeof(_CmdName));
 
@@ -206,7 +206,7 @@ static void _sa_do_reference(void)
 {
     motors_stop(MOTOR_ALL_BITS);
     motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
-    motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, 0, 0, STEPS);
+    motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
 	
 	RX_StepperStatus.cmdRunning  = CMD_SA_REFERENCE;
 	RX_StepperStatus.info.moving = TRUE;
@@ -308,7 +308,7 @@ static void _sa_motor_test(int motorNo, int steps)
     if (motorNo == MOTOR_SLEDGE)
     {
         par.current_acc = 420.0;
-        par.current_run = 300.0;
+        par.current_run = 420.0;
     }
     else
     {
@@ -317,8 +317,7 @@ static void _sa_motor_test(int motorNo, int steps)
     }
     par.stop_mux = 0;
     par.estop_in_bit[MOTOR_SLEDGE] = (1 << SLEDGE_REF);
-    par.estop_in_bit[MOTOR_LIFT] = (1 << SLEDGE_REF);
-    par.estop_level = TRUE;
+    par.estop_level = FALSE;
 	par.dis_mux_in	= 0;
 	par.encCheck	= chk_off;
 	
@@ -328,8 +327,8 @@ static void _sa_motor_test(int motorNo, int steps)
     if (motorNo == MOTOR_SLEDGE)
         motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
     else if (motorNo == MOTOR_LIFT)
-        motor_config(MOTOR_LIFT, 5, 0, 0, STEPS);
+        motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
     
-    motors_move_by_step(motors, &par, steps, FALSE);			
+    motors_move_by_step(motors, &par, steps, FALSE);
 }
 
