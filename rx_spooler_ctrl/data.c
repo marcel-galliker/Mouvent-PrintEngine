@@ -865,15 +865,15 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 		}
 
 		#ifdef DEBUG
-//		if (FALSE)
-		if (loaded)
+		if (FALSE)
+//		if (loaded)
 		{
 			char dir[MAX_PATH];
 			char fname[MAX_PATH];
 			sprintf(dir, PATH_RIPPED_DATA "trace");
 			sprintf(fname, "ID_%d", id->id);
 			bmpInfo.planes = RX_Spooler.colorCnt;
-			tif_write(dir, fname, &bmpInfo, "C");
+			tif_write(dir, fname, &bmpInfo, NULL);
 			Error(WARN, 0, "Test: Written bitmap to >>%s\\%s<<", dir, fname);
 		}
 		#endif
@@ -1361,7 +1361,10 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				{
 					empty=TRUE;
 				}
-				
+
+			//	if (rx_def_is_lb(RX_Spooler.printerType)) 
+			//		empty=FALSE;
+					
 				if (rx_def_is_lb(RX_Spooler.printerType) 
 				&& (id->id==PQ_TEST_ENCODER)  
 				&& (RX_Spooler.colorCnt<2 || RX_Color[color].color.colorCode!=0)) // encoder only in black

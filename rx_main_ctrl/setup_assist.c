@@ -179,7 +179,7 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								}
 								break;
 
-    case CMD_SA_OUT_TRIGGER://	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
+    case CMD_SA_OUT_TRIGGER:	//	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
 								{
 									SetupAssist_OutTriggerCmd cmd;
 									cmd.hdr.msgLen = sizeof(cmd);

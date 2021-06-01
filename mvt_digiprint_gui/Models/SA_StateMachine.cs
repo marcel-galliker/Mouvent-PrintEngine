@@ -16,7 +16,7 @@ namespace RX_DigiPrint.Models
 		private const bool		 _Debug=true;
 
 		public const bool		 _SimuCamera  = false;
-		public const bool		 _SimuMachine = true;
+		public bool				_SimuMachine = false;
 
 		private enum ENAssistMode
 		{
@@ -56,6 +56,10 @@ namespace RX_DigiPrint.Models
 			RxGlobals.SetupAssist.OnWebMoveDone  = _WebMoveDone;
 			RxGlobals.SetupAssist.OnScanMoveDone = _ScanMoveDone;
 			RxGlobals.SetupAssist.Simu			 = _SimuMachine;
+			#if DEBUG
+			_SimuMachine |= (RxGlobals.PrinterProperties.Host_Name==null);
+			#endif
+
 			foreach (var state in RxGlobals.StepperStatus)
 			{
 				state.PropertyChanged += SA_StateMachine_PropertyChanged; 			
@@ -157,24 +161,26 @@ namespace RX_DigiPrint.Models
 			{
 				Function = ECamFunction.CamFindLines_Vertical,
 				Name="Find 3 Vert Lines",
-				ScanPos	= 30.0,
+				ScanPos	= 20.0,
 			});
 
 			_Actions.Add(new SA_Action()
 			{
 				Function = ECamFunction.CamFindLine_Horzizontal,
 				Name="Find Horiz Line",
-				WebMoveDist = -5,
-				ScanPos	    = 30.0,
+				WebMoveDist = 0,
+				ScanPos	    = 20.0,
 			});
 
 			_Actions.Add(new SA_Action()
 			{
 				Function = ECamFunction.CamFindFirstAngle,
 				Name="Find First Angle",
-				WebMoveDist = 12.0,
-				WebPos		= 12.0,
-				ScanPos	    = 0,
+			//	WebMoveDist = 12.0,
+			//	WebPos		= 12.0,
+				WebMoveDist = 0,
+				WebPos		= 0,
+				ScanPos	    = 20.0,
 			});
 
 			if (!_Confirmed)
@@ -185,7 +191,8 @@ namespace RX_DigiPrint.Models
 					Name="Confirm",
 				//	WebMoveDist = 12.0,
 					WebMoveDist = 0,
-					WebPos = 12.0
+				//	WebPos = 12.0
+					WebPos = 0
 				});
 			}
 
@@ -204,6 +211,8 @@ namespace RX_DigiPrint.Models
 							PrintbarNo	= color,
 							StepperNo   = color/2,
 							HeadNo		= n,
+							WebMoveDist = n==0? 12.0 : 0,
+							WebPos		= 12.0,
 							Function	= ECamFunction.CamMeasureAngle,
 							Name		= String.Format(" {0}-{1}",  colorName, n+1),
 						};						
@@ -267,7 +276,7 @@ namespace RX_DigiPrint.Models
 			{
 				Function = ECamFunction.CamFindLines_Vertical,
 				Name="Find 3 Vert Lines",
-				ScanPos	= 30.0,
+				ScanPos	= 20.0,
 			});
 
 			_Actions.Add(new SA_Action()
@@ -275,7 +284,7 @@ namespace RX_DigiPrint.Models
 				Function = ECamFunction.CamFindLine_Horzizontal,
 				Name="Find Horiz Line",
 				WebMoveDist = 0,
-				ScanPos	    = 30.0,
+				ScanPos	    = 20.0,
 			});
 
 			_Actions.Add(new SA_Action()
@@ -383,7 +392,7 @@ namespace RX_DigiPrint.Models
 
 			if (_Action!=null)
 			{
-				Console.WriteLine("CALLBACK: info={0} Action[{1}].function={2}, cnt={3}, NumMeasures={4}, value={5}, DPosX={6}, DPosY={7}", CallBackInfo.ToString(), _ActionIdx, _Action.Function.ToString(), _Action.MeasureCnt, CallBackData.NumMeasures, CallBackData.Value_1, CallBackData.DPosX, CallBackData.DPosY);
+				Console.WriteLine("CALLBACK: info={0} Action[{1}].function={2}, pos={3}, cnt={4}, NumMeasures={5}, value={6}, DPosX={7}, DPosY={8}", CallBackInfo.ToString(), _ActionIdx, _Action.Function.ToString(), RxGlobals.SetupAssist.ScanPos,  _Action.MeasureCnt, CallBackData.NumMeasures, CallBackData.Value_1, CallBackData.DPosX, CallBackData.DPosY);
 				if (CallBackData.DPosX.Equals(float.NaN)) CallBackData.DPosX=0;
 				if (CallBackData.DPosY.Equals(float.NaN)) CallBackData.DPosY=0;
 				switch(_Action.Function)
@@ -439,6 +448,14 @@ namespace RX_DigiPrint.Models
 							}
 							handled=true;
 							break;
+
+					case ECamFunction.CamConfirmFocus:
+							_CallbackData = CallBackData;
+							CallbackInfo=string.Format("# {0}\n", ++_CallbackNo) 
+										+ "Measure Angle\n"
+										+ string.Format("  Correction: X={0:0.00}\n", CallBackData.Value_1)
+										+ string.Format("  Center position: X={0:0.00}, y={1:0.00}\n", CallBackData.DPosX, CallBackData.DPosY);
+						break;
 
 					//--- Measure angle ----------------------------------------------------
 					case ECamFunction.CamMeasureAngle: 
@@ -516,7 +533,7 @@ namespace RX_DigiPrint.Models
 									Console.WriteLine("CamMeasureStitch next actinIdx={0}", _ActionIdx);									
 									_Action.WebMoveDone=false;
 									_Action.ScanMoveDone=false;
-									RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos-10, 1000);
+									RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos, 1000);
 									RxGlobals.SetupAssist.WebMove(_StitchWebDist);
 								}
 								else 
@@ -797,8 +814,11 @@ namespace RX_DigiPrint.Models
 		private void _CamFindFirstAngle_start()
 		{
 		//	Console.WriteLine("{0}: Action[{1}]: _CamFindFirstAngle_start, ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
-			RxGlobals.SetupAssist.ScanReference();
-			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
+		//	RxGlobals.SetupAssist.ScanReference();
+		//	RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
+			_Action.ScanMoveDone = true;
+			_Action.WebMoveDone  = true;
+			_StartCamFunction();
 		}
 
 		//--- _CamConfirmFocus_start ----------------------------------------------
@@ -812,23 +832,24 @@ namespace RX_DigiPrint.Models
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("_CamMeasureAngle_start: stopPos={0}", RxGlobals.SetupAssist.ScanStopPos));
 
-			Console.WriteLine("{0}: _CamMeasureAngle_start Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
+			Console.WriteLine("{0}: _CamMeasureAngle_start Action[{1}]: ScannerPos={2}, ScanPos={3}, WebMoveDist={4}, ", RxGlobals.Timer.Ticks(), _ActionIdx, RxGlobals.SetupAssist.ScanPos, _Action.ScanPos, _Action.WebMoveDist);
 			_Confirmed = true;
 			if (_Actions[_ActionIdx-1].Function==ECamFunction.CamConfirmFocus || _Actions[_ActionIdx-1].Function==ECamFunction.CamFindFirstAngle)
 			{
-				_Action.ScanMoveDone = _Action.WebMoveDone = true;
+				if (true) //--- skip first measurement, probably out of scanner range
+				{
+					_Action.Measured(float.NaN);
+					_Action.ScanPos = RxGlobals.SetupAssist.ScanPos + _AngleDist;
+				}
+
+				RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
+				RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 				_CamMeasureAngle_Step = 3;
-				_StartCamFunction();
 			}
-			/*
 			else
 			{
 				_CamMeasureAngle_Step = 0;
-				if (_Action.HeadNo==0) RxGlobals.SetupAssist.ScanReference();
-				else _ScanMoveDone();
-				RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
 			}
-			*/
 			Console.WriteLine("_CamMeasureAngle_start: _CamMeasureAngle_Step={0}", _CamMeasureAngle_Step);
 		}
 
@@ -838,8 +859,7 @@ namespace RX_DigiPrint.Models
 		//	RxGlobals.Events.AddItem(new LogItem("_CamMeasureStitch_start"));
 
 			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
-			if (_HeadNo==0) RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos-10);
-			else			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
 		}
 
@@ -849,8 +869,7 @@ namespace RX_DigiPrint.Models
 		//	RxGlobals.Events.AddItem(new LogItem("_CamMeasureDist_start"));
 
 			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
-			if (_HeadNo==0) RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos-10);
-			else			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 
 			Console.WriteLine("{0}: Action[{1}]: Move web from {2} to {3} dist={4}", RxGlobals.Timer.Ticks(), _ActionIdx, RxGlobals.SetupAssist.WebPos, _Action.WebPos, _Action.WebPos-RxGlobals.SetupAssist.WebPos);
 
@@ -866,7 +885,7 @@ namespace RX_DigiPrint.Models
 
 			if (_ActionIdx+1<_Actions.Count && _Actions[_ActionIdx+1].Function==ECamFunction.CamMeasureAngle && _Actions[_ActionIdx+1].HeadNo>0)
 			{
-				_Actions[_ActionIdx+1].ScanPos = _Actions[_ActionIdx].ScanPos+_AngleDist;
+				_Actions[_ActionIdx+1].ScanPos = _Actions[_ActionIdx].ScanPos+2*_AngleDist;
 
 				if (_StitchIdx+_Action.HeadNo<_Actions.Count())
 				{					
@@ -925,11 +944,12 @@ namespace RX_DigiPrint.Models
 			if (_Action.Function==ECamFunction.CamFindFirstAngle)
 			{
 				Console.WriteLine("{0}: CamFindFirstAngle: _ScanMoveDone motorPos={1}, stopPos={2}, DPosX={3}", RxGlobals.Timer.Ticks(), RxGlobals.SetupAssist.ScanPos, RxGlobals.SetupAssist.ScanStopPos, _CallbackData.DPosX);
-				if (RxGlobals.SetupAssist.ScanPos>5)
+				// if (RxGlobals.SetupAssist.ScanPos>5)
 				{
 					if (_MarkFound) 
 					{
 						ActionDone();
+						RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanStopPos + 0.2 + _CallbackData.DPosX/1000);
 					}
 					else
 					{
@@ -967,6 +987,7 @@ namespace RX_DigiPrint.Models
 							break;
 				}
 			}
+			/*
 			if (_Action.Function==ECamFunction.CamMeasureStitch && _Action.HeadNo==0 && !_SimuMachine)
 			{
 				Console.WriteLine("Action[{0}].CamMeasureStitch, HeadNo={1}, ScanPos={2}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos);
@@ -976,6 +997,7 @@ namespace RX_DigiPrint.Models
 					RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 				}
 			}
+			*/
 			if (_Action.Function==ECamFunction.CamMeasureDist && _Action.HeadNo==0 && !_SimuMachine)
 			{
 				Console.WriteLine("Action[{0}].CamMeasureDist, HeadNo={1}, ScanPos={2}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos);
@@ -1033,10 +1055,12 @@ namespace RX_DigiPrint.Models
 														else _StartCamFunction();
 														break;
 
+					/*
 					case ECamFunction.CamFindFirstAngle:
 														if (_Action.ScanMoveDone)
 															_StartCamFunction();
 														break;
+					*/
 
 					default: _StartCamFunction(); break;
 				}
@@ -1087,7 +1111,7 @@ namespace RX_DigiPrint.Models
 						Console.WriteLine("Action[{0}]: Start MeasureAngle, cnt={1}", _ActionIdx, _Actions[_ActionIdx].MeasureCnt);
 						result=_CamFunctions.MeasureAngle(true);
 						if (result!=RxCam.ENCamResult.OK) RxGlobals.Events.AddItem(new LogItem("MeasureAngle Error {0}", result.ToString()));
-						RxGlobals.SetupAssist.ScanMoveTo(100, 5);
+						RxGlobals.SetupAssist.ScanMoveTo(0, 10);
 						break;
 
 					case ECamFunction.CamConfirmFocus:

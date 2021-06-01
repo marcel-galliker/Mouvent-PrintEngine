@@ -157,6 +157,8 @@
                         <TextBlock  Grid.Row="6" Grid.Column="0" Text="Stop Left"/>
                         <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
                         <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
+                        <Button Grid.Row="7" Content="Left"   Width="70" HorizontalAlignment="Left" Click="SlideLeft_Clicked"/>
+                        <Button Grid.Row="7" Content="Right"  Width="70" HorizontalAlignment="Right" Click="Reference_Clicked"/>
 
                         <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
                                HorizontalAlignment="Center" 
@@ -196,7 +198,7 @@
             </common:MvtButton>
 
             <local:SA_CamSettings x:Name="CamSettings" Grid.Column="1" Margin="5,0"/>
-            <local:SA_ActionsView x:Name="SetupActions" Grid.Column="1" Grid.RowSpan="2" Margin="5,0"/>
+            <local:SA_ActionsView x:Name="SetupActions" Grid.Column="1" Grid.RowSpan="3" Margin="5,0"/>
         </Grid>
     </Grid>
 </UserControl>
