@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
         xmlns:views="clr-namespace:RX_DigiPrint.Views"
-        xmlns:views_su="clr-namespace:RX_DigiPrint.Views.SupervisorsView"
+        xmlns:views_su="clr-namespace:RX_DigiPrint.Views.UsersView"
         xmlns:views_pq="clr-namespace:RX_DigiPrint.Views.PrintQueueView"
         xmlns:views_ps="clr-namespace:RX_DigiPrint.Views.PrintSystemView"
         xmlns:views_al="clr-namespace:RX_DigiPrint.Views.Alignment"
@@ -158,14 +158,14 @@
                 </Grid>
             </TabItem>
 
-            <TabItem x:Name="TabSupervisors">
+            <TabItem x:Name="TabUsers">
                 <TabItem.Header>
-                    <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabSupervisors}">
+                    <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabUsers}">
                         <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding Users}"/>
                     </Grid>
                 </TabItem.Header>
                 <Grid>
-                    <views_su:SupervisorsView x:Name="SupervisorsView"/>
+                    <views_su:UsersView x:Name="UsersView"/>
                 </Grid>
             </TabItem>
 

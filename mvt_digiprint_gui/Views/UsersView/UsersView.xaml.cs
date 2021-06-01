@@ -23,43 +23,43 @@ using System.IO;
 using Infragistics.Controls.Grids;
 using RX_DigiPrint.Views.Settings;
 
-namespace RX_DigiPrint.Views.SupervisorsView
+namespace RX_DigiPrint.Views.UsersView
 {
     /// <summary>
-    /// Main view for the Supervisors Tab
+    /// Main view for the Users Tab
     /// </summary>
-    public partial class SupervisorsView : UserControl
+    public partial class UsersView : UserControl
     {
         private readonly MvtUserLevelManager ulm = new MvtUserLevelManager(SettingsDlg.GetVersion(), RxGlobals.PrinterProperties.Host_Name);
 
-        public SupervisorsView()
+        public UsersView()
         {
             InitializeComponent();
 
             UpdateView();
         }
 
-        private void AddSupervisor_clicked(object sender, System.Windows.RoutedEventArgs e)
+        private void AddUser_clicked(object sender, System.Windows.RoutedEventArgs e)
         {
-            Window addSupervisor = new AddSupervisor();
-            addSupervisor.Owner = Window.GetWindow(this);
-            addSupervisor.ShowDialog();
+            Window addUser = new AddUser();
+            addUser.Owner = Window.GetWindow(this);
+            addUser.ShowDialog();
             UpdateView();
         }
 
-        private void RemoveSupervisor_clicked(object sender, System.Windows.RoutedEventArgs e)
+        private void RemoveUser_clicked(object sender, System.Windows.RoutedEventArgs e)
         {
-            Supervisor s = GetSelectedSupervisor();
+            Helpers.User s = GetSelectedUser();
             if(s != null)
             {
-                ulm.RemoveSupervisor(s.Username);
+                ulm.RemoveUser(s.Username);
                 UpdateView();
             }
         }
 
         private void ChangeValidity_clicked(object sender, System.Windows.RoutedEventArgs e)
         {
-            Supervisor s = GetSelectedSupervisor();
+            Helpers.User s = GetSelectedUser();
             if (s != null)
             {
                 CalendarValidity calendarValidity = new CalendarValidity(ulm, s.Username);
@@ -71,7 +71,7 @@ namespace RX_DigiPrint.Views.SupervisorsView
 
         private void ShowCode_Click(object sender, RoutedEventArgs e)
         {
-            Supervisor s = GetSelectedSupervisor();
+            Helpers.User s = GetSelectedUser();
             if (s != null)
             {
                 QRCodeView qrCodeView = new QRCodeView(s.Username);
@@ -81,12 +81,12 @@ namespace RX_DigiPrint.Views.SupervisorsView
         }
 
         /// <summary>
-        /// Helper function to check if a supervisor is selected
+        /// Helper function to check if a User is selected
         /// </summary>
-        /// <returns>true if a supervisor is selected, false otherwise</returns>
-        private bool SupervisorSelected()
+        /// <returns>true if a User is selected, false otherwise</returns>
+        private bool UserSelected()
         {
-            foreach (Row row in SupervisorsGrid.Rows)
+            foreach (Row row in UsersGrid.Rows)
             {
                 if (row.IsSelected) return true;
             }
@@ -94,18 +94,18 @@ namespace RX_DigiPrint.Views.SupervisorsView
         }
 
         /// <summary>
-        /// Helper function to get the selected supervisor
+        /// Helper function to get the selected User
         /// </summary>
-        /// <returns>The selected supervisor, or null if there isn't one</returns>
-        private Supervisor GetSelectedSupervisor()
+        /// <returns>The selected User, or null if there isn't one</returns>
+        private Helpers.User GetSelectedUser()
         {
-            if(SupervisorSelected())
+            if(UserSelected())
             {
-                foreach (Row row in SupervisorsGrid.Rows)
+                foreach (Row row in UsersGrid.Rows)
                 {
                     if (row.IsSelected)
                     {
-                        return row.Data as Supervisor;
+                        return row.Data as Helpers.User;
                     }                    
                 }
             }
@@ -113,36 +113,36 @@ namespace RX_DigiPrint.Views.SupervisorsView
         }
 
         /// <summary>
-        /// Helper function to update the DataGrid view containing the supervisor list
+        /// Helper function to update the DataGrid view containing the User list
         /// </summary>
         private void UpdateView()
         {
-            SupervisorsGrid.ItemsSource = ulm.GetAllSupervisors();
+            UsersGrid.ItemsSource = ulm.GetAllUsers();
             UpdateButtons();
         }
 
         private void UpdateButtons()
         {
-            if(SupervisorSelected())
+            if(UserSelected())
             {
-                RemoveSupervisor.Visibility = Visibility.Visible;
+                RemoveUser.Visibility = Visibility.Visible;
                 ChangeValidity.Visibility = Visibility.Visible;
                 ShowCode.Visibility = Visibility.Visible;
             }
             else
             {
-                RemoveSupervisor.Visibility = Visibility.Hidden;
+                RemoveUser.Visibility = Visibility.Hidden;
                 ChangeValidity.Visibility = Visibility.Hidden;
                 ShowCode.Visibility = Visibility.Hidden;
             }
         }
 
-        private void SupervisorsGrid_SelectedItemsChanged(object sender, Infragistics.Windows.DataPresenter.Events.SelectedItemsChangedEventArgs e)
+        private void UsersGrid_SelectedItemsChanged(object sender, Infragistics.Windows.DataPresenter.Events.SelectedItemsChangedEventArgs e)
         {
             UpdateButtons();
         }
 
-        private void SupervisorsGrid_SelectedRowsCollectionChanged(object sender, Infragistics.Controls.Grids.SelectionCollectionChangedEventArgs<Infragistics.Controls.Grids.SelectedRowsCollection> e)
+        private void UsersGrid_SelectedRowsCollectionChanged(object sender, Infragistics.Controls.Grids.SelectionCollectionChangedEventArgs<Infragistics.Controls.Grids.SelectedRowsCollection> e)
         {
             UpdateButtons();
         }

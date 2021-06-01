@@ -16,7 +16,7 @@ using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Views.Settings;
 
-namespace RX_DigiPrint.Views.SupervisorsView
+namespace RX_DigiPrint.Views.UsersView
 {
     /// <summary>
     /// Class managing the QR code displaying view
@@ -27,7 +27,7 @@ namespace RX_DigiPrint.Views.SupervisorsView
         {
             InitializeComponent();
             MvtUserLevelManager ulm = new MvtUserLevelManager(SettingsDlg.GetVersion(), RxGlobals.PrinterProperties.Host_Name);
-            MvtTOTP codes = ulm.GetSupervisorCode(username);
+            MvtTOTP codes = ulm.GetUserCode(username);
             
             QRCode.Source = codes.QRImgSrc();
             ManualCode.Text = codes.GetManualCode();

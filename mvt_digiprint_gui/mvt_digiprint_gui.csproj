@@ -508,7 +508,7 @@
     <Compile Include="Views\LH702View\LH702_Counters.xaml.cs">
       <DependentUpon>LH702_Counters.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SupervisorsView\CalendarValidity.xaml.cs">
+    <Compile Include="Views\UsersView\CalendarValidity.xaml.cs">
       <DependentUpon>CalendarValidity.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml.cs">
@@ -709,7 +709,7 @@
     <Compile Include="Views\PrintSystemView\StepperGridLB702.xaml.cs">
       <DependentUpon>StepperGridLB702.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SupervisorsView\QRCodeView.xaml.cs">
+    <Compile Include="Views\UsersView\QRCodeView.xaml.cs">
       <DependentUpon>QRCodeView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings\NetworkItem.xaml.cs">
@@ -718,7 +718,7 @@
     <Compile Include="Views\Settings\SettingsDlg.xaml.cs">
       <DependentUpon>SettingsDlg.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SupervisorsView\UserLogin.xaml.cs">
+    <Compile Include="Views\UsersView\UserLogin.xaml.cs">
       <DependentUpon>UserLogin.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings\WlanSettings.xaml.cs">
@@ -763,8 +763,8 @@
     <Compile Include="Views\TexView\TexStepper.xaml.cs">
       <DependentUpon>TexStepper.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SupervisorsView\SupervisorsView.xaml.cs">
-      <DependentUpon>SupervisorsView.xaml</DependentUpon>
+    <Compile Include="Views\UsersView\UsersView.xaml.cs">
+      <DependentUpon>UsersView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemView\ChillerView.xaml.cs">
       <DependentUpon>ChillerView.xaml</DependentUpon>
@@ -920,8 +920,8 @@
     <Compile Include="Views\UserControls\UVLampView.xaml.cs">
       <DependentUpon>UVLampView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SupervisorsView\AddSupervisor.xaml.cs">
-      <DependentUpon>AddSupervisor.xaml</DependentUpon>
+    <Compile Include="Views\UsersView\AddUser.xaml.cs">
+      <DependentUpon>AddUser.xaml</DependentUpon>
     </Compile>
     <Page Include="Comparers\Comparers.xaml">
       <SubType>Designer</SubType>
@@ -1043,7 +1043,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SupervisorsView\CalendarValidity.xaml">
+    <Page Include="Views\UsersView\CalendarValidity.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1347,7 +1347,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\SupervisorsView\QRCodeView.xaml">
+    <Page Include="Views\UsersView\QRCodeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1359,7 +1359,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SupervisorsView\UserLogin.xaml">
+    <Page Include="Views\UsersView\UserLogin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1419,7 +1419,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SupervisorsView\SupervisorsView.xaml">
+    <Page Include="Views\UsersView\UsersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1616,7 +1616,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SupervisorsView\AddSupervisor.xaml">
+    <Page Include="Views\UsersView\AddUser.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

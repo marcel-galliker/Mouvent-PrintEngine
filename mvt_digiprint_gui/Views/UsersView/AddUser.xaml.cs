@@ -15,28 +15,28 @@ using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Views.Settings;
 
-namespace RX_DigiPrint.Views.SupervisorsView
+namespace RX_DigiPrint.Views.UsersView
 {
     /// <summary>
-    /// Class managing the view to add a supervisor
+    /// Class managing the view to add a user
     /// </summary>
-    public partial class AddSupervisor : Window
+    public partial class AddUser : Window
     {
         private MvtUserLevelManager ulm;
-        public AddSupervisor()
+        public AddUser()
         {
             InitializeComponent();
 
             ulm = new MvtUserLevelManager(SettingsDlg.GetVersion(), RxGlobals.PrinterProperties.Host_Name);
-            ulm.NewMessage += LogSupervisorAddition;
+            ulm.NewMessage += LogUserAddition;
         }
 
         private void ValidateCreation_Click(object sender, RoutedEventArgs e)
         {
-            /* If a name was entered and a Date chosen, Superisor is added and his QR code is showed */
+            /* If a name was entered and a Date chosen, User is added and his QR code is showed */
             if(!String.IsNullOrWhiteSpace(Username.Text) && ValidityCal.SelectedDate != null)
             {
-                ulm.AddSupervisor(Username.Text, (DateTime)ValidityCal.SelectedDate);
+                ulm.AddUser(Username.Text, (DateTime)ValidityCal.SelectedDate);
                 QRCodeView qrCode = new QRCodeView(Username.Text);
                 qrCode.Owner = Window.GetWindow(this);
                 qrCode.ShowDialog();
@@ -49,7 +49,7 @@ namespace RX_DigiPrint.Views.SupervisorsView
             Close();
         }
 
-        public static void LogSupervisorAddition(String message)
+        public static void LogUserAddition(String message)
         {
             RxGlobals.Events.AddItem(new LogItem(message));
         }

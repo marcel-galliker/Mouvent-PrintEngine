@@ -124,7 +124,7 @@ namespace RX_DigiPrint.Views
 			{
                 _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance), TabLog, AddLocationHint.Last);
                 _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance), TabNetwork, AddLocationHint.Last);
-                _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance), TabSupervisors, AddLocationHint.Last);             
+                _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance), TabUsers, AddLocationHint.Last);             
                 _UserType = RxGlobals.User.UserType;
 			}
 		}

@@ -88,11 +88,11 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add a supervisor.
+        ///   Looks up a localized string similar to Add a user.
         /// </summary>
-        public static string AddASupervisor {
+        public static string AddAUser {
             get {
-                return ResourceManager.GetString("AddASupervisor", resourceCulture);
+                return ResourceManager.GetString("AddAUser", resourceCulture);
             }
         }
         
@@ -115,11 +115,11 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add Supervisor.
+        ///   Looks up a localized string similar to Add User.
         /// </summary>
-        public static string AddSupervisor {
+        public static string AddUser {
             get {
-                return ResourceManager.GetString("AddSupervisor", resourceCulture);
+                return ResourceManager.GetString("AddUser", resourceCulture);
             }
         }
         
@@ -664,11 +664,11 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Change a supervisor&apos;s validity.
+        ///   Looks up a localized string similar to Change a user&apos;s validity.
         /// </summary>
-        public static string ChangeASupervisorValidity {
+        public static string ChangeAUserValidity {
             get {
-                return ResourceManager.GetString("ChangeASupervisorValidity", resourceCulture);
+                return ResourceManager.GetString("ChangeAUserValidity", resourceCulture);
             }
         }
         
@@ -3742,7 +3742,7 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("Mark", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to MarkI.
         /// </summary>
@@ -3760,27 +3760,25 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("MarkV", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Mark.
+        ///   Looks up a localized string similar to MarkVerso.
         /// </summary>
         public static string MarkVerso {
-            get
-            {
+            get {
                 return ResourceManager.GetString("MarkVerso", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Mark.
+        ///   Looks up a localized string similar to MarkVersoI.
         /// </summary>
         public static string MarkVersoI {
-            get
-            {
+            get {
                 return ResourceManager.GetString("MarkVersoI", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Mask Length.
         /// </summary>
@@ -5213,11 +5211,11 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remove a supervisor.
+        ///   Looks up a localized string similar to Remove a user.
         /// </summary>
-        public static string RemoveASupervisor {
+        public static string RemoveAUser {
             get {
-                return ResourceManager.GetString("RemoveASupervisor", resourceCulture);
+                return ResourceManager.GetString("RemoveAUser", resourceCulture);
             }
         }
         
@@ -5817,11 +5815,11 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show Supervisor&apos;s authenticator codes.
+        ///   Looks up a localized string similar to Show User&apos;s authenticator codes.
         /// </summary>
-        public static string ShowSupervisorAuthenticatorCodes {
+        public static string ShowUserAuthenticatorCodes {
             get {
-                return ResourceManager.GetString("ShowSupervisorAuthenticatorCodes", resourceCulture);
+                return ResourceManager.GetString("ShowUserAuthenticatorCodes", resourceCulture);
             }
         }
         

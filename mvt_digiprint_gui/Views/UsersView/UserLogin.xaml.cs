@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 
-namespace RX_DigiPrint.Views.SupervisorsView
+namespace RX_DigiPrint.Views.UsersView
 {
     /// <summary>
     /// Class managin the user login View

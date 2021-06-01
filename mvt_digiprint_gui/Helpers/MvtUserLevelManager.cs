@@ -14,8 +14,8 @@ namespace RX_DigiPrint.Helpers
     public enum User_Level
     {
         Operator = 1,
-        Supervisor = 2,
-        Mouvent = 4
+        Maintenance = 2,
+        Engineer = 4
     }
 
     public delegate void LogMessage(String message);
@@ -113,50 +113,50 @@ namespace RX_DigiPrint.Helpers
         }
 
         /// <summary>
-        /// Adds a Supervisor to the database
+        /// Adds a User to the database
         /// </summary>
-        /// <param name="name">Name of new supervisor</param>
-        /// <param name="validUntil">Validity of new supervisor</param>
-        /// <returns>True if supervisor was added, false otherwise</returns>
-        public bool AddSupervisor(String name, DateTime validUntil)
+        /// <param name="name">Name of new User</param>
+        /// <param name="validUntil">Validity of new User</param>
+        /// <returns>True if User was added, false otherwise</returns>
+        public bool AddUser(String name, DateTime validUntil)
         {
             if (String.IsNullOrWhiteSpace(name)) return false;
 
-            List<Supervisor> supervisors = this.RetrieveSupervisors();
+            List<User> users = this.RetrieveUsers();
 
             /* Random GUID is created and secret key is made to look like this : MvtAuth-<user-name>-<GUID> */
             Guid guid = Guid.NewGuid();
             String random_guid = Convert.ToString(guid).Replace("-", "").Substring(0, 5);
 
-            /* Supervisor is added */
-            Supervisor newSup = new Supervisor(name, random_guid, validUntil, machineName);
-            supervisors.Add(newSup);
-            this.WriteSupervisors(supervisors);
+            /* User is added */
+            User newSup = new User(name, random_guid, validUntil, machineName);
+            users.Add(newSup);
+            this.WriteUsers(users);
 
             OnNewMessage(name + " was added as maintenance user");
             return true;
         }
 
         /// <summary>
-        /// Removes a Supervisor
+        /// Removes a User
         /// </summary>
-        /// <param name="name">Name of the Supervisor to remove</param>
-        /// <returns>True if supervisor was removed, false otherwise</returns>
-        public bool RemoveSupervisor(String name)
+        /// <param name="name">Name of the User to remove</param>
+        /// <returns>True if User was removed, false otherwise</returns>
+        public bool RemoveUser(String name)
         {
             if (String.IsNullOrWhiteSpace(name)) return false;
 
-            /* Get supervisors list */
-            List<Supervisor> supervisors = this.RetrieveSupervisors();
+            /* Get Users list */
+            List<User> users = this.RetrieveUsers();
 
-            /* Find supervisor and delete him if he exists */
-            foreach (Supervisor s in supervisors)
+            /* Find User and delete him if he exists */
+            foreach (User s in users)
             {
                 if (s.Username == name)
                 {
-                    supervisors.Remove(s);
+                    users.Remove(s);
                     OnNewMessage(name + " was removed from maintenance user list");
-                    return this.WriteSupervisors(supervisors);
+                    return this.WriteUsers(users);
                 }
             }
 
@@ -164,22 +164,22 @@ namespace RX_DigiPrint.Helpers
         }
 
         /// <summary>
-        /// Gets MvtTOTP object containing given supervisor's codes
+        /// Gets MvtTOTP object containing given User's codes
         /// </summary>
-        /// <param name="name">Name of the supervisor</param>
-        /// <returns>An MvtTOTP object with the codes of the supervisor</returns>
-        public MvtTOTP GetSupervisorCode(String name)
+        /// <param name="name">Name of the User</param>
+        /// <returns>An MvtTOTP object with the codes of the User</returns>
+        public MvtTOTP GetUserCode(String name)
         {
             if (String.IsNullOrWhiteSpace(name))
             {
-                Console.WriteLine("Name problem in GetSupervisorCode()");
+                Console.WriteLine("Name problem in GetUserCode()");
                 return new MvtTOTP("bad", false, " ");
             }
 
-            List<Supervisor> supervisors = this.RetrieveSupervisors();
+            List<User> users = this.RetrieveUsers();
 
             String secretKey = "temp";
-            foreach (Supervisor s in supervisors)
+            foreach (User s in users)
             {
                 if (s.Username == name)
                 {
@@ -192,43 +192,43 @@ namespace RX_DigiPrint.Helpers
         }
 
         /// <summary>
-        /// Gets all supervisors's names
+        /// Gets all Users's names
         /// </summary>
-        /// <returns>A list containing all supervisors names</returns>
-        public List<String> GetSupervisorList()
+        /// <returns>A list containing all Users names</returns>
+        public List<String> GetUserList()
         {
-            List<String> supervisors = new List<string>();
-            List<Supervisor> sups = this.RetrieveSupervisors();
+            List<String> users = new List<string>();
+            List<User> sups = this.RetrieveUsers();
 
-            foreach (Supervisor s in sups)
+            foreach (User s in sups)
             {
-                supervisors.Add(s.Username);
+                users.Add(s.Username);
             }
 
-            return supervisors;
+            return users;
         }
 
         /// <summary>
-        /// Function to get an ObservableCollection of Supervisors
+        /// Function to get an ObservableCollection of Users
         /// </summary>
-        /// <returns>An ObservableCollection<Supervisor> Object with all supervisors</returns>
-        public ObservableCollection<Supervisor> GetAllSupervisors()
+        /// <returns>An ObservableCollection<User> Object with all Users</returns>
+        public ObservableCollection<User> GetAllUsers()
         {
-            return new ObservableCollection<Supervisor>(this.RetrieveSupervisors());
+            return new ObservableCollection<User>(this.RetrieveUsers());
         }
 
         /// <summary>
-        /// Gives the validity of a supervisor
+        /// Gives the validity of a User
         /// </summary>
-        /// <param name="name">Name of the supervisor</param>
-        /// <returns>The date until which a supervisor is valid</returns>
-        public DateTime GetSupervisorValidity(String name)
+        /// <param name="name">Name of the User</param>
+        /// <returns>The date until which a User is valid</returns>
+        public DateTime GetUserValidity(String name)
         {
-            List<Supervisor> supervisors = this.RetrieveSupervisors();
+            List<User> users = this.RetrieveUsers();
 
-            if (supervisors.Exists(x => x.Username == name))
+            if (users.Exists(x => x.Username == name))
             {
-                Supervisor s = supervisors.Find(x => x.Username == name);
+                User s = users.Find(x => x.Username == name);
                 return s.Validity;
             }
 
@@ -242,10 +242,10 @@ namespace RX_DigiPrint.Helpers
         /// <returns>True if there's a match, false otherwise</returns>
         public bool Verify(String pin)
         {
-            List<Supervisor> supervisors = this.RetrieveSupervisors();
+            List<User> users = this.RetrieveUsers();
 
             /* For all secrets, create an object to check if it's valid */
-            foreach (Supervisor s in supervisors)
+            foreach (User s in users)
             {
                 MvtTOTP temp = new MvtTOTP(s.GetSecretString(), false, machineName);
                 if (temp.Verify(pin))
@@ -256,7 +256,7 @@ namespace RX_DigiPrint.Helpers
                         return false;
                     }
 
-                    level = User_Level.Supervisor;
+                    level = User_Level.Maintenance;
                     OnNewMessage(s.Username + " has logged in");
                     return true;
                 }
@@ -266,7 +266,7 @@ namespace RX_DigiPrint.Helpers
             MvtTOTP testMvt = new MvtTOTP(CreateMouventSecret(), true, machineName);
             if (testMvt.Verify(pin))
             {
-                level = User_Level.Mouvent;
+                level = User_Level.Engineer;
                 OnNewMessage("Engineer has logged in");
                 return true;
             }
@@ -284,16 +284,16 @@ namespace RX_DigiPrint.Helpers
         }
 
         /// <summary>
-        /// Changes the Validity date of a Supervisor
+        /// Changes the Validity date of a User
         /// </summary>
-        /// <param name="name">Name of the supervisor</param>
+        /// <param name="name">Name of the User</param>
         /// <param name="d">Date to set for new validity</param>
         /// <returns>true if validity was changed, false otherwise</returns>
-        public bool ChangeSupervisorValidity(String name, DateTime d)
+        public bool ChangeUserValidity(String name, DateTime d)
         {
-            List<Supervisor> supervisors = this.RetrieveSupervisors();
+            List<User> users = this.RetrieveUsers();
 
-            Supervisor s = supervisors.Find(x => x.Username == name);
+            User s = users.Find(x => x.Username == name);
 
             if (s == null)
             {
@@ -302,7 +302,7 @@ namespace RX_DigiPrint.Helpers
 
             s.Validity = d;
 
-            return this.WriteSupervisors(supervisors);
+            return this.WriteUsers(users);
         }
 
         /// <summary>
@@ -316,14 +316,14 @@ namespace RX_DigiPrint.Helpers
         }
 
         /// <summary>
-        /// Helper function to get all supervisors from xml file
+        /// Helper function to get all Users from xml file
         /// </summary>
-        /// <returns>A list of all supervisors</returns>
-        private List<Supervisor> RetrieveSupervisors()
+        /// <returns>A list of all Users</returns>
+        private List<User> RetrieveUsers()
         {
-            List<Supervisor> sups = new List<Supervisor>();
+            List<User> sups = new List<User>();
 
-            XmlSerializer serializer = new XmlSerializer(typeof(List<Supervisor>));
+            XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
             if (!Directory.Exists(Path.GetDirectoryName(dbPath)))
             {
                 try
@@ -354,7 +354,7 @@ namespace RX_DigiPrint.Helpers
             {
                 try
                 {
-                    sups = (List<Supervisor>)serializer.Deserialize(fs);
+                    sups = (List<User>)serializer.Deserialize(fs);
                 }
                 catch (Exception e) /* We get here if XML file is empty */
                 {
@@ -366,18 +366,18 @@ namespace RX_DigiPrint.Helpers
         }
 
         /// <summary>
-        /// Helper function to write all supervisors to an xml file
+        /// Helper function to write all Users to an xml file
         /// </summary>
-        /// <param name="supervisors">List of supervisors to write</param>
+        /// <param name="users">List of Users to write</param>
         /// <returns>True if written without problem, false otherwise</returns>
-        private bool WriteSupervisors(List<Supervisor> supervisors)
+        private bool WriteUsers(List<User> users)
         {
             using (Stream fs = new FileStream(dbPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(List<Supervisor>));
+                XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
                 try
                 {
-                    serializer.Serialize(fs, supervisors);
+                    serializer.Serialize(fs, users);
                 }
                 catch (Exception e)
                 {
@@ -397,10 +397,10 @@ namespace RX_DigiPrint.Helpers
     }
 
     /// <summary>
-    /// Class to represent a supervisor
+    /// Class to represent a User
     /// </summary>
     [Serializable()]
-    public class Supervisor
+    public class User
     {
         /// <summary>
         /// Base to the secret key that will be used for Authenticator code generation
@@ -433,8 +433,8 @@ namespace RX_DigiPrint.Helpers
         /* This contains the whole secret key */
         private String secretKey;
 
-        public Supervisor() { }
-        public Supervisor(String username, String secretKey, DateTime validity, String machineName)
+        public User() { }
+        public User(String username, String secretKey, DateTime validity, String machineName)
         {
             Username = username;
             SecretKey = secretKey;

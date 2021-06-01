@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using RX_DigiPrint.Helpers;
 
-namespace RX_DigiPrint.Views.SupervisorsView
+namespace RX_DigiPrint.Views.UsersView
 {
     /// <summary>
     /// Class managing the view for Validity date changes
@@ -36,7 +36,7 @@ namespace RX_DigiPrint.Views.SupervisorsView
             /* Validity is changed if a date was chosen */
             if (!String.IsNullOrWhiteSpace(name) && NewValidity.SelectedDate != null)
             {
-                ulm.ChangeSupervisorValidity(name, (DateTime)NewValidity.SelectedDate);
+                ulm.ChangeUserValidity(name, (DateTime)NewValidity.SelectedDate);
                 Close();
             }
         }

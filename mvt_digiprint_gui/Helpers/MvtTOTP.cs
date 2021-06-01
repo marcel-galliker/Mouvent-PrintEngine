@@ -16,7 +16,7 @@ namespace RX_DigiPrint.Helpers
 		/// Unique constructor for MvtTOTP objects
 		/// </summary>
 		/// <param name="secret"> Secret key that will be used for setup code generation and validity check </param>
-		/// <param name="mouvent"> Decides if Mouvent or not (supervisor otherwise) </param>
+		/// <param name="mouvent"> Decides if Engineer or not (maintenance otherwise) </param>
 		/// <param name="machineName"> Name of the machine, must be given for non mouvent codes </param>
 		/// <exception cref="ArgumentException"> Thrown when given secret or machine name is null, empty or whitespaces </exception>
 		public MvtTOTP(String secret, bool mouvent, String machineName)
@@ -37,7 +37,7 @@ namespace RX_DigiPrint.Helpers
 
 			/* Generating strings displayed on google authenticator */
 			String mouventLevel = "Mouvent ";
-			mouventLevel += mouvent ? "Service" : "Supervisor";
+			mouventLevel += mouvent ? "Engineer" : "Maintenance";
 			String[] secretKeyParsed = secret.Split('-');
 			String machineOrVersion = mouvent ? secretKeyParsed[1] : machineName;
 

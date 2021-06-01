@@ -2268,8 +2268,8 @@ No Splices in the machine?</value>
   <data name="Variable" xml:space="preserve">
     <value>Variable</value>
   </data>
-  <data name="AddSupervisor" xml:space="preserve">
-    <value>Add Supervisor</value>
+  <data name="AddUser" xml:space="preserve">
+    <value>Add User</value>
   </data>
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Authentication Failed</value>
@@ -2313,8 +2313,8 @@ No Splices in the machine?</value>
   <data name="AbortPrinting" xml:space="preserve">
     <value>Abort Printing</value>
   </data>
-  <data name="AddASupervisor" xml:space="preserve">
-    <value>Add a supervisor</value>
+  <data name="AddAUser" xml:space="preserve">
+    <value>Add a user</value>
   </data>
   <data name="AddImage" xml:space="preserve">
     <value>Add Image</value>
@@ -2322,8 +2322,8 @@ No Splices in the machine?</value>
   <data name="AdvanceImage" xml:space="preserve">
     <value>Advance Image</value>
   </data>
-  <data name="ChangeASupervisorValidity" xml:space="preserve">
-    <value>Change a supervisor's validity</value>
+  <data name="ChangeAUserValidity" xml:space="preserve">
+    <value>Change a user's validity</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
@@ -2358,8 +2358,8 @@ No Splices in the machine?</value>
   <data name="PageUp" xml:space="preserve">
     <value>Page Up</value>
   </data>
-  <data name="RemoveASupervisor" xml:space="preserve">
-    <value>Remove a supervisor</value>
+  <data name="RemoveAUser" xml:space="preserve">
+    <value>Remove a user</value>
   </data>
   <data name="RemoveImage" xml:space="preserve">
     <value>Remove Image</value>
@@ -2370,8 +2370,8 @@ No Splices in the machine?</value>
   <data name="SaveValues" xml:space="preserve">
     <value>Save Values</value>
   </data>
-  <data name="ShowSupervisorAuthenticatorCodes" xml:space="preserve">
-    <value>Show Supervisor's authenticator codes</value>
+  <data name="ShowUserAuthenticatorCodes" xml:space="preserve">
+    <value>Show User's authenticator codes</value>
   </data>
   <data name="StopPrinting" xml:space="preserve">
     <value>Stop Printing</value>
@@ -2678,5 +2678,11 @@ No Splices in the machine?</value>
   </data>
   <data name="SpliceMode" xml:space="preserve">
     <value>Splice Mode</value>
+  </data>
+  <data name="MarkVerso" xml:space="preserve">
+    <value>MarkVerso</value>
+  </data>
+  <data name="MarkVersoI" xml:space="preserve">
+    <value>MarkVersoI</value>
   </data>
 </root>

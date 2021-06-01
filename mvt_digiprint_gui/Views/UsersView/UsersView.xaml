@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="RX_DigiPrint.Views.SupervisorsView.SupervisorsView"
+﻿<UserControl x:Class="RX_DigiPrint.Views.UsersView.UsersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -9,7 +9,7 @@
              xmlns:rx="clr-namespace:RX_DigiPrint.Helpers"
              xmlns:ig="http://schemas.infragistics.com/xaml"
              xmlns:igDP="http://infragistics.com/DataPresenter"
-             xmlns:local="clr-namespace:RX_DigiPrint.Views.SupervisorsView"
+             xmlns:local="clr-namespace:RX_DigiPrint.Views.UsersView"
              xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="1100">
@@ -33,28 +33,28 @@
             <rx_uc:MouventTopToolBar Grid.Row="0" HorizontalAlignment="Right"></rx_uc:MouventTopToolBar>
 
             <StackPanel Background="{StaticResource Mouvent.MainColorBrush}" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="AddSupervisor" ToolTip="{mvt:LocalizedBinding AddASupervisor}" Click="AddSupervisor_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="AddUser" ToolTip="{mvt:LocalizedBinding AddAUser}" Click="AddUser_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Plus"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="RemoveSupervisor" ToolTip="{mvt:LocalizedBinding RemoveASupervisor}" Click="RemoveSupervisor_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="RemoveUser" ToolTip="{mvt:LocalizedBinding RemoveAUser}" Click="RemoveUser_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Minus"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ChangeValidity" ToolTip="{mvt:LocalizedBinding ChangeASupervisorValidity}" Click="ChangeValidity_clicked" >
+                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ChangeValidity" ToolTip="{mvt:LocalizedBinding ChangeAUserValidity}" Click="ChangeValidity_clicked" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Calendar"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ShowCode" ToolTip="{mvt:LocalizedBinding ShowSupervisorAuthenticatorCodes}" Click="ShowCode_Click" >
+                <common:MvtButton Margin="0, 0, 15, 0" Visibility="Hidden" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="ShowCode" ToolTip="{mvt:LocalizedBinding ShowUserAuthenticatorCodes}" Click="ShowCode_Click" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                         Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Qrcode"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
             </StackPanel>
         </Grid>
         <ig:XamGrid
-                x:Name="SupervisorsGrid"
+                x:Name="UsersGrid"
                 Grid.Row="1"
                 Grid.Column="0"
                 AutoGenerateColumns="False"
@@ -65,7 +65,7 @@
                 MinimumRowHeight="36"
                 RowHover="Row"
                 Background="Transparent"
-                SelectedRowsCollectionChanged="SupervisorsGrid_SelectedRowsCollectionChanged"
+                SelectedRowsCollectionChanged="UsersGrid_SelectedRowsCollectionChanged"
                 BorderBrush="Transparent"
                 Margin="10"
                 >

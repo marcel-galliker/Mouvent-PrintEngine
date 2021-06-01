@@ -1,4 +1,4 @@
-﻿<Window x:Class="RX_DigiPrint.Views.SupervisorsView.AddSupervisor"
+﻿<Window x:Class="RX_DigiPrint.Views.UsersView.AddUser"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,7 +10,7 @@
         xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
-        Title="{mvt:LocalizedBinding AddSupervisor}" 
+        Title="{mvt:LocalizedBinding AddUser}" 
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize">
     <Grid>
