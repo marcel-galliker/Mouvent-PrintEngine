@@ -58,7 +58,7 @@
 
 #define MAX_WAIT_TIME_SLEDGE    100000  // ms
 #define MAX_WAIT_TIME           40000   // ms
-#define MAX_WAIT_TIME_SCREW     180000  // ms		// with TCP/IP 100000 is enought
+#define MAX_WAIT_TIME_SCREW     180000  // ms		// with TCP/IP 100000 is enough
 
 // Digital Inputs
 #define CABLE_PULL_REF          2

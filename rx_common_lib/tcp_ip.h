@@ -251,6 +251,8 @@
 #define CMD_SA_OUT_TRIGGER		0x01000174
 #define CMD_SA_WEB_MOVE			0x01000175
 #define CMD_SA_WEB_STOP			0x01000176
+#define CMD_SA_UP				0x01000177
+#define CMD_SA_DOWN				0x01000178
 
 #define CMD_START_PRINTING		0x01000201
 #define REP_START_PRINTING		0x02000201
@@ -419,10 +421,11 @@
 #define CMD_ROBI_SCREW_TIGHT		0x01000747
 #define CMD_ROBI_SCREW_LOOSE		0x01000748
 #define CMD_ROBI_MOVE_TO_X			0x01000749
-#define CMD_ROBI_MOVE_TO_Y			0x0100075a
-#define CMD_ROBI_MOVE_TO_GARAGE		0x0100075b
+#define CMD_ROBI_MOVE_TO_Y			0x0100074a
+#define CMD_ROBI_MOVE_TO_GARAGE		0x0100074b
 
-#define CMD_ROB_END				0x010007ff
+#define CMD_ROB_END					0x010007ff
+
 
 
 //--- Data Spooler -------------------------------------------------
