@@ -1,12 +1,6 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Services;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace RX_DigiPrint.Models
 {

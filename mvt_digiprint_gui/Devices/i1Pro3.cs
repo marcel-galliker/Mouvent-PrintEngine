@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading.Tasks;
+using System.Threading;
+using RX_Common;
 
 namespace RX_DigiPrint.Devices
 {
@@ -11,7 +14,7 @@ namespace RX_DigiPrint.Devices
     {
         #region Definitions
         
-		private ColorConversion.SpectroResultStruct SpectroResult = new ColorConversion.SpectroResultStruct();
+//		private ColorConversion.SpectroResultStruct SpectroResult = new ColorConversion.SpectroResultStruct();
 
         private static bool sdkInitialized = false;
         private static Dictionary<IntPtr, I1Pro3> deviceMap = new Dictionary<IntPtr, I1Pro3>();
@@ -718,6 +721,16 @@ namespace RX_DigiPrint.Devices
             return ReplyString;
         }
 
+        //--- WhiteCalibrate (action)
+        public void WhiteCalibrate(Action<bool> done)
+		{
+            new Task(() =>
+			{
+                bool ret=WhiteCalibrate();
+                RxBindable.Invoke(()=>done(ret));
+			}).Start();
+		}
+
         /// <summary>
         /// Does a white calibration
         /// </summary>
@@ -813,6 +826,16 @@ namespace RX_DigiPrint.Devices
             return true;
         }
 
+        public void MeasurePoint(Action<ColorConversion.SpectroResultStruct> done)
+		{
+            new Task(() =>
+			{
+                ColorConversion.SpectroResultStruct result =  new ColorConversion.SpectroResultStruct();
+                result.CieLab.L = float.NaN;
+                MeasurePoint(ref result);
+                RxBindable.Invoke(()=>done(result));
+			}).Start();
+		}
 
         public bool MeasurePoint(ref ColorConversion.SpectroResultStruct Result)
         {
