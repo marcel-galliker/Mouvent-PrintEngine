@@ -124,8 +124,8 @@ int tw8_init(void)
 	
 	rx_sleep(500); // Wait for Analog-Encoder-Board to be ready
 	
-	tw8_config(0, 60, printer_TX801, enc_Balluff);
-	tw8_config(1, 60, printer_TX801, enc_Balluff);
+	tw8_config(0, 60, printer_LB702_UV, enc_Renishaw);
+	tw8_config(1, 60, printer_LB702_UV, enc_Renishaw);
 	
 	return REPLY_OK;
 }

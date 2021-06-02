@@ -97,7 +97,7 @@ static int  _handle_enc_msg		(RX_SOCKET socket, void *msg, int len, struct socka
 static void _handle_status		(int no, SEncoderStat* pstat);
 static void _handle_config_reply(int no, SReply* preply);
 static void _handle_event		(int no, SLogMsg *msg);
-static void _enc_start_printing (int no, SPrintQueueItem *pitem, int restart);
+static void _enc_config (int no, SPrintQueueItem *pitem, int restart);
 
 //--- enc_init -------------------------------------------------
 void enc_init(void)
@@ -164,6 +164,7 @@ static void *_enc_thread(void *lpParameter)
 				else
 				{
 					ErrorEx(dev_enc, no, LOG, 0, "Connected");
+					_enc_config(no, NULL, 0);
 				}
 			}				
 		}
@@ -264,7 +265,7 @@ int  enc_start_printing(SPrintQueueItem *pitem, int restart)
 //	Error(LOG, 0, "enc_start_printing");
 	for (no=0; no<ENC_CNT; no++)
 	{
-		if (_Encoder[no].used) 	_enc_start_printing(no, pitem, restart);		
+		if (_Encoder[no].used) 	_enc_config(no, pitem, restart);		
 	}
 	_Printing = TRUE;
 	_StopPG   = FALSE;
@@ -279,8 +280,8 @@ int  enc_start_printing(SPrintQueueItem *pitem, int restart)
 	return REPLY_OK;
 }
 
-//--- _enc_start_printing ---------------------------------------------------------------
-static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
+//--- _enc_config ---------------------------------------------------------------
+static void _enc_config(int no, SPrintQueueItem *pitem, int restart)
 {
 	SEncoderCfg msg;
 	double comp, comp2;
@@ -294,9 +295,12 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	msg.encoderType = RX_Config.printer.encoderType;
 	// if (arg_testMachine) msg.printerType=printer_LB701;
 
-	if (pitem->printGoMode==PG_MODE_MARK) msg.printGoMode = PG_MODE_MARK_FILTER;
-	else                                  msg.printGoMode = pitem->printGoMode;
-	msg.printGoDist = pitem->printGoDist;
+	if (pitem)
+	{
+		if (pitem->printGoMode==PG_MODE_MARK) msg.printGoMode = PG_MODE_MARK_FILTER;
+		else                                  msg.printGoMode = pitem->printGoMode;
+		msg.printGoDist = pitem->printGoDist;
+	}
 	msg.correction  = CORR_OFF; 
 	msg.ftc			= RX_Config.printer.offset.manualFlightTimeComp;
 	
@@ -314,7 +318,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	case printer_TX801:
 	case printer_TX802:			
 	case printer_TX404:			msg.orientation = FALSE;	msg.scanning=TRUE;  msg.incPerMeter=1000000; msg.pos_actual = machine_get_scanner_pos(); 
-								if (!pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
+								if (pitem && !pitem->testImage) _WakeupLen=WAKEUP_BAR_LEN*(RX_Config.inkSupplyCnt+1);
 								if (!arg_simuPLC) 
 								{
 									if (TRUE) msg.correction=CORR_LINEAR;
@@ -387,7 +391,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 	//	if (wakeupLen) Error(LOG, 0, "Set WakeupLen for Lazy jets: %d strokes", wakeupLen);
 	
 		
-	msg.speed_mmin  = pitem->speed;
+	if (pitem) msg.speed_mmin  = pitem->speed;
 	_IncPerMeter    = msg.incPerMeter;
 
 	memcpy(msg.corrRotPar, RX_Config.encoder[no].corrRotPar, sizeof(msg.corrRotPar));
@@ -396,11 +400,14 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 
 	if (_Scanning)
 	{
+		if (pitem)
+		{
 		msg.pos_pg_fwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin - (_WakeupLen*25400/1200);
 		if (rx_def_is_tx(RX_Config.printer.type))
 			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13350 + 5000 + (_WakeupLen*25400/1200);	// add extra 5000 for nagative distance
 		else // test table
 			msg.pos_pg_bwd  = _Encoder[no].webOffset_mm*1000 + pitem->pageMargin + pitem->srcHeight + 13350 + RX_Config.headDistBackMax;
+		}
 	}
 	else
 	{
@@ -414,7 +421,7 @@ static void _enc_start_printing(int no, SPrintQueueItem *pitem, int restart)
 		msg.pos_actual = 0;			
 	}
 
-	switch(pitem->scanMode)
+	if (pitem) switch(pitem->scanMode)
 	{
 	case PQ_SCAN_RTL:		msg.pos_pg_fwd = 	10000000; 
 							break;
