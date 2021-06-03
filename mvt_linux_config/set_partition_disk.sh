@@ -14,3 +14,10 @@ fi
 # Configures partman and GRUB.
 debconf-set partman-auto/disk "${DISK_DEV}"
 debconf-set grub-installer/bootdev "${DISK_DEV}"
+
+# Unmounts '/media'.
+# See: https://serverfault.com/questions/685302/unattended-installation-of-ubuntu-from-usb-drive-not-mounted-correctly
+mount | grep '/media'
+if [ $? -eq 0 ]; then
+  umount /media
+fi

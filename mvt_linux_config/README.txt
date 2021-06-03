@@ -47,12 +47,14 @@ Writing on a USB dongle may result in a non-bootable/non-working media depending
 * the writing tool used, and/or
 * the PC model we install on.
 
-We tried different writing tools, with varied levels of success:
+To write to a USB dongle, we tried different writing tools, with varied levels of success:
 * 'Rufus' (our advised tool), available at https://rufus.ie:
-  - After pressing 'START' select 'Write in ISO Image mode (Recommended)',
-  - If the resulting USB dongle stops at the beginning, issuing an error
-    about '/cdrom' not being mounted, then rewrite it using a different option:
-    after pressing 'START' select 'Write in DD Image mode'.
+  After pressing 'START' select 'Write in DD Image mode'.
+  You must do this because the Debian installer fails to mount '/cdrom' correctly
+  when installing:
+  - from an ISO 9660 partition residing on a USB dongle, and
+  - on a system where no partition already exists.
+  See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=847166
 * 'balenaEtcher', available at https://www.balena.io/etcher:
   The resulting USB dongle may work or not.
 * 'UNetbootin': do not use it (the Debian installer detects it and issues a warning).

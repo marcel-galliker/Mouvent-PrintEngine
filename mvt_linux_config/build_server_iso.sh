@@ -94,9 +94,11 @@
 # * FAQs:
 #   - https://askubuntu.com/questions/1219749/how-to-install-software-using-preseed-cfg-ubuntu-18-04-4
 #   - https://askubuntu.com/questions/1233454/how-to-preseed-ubuntu-20-04-desktop
+#   - https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=847166
 #   - https://ma.ttias.be/how-to-generate-a-passwd-password-hash-via-the-command-line-on-linux
 #   - https://matelakat.blogspot.com/2014/05/ubuntu-installer-unmount-partitions.html
 #   - https://serverfault.com/questions/550072/preseeding-ubuntu-partman-recipe-using-lvm-and-raid
+#   - https://serverfault.com/questions/685302/unattended-installation-of-ubuntu-from-usb-drive-not-mounted-correctly
 # * Downloads:
 #   - https://releases.ubuntu.com
 # * Tools:
@@ -169,9 +171,6 @@ CONFIG_POST_INSTALL_FILE='post_install.sh'
 chmod u+w "${MOUVENT_DIR}/preseed"
 rm -f "${MOUVENT_DIR}/preseed"/*
 cat << EOF > "${MOUVENT_DIR}/preseed/${CONFIG_SEED_FILE}"
-### Unmount '/media' to avoid complications with 'partman'.
-d-i preseed/early_command string umount /media
-
 ### Automatic installation.
 d-i auto-install/enable boolean true
 d-i debconf/priority select critical
@@ -233,7 +232,7 @@ d-i pkgsel/update-policy select ${CONFIG_UPDATE_POLICY}
 ### Server base.
 #tasksel tasksel/force-tasks string ${CONFIG_SERVER_TYPE}
 tasksel tasksel/first multiselect openssh-server
-d-i pkgsel/include string net-tools samba ssh unzip
+d-i pkgsel/include string net-tools postgresql samba ssh unzip
 
 ### Verbose output and no boot splash screen.
 d-i debian-installer/quiet boolean false
@@ -246,7 +245,8 @@ d-i preseed/late_command string sh /cdrom/preseed/${CONFIG_POST_INSTALL_FILE}
 d-i finish-install/reboot_in_progress note
 EOF
 chmod a=r "${MOUVENT_DIR}/preseed/${CONFIG_SEED_FILE}"
-cp "${CONFIG_POST_INSTALL_FILE}" \
+cp packages/*.deb \
+   "${CONFIG_POST_INSTALL_FILE}" \
    "${CONFIG_SET_PARTITION_DISK_FILE}" \
    01-eth-config.yaml \
    first-start.sh \
@@ -258,7 +258,8 @@ sed --in-place \
     --expression "s/user_name_placeholder/${CONFIG_USER_NAME}/" \
     --expression "s/user_password_placeholder/${CONFIG_USER_PASSWORD}/" \
     "${MOUVENT_DIR}/preseed/${CONFIG_POST_INSTALL_FILE}"
-chmod a=rx "${MOUVENT_DIR}/preseed/${CONFIG_POST_INSTALL_FILE}" \
+chmod a=rx "${MOUVENT_DIR}/preseed"/*.deb \
+           "${MOUVENT_DIR}/preseed/${CONFIG_POST_INSTALL_FILE}" \
            "${MOUVENT_DIR}/preseed/${CONFIG_SET_PARTITION_DISK_FILE}" \
            "${MOUVENT_DIR}/preseed/first-start.sh" \
            "${MOUVENT_DIR}/preseed/update-eth-names.py"
@@ -348,4 +349,9 @@ if [ -d "${MOUVENT_DIR}" ]; then
 fi
 if [ -f "${UBUNTU_ISO_MBR_FILE}" ]; then
   rm "${UBUNTU_ISO_MBR_FILE}"
+fi
+
+if mountpoint -q "${UBUNTU_DIR}"; then
+  echo "Unmounting ISO image in ${UBUNTU_DIR} ..."
+  sudo umount "${UBUNTU_DIR}"
 fi

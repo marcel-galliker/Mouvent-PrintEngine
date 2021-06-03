@@ -1,26 +1,32 @@
 #!/bin/bash
 
-# Change eth names
+# Changes eth names.
 python3 /home/mouvent/update-eth-names.py
+rm /home/mouvent/update-eth-names.py
 
-# Configure user root
+# Configures user root.
 echo root:radex | chpasswd
 mkdir -p "/home/root/.ssh"
 chmod -R 700 "/home/root"
 
-# Create user radex
+# Creates user radex.
 useradd -m radex
 echo radex:radex | chpasswd
 mkdir -p "/home/radex/source-data"
 mkdir -p "/home/radex/print-data"
 chmod -R 777 "/home/radex"
 
-# Copy Print Engine
+# Installs additional packages.
+dpkg --install /home/mouvent/*.deb
+rm /home/mouvent/*.deb
+
+# Copies Print Engine.
 mkdir "/opt/radex"
 unzip /home/mouvent/PrintEngine.zip -d /opt/radex
 chmod -R 777 "/opt/radex"
+rm /home/mouvent/PrintEngine.zip
 
-# Create Mouvent service
+# Creates Mouvent service.
 SERVICE_FILE=/etc/systemd/system/radex.service
 STARTUP_FILE=/opt/radex/mouvent.sh
 
@@ -40,12 +46,12 @@ systemctl enable radex.service
 #echo 'Start service'
 systemctl start radex.service
 
-# Remove startup script
+# Removes startup script.
 rm /etc/rc.local
 
-# Set SSH allowed users
+# Sets SSH allowed users.
 echo -e '\nAllowUsers root radex mouvent' >> /etc/ssh/sshd_config
 echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
 
-# The end
+# The end.
 reboot
