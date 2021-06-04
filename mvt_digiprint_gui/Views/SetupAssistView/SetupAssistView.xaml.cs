@@ -1,10 +1,7 @@
-﻿using rx_CamLib;
-using RX_Common;
+﻿using RX_Common;
 using RX_DigiPrint.Devices;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
@@ -46,6 +43,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			return box;
 		}
 
+		//--- PrinterStatusChanged ---------------------------------------------
 		private void PrinterStatusChanged(object sender,PropertyChangedEventArgs e)
 		{
 			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
@@ -85,6 +83,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		private void Reference_Clicked(object sender,RoutedEventArgs e)
 		{
 			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_REFERENCE);
+		}
+
+		private void SlideLeft_Clicked(object sender,RoutedEventArgs e)
+		{
+			RxGlobals.SetupAssist.ScanMoveTo(20);
 		}
 
 		//--- Start_Clicked -------------------------------------------
@@ -199,5 +202,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 
 			ResultDE.Text = "ΔE₂₀₀₀ " + ColorConversion.DeltaE2000(SpectroResult.CieLab, last.CieLab).ToString("F3");
 		}
+
 	}
 }
