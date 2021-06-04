@@ -1,0 +1,28 @@
+﻿<Window x:Class="RX_DigiPrint.Views.UserControls.PowerOff"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
+        Title="{mvt:LocalizedBinding PowerOff}"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Height="300" 
+        Width="400">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- FLUSH BUTTONS _________________________________________________-->
+        <StackPanel Grid.Row="1" VerticalAlignment="Center">
+            <Button Style="{StaticResource Mouvent.StandardButton}" Content="{mvt:LocalizedBinding TurnOffHeads}"   Click="TurnOffHeads_Clicked"
+                    Width="170" Height="30" Margin="10"/>
+            <Button Style="{StaticResource Mouvent.StandardButton}" Content="{mvt:LocalizedBinding ShutDown}"       Click="ShutDown_Clicked"
+                    Width="170" Height="30" Margin="10"/>
+        </StackPanel>
+    </Grid>
+</Window>

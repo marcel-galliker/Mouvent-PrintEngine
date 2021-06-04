@@ -508,6 +508,12 @@
     <Compile Include="Views\LH702View\LH702_Counters.xaml.cs">
       <DependentUpon>LH702_Counters.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UserControls\PowerOff.xaml.cs">
+      <DependentUpon>PowerOff.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\ShutDown.xaml.cs">
+      <DependentUpon>ShutDown.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UsersView\CalendarValidity.xaml.cs">
       <DependentUpon>CalendarValidity.xaml</DependentUpon>
     </Compile>
@@ -781,9 +787,6 @@
     <Compile Include="Views\PrintSystemView\EncoderView.xaml.cs">
       <DependentUpon>EncoderView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UserControls\FlushWindow.xaml.cs">
-      <DependentUpon>FlushWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\UserControls\InkInfoWnd.xaml.cs">
       <DependentUpon>InkInfoWnd.xaml</DependentUpon>
     </Compile>
@@ -909,6 +912,9 @@
     </Compile>
     <Compile Include="Views\UserControls\SetupButtons.xaml.cs">
       <DependentUpon>SetupButtons.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\ShuttingDown.xaml.cs">
+      <DependentUpon>ShuttingDown.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\Splicing.xaml.cs">
       <DependentUpon>Splicing.xaml</DependentUpon>
@@ -1040,6 +1046,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\LH702View\LH702_Counters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\PowerOff.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\ShutDown.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1447,10 +1461,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\UserControls\FlushWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\UserControls\InkInfoWnd.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1599,6 +1609,10 @@
     <Page Include="Views\UserControls\SetupButtons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UserControls\ShuttingDown.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UserControls\Splicing.xaml">
       <SubType>Designer</SubType>

@@ -52,6 +52,7 @@ static void _do_get_evt			(RX_SOCKET socket);
 static void _do_evt_confirm		(RX_SOCKET socket);
 
 static void _do_restart_main	(RX_SOCKET socket);
+static void _do_shutdown_main	();
 
 static void _do_req_log			(RX_SOCKET socket, SLogReqMsg*pmsg);
 static void _do_export_log		(RX_SOCKET socket, SLogReqMsg*pmsg);
@@ -138,6 +139,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_EVT_CONFIRM:		_do_evt_confirm(socket);											break;
 			
 		case CMD_RESTART_MAIN:		_do_restart_main(socket);											break;
+		case CMD_SHUTDOWN_MAIN:		_do_shutdown_main();											break;
 
 		case CMD_REQ_LOG:			_do_req_log   (socket, (SLogReqMsg*)pmsg);							break;
 			
@@ -292,6 +294,17 @@ static void _do_restart_main(RX_SOCKET socket)
 #ifdef linux
     system("/bin/systemctl restart radex.service");
     exit(100);
+#endif
+}
+
+//--- _do_shutdown_main -----------------------------------------------------------------------
+static void _do_shutdown_main()
+{
+	TrPrintfL(TRUE, "_do_shutdown_main");
+	Error(LOG, 0, "Shutting down main");
+#ifdef linux
+	system("shutdown now");
+	exit(100);
 #endif
 }
 

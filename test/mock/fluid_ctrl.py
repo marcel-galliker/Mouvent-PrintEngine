@@ -53,6 +53,10 @@ class TCPProtocol(network.AbstractTCPProtocol):
         
     def mgt_CMD_FLUID_CTRL_MODE(self, msg):
         logging.info("CMD_FLUID_CTRL_MODE")
+        for i in range(4):
+            if msg.ctrlMode == 0x001: #shutdown
+                msg.ctrlMode = 0x004 # off
+            self.board.config["REP_FLUID_STAT"]["stat"][i]["ctrlMode"] = msg.ctrlMode
         #_do_fluid_ctrlMode(socket, (SFluidCtrlCmd*)msg);
         
     def mgt_CMD_FLUID_DEGASSER(self, msg):

@@ -2685,4 +2685,41 @@ No Splices in the machine?</value>
   <data name="MarkVersoI" xml:space="preserve">
     <value>MarkVersoI</value>
   </data>
+  <data name="ShuttingDown" xml:space="preserve">
+    <value>Shutting down...</value>
+  </data>
+  <data name="TheMachineIsAboutToShutDownOptions" xml:space="preserve">
+    <value>The machine is about to shut down. 
+Options: </value>
+  </data>
+  <data name="TurnOffHeads" xml:space="preserve">
+    <value>Turn Off Heads</value>
+  </data>
+  <data name="NightFlush" xml:space="preserve">
+    <value>Night Flush</value>
+  </data>
+  <data name="WeekendFlush" xml:space="preserve">
+    <value>Weekend Flush</value>
+  </data>
+  <data name="WeekFlush" xml:space="preserve">
+    <value>Week Flush</value>
+  </data>
+  <data name="HeadsShuttingDown" xml:space="preserve">
+    <value>Heads Shutting Down...</value>
+  </data>
+  <data name="UvLampShuttingDown" xml:space="preserve">
+    <value>UV Lamp Shutting Down...</value>
+  </data>
+  <data name="MainShuttingDown" xml:space="preserve">
+    <value>Main Shutting Down...</value>
+  </data>
+  <data name="PowerOff" xml:space="preserve">
+    <value>Power Off</value>
+  </data>
+  <data name="HeadsFlushing" xml:space="preserve">
+    <value>Heads Flushing...</value>
+  </data>
+  <data name="NoFlush" xml:space="preserve">
+    <value>No Flush</value>
+  </data>
 </root>

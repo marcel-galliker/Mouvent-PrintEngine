@@ -291,6 +291,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 EVT_STATUS          = 0x03000002;
 
         public const UInt32 CMD_RESTART_MAIN    = 0x01000004;
+        public const UInt32 CMD_SHUTDOWN_MAIN   = 0x01000005;
 
         public const UInt32 CMD_GET_EVT         = 0x01000011;
         public const UInt32 REP_GET_EVT         = 0x02000011;

@@ -2942,6 +2942,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Heads Flushing....
+        /// </summary>
+        public static string HeadsFlushing {
+            get {
+                return ResourceManager.GetString("HeadsFlushing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Heads at Print Pos.
         /// </summary>
         public static string HeadsPrintPos {
@@ -2956,6 +2965,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string HeadsReferenced {
             get {
                 return ResourceManager.GetString("HeadsReferenced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Heads Shutting Down....
+        /// </summary>
+        public static string HeadsShuttingDown {
+            get {
+                return ResourceManager.GetString("HeadsShuttingDown", resourceCulture);
             }
         }
         
@@ -3708,6 +3726,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Main Shutting Down....
+        /// </summary>
+        public static string MainShuttingDown {
+            get {
+                return ResourceManager.GetString("MainShuttingDown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Maintenance.
         /// </summary>
         public static string Maintenance {
@@ -4068,6 +4095,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Night Flush.
+        /// </summary>
+        public static string NightFlush {
+            get {
+                return ResourceManager.GetString("NightFlush", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NIP.
         /// </summary>
         public static string NIP {
@@ -4091,6 +4127,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string No {
             get {
                 return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Flush.
+        /// </summary>
+        public static string NoFlush {
+            get {
+                return ResourceManager.GetString("NoFlush", resourceCulture);
             }
         }
         
@@ -4433,6 +4478,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string Power {
             get {
                 return ResourceManager.GetString("Power", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Power Off.
+        /// </summary>
+        public static string PowerOff {
+            get {
+                return ResourceManager.GetString("PowerOff", resourceCulture);
             }
         }
         
@@ -5842,6 +5896,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Shutting down....
+        /// </summary>
+        public static string ShuttingDown {
+            get {
+                return ResourceManager.GetString("ShuttingDown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Shutting Down the GUI!.
         /// </summary>
         public static string ShuttingDownTheGui {
@@ -6472,6 +6535,16 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The machine is about to shut down. 
+        ///Options: .
+        /// </summary>
+        public static string TheMachineIsAboutToShutDownOptions {
+            get {
+                return ResourceManager.GetString("TheMachineIsAboutToShutDownOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Thickness.
         /// </summary>
         public static string Thickness {
@@ -6522,6 +6595,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string Total {
             get {
                 return ResourceManager.GetString("Total", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Turn Off Heads.
+        /// </summary>
+        public static string TurnOffHeads {
+            get {
+                return ResourceManager.GetString("TurnOffHeads", resourceCulture);
             }
         }
         
@@ -6747,6 +6829,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string UvLampIsNotReady {
             get {
                 return ResourceManager.GetString("UvLampIsNotReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UV Lamp Shutting Down....
+        /// </summary>
+        public static string UvLampShuttingDown {
+            get {
+                return ResourceManager.GetString("UvLampShuttingDown", resourceCulture);
             }
         }
         
@@ -7530,6 +7621,24 @@ namespace RX_DigiPrint.Resources.Language {
         public static string Weekend {
             get {
                 return ResourceManager.GetString("Weekend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weekend Flush.
+        /// </summary>
+        public static string WeekendFlush {
+            get {
+                return ResourceManager.GetString("WeekendFlush", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Week Flush.
+        /// </summary>
+        public static string WeekFlush {
+            get {
+                return ResourceManager.GetString("WeekFlush", resourceCulture);
             }
         }
         

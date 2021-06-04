@@ -40,7 +40,7 @@ namespace RX_DigiPrint.Views.UserControls
             get { return _ShowPauseButton; }
             set { _ShowPauseButton = value; OnPropertyChanged("ShowPauseButton"); }
         }
-        
+
         public static Func<bool> StartClicked = null;
        
         public MouventCommandButtons()
@@ -112,7 +112,6 @@ namespace RX_DigiPrint.Views.UserControls
                 PowerButtonToolTip = "Switch Power Off";
                 Button_Power.IsEnabled = true;
             }
-
         }
 
         //--- PrinterStatusChanged ----------------------------------------
@@ -215,12 +214,12 @@ namespace RX_DigiPrint.Views.UserControls
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
             }
             else // Switch Power Off
-            {
+            {   
                 bool askForFlush = RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LH702;
                 if (askForFlush) 
                 {
-                    FlushWindow wnd = new FlushWindow();
-                    wnd.Show(); 
+                    PowerOff wnd = new PowerOff();
+                    wnd.Show();
                 }
                 else
                 {
