@@ -556,12 +556,32 @@ int step_set_config(void)
 }
 
 //--- step_stepper_to_fluid -----------------------------------
-int step_stepper_to_fluid(int fluidno)
+int step_stepper_to_fluid(int fluidNo)
 {
     switch (_StepperType)
     {
-    case STEPPER_LB:	return steplb_stepper_to_fluid(fluidno);
+    case STEPPER_LB:	return steplb_stepper_to_fluid(fluidNo);
     }
+	return 0;
+}
+
+//--- step_stepper_to_head ------------------------------------------
+int step_stepper_to_head(int headNo)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:	return steplb_stepper_to_head(headNo);
+	}
+	return 0;
+}
+
+//--- step_get_ScrewPos ------------------------------------------------
+int step_get_ScrewPos(int stepperNo)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:	return steplb_get_ScrewPos(stepperNo);
+	}
 	return 0;
 }
 

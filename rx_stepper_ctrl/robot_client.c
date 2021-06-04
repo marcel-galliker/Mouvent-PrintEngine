@@ -60,7 +60,7 @@
 #define ENCODER_TOL_SCREW			220000
 
 #define SCREW_CURRENT_HIGH			(0b00000000000000010001110000000000)
-#define SCREW_CURRENT_LOW			(0b00000000000000010001001100000000)
+#define SCREW_CURRENT_LOW			(0b00000000000000010001001000000000)
 #define Z_CURRENT_UP				(0b00000000000000010000101000000000)
 #define Z_CURRENT_DOWN				(0b00000000000000010000111000000000)
 
@@ -271,7 +271,7 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 	SRobotTraceMsg  *ptrace = (SRobotTraceMsg*)msg;
 
 	_Connected  = TRUE;
-	_Timeout	= 2;
+	_Timeout	= 3;
 
 	switch(phdr->msgId)
 	{
@@ -483,8 +483,8 @@ static void _rc_state_machine(void)
 								TrPrintfL(TRUE, "RC_STATE_REF+1: down=%d, moving=%d, start=%d, done=%d", ROB_IN(IN_Z_DOWN), _RobotStatus.motor[MOTOR_Z].isMoving, _RobotStatus.motor[MOTOR_Z].moveIdStarted, _RobotStatus.motor[MOTOR_Z].moveIdDone);
 								if (ROB_IN(IN_Z_DOWN))
 								{
+                                    _rc_moveto_y_stop(1000000, IN_Y_END, _FL_);
 									_rc_motor_moveToStop(MOTOR_SCREW, 300000, IN_SCREW_EDGE, LOW, _FL_);
-									_rc_moveto_y_stop(1000000, IN_Y_END, _FL_);
 									_RC_State++;
 								}
 								else if (_RobotStatus.motor[MOTOR_Z].moveIdDone == _MoveId[MOTOR_Z]) 
@@ -1159,6 +1159,8 @@ void rc_turn_steps(int steps)
 //--- rc_set_screw_current ---------------------------------------------
 void rc_set_screw_current(int high)
 {
+	rc_reset_motors(MOTOR_SCREW);
+	rx_sleep(50);
     if (high) _configure_screw_motor(SCREW_CURRENT_HIGH);
     else	  _configure_screw_motor(SCREW_CURRENT_LOW);
 }

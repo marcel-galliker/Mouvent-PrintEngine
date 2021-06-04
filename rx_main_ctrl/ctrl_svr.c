@@ -68,8 +68,6 @@ typedef struct SBufferFluidCmd
     int used;
 } SBufferFluidCmd;
 
-HANDLE	_HeadCtrlSvr;
-
 SHeadCtrlPar _HeadCtrl[HEAD_BOARD_CNT];
 SBufferFluidCmd _BufferFluidCmd[INK_SUPPLY_CNT];
 static int	_HeadResetCnt;

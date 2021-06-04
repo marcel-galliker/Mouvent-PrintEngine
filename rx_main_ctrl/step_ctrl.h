@@ -75,3 +75,5 @@ int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment);
 int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment);
 int step_robot_used(int fluidNo);
 int step_stepper_to_fluid(int fluidno);
+int step_stepper_to_head(int headNo);
+int step_get_ScrewPos(int stepperNo);

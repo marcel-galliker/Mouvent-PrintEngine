@@ -46,6 +46,7 @@ static int _do_save_file_hdr	(RX_SOCKET socket, int headNo, SFSDirEntry		*msg);
 static int _do_save_file_blk	(RX_SOCKET socket, int headNo, SDataBlockMsg	*msg); 
 
 //--- Statics -----------------------------------------------------------------
+static int _RobPosSent[HEAD_BOARD_CNT] = {FALSE};
 
 //--- handle_headCtrl_msg ------------------------------------------
 int handle_headCtrl_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par)
@@ -101,6 +102,12 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 	{
 		ctrl_head_alive(headNo);
 		memcpy(&RX_HBStatus[headNo], pstat, sizeof(RX_HBStatus[0]));
+        if (RX_StepperStatus.robot_used && !_RobPosSent[headNo])
+		{
+			step_get_ScrewPos(step_stepper_to_head(headNo+1));
+			_RobPosSent[headNo] = TRUE;
+		}
+        
 		if (RX_HBStatus[headNo].err & 
 			( err_fpga_overheated
 		//	| err_head_pcb_overheated

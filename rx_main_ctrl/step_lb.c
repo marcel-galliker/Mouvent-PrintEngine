@@ -866,7 +866,6 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     
     if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw) && _Status[stepperno].screw_count >= _ScrewCnt[stepperno])
     {
-        _set_screw_pos(stepperno);
         _HeadAdjustment[stepperno] = *headAdjustment;
         if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
             headAdjustment->printbarNo %= 2;
@@ -1077,4 +1076,14 @@ int steplb_stepper_to_fluid(int fluidno)
         return fluidno / 2;
     else
         return (fluidno + 1) / 2;
-}   
+}
+
+//--- steplb_stepper_to_head ----------------------------------------
+int steplb_stepper_to_head(int headNo)
+{
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+        return headNo / (RX_Config.headsPerColor * 2);
+    else
+        return (headNo + RX_Config.headsPerColor) /
+               (RX_Config.headsPerColor * 2);
+}

@@ -174,7 +174,7 @@ void robi_lb702_main(int ticks, int menu)
 
     if (!_CmdRunning)
         _CmdStarted = FALSE;
-    else if (!robi_move_done() || rc_move_started())
+    else if (!robi_move_done())
         _CmdStarted = TRUE;
     
 
