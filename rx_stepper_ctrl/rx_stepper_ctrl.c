@@ -45,6 +45,7 @@
 #include "test_table.h"
 #include "fpga_stepper.h"
 #include "robi_def.h"
+#include "sa.h"
 	
 
 //--- globals ------------------------------------------------------------

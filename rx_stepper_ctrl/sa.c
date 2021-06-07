@@ -72,7 +72,7 @@ void sa_init(void)
     _ParSledge.dis_mux_in = 0;
     _ParSledge.encCheck		= chk_off;
 
-    _ParSledgeRef.speed = 10000;
+    _ParSledgeRef.speed = 1000;
     _ParSledgeRef.accel = 32000;
     _ParSledgeRef.current_acc = 420.0;
     _ParSledgeRef.current_run = 300.0;
@@ -84,8 +84,8 @@ void sa_init(void)
 
     _ParLift.speed = 10000;
     _ParLift.accel = 32000;
-    _ParLift.current_acc = 30.0;		// max 60 (60 means 0.6A)
-    _ParLift.current_run = 30.0;        // max 60 (60 means 0.6A)
+    _ParLift.current_acc = 60.0;		// max 60 (60 means 0.6A)
+    _ParLift.current_run = 60.0;        // max 60 (60 means 0.6A)
     _ParLift.stop_mux = 0;
     _ParLift.dis_mux_in = 0;
     _ParLift.encCheck		= chk_off;
@@ -251,7 +251,7 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SLEDGE");
 									pos   = (*((INT32*)pdata));
 									steps = _micron_2_steps_sledge(pos);
-									if (!RX_StepperStatus.cmdRunning && steps!=_SledgePos_Act)
+									if (!RX_StepperStatus.cmdRunning && (steps!=_SledgePos_Act || !RX_StepperStatus.info.ref_done))
 									{
                                         _SledgePos_New = steps;
                                         if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
