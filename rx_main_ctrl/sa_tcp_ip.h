@@ -3,7 +3,7 @@
 
 //--- ICP/IP Addresses -----------------------------------------
 #define SETUP_ASSIST_IP_ADDR	"192.168.200.99"
-#define SETUP_ASSIST_PORT		1337
+#define SETUP_ASSIST_PORT		PORT_CTRL_STEPPER
 
 //--- COMMANDS ---------------------------------------------------
 #define COMMAND_TYPE_MASK		(0xFF000000)

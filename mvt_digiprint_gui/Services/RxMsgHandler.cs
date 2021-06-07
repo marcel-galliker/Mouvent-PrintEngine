@@ -306,20 +306,6 @@ namespace RX_DigiPrint.Services
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SHeadBoardStatMsg"));
         }
 
-        private void handle_setup_assist_stat(Byte[] buf)
-        {
-            TcpIp.SSetupAssistStatMsg msg;
-
-            int len=RxStructConvert.ToStruct(out msg, buf);
-
-            if (len==msg.hdr.msgLen) 
-            {
-                RxGlobals.SetupAssist.Update(msg);
-            }
-            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SSetupAssistStatMsg"));
-        }
-
-
         //--- handle_density -----------------------------------------
         private void handle_density(Byte[] buf)
         {
@@ -344,6 +330,21 @@ namespace RX_DigiPrint.Services
             }
             else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SStepperStat"));
         }        
+
+        //--- handle_setup_assist_stat -------------------------
+        
+        private void handle_setup_assist_stat(Byte[] buf)
+        {
+            TcpIp.SStepperStat msg;
+
+            int len=RxStructConvert.ToStruct(out msg, buf);
+
+            if (len==msg.hdr.msgLen) 
+            {
+                RxGlobals.SetupAssist.Update(msg);
+            }
+            else RxGlobals.Events.AddItem(new LogItem("Received invalid message Length SSetupAssistStatMsg"));
+        }
 
         //--- handle_printer_cfg -----------------------------------------
         private void handle_printer_cfg(Byte[] buf)

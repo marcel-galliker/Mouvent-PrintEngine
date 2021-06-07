@@ -529,7 +529,6 @@ static void _step_set_config(int no)
 	default: 			steps_init		(    _step_Socket[0]);
 	}
 	sok_send_2(&_step_Socket[no], CMD_STEPPER_CFG, sizeof(cfg), &cfg);
-
 }
 
 //--- step_set_config -------------------------------------------------

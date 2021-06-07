@@ -474,6 +474,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_SA_OUT_TRIGGER	    = 0x01000174;
         public const UInt32 CMD_SA_WEB_MOVE	        = 0x01000175;
         public const UInt32 CMD_SA_WEB_STOP	        = 0x01000176;
+        public const UInt32 CMD_SA_UP				= 0x01000177;
+        public const UInt32 CMD_SA_DOWN				= 0x01000178;
 
         public const UInt32 CMD_START_PRINTING		= 0x01000201;
         public const UInt32 REP_START_PRINTING		= 0x02000201;
@@ -1362,9 +1364,6 @@ namespace RX_DigiPrint.Services
         {
 	        SMsgHdr         header;
 	        public Int32    steps;
-	        public Int32    speed;
-	        public UInt32   acc;
-	        public UInt32   current;
         };
 
         //--- CLEAF Orders ------------------------------------------------------

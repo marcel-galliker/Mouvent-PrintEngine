@@ -22,14 +22,6 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _Simu,value); }
 		}
 
-		//--- Property powerStepStatus ---------------------------------------
-		private UInt32 _powerStepStatus;
-		public UInt32 powerStepStatus
-		{
-			get { return _powerStepStatus; }
-			set { SetProperty(ref _powerStepStatus,value); }
-		}
-
 		//--- Property ScanPos ---------------------------------------
 		private double _ScanPos;
 		public double ScanPos
@@ -46,28 +38,6 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _ScanStopPos,value); }
 		}
 
-		//--- Property motorVoltage ---------------------------------------
-		private UInt32 _motorVoltage;
-		public UInt32 motorVoltage
-		{
-			get { return _motorVoltage; }
-			set { SetProperty(ref _motorVoltage,value); }
-		}
-		//--- Property motorMoveCurrent ---------------------------------------
-		private UInt32 _motorMoveCurrent;
-		public UInt32 motorMoveCurrent
-		{
-			get { return _motorMoveCurrent; }
-			set { SetProperty(ref _motorMoveCurrent,value); }
-		}
-
-		//--- Property motorHoldCurrent ---------------------------------------
-		private UInt32 _motorHoldCurrent;
-		public UInt32 motorHoldCurrent
-		{
-			get { return _motorHoldCurrent; }
-			set { SetProperty(ref _motorHoldCurrent,value); }
-		}
 		//--- Property ScanRefDone ---------------------------------------
 		private bool _ScanRefDone;
 		public bool ScanRefDone
@@ -123,6 +93,18 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _ScanInRight,value); }
 		}
 
+		//--- Up -------------------------------------------
+		public void Up()
+		{
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_UP);
+		}
+
+		//--- Down -------------------------------------------
+		public void Down()
+		{
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_DOWN);
+		}
+
 		//--- Property Connected ---------------------------------------
 		private int _ConnectedTimer;
 		private bool _Connected=false;
@@ -141,17 +123,13 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- Update ------------------------------------------------
-		public void Update(TcpIp.SSetupAssistStatMsg msg)
+		public void Update(TcpIp.SStepperStat msg)
 		{
-			powerStepStatus = msg.powerStepStatus;
-			ScanPos	= Math.Round(msg.motorPosition/1000.0, 1);
-			ScanStopPos		    = Math.Round(msg.stopPos/1000.0, 1);
-			motorVoltage	= msg.motorVoltage;
-			motorMoveCurrent= msg.motorMoveCurrent;
-			motorHoldCurrent= msg.motorHoldCurrent;
-			ScanMoveCnt		= msg.moveCnt;
-			ScanRefDone			= msg.refDone!=0;
-			ScanMoving			= msg.moving!=0;
+			ScanPos				= Math.Round(msg.posX/1000.0, 1);
+			ScanStopPos		    = Math.Round(msg.posX/1000.0, 1);
+			ScanMoveCnt			= msg.posY[0];
+			ScanRefDone			= (msg.info & 0x00000001)!=0;
+			ScanMoving			= (msg.info & 0x00000002)!=0;
 			ScanInLeft			= (msg.inputs&(1<<0))!=0;
 			ScanInRight			= (msg.inputs&(1<<1))!=0;
 			ScanConnected		= true;
@@ -181,11 +159,7 @@ namespace RX_DigiPrint.Models
 		public void ScanMoveTo(double pos, int speed=0)
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
-			cmd.steps	= (Int32)(pos*1000.0);
-			cmd.speed   = speed;
-			if (speed>0 && speed<20) cmd.acc = 20;
-			else cmd.acc=0;
-		//	Console.WriteLine("{0} SCAN MOVE TO [{1}] from {2:N3} to {3:N3}, speed={4}, acc={5}", RxGlobals.Timer.Ticks(), _ScanMoveCnt, ScanPos, pos, cmd.speed, cmd.acc);
+			cmd.steps = (int)(1000.0*pos);
 			if (_Simu) _OnScanMoveDone();
 			else RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
@@ -211,7 +185,6 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- WebMove ----------------------------------
-		public const int WebSpeed = 1;	// [m/min]
 		private int _WebMoveStartCnt=-1;
 		public void WebMove(double dist)
 		{
@@ -224,24 +197,16 @@ namespace RX_DigiPrint.Models
 				double old=WebPos;
 				WebPos	   += (double)dist;
 				cmd.steps	= (Int32)(1000*dist);
-				cmd.speed = WebSpeed;
-				if (cmd.steps==0)
-				{
-			//		if (_OnWebMoveDone!=null) _OnWebMoveDone();
-				}
-				else
-				{
-					EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-					if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
-					string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3} oldpos={4} WebPos={5}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps, old, WebPos);
-					if (_WebMoveCnt!=_WebMoveStartCnt)
-						Console.WriteLine("WEB MOVE Error: _WebMoveCnt={0}, _WebMoveStartCnt={1}", _WebMoveCnt, _WebMoveStartCnt);
-					_WebMoveStartCnt++;
-					WebMoving=true;
-					Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
-				//	RxGlobals.Events.AddItem(new LogItem(msg));
-					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
-				}
+				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
+				if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
+				string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3} oldpos={4} WebPos={5}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps, old, WebPos);
+				if (_WebMoveCnt!=_WebMoveStartCnt)
+					Console.WriteLine("WEB MOVE Error: _WebMoveCnt={0}, _WebMoveStartCnt={1}", _WebMoveCnt, _WebMoveStartCnt);
+				_WebMoveStartCnt++;
+				WebMoving=true;
+				Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
+			//	RxGlobals.Events.AddItem(new LogItem(msg));
+				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
 			}
 		}
 

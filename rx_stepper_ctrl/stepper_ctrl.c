@@ -282,7 +282,7 @@ static void _do_config(SStepperCfg *pcfg)
 	case printer_test_slide_only:	break;
 	case printer_test_slide_HB:		break;
     case printer_Dropwatcher:		break;
-	case printer_test_table:	tt_init(); break;
+	case printer_test_table:		tt_init(); break;
     case printer_test_table_seon:	if (RX_StepperCfg.boardNo == 0)
 									    tts_lift_init();
 									else

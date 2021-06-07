@@ -16,7 +16,7 @@ namespace RX_DigiPrint.Models
 		private const bool		 _Debug=true;
 
 		public const bool		 _SimuCamera  = false;
-		public bool				_SimuMachine = false;
+		public bool				_SimuMachine  = false;
 
 		private enum ENAssistMode
 		{
@@ -63,7 +63,7 @@ namespace RX_DigiPrint.Models
 			RxGlobals.SetupAssist.OnScanMoveDone = _ScanMoveDone;
 			RxGlobals.SetupAssist.Simu			 = _SimuMachine;
 			#if DEBUG
-			_SimuMachine |= (RxGlobals.PrinterProperties.Host_Name==null);
+	//		_SimuMachine |= (RxGlobals.PrinterProperties.Host_Name==null);
 			#endif
 
 			foreach (var state in RxGlobals.StepperStatus)
@@ -836,7 +836,9 @@ namespace RX_DigiPrint.Models
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Finding Mark"));
 			Console.WriteLine("_FindMark_1: _MarkFound = false");
+
 			_MarkFound = false;
+			RxGlobals.SetupAssist.Down();
 			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 		}
 

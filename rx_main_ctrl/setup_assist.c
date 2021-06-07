@@ -29,14 +29,15 @@ static RX_SOCKET	_SaSocket = INVALID_SOCKET;
 static int			_Timeout=0;
 static const double	_microns2steps = 30.000;
 
-static SSetupAssist_StatusMsg	_Status;
+static SStepperStat	_Status;
 
 //--- prorotypes -----------------------------------------
 static void *_sa_thread(void *lpParameter);
+static void _sa_set_config(void);
+static int  _sa_socket_closed(RX_SOCKET socket, const char *peerName);
 static void *_sa_tick_thread(void *lpParameter);
 static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
-static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat);
-static int _do_sa_trace(RX_SOCKET socket, SSetupAssist_TraceMsg	*ptrace);
+static int _do_sa_stat(RX_SOCKET socket, SStepperStat *pstat);
 
 //--- sa_init -----------------------------------------
 int	 sa_init(void)
@@ -69,17 +70,32 @@ static void *_sa_thread(void *lpParameter)
 	{
 		if (_SaSocket==INVALID_SOCKET)
 		{
-			if (sok_open_client(&_SaSocket, SETUP_ASSIST_IP_ADDR, SETUP_ASSIST_PORT, SOCK_STREAM)==REPLY_OK)
+			if (sok_open_client_2(&_SaSocket, SETUP_ASSIST_IP_ADDR, PORT_CTRL_STEPPER, SOCK_STREAM, _sa_handle_msg, _sa_socket_closed)==REPLY_OK)
 			{
-				UINT32	trace=TRACE_DEVICE;
-				int ret=sok_send_2(&_SaSocket, CMD_TRACE_ENABLE, sizeof(trace), &trace);
-				sok_receiver(NULL, &_SaSocket, _sa_handle_msg, NULL);
+                Error(LOG, 0, "Connected");
+                _sa_set_config();
 			}
 		}
 		
 		rx_sleep(1000);
 	}
 	return NULL;
+}
+
+//--- _sa_socket_closed -------------------------
+static int  _sa_socket_closed(RX_SOCKET socket, const char *peerName)
+{
+	Error(ERR_CONT, 0, "Socket %d closed", socket);
+	_SaSocket = INVALID_SOCKET;
+}
+
+//--- _sa_set_config -------------------
+static void _sa_set_config(void)				
+{
+	SStepperCfg cfg;
+	memset(&cfg, 0, sizeof(cfg));
+	cfg.printerType = printer_setup_assist;
+	sok_send_2(&_SaSocket, CMD_STEPPER_CFG, sizeof(cfg), &cfg);
 }
 
 //--- _sa_tick_thread ---------------------------------------------
@@ -89,7 +105,7 @@ static void* _sa_tick_thread(void *lpParameter)
 	{
 		if (_SaSocket!=INVALID_SOCKET) 
 		{
-			int ret=sok_send_2(&_SaSocket, CMD_STATUS_GET, 0, NULL);
+			int ret=sok_send_2(&_SaSocket, CMD_STEPPER_STAT, 0, NULL);
 		//	TrPrintfL(TRUE, "SetupAssist: CMD_STATUS_GET socket=%d, ret=%d", _SaSocket, ret);
 			if (_Timeout>0 && --_Timeout==0) Error(ERR_CONT, 0, "Setup Assistant Scanner timeout");
 		}
@@ -103,33 +119,25 @@ static int _sa_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr 
 {	
 	//--- handle the message --------------
 	SMsgHdr *phdr = (SMsgHdr*)msg;
+	void *data = (void*)&phdr[1];
+	_Timeout = MOVE_TIEMOUT;
 	switch(phdr->msgId)
 	{
-		case CMD_STATUS_GET: _do_sa_stat(socket, (SSetupAssist_StatusMsg*) msg); break;
-        case CMD_TRACE_GET:	 _do_sa_trace(socket, (SSetupAssist_TraceMsg*) msg); break;
+		case REP_STEPPER_STAT: _do_sa_stat(socket, (SStepperStat*) data); break;
+        case EVT_GET_EVT:		SlaveError(dev_stepper, 99, &((SLogMsg*)msg)->log);	
+								break;
 		default:
-		Error(ERR_CONT, 0, "Unknown Command 0x%04x, sent by Setup-Assist >>%s<<", phdr->msgId);
+		Error(ERR_CONT, 0, "Unknown Command 0x%04x, sent by Setup-Assist", phdr->msgId);
 	}
 	return REPLY_OK;
 }
 
 //--- _do_sa_stat ---------------------------------------------------------------
-static int _do_sa_stat(RX_SOCKET socket, SSetupAssist_StatusMsg	*pstat)
+static int _do_sa_stat(RX_SOCKET socket, SStepperStat *pstat)
 {
 //	TrPrintfL(TRUE, "SetupAssist: Got Status");
 	memcpy(&_Status, pstat, sizeof(_Status));
-	_Status.hdr.msgId = REP_SETUP_ASSIST_STAT;
-	_Status.motor.position = (INT32)(pstat->motor.position*_microns2steps);
-	_Status.motor.stopPos  = (INT32)(pstat->motor.stopPos *_microns2steps);
-	if (!_Status.motor.moving && _Timeout<MOVE_TIEMOUT) _Timeout=0;
-	gui_send_msg(INVALID_SOCKET, &_Status);
-	return REPLY_OK;
-}
-
-//--- _do_sa_trace ---------------------------------------------------------------
-static int _do_sa_trace(RX_SOCKET socket, SSetupAssist_TraceMsg	*ptrace)
-{
-	TrPrintfL(TRUE, "SetupAssist: trace >>%s<<", ptrace->message);
+	gui_send_msg_2(0, REP_SETUP_ASSIST_STAT, sizeof(_Status), &_Status);
 	return REPLY_OK;
 }
 
@@ -138,7 +146,7 @@ void sa_to_print_pos(void)
 {
 	if (sa_connected()) 
 	{
-		sok_send_2(&_SaSocket, CMD_MOTOR_REFERENCE,    0, NULL);
+		sok_send_2(&_SaSocket, CMD_SA_REFERENCE,    0, NULL);
 		_Timeout = MOVE_TIEMOUT;
 	}
 }
@@ -156,41 +164,16 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 	SetupAssist_MoveCmd *pmsg = (SetupAssist_MoveCmd*)pmsg_;
 	switch (pmsg->hdr.msgId)
 	{
-    case CMD_SA_REFERENCE:	//	Error(LOG, 0, "Send CMD_MOTOR_REFERENCE");
-								sok_send_2(&_SaSocket, CMD_MOTOR_REFERENCE,    0, NULL); 
-								break;
-
-    case CMD_SA_STOP:		//	Error(LOG, 0, "Send CMD_SA_STOP");
-								sok_send_2(&_SaSocket, CMD_MOTOR_STOP,    0, NULL); 
-								break;
-
-    case CMD_SA_MOVE:			// Error(LOG, 0, "Send CMD_MOTOR_MOVE");
-								{
-									SetupAssist_MoveCmd cmd;
-									cmd.hdr.msgLen = sizeof(cmd);
-									cmd.hdr.msgId  = CMD_MOTOR_MOVE;
-									cmd.steps	   = (INT32)((double)pmsg->steps/_microns2steps);
-									if (pmsg->speed) cmd.speed = pmsg->speed;
-									else			 cmd.speed = 200;
-									if (pmsg->acc)   cmd.acc   = pmsg->acc;
-									else			 cmd.acc   = 100;
-									cmd.current	   = 300;
-									sok_send(&_SaSocket, &cmd);
-								}
-								break;
-
-    case CMD_SA_OUT_TRIGGER:	//	Error(LOG, 0, "Send CMD_SET_DENSIO_TRIGGER");
-								{
-									SetupAssist_OutTriggerCmd cmd;
-									cmd.hdr.msgLen = sizeof(cmd);
-									cmd.hdr.msgId  = CMD_OUT_TRIGGER;
-									cmd.time_ms		  = 100;
-									sok_send(&_SaSocket, &cmd);
-								}
+    case CMD_SA_REFERENCE:
+    case CMD_SA_STOP:			
+    case CMD_SA_MOVE:			
+    case CMD_SA_UP:
+    case CMD_SA_DOWN:
+								sok_send(&_SaSocket, pmsg_);
 								break;
 
     case CMD_SA_WEB_MOVE:		// Error(LOG, 0, "Send CMD_SA_WEB_MOVE");
-								plc_move_web(pmsg->steps, pmsg->speed);
+								plc_move_web(pmsg->steps, 1);
 								break;
 
     case CMD_SA_WEB_STOP:	//	gui_send_cmd(CMD_SA_WEB_STOP);

@@ -28,12 +28,12 @@
 #define CURRENT_HOLD_SLEDGE	50
 #define CURRENT_HOLD_LIFT	20
 
-#define POS_UP				5000		// um
+#define POS_UP				6000		// um
 
-#define STEPS_REV_SLEDGE	200*STEPS	// steps per motor revolution * 16 times oversampling
+#define STEPS_REV_SLEDGE	(200*STEPS)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV_SLEDGE		99000.0		// moving distance per revolution [um]
 
-#define STEPS_REV_LIFT		200*STEPS	// steps per motor revolution * 16 times oversampling
+#define STEPS_REV_LIFT		(200*STEPS)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV_LIFT		1000		// moving distance per revolution [um]
 
 //Inputs
@@ -42,6 +42,7 @@
 static SMovePar	_ParSledge;
 static SMovePar _ParSledgeRef;
 static SMovePar	_ParLift;
+static int		_Step;
 static char		_CmdName[32];
 static int		_SledgePos_New=0;
 static int		_SledgePos_Act=0;
@@ -53,6 +54,7 @@ static void _sa_motor_test  (int motor, int steps);
 static void _sa_do_reference(void);
 static void _sa_move_to_pos(int cmd, int pos);
 static int  _micron_2_steps_sledge(int micron);
+static int  _steps_2_microns_sledge(int steps);
 static int	_micron_2_steps_lift(int micron);
 
 //--- sa_init --------------------------------------
@@ -96,8 +98,7 @@ void sa_main(int ticks, int menu)
 {
 	int motor;
 	motor_main(ticks, menu);
-
-    RX_StepperStatus.posX = motor_get_step(MOTOR_SLEDGE);
+	
     RX_StepperStatus.info.headUpInput_0 = !fpga_input(SLEDGE_REF);
 
     if (RX_StepperStatus.info.moving)
@@ -105,38 +106,44 @@ void sa_main(int ticks, int menu)
 		RX_StepperStatus.info.x_in_ref   = FALSE;
 		RX_StepperStatus.info.z_in_up    = FALSE;
         RX_StepperStatus.info.z_in_down  = FALSE;
+		RX_StepperStatus.posX = _steps_2_microns_sledge(motor_get_step(MOTOR_SLEDGE));
     }
-	if (RX_StepperStatus.cmdRunning==0) RX_StepperStatus.info.moving = FALSE;
-    if (RX_StepperStatus.cmdRunning && motors_move_done(MOTOR_ALL_BITS)) 
+	else RX_StepperStatus.posX = _SledgePos_Act;
+
+//	if (RX_StepperStatus.cmdRunning==0) RX_StepperStatus.info.moving = FALSE;
+    if (RX_StepperStatus.cmdRunning && motors_move_done(MOTOR_ALL_BITS))
 	{
         RX_StepperStatus.info.headUpInput_0 = !fpga_input(SLEDGE_REF);
-		RX_StepperStatus.info.moving = FALSE;
+		RX_StepperStatus.info.x_in_ref      = RX_StepperStatus.info.headUpInput_0;
+
+		RX_StepperStatus.info.moving	    = FALSE;
+		RX_StepperStatus.info.z_in_up       = (RX_StepperStatus.cmdRunning==CMD_SA_UP || RX_StepperStatus.cmdRunning == CMD_SA_REFERENCE);
+		RX_StepperStatus.info.z_in_down     = (RX_StepperStatus.cmdRunning==CMD_SA_DOWN);
 		if (RX_StepperStatus.cmdRunning == CMD_SA_REFERENCE) 
 		{
-			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "SA: Command REFERENCE: End Sensor NOT HIGH");
-			RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0;
-            motors_reset(MOTOR_ALL_BITS);				
+			_sa_do_reference();
 		}
-        else if (motors_error(MOTOR_ALL_BITS, &motor))
+        else 
 		{
-			Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);			
-			RX_StepperStatus.info.ref_done = FALSE;							
-		}
+			if (motors_error(MOTOR_ALL_BITS, &motor))
+			{
+				Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);			
+				RX_StepperStatus.info.ref_done = FALSE;							
+			}
+			else
+			{
+				if (RX_StepperStatus.cmdRunning == CMD_SA_MOVE)
+				{
+					RX_StepperStatus.posY[0]++;
+					_SledgePos_Act = _SledgePos_New;
+					RX_StepperStatus.posX = _SledgePos_Act;
+					_SledgePos_New = 0;
 
-        if (RX_StepperStatus.cmdRunning == CMD_SA_MOVE)
-        {
-            _SledgePos_Act = _SledgePos_New;
-            _SledgePos_New = 0;
-        }
-
-        RX_StepperStatus.info.x_in_ref    = (RX_StepperStatus.cmdRunning==CMD_SA_REFERENCE && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_up     = (RX_StepperStatus.cmdRunning==CMD_SA_UP && RX_StepperStatus.info.ref_done);
-		RX_StepperStatus.info.z_in_down  = (RX_StepperStatus.cmdRunning==CMD_SA_DOWN && RX_StepperStatus.info.ref_done);
-        
-		if (RX_StepperStatus.info.ref_done && RX_StepperStatus.cmdRunning==CMD_SA_REFERENCE && _SledgePos_New)
-			_sa_move_to_pos(CMD_SA_MOVE,    _SledgePos_New);
-		else
+				}
+				else if (_SledgePos_New) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
+			}
 			RX_StepperStatus.cmdRunning = FALSE;
+		}
 	}	
 }
 
@@ -148,7 +155,8 @@ static void _sa_display_status(void)
 	term_printf("reference done: %d\n",	RX_StepperStatus.info.ref_done);
 	term_printf("z in reference: %d\n",	RX_StepperStatus.info.x_in_ref);
 	term_printf("z in up:        %d\n",	RX_StepperStatus.info.z_in_up);
-	term_printf("z in down:     %d\n",	RX_StepperStatus.info.z_in_down);
+	term_printf("z in down:      %d\n",	RX_StepperStatus.info.z_in_down);
+	term_printf("posX:           %d\n",	RX_StepperStatus.posX);	
 	term_printf("\n");
 }
 
@@ -201,19 +209,46 @@ int sa_menu(void)
 //--- _sa_do_reference ----------------------------------------------------------------
 static void _sa_do_reference(void)
 {
-    motors_stop(MOTOR_ALL_BITS);
-    motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
-    motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
-	
-	RX_StepperStatus.cmdRunning  = CMD_SA_REFERENCE;
-	RX_StepperStatus.info.moving = TRUE;
-    motors_move_by_step(1 << MOTOR_SLEDGE, &_ParSledgeRef, -500000, FALSE);
+	switch(_Step)
+	{
+    case 0:	motors_stop(MOTOR_ALL_BITS);
+			motors_reset(MOTOR_ALL_BITS);
+			motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
+			motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);	
+			RX_StepperStatus.cmdRunning  = CMD_SA_REFERENCE;
+			_Step=1;
+
+	case 1: _Step=2;
+			if (!RX_StepperStatus.info.z_in_up)
+			{
+				RX_StepperStatus.info.moving = TRUE;
+				motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, POS_UP);
+				break;				
+			}
+
+    case 2: _Step=3;
+			RX_StepperStatus.info.moving = TRUE;
+			motors_move_by_step(1 << MOTOR_SLEDGE, &_ParSledgeRef, -500000, TRUE);
+			break;
+
+    case 3: RX_StepperStatus.cmdRunning=0;
+			RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0;
+			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "SA: Command REFERENCE: End Sensor NOT HIGH");
+			motors_reset(MOTOR_ALL_BITS);
+			_SledgePos_Act=0;
+			if (_SledgePos_New) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
+	}
 }
 
 //---_micron_2_steps_seldge --------------------------------------------------------------
 static int  _micron_2_steps_sledge(int micron)
 {
-	return (int)(0.5 + STEPS_REV_SLEDGE / DIST_REV_SLEDGE*micron);
+	return (int)(0.5 + micron*STEPS_REV_SLEDGE / DIST_REV_SLEDGE);
+}
+
+static int  _steps_2_microns_sledge(int steps)
+{
+	return (int)(0.5 + steps * DIST_REV_SLEDGE / STEPS_REV_SLEDGE);
 }
 
 //---_micron_2_sptes_lift --------------------------------------------------------------
@@ -227,7 +262,7 @@ static void _sa_move_to_pos(int cmd, int pos)
 {
     RX_StepperStatus.cmdRunning  = cmd;
 	RX_StepperStatus.info.moving = TRUE;
-    motors_move_to_step(1 << MOTOR_SLEDGE, &_ParSledge, pos);
+    motors_move_to_step(1 << MOTOR_SLEDGE, &_ParSledge, _micron_2_steps_sledge(pos));
 }
 
 //--- sa_handle_ctrl_msg -----------------------------------
@@ -239,40 +274,41 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	{
     case CMD_SA_STOP:				strcpy(_CmdName, "CMD_SA_STOP");
 									motors_stop(MOTOR_ALL_BITS);
+									motors_reset(MOTOR_ALL_BITS);
 									RX_StepperStatus.cmdRunning = 0;
+									_SledgePos_Act=0;
 									RX_StepperStatus.info.ref_done = FALSE;
 									break;
 
     case CMD_SA_REFERENCE:			strcpy(_CmdName, "CMD_SA_REFERENCE");
 									_SledgePos_New=0;
+                                    RX_StepperStatus.cmdRunning = msgId;
+									_Step=0;
 									_sa_do_reference();	
 									break;
 
     case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SLEDGE");
 									pos   = (*((INT32*)pdata));
-									steps = _micron_2_steps_sledge(pos);
-									if (!RX_StepperStatus.cmdRunning && (steps!=_SledgePos_Act || !RX_StepperStatus.info.ref_done))
+									if ((pos!=_SledgePos_Act || !RX_StepperStatus.info.ref_done))
 									{
-                                        _SledgePos_New = steps;
+										_SledgePos_New = pos;
                                         if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
 										else								_sa_do_reference();
 									}
 									break;
 
     case CMD_SA_UP:					strcpy(_CmdName, "CMD_SA_UP");
-									if (!RX_StepperStatus.cmdRunning && !RX_StepperStatus.info.z_in_up)
+									if (!RX_StepperStatus.info.z_in_up)
 									{
                                         RX_StepperStatus.cmdRunning = msgId;
-                                        RX_StepperStatus.info.moving = TRUE;
                                         motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, POS_UP);
                                     }
 									break;
 
     case CMD_SA_DOWN:				strcpy(_CmdName, "CMD_SA_DOWN");
-									if (!RX_StepperStatus.cmdRunning && !RX_StepperStatus.info.z_in_down)
+									if (!RX_StepperStatus.info.z_in_down)
 									{
                                         RX_StepperStatus.cmdRunning = msgId;
-                                        RX_StepperStatus.info.moving = TRUE;
                                         motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, -POS_UP);
                                     }
 									break;

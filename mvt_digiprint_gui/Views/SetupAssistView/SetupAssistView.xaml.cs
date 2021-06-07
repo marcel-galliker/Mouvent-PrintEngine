@@ -85,6 +85,18 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_REFERENCE);
 		}
 
+		//--- Up_Clicked -------------------------------------------
+		private void Up_Clicked(object sender,RoutedEventArgs e)
+		{
+			RxGlobals.SetupAssist.Up();
+		}
+
+		//--- Down_Clicked -------------------------------------------
+		private void Down_Clicked(object sender,RoutedEventArgs e)
+		{
+			RxGlobals.SetupAssist.Down();
+		}
+
 		private void SlideLeft_Clicked(object sender,RoutedEventArgs e)
 		{
 			RxGlobals.SetupAssist.ScanMoveTo(20);
