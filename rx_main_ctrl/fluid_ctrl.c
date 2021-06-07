@@ -680,12 +680,12 @@ static void _control(int fluidNo)
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		
                 case ctrl_purge4ever:		_PurgeCtrlMode = pstat->ctrlMode;
-											if (_PurgeCtrlMode <= ctrl_purge4ever && _PurgeCtrlMode >= ctrl_purge_hard_wipe && rx_def_is_lb(RX_Config.printer.type) && !_lbrob)
+											if (_PurgeCtrlMode <= ctrl_purge_hard_wash && _PurgeCtrlMode >= ctrl_purge_hard_wipe && rx_def_is_lb(RX_Config.printer.type) && !_lbrob)
 											{
                                                 _send_ctrlMode(no, _EndCtrlMode[no], TRUE);
                                                 break;
                                             }
-											if (_lbrob && _PurgeCtrlMode == ctrl_purge4ever)
+											if (_lbrob && _PurgeCtrlMode == ctrl_purge_hard_wash)
 											{
                                                 if (!steplb_rob_in_fct_pos(step_stepper_to_fluid(no), rob_fct_purge4ever))
 													steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_purge4ever);
@@ -928,11 +928,11 @@ static void _control(int fluidNo)
 											}
                                             break;
                                             
-                case ctrl_recovery_start:	if (rx_def_is_lb(RX_Config.printer.type) && !_lbrob)
+                case ctrl_recovery_start:	/*if (rx_def_is_lb(RX_Config.printer.type) && !_lbrob)
 											{
                                                 _send_ctrlMode(no, _EndCtrlMode[no], TRUE); 
                                                 break;
-                                            }
+                                            }*/
 												
 											if (_lbrob)
 											{

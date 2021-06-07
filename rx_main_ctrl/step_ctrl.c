@@ -11,7 +11,6 @@
 
 #include "rx_error.h"
 #include "rx_def.h"
-#include "rx_error.h"
 #include "rx_sok.h"
 #include "rx_threads.h"
 #include "rx_trace.h"

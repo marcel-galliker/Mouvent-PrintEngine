@@ -113,8 +113,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
-            visible = (RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
-            Button_Purge4Ever.Visibility = visible;
 
             //--- printer_test_table_seon -----------------------------------------------------------
             visible   = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide 
@@ -130,6 +128,9 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Cooler_Temp.Visibility = visible;
             ClusterNo.Visibility = visible;
             Temp_Head.Visibility = Temp_Head_Warn.Visibility = collapsed;
+
+
+            Button_Purge4Ever.Visibility = (RxGlobals.User.UserType >= EUserType.usr_mouvent) ? Visibility.Visible : Visibility.Collapsed;
         }
         
         //--- FpVoltage_TextChanged -----------------------------------------
