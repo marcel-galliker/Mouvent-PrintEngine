@@ -52,8 +52,8 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
-            visible = (RxGlobals.StepperStatus[0].RobotUsed) ? Visibility.Visible : Visibility.Collapsed;
-            Button_Purge4Ever.Visibility = visible;
+
+            Button_Purge4Ever.Visibility = (RxGlobals.User.UserType >= EUserType.usr_mouvent) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
