@@ -279,6 +279,7 @@ void lbrob_main(int ticks, int menu)
     if (!RX_StepperStatus.robinfo.ref_done)
     {
         _HeadScrewPos = FALSE;
+        _CapIsWet = TRUE;
     }
     
 
