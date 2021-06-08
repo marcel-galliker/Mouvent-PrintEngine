@@ -159,7 +159,7 @@ namespace RX_DigiPrint.Models
 		public void ScanMoveTo(double pos, int speed=0)
 		{
 			TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
-			cmd.steps = (int)(1000.0*pos);
+			cmd.pos = (int)(1000.0*pos);
 			if (_Simu) _OnScanMoveDone();
 			else RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}
@@ -196,10 +196,10 @@ namespace RX_DigiPrint.Models
 				TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 				double old=WebPos;
 				WebPos	   += (double)dist;
-				cmd.steps	= (Int32)(1000*dist);
+				cmd.pos	= (Int32)(1000*dist);
 				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
 				if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
-				string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3} oldpos={4} WebPos={5}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.steps, old, WebPos);
+				string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3} oldpos={4} WebPos={5}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.pos, old, WebPos);
 				if (_WebMoveCnt!=_WebMoveStartCnt)
 					Console.WriteLine("WEB MOVE Error: _WebMoveCnt={0}, _WebMoveStartCnt={1}", _WebMoveCnt, _WebMoveStartCnt);
 				_WebMoveStartCnt++;

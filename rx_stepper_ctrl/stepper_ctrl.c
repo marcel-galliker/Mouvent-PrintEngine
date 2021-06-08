@@ -31,7 +31,7 @@
 #include "dp803.h"
 #include "txrob.h"
 #include "slide.h"
-#include "sa.h"
+#include "setup_assist.h"
 #include "tcp_ip.h"
 #include "test_table.h"
 #include "cleaf.h"

@@ -22,7 +22,6 @@
 #include "rx_mac_address.h"
 #include "args.h"
 #include "rfs.h"
-#include "sa_tcp_ip.h"
 #include "setup.h"
 #include "tcp_ip.h"
 #include "ctrl_svr.h"
@@ -399,7 +398,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 							{
 							//	printf("Error\n");
 							//	return REPLY_ERROR;
-								strcpy(ipAddr, SETUP_ASSIST_IP_ADDR);
+								strcpy(ipAddr, RX_CTRL_SETUP_ASSIST);
 								break;
 							}
 							sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_STEPPER_0+1+10*no);  														

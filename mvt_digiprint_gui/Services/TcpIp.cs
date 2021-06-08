@@ -1343,27 +1343,10 @@ namespace RX_DigiPrint.Services
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SSetupAssistStatMsg
-        {
-            public SMsgHdr          hdr;
-            
-            public UInt32	powerStepStatus;	
-	        public Int32	motorPosition;
-	        public Int32	stopPos;
-	        public UInt32	motorVoltage;
-	        public UInt32	motorMoveCurrent;
-	        public UInt32	motorHoldCurrent;
-	        public byte	    moveCnt;
-	        public byte	    refDone;
-	        public byte	    moving;	
-	        public byte	    inputs;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SetupAssist_MoveCmd
         {
-	        SMsgHdr         header;
-	        public Int32    steps;
+	        SMsgHdr         hdr;
+	        public Int32    pos;    
         };
 
         //--- CLEAF Orders ------------------------------------------------------

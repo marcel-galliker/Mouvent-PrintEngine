@@ -34,6 +34,7 @@
 #define RX_CTRL_ROBOT_0		50
 #define RX_CTRL_STEPPER_HD	RX_CTRL_SUBNET "9"
 #define RX_CTRL_STEPPER_CLN	RX_CTRL_SUBNET "10"
+#define RX_CTRL_SETUP_ASSIST RX_CTRL_SUBNET "99"
 #define RX_CTRL_IQ500		RX_CTRL_SUBNET "240"
 #define RX_CTRL_POWERSUPPLY	RX_CTRL_SUBNET "241"
 #define RX_CTRL_SWITCH_MAIN RX_CTRL_SUBNET "250"
@@ -720,6 +721,13 @@ typedef struct
 #define AXE_STITCH 1
     INT32 steps; // in steps
 } SHeadAdjustmentMsg;
+
+typedef struct
+{
+	SMsgHdr     hdr;
+	INT32	    pos;    
+} SetupAssist_MoveCmd;
+
 
 //--- message CMD_SEND_DATA -------------------------------------------
 

@@ -14,6 +14,7 @@
 #include "rx_error.h"
 #include "rx_term.h"
 #include "rx_trace.h"
+#include "rx_threads.h"
 #include "tcp_ip.h"
 #include "fpga_stepper.h"
 #include "power_step.h"

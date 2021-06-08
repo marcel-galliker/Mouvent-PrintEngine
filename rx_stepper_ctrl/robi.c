@@ -57,9 +57,9 @@ static int _RobiNotStarted = FALSE;
 static int _ZNotReachedUp = FALSE;
 static int _ZNotReachedDown = FALSE;
 
-volatile static SUsbTxMsg _txFifo[ROBI_FIFO_SIZE];
-volatile static int32_t _txFifoInIndex;
-volatile static int32_t _txFifoOutIndex;
+static SUsbTxMsg _txFifo[ROBI_FIFO_SIZE];
+static int32_t _txFifoInIndex;
+static int32_t _txFifoOutIndex;
 
 static uint32_t _currentVersion;
 
@@ -472,9 +472,10 @@ static void* update_thread(void *par)
     if (fd != -1)
     {
         int32_t error = REPLY_OK;
-        uint8_t *dataBuffer = 0;
-        uint8_t *currentData = 0;
-        uint32_t size = 0, size_read = 0, available_data = 0, total_data = 0;
+        uint8_t *dataBuffer = NULL;
+        uint8_t *currentData = NULL;
+        uint8_t *total_data = NULL;
+        uint32_t size = 0, size_read = 0, available_data = 0;
         
         // Get File Size
         size = lseek(fd, 0L, SEEK_END);
@@ -502,7 +503,7 @@ static void* update_thread(void *par)
                 rx_sleep(25);
             }
             
-            available_data = total_data - (uint32_t)currentData;
+            available_data = (UINT32)(total_data - currentData);
 
             if (available_data > 64)
             {

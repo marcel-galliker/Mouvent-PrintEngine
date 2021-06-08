@@ -244,7 +244,7 @@ int flz_load_simple	(const char *path, BYTE **buffer, int bufsize, SBmpInfo *pin
 			len = fastlz_decompress(cmpbuf, (int)pband->bandSize, dst, pband->rows * pFlzInfo->lineLen);
 			if (invert)
 			{
-				for (int i=0; i<len; i++) *dst++ = ~(*dst);
+				for (UINT32 i=0; i<len; i++) *dst++ = ~(*dst);
 			}
 			else dst += len;
 		}

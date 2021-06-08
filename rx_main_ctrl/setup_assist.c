@@ -16,7 +16,6 @@
 #include "rx_trace.h"
 #include "gui_svr.h"
 #include "tcp_ip.h"
-#include "sa_tcp_ip.h"
 #include "plc_ctrl.h"
 #include "setup_assist.h"
 
@@ -70,7 +69,7 @@ static void *_sa_thread(void *lpParameter)
 	{
 		if (_SaSocket==INVALID_SOCKET)
 		{
-			if (sok_open_client_2(&_SaSocket, SETUP_ASSIST_IP_ADDR, PORT_CTRL_STEPPER, SOCK_STREAM, _sa_handle_msg, _sa_socket_closed)==REPLY_OK)
+			if (sok_open_client_2(&_SaSocket, RX_CTRL_SETUP_ASSIST, PORT_CTRL_STEPPER, SOCK_STREAM, _sa_handle_msg, _sa_socket_closed)==REPLY_OK)
 			{
                 Error(LOG, 0, "Connected");
                 _sa_set_config();
@@ -87,6 +86,7 @@ static int  _sa_socket_closed(RX_SOCKET socket, const char *peerName)
 {
 	Error(ERR_CONT, 0, "Socket %d closed", socket);
 	_SaSocket = INVALID_SOCKET;
+	return REPLY_OK;
 }
 
 //--- _sa_set_config -------------------
@@ -159,21 +159,22 @@ int sa_in_print_pos(void)
 }
 
 //--- sa_handle_gui_msg -------------------------------------------------------
-void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
+void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg)
 {
-	SetupAssist_MoveCmd *pmsg = (SetupAssist_MoveCmd*)pmsg_;
-	switch (pmsg->hdr.msgId)
+	SetupAssist_MoveCmd* pcmd = (SetupAssist_MoveCmd*)pmsg;
+
+	switch (pcmd->hdr.msgId)
 	{
     case CMD_SA_REFERENCE:
     case CMD_SA_STOP:			
     case CMD_SA_MOVE:			
     case CMD_SA_UP:
     case CMD_SA_DOWN:
-								sok_send(&_SaSocket, pmsg_);
+								sok_send(&_SaSocket, pmsg);
 								break;
 
     case CMD_SA_WEB_MOVE:		// Error(LOG, 0, "Send CMD_SA_WEB_MOVE");
-								plc_move_web(pmsg->steps, 1);
+								plc_move_web(pcmd->pos, 1);
 								break;
 
     case CMD_SA_WEB_STOP:	//	gui_send_cmd(CMD_SA_WEB_STOP);
@@ -181,6 +182,6 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg_)
 								plc_pause_printing(FALSE);
 								break;
 
-    default: Error(WARN, 0, "Unknown Command 0x%08x", pmsg->hdr.msgId);
+    default: Error(WARN, 0, "Unknown Command 0x%08x", pcmd->hdr.msgId);
 	}
 }

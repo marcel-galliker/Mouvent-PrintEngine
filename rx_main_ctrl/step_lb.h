@@ -61,7 +61,7 @@ void steplb_rob_start_cap_all(void);
 
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 int steplb_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment);
-SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment);
+// SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment);
 int steplb_get_stitch_position(SHeadAdjustmentMsg *headAdjustment);
 void steplb_cluster_Screw_Turned(int stepperNo);
 

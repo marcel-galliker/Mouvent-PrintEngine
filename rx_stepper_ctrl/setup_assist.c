@@ -18,34 +18,34 @@
 #include "power_step.h"
 #include "motor_cfg.h"
 #include "motor.h"
-#include "sa.h"
+#include "setup_assist.h"
 
-#define MOTOR_SLEDGE		0
+#define MOTOR_SCAN		0
 #define MOTOR_LIFT			1
 
 #define MOTOR_ALL_BITS		0x03
 
-#define CURRENT_HOLD_SLEDGE	50
+#define CURRENT_HOLD_SCAN	50
 #define CURRENT_HOLD_LIFT	20
 
 #define POS_UP				6000		// um
 
-#define STEPS_REV_SLEDGE	(200*STEPS)	// steps per motor revolution * 16 times oversampling
-#define DIST_REV_SLEDGE		99000.0		// moving distance per revolution [um]
+#define STEPS_REV_SCAN		(200*STEPS)	// steps per motor revolution * 16 times oversampling
+#define DIST_REV_SCAN		99000.0		// moving distance per revolution [um]
 
 #define STEPS_REV_LIFT		(200*STEPS)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV_LIFT		1000		// moving distance per revolution [um]
 
 //Inputs
-#define SLEDGE_REF			0
+#define SCAN_REF			0
 
-static SMovePar	_ParSledge;
-static SMovePar _ParSledgeRef;
+static SMovePar	_ParScan;
+static SMovePar _ParScanRef;
 static SMovePar	_ParLift;
 static int		_Step;
 static char		_CmdName[32];
-static int		_SledgePos_New=0;
-static int		_SledgePos_Act=0;
+static int		_ScanPos_New=0;
+static int		_ScanPos_Act=0;
 
 
 //--- prototypes --------------------------------------------
@@ -53,36 +53,36 @@ static void _sa_motor_z_test(int steps);
 static void _sa_motor_test  (int motor, int steps);
 static void _sa_do_reference(void);
 static void _sa_move_to_pos(int cmd, int pos);
-static int  _micron_2_steps_sledge(int micron);
-static int  _steps_2_microns_sledge(int steps);
+static int  _micron_2_steps_scan(int micron);
+static int  _steps_2_microns_scan(int steps);
 static int	_micron_2_steps_lift(int micron);
 
 //--- sa_init --------------------------------------
 void sa_init(void)
 {
-    motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
+    motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, STEPS);
     motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
 
     memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
-    _ParSledge.speed = 10000;
-    _ParSledge.accel = 32000;
-    _ParSledge.current_acc = 420.0;
-    _ParSledge.current_run = 300.0;
-    _ParSledge.stop_mux = 0;
-    _ParSledge.dis_mux_in = 0;
-    _ParSledge.encCheck		= chk_off;
+    _ParScan.speed = 10000;
+    _ParScan.accel = 32000;
+    _ParScan.current_acc = 420.0;
+    _ParScan.current_run = 300.0;
+    _ParScan.stop_mux = 0;
+    _ParScan.dis_mux_in = 0;
+    _ParScan.encCheck		= chk_off;
 
-    _ParSledgeRef.speed = 1000;
-    _ParSledgeRef.accel = 32000;
-    _ParSledgeRef.current_acc = 420.0;
-    _ParSledgeRef.current_run = 300.0;
-    _ParSledgeRef.stop_mux = 0;
-    _ParSledgeRef.estop_in_bit[MOTOR_SLEDGE] = 1 << SLEDGE_REF;
-    _ParSledgeRef.estop_level = FALSE;
-    _ParSledgeRef.dis_mux_in = 0;
-    _ParSledgeRef.encCheck = chk_off;
+    _ParScanRef.speed = 1000;
+    _ParScanRef.accel = 32000;
+    _ParScanRef.current_acc = 420.0;
+    _ParScanRef.current_run = 300.0;
+    _ParScanRef.stop_mux = 0;
+    _ParScanRef.estop_in_bit[MOTOR_SCAN] = 1 << SCAN_REF;
+    _ParScanRef.estop_level = FALSE;
+    _ParScanRef.dis_mux_in = 0;
+    _ParScanRef.encCheck = chk_off;
 
     _ParLift.speed = 10000;
     _ParLift.accel = 32000;
@@ -99,21 +99,21 @@ void sa_main(int ticks, int menu)
 	int motor;
 	motor_main(ticks, menu);
 	
-    RX_StepperStatus.info.headUpInput_0 = !fpga_input(SLEDGE_REF);
+    RX_StepperStatus.info.headUpInput_0 = !fpga_input(SCAN_REF);
 
     if (RX_StepperStatus.info.moving)
 	{
 		RX_StepperStatus.info.x_in_ref   = FALSE;
 		RX_StepperStatus.info.z_in_up    = FALSE;
         RX_StepperStatus.info.z_in_down  = FALSE;
-		RX_StepperStatus.posX = _steps_2_microns_sledge(motor_get_step(MOTOR_SLEDGE));
+		RX_StepperStatus.posX = _steps_2_microns_scan(motor_get_step(MOTOR_SCAN));
     }
-	else RX_StepperStatus.posX = _SledgePos_Act;
+	else RX_StepperStatus.posX = _ScanPos_Act;
 
 //	if (RX_StepperStatus.cmdRunning==0) RX_StepperStatus.info.moving = FALSE;
     if (RX_StepperStatus.cmdRunning && motors_move_done(MOTOR_ALL_BITS))
 	{
-        RX_StepperStatus.info.headUpInput_0 = !fpga_input(SLEDGE_REF);
+        RX_StepperStatus.info.headUpInput_0 = !fpga_input(SCAN_REF);
 		RX_StepperStatus.info.x_in_ref      = RX_StepperStatus.info.headUpInput_0;
 
 		RX_StepperStatus.info.moving	    = FALSE;
@@ -135,12 +135,12 @@ void sa_main(int ticks, int menu)
 				if (RX_StepperStatus.cmdRunning == CMD_SA_MOVE)
 				{
 					RX_StepperStatus.posY[0]++;
-					_SledgePos_Act = _SledgePos_New;
-					RX_StepperStatus.posX = _SledgePos_Act;
-					_SledgePos_New = 0;
+					_ScanPos_Act = _ScanPos_New;
+					RX_StepperStatus.posX = _ScanPos_Act;
+					_ScanPos_New = 0;
 
 				}
-				else if (_SledgePos_New) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
+				else if (_ScanPos_New) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New);
 			}
 			RX_StepperStatus.cmdRunning = FALSE;
 		}
@@ -174,7 +174,7 @@ int sa_menu(void)
 	term_printf("s: STOP\n");
     term_printf("R: Reference\n");
 	term_printf("r<n>: reset motor<n>\n");	
-    term_printf("p<n>: move sledge to pos <n> um\n");
+    term_printf("p<n>: move scan to pos <n> um\n");
 	term_printf("u: move to UP position\n");
 	term_printf("d: move to DOWN position\n");
     term_printf("z: move by <steps>\n");
@@ -213,7 +213,7 @@ static void _sa_do_reference(void)
 	{
     case 0:	motors_stop(MOTOR_ALL_BITS);
 			motors_reset(MOTOR_ALL_BITS);
-			motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
+			motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, STEPS);
 			motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);	
 			RX_StepperStatus.cmdRunning  = CMD_SA_REFERENCE;
 			_Step=1;
@@ -228,27 +228,27 @@ static void _sa_do_reference(void)
 
     case 2: _Step=3;
 			RX_StepperStatus.info.moving = TRUE;
-			motors_move_by_step(1 << MOTOR_SLEDGE, &_ParSledgeRef, -500000, TRUE);
+			motors_move_by_step(1 << MOTOR_SCAN, &_ParScanRef, -500000, TRUE);
 			break;
 
     case 3: RX_StepperStatus.cmdRunning=0;
 			RX_StepperStatus.info.ref_done = RX_StepperStatus.info.headUpInput_0;
 			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "SA: Command REFERENCE: End Sensor NOT HIGH");
 			motors_reset(MOTOR_ALL_BITS);
-			_SledgePos_Act=0;
-			if (_SledgePos_New) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
+			_ScanPos_Act=0;
+			if (_ScanPos_New) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New);
 	}
 }
 
 //---_micron_2_steps_seldge --------------------------------------------------------------
-static int  _micron_2_steps_sledge(int micron)
+static int  _micron_2_steps_scan(int micron)
 {
-	return (int)(0.5 + micron*STEPS_REV_SLEDGE / DIST_REV_SLEDGE);
+	return (int)(0.5 + micron*STEPS_REV_SCAN / DIST_REV_SCAN);
 }
 
-static int  _steps_2_microns_sledge(int steps)
+static int  _steps_2_microns_scan(int steps)
 {
-	return (int)(0.5 + steps * DIST_REV_SLEDGE / STEPS_REV_SLEDGE);
+	return (int)(0.5 + steps * DIST_REV_SCAN / STEPS_REV_SCAN);
 }
 
 //---_micron_2_sptes_lift --------------------------------------------------------------
@@ -262,13 +262,13 @@ static void _sa_move_to_pos(int cmd, int pos)
 {
     RX_StepperStatus.cmdRunning  = cmd;
 	RX_StepperStatus.info.moving = TRUE;
-    motors_move_to_step(1 << MOTOR_SLEDGE, &_ParSledge, _micron_2_steps_sledge(pos));
+    motors_move_to_step(1 << MOTOR_SCAN, &_ParScan, _micron_2_steps_scan(pos));
 }
 
 //--- sa_handle_ctrl_msg -----------------------------------
 int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {	
-	INT32 pos, steps;
+	INT32 pos;
 
 	switch(msgId)
 	{
@@ -276,23 +276,23 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 									motors_stop(MOTOR_ALL_BITS);
 									motors_reset(MOTOR_ALL_BITS);
 									RX_StepperStatus.cmdRunning = 0;
-									_SledgePos_Act=0;
+									_ScanPos_Act=0;
 									RX_StepperStatus.info.ref_done = FALSE;
 									break;
 
     case CMD_SA_REFERENCE:			strcpy(_CmdName, "CMD_SA_REFERENCE");
-									_SledgePos_New=0;
+									_ScanPos_New=0;
                                     RX_StepperStatus.cmdRunning = msgId;
 									_Step=0;
 									_sa_do_reference();	
 									break;
 
-    case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SLEDGE");
+    case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SCAN");
 									pos   = (*((INT32*)pdata));
-									if ((pos!=_SledgePos_Act || !RX_StepperStatus.info.ref_done))
+									if ((pos!=_ScanPos_Act || !RX_StepperStatus.info.ref_done))
 									{
-										_SledgePos_New = pos;
-                                        if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _SledgePos_New);
+										_ScanPos_New = pos;
+                                        if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New);
 										else								_sa_do_reference();
 									}
 									break;
@@ -325,7 +325,7 @@ void _sa_motor_z_test(int steps)
 {	
 	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
-	motors_move_by_step(MOTOR_SLEDGE, &_ParSledge, steps, TRUE);
+	motors_move_by_step(MOTOR_SCAN, &_ParScan, steps, TRUE);
 }
 
 //--- _sa_motor_test ---------------------------------
@@ -338,7 +338,7 @@ static void _sa_motor_test(int motorNo, int steps)
 	memset(&par, 0, sizeof(par));
 	par.speed		= 10000;
 	par.accel		= 32000;
-    if (motorNo == MOTOR_SLEDGE)
+    if (motorNo == MOTOR_SCAN)
     {
         par.current_acc = 420.0;
         par.current_run = 420.0;
@@ -349,7 +349,7 @@ static void _sa_motor_test(int motorNo, int steps)
         par.current_run = 60.0;
     }
     par.stop_mux = 0;
-    par.estop_in_bit[MOTOR_SLEDGE] = (1 << SLEDGE_REF);
+    par.estop_in_bit[MOTOR_SCAN] = (1 << SCAN_REF);
     par.estop_level = FALSE;
 	par.dis_mux_in	= 0;
 	par.encCheck	= chk_off;
@@ -357,8 +357,8 @@ static void _sa_motor_test(int motorNo, int steps)
 	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
 
-    if (motorNo == MOTOR_SLEDGE)
-        motor_config(MOTOR_SLEDGE, CURRENT_HOLD_SLEDGE, STEPS_REV_SLEDGE, DIST_REV_SLEDGE, STEPS);
+    if (motorNo == MOTOR_SCAN)
+        motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, STEPS);
     else if (motorNo == MOTOR_LIFT)
         motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
     

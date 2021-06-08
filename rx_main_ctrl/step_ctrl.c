@@ -691,6 +691,7 @@ void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     }
 }
 
+/*
 //--- step_get_StepperStatus ---------------------------------------------
 SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
 {
@@ -702,7 +703,7 @@ SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
         break;
     }
 }
-
+*/
 //--- step_screw_in_Buffer ------------------------------------------
 int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
 {
@@ -713,6 +714,7 @@ int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
     default:
         break;
     }
+	return FALSE;
 }
 
 //--- step_get_stitch_position ---------------------------------------------
@@ -725,6 +727,7 @@ int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
     default:
         break;
     }
+	return FALSE;
 }
 
 //--- step_robot_used ----------------------------------

@@ -922,6 +922,7 @@ int steplb_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
 	return FALSE;
 }
 
+/*
 //--- steplb_get_StepperStatus ---------------------------------------------------------
 SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
 {
@@ -934,6 +935,7 @@ SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
 
 	return _Status[stepperNo];
 }
+*/
 
 //--- steplb_get_stitch_position --------------------------------------------
 int steplb_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
