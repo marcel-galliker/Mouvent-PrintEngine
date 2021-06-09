@@ -164,7 +164,7 @@
                         <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToVisible_Converter}}" Width="16"/>
                         <Image Grid.Row="6" Grid.Column="1" Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding ScanInLeft,   Converter={StaticResource BoolToInVisible_Converter}}" Width="16"/>
                         <Button Grid.Row="7" Content="Left"   Width="70" HorizontalAlignment="Left" Click="SlideLeft_Clicked"/>
-                        <Button Grid.Row="7" Content="Right"  Width="70" HorizontalAlignment="Right" Click="Reference_Clicked"/>
+                        <Button Grid.Row="7" Content="Right"  Width="70" HorizontalAlignment="Right" Click="SlideRight_Clicked"/>
 
                         <TextBlock Grid.RowSpan="10" Grid.ColumnSpan="10" Text="NOT CONNECTED" Foreground="Red" FontSize="20" RenderTransformOrigin="0.5,0.5" 
                                HorizontalAlignment="Center" 

@@ -19,6 +19,6 @@ void sa_init(void);
 int  sa_menu(void);
 void sa_main(int ticks, int menu);
 	
-int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
+int  sa_handle_ctrl_msg(RX_SOCKET socket, void *pmsg);
 
 

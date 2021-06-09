@@ -21,3 +21,4 @@ int ctrl_main(int ticks, int menu);
 char *ctrl_cmd_name(int cmd);
 
 int ctrl_send_2(INT32 id, UINT32 dataLen, void *data);
+void ctrl_send_status(void);

@@ -99,7 +99,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 
 		private void SlideLeft_Clicked(object sender,RoutedEventArgs e)
 		{
-			RxGlobals.SetupAssist.ScanMoveTo(20);
+			RxGlobals.SetupAssist.ScanMoveTo(100, 50);
+		}
+		private void SlideRight_Clicked(object sender,RoutedEventArgs e)
+		{
+			RxGlobals.SetupAssist.ScanMoveTo(20, 50);
 		}
 
 		//--- Start_Clicked -------------------------------------------

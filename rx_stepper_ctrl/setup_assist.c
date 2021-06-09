@@ -13,6 +13,7 @@
 
 #include "rx_error.h"
 #include "rx_term.h"
+#include "rx_trace.h"
 #include "tcp_ip.h"
 #include "fpga_stepper.h"
 #include "power_step.h"
@@ -20,7 +21,7 @@
 #include "motor.h"
 #include "setup_assist.h"
 
-#define MOTOR_SCAN		0
+#define MOTOR_SCAN			0
 #define MOTOR_LIFT			1
 
 #define MOTOR_ALL_BITS		0x03
@@ -36,6 +37,8 @@
 #define STEPS_REV_LIFT		(200*STEPS)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV_LIFT		1000		// moving distance per revolution [um]
 
+#define SCAN_SPEED			10000
+
 //Inputs
 #define SCAN_REF			0
 
@@ -45,6 +48,7 @@ static SMovePar	_ParLift;
 static int		_Step;
 static char		_CmdName[32];
 static int		_ScanPos_New=0;
+static int		_ScanSpeed=0;
 static int		_ScanPos_Act=0;
 
 
@@ -52,7 +56,7 @@ static int		_ScanPos_Act=0;
 static void _sa_motor_z_test(int steps);
 static void _sa_motor_test  (int motor, int steps);
 static void _sa_do_reference(void);
-static void _sa_move_to_pos(int cmd, int pos);
+static void _sa_move_to_pos(int cmd, int pos, int speed);
 static int  _micron_2_steps_scan(int micron);
 static int  _steps_2_microns_scan(int steps);
 static int	_micron_2_steps_lift(int micron);
@@ -60,18 +64,18 @@ static int	_micron_2_steps_lift(int micron);
 //--- sa_init --------------------------------------
 void sa_init(void)
 {
-    motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, STEPS);
+    motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, 1);
     motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
 
     memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
-    _ParScan.speed = 10000;
-    _ParScan.accel = 32000;
-    _ParScan.current_acc = 420.0;
-    _ParScan.current_run = 300.0;
-    _ParScan.stop_mux = 0;
-    _ParScan.dis_mux_in = 0;
+    _ParScan.speed			= SCAN_SPEED;
+    _ParScan.accel			= 32000;
+    _ParScan.current_acc	= 420.0;
+    _ParScan.current_run	= 300.0;
+    _ParScan.stop_mux		= 0;
+    _ParScan.dis_mux_in		= 0;
     _ParScan.encCheck		= chk_off;
 
     _ParScanRef.speed = 1000;
@@ -104,8 +108,8 @@ void sa_main(int ticks, int menu)
     if (RX_StepperStatus.info.moving)
 	{
 		RX_StepperStatus.info.x_in_ref   = FALSE;
-		RX_StepperStatus.info.z_in_up    = FALSE;
-        RX_StepperStatus.info.z_in_down  = FALSE;
+	//	RX_StepperStatus.info.z_in_up    = FALSE;
+    //  RX_StepperStatus.info.z_in_down  = FALSE;
 		RX_StepperStatus.posX = _steps_2_microns_scan(motor_get_step(MOTOR_SCAN));
     }
 	else RX_StepperStatus.posX = _ScanPos_Act;
@@ -135,14 +139,17 @@ void sa_main(int ticks, int menu)
 				if (RX_StepperStatus.cmdRunning == CMD_SA_MOVE)
 				{
 					RX_StepperStatus.posY[0]++;
-					_ScanPos_Act = _ScanPos_New;
+					TrPrintfL(TRUE, "MOVE DONE [%d]: step=%d", RX_StepperStatus.posY[0], motor_get_step(MOTOR_SCAN));
+					if (_ScanPos_New>=0) _ScanPos_Act = _ScanPos_New;
+					else				 _ScanPos_Act = RX_StepperStatus.posX;
 					RX_StepperStatus.posX = _ScanPos_Act;
 					_ScanPos_New = 0;
 
 				}
-				else if (_ScanPos_New) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New);
+				else if (_ScanPos_New) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New, _ScanSpeed);
 			}
 			RX_StepperStatus.cmdRunning = FALSE;
+			ctrl_send_status();
 		}
 	}	
 }
@@ -166,7 +173,7 @@ int sa_menu(void)
 	char str[MAX_PATH];
 	int synth=FALSE;
 	static int cnt=0;
-	int pos=10000;
+	SetupAssist_MoveCmd msg;
 
 	_sa_display_status();
 	
@@ -188,14 +195,17 @@ int sa_menu(void)
 	{
 		switch (str[0])
 		{
-		case 's': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_STOP,			NULL); break;
-		case 'R': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_REFERENCE,		NULL); break;
+		case 's': msg.hdr.msgId=CMD_SA_STOP;		sa_handle_ctrl_msg(INVALID_SOCKET, &msg); break;
+		case 'R': msg.hdr.msgId=CMD_SA_REFERENCE;	sa_handle_ctrl_msg(INVALID_SOCKET, &msg); break;
 		case 'r': motor_reset(atoi(&str[1]));									   break;
-		case 'p': pos = atoi(&str[1]);
-                  sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_MOVE, &pos);
-				  break;
-		case 'u': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_UP,		NULL); break;
-		case 'd': sa_handle_ctrl_msg(INVALID_SOCKET, CMD_SA_DOWN,		NULL); break;
+		case 'p': 
+					msg.hdr.msgId = CMD_SA_MOVE;
+					msg.pos		  = atoi(&str[1]);
+					msg.speed	  = 0;
+					sa_handle_ctrl_msg(INVALID_SOCKET, &msg);
+					break;
+		case 'u': msg.hdr.msgId=CMD_SA_UP;	 sa_handle_ctrl_msg(INVALID_SOCKET, &msg); break;
+		case 'd': msg.hdr.msgId=CMD_SA_DOWN; sa_handle_ctrl_msg(INVALID_SOCKET, &msg); break;
 		case 'z': _sa_motor_z_test(atoi(&str[1])); break;
         case 'o': Fpga.par->output ^= (1 << atoi(&str[1]));	break;
 		case 'm': _sa_motor_test(str[1]-'0', atoi(&str[2])); break;
@@ -213,7 +223,7 @@ static void _sa_do_reference(void)
 	{
     case 0:	motors_stop(MOTOR_ALL_BITS);
 			motors_reset(MOTOR_ALL_BITS);
-			motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, STEPS);
+			motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, 1);
 			motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);	
 			RX_StepperStatus.cmdRunning  = CMD_SA_REFERENCE;
 			_Step=1;
@@ -236,19 +246,21 @@ static void _sa_do_reference(void)
 			if (!RX_StepperStatus.info.headUpInput_0) Error(ERR_CONT, 0, "SA: Command REFERENCE: End Sensor NOT HIGH");
 			motors_reset(MOTOR_ALL_BITS);
 			_ScanPos_Act=0;
-			if (_ScanPos_New) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New);
+			if (_ScanPos_New) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New, _ScanSpeed);
 	}
 }
 
 //---_micron_2_steps_seldge --------------------------------------------------------------
 static int  _micron_2_steps_scan(int micron)
 {
-	return (int)(0.5 + micron*STEPS_REV_SCAN / DIST_REV_SCAN);
+	int steps=(int)(0.5 + (double)micron*STEPS_REV_SCAN /  DIST_REV_SCAN);
+	return steps;
 }
 
 static int  _steps_2_microns_scan(int steps)
 {
-	return (int)(0.5 + steps * DIST_REV_SCAN / STEPS_REV_SCAN);
+	int microns=(int)(0.5 + (double)steps * DIST_REV_SCAN / STEPS_REV_SCAN);
+	return microns;
 }
 
 //---_micron_2_sptes_lift --------------------------------------------------------------
@@ -258,41 +270,43 @@ static int _micron_2_steps_lift(int micron)
 }
 
 //--- _sa_move_to_pos ---------------------------------------------------------------
-static void _sa_move_to_pos(int cmd, int pos)
+static void _sa_move_to_pos(int cmd, int pos, int speed)
 {
     RX_StepperStatus.cmdRunning  = cmd;
 	RX_StepperStatus.info.moving = TRUE;
+	if (speed)	_ParScan.speed = speed;
+	else		_ParScan.speed = SCAN_SPEED;
     motors_move_to_step(1 << MOTOR_SCAN, &_ParScan, _micron_2_steps_scan(pos));
 }
 
 //--- sa_handle_ctrl_msg -----------------------------------
-int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
+int  sa_handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 {	
-	INT32 pos;
+	SetupAssist_MoveCmd *pcmd = (SetupAssist_MoveCmd*)pmsg;
 
-	switch(msgId)
+	switch(pcmd->hdr.msgId)
 	{
     case CMD_SA_STOP:				strcpy(_CmdName, "CMD_SA_STOP");
-									motors_stop(MOTOR_ALL_BITS);
-									motors_reset(MOTOR_ALL_BITS);
-									RX_StepperStatus.cmdRunning = 0;
-									_ScanPos_Act=0;
-									RX_StepperStatus.info.ref_done = FALSE;
+									TrPrintfL(TRUE, "CMD_SA_STOP pos=%d", _steps_2_microns_scan(motor_get_step(MOTOR_SCAN)));
+                                    _ScanPos_New = -1;
+									motors_stop(1<<MOTOR_SCAN);
 									break;
 
     case CMD_SA_REFERENCE:			strcpy(_CmdName, "CMD_SA_REFERENCE");
 									_ScanPos_New=0;
-                                    RX_StepperStatus.cmdRunning = msgId;
+									_ScanSpeed=0;
+                                    RX_StepperStatus.cmdRunning = pcmd->hdr.msgId;
 									_Step=0;
 									_sa_do_reference();	
 									break;
 
     case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SCAN");
-									pos   = (*((INT32*)pdata));
-									if ((pos!=_ScanPos_Act || !RX_StepperStatus.info.ref_done))
+									if ((pcmd->pos!=_ScanPos_Act || !RX_StepperStatus.info.ref_done))
 									{
-										_ScanPos_New = pos;
-                                        if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New);
+										_ScanPos_New = pcmd->pos;
+										_ScanSpeed   = pcmd->speed;
+										TrPrintfL(TRUE, "CMD_SA_MOVE [%d]: from %d to %d, speed=%d", RX_StepperStatus.posY[0]+1, RX_StepperStatus.posX, _ScanPos_New, _ScanSpeed);
+                                        if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New, _ScanSpeed);
 										else								_sa_do_reference();
 									}
 									break;
@@ -300,7 +314,7 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_SA_UP:					strcpy(_CmdName, "CMD_SA_UP");
 									if (!RX_StepperStatus.info.z_in_up)
 									{
-                                        RX_StepperStatus.cmdRunning = msgId;
+                                        RX_StepperStatus.cmdRunning = pcmd->hdr.msgId;
                                         motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, POS_UP);
                                     }
 									break;
@@ -308,7 +322,7 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_SA_DOWN:				strcpy(_CmdName, "CMD_SA_DOWN");
 									if (!RX_StepperStatus.info.z_in_down)
 									{
-                                        RX_StepperStatus.cmdRunning = msgId;
+                                        RX_StepperStatus.cmdRunning = pcmd->hdr.msgId;
                                         motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, -POS_UP);
                                     }
 									break;
@@ -316,7 +330,7 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 									break;
                                     
-	default:						Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId); break;
+	default:						Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", pcmd->hdr.msgId); break;
 	}
 }
 
@@ -325,7 +339,7 @@ void _sa_motor_z_test(int steps)
 {	
 	RX_StepperStatus.cmdRunning = 1; // TEST
 	RX_StepperStatus.info.moving = TRUE;
-	motors_move_by_step(MOTOR_SCAN, &_ParScan, steps, TRUE);
+	motors_move_by_step(1<<MOTOR_LIFT, &_ParLift, steps, TRUE);
 }
 
 //--- _sa_motor_test ---------------------------------
@@ -358,10 +372,9 @@ static void _sa_motor_test(int motorNo, int steps)
 	RX_StepperStatus.info.moving = TRUE;
 
     if (motorNo == MOTOR_SCAN)
-        motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, STEPS);
+        motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, 1);
     else if (motorNo == MOTOR_LIFT)
         motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
     
     motors_move_by_step(motors, &par, steps, FALSE);
 }
-

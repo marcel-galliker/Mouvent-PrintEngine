@@ -1346,7 +1346,8 @@ namespace RX_DigiPrint.Services
         public struct SetupAssist_MoveCmd
         {
 	        SMsgHdr         hdr;
-	        public Int32    pos;    
+	        public Int32    pos;
+            public Int32    speed;    
         };
 
         //--- CLEAF Orders ------------------------------------------------------

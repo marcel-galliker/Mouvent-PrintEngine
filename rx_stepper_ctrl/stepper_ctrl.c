@@ -246,7 +246,7 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 										else							 lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	
 										break;
 
-        case printer_setup_assist:		sa_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
+        case printer_setup_assist:		sa_handle_ctrl_msg(socket, pmsg);	break;
 
 //		case printer_LBROB:				lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);	break;
 			
@@ -258,6 +258,14 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 	sok_send_2(&socket, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
 	return reply;
 };
+
+
+//--- ctrl_send_status --------------------------
+void ctrl_send_status(void)
+{
+	sok_send_2(&_MainSocket, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &RX_StepperStatus);
+}
+
 
 //=== command  handlers ===========================================================================
 

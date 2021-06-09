@@ -222,13 +222,28 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		ps_set_backwards(&Fpga.qsys->spi_powerstep[motor], TRUE);
 	}
 
-    if (speed<MIN_SPEED_HZ+500) 
+    int min;
+	int min_speed_hz;
+	if (Fpga.par->cfg[motor].enc_mot_ratio<100000)
+	{
+		//--- special for setup assist scanner -----------
+		min			 = 50;
+		min_speed_hz = 1000;
+	}
+	else
+	{
+		min			 = 500;
+		min_speed_hz = MIN_SPEED_HZ;
+	}
+
+    if (speed<min_speed_hz+min) 
     {
         if (speed<1000 && microsteps!=MICROSTEPS && (!RX_StepperStatus.robot_used || motor != 4)) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
-        minSpeed = speed-500;
+		if (Fpga.par->cfg[motor].enc_mot_ratio>100000)
+			minSpeed = speed-min;
         if (minSpeed <= 0) minSpeed = speed;
 	}
-    else minSpeed = MIN_SPEED_HZ;
+    else minSpeed = min_speed_hz;
 	
 	switch(par->encCheck)
 	{	
@@ -313,13 +328,15 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		// Dividing by encoder step to morot step ratio if we drive to a target position based on the encoder
 		min_speed = minSpeed * FIX_POINT_SPEED;
         
-        // Motor already in position
+		/* 
+        // Motor already in position --> this is NOT true!
         if (rising_steps < microsteps && linear_steps < CURRENT_OFFSET && falling_steps < microsteps)
         {
             _motor_start_cnt[motor]--;
             return 0;
         }
-		
+		*/
+
 		cnt=0;
         if (rising_steps >= microsteps)
         {
@@ -401,7 +418,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 			move[0].a_256   = accel;
 			move[0].steps   = rising_steps/microsteps;
 			move[0].amp		= Tval_Current_to_Par(par->current_acc);
-}
+		}
 
         if (falling_steps >= microsteps)
         {
