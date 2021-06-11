@@ -29,7 +29,7 @@
             </ig:XamGrid.SelectionSettings>
             <ig:XamGrid.Columns>
                 <!-- Key="State" ImageColumn -->
-                <ig:UnboundColumn Key="Image"  HeaderText="{mvt:LocalizedBinding St}">
+                <ig:UnboundColumn Key="Image"  HeaderText="{mvt:LocalizedBinding St}" Width="auto">
                     <ig:UnboundColumn.ItemTemplate>
                         <DataTemplate>
                             <Image Source="{Binding Converter={StaticResource PlcLogState_Converter}}" Height="24"/>

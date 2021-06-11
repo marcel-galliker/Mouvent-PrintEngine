@@ -35,10 +35,10 @@
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
 
-                    <rx_uc:PlcParPanel Grid.Row="1" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="120" Margin="0,1,0,0" Grid.RowSpan="2">
+                    <rx_uc:PlcParPanel Grid.Row="1" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="200" Margin="0,1,0,0" Grid.RowSpan="2">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="200"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="32"/>
                             </Grid.ColumnDefinitions>
@@ -102,13 +102,13 @@
                                 <rx_uc:PlcParCtrl                      ID="PAR_NIP_TENSION_1"          Label=""             Unit="N/mm" HorizontalAlignment="Right" Width="auto" UnitWidth="50" Format="1" />
                             </Grid>
 
+                            <Rectangle Grid.Column="1" Grid.RowSpan="11" Fill="{StaticResource Mouvent.MainColorBrush}" Width="1" HorizontalAlignment="Center" />
+                            
                             <rx_uc:PlcTitle Grid.Row="0" Grid.Column="2" Header="{mvt:LocalizedBinding Corona}"/>
                             <Grid Grid.Row="1" Grid.Column="2" Loaded="Grid_Loaded">
                                 <rx_uc:PlcParCtrl ID="PAR_CORONA_MODE"           Label="{mvt:LocalizedBinding Corona}" Type="Combo" x:Name="CB_Corona" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl ID="PAR_CORONA_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto"/>
                             </Grid>
-
-                            <Rectangle Grid.Column="1" Grid.RowSpan="10" Fill="{StaticResource Mouvent.MainColorBrush}" Width="1" HorizontalAlignment="Center" />
 
                             <rx_uc:PlcTitle Grid.Row="2" Grid.Column="2" Header="{mvt:LocalizedBinding CuringLamp}"/>
                             <Grid Grid.Row="3" Grid.Column="2" Loaded="Grid_Loaded">
@@ -122,7 +122,7 @@
                             </Grid>
 
                             <Grid Grid.Row="5" Grid.Column="2" Loaded="Grid_Loaded">
-                                <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_MODE"           Label="{mvt:LocalizedBinding Curing}" Type="Combo" x:Name="CB_UVLamp" Padding="0,0,70,0" Margin="0,3,0,-3"/>
+                                <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_MODE"           Label="{mvt:LocalizedBinding Curing}" Type="Combo" x:Name="CB_UVLamp" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto"/>
                             </Grid>
 

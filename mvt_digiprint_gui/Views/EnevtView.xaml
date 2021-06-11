@@ -78,7 +78,7 @@
 
                 <ig:TextColumn Key="TimeStrShort"  HeaderText="{mvt:LocalizedBinding Time}" Width="auto" TextBlockStyle="{StaticResource XamGridTextBlockStyle}"/>
                 <ig:TextColumn Key="DeviceStr"  TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Device}"  Width="auto" HorizontalContentAlignment="Left"/>
-                <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding No}"      HorizontalContentAlignment="Left"/>
+                <ig:TextColumn Key="Error"      TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding No}"      Width="auto" HorizontalContentAlignment="Left"/>
                 <ig:TextColumn Key="Message"    TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Message}" Width="*"/>
                 <ig:TextColumn Key="File"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding File}"    Width="auto"/>
                 <ig:TextColumn Key="Line"       TextBlockStyle="{StaticResource XamGridTextBlockStyle}" HeaderText="{mvt:LocalizedBinding Line}"    Width="auto" HorizontalContentAlignment="Left"/>

@@ -31,6 +31,7 @@
                                    UnitID="Application.GUI_00_001_Main" 
                                    ReadOnly="False" 
                                    PreviewKeyDown="ParPanel_PreviewKeyDown"
+                                   LabelWidth="200"
                                    ChildPadding="0,3">
                         <Grid>
                             <Grid.ColumnDefinitions>

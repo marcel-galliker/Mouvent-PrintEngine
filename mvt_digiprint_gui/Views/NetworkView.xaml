@@ -132,7 +132,8 @@
  
                 <ig:TemplateColumn  
                     HeaderText="{mvt:LocalizedBinding Identify}"          
-                    Key="Flash"         
+                    Key="Flash"  
+                    Width="auto"
                     VerticalContentAlignment="Stretch" 
                     HorizontalContentAlignment="Stretch"
                     >

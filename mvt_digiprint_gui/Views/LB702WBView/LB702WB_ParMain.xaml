@@ -29,27 +29,27 @@
 
             <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Visible" PanningMode="VerticalOnly">
 
-                <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="120" Margin="0,1,0,0">
+                <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="220" Margin="0,1,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="220"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="32"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="{mvt:LocalizedBinding Material}"/>
                         <igWPF:XamComboEditor 
-			        x:Name="CB_Material"
-                    Grid.Column="1"
+			                x:Name="CB_Material"
+                            Grid.Column="1"
+			                Width="160"
 			                HorizontalAlignment="Left"
-                            Width="200"
-                    DisplayMemberPath="Name"
-			        DropDownResizeMode="None"
-                    IsEditable="False"
-                    DropDownClosed="CB_Material_DropDownClosed"
-                    ValueToDisplayTextConverter="{StaticResource MaterialName_Converter}"
-                    SelectedItemChanged="CB_Material_SelectedItemChanged"
-                    />
+                            DisplayMemberPath="Name"
+			                DropDownResizeMode="None"
+                            IsEditable="False"
+                            DropDownClosed="CB_Material_DropDownClosed"
+                            ValueToDisplayTextConverter="{StaticResource MaterialName_Converter}"
+                            SelectedItemChanged="CB_Material_SelectedItemChanged"
+                        />
                         <TextBox Grid.Column="1" x:Name="MaterialName" Text="{mvt:LocalizedBinding Name}" Visibility="Collapsed"/>
                     </Grid>
                     <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed" Width="auto"/>
@@ -76,11 +76,11 @@
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
-                                <RowDefinition Height="20"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
-                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
@@ -126,9 +126,9 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="auto"/>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
@@ -156,9 +156,9 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="auto"/>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
@@ -179,13 +179,13 @@
                             <rx_uc:PlcParCtrl Grid.Row="11" ID="PAR_DRYER2_EXHAUST_DOWN_SETPOINT"       Label="{mvt:LocalizedBinding ExhaustDown}" Unit="Pa" UnitWidth="50" Format="n" />
                         </Grid>
                         <Rectangle Name="FlexoUnitSeparation" Grid.Column="5" Fill="{StaticResource Mouvent.MainColorBrush}" Width="1"/>
-                        <Grid Name="FlexoUnit" Grid.Column="6">
+                        <Grid Name="FlexoUnit" Grid.Column="6" Margin="0,0,10,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="auto"/>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>

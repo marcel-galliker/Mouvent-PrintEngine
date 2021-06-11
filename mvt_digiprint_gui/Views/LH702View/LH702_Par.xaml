@@ -25,10 +25,10 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
-            <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="120">
+            <rx_uc:PlcParPanel Grid.Row="0" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" LabelWidth="200">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="{mvt:LocalizedBinding Material}"/>

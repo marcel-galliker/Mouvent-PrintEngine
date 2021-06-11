@@ -40,6 +40,7 @@
                                    UnitID="Application.GUI_00_001_Main" 
                                    ReadOnly="False" 
                                    PreviewKeyDown="ParPanel_PreviewKeyDown"
+                                   LabelWidth="200"
                                    ChildPadding="0,3">
                         <StackPanel>
                             <Grid>
@@ -95,13 +96,13 @@
 
                             <rx_uc:PlcTitle   Grid.Row="2" Grid.Column="0" Header="{mvt:LocalizedBinding Unwinder}"/>
                             <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="0"                       ID="PAR_MATERIAL_FLEXIBILITY_UW"   Label="{mvt:LocalizedBinding MatFlexibility}"  UnitWidth="30" MinVal="1" MaxVal="10" UserEnabled="usr_maintenance"/>
-                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="0"                       ID="PAR_TENSION_WINDER_1"          Label="{mvt:LocalizedBinding Tension}"          Unit="N" LabelWidth="100"  UnitWidth="30" Format="n" MinVal="1" MaxVal="200"  UserEnabled="usr_maintenance" Background="{DynamicResource XamGrid_Alternate}"/>
-                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="0" x:Name="CB_RotUW"     ID="PAR_WIND_DIRECTION_WINDER1"    Label="{mvt:LocalizedBinding Rotation}"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_maintenance"/>
+                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="0"                       ID="PAR_TENSION_WINDER_1"          Label="{mvt:LocalizedBinding Tension}"          Unit="N" UnitWidth="30" Format="n" MinVal="1" MaxVal="200"  UserEnabled="usr_maintenance" Background="{DynamicResource XamGrid_Alternate}"/>
+                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="0" x:Name="CB_RotUW"     ID="PAR_WIND_DIRECTION_WINDER1"    Label="{mvt:LocalizedBinding Rotation}"         Unit="" UnitWidth="30" Type="ImgCombo" UserEnabled="usr_maintenance"/>
 
                             <rx_uc:PlcTitle   Grid.Row="2" Grid.Column="2" x:Name="RW_Title"        Header="{mvt:LocalizedBinding Rewinder}" Background="{DynamicResource XamGrid_Alternate}"/>
                             <rx_uc:PlcParCtrl Grid.Row="3" Grid.Column="2" x:Name="RW_Flexibility"  ID="PAR_MATERIAL_FLEXIBILITY_RW"   Label="{mvt:LocalizedBinding MatFlexibility}"  UnitWidth="30" UserEnabled="usr_maintenance" Format="n"/>
-                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="2" x:Name="RW_Tension"      ID="PAR_TENSION_WINDER_2"          Label="{mvt:LocalizedBinding Tension}"          Unit="N" LabelWidth="100"  UnitWidth="30" Format="n" MinVal="0" MaxVal="200" Background="{DynamicResource XamGrid_Alternate}" UserEnabled="usr_maintenance"/>
-                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2" x:Name="RW_Rotation"     ID="PAR_WIND_DIRECTION_WINDER2"    Label="{mvt:LocalizedBinding Rotation}"         Unit=""  LabelWidth="100"  UnitWidth="30" Type="ImgCombo" UserEnabled="usr_maintenance"/>
+                            <rx_uc:PlcParCtrl Grid.Row="4" Grid.Column="2" x:Name="RW_Tension"      ID="PAR_TENSION_WINDER_2"          Label="{mvt:LocalizedBinding Tension}"          Unit="N" UnitWidth="30" Format="n" MinVal="0" MaxVal="200" Background="{DynamicResource XamGrid_Alternate}" UserEnabled="usr_maintenance"/>
+                            <rx_uc:PlcParCtrl Grid.Row="5" Grid.Column="2" x:Name="RW_Rotation"     ID="PAR_WIND_DIRECTION_WINDER2"    Label="{mvt:LocalizedBinding Rotation}"         Unit="" UnitWidth="30" Type="ImgCombo" UserEnabled="usr_maintenance"/>
                         </Grid>
                     </rx_uc:PlcParPanel>
 

@@ -20,7 +20,7 @@
         
             <ScrollViewer Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
 
-            <rx_uc:PlcParPanel x:Name="CfgPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown">
+                <rx_uc:PlcParPanel x:Name="CfgPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="240">
 
                 <Grid>
                     <Grid.RowDefinitions>

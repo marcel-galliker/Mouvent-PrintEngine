@@ -26,7 +26,7 @@
 
                     <ScrollViewer Grid.Row="0" Margin="0, 5, 0, 0" ScrollViewer.VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
 
-                        <rx_uc:PlcParPanel x:Name="CfgPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" HorizontalAlignment="Stretch">
+                        <rx_uc:PlcParPanel x:Name="CfgPanel" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="200" HorizontalAlignment="Stretch">
                             <rx_uc:PlcParCtrl ID="STA_REWINDER_SENSOR_DIST"     Label="{mvt:LocalizedBinding RewinderDist}"      Unit="mm" Format="n" IsEnabled="False" />
                             <!-- <rx_uc:PlcParCtrl ID="STA_REWINDER_SENSOR_DIST_MAX" Label="Rewinder Dist MAX"  Unit="mm" Format="n" IsEnabled="False" /> -->
                             <rx_uc:PlcParCtrl ID="CFG_REWINDER_SENSOR_DIST"     Label="{mvt:LocalizedBinding RewinderDist}"      Unit="mm" Type="Combo" UserEnabled="usr_service" x:Name="CB_Dist"/>

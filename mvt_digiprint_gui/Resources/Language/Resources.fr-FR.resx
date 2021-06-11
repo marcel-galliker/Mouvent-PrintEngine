@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -120,6 +120,9 @@
   <data name="AboutRxDigiPrint" xml:space="preserve">
     <value>À propos de RX-DigiPrint</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>Actif</value>
+  </data>
   <data name="AddFileToPrint" xml:space="preserve">
     <value>Ajouter un fichier à imprimer</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="All" xml:space="preserve">
     <value>TOUS</value>
   </data>
+  <data name="JetNumberAlreadyListed" xml:space="preserve">
+    <value>Nombre de jets {0} déjà répertoriés !</value>
+  </data>
   <data name="Angle" xml:space="preserve">
     <value>Angle</value>
   </data>
@@ -152,6 +158,12 @@
   </data>
   <data name="AngleStp" xml:space="preserve">
     <value>Angle [stp]</value>
+  </data>
+  <data name="Antifoam" xml:space="preserve">
+    <value>Antimousse</value>
+  </data>
+  <data name="AtLeastOneInkSupplyIsFlushed" xml:space="preserve">
+    <value>Au moins une réserve d’encre est vide. Veuillez purge d’abord.</value>
   </data>
   <data name="AutoGenerateMessage" xml:space="preserve">
     <value>Génération automatique du message</value>
@@ -171,6 +183,9 @@
   <data name="Basket" xml:space="preserve">
     <value>Panier</value>
   </data>
+  <data name="BeltHeaterMax" xml:space="preserve">
+    <value>Chauffe-bande max.</value>
+  </data>
   <data name="BeltStep" xml:space="preserve">
     <value>Distance d'avancée de la bande [µm]</value>
   </data>
@@ -185,6 +200,12 @@
   </data>
   <data name="Buses" xml:space="preserve">
     <value>Bus</value>
+  </data>
+  <data name="BusesDown" xml:space="preserve">
+    <value>Bus bas</value>
+  </data>
+  <data name="BusesUp" xml:space="preserve">
+    <value>Bus haut</value>
   </data>
   <data name="Button" xml:space="preserve">
     <value>Bouton</value>
@@ -234,8 +255,17 @@
   <data name="ChillerNotRunning" xml:space="preserve">
     <value>Le refroidisseur ne fonctionne pas</value>
   </data>
+  <data name="Cleaner" xml:space="preserve">
+    <value>Nettoyeur</value>
+  </data>
   <data name="Cleaning" xml:space="preserve">
     <value>Nettoyage</value>
+  </data>
+  <data name="ClearError" xml:space="preserve">
+    <value>Effacez l’erreur</value>
+  </data>
+  <data name="CLGainFact" xml:space="preserve">
+    <value>Coefficient d’élargissement C.L.</value>
   </data>
   <data name="Cluster1" xml:space="preserve">
     <value>Groupe 1</value>
@@ -250,7 +280,7 @@
     <value>Tension du couchage</value>
   </data>
   <data name="CoatingUnit" xml:space="preserve">
-    <value>Unité de couchage</value>
+    <value>Unité de revêtement</value>
   </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
@@ -294,14 +324,26 @@
   <data name="Corona" xml:space="preserve">
     <value>Corona</value>
   </data>
+  <data name="CouldNotLoadButtonStyle" xml:space="preserve">
+    <value>Impossible de charger le style de bouton.</value>
+  </data>
   <data name="CoverOpen" xml:space="preserve">
     <value>Couvercle ouvert</value>
+  </data>
+  <data name="Curing" xml:space="preserve">
+    <value>Polymérisation</value>
   </data>
   <data name="CuringLamp" xml:space="preserve">
     <value>Lampe à polymériser</value>
   </data>
+  <data name="CuringLampOk" xml:space="preserve">
+    <value>Lampe à polymériser OK</value>
+  </data>
   <data name="CuringPasses" xml:space="preserve">
     <value>Passages de polymérisation</value>
+  </data>
+  <data name="CutDist" xml:space="preserve">
+    <value>Distance de découpe</value>
   </data>
   <data name="CutterNipStandstill" xml:space="preserve">
     <value>Arrêt du pincement du massicot</value>
@@ -318,6 +360,18 @@
   <data name="Date" xml:space="preserve">
     <value>Date</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="ConfirmDeleteMaterial" xml:space="preserve">
+    <value>Supprimer le matériel &gt;&gt;{0}&lt;&lt; ?</value>
+  </data>
+  <data name="DeleteTheItems" xml:space="preserve">
+    <value>Supprimez les articles</value>
+  </data>
+  <data name="ConfirmDelete" xml:space="preserve">
+    <value>Le supprimer {0} ?</value>
+  </data>
   <data name="Density" xml:space="preserve">
     <value>Densité</value>
   </data>
@@ -333,11 +387,29 @@
   <data name="Device" xml:space="preserve">
     <value>Dispositif</value>
   </data>
+  <data name="Diameter" xml:space="preserve">
+    <value>Diamètre</value>
+  </data>
   <data name="DiameterOffset" xml:space="preserve">
     <value>Correction de diamètre</value>
   </data>
+  <data name="DiameterRw-L" xml:space="preserve">
+    <value>Diamètre RW-L</value>
+  </data>
+  <data name="DiameterRw-R" xml:space="preserve">
+    <value>Diamètre RW-R</value>
+  </data>
+  <data name="DiameterUw-L" xml:space="preserve">
+    <value>Diamètre UW-L</value>
+  </data>
+  <data name="DiameterUw-R" xml:space="preserve">
+    <value>Diamètre UW-R</value>
+  </data>
   <data name="DieCut" xml:space="preserve">
     <value>Découpe à l'emporte-pièce</value>
+  </data>
+  <data name="DieCutter" xml:space="preserve">
+    <value>Emporte-pièce</value>
   </data>
   <data name="DieNipStandstill" xml:space="preserve">
     <value>Arrêt du pincement de la matrice</value>
@@ -348,11 +420,17 @@
   <data name="Directory" xml:space="preserve">
     <value>Répertoire</value>
   </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>Débranchez</value>
+  </data>
   <data name="Displayed" xml:space="preserve">
     <value>Affiché</value>
   </data>
   <data name="Distance" xml:space="preserve">
     <value>Distance</value>
+  </data>
+  <data name="DistToStop" xml:space="preserve">
+    <value>Distance de l’arrêt</value>
   </data>
   <data name="DistVerso" xml:space="preserve">
     <value>Dist. verso [mm]</value>
@@ -360,14 +438,26 @@
   <data name="Done" xml:space="preserve">
     <value>Fait</value>
   </data>
+  <data name="DoYouWantToResetAllValues" xml:space="preserve">
+    <value>Voulez-vous réinitialiser toutes les valeurs ?</value>
+  </data>
   <data name="DripPans" xml:space="preserve">
     <value>BACS COLLECTEURS</value>
+  </data>
+  <data name="DripPansBelowTheClusters" xml:space="preserve">
+    <value>Bacs collecteurs sous les groupes. Déplacez-le avant l’impression</value>
   </data>
   <data name="DropSize" xml:space="preserve">
     <value>Taille de goutte</value>
   </data>
   <data name="Dryer" xml:space="preserve">
     <value>Séchoir</value>
+  </data>
+  <data name="DryerTemp" xml:space="preserve">
+    <value>Température du séchoir</value>
+  </data>
+  <data name="Dutch" xml:space="preserve">
+    <value>Néerlandais</value>
   </data>
   <data name="Empty" xml:space="preserve">
     <value>Vider</value>
@@ -376,7 +466,13 @@
     <value>Vider 2 min</value>
   </data>
   <data name="Encoder" xml:space="preserve">
-    <value>Codeur [incr./m]</value>
+    <value>Codeur</value>
+  </data>
+  <data name="EncoderAdj" xml:space="preserve">
+    <value>Ajustement du codeur</value>
+  </data>
+  <data name="EncoderCompensation" xml:space="preserve">
+    <value>Compensation du codeur</value>
   </data>
   <data name="EncodersType" xml:space="preserve">
     <value>Type de codeurs</value>
@@ -390,6 +486,9 @@
   <data name="English" xml:space="preserve">
     <value>Anglais</value>
   </data>
+  <data name="Error" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
   <data name="ErrorNo" xml:space="preserve">
     <value>Erreur n°</value>
   </data>
@@ -399,11 +498,27 @@
   <data name="Events" xml:space="preserve">
     <value>Événements</value>
   </data>
+  <data name="ConfirmExecute" xml:space="preserve">
+    <value>Exécuter {0} ?</value>
+  </data>
   <data name="Exhaust" xml:space="preserve">
     <value>Échappement</value>
   </data>
+  <data name="ExhaustDown" xml:space="preserve">
+    <value>Échappement bas</value>
+  </data>
+  <data name="ExhaustUp" xml:space="preserve">
+    <value>Échappement haut</value>
+  </data>
+  <data name="FabricPosition" xml:space="preserve">
+    <value>Position du tissu</value>
+  </data>
   <data name="FactoryNetwork" xml:space="preserve">
     <value>Réseau d'usine</value>
+  </data>
+  <data name="FailedToImportValues" xml:space="preserve">
+    <value>Échec de l’importation des valeurs, vérifiez le format du fichier.
+ Message d’erreur :</value>
   </data>
   <data name="Family" xml:space="preserve">
     <value>Famille</value>
@@ -421,7 +536,7 @@
     <value>Finisseur</value>
   </data>
   <data name="FirepulseVoltage" xml:space="preserve">
-    <value>Tension de l'impulsion de démarrage</value>
+    <value>Tension de l’impulsion de démarrage</value>
   </data>
   <data name="Flexo" xml:space="preserve">
     <value>Flexographie</value>
@@ -468,11 +583,20 @@
   <data name="FrontRight" xml:space="preserve">
     <value>Avant droite</value>
   </data>
+  <data name="German" xml:space="preserve">
+    <value>Allemand</value>
+  </data>
   <data name="Gloss" xml:space="preserve">
     <value>Brillance</value>
   </data>
+  <data name="GlueSpeed" xml:space="preserve">
+    <value>Vitesse de la colle</value>
+  </data>
   <data name="Gluing" xml:space="preserve">
     <value>Collage</value>
+  </data>
+  <data name="GoodQuality" xml:space="preserve">
+    <value>Bonne qualité</value>
   </data>
   <data name="HeadAdjustment" xml:space="preserve">
     <value>Ajustement de la tête</value>
@@ -485,6 +609,12 @@
   </data>
   <data name="HeadInPrintingPosition" xml:space="preserve">
     <value>Tête en position d'impression</value>
+  </data>
+  <data name="HeadIsUp" xml:space="preserve">
+    <value>Tête en haut</value>
+  </data>
+  <data name="HeadReference" xml:space="preserve">
+    <value>Tête référencée</value>
   </data>
   <data name="HeadsColor" xml:space="preserve">
     <value>Têtes / couleur</value>
@@ -528,6 +658,12 @@
   <data name="Info" xml:space="preserve">
     <value>Info</value>
   </data>
+  <data name="InitBarcodeScanner" xml:space="preserve">
+    <value>Init lecteur de code-barre</value>
+  </data>
+  <data name="ConfirmInitBarcodeScanner" xml:space="preserve">
+    <value>Init lecteur de code-barre {0} ?</value>
+  </data>
   <data name="Ink" xml:space="preserve">
     <value>Encre</value>
   </data>
@@ -540,6 +676,9 @@
   <data name="InkCylindersColor" xml:space="preserve">
     <value>Cylindres d'encre / Couleur</value>
   </data>
+  <data name="InkRollerSpeed" xml:space="preserve">
+    <value>Vitesse du rouleau encreur</value>
+  </data>
   <data name="InkSupply" xml:space="preserve">
     <value>Alimentation en encre</value>
   </data>
@@ -547,16 +686,35 @@
     <value>Commande d'alimentation en encre</value>
   </data>
   <data name="InkTankPressure" xml:space="preserve">
-    <value>Pression du réservoir d'encre</value>
+    <value>Pression du réservoir d’encre</value>
+  </data>
+  <data name="InsertPurgeTray" xml:space="preserve">
+    <value>Insérez le tiroir Voulez-vous continuer ?</value>
+  </data>
+  <data name="InvalidJetNr" xml:space="preserve">
+    <value>Nombre de jets invalides :</value>
   </data>
   <data name="IpAddress" xml:space="preserve">
     <value>Adresse IP</value>
+  </data>
+  <data name="IRHeater" xml:space="preserve">
+    <value>Chauffage IR</value>
+  </data>
+  <data name="IsTheMachineReadyToPrint" xml:space="preserve">
+    <value>La machine est-elle prête à imprimer ?
+Pas d’épissures dans la machine ?</value>
+  </data>
+  <data name="Italian" xml:space="preserve">
+    <value>Italien</value>
   </data>
   <data name="JetCompensation" xml:space="preserve">
     <value>Compensation des jets</value>
   </data>
   <data name="JetNumber" xml:space="preserve">
     <value>Nombre de jets</value>
+  </data>
+  <data name="JetOvercorrection" xml:space="preserve">
+    <value>Sur-correction du jet</value>
   </data>
   <data name="LampTime" xml:space="preserve">
     <value>Durée de séchage lampe</value>
@@ -573,11 +731,20 @@
   <data name="Lateral" xml:space="preserve">
     <value>Latéral</value>
   </data>
+  <data name="LeftOut" xml:space="preserve">
+    <value>Left out</value>
+  </data>
   <data name="Len" xml:space="preserve">
     <value>Longueur</value>
   </data>
   <data name="Length" xml:space="preserve">
     <value>Longueur</value>
+  </data>
+  <data name="LengthIn" xml:space="preserve">
+    <value>Longueur au-dehors</value>
+  </data>
+  <data name="LengthOut" xml:space="preserve">
+    <value>Longueur au-dedans</value>
   </data>
   <data name="Line" xml:space="preserve">
     <value>Ligne</value>
@@ -594,6 +761,9 @@
   <data name="Machine" xml:space="preserve">
     <value>Machine</value>
   </data>
+  <data name="MachineState" xml:space="preserve">
+    <value>État de la machine</value>
+  </data>
   <data name="MagneticBand" xml:space="preserve">
     <value>Bande magnétique</value>
   </data>
@@ -603,8 +773,26 @@
   <data name="MainCtrlNotConnected" xml:space="preserve">
     <value>COMMANDE PRINCIPALE NON CONNECTÉE</value>
   </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="ManSplicing" xml:space="preserve">
+    <value>Raccordement manuel</value>
+  </data>
+  <data name="MaskLength" xml:space="preserve">
+    <value>Longueur du masque</value>
+  </data>
+  <data name="MasksBlade" xml:space="preserve">
+    <value>Masques/lame</value>
+  </data>
   <data name="Material" xml:space="preserve">
     <value>Matériel</value>
+  </data>
+  <data name="MatFlexibility" xml:space="preserve">
+    <value>Flexibilité du tapis</value>
+  </data>
+  <data name="MaxDisabledJets" xml:space="preserve">
+    <value>Nombre maximal de jets désactivés =</value>
   </data>
   <data name="Meniscus" xml:space="preserve">
     <value>Ménisque</value>
@@ -618,8 +806,14 @@
   <data name="Mid" xml:space="preserve">
     <value>Milieu</value>
   </data>
+  <data name="MixerSpeed" xml:space="preserve">
+    <value>Vitesse du mélangeur</value>
+  </data>
   <data name="Mode" xml:space="preserve">
     <value>Mode</value>
+  </data>
+  <data name="ModePower" xml:space="preserve">
+    <value>Mode/Puissance</value>
   </data>
   <data name="Motor" xml:space="preserve">
     <value>Moteur</value>
@@ -666,11 +860,17 @@
   <data name="Offsets" xml:space="preserve">
     <value>Compensations</value>
   </data>
+  <data name="OffTimer" xml:space="preserve">
+    <value>Délais d’extinction</value>
+  </data>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="OnlyAvailableInErrorState" xml:space="preserve">
     <value>DISPONIBLE UNIQUEMENT EN ÉTAT D'ERREUR</value>
+  </data>
+  <data name="OnTimer" xml:space="preserve">
+    <value>Délais d’allumage</value>
   </data>
   <data name="OpenFile" xml:space="preserve">
     <value>Ouvrir fichier</value>
@@ -705,6 +905,21 @@
   <data name="Password" xml:space="preserve">
     <value>Mot de passe</value>
   </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="PauseUpDelay" xml:space="preserve">
+    <value>Délai de mise en pause</value>
+  </data>
+  <data name="Pinning1" xml:space="preserve">
+    <value>Ancrage 1</value>
+  </data>
+  <data name="Pinning2" xml:space="preserve">
+    <value>Ancrage 2</value>
+  </data>
+  <data name="PinningLamp" xml:space="preserve">
+    <value>Lampe d’ancrage</value>
+  </data>
   <data name="PlcInfo" xml:space="preserve">
     <value>Info API</value>
   </data>
@@ -714,11 +929,26 @@
   <data name="PlcNotConnected" xml:space="preserve">
     <value>API NON CONNECTÉ</value>
   </data>
+  <data name="Polish" xml:space="preserve">
+    <value>Polonais</value>
+  </data>
+  <data name="Portuguese" xml:space="preserve">
+    <value>Portugais</value>
+  </data>
   <data name="PositionX" xml:space="preserve">
     <value>Position X</value>
   </data>
   <data name="PositionY" xml:space="preserve">
     <value>Position Y</value>
+  </data>
+  <data name="Power" xml:space="preserve">
+    <value>Puissance</value>
+  </data>
+  <data name="Prepare" xml:space="preserve">
+    <value>Préparez</value>
+  </data>
+  <data name="PrepareActive" xml:space="preserve">
+    <value>Préparez l’actif</value>
   </data>
   <data name="PrepareState" xml:space="preserve">
     <value>État de préparation</value>
@@ -783,17 +1013,29 @@
   <data name="PrintGoMode" xml:space="preserve">
     <value>Mode activation de l'impression</value>
   </data>
+  <data name="PrintheadNotInCappingPosition" xml:space="preserve">
+    <value>La tête d’impression n’est PAS en position de recouvrement. Voulez-vous continuer ?</value>
+  </data>
   <data name="PrintHeads" xml:space="preserve">
     <value>Têtes d'impression</value>
   </data>
+  <data name="PrintHeight" xml:space="preserve">
+    <value>Hauteur d’impression</value>
+  </data>
   <data name="Printing" xml:space="preserve">
     <value>Impression</value>
+  </data>
+  <data name="PrintingSpeed" xml:space="preserve">
+    <value>Vitesse d’impression</value>
   </data>
   <data name="PrintingTime" xml:space="preserve">
     <value>Temps d'impression</value>
   </data>
   <data name="PrintQueue" xml:space="preserve">
     <value>File d'attente d'impression</value>
+  </data>
+  <data name="PrintSpeed" xml:space="preserve">
+    <value>Vitesse d’impression</value>
   </data>
   <data name="PrintSystem" xml:space="preserve">
     <value>Système d'impression</value>
@@ -810,6 +1052,9 @@
   <data name="Produced" xml:space="preserve">
     <value>Produit</value>
   </data>
+  <data name="Production" xml:space="preserve">
+    <value>Production</value>
+  </data>
   <data name="PropagateCorrectionValuesToAllFollowingPrintHeads" xml:space="preserve">
     <value>Propager les valeurs de correction à toutes les têtes d'impression suivantes</value>
   </data>
@@ -819,17 +1064,29 @@
   <data name="Purge" xml:space="preserve">
     <value>Purge</value>
   </data>
+  <data name="ShortPurgeAndVacc" xml:space="preserve">
+    <value>Purge + vide</value>
+  </data>
+  <data name="ShortPurgeAndWipe" xml:space="preserve">
+    <value>Purge + essuyage</value>
+  </data>
   <data name="PurgeAndVacuum" xml:space="preserve">
     <value>Purge et vide</value>
   </data>
   <data name="PurgeAndWipe" xml:space="preserve">
     <value>Purge et essuyage</value>
   </data>
+  <data name="PurgeAndWipeAllPrintheads" xml:space="preserve">
+    <value>PURGER et ESSUYER toutes les têtes d’impression ?</value>
+  </data>
   <data name="PurgeHard" xml:space="preserve">
     <value>Purge forte</value>
   </data>
   <data name="PurgeMicro" xml:space="preserve">
     <value>Purge micro</value>
+  </data>
+  <data name="PurgePos" xml:space="preserve">
+    <value>PURGEZ le coulisseau</value>
   </data>
   <data name="PurgeSoft" xml:space="preserve">
     <value>Purge douce</value>
@@ -841,19 +1098,25 @@
     <value>File d'attente</value>
   </data>
   <data name="ReadyToPrint" xml:space="preserve">
-    <value>Prêt pour imprimer</value>
+    <value>Prêt à imprimer</value>
   </data>
   <data name="Recto" xml:space="preserve">
-    <value>RECTO</value>
+    <value>Recto</value>
   </data>
   <data name="Ref" xml:space="preserve">
     <value>Réf.</value>
+  </data>
+  <data name="RefBuffer" xml:space="preserve">
+    <value>Tampon de référence</value>
   </data>
   <data name="Reference" xml:space="preserve">
     <value>Référence</value>
   </data>
   <data name="ReferenceDone" xml:space="preserve">
     <value>Référence faite</value>
+  </data>
+  <data name="ReferenceEnable" xml:space="preserve">
+    <value>Référence possible</value>
   </data>
   <data name="RefHeight" xml:space="preserve">
     <value>Hauteur de réf.</value>
@@ -870,11 +1133,17 @@
   <data name="RefRobot" xml:space="preserve">
     <value>Robot de réf.</value>
   </data>
+  <data name="Register" xml:space="preserve">
+    <value>Registre</value>
+  </data>
   <data name="Remove" xml:space="preserve">
     <value>Supprimez</value>
   </data>
   <data name="Reset" xml:space="preserve">
     <value>Réinitialiser</value>
+  </data>
+  <data name="ResetCounter" xml:space="preserve">
+    <value>Réinitialisez le compteur</value>
   </data>
   <data name="ResetLengthL" xml:space="preserve">
     <value>Réinitialiser longueur L</value>
@@ -882,8 +1151,23 @@
   <data name="ResetLengthR" xml:space="preserve">
     <value>Réinitialiser longueur R</value>
   </data>
+  <data name="ResetTheCounterOfUvLampOperatingHours" xml:space="preserve">
+    <value>Réinitialiser le compteur d’heures de fonctionnement de la lampe UV ?</value>
+  </data>
+  <data name="ResetValues" xml:space="preserve">
+    <value>Réinitialisez les valeurs</value>
+  </data>
+  <data name="Restart" xml:space="preserve">
+    <value>Redémarrer</value>
+  </data>
   <data name="RestartGui" xml:space="preserve">
     <value>Redémarrer GUI</value>
+  </data>
+  <data name="RestartingTheGui" xml:space="preserve">
+    <value>Redémarrage de l’interface graphique !</value>
+  </data>
+  <data name="RestartingTheMain" xml:space="preserve">
+    <value>Redémarrage PRINCIPAL !</value>
   </data>
   <data name="RestartMain" xml:space="preserve">
     <value>Redémarrer Principal</value>
@@ -906,11 +1190,29 @@
   <data name="RewinderBuffer" xml:space="preserve">
     <value>Tampon enrouleur</value>
   </data>
+  <data name="RewinderCore" xml:space="preserve">
+    <value>Noyau de l’enrouleur</value>
+  </data>
+  <data name="RewinderDiameter" xml:space="preserve">
+    <value>Diamètre de l’enrouleur</value>
+  </data>
+  <data name="RewinderDist" xml:space="preserve">
+    <value>Distance enrouleur</value>
+  </data>
   <data name="RewinderGridStandstill" xml:space="preserve">
     <value>Arrêt Rewinder Grid</value>
   </data>
   <data name="RewinderGridTension" xml:space="preserve">
     <value>Tension Rewinder Grid</value>
+  </data>
+  <data name="RewinderMax" xml:space="preserve">
+    <value>Enrouleur max</value>
+  </data>
+  <data name="RewinderRw_L" xml:space="preserve">
+    <value>Enrouleur RW-L</value>
+  </data>
+  <data name="RewinderRw_R" xml:space="preserve">
+    <value>Enrouleur RW-R</value>
   </data>
   <data name="RewinderStandstill" xml:space="preserve">
     <value>Arrêt enrouleur</value>
@@ -918,11 +1220,20 @@
   <data name="RewinderTension" xml:space="preserve">
     <value>Tension enrouleur</value>
   </data>
+  <data name="RewinderØ" xml:space="preserve">
+    <value>Enrouleur Ø</value>
+  </data>
   <data name="Ripped" xml:space="preserve">
     <value>Rastérisé</value>
   </data>
   <data name="RippedData" xml:space="preserve">
     <value>Données rastérisées</value>
+  </data>
+  <data name="Robot" xml:space="preserve">
+    <value>Robot</value>
+  </data>
+  <data name="RobotFunctionalityNotImplementedYet" xml:space="preserve">
+    <value>La fonctionnalité robot n’est pas encore mise en œuvre.</value>
   </data>
   <data name="RollsDiameter" xml:space="preserve">
     <value>Diamètre des rouleaux</value>
@@ -930,8 +1241,23 @@
   <data name="RollsProduced" xml:space="preserve">
     <value>Rouleaux produits</value>
   </data>
+  <data name="RollNo" xml:space="preserve">
+    <value>Lancez {0}</value>
+  </data>
+  <data name="Romanian" xml:space="preserve">
+    <value>Roumain</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Rotation</value>
+  </data>
+  <data name="Run" xml:space="preserve">
+    <value>Exécutez</value>
+  </data>
   <data name="RwTension0" xml:space="preserve">
-    <value>Tension dérouleur &amp;amp; Ø</value>
+    <value>Tension dérouleur &amp;amp ; Ø</value>
+  </data>
+  <data name="SaveNewCompensationParameters" xml:space="preserve">
+    <value>Enregistrer les nouveaux paramètres de compensation ?</value>
   </data>
   <data name="ScalesCalibration" xml:space="preserve">
     <value>Calibrage échelles</value>
@@ -939,8 +1265,14 @@
   <data name="Scan" xml:space="preserve">
     <value>Numériser</value>
   </data>
+  <data name="ScanCheckImport" xml:space="preserve">
+    <value>Importation du contrôle du scan</value>
+  </data>
   <data name="ScanMode" xml:space="preserve">
     <value>Mode de numérisation</value>
+  </data>
+  <data name="ScannerEnabled" xml:space="preserve">
+    <value>Scanner activé</value>
   </data>
   <data name="ScannerInStart" xml:space="preserve">
     <value>Scanner en position de démarrage</value>
@@ -951,20 +1283,47 @@
   <data name="SerialNo" xml:space="preserve">
     <value>Numéro de série</value>
   </data>
+  <data name="Set" xml:space="preserve">
+    <value>DÉFINISSEZ</value>
+  </data>
+  <data name="SetTara" xml:space="preserve">
+    <value>Définissez la TARE</value>
+  </data>
+  <data name="ConfirmSetTaraFor" xml:space="preserve">
+    <value>Définir la TARE pour {0} ?</value>
+  </data>
   <data name="Settings" xml:space="preserve">
     <value>Paramètres</value>
+  </data>
+  <data name="Setup" xml:space="preserve">
+    <value>Configuration</value>
   </data>
   <data name="SetupCommands" xml:space="preserve">
     <value>Commandes de configuration</value>
   </data>
+  <data name="ShutDown" xml:space="preserve">
+    <value>Arrêtée</value>
+  </data>
   <data name="ShutDownGui" xml:space="preserve">
     <value>Fermer l'interface graphique</value>
+  </data>
+  <data name="ShuttingDownTheGui" xml:space="preserve">
+    <value>Fermeture de l’interface graphique !</value>
   </data>
   <data name="Side" xml:space="preserve">
     <value>Côté</value>
   </data>
+  <data name="SlaveOffset" xml:space="preserve">
+    <value>Compensation esclave</value>
+  </data>
   <data name="Slide" xml:space="preserve">
     <value>Coulisseau</value>
+  </data>
+  <data name="SlidePos" xml:space="preserve">
+    <value>Position du coulisseau</value>
+  </data>
+  <data name="SlideState" xml:space="preserve">
+    <value>État de glissement</value>
   </data>
   <data name="SlideToLeft" xml:space="preserve">
     <value>Glisser à gauche</value>
@@ -981,17 +1340,32 @@
   <data name="SoftwareVersion" xml:space="preserve">
     <value>Version du logiciel</value>
   </data>
+  <data name="SomeInkSuppliesAreOff" xml:space="preserve">
+    <value>Certaines réserves d’encre sont désactivées. Imprimer quand même ?</value>
+  </data>
   <data name="SourceData" xml:space="preserve">
     <value>Données source</value>
   </data>
+  <data name="Spanish" xml:space="preserve">
+    <value>Espagnol</value>
+  </data>
   <data name="Speed" xml:space="preserve">
     <value>Vitesse</value>
+  </data>
+  <data name="SpeedMax" xml:space="preserve">
+    <value>Vitesse maximale</value>
+  </data>
+  <data name="SpeedOffset" xml:space="preserve">
+    <value>Compensation de la vitesse</value>
   </data>
   <data name="SpeedUnit" xml:space="preserve">
     <value>Unité de vitesse</value>
   </data>
   <data name="Splicing" xml:space="preserve">
     <value>Raccordement</value>
+  </data>
+  <data name="SplicingType" xml:space="preserve">
+    <value>Type de raccordement</value>
   </data>
   <data name="SpreadRoller" xml:space="preserve">
     <value>Rouleau d'expansion</value>
@@ -1001,6 +1375,12 @@
   </data>
   <data name="StartAt" xml:space="preserve">
     <value>Démarrer à</value>
+  </data>
+  <data name="ConfirmStartGluing" xml:space="preserve">
+    <value>Démarrer le collage ?</value>
+  </data>
+  <data name="ConfirmStartWashingTheBelt" xml:space="preserve">
+    <value>Démarrer le nettoyage de la bande ?</value>
   </data>
   <data name="State" xml:space="preserve">
     <value>État</value>
@@ -1024,13 +1404,22 @@
     <value>Stitch</value>
   </data>
   <data name="Stop" xml:space="preserve">
-    <value>ARRÊTER</value>
+    <value>Arrêter</value>
+  </data>
+  <data name="StopDist" xml:space="preserve">
+    <value>Distance d’arrêt</value>
   </data>
   <data name="SubstrateSettings" xml:space="preserve">
     <value>Paramètres du substrat</value>
   </data>
+  <data name="Supervision" xml:space="preserve">
+    <value>Surveillance</value>
+  </data>
   <data name="SupportCommands" xml:space="preserve">
     <value>Commandes du support technique</value>
+  </data>
+  <data name="SwitchOff" xml:space="preserve">
+    <value>Éteignez</value>
   </data>
   <data name="SystemTime" xml:space="preserve">
     <value>Heure du système</value>
@@ -1062,8 +1451,17 @@
   <data name="Tension" xml:space="preserve">
     <value>Tension</value>
   </data>
+  <data name="TensionNip" xml:space="preserve">
+    <value>Tension de pincement</value>
+  </data>
   <data name="TensionOffset" xml:space="preserve">
     <value>Compensation de la tension</value>
+  </data>
+  <data name="TensionRw" xml:space="preserve">
+    <value>Tension enrouleur</value>
+  </data>
+  <data name="TensionUw" xml:space="preserve">
+    <value>Tension dérouleur</value>
   </data>
   <data name="Test" xml:space="preserve">
     <value>Test</value>
@@ -1074,7 +1472,16 @@
   <data name="Text" xml:space="preserve">
     <value>Texte</value>
   </data>
+  <data name="UvLampIsNotReady" xml:space="preserve">
+    <value>La lampe UV n’est PAS PRÊTE. Démarrer l’impression ?</value>
+  </data>
+  <data name="Thickness" xml:space="preserve">
+    <value>Épaisseur</value>
+  </data>
   <data name="Time" xml:space="preserve">
+    <value>Temps</value>
+  </data>
+  <data name="Timer" xml:space="preserve">
     <value>Temps</value>
   </data>
   <data name="Title" xml:space="preserve">
@@ -1101,23 +1508,59 @@
   <data name="UnwinderBuffer" xml:space="preserve">
     <value>Tampon du dérouleur</value>
   </data>
+  <data name="UnwinderCore" xml:space="preserve">
+    <value>Noyau du dérouleur</value>
+  </data>
+  <data name="UnwinderDiameter" xml:space="preserve">
+    <value>Diamètre du dérouleur</value>
+  </data>
   <data name="UnwinderStandstill" xml:space="preserve">
     <value>Arrêt du dérouleur</value>
   </data>
   <data name="UnwinderTension" xml:space="preserve">
     <value>Tension dérouleur</value>
   </data>
+  <data name="UnwinderØ" xml:space="preserve">
+    <value>Dérouleur Ø</value>
+  </data>
   <data name="Up" xml:space="preserve">
     <value>Haut</value>
   </data>
+  <data name="UpdatingWindows" xml:space="preserve">
+    <value>Fenêtres de mise à jour !</value>
+  </data>
   <data name="UserAccount" xml:space="preserve">
     <value>Compte utilisateur</value>
+  </data>
+  <data name="UvDryer" xml:space="preserve">
+    <value>Séchoir UV</value>
+  </data>
+  <data name="UvFlexo1" xml:space="preserve">
+    <value>UV Flexo 1</value>
+  </data>
+  <data name="UvFlexo2" xml:space="preserve">
+    <value>UV Flexo 2</value>
+  </data>
+  <data name="UvFlexo3" xml:space="preserve">
+    <value>UV Flexo 3</value>
+  </data>
+  <data name="UvFlexo4" xml:space="preserve">
+    <value>UV Flexo 4</value>
+  </data>
+  <data name="UvLamp" xml:space="preserve">
+    <value>Lampe UV</value>
+  </data>
+  <data name="UvLampsReady" xml:space="preserve">
+    <value>Lampes UV prêtes</value>
+  </data>
+  <data name="UvPrinter" xml:space="preserve">
+    <value>Imprimante UV</value>
   </data>
   <data name="UvReady" xml:space="preserve">
     <value>Prêt UV</value>
   </data>
   <data name="UwTension0" xml:space="preserve">
-    <value>Tension dérouleur &amp; Ø</value>
+    <value>Tension dérouleur &amp;amp; Ø</value>
   </data>
   <data name="Vacuum" xml:space="preserve">
     <value>Vide</value>
@@ -1129,7 +1572,7 @@
     <value>Version</value>
   </data>
   <data name="Verso" xml:space="preserve">
-    <value>VERSO</value>
+    <value>Verso</value>
   </data>
   <data name="Volume" xml:space="preserve">
     <value>Volume</value>
@@ -1140,17 +1583,41 @@
   <data name="Wash" xml:space="preserve">
     <value>Laver</value>
   </data>
+  <data name="Washing" xml:space="preserve">
+    <value>Lavage</value>
+  </data>
   <data name="WashingUnit" xml:space="preserve">
     <value>Unité de lavage</value>
+  </data>
+  <data name="WashingUp" xml:space="preserve">
+    <value>Lavage SUPÉRIEUR</value>
   </data>
   <data name="Waste" xml:space="preserve">
     <value>Déchet</value>
   </data>
+  <data name="WaterOffTime" xml:space="preserve">
+    <value>Temps d’arrêt de l’eau</value>
+  </data>
+  <data name="WaterOnTime" xml:space="preserve">
+    <value>Durée de fonctionnement de l’eau</value>
+  </data>
+  <data name="WebOutOffset" xml:space="preserve">
+    <value>Compensation hors bobine</value>
+  </data>
+  <data name="WebIn" xml:space="preserve">
+    <value>Entrée de la bobine</value>
+  </data>
   <data name="WebLength" xml:space="preserve">
     <value>Longueur bobine</value>
   </data>
+  <data name="WebOut" xml:space="preserve">
+    <value>Sortie de la bobine</value>
+  </data>
   <data name="WebTensions" xml:space="preserve">
     <value>Tensions bobine</value>
+  </data>
+  <data name="WebWidth" xml:space="preserve">
+    <value>Largeur de la bobine</value>
   </data>
   <data name="Week" xml:space="preserve">
     <value>Semaine</value>
@@ -1161,6 +1628,12 @@
   <data name="Width" xml:space="preserve">
     <value>Largeur [mm]</value>
   </data>
+  <data name="WinderRed" xml:space="preserve">
+    <value>Bobinoir rouge</value>
+  </data>
+  <data name="WinderWaste" xml:space="preserve">
+    <value>Déchets du bobinoir</value>
+  </data>
   <data name="WindowsCommands" xml:space="preserve">
     <value>Commandes Windows</value>
   </data>
@@ -1170,6 +1643,9 @@
   <data name="Wipe" xml:space="preserve">
     <value>Essuyage</value>
   </data>
+  <data name="WipePos" xml:space="preserve">
+    <value>ESSUYEZ LE COULISSEAU</value>
+  </data>
   <data name="WipingDelay" xml:space="preserve">
     <value>Retard d'essuyage</value>
   </data>
@@ -1178,5 +1654,1029 @@
   </data>
   <data name="WipingSpeed" xml:space="preserve">
     <value>Vitesse d'essuyage</value>
+  </data>
+  <data name="Wlan" xml:space="preserve">
+    <value>R-LAN</value>
+  </data>
+  <data name="Zone1" xml:space="preserve">
+    <value>Zone 1</value>
+  </data>
+  <data name="Zone2" xml:space="preserve">
+    <value>Zone 2</value>
+  </data>
+  <data name="Zone3" xml:space="preserve">
+    <value>Zone 3</value>
+  </data>
+  <data name="PutBleedTubeToEmptyCanister" xml:space="preserve">
+    <value>Mettez le tube de purge sur le bidon vide.</value>
+  </data>
+  <data name="PutNewInkCanister" xml:space="preserve">
+    <value>Mettez un nouveau réservoir d’encre.</value>
+  </data>
+  <data name="RemoveFillTube" xml:space="preserve">
+    <value>Retirez le tube de remplissage.
+</value>
+  </data>
+  <data name="BlackK" xml:space="preserve">
+    <value>Noir (K)</value>
+  </data>
+  <data name="BlueB" xml:space="preserve">
+    <value>Bleu (B)</value>
+  </data>
+  <data name="CalDone" xml:space="preserve">
+    <value>Étalonnage fait</value>
+  </data>
+  <data name="Calib" xml:space="preserve">
+    <value>Étalonnage</value>
+  </data>
+  <data name="Calib1" xml:space="preserve">
+    <value>Étalonnage / 1</value>
+  </data>
+  <data name="Calib2" xml:space="preserve">
+    <value>Étalonnage / 2</value>
+  </data>
+  <data name="Calib3" xml:space="preserve">
+    <value>Étalonnage / 3</value>
+  </data>
+  <data name="Calib4" xml:space="preserve">
+    <value>Étalonnage / 4</value>
+  </data>
+  <data name="CalibDone" xml:space="preserve">
+    <value>Étalonnage fait</value>
+  </data>
+  <data name="CalOffset" xml:space="preserve">
+    <value>Compensation de l’étalonnage</value>
+  </data>
+  <data name="Cap1" xml:space="preserve">
+    <value>Bouchon /1</value>
+  </data>
+  <data name="Cap2" xml:space="preserve">
+    <value>Bouchon /2</value>
+  </data>
+  <data name="Cap3" xml:space="preserve">
+    <value>Bouchon /3</value>
+  </data>
+  <data name="Cap4" xml:space="preserve">
+    <value>Bouchon /4</value>
+  </data>
+  <data name="Cap5" xml:space="preserve">
+    <value>Bouchon /5</value>
+  </data>
+  <data name="Cap6" xml:space="preserve">
+    <value>Bouchon /6</value>
+  </data>
+  <data name="Check0" xml:space="preserve">
+    <value>Vérification /0</value>
+  </data>
+  <data name="Check1" xml:space="preserve">
+    <value>Vérification /1</value>
+  </data>
+  <data name="Check2" xml:space="preserve">
+    <value>Vérification /2</value>
+  </data>
+  <data name="Check3" xml:space="preserve">
+    <value>Vérification /3</value>
+  </data>
+  <data name="Check4" xml:space="preserve">
+    <value>Vérification /4</value>
+  </data>
+  <data name="Check5" xml:space="preserve">
+    <value>Vérification /5</value>
+  </data>
+  <data name="Check6" xml:space="preserve">
+    <value>Vérification /6</value>
+  </data>
+  <data name="Check7" xml:space="preserve">
+    <value>Vérification /7</value>
+  </data>
+  <data name="Check8" xml:space="preserve">
+    <value>Vérification /8</value>
+  </data>
+  <data name="Check9" xml:space="preserve">
+    <value>Vérification /9</value>
+  </data>
+  <data name="Cluster" xml:space="preserve">
+    <value>groupe</value>
+  </data>
+  <data name="CutLeft" xml:space="preserve">
+    <value>coupez à gauche</value>
+  </data>
+  <data name="CutRight" xml:space="preserve">
+    <value>coupez à droite</value>
+  </data>
+  <data name="CyanC" xml:space="preserve">
+    <value>Cyan (C)</value>
+  </data>
+  <data name="Docs" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="Empty1" xml:space="preserve">
+    <value>Vide /1</value>
+  </data>
+  <data name="Empty2" xml:space="preserve">
+    <value>Vide /2</value>
+  </data>
+  <data name="Empty3" xml:space="preserve">
+    <value>Vide /3</value>
+  </data>
+  <data name="Empty4" xml:space="preserve">
+    <value>Vide /4</value>
+  </data>
+  <data name="Empty5" xml:space="preserve">
+    <value>Vide /5</value>
+  </data>
+  <data name="Fill1" xml:space="preserve">
+    <value>Plein /1</value>
+  </data>
+  <data name="Fill2" xml:space="preserve">
+    <value>Plein /2</value>
+  </data>
+  <data name="Fill3" xml:space="preserve">
+    <value>Plein /3</value>
+  </data>
+  <data name="Fill4" xml:space="preserve">
+    <value>Plein /4</value>
+  </data>
+  <data name="Fill5" xml:space="preserve">
+    <value>Plein /5</value>
+  </data>
+  <data name="Fluid" xml:space="preserve">
+    <value>fluide</value>
+  </data>
+  <data name="Flush1" xml:space="preserve">
+    <value>Flush /1</value>
+  </data>
+  <data name="Flush2" xml:space="preserve">
+    <value>Flush /2</value>
+  </data>
+  <data name="Flush3" xml:space="preserve">
+    <value>Flush /3</value>
+  </data>
+  <data name="Flush4" xml:space="preserve">
+    <value>Flush /4</value>
+  </data>
+  <data name="FlushDone" xml:space="preserve">
+    <value>Flush fait</value>
+  </data>
+  <data name="FlushN" xml:space="preserve">
+    <value>Flush N</value>
+  </data>
+  <data name="FlushW" xml:space="preserve">
+    <value>Flush B</value>
+  </data>
+  <data name="FlushWE" xml:space="preserve">
+    <value>Flush WE</value>
+  </data>
+  <data name="GreenG" xml:space="preserve">
+    <value>Vert (G)</value>
+  </data>
+  <data name="Gui" xml:space="preserve">
+    <value>interface graphique</value>
+  </data>
+  <data name="KnifeLargeTape" xml:space="preserve">
+    <value>Couteau large / Ruban adhésif</value>
+  </data>
+  <data name="KnifeLargeUltrasonic" xml:space="preserve">
+    <value>Couteau large / Ultrasonique</value>
+  </data>
+  <data name="KnifeSmallTape" xml:space="preserve">
+    <value>Couteau étroit / Ruban adhésif</value>
+  </data>
+  <data name="KnifeSmallUltrasonic" xml:space="preserve">
+    <value>Couteau étroit / Ultrasonique</value>
+  </data>
+  <data name="LightBlack2LLK" xml:space="preserve">
+    <value>Noir clair 2 (LLK)</value>
+  </data>
+  <data name="LightBlack33LK" xml:space="preserve">
+    <value>Noir clair 3 (3LK)</value>
+  </data>
+  <data name="LightBlack44LK" xml:space="preserve">
+    <value>Noir clair 4 (4LK)</value>
+  </data>
+  <data name="LightBlack55LK" xml:space="preserve">
+    <value>Noir clair 5 (5LK)</value>
+  </data>
+  <data name="LightBlack66LK" xml:space="preserve">
+    <value>Noir clair 6 (6LK)</value>
+  </data>
+  <data name="LightBlackLK" xml:space="preserve">
+    <value>Noir clair (LK)</value>
+  </data>
+  <data name="LightBlueLB" xml:space="preserve">
+    <value>Bleu clair (LB)</value>
+  </data>
+  <data name="LightCyan2LLC" xml:space="preserve">
+    <value>Cyan clair 2 (LLC)</value>
+  </data>
+  <data name="LightCyanLC" xml:space="preserve">
+    <value>Cyan clair (LC)</value>
+  </data>
+  <data name="LightGreenLG" xml:space="preserve">
+    <value>Vert clair (LG)</value>
+  </data>
+  <data name="LightMagenta2LLM" xml:space="preserve">
+    <value>Magenta clair 2 (LLM)</value>
+  </data>
+  <data name="LightMagentaLM" xml:space="preserve">
+    <value>Magenta clair (LM)</value>
+  </data>
+  <data name="LightProfileChannel10LP10" xml:space="preserve">
+    <value>Canal de profil clair 10 (LP10)</value>
+  </data>
+  <data name="LightProfileChannel11LP11" xml:space="preserve">
+    <value>Canal de profil clair 11 (LP11)</value>
+  </data>
+  <data name="LightProfileChannel12LP12" xml:space="preserve">
+    <value>Canal de profil clair 12 (LP12)</value>
+  </data>
+  <data name="LightProfileChannel8LP8" xml:space="preserve">
+    <value>Canal de profil clair 8 (LP8)</value>
+  </data>
+  <data name="LightProfileChannel9LP9" xml:space="preserve">
+    <value>Canal de profil clair 9 (LP9)</value>
+  </data>
+  <data name="LightRedLR" xml:space="preserve">
+    <value>Rouge clair (LR)</value>
+  </data>
+  <data name="LightSpotColor1LS1" xml:space="preserve">
+    <value>Couleur d’accompagnement claire 1 (LS1)</value>
+  </data>
+  <data name="LightSpotColor2LS2" xml:space="preserve">
+    <value>Couleur d’accompagnement claire 2 (LS2)</value>
+  </data>
+  <data name="LightSpotColor3LS3" xml:space="preserve">
+    <value>Couleur d’accompagnement claire 3 (LS3)</value>
+  </data>
+  <data name="LightSpotColor4LS4" xml:space="preserve">
+    <value>Couleur d’accompagnement claire 4 (LS4)</value>
+  </data>
+  <data name="LightSpotColor5LS5" xml:space="preserve">
+    <value>Couleur d’accompagnement claire 5 (LS5)</value>
+  </data>
+  <data name="LightSpotColor6LS6" xml:space="preserve">
+    <value>Couleur d’accompagnement claire 6 (LS6)</value>
+  </data>
+  <data name="LightYellow2LLY" xml:space="preserve">
+    <value>Jaune clair 2 (LLY)</value>
+  </data>
+  <data name="LightYellowLY" xml:space="preserve">
+    <value>Jaune clair (LY)</value>
+  </data>
+  <data name="MagentaM" xml:space="preserve">
+    <value>Magenta (M)</value>
+  </data>
+  <data name="MidlayerMID" xml:space="preserve">
+    <value>Couche intermédiaire (MID)</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>aucune</value>
+  </data>
+  <data name="Plc" xml:space="preserve">
+    <value>API</value>
+  </data>
+  <data name="Primer1PRI1" xml:space="preserve">
+    <value>Primaire 1 (PRI1)</value>
+  </data>
+  <data name="Primer2PRI2" xml:space="preserve">
+    <value>Primaire 2 (PRI2)</value>
+  </data>
+  <data name="ProfileChannel10P10" xml:space="preserve">
+    <value>Canal de profil 10 (P10)</value>
+  </data>
+  <data name="ProfileChannel11P11" xml:space="preserve">
+    <value>Canal de profil 11 (P11)</value>
+  </data>
+  <data name="ProfileChannel12P12" xml:space="preserve">
+    <value>Canal de profil 12 (P12)</value>
+  </data>
+  <data name="ProfileChannel8P8" xml:space="preserve">
+    <value>Canal de profil 8 (P8)</value>
+  </data>
+  <data name="ProfileChannel9P9" xml:space="preserve">
+    <value>Canal de profil 9 (P9)</value>
+  </data>
+  <data name="Purge1" xml:space="preserve">
+    <value>Purge /1</value>
+  </data>
+  <data name="Purge2" xml:space="preserve">
+    <value>Purge /2</value>
+  </data>
+  <data name="Purge3" xml:space="preserve">
+    <value>Purge /3</value>
+  </data>
+  <data name="Purge4" xml:space="preserve">
+    <value>Purge /4</value>
+  </data>
+  <data name="Purge5" xml:space="preserve">
+    <value>Purge /5</value>
+  </data>
+  <data name="Purge6" xml:space="preserve">
+    <value>Purge /6</value>
+  </data>
+  <data name="PurgeVacc" xml:space="preserve">
+    <value>Purge + vide</value>
+  </data>
+  <data name="PurgeWipe" xml:space="preserve">
+    <value>Purge + essuyage</value>
+  </data>
+  <data name="RedOrangeR" xml:space="preserve">
+    <value>Rouge/Orange (R)</value>
+  </data>
+  <data name="RobiOut" xml:space="preserve">
+    <value>Sortie Robi</value>
+  </data>
+  <data name="RobiOut1" xml:space="preserve">
+    <value>Sortie Robi /1</value>
+  </data>
+  <data name="SDDone" xml:space="preserve">
+    <value>SD-Done</value>
+  </data>
+  <data name="Sonotrode" xml:space="preserve">
+    <value>sonotrode</value>
+  </data>
+  <data name="Spooler" xml:space="preserve">
+    <value>spooler</value>
+  </data>
+  <data name="SpotColor1S1" xml:space="preserve">
+    <value>Couleur d’accompagnement 1 (S1)</value>
+  </data>
+  <data name="SpotColor2S2" xml:space="preserve">
+    <value>Couleur d’accompagnement 2 (S2)</value>
+  </data>
+  <data name="SpotColor3S3" xml:space="preserve">
+    <value>Couleur d’accompagnement 3 (S3)</value>
+  </data>
+  <data name="SpotColor4S4" xml:space="preserve">
+    <value>Couleur d’accompagnement 4 (S4)</value>
+  </data>
+  <data name="SpotColor5S5" xml:space="preserve">
+    <value>Couleur d’accompagnement 5 (S5)</value>
+  </data>
+  <data name="SpotColor6S6" xml:space="preserve">
+    <value>Couleur d’accompagnement 6 (S6)</value>
+  </data>
+  <data name="Tape" xml:space="preserve">
+    <value>ruban</value>
+  </data>
+  <data name="TestWDG" xml:space="preserve">
+    <value>Test WDG</value>
+  </data>
+  <data name="Ultrasonic" xml:space="preserve">
+    <value>ultrasonique</value>
+  </data>
+  <data name="Undef" xml:space="preserve">
+    <value>non défini</value>
+  </data>
+  <data name="Vac" xml:space="preserve">
+    <value>Vide</value>
+  </data>
+  <data name="Vac1" xml:space="preserve">
+    <value>Vide /1</value>
+  </data>
+  <data name="Vac10" xml:space="preserve">
+    <value>Vide /10</value>
+  </data>
+  <data name="Vac11" xml:space="preserve">
+    <value>Vide /11</value>
+  </data>
+  <data name="Vac12" xml:space="preserve">
+    <value>Vide /12</value>
+  </data>
+  <data name="Vac13" xml:space="preserve">
+    <value>Vide /13</value>
+  </data>
+  <data name="Vac14" xml:space="preserve">
+    <value>Vide /14</value>
+  </data>
+  <data name="Vac2" xml:space="preserve">
+    <value>Vide /2</value>
+  </data>
+  <data name="Vac3" xml:space="preserve">
+    <value>Vide /3</value>
+  </data>
+  <data name="Vac4" xml:space="preserve">
+    <value>Vide /4</value>
+  </data>
+  <data name="Vac5" xml:space="preserve">
+    <value>Vide /5</value>
+  </data>
+  <data name="Vac6" xml:space="preserve">
+    <value>Vide /6</value>
+  </data>
+  <data name="Vac7" xml:space="preserve">
+    <value>Vide /7</value>
+  </data>
+  <data name="Vac8" xml:space="preserve">
+    <value>Vide /8</value>
+  </data>
+  <data name="Vac9" xml:space="preserve">
+    <value>Vide /9</value>
+  </data>
+  <data name="VarnishFinish1V1" xml:space="preserve">
+    <value>Vernis / Finition 1 (V1)</value>
+  </data>
+  <data name="VarnishFinish2V2" xml:space="preserve">
+    <value>Vernis / Finition 2 (V2)</value>
+  </data>
+  <data name="VarnishFinish3V3" xml:space="preserve">
+    <value>Vernis / Finition 3 (V3)</value>
+  </data>
+  <data name="VarnishFinish4V4" xml:space="preserve">
+    <value>Vernis / Finition 4 (V4)</value>
+  </data>
+  <data name="WarmUp" xml:space="preserve">
+    <value>Réchauffez</value>
+  </data>
+  <data name="Wash1" xml:space="preserve">
+    <value>Lavage /1</value>
+  </data>
+  <data name="Wash2" xml:space="preserve">
+    <value>Lavage /2</value>
+  </data>
+  <data name="Wash3" xml:space="preserve">
+    <value>Lavage /3</value>
+  </data>
+  <data name="Wash4" xml:space="preserve">
+    <value>Lavage /4</value>
+  </data>
+  <data name="Wash5" xml:space="preserve">
+    <value>Lavage /5</value>
+  </data>
+  <data name="Wash6" xml:space="preserve">
+    <value>Lavage /6</value>
+  </data>
+  <data name="White1W1" xml:space="preserve">
+    <value>Blanc 1 (W1)</value>
+  </data>
+  <data name="White2W2" xml:space="preserve">
+    <value>Blanc 2 (W2)</value>
+  </data>
+  <data name="White3W3" xml:space="preserve">
+    <value>Blanc 3 (W3)</value>
+  </data>
+  <data name="White4W4" xml:space="preserve">
+    <value>Blanc 4 (W4)</value>
+  </data>
+  <data name="Wipe1" xml:space="preserve">
+    <value>Essuyage /1</value>
+  </data>
+  <data name="Wipe2" xml:space="preserve">
+    <value>Essuyage /2</value>
+  </data>
+  <data name="Wipe3" xml:space="preserve">
+    <value>Essuyage /3</value>
+  </data>
+  <data name="Wipe4" xml:space="preserve">
+    <value>Essuyage /4</value>
+  </data>
+  <data name="Wipe5" xml:space="preserve">
+    <value>Essuyage /5</value>
+  </data>
+  <data name="Wipe6" xml:space="preserve">
+    <value>Essuyage /6</value>
+  </data>
+  <data name="YellowY" xml:space="preserve">
+    <value>Jaune (Y)</value>
+  </data>
+  <data name="BootUp" xml:space="preserve">
+    <value>Démarrage</value>
+  </data>
+  <data name="Capping" xml:space="preserve">
+    <value>Bouchage</value>
+  </data>
+  <data name="CleafProject" xml:space="preserve">
+    <value>Cleaf projet</value>
+  </data>
+  <data name="Gap" xml:space="preserve">
+    <value>Écart</value>
+  </data>
+  <data name="Glue" xml:space="preserve">
+    <value>Colle</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Manuel</value>
+  </data>
+  <data name="Mark" xml:space="preserve">
+    <value>Marque</value>
+  </data>
+  <data name="MarkI" xml:space="preserve">
+    <value>MarqueI</value>
+  </data>
+  <data name="MarkV" xml:space="preserve">
+    <value>MarqueV</value>
+  </data>
+  <data name="MouventCB612" xml:space="preserve">
+    <value>Mouvent CB612</value>
+  </data>
+  <data name="MouventDP803" xml:space="preserve">
+    <value>Mouvent DP803</value>
+  </data>
+  <data name="MouventLB701" xml:space="preserve">
+    <value>Mouvent LB701</value>
+  </data>
+  <data name="MouventLB702UV" xml:space="preserve">
+    <value>Mouvent LB702-UV</value>
+  </data>
+  <data name="MouventLB702WB" xml:space="preserve">
+    <value>Mouvent LB702-WB</value>
+  </data>
+  <data name="MouventLB703UV" xml:space="preserve">
+    <value>Mouvent LB703-UV</value>
+  </data>
+  <data name="MouventLH702" xml:space="preserve">
+    <value>Mouvent LH702</value>
+  </data>
+  <data name="MouventTX404" xml:space="preserve">
+    <value>Mouvent TX404</value>
+  </data>
+  <data name="MouventTX801" xml:space="preserve">
+    <value>Mouvent TX801</value>
+  </data>
+  <data name="MouventTX802" xml:space="preserve">
+    <value>Mouvent TX802</value>
+  </data>
+  <data name="Paper" xml:space="preserve">
+    <value>Papier</value>
+  </data>
+  <data name="RadexTestSlide" xml:space="preserve">
+    <value>Lame de test Radex</value>
+  </data>
+  <data name="RadexTestSlideOnly" xml:space="preserve">
+    <value>Lame de test Radex uniquement</value>
+  </data>
+  <data name="Referencing" xml:space="preserve">
+    <value>Référencement</value>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Démarrer</value>
+  </data>
+  <data name="Stopped" xml:space="preserve">
+    <value>Arrêté</value>
+  </data>
+  <data name="Swiss4JetTestTable" xml:space="preserve">
+    <value>Table d’essai Swiss4Jet</value>
+  </data>
+  <data name="AngleOverlapped" xml:space="preserve">
+    <value>Angle chevauché</value>
+  </data>
+  <data name="AngleSeparated" xml:space="preserve">
+    <value>Angle séparé</value>
+  </data>
+  <data name="Comma" xml:space="preserve">
+    <value>Virgule</value>
+  </data>
+  <data name="Fixed" xml:space="preserve">
+    <value>Fixe</value>
+  </data>
+  <data name="FullAlignment" xml:space="preserve">
+    <value>Alignement complet</value>
+  </data>
+  <data name="Grid" xml:space="preserve">
+    <value>Grille</value>
+  </data>
+  <data name="JetNumbers" xml:space="preserve">
+    <value>Nombre de jets</value>
+  </data>
+  <data name="Jets" xml:space="preserve">
+    <value>Jets</value>
+  </data>
+  <data name="Mounted" xml:space="preserve">
+    <value>Monté</value>
+  </data>
+  <data name="Mouvent" xml:space="preserve">
+    <value>Mouvent</value>
+  </data>
+  <data name="Running" xml:space="preserve">
+    <value>En marche</value>
+  </data>
+  <data name="Scanning" xml:space="preserve">
+    <value>Numérisation</value>
+  </data>
+  <data name="Semicolon" xml:space="preserve">
+    <value>Point-virgule</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Utilisateur</value>
+  </data>
+  <data name="Tab" xml:space="preserve">
+    <value>Onglet</value>
+  </data>
+  <data name="Variable" xml:space="preserve">
+    <value>Variable</value>
+  </data>
+  <data name="AddSupervisor" xml:space="preserve">
+    <value>Ajoutez un superviseur</value>
+  </data>
+  <data name="AuthenticationFailed" xml:space="preserve">
+    <value>Échec de l’authentification</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Dos</value>
+  </data>
+  <data name="ChangeValidity" xml:space="preserve">
+    <value>Validité de modification</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Effacez</value>
+  </data>
+  <data name="EnterAuthenticationCode" xml:space="preserve">
+    <value>Saisissez le code d’identification</value>
+  </data>
+  <data name="EnterVersionHere" xml:space="preserve">
+    <value>Entrez la version ici</value>
+  </data>
+  <data name="PublishSP" xml:space="preserve">
+    <value>Publiez : </value>
+  </data>
+  <data name="QRCode" xml:space="preserve">
+    <value>Code QR</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Utilisateurs</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>Nom d’utilisateur </value>
+  </data>
+  <data name="Valid" xml:space="preserve">
+    <value>Validité </value>
+  </data>
+  <data name="ValidityDate" xml:space="preserve">
+    <value>Date de validité </value>
+  </data>
+  <data name="VersionSP" xml:space="preserve">
+    <value>Version : </value>
+  </data>
+  <data name="AbortPrinting" xml:space="preserve">
+    <value>Abandonnez l’impression</value>
+  </data>
+  <data name="AddASupervisor" xml:space="preserve">
+    <value>Ajoutez un superviseur</value>
+  </data>
+  <data name="AddImage" xml:space="preserve">
+    <value>Ajouter image</value>
+  </data>
+  <data name="AdvanceImage" xml:space="preserve">
+    <value>Décalage de l’image</value>
+  </data>
+  <data name="ChangeASupervisorValidity" xml:space="preserve">
+    <value>Modifiez la validité d’un superviseur</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Fermez</value>
+  </data>
+  <data name="ColorOffset" xml:space="preserve">
+    <value>Compensation de la couleur</value>
+  </data>
+  <data name="DelayImage" xml:space="preserve">
+    <value>Retardez l’image</value>
+  </data>
+  <data name="EditJetCompensation" xml:space="preserve">
+    <value>Modifiez la compensation des jets</value>
+  </data>
+  <data name="GoToLatestMessage" xml:space="preserve">
+    <value>Allez au dernier message</value>
+  </data>
+  <data name="GoToOldestMessage" xml:space="preserve">
+    <value>Allez au message le plus ancien</value>
+  </data>
+  <data name="HeadDistance" xml:space="preserve">
+    <value>Distance entre les têtes</value>
+  </data>
+  <data name="HeadDistanceBackwards" xml:space="preserve">
+    <value>Distance entre les têtes en arrière</value>
+  </data>
+  <data name="ImportScanCheckValues" xml:space="preserve">
+    <value>Importez les valeurs de contrôle du scan</value>
+  </data>
+  <data name="PageDown" xml:space="preserve">
+    <value>Page suivante</value>
+  </data>
+  <data name="PageUp" xml:space="preserve">
+    <value>Page précédente</value>
+  </data>
+  <data name="RemoveASupervisor" xml:space="preserve">
+    <value>Supprimez un superviseur</value>
+  </data>
+  <data name="RemoveImage" xml:space="preserve">
+    <value>Supprimez l’image</value>
+  </data>
+  <data name="ResetAllValues" xml:space="preserve">
+    <value>Réinitialisez toutes les valeurs</value>
+  </data>
+  <data name="SaveValues" xml:space="preserve">
+    <value>Enregistrez les valeurs</value>
+  </data>
+  <data name="ShowSupervisorAuthenticatorCodes" xml:space="preserve">
+    <value>Affichez les codes d’identification du superviseur</value>
+  </data>
+  <data name="StopPrinting" xml:space="preserve">
+    <value>Arrêtez l’impression</value>
+  </data>
+  <data name="Error.01" xml:space="preserve">
+    <value>Commutateur d’arrêt</value>
+  </data>
+  <data name="Error.02" xml:space="preserve">
+    <value>DANGER Surchauffe du Webdyer </value>
+  </data>
+  <data name="Error.03" xml:space="preserve">
+    <value>DANGER Surchauffe du chauffe-bande</value>
+  </data>
+  <data name="Error.04" xml:space="preserve">
+    <value>DANGER Signal de validation du scanner manquant</value>
+  </data>
+  <data name="Error.05" xml:space="preserve">
+    <value>DANGER Choc de tête, plis sur la bobine</value>
+  </data>
+  <data name="Error.06" xml:space="preserve">
+    <value>DANGER Vitesse trop élevée</value>
+  </data>
+  <data name="Error.07" xml:space="preserve">
+    <value>DANGER Positions différentes sur le scanner</value>
+  </data>
+  <data name="Error.08" xml:space="preserve">
+    <value>Bouton d’arrêt d’urgence du dérouleur côté opérateur pressé</value>
+  </data>
+  <data name="Error.09" xml:space="preserve">
+    <value>Bouton d’arrêt d’urgence du dérouleur côté maintenance pressé</value>
+  </data>
+  <data name="Error.10" xml:space="preserve">
+    <value>Bouton d’arrêt d’urgence côté opérateur principal pressé</value>
+  </data>
+  <data name="Error.11" xml:space="preserve">
+    <value>Bouton d’arrêt d’urgence côté maintenance principale pressé</value>
+  </data>
+  <data name="Error.12" xml:space="preserve">
+    <value>Bouton d’arrêt d’urgence de l’enrouleur côté opérateur pressé</value>
+  </data>
+  <data name="Error.13" xml:space="preserve">
+    <value>Bouton d’arrêt d’urgence de l’enrouleur côté maintenance pressé</value>
+  </data>
+  <data name="Error.14" xml:space="preserve">
+    <value>Matériel dans l’unité de lavage</value>
+  </data>
+  <data name="Error.15" xml:space="preserve">
+    <value>La pression d’air est faible</value>
+  </data>
+  <data name="Error.16" xml:space="preserve">
+    <value>Porte de sécurité principale côté opérateur ouverte</value>
+  </data>
+  <data name="Error.17" xml:space="preserve">
+    <value>Porte de sécurité principale côté maintenance ouverte</value>
+  </data>
+  <data name="Error.18" xml:space="preserve">
+    <value>Porte de sécurité principale côté gauche ouverte</value>
+  </data>
+  <data name="Error.19" xml:space="preserve">
+    <value>Porte de sécurité principale côté droit ouverte</value>
+  </data>
+  <data name="Error.20" xml:space="preserve">
+    <value>Bande hors positionError.20=Bande hors position</value>
+  </data>
+  <data name="Error.21" xml:space="preserve">
+    <value>Erreur après le premier démarrage</value>
+  </data>
+  <data name="Error.22" xml:space="preserve">
+    <value>Le rouleau de pression ne descend pas : Vérifiez le câble</value>
+  </data>
+  <data name="Error.23" xml:space="preserve">
+    <value>ERREUR 23 :</value>
+  </data>
+  <data name="Error.24" xml:space="preserve">
+    <value>ERREUR 24 :</value>
+  </data>
+  <data name="Error.25" xml:space="preserve">
+    <value>ERREUR 25 :</value>
+  </data>
+  <data name="Error.26" xml:space="preserve">
+    <value>ERREUR 26 :</value>
+  </data>
+  <data name="Error.27" xml:space="preserve">
+    <value>ERREUR 27 :</value>
+  </data>
+  <data name="Error.28" xml:space="preserve">
+    <value>ERREUR 28 :</value>
+  </data>
+  <data name="Error.29" xml:space="preserve">
+    <value>ERREUR 29 :</value>
+  </data>
+  <data name="Error.30" xml:space="preserve">
+    <value>ERREUR 30 :</value>
+  </data>
+  <data name="Error.31" xml:space="preserve">
+    <value>ERREUR 31 :</value>
+  </data>
+  <data name="Error.32" xml:space="preserve">
+    <value>ERREUR 32 :</value>
+  </data>
+  <data name="ESTOP 00" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 00 : Dérouleur</value>
+  </data>
+  <data name="ESTOP 01" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 01 : Dérouleur</value>
+  </data>
+  <data name="ESTOP 02" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 02 : Imprimante</value>
+  </data>
+  <data name="ESTOP 03" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 03 : Imprimante</value>
+  </data>
+  <data name="ESTOP 04" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 04 : Imprimante</value>
+  </data>
+  <data name="ESTOP 05" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 05 : Imprimante</value>
+  </data>
+  <data name="ESTOP 06" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 06 : Séchoir</value>
+  </data>
+  <data name="ESTOP 07" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 07 : Séchoir</value>
+  </data>
+  <data name="ESTOP 08" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 08 : Enrouleur</value>
+  </data>
+  <data name="ESTOP 09" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 09 : Enrouleur</value>
+  </data>
+  <data name="ESTOP 10" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 10 :</value>
+  </data>
+  <data name="ESTOP 11" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 11 :</value>
+  </data>
+  <data name="ESTOP 12" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 12 :</value>
+  </data>
+  <data name="ESTOP 13" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 13 :</value>
+  </data>
+  <data name="ESTOP 14" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 14 :</value>
+  </data>
+  <data name="ESTOP 15" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 15 :</value>
+  </data>
+  <data name="ESTOP 16" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 16 :</value>
+  </data>
+  <data name="ESTOP 17" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 17 :</value>
+  </data>
+  <data name="ESTOP 18" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 18 :</value>
+  </data>
+  <data name="ESTOP 19" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 19 :</value>
+  </data>
+  <data name="ESTOP 20" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 20 :</value>
+  </data>
+  <data name="ESTOP 21" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 21 :</value>
+  </data>
+  <data name="ESTOP 22" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 22 :</value>
+  </data>
+  <data name="ESTOP 23" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 23 :</value>
+  </data>
+  <data name="ESTOP 24" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 24 :</value>
+  </data>
+  <data name="ESTOP 25" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 25 :</value>
+  </data>
+  <data name="ESTOP 26" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 26 :</value>
+  </data>
+  <data name="ESTOP 27" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 27 :</value>
+  </data>
+  <data name="ESTOP 28" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 28 :</value>
+  </data>
+  <data name="ESTOP 29" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 29 :</value>
+  </data>
+  <data name="ESTOP 30" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 30 :</value>
+  </data>
+  <data name="ESTOP 31" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 31 :</value>
+  </data>
+  <data name="ESTOP 32" xml:space="preserve">
+    <value>COMMUTATEUR D’ARRÊT 32 :</value>
+  </data>
+  <data name="FillCap" xml:space="preserve">
+    <value>Bouchon de remplissage</value>
+  </data>
+  <data name="Standstill" xml:space="preserve">
+    <value>Arrêt</value>
+  </data>
+  <data name="WARN 01" xml:space="preserve">
+    <value>AVERTISSEMENT 01 :</value>
+  </data>
+  <data name="WARN 02" xml:space="preserve">
+    <value>AVERTISSEMENT 02 :</value>
+  </data>
+  <data name="WARN 03" xml:space="preserve">
+    <value>AVERTISSEMENT 03 :</value>
+  </data>
+  <data name="WARN 04" xml:space="preserve">
+    <value>AVERTISSEMENT 04 :</value>
+  </data>
+  <data name="WARN 05" xml:space="preserve">
+    <value>AVERTISSEMENT 05 :</value>
+  </data>
+  <data name="WARN 06" xml:space="preserve">
+    <value>AVERTISSEMENT 06 :</value>
+  </data>
+  <data name="WARN 07" xml:space="preserve">
+    <value>AVERTISSEMENT 07 :</value>
+  </data>
+  <data name="WARN 08" xml:space="preserve">
+    <value>AVERTISSEMENT 08 :</value>
+  </data>
+  <data name="WARN 09" xml:space="preserve">
+    <value>AVERTISSEMENT 09 :</value>
+  </data>
+  <data name="WARN 10" xml:space="preserve">
+    <value>AVERTISSEMENT 10 :</value>
+  </data>
+  <data name="WARN 11" xml:space="preserve">
+    <value>AVERTISSEMENT 11 :</value>
+  </data>
+  <data name="WARN 12" xml:space="preserve">
+    <value>AVERTISSEMENT 12 :</value>
+  </data>
+  <data name="WARN 13" xml:space="preserve">
+    <value>AVERTISSEMENT 13 :</value>
+  </data>
+  <data name="WARN 14" xml:space="preserve">
+    <value>AVERTISSEMENT 14 :</value>
+  </data>
+  <data name="WARN 15" xml:space="preserve">
+    <value>AVERTISSEMENT 15 :</value>
+  </data>
+  <data name="WARN 16" xml:space="preserve">
+    <value>AVERTISSEMENT 16 :</value>
+  </data>
+  <data name="WARN 17" xml:space="preserve">
+    <value>AVERTISSEMENT 17 :</value>
+  </data>
+  <data name="WARN 18" xml:space="preserve">
+    <value>AVERTISSEMENT 18 :</value>
+  </data>
+  <data name="WARN 19" xml:space="preserve">
+    <value>AVERTISSEMENT 19 :</value>
+  </data>
+  <data name="WARN 20" xml:space="preserve">
+    <value>AVERTISSEMENT 20 :</value>
+  </data>
+  <data name="WARN 21" xml:space="preserve">
+    <value>AVERTISSEMENT 21 :</value>
+  </data>
+  <data name="WARN 22" xml:space="preserve">
+    <value>AVERTISSEMENT 22 :</value>
+  </data>
+  <data name="WARN 23" xml:space="preserve">
+    <value>AVERTISSEMENT 23 :</value>
+  </data>
+  <data name="WARN 24" xml:space="preserve">
+    <value>AVERTISSEMENT 24 :</value>
+  </data>
+  <data name="WARN 25" xml:space="preserve">
+    <value>AVERTISSEMENT 25 :</value>
+  </data>
+  <data name="WARN 26" xml:space="preserve">
+    <value>AVERTISSEMENT 26 :</value>
+  </data>
+  <data name="WARN 27" xml:space="preserve">
+    <value>AVERTISSEMENT 27 :</value>
+  </data>
+  <data name="WARN 28" xml:space="preserve">
+    <value>AVERTISSEMENT 28 :</value>
+  </data>
+  <data name="WARN 29" xml:space="preserve">
+    <value>AVERTISSEMENT 29 :</value>
+  </data>
+  <data name="WARN 30" xml:space="preserve">
+    <value>AVERTISSEMENT 30 :</value>
+  </data>
+  <data name="WARN 31" xml:space="preserve">
+    <value>AVERTISSEMENT 31 :</value>
+  </data>
+  <data name="WARN 32" xml:space="preserve">
+    <value>AVERTISSEMENT 32 :</value>
+  </data>
+  <data name="Center" xml:space="preserve">
+    <value>Centre</value>
+  </data>
+  <data name="SpliceMode" xml:space="preserve">
+    <value>Mode source</value>
   </data>
 </root>

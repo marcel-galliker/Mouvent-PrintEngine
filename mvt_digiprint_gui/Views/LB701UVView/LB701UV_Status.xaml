@@ -10,7 +10,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
 
     <GroupBox Style="{StaticResource MvtGroupBox}" Header="{mvt:LocalizedBinding Status}">
-        <rx_uc:PlcParPanel Grid.Row="1" UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel">
+        <rx_uc:PlcParPanel Grid.Row="1" UnitID="Application.GUI_00_001_Main" ReadOnly="True" x:Name="StatusPanel" LabelWidth="200">
             <rx_uc:PlcParCtrl ID="STA_MACHINE_STATE"                Label="{mvt:LocalizedBinding MachineState}" x:Name="CB_MainState" Type="ComboStr"/>
 
             <rx_uc:PlcParCtrl ID="STA_UV_LAMPS_READY"              Label="{mvt:LocalizedBinding CuringLampOk}"   Visibility="Collapsed"/>

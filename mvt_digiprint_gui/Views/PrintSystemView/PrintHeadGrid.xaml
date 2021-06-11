@@ -41,7 +41,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250"/>
                 <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -78,7 +77,7 @@
             <TextBlock Grid.Row="7" Grid.Column="0" Text="{mvt:LocalizedBinding ImageInCnt}"/>
         </Grid>
 
-        <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="13">
+        <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="7">
             <StackPanel x:Name="PrintHeadStack" Orientation="Horizontal"/>
         </Grid>
     </Grid>

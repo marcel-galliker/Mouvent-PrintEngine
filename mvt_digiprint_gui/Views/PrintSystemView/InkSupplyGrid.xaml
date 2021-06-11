@@ -20,7 +20,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="50"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -33,7 +33,7 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding ControlMode}"/>
 
         <TextBlock Grid.Row="4" Text="{mvt:LocalizedBinding PressureLung}" />
-        <TextBlock Grid.Row="4" Grid.Column="1" Text="mbar" />
+        <TextBlock Grid.Row="4" Grid.Column="1" Text="mbar"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding TemperatureInkSupply}"/>
         <TextBlock Grid.Row="5" Grid.Column="1" Text="°C"/>
@@ -44,7 +44,7 @@
         <TextBlock Grid.Row="7" Grid.Column="0" Text="{mvt:LocalizedBinding InkTankPressure}"/>
         <TextBlock Grid.Row="7" Grid.Column="1" Text="mbar"/>
 
-        <Grid Grid.Row="8" Grid.ColumnSpan="3" x:Name="ServiceGrid">
+        <Grid Grid.Row="8" Grid.ColumnSpan="2" x:Name="ServiceGrid">
 
             <Grid.RowDefinitions>              
                 <RowDefinition Height="auto"/>
@@ -54,9 +54,8 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             
             <!--
@@ -78,7 +77,7 @@
             <TextBlock Grid.Row="4" Grid.Column="0" Text="{mvt:LocalizedBinding AirValve}"/>
         </Grid>
 
-        <Grid  Grid.Row="0" Grid.Column="2" Grid.RowSpan="13" >
+        <Grid  Grid.Row="0" Grid.Column="2" Grid.RowSpan="9" >
             <StackPanel x:Name="InkSupplyStack" Orientation="Horizontal" />
         </Grid>
     </Grid>

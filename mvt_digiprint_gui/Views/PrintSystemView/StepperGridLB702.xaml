@@ -23,7 +23,7 @@
                 <RowDefinition Height="auto" x:Name="WipingSpeed_Height"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="50"/>
@@ -41,9 +41,9 @@
             <TextBlock       Grid.Row="1" Grid.Column="3" Text="3" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
             <TextBlock       Grid.Row="1" Grid.Column="4" Text="4" FontSize="{StaticResource MvtFontSize}" HorizontalAlignment="Center"/>
 
-            <TextBlock       Grid.Row="2" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
-            <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
-            <TextBlock       Grid.Row="4" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}" VerticalAlignment="Center"/>
+            <TextBlock       Grid.Row="2" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
+            <TextBlock       Grid.Row="3" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
+            <TextBlock       Grid.Row="4" Grid.Column="5" Text=" mm" FontSize="{StaticResource MvtFontSize}"/>
 
             <Grid Grid.Column="1" Grid.RowSpan="3" >
                 <Grid.ColumnDefinitions>

@@ -38,7 +38,7 @@
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
 
-                        <rx_uc:PlcParPanel Grid.Row="1" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="120" Margin="0,1,0,0" Grid.RowSpan="2">
+                        <rx_uc:PlcParPanel Grid.Row="1" x:Name="ParPanelMaterial" UnitID="Application.GUI_00_001_Main" ReadOnly="False" PreviewKeyDown="ParPanel_PreviewKeyDown" LabelWidth="200" Margin="0,1,0,0" Grid.RowSpan="2">
                             <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto"/>
@@ -63,7 +63,7 @@
 
                             <TextBlock Grid.Column="0" Text="{mvt:LocalizedBinding Material}"/>
 
-                                <igWPF:XamComboEditor   Margin="120,0,10,0"
+                                <igWPF:XamComboEditor   Margin="200,0,10,0"
 			                    x:Name="CB_Material"
                                 Grid.Column="0"
                                 Grid.ColumnSpan="3"
@@ -120,7 +120,7 @@
                             </Grid>
 
                             <Grid Grid.Row="6" Grid.Column="2" Loaded="Grid_Loaded"  Margin="0,0,10,0">
-                                <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_MODE"           Label="{mvt:LocalizedBinding Curing}" Type="Combo" x:Name="CB_UVLamp" Padding="0,0,70,0" Margin="0,3,0,-3"/>
+                                <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_MODE"           Label="{mvt:LocalizedBinding Curing}" Type="Combo" x:Name="CB_UVLamp" Padding="0,0,70,0"/>
                                 <rx_uc:PlcParCtrl ID="PAR_UV_LAMP_1_POWER_MAX"      Label=""  Format="n" HorizontalAlignment="Right" Unit="%" Width="auto"/>
                             </Grid>
 
