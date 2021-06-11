@@ -394,12 +394,15 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 
 	case dev_stepper:	if (rx_def_is_lb(RX_Config.printer.type) || RX_Config.printer.type == printer_test_table_seon)
 						{
-							if (no<0 || no>3)
+							if (no>3)
 							{
-							//	printf("Error\n");
-							//	return REPLY_ERROR;
 								strcpy(ipAddr, RX_CTRL_SETUP_ASSIST);
 								break;
+							}
+							if (no<0 || no>3)
+							{
+								printf("Error Stepper[%d]\n", no);
+								return REPLY_ERROR;
 							}
 							sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_STEPPER_0+1+10*no);  														
 						}

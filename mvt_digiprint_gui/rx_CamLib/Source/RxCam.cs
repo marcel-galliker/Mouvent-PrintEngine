@@ -593,9 +593,12 @@ namespace rx_CamLib
             
             if (MeasureMode == ENMeasureMode.MeasureMode_Off ||
                 MeasureMode == ENMeasureMode.MeasureMode_StartLines ||
-                MeasureMode == ENMeasureMode.MeasureMode_StartLinesCont) return ENCamResult.Filter_NoMeasurePossible;
+                MeasureMode == ENMeasureMode.MeasureMode_StartLinesCont) 
+                return ENCamResult.Filter_NoMeasurePossible;
 
-            if (halignFilter.DoMeasures(NumMeasures, TO_1st, TO_End)) return ENCamResult.OK;
+            int res = halignFilter.DoMeasures(NumMeasures, TO_1st, TO_End);
+            Console.WriteLine("DoMeasures.result={0}", res);
+            if (res==0) return ENCamResult.OK;
             else return ENCamResult.Filter_NoMeasurePossible;
         }
 

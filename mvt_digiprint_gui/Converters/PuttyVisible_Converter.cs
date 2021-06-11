@@ -14,6 +14,7 @@ namespace RX_DigiPrint.Converters
             {
             case EDeviceType.dev_main:   return Visibility.Visible;
             case EDeviceType.dev_plc:    return Visibility.Hidden;
+            case EDeviceType.dev_robot:  return Visibility.Hidden;
             default:                     return Visibility.Visible;
             }
         }
@@ -32,6 +33,7 @@ namespace RX_DigiPrint.Converters
             {
             case EDeviceType.dev_main:   return Visibility.Hidden;
             case EDeviceType.dev_plc:    return Visibility.Hidden;
+            case EDeviceType.dev_robot:  return Visibility.Hidden;
             default:                     return Visibility.Visible;
             }
         }

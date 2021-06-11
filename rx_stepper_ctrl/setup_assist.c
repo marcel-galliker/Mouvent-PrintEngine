@@ -29,7 +29,7 @@
 #define CURRENT_HOLD_SCAN	50
 #define CURRENT_HOLD_LIFT	20
 
-#define POS_UP				6000		// um
+#define LIFT_DIST			10000		// um
 
 #define STEPS_REV_SCAN		(200*STEPS)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV_SCAN		99000.0		// moving distance per revolution [um]
@@ -50,6 +50,7 @@ static char		_CmdName[32];
 static int		_ScanPos_New=0;
 static int		_ScanSpeed=0;
 static int		_ScanPos_Act=0;
+static int		_CmdRunning_Z = 0;
 
 
 //--- prototypes --------------------------------------------
@@ -108,30 +109,48 @@ void sa_main(int ticks, int menu)
     if (RX_StepperStatus.info.moving)
 	{
 		RX_StepperStatus.info.x_in_ref   = FALSE;
-	//	RX_StepperStatus.info.z_in_up    = FALSE;
-    //  RX_StepperStatus.info.z_in_down  = FALSE;
 		RX_StepperStatus.posX = _steps_2_microns_scan(motor_get_step(MOTOR_SCAN));
     }
 	else RX_StepperStatus.posX = _ScanPos_Act;
 
+	if (_CmdRunning_Z && motor_move_done(MOTOR_LIFT))
+	{
+		if (motor_error(MOTOR_LIFT))
+		{
+			Error(ERR_CONT, 0, "LIFT: Command %d: Motor LIFT blocked", _CmdRunning_Z);			
+			RX_StepperStatus.info.ref_done = FALSE;							
+		}
+
+		switch(_CmdRunning_Z)
+		{
+        case CMD_SA_UP:		TrPrintfL(TRUE, "CMD_SA_UP DONE");
+							RX_StepperStatus.info.z_in_up=TRUE;  
+							RX_StepperStatus.info.z_in_down=FALSE;
+							break;
+
+        case CMD_SA_DOWN:	TrPrintfL(TRUE, "CMD_SA_DOWN DONE");
+							RX_StepperStatus.info.z_in_up=FALSE; 
+							RX_StepperStatus.info.z_in_down=TRUE; 
+							break;
+		}
+		_CmdRunning_Z = 0;
+	}
+
 //	if (RX_StepperStatus.cmdRunning==0) RX_StepperStatus.info.moving = FALSE;
     if (RX_StepperStatus.cmdRunning && motors_move_done(MOTOR_ALL_BITS))
 	{
-        RX_StepperStatus.info.headUpInput_0 = !fpga_input(SCAN_REF);
 		RX_StepperStatus.info.x_in_ref      = RX_StepperStatus.info.headUpInput_0;
 
 		RX_StepperStatus.info.moving	    = FALSE;
-		RX_StepperStatus.info.z_in_up       = (RX_StepperStatus.cmdRunning==CMD_SA_UP || RX_StepperStatus.cmdRunning == CMD_SA_REFERENCE);
-		RX_StepperStatus.info.z_in_down     = (RX_StepperStatus.cmdRunning==CMD_SA_DOWN);
 		if (RX_StepperStatus.cmdRunning == CMD_SA_REFERENCE) 
 		{
 			_sa_do_reference();
 		}
         else 
 		{
-			if (motors_error(MOTOR_ALL_BITS, &motor))
+			if (motor_error(MOTOR_SCAN))
 			{
-				Error(ERR_CONT, 0, "LIFT: Command %s: Motor[%d] blocked", _CmdName, motor+1);			
+				Error(ERR_CONT, 0, "LIFT: Command %s: Motor SCAN blocked", _CmdName);			
 				RX_StepperStatus.info.ref_done = FALSE;							
 			}
 			else
@@ -139,7 +158,7 @@ void sa_main(int ticks, int menu)
 				if (RX_StepperStatus.cmdRunning == CMD_SA_MOVE)
 				{
 					RX_StepperStatus.posY[0]++;
-					TrPrintfL(TRUE, "MOVE DONE [%d]: step=%d", RX_StepperStatus.posY[0], motor_get_step(MOTOR_SCAN));
+					TrPrintfL(TRUE, "MOVE DONE [%d]: pos=%d", RX_StepperStatus.posY[0], RX_StepperStatus.posX);
 					if (_ScanPos_New>=0) _ScanPos_Act = _ScanPos_New;
 					else				 _ScanPos_Act = RX_StepperStatus.posX;
 					RX_StepperStatus.posX = _ScanPos_Act;
@@ -219,20 +238,23 @@ int sa_menu(void)
 //--- _sa_do_reference ----------------------------------------------------------------
 static void _sa_do_reference(void)
 {
+	TrPrintfL(TRUE, "_sa_do_reference(%d)", _Step);
 	switch(_Step)
 	{
-    case 0:	motors_stop(MOTOR_ALL_BITS);
-			motors_reset(MOTOR_ALL_BITS);
-			motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, 1);
-			motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);	
+    case 0:	motors_stop(1<<MOTOR_SCAN);
+			motors_reset(1<<MOTOR_SCAN);
+		//	motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, 1);
+		//	motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
+			RX_StepperStatus.info.z_in_up   = FALSE;
+			RX_StepperStatus.info.z_in_down = FALSE;
 			RX_StepperStatus.cmdRunning  = CMD_SA_REFERENCE;
 			_Step=1;
 
 	case 1: _Step=2;
 			if (!RX_StepperStatus.info.z_in_up)
 			{
-				RX_StepperStatus.info.moving = TRUE;
-				motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, POS_UP);
+				_CmdRunning_Z = CMD_SA_UP;
+				motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, LIFT_DIST);
 				break;				
 			}
 
@@ -301,6 +323,7 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 									break;
 
     case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SCAN");
+									TrPrintfL(TRUE, "CMD_SA_MOVE");
 									if ((pcmd->pos!=_ScanPos_Act || !RX_StepperStatus.info.ref_done))
 									{
 										_ScanPos_New = pcmd->pos;
@@ -312,18 +335,20 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 									break;
 
     case CMD_SA_UP:					strcpy(_CmdName, "CMD_SA_UP");
+									TrPrintfL(TRUE, "CMD_SA_UP");
 									if (!RX_StepperStatus.info.z_in_up)
 									{
-                                        RX_StepperStatus.cmdRunning = pcmd->hdr.msgId;
-                                        motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, POS_UP);
+                                        _CmdRunning_Z = pcmd->hdr.msgId;
+                                        motors_move_by_step(1<<MOTOR_LIFT, &_ParLift, LIFT_DIST, FALSE);
                                     }
 									break;
 
     case CMD_SA_DOWN:				strcpy(_CmdName, "CMD_SA_DOWN");
+									TrPrintfL(TRUE, "CMD_SA_DOWN");
 									if (!RX_StepperStatus.info.z_in_down)
 									{
-                                        RX_StepperStatus.cmdRunning = pcmd->hdr.msgId;
-                                        motors_move_to_step(1 << MOTOR_LIFT, &_ParLift, -POS_UP);
+                                        _CmdRunning_Z = pcmd->hdr.msgId;
+										motors_move_by_step(1<<MOTOR_LIFT, &_ParLift, -LIFT_DIST, FALSE);
                                     }
 									break;
 

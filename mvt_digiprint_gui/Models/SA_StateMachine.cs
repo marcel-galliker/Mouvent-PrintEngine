@@ -43,9 +43,9 @@ namespace RX_DigiPrint.Models
 		private readonly double	 _StitchWebDist = px2mm(2*140);
 		private readonly double	 _DistWebDist   = Math.Round((24.0*25.4)/1200, 3);	// 
 		private int				 _DistStepCnt   = 0;
-		private double			 _DistCorr		= 0;
+		private int				 _DistMeasureCnt= 0;
 		private bool			 _Confirmed		= false;
-		private int				_CamMeasureAngle_Step;
+		private int				 _CamMeasureAngle_Step;
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
@@ -157,6 +157,25 @@ namespace RX_DigiPrint.Models
 		{
 			int color, n;
 
+			/*
+			{
+				RxCam.ENCamCallBackInfo CallBackInfo = new ENCamCallBackInfo(); 
+				RxCam.CallBackDataStruct CallBackData = new CallBackDataStruct();
+				_Action=new SA_Action()
+				{
+					PrintbarNo	= 0,
+					StepperNo   = 0,
+					HeadNo		= 0,
+					WebMoveDist = 12.0,
+					WebPos		= 12.0,
+					Function	= ECamFunction.CamMeasureAngle,
+					Name		= String.Format(" {0}-{1}",  "TEST", 1),
+				};
+				_CamMeasureAngle_Step=3;
+				CallBackfromCam(CallBackInfo, CallBackData);
+			}
+			*/
+
 			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
 			_AssistMode = ENAssistMode.align;
@@ -260,7 +279,6 @@ namespace RX_DigiPrint.Models
 			}
 
 			_DistStepCnt = 0;
-			_DistCorr    = 0;
 			_ActionIdx	 = 0;
 			_HeadNo		 = 0;
 			_StartAction();
@@ -362,7 +380,6 @@ namespace RX_DigiPrint.Models
 			}
 
 			_DistStepCnt = 0;
-			_DistCorr    = 0;
 			_ActionIdx	 = 0;
 			_HeadNo		 = 0;
 			_StartAction();
@@ -409,7 +426,7 @@ namespace RX_DigiPrint.Models
 				if (CallBackData.DPosY.Equals(float.NaN)) CallBackData.DPosY=0;
 				switch(_Action.Function)
 				{
-					case ECamFunction.CamFindLines_Vertical:
+					case ECamFunction.CamFindLines_Vertical: // CallBackfromCam
 						if (CallBackInfo== RxCam.ENCamCallBackInfo.StartLinesDetected) 
 						{
 							if (!_MarkFound)
@@ -424,7 +441,7 @@ namespace RX_DigiPrint.Models
 						}
 						break;
 
-					case ECamFunction.CamFindLine_Horzizontal:
+					case ECamFunction.CamFindLine_Horzizontal: // CallBackfromCam
 						if (CallBackInfo==RxCam.ENCamCallBackInfo.StartLinesDetected)
 						{
 							Console.WriteLine("CamFindLine_Horzizontal: _MarkFound={0}, LineLayout={1}, LineAttatch={2}, value={3}, dx={4}, dy={5}", _MarkFound, CallBackData.LineLayout.ToString(), CallBackData.LineAttach.ToString(), CallBackData.Value_1, CallBackData.DPosX, CallBackData.DPosY);
@@ -446,7 +463,7 @@ namespace RX_DigiPrint.Models
 						break;
 					
 					//--- Find first angle ----------------------------------------------------
-					case ECamFunction.CamFindFirstAngle: 
+					case ECamFunction.CamFindFirstAngle:  // CallBackfromCam
 							_CallbackData = CallBackData;
 							CallbackInfo=string.Format("# {0}\n", ++_CallbackNo) 
 										+ "Measure Angle\n"
@@ -462,7 +479,7 @@ namespace RX_DigiPrint.Models
 							handled=true;
 							break;
 
-					case ECamFunction.CamConfirmFocus:
+					case ECamFunction.CamConfirmFocus: // CallBackfromCam
 							_CallbackData = CallBackData;
 							CallbackInfo=string.Format("# {0}\n", ++_CallbackNo) 
 										+ "Measure Angle\n"
@@ -471,20 +488,30 @@ namespace RX_DigiPrint.Models
 						break;
 
 					//--- Measure angle ----------------------------------------------------
-					case ECamFunction.CamMeasureAngle: 
+					case ECamFunction.CamMeasureAngle: // CallBackfromCam
 							_CallbackData = CallBackData;
 							CallbackInfo=string.Format("# {0}\n", ++_CallbackNo) 
 										+ "Measure Angle\n"
 										+ string.Format("  Correction: {0:0.00} cnt={1}\n", CallBackData.Value_1, CallBackData.NumMeasures)
 										+ string.Format("  Center position: X={0:0.00}, y={1:0.00}\n", CallBackData.DPosX, CallBackData.DPosY);
 
-							if (_CamMeasureAngle_Step==1 && CallBackInfo==RxCam.ENCamCallBackInfo.AngleCorr && !Equals(CallBackData.Value_1, float.NaN))
+							bool next=false;
+							if (_CamMeasureAngle_Step==1)
 							{
-								Console.WriteLine("{0} Callback: _CamMeasureAngle_Step=1, Cnt={1}", RxGlobals.Timer.Ticks(), _Action.MeasureCnt);
-								_CamMeasureAngle_Step++;
-								RxGlobals.SetupAssist.ScanStop();
-								_MarkFound=true;
 								_CamFunctions.Off();
+								if (CallBackInfo==RxCam.ENCamCallBackInfo.AngleCorr && !Equals(CallBackData.Value_1, float.NaN))
+								{
+									Console.WriteLine("{0} Callback: _CamMeasureAngle_Step=1, Cnt={1}", RxGlobals.Timer.Ticks(), _Action.MeasureCnt);
+									_CamMeasureAngle_Step++;
+									RxGlobals.SetupAssist.ScanStop();
+									_MarkFound=true;
+								}
+								else
+								{
+									_MarkFound = false;
+									_Action.Measured(float.NaN);
+									next=true;
+								}
 							}
 							else if (_CamMeasureAngle_Step==3)
 							{
@@ -494,6 +521,11 @@ namespace RX_DigiPrint.Models
 									_Action.Measured(CallBackData.Value_1);
 								}
 								_Action.ScanPos = RxGlobals.SetupAssist.ScanPos - CallBackData.DPosX/1000;
+								next=true;
+							}
+
+							if (next)
+							{ 
 								_CamFunctions.Off();
 								_CamMeasureAngle_Step = 0;
 								Console.WriteLine("Callback: _CamMeasureAngle_Step=3, Cnt={0}, move from {1} to {2}", _Action.MeasureCnt, RxGlobals.SetupAssist.ScanPos, RxGlobals.SetupAssist.ScanPos+2*_AngleDist-0.5);
@@ -503,14 +535,21 @@ namespace RX_DigiPrint.Models
 									_CamMeasureAngle_done();
 									_HeadNo++;
 								}
-								if (_HeadNo<_HeadsPerColor) RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+2*_AngleDist-0.5);
+								if (_HeadNo<_HeadsPerColor) 
+								{
+									_Action.ScanMoveDone=false;
+									if (CallBackInfo==RxCam.ENCamCallBackInfo.AngleCorr)
+										RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+2*_AngleDist-0.5, 500);
+									else
+										RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+2*_AngleDist-1.0, 500); // mark not found
+								}
 								else _HeadNo=0;
 							}
 							handled=true;
 							break;
 
 					//--- measure stitch ----------------------------------------------------------------------------
-					case ECamFunction.CamMeasureStitch:
+					case ECamFunction.CamMeasureStitch: // CallBackfromCam
 							action=_Actions[_StitchIdx+_HeadNo];
 							if (CallBackInfo!=RxCam.ENCamCallBackInfo.StitchCorr)
 								break;
@@ -560,7 +599,7 @@ namespace RX_DigiPrint.Models
 							break;
 
 					//--- measure distance ----------------------------------------------------------------------------
-					case ECamFunction.CamMeasureDist:
+					case ECamFunction.CamMeasureDist: // CallBackfromCam
 							action=_Actions[_DistIdx+_HeadNo];
 							double offset=-((_DistStepCnt/4)-2) * px2mm(18);
 							CallbackInfo=string.Format("# {0}\n", ++_CallbackNo) 
@@ -573,42 +612,46 @@ namespace RX_DigiPrint.Models
 							if (CallBackInfo!=RxCam.ENCamCallBackInfo.RegisterCorr)
 								break;
 							action.Measured(CallBackData.Value_1);
-							if (!float.IsNaN(CallBackData.Value_1) || _DistStepCnt>25)
-							{ 
-								if (!float.IsNaN(CallBackData.Value_1))
-								{ 
-									double corr=offset+CallBackData.Value_1/1000;
-									Console.WriteLine("Measure Dist: corr={0:0.00}, _DistCorr={1:0.00}, sum={2:0.00}", corr, _DistCorr, _DistCorr+corr);
-								//	if (action.Correction!=null && Math.Abs((double)action.Correction)>0.010) 
-									{
-										action.Correction = corr;
-										_DistCorr += corr;
-										RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] += _DistCorr;
-									}
-									action.State = ECamFunctionState.done;
-									RxGlobals.PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);									
-								}
-								else action.State = ECamFunctionState.error;
-								_HeadNo++;								
-								if (_HeadNo+1<_HeadsPerColor)
+
+							if (!float.IsNaN(CallBackData.Value_1))
+							{
+								action.Correction=offset+CallBackData.Value_1/1000;
+								Console.WriteLine("Measure Dist: corr={0:0.00}", action.Correction);
+								action.State = ECamFunctionState.done;
+								_DistMeasureCnt++;
+								if (_DistMeasureCnt+1==_HeadsPerColor)
 								{
-									_ActionIdx=_DistIdx+_HeadNo;
-									_Action=_Actions[_ActionIdx];
-									RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
-									RxGlobals.SetupAssist.WebMove(-_DistWebDist*_DistStepCnt);
-									_DistStepCnt=0;
-								}
-								else 
-								{
-									_DistCorr = 0;
 									_CamMeasureDist_done();
+									break;
 								}
 							}
-							else
+
+							//--- find next head ----------------
+							while(true)
 							{
-								action.WebMoveDone = false;
-								RxGlobals.SetupAssist.WebMove(_DistWebDist);
-								_DistStepCnt++;
+								_HeadNo++;
+								if (_HeadNo+1==_HeadsPerColor) // end of line
+								{								
+									if (_DistStepCnt==25) // end of measurment
+									{										
+										Abort();
+										break;
+									}
+									// new line 
+									_HeadNo = 0;
+									_Action=_Actions[_DistIdx+_HeadNo];
+									_DistStepCnt++;
+									action.WebMoveDone = false;
+									RxGlobals.SetupAssist.WebMove(_DistWebDist);
+									RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+									break;
+								}
+								if (_HeadNo+1<_HeadsPerColor && _Actions[_DistIdx+_HeadNo].State!=ECamFunctionState.done)
+								{
+									_Action=_Actions[_DistIdx+_HeadNo];
+									RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+									break;
+								}							
 							}
 							handled=true;
 							break;
@@ -845,7 +888,6 @@ namespace RX_DigiPrint.Models
 			Console.WriteLine("_FindMark_1: _MarkFound = false");
 
 			_MarkFound = false;
-			RxGlobals.SetupAssist.Down();
 			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 		}
 
@@ -990,19 +1032,18 @@ namespace RX_DigiPrint.Models
 		//--- _CamMeasureDist_done -----------------------------
 		private void _CamMeasureDist_done()
 		{
-			/*
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
+			double corr=0;
 			for(int i=0; i+1<_HeadsPerColor; i++)
 			{
 				SA_Action action=_Actions[_DistIdx+i];
 				if (action.Correction!=null && Math.Abs((double)action.Correction)>0.010) 
 				{
-					RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] -= (double)action.Correction;
+					corr += (double)action.Correction;
+					RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] -= corr;
 				}
-				action.State = ECamFunctionState.done;
 			}
 			RxGlobals.PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
-			*/
 			ActionDone();
 		}
 
@@ -1013,77 +1054,94 @@ namespace RX_DigiPrint.Models
 			if (_Action==null) return;
 			_Action.ScanMoveDone=true;
 
-			if (_Action.Function==ECamFunction.CamFindFirstAngle)
+			switch(_Action.Function)
 			{
-				Console.WriteLine("{0}: CamFindFirstAngle: _ScanMoveDone motorPos={1}, stopPos={2}, DPosX={3}", RxGlobals.Timer.Ticks(), RxGlobals.SetupAssist.ScanPos, RxGlobals.SetupAssist.ScanStopPos, _CallbackData.DPosX);
-				if (_MarkFound) 
-				{
-					for (int idx=_ActionIdx; idx<_Actions.Count; idx++)
+			case ECamFunction.CamFindLines_Vertical: // _ScanMoveDone
+					RxGlobals.SetupAssist.Down(); 
+					break;
+
+			case ECamFunction.CamFindFirstAngle: // _ScanMoveDone
+					Console.WriteLine("{0}: CamFindFirstAngle: _ScanMoveDone motorPos={1}, stopPos={2}, DPosX={3}", RxGlobals.Timer.Ticks(), RxGlobals.SetupAssist.ScanPos, RxGlobals.SetupAssist.ScanStopPos, _CallbackData.DPosX);
+					if (_MarkFound) 
 					{
-						SA_Action action=_Actions[idx];
-						switch(action.Function)
+						for (int idx=_ActionIdx; idx<_Actions.Count; idx++)
 						{
-							case ECamFunction.CamMeasureAngle:  RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos + _CallbackData.DPosX/1000); idx=1000; break;
-							case ECamFunction.I1Measure:  action.ScanPos = RxGlobals.SetupAssist.ScanStopPos + _CallbackData.DPosX/1000 - px2mm(97); break;
-							default: break;
+							SA_Action action=_Actions[idx];
+							switch(action.Function)
+							{
+								case ECamFunction.CamMeasureAngle:  RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos + _CallbackData.DPosX/1000); idx=1000; break;
+								case ECamFunction.I1Measure:  action.ScanPos = RxGlobals.SetupAssist.ScanStopPos + _CallbackData.DPosX/1000 - px2mm(97); break;
+								default: break;
+							}
+						}
+						ActionDone();
+					}
+					else
+					{
+						Console.WriteLine("{0}: Mark NOT Found", RxGlobals.Timer.Ticks());
+						_Action.State=ECamFunctionState.error;
+						Abort();
+						return;
+					}
+					break;
+
+			case ECamFunction.CamConfirmFocus: // _ScanMoveDone
+					Console.WriteLine("Action[{0}].CamConfirmFocus, ScanPos={1}", _ActionIdx, RxGlobals.SetupAssist.ScanPos);
+					if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
+					{
+						_Action.ScanMoveDone=false;
+						RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+					}
+					else _Action.ConfirmVisibile = true;
+					break;
+
+			case ECamFunction.CamMeasureAngle: // _ScanMoveDone
+					Console.WriteLine("Action[{0}].CamMeasureAngle, HeadNo={1}, ScanPos={2}, _CamMeasureAngle_Step={3}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos, _CamMeasureAngle_Step);
+					switch(_CamMeasureAngle_Step)
+					{
+						case 0: _CamMeasureAngle_Step=1;
+								_CamFunctions.MeasureAngle(true);
+								_Action.ScanMoveDone=false;
+								RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+1.0, 100);
+								break;
+
+								
+						case 1:	//--- mark not found !
+								RxCam.ENCamCallBackInfo CallBackInfo = new ENCamCallBackInfo(); 
+								RxCam.CallBackDataStruct CallBackData = new CallBackDataStruct();
+								CallBackfromCam(CallBackInfo, CallBackData);
+								break;
+
+						case 2: _CamMeasureAngle_Step = 3;
+								break;
+					}
+					break;
+
+			case ECamFunction.CamMeasureStitch: // _ScanMoveDone
+					/*
+					if (_Action.HeadNo==0 && !_SimuMachine)
+					{
+						Console.WriteLine("Action[{0}].CamMeasureStitch, HeadNo={1}, ScanPos={2}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos);
+						if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
+						{
+							_Action.ScanMoveDone=false;
+							RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 						}
 					}
-					ActionDone();
-				}
-				else
-				{
-					Console.WriteLine("{0}: Mark NOT Found", RxGlobals.Timer.Ticks());
-					_Action.State=ECamFunctionState.error;
-					Abort();
-					return;
-				}
-			}
+					*/
+					break;
 
-			if (_Action.Function==ECamFunction.CamConfirmFocus)
-			{
-				Console.WriteLine("Action[{0}].CamConfirmFocus, ScanPos={1}", _ActionIdx, RxGlobals.SetupAssist.ScanPos);
-				if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
-				{
-					_Action.ScanMoveDone=false;
-					RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
-				}
-				else _Action.ConfirmVisibile = true;
-			}
-
-			if (_Action.Function==ECamFunction.CamMeasureAngle)
-			{
-				Console.WriteLine("Action[{0}].CamMeasureAngle, HeadNo={1}, ScanPos={2}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos);
-				switch(_CamMeasureAngle_Step)
-				{
-					case 0: _CamMeasureAngle_Step=1;
-							_CamFunctions.MeasureAngle(true);
+			case ECamFunction.CamMeasureDist: // _ScanMoveDone
+					if (_Action.HeadNo==0 && !_SimuMachine)
+					{
+						Console.WriteLine("Action[{0}].CamMeasureDist, HeadNo={1}, ScanPos={2}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos);
+						if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
+						{
 							_Action.ScanMoveDone=false;
-							RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+1, 100);
-							break;
-
-					case 2: _CamMeasureAngle_Step = 3;
-							break;
-				}
-			}
-			/*
-			if (_Action.Function==ECamFunction.CamMeasureStitch && _Action.HeadNo==0 && !_SimuMachine)
-			{
-				Console.WriteLine("Action[{0}].CamMeasureStitch, HeadNo={1}, ScanPos={2}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos);
-				if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
-				{
-					_Action.ScanMoveDone=false;
-					RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
-				}
-			}
-			*/
-			if (_Action.Function==ECamFunction.CamMeasureDist && _Action.HeadNo==0 && !_SimuMachine)
-			{
-				Console.WriteLine("Action[{0}].CamMeasureDist, HeadNo={1}, ScanPos={2}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos);
-				if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
-				{
-					_Action.ScanMoveDone=false;
-					RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
-				}
+							RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+						}
+					}
+					break;
 			}
 			
 			Console.WriteLine("{0}: Action[{1}]: _ScanMoveDone: WebMoveDist={2}, WebMoveDone={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.WebMoveDist, _Action.WebMoveDone);
