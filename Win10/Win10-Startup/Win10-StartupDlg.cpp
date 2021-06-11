@@ -29,7 +29,7 @@
 #define USER				"radex"
 #define PASSWORD			"radex"
 
-#define LOCAL_GUI_DIR		"c:\\gui\\"
+#define LOCAL_GUI_DIR		"c:\\gui_\\"
 #define GUI_EXE				"RX_DigiPrint.exe"
 #define REMOTE				false
 
