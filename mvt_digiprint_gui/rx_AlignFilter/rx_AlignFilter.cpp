@@ -7304,7 +7304,11 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 TO_1
 		if (m_LogToFile) LogToFile(L"DoMeasures but MeasureMode: %d, MeasureRunning: %d", m_MeasureMode, m_MeasureRunning);
 		CallbackDebug("DoMeasures but MeasureMode: %d, MeasureRunning: %d", m_MeasureMode, m_MeasureRunning);
 
-		return false;
+		if (m_PresetMeasureMode == MeasureModeEnum::MeasureMode_Off) return -1;
+		if (m_PresetMeasureMode == MeasureModeEnum::MeasureMode_AllLines) return -2;
+		if (m_PresetMeasureMode == MeasureModeEnum::MeasureMode_StartLines) return -3;
+		if (m_MeasureRunning) return -4;
+		return -5;
 	}
 
 	if (m_DebugOn)
@@ -7329,7 +7333,7 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 TO_1
 			}
 			if (m_LogToFile) LogToFile(L"Could not enter Critical Section m_MeasureStartLock");
 			CallbackDebug("Could not enter Critical Section m_MeasureStartLock");
-			return false;
+			return -100;
 		}
 
 		if (m_DebugOn)
@@ -7353,7 +7357,7 @@ STDMETHODIMP_(BOOL) C_rx_AlignFilter::DoMeasures(UINT32 NumMeasures, UINT32 TO_1
 
 	LeaveCriticalSection(&m_MeasureStartLock);
 
-	return true;
+	return 0;
 }
 
 //GetMeasure Results

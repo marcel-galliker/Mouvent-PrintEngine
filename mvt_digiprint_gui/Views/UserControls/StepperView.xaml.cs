@@ -93,7 +93,7 @@ namespace RX_DigiPrint.Views.UserControls
             bool[] used = new bool[STEPPER_CNT];
             foreach(NetworkItem item in RxGlobals.Network.List)
             {
-                if (item.DeviceType==EDeviceType.dev_stepper && !RxGlobals.PrintSystem.IsCLEAF && item.DeviceNo-1 < used.Length) used[item.DeviceNo-1]=true;
+                if (item.DeviceType==EDeviceType.dev_stepper && !RxGlobals.PrintSystem.IsCLEAF && item.DeviceNo<=STEPPER_CNT) used[item.DeviceNo-1]=true;
             }
             for (int i=0; i<STEPPER_CNT; i++) _RefDone[i].Visibility = used[i]? Visibility.Visible : Visibility.Collapsed;
         }

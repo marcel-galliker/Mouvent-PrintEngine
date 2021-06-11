@@ -177,8 +177,11 @@ namespace rx_CamLib
 				_Camera.NumExtraErodes=3;
 				_Camera.SetLineAspectLimit(5);
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-				if (first) _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 1,  0,  0);
-				else       _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
+				ENCamResult result;
+				if (first) result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 1,  0,  0);
+				else       result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
+				if (result!=ENCamResult.OK)
+					Console.WriteLine("CamResult={0}", result.ToString());
 			});
 			return RxCam.ENCamResult.OK;
 		}

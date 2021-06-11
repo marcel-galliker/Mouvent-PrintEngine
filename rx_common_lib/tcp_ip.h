@@ -725,7 +725,8 @@ typedef struct
 typedef struct
 {
 	SMsgHdr     hdr;
-	INT32	    pos;    
+	INT32	    pos;
+	INT32		speed;
 } SetupAssist_MoveCmd;
 
 

@@ -216,7 +216,7 @@ namespace rx_CamLib.Models
 
         //Execute Measures
         [PreserveSig]
-        bool DoMeasures(UInt32 NumMeasures, UInt32 TO_1st, UInt32 TO_End);
+        int DoMeasures(UInt32 NumMeasures, UInt32 TO_1st, UInt32 TO_End);
 
         //Read Correction List
         [PreserveSig]
