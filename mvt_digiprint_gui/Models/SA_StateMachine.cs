@@ -215,9 +215,7 @@ namespace RX_DigiPrint.Models
 				{
 					Function = ECamFunction.CamConfirmFocus,
 					Name="Confirm",
-				//	WebMoveDist = 12.0,
 					WebMoveDist = 0,
-				//	WebPos = 12.0
 					WebPos = 0
 				});
 			}
@@ -329,9 +327,8 @@ namespace RX_DigiPrint.Models
 					{
 						Function = ECamFunction.CamConfirmFocus,
 						Name="Confirm",
-					//	WebMoveDist = 12.0,
 						WebMoveDist = 0,
-						WebPos = 12.0
+						WebPos = 0
 					});
 				}
 			}
@@ -367,7 +364,7 @@ namespace RX_DigiPrint.Models
 					{
 						SA_Action action=new SA_Action()
 						{
-							WebMoveDist = (d==0)? px2mm(144) : px2mm(400),
+							WebMoveDist = (d==0)? px2mm(280) : px2mm(400),
 							PrintbarNo	= color,
 							StepperNo   = color/2,
 							HeadNo		= n,
@@ -697,7 +694,7 @@ namespace RX_DigiPrint.Models
 					else
 					{
 						_Action.ScanMoveDone=false;
-						RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+_DensitiyDist[_Action.MeasureCnt % _DensitiyDist.Length]);
+						RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+px2mm(_DensitiyDist[_Action.MeasureCnt % _DensitiyDist.Length]));
 					}
 				}
 			}
@@ -919,6 +916,11 @@ namespace RX_DigiPrint.Models
 		private void _CamConfirmFocus_start()
 		{
 			if (_Confirmed) ActionDone();
+			else if (_AssistMode == ENAssistMode.density)
+			{
+				_Action.ScanMoveDone=true;
+				_Action.WebMoveDone =true;
+			}
 		}
 
 		//--- _CamMeasureAngle_start ----------------------------------------------
@@ -984,10 +986,12 @@ namespace RX_DigiPrint.Models
 		private void _I1Measure_start()
 		{
 			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
-			_Action.ScanMoveDone = true;
-			_Action.WebMoveDone  = true;
 			_DensityResult = new List<ColorConversion.SpectroResultStruct>();
-			_StartCamFunction();
+			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
+		//	_Action.ScanMoveDone = true;
+		//	_Action.WebMoveDone  = true;
+		//	_StartCamFunction();
 		}
 
 		//--- _CamMeasureAngle_done -----------------------------
@@ -1087,12 +1091,15 @@ namespace RX_DigiPrint.Models
 
 			case ECamFunction.CamConfirmFocus: // _ScanMoveDone
 					Console.WriteLine("Action[{0}].CamConfirmFocus, ScanPos={1}", _ActionIdx, RxGlobals.SetupAssist.ScanPos);
+					/*
 					if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
 					{
 						_Action.ScanMoveDone=false;
 						RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 					}
-					else _Action.ConfirmVisibile = true;
+					else 
+					*/
+					_Action.ConfirmVisibile = true;
 					break;
 
 			case ECamFunction.CamMeasureAngle: // _ScanMoveDone
@@ -1254,6 +1261,7 @@ namespace RX_DigiPrint.Models
 						break;
 
 					case ECamFunction.CamConfirmFocus:
+						_Action.ConfirmVisibile = true;
 						_CamFunctions.MeasureAngle(false);
 						break;
 
