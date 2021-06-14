@@ -1223,7 +1223,7 @@ void ink_tick_10ms(void)
 				_InkSupply[isNo].degassing = FALSE;
 				_set_air_valve(isNo, PV_OPEN);
 				_set_bleed_valve(isNo, PV_CLOSED);
-				_FillPressure = pRX_Config->headsPerColor * 50;
+				_FillPressure = pRX_Config->headsPerColor * 70;
 				if(_FillPressure < 100) _FillPressure = 100;
 				if(_FillPressure > 1000) _FillPressure = 1000;
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_fill;
