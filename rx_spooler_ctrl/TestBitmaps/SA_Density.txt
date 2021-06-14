@@ -6,4 +6,5 @@ Convert 8-Bit BMP to FLZ:
 - menu: Image / Information: Change to 1200x1200 DPI
 - Menu: Image / Concert to Grayscale
 - Menu: Save as ...   TIF, all options on
+- cd F:\Tools\Mouvent\MvtFlzConverter
 - MvtFlzConverter.exe C:\Develop\PrintEngine-Master-1.5-WB\bin\spooler\SA_Density.tif

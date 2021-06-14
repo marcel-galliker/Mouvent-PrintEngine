@@ -2,12 +2,13 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="" key="selection"/>
+		<item value="_ctrl_addr" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="_ctrl_addr"/>
 			<item value="APP_SECTOR"/>
 			<item value="APP_START"/>
 			<item value="init"/>
@@ -15,7 +16,6 @@
 			<item value="APP_TO_FLASH"/>
 			<item value="memc"/>
 			<item value="DBG_CMDF2P1"/>
-			<item value="f2p1"/>
 		</list>
 		<list key="replacehistory">
 			<item value="network_send_ctrl_msg"/>
