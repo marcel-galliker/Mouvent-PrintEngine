@@ -52,7 +52,8 @@ namespace RX_DigiPrint.Models
 
 		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
 //		private readonly int[]	 _DensitiyDist   = { 42, 42, 108, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 108, 42, 42};
-		private readonly int[]	 _DensitiyDist   = { 108, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 108, 42, 42};
+		private readonly int[]	 _DensitiyDist   = { 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64,  48+32, 48, 48, 48+32};
+		private int				 _Jet;
 		private List<ColorConversion.SpectroResultStruct> _DensityResult;
 
 		private int				_HeadsPerColor=4;
@@ -345,11 +346,11 @@ namespace RX_DigiPrint.Models
 				});
 			}
 
-			int dist=0;
-			for (n=0; n<_DensitiyDist.Length; n++)
+			_Jet=128+64;
+			for (n=0; n<2*_DensitiyDist.Length; n++)
 			{
-				dist+=_DensitiyDist[n];
-				Console.WriteLine("DsnsityDist cnt={0:F00}, dist={1:F000}, jet={2:F0000}", n, _DensitiyDist[n], dist);
+				Console.WriteLine("DensityDist[{0:F00}] dist={1:F000}, jet={2:F0000}, jet={3:F000} ", n+3, _DensitiyDist[n%_DensitiyDist.Length], _Jet, _Jet%2048);
+				_Jet+=_DensitiyDist[n%_DensitiyDist.Length];
 			}
 
 			//--- measurmentfunctions -----------------------------
@@ -367,7 +368,7 @@ namespace RX_DigiPrint.Models
 							WebMoveDist = (d==0)? px2mm(280) : px2mm(400),
 							PrintbarNo	= color,
 							StepperNo   = color/2,
-							HeadNo		= n,
+							HeadNo		= d,
 							Function	= ECamFunction.I1Measure,
 							Name		= String.Format(" {0} {1}%",  colorName, _DensitiyLevels[d]),
 						};						
@@ -375,7 +376,6 @@ namespace RX_DigiPrint.Models
 					}
 				}
 			}
-
 			_DistStepCnt = 0;
 			_ActionIdx	 = 0;
 			_HeadNo		 = 0;
@@ -674,7 +674,9 @@ namespace RX_DigiPrint.Models
 		//--- _I1Calibrate_done --------------------------------
 		private void _I1Calibrate_done(bool ok)
 		{
-			ActionDone();
+			if (RxGlobals.I1Pro3.IsWhiteCalibrated)	
+				ActionDone();
+			else Abort();
 		}
 
 		//--- _I1Measure_done --------------------------------
@@ -694,7 +696,9 @@ namespace RX_DigiPrint.Models
 					else
 					{
 						_Action.ScanMoveDone=false;
-						RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos+px2mm(_DensitiyDist[_Action.MeasureCnt % _DensitiyDist.Length]));
+						Console.WriteLine("_I1Measure_done: cnt={0}, jet={1}, idx={2}, dist={3}", _Action.MeasureCnt, _Jet, (_Action.MeasureCnt-1) % _DensitiyDist.Length, _DensitiyDist[_Action.MeasureCnt % _DensitiyDist.Length]);
+						_Jet += _DensitiyDist[(_Action.MeasureCnt-1) % _DensitiyDist.Length];
+						RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos+px2mm(_Jet), 500);
 					}
 				}
 			}
@@ -987,11 +991,9 @@ namespace RX_DigiPrint.Models
 		{
 			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
 			_DensityResult = new List<ColorConversion.SpectroResultStruct>();
-			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+			_Jet=128+64;
+			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos+px2mm(_Jet));
 			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
-		//	_Action.ScanMoveDone = true;
-		//	_Action.WebMoveDone  = true;
-		//	_StartCamFunction();
 		}
 
 		//--- _CamMeasureAngle_done -----------------------------
@@ -1074,7 +1076,7 @@ namespace RX_DigiPrint.Models
 							switch(action.Function)
 							{
 								case ECamFunction.CamMeasureAngle:  RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos + _CallbackData.DPosX/1000); idx=1000; break;
-								case ECamFunction.I1Measure:  action.ScanPos = RxGlobals.SetupAssist.ScanStopPos + _CallbackData.DPosX/1000 - px2mm(97); break;
+								case ECamFunction.I1Measure:  action.ScanPos = RxGlobals.SetupAssist.ScanPos + _CallbackData.DPosX/1000 - px2mm(286); break;
 								default: break;
 							}
 						}
