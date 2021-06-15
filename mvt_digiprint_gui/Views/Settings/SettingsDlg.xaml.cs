@@ -91,8 +91,8 @@ namespace RX_DigiPrint.Views.Settings
             FactoryNework.Visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
             WlanButton.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
             WinScpButton.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
-            NetworkCommands.SetValue(Grid.ColumnSpanProperty, RxGlobals.User.UserType >= EUserType.usr_engineer ? 1 : 2); 
-            WindowsCommands.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
+            ShutdownCommand.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
+            WindowsUpdateCommand.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
             if (RxGlobals.User.UserType != _UserType) IpAddress.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_engineer;
             if (RxGlobals.User.UserType != _UserType) FactoryNework.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_engineer;
         }

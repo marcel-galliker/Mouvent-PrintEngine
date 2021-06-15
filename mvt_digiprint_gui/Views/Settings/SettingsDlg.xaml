@@ -137,12 +137,12 @@
             </StackPanel>
         </GroupBox>
 
-        <GroupBox x:Name="WindowsCommands" Grid.Row="1" Grid.Column="1" Header="{mvt:LocalizedBinding WindowsCommands}" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
+        <GroupBox Grid.Row="1" Grid.Column="1" Header="{mvt:LocalizedBinding WindowsCommands}" Style="{StaticResource MvtGroupBox}" Margin="10,10,10,0">
             <StackPanel HorizontalAlignment="Center" >
                 <Button Content="{mvt:LocalizedBinding RestartMain}"   Click="RestartMain_Clicked" Margin="0, 10, 0, 10" Style="{StaticResource Mouvent.StandardButton}"/>
                 <Button Content="{mvt:LocalizedBinding RestartGui}"    Click="RestartGUI_Clicked" Margin="0, 0, 0, 10"  Style="{StaticResource Mouvent.StandardButton}"/>
-                <Button Content="{mvt:LocalizedBinding ShutDownGui}"  Click="ShutDown_Clicked" Margin="0, 0, 0, 10"   Style="{StaticResource Mouvent.StandardButton}"/>
-                <Button Content="{mvt:LocalizedBinding WindowsUpdate}" Click="Update_Clicked" Margin="0, 0, 0, 10"     Style="{StaticResource Mouvent.StandardButton}"/>
+                <Button x:Name="ShutdownCommand" Content="{mvt:LocalizedBinding ShutDownGui}"  Click="ShutDown_Clicked" Margin="0, 0, 0, 10"   Style="{StaticResource Mouvent.StandardButton}"/>
+                <Button x:Name="WindowsUpdateCommand" Content="{mvt:LocalizedBinding WindowsUpdate}" Click="Update_Clicked" Margin="0, 0, 0, 10"     Style="{StaticResource Mouvent.StandardButton}"/>
             </StackPanel>
         </GroupBox>
 
