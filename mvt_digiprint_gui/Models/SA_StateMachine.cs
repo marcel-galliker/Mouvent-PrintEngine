@@ -51,10 +51,11 @@ namespace RX_DigiPrint.Models
 		private bool[]			 _RobotRunning= new bool[4];
 
 		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
-//		private readonly int[]	 _DensitiyDist   = { 42, 42, 108, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 108, 42, 42};
-		private readonly int[]	 _DensitiyDist   = { 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64,  48+32, 48, 48, 48+32};
+//		private readonly int[]	 _DensitiyDist   = { 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64,  48+32, 48, 48, 48+32};
+		private readonly int[]	 _DensitiyDist   = { 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64,  104, 48, 104};
 		private int				 _Jet;
 		private List<ColorConversion.SpectroResultStruct> _DensityResult;
+		private List<List<ColorConversion.SpectroResultStruct>> _DensityResults = new List<List<ColorConversion.SpectroResultStruct>>();
 
 		private int				_HeadsPerColor=4;
 
@@ -671,16 +672,16 @@ namespace RX_DigiPrint.Models
 			callbackMutex.ReleaseMutex();
 		}
 
-		//--- _I1Calibrate_done --------------------------------
-		private void _I1Calibrate_done(bool ok)
+		//--- _I1Calibrated --------------------------------
+		private void _I1Calibrated(bool ok)
 		{
 			if (RxGlobals.I1Pro3.IsWhiteCalibrated)	
 				ActionDone();
 			else Abort();
 		}
 
-		//--- _I1Measure_done --------------------------------
-		private void _I1Measure_done(ColorConversion.SpectroResultStruct result)
+		//--- _I1Measured --------------------------------
+		private void _I1Measured(ColorConversion.SpectroResultStruct result)
 		{
 			if (_Action!=null)
 			{
@@ -688,7 +689,7 @@ namespace RX_DigiPrint.Models
 				_Action.Measured(result.CieLab.L);
 				if (_Action.MeasureCnt==_HeadsPerColor*_DensitiyDist.Length-2)
 				{
-					ActionDone();
+					_I1Measure_done();
 				}
 				else
 				{
@@ -696,7 +697,7 @@ namespace RX_DigiPrint.Models
 					else
 					{
 						_Action.ScanMoveDone=false;
-						Console.WriteLine("_I1Measure_done: cnt={0}, jet={1}, idx={2}, dist={3}", _Action.MeasureCnt, _Jet, (_Action.MeasureCnt-1) % _DensitiyDist.Length, _DensitiyDist[_Action.MeasureCnt % _DensitiyDist.Length]);
+						Console.WriteLine("_I1Measured: cnt={0}, jet={1}, idx={2}, dist={3}", _Action.MeasureCnt, _Jet, (_Action.MeasureCnt-1) % _DensitiyDist.Length, _DensitiyDist[_Action.MeasureCnt % _DensitiyDist.Length]);
 						_Jet += _DensitiyDist[(_Action.MeasureCnt-1) % _DensitiyDist.Length];
 						RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos+px2mm(_Jet), 500);
 					}
@@ -996,6 +997,63 @@ namespace RX_DigiPrint.Models
 			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
 		}
 
+		//--- _I1Measure_done ----------------------------------------------------
+		private void _I1Measure_done()
+		{
+			_DensityResults.Add(_DensityResult);
+			if (_DensityResults.Count==_DensitiyLevels.Length)
+			{
+				DensityCalc calc = new DensityCalc();
+
+				InkType ink = RxGlobals.InkSupply.List[_Action.PrintbarNo*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
+				bool isYellow = (ink.ColorCode==3);
+				List<List<int>> currentDensityList = new List<List<int>>();
+				List<List<int>> newDensityList;
+				List<List<double>> deList;
+				List<List<double>> deList12;
+
+				//--- prepare ---------------------------------
+				for (int head=0; head<_HeadsPerColor; head++)
+				{
+					List<int> values = new List<int>();
+					HeadStat stat = RxGlobals.HeadStat.List[_Action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor + head];
+					foreach(short val in stat.DensityValue) values.Add((int)val);
+					currentDensityList.Add(values);
+				}
+
+				//--- calculate ----------------------
+				ColorConversion.CieLabStruct[] avg = calc.CalcAverageCie(_DensityResults, isYellow);
+				deList		   = calc.CalcWeightedDeList(_DensityResults, avg, isYellow);
+				deList12	   = calc.CalcAverageTo12Points(deList, _HeadsPerColor);
+				newDensityList = calc.CalcNewDensities(_HeadsPerColor, currentDensityList, deList12);
+
+				//--- save ----------------------------------------------------------
+				for (int head=0; head<RxGlobals.PrintSystem.HeadsPerColor; head++)
+				{
+					HeadStat stat = RxGlobals.HeadStat.List[_Action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor + head];
+
+					TcpIp.SDensityMsg msg = new TcpIp.SDensityMsg();
+
+					RxGlobals.DisabledJets.Save(ref msg);
+					RxGlobals.Density.Save(ref msg);
+					int cnt = newDensityList[0].Count;
+					msg.head = _Action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor + head;
+					msg.data.voltage		= stat.Voltage;
+					msg.data.disabledJets	= stat.DisabledJets;
+					msg.data.densityValue	= new Int16[cnt];
+
+					for (int i = 0; i < cnt; i++)
+					{
+						stat.DensityValue[i]     = (short)newDensityList[head][i];
+						msg.data.densityValue[i] = (short)newDensityList[head][i];
+					}
+
+					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_DENSITY, ref msg);
+				}
+			}
+			ActionDone();
+		}
+
 		//--- _CamMeasureAngle_done -----------------------------
 		private void _CamMeasureAngle_done()
 		{
@@ -1289,11 +1347,11 @@ namespace RX_DigiPrint.Models
 						break;
 
 					case ECamFunction.I1Calibrate:
-						RxGlobals.I1Pro3.WhiteCalibrate(_I1Calibrate_done);						
+						RxGlobals.I1Pro3.WhiteCalibrate(_I1Calibrated);						
 						break;
 
 					case ECamFunction.I1Measure:
-						RxGlobals.I1Pro3.MeasurePoint(_I1Measure_done);
+						RxGlobals.I1Pro3.MeasurePoint(_I1Measured);
 						break;
 
 					default: 

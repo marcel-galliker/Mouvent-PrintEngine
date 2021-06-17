@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 namespace RX_DigiPrint.Devices
 {
-    public partial class ColorConversion
+//    public partial class ColorConversion
+    public class ColorConversion
     {
         public struct CmykStruct
         {

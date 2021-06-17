@@ -351,6 +351,7 @@
     <Compile Include="Converters\UvLampImg_Converter.cs" />
     <Compile Include="Converters\WlanQuality_Converter.cs" />
     <Compile Include="Devices\ColorConversions.cs" />
+    <Compile Include="Devices\DensityCalc.cs" />
     <Compile Include="Devices\i1Pro3.cs" />
     <Compile Include="External\FastBitmap.cs" />
     <Compile Include="External\QuadDistort.cs" />
