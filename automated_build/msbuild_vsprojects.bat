@@ -138,7 +138,6 @@ REM ----------------------------------------------------------------------------
 	call :BUILD_PROJECT mvt_digiprint_gui, sln
 	call :BUILD_PROJECT mvt_service, sln
 	set TARGETS=/t:Build
-	call :BUILD_PROJECT Win10-Install, vcxproj, Win10\
 	call :BUILD_PROJECT Win10-Startup, vcxproj, Win10\
 	goto :EOF
 REM ----------------------------------------------------------------------------

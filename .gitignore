@@ -91,3 +91,4 @@ version.c
 /bin/gui/*.ppk
 /printed/*.bmp
 Stored_Data/
+/Win10/InstallUI/Release

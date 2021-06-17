@@ -34,7 +34,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnClose();
 	afx_msg void StartGui();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 
@@ -44,8 +43,6 @@ private:
 
 private:
 	CProgressCtrl m_progress;
-	bool m_started;
-	bool m_connected;
 	CStatic m_loading;
 	CButton IDB_Local;
 

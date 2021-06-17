@@ -139,6 +139,4 @@ bin\win\rx_spooler_ctrl.exe
 bin\win\TBarCode11_x64.dll
 bin\win\cudart64_102.dll
 bin\win10
-bin\win10\msvcr120.dll
-bin\win10\Win10-Install.exe
 bin\win10\Win10-Startup.exe

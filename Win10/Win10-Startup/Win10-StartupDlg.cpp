@@ -31,7 +31,6 @@
 
 #define LOCAL_GUI_DIR		"c:\\gui_\\"
 #define GUI_EXE				"RX_DigiPrint.exe"
-#define REMOTE				false
 
 int		_startup_time;
 int		_delay_time;
@@ -48,8 +47,6 @@ CWin10StartupDlg::CWin10StartupDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CWin10StartupDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_started = false;
-	m_connected = false;
 }
 
 void CWin10StartupDlg::DoDataExchange(CDataExchange* pDX)
@@ -134,76 +131,6 @@ int rx_process_execute(const char *process, const char *outPath, int timeout)
 	return code;
 }
 
-//--- rx_popen ---------------------------------------------------------
-HANDLE rx_popen(const char *cmd)
-{
-	SECURITY_ATTRIBUTES		sa;
-	STARTUPINFOA			startuopInfo;
-	PROCESS_INFORMATION		processInfo;
-	HANDLE					stream_rd = NULL;
-	HANDLE					stream_wr = NULL;
-	int		ret;
-	 
-	//--- create the pipe -------------------
-	sa.nLength = sizeof(SECURITY_ATTRIBUTES); 
-	sa.bInheritHandle = TRUE; 
-	sa.lpSecurityDescriptor = NULL; 
-
-	if ( !CreatePipe(&stream_rd, &stream_wr, &sa, 0) ) 
-	{
-		printf("StdoutRd CreatePipe"); 
-		return NULL;
-	}
-
-	if ( !SetHandleInformation(stream_rd, HANDLE_FLAG_INHERIT, 0) )
-	{
-		printf("Stdout SetHandleInformation"); 
-		return NULL;
-	}
-
-	//--- create the process ----------------------------------
-	memset(&startuopInfo, 0, sizeof(startuopInfo));
-	startuopInfo.cb			= sizeof(startuopInfo);
-	startuopInfo.dwFlags	= STARTF_USESTDHANDLES;
-	startuopInfo.hStdOutput = stream_wr;
-	startuopInfo.hStdError  = stream_wr;
-
-	ret = CreateProcessA(NULL, (char*)cmd, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS | CREATE_NO_WINDOW, NULL, NULL, &startuopInfo, &processInfo);
-
-	CloseHandle(stream_wr);
-	CloseHandle(processInfo.hProcess);
-    CloseHandle(processInfo.hThread);
-	return stream_rd;
-}
-
-//--- rx_process_running_cnt --------------------------------------
-int rx_process_running_cnt(const char *process, const char *arg)
-{
-	int start, count=0;
-	DWORD len;
-	HANDLE file;
-	char str[100];
-
-	for (start = (int)strlen(process); start > 0; start--)
-	{
-		if (process[start] == '\\' || process[start] == '/')
-		{
-			start++;
-			break;
-		}
-	}
-
-	file = rx_popen("tasklist.exe");
-	if (file)
-	{
-		while (ReadFile( file, str, sizeof(str), &len, NULL))
-		{
-			if (strstr(str, &process[start])) count++;
-		}
-		CloseHandle(file);
-	}
-	return count;
-}
 
 //--- _checkPower ------------------------------
 void CWin10StartupDlg::CheckPower()
@@ -285,54 +212,33 @@ void CWin10StartupDlg::BackgroundThread(void *par)
 
 	CWin10StartupDlg	*pdlg = (CWin10StartupDlg*)par;
 
-	HANDLE	stream_rd;
 	char	cmd[100];
 	char	buf[256];
-	DWORD	len;
-	int		ret;
 
-	ret = rx_process_running_cnt(GUI_EXE, NULL);
-	if (ret>0) pdlg->m_started=true;
-
-	sprintf(cmd, "ping -t %s", _HostName);
-	stream_rd = rx_popen(cmd);
+	int pos = 0;
 
 	while (m_BackgroundThreadRunning)
 	{
 		memset(buf, 0, sizeof(buf));
-		if (ReadFile( stream_rd, buf, sizeof(buf), &len, NULL))
+		pdlg->m_progress.SetPos(pos++);
+		if (pos > _delay_time)
+		{
+			pdlg->m_progress.SetBarColor(RGB(255, 0, 0));
+		}
+		sprintf(cmd, "ping -w 1000 -n 1 %s", _HostName);
+		if (rx_process_execute(cmd, NULL, 0) == 0)
 		{
 			CheckPower();
 			OutputDebugStringA(buf);
-			if (strstr(buf, "Request timed out"))
-			{
-				if (pdlg->m_connected)
-				{
-					pdlg->m_connected = false;
-					sprintf(cmd, "net use \"\\\\%s\\gui\" /DELETE", _HostName);
-					ret = rx_process_execute(cmd, NULL, 1000);
-				}
-			}
-			else if (strstr(buf, "Reply from"))
-			{
-				if (!pdlg->m_connected)
-				{
-					sprintf(cmd, "net.exe use \\\\%s\\gui /USER:%s %s", _HostName, USER, PASSWORD);
-					ret = rx_process_execute(cmd, NULL, 1000);
-					pdlg->m_connected = (ret==0);
-				}
-			}
-			if (pdlg->m_connected && !pdlg->m_started)
-			{
-				//--- copy directory ---
-				char *dst_dir=LOCAL_GUI_DIR;
-				sprintf(cmd, "md %s", dst_dir);
-				rx_process_execute(cmd, NULL, 0);
+			pdlg->m_loading.SetWindowText(L"Connected");
+			//--- copy directory ---
+			char *dst_dir=LOCAL_GUI_DIR;
+			sprintf(cmd, "md %s", dst_dir);
+			rx_process_execute(cmd, NULL, 0);
 
-				sprintf(cmd, "xcopy \"\\\\%s\\gui\" %s /I /R /Y /S", _HostName, dst_dir);
-				rx_process_execute(cmd, NULL, 0);
-				pdlg->StartGui();
-			}
+			sprintf(cmd, "xcopy \"\\\\%s\\gui\" %s /I /R /Y /S", _HostName, dst_dir);
+			if (rx_process_execute(cmd, NULL, 0) == 0) pdlg->StartGui();
+
 		}
 	};
 }
@@ -420,67 +326,17 @@ HCURSOR CWin10StartupDlg::OnQueryDragIcon()
 //--- StartGui -------------------------------------
 void CWin10StartupDlg::StartGui()
 {
-	int pos = m_progress.GetPos();
-	rx_process_start(LOCAL_GUI_DIR GUI_EXE, NULL);
-	m_loading.SetWindowText(L"Starting");
-	m_loading.Invalidate();
-	m_progress.SetBarColor(CLR_DEFAULT);
-	m_progress.SetRange(0, STARTUP_TIME_REMOTE);
-	m_started = TRUE;
-}
-
-//--- OnTimer ---------------------------------------
-void CWin10StartupDlg::OnTimer(UINT_PTR nIDEvent)
-{
-	// TODO: Add your message handler code here and/or call default
-
-	CDialogEx::OnTimer(nIDEvent);
-
-	if (nIDEvent == 1)
+	if (rx_process_start(LOCAL_GUI_DIR GUI_EXE, NULL))
 	{
-		int pos = m_progress.GetPos();
-		CheckPower();
-		if (REMOTE)
-		{
-			char cmd[256];
-			sprintf(cmd, "net.exe use \\\\%s\\gui /USER:%s %s", _HostName, USER, PASSWORD);
-//			ret= rx_process_execute(cmd, "c:/radex/trace.txt", 1000);	
-			int ret= rx_process_execute(cmd, NULL, 1000);
-			if (ret==0 && !m_started) 
-			{
-				//--- start binary on main PC --------------------------
-				//	sprintf(cmd, "\\\\%s\\gui\\RX_DigiPrint.exe", _HostName);
-				//	ret = rx_process_start(cmd, NULL);
-
-				//--- copy directory ---
-				char *dst_dir=LOCAL_GUI_DIR;
-				sprintf(cmd, "md %s", dst_dir);
-				rx_process_execute(cmd, NULL, 0);
-
-				sprintf(cmd, "xcopy \"\\\\%s\\gui\" %s /I /R /Y", _HostName, dst_dir);
-				rx_process_execute(cmd, NULL, 0);
-				StartGui();
-			}
-			else if (pos>_delay_time)
-			{					
-				m_progress.SetBarColor(RGB(255,0,0));
-			}
-			else
-			{
-				sprintf(cmd, "cmd /C net use \"\\\\%s\\gui\" /DELETE", _HostName);
-				ret= rx_process_execute(cmd, NULL, 1000);
-//				system(cmd);
-			}
-		}
-		else
-		{
-			if (pos==_delay_time) rx_process_start("d:\\radex\\bin\\gui\\RX_DigiPrint.exe", NULL);
-	//		if (pos==_delay_time+_startup_time)  EndDialog(0);
-		}
-
-		m_progress.SetPos(pos+1);
+		m_loading.SetWindowText(L"Starting");
+		m_loading.Invalidate();
+		m_progress.SetBarColor(CLR_DEFAULT);
+		m_progress.SetPos(_delay_time);
+		m_progress.Invalidate();
+		m_BackgroundThreadRunning = false;
 	}
 }
+
 
 //--- OnBnClicked_StartLocal -----------------------------
 void CWin10StartupDlg::OnBnClicked_StartLocal()
