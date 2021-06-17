@@ -49,6 +49,7 @@ namespace RX_DigiPrint.Models
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
+		private bool			 _Adjusted;
 
 		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
 //		private readonly int[]	 _DensitiyDist   = { 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64,  48+32, 48, 48, 48+32};
@@ -77,6 +78,7 @@ namespace RX_DigiPrint.Models
 			if (_SimuCamera) _CamFunctions.SimuCallback	+= CallBackfromCam;
 		}
 
+		//--- SA_StateMachine_PropertyChanged --------------------------------------
 		private void SA_StateMachine_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
 			for (int no=0; no<RxGlobals.StepperStatus.Length; no++)
@@ -136,6 +138,7 @@ namespace RX_DigiPrint.Models
 						}
 						else
 						{
+							_Adjusted = true;
 							_RobotRunning[stepperNo] = true;
 
 							action.State	= ECamFunctionState.runningRob;
@@ -181,6 +184,7 @@ namespace RX_DigiPrint.Models
 			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
 			_AssistMode = ENAssistMode.align;
+			_Adjusted   = false;
 
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
@@ -293,6 +297,7 @@ namespace RX_DigiPrint.Models
 			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
 			_AssistMode = ENAssistMode.density;
+			_Adjusted	= false;
 
 			_Actions = new List<SA_Action>();
 			if (_SimuMachine==false)
@@ -793,12 +798,27 @@ namespace RX_DigiPrint.Models
 				if (_Action.State!=ECamFunctionState.waitRob && _Action.State!=ECamFunctionState.runningRob) 
 					_Action.State = ECamFunctionState.done;
 				if (_Debug && _Action!=_Actions.Last()) CanContinue = true;
+
+				ECamFunction function=_Action.Function;
+				_Action = null;
+				_ActionIdx++;
+				if (_ActionIdx<_Actions.Count())
 				{
-					_Action = null;
-					_ActionIdx++;
-					if (_ActionIdx<_Actions.Count()) _StartAction();
-					else RxGlobals.SetupAssist.ScanReference();
+					if (_Actions[_ActionIdx].Function==function)
+					{
+						_StartAction();
+						return;
+					}
+					else if (_Adjusted)
+					{
+						RxGlobals.SetupAssist.ScanReference();
+						Start();
+						return;
+					}
+					_StartAction();
+					return;
 				}
+				RxGlobals.SetupAssist.ScanReference();
 			}
 		}
 		
@@ -1009,8 +1029,6 @@ namespace RX_DigiPrint.Models
 				bool isYellow = (ink.ColorCode==3);
 				List<List<int>> currentDensityList = new List<List<int>>();
 				List<List<int>> newDensityList;
-				List<List<double>> deList;
-				List<List<double>> deList12;
 
 				//--- prepare ---------------------------------
 				for (int head=0; head<_HeadsPerColor; head++)
@@ -1023,8 +1041,8 @@ namespace RX_DigiPrint.Models
 
 				//--- calculate ----------------------
 				ColorConversion.CieLabStruct[] avg = calc.CalcAverageCie(_DensityResults, isYellow);
-				deList		   = calc.CalcWeightedDeList(_DensityResults, avg, isYellow);
-				deList12	   = calc.CalcAverageTo12Points(deList, _HeadsPerColor);
+				List<List<double>>	deList		   = calc.CalcWeightedDeList(_DensityResults, avg, isYellow);
+				List<List<double>>	deList12	   = calc.CalcAverageTo12Points(deList, _HeadsPerColor);
 				newDensityList = calc.CalcNewDensities(_HeadsPerColor, currentDensityList, deList12);
 
 				//--- save ----------------------------------------------------------
