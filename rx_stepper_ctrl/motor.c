@@ -224,6 +224,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 
     int min;
 	int min_speed_hz;
+	int ratio=Fpga.par->cfg[motor].enc_mot_ratio;
 	if (Fpga.par->cfg[motor].enc_mot_ratio<100000)
 	{
 		//--- special for setup assist scanner -----------
@@ -238,7 +239,8 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 
     if (speed<min_speed_hz+min) 
     {
-        if (speed<1000 && microsteps!=MICROSTEPS && (!RX_StepperStatus.robot_used || motor != 4)) Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
+        if (speed<1000 && microsteps!=MICROSTEPS && (!RX_StepperStatus.robot_used || motor != 4)) 
+			Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
 		if (Fpga.par->cfg[motor].enc_mot_ratio>100000)
 			minSpeed = speed-min;
         if (minSpeed <= 0) minSpeed = speed;

@@ -162,8 +162,6 @@ namespace RX_DigiPrint.Models
 			Console.WriteLine("{0} SCAN MOVE [{1}] FROM {2} TO {3}", RxGlobals.Timer.Ticks(), _ScanMoveCnt+1, ScanPos, pos);
 			cmd.pos = (int)(1000.0*pos);
 			cmd.speed = speed;
-			if (cmd.pos==1200)
-				Console.WriteLine("Test");
 			if (_Simu) _OnScanMoveDone();
 			else RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_MOVE, ref cmd);
 		}

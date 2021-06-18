@@ -93,7 +93,8 @@ static int  _incs_2_micron(int incs);
 void lb702_init(void)
 {
 #ifdef DEBUG
-	RX_StepperStatus.robot_used = (RX_StepperCfg.printerType==printer_LB702_WB);
+//	RX_StepperStatus.robot_used = (RX_StepperCfg.printerType==printer_LB702_WB);
+	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
 #else
 	RX_StepperStatus.robot_used = fpga_input(ROBOT_USED_IN);
 #endif

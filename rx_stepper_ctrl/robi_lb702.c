@@ -465,6 +465,8 @@ void robi_lb702_display_status(void)
 	
 	if (robi_is_init() == FALSE)
 		return;
+
+     if (!robi_connected()) return;
 	
 	term_printf("\n");
 	term_printf("Robi system status ---------------------------------\n");

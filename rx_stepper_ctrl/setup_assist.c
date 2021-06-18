@@ -324,7 +324,7 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 
     case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SCAN");
 									TrPrintfL(TRUE, "CMD_SA_MOVE");
-									if ((pcmd->pos!=_ScanPos_Act || !RX_StepperStatus.info.ref_done))
+								//	if ((pcmd->pos!=_ScanPos_Act || !RX_StepperStatus.info.ref_done))
 									{
 										_ScanPos_New = pcmd->pos;
 										_ScanSpeed   = pcmd->speed;

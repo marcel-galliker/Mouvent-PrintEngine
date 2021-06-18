@@ -999,7 +999,7 @@ void rc_display_status(void)
 	{
 		term_printf("Downloading: v=%d.%d.%d.%d %d/%d\n", _FileVersion.major, _FileVersion.minor, _FileVersion.revision, _FileVersion.build, _FilePos, _FileSize);
 	}
-	else
+	else if (_Connected)
 	{
 		// GPIO information
 		term_printf("Inputs:    ");

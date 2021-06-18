@@ -35,7 +35,9 @@ namespace RX_DigiPrint.Models
 		private List<SA_Action>  _Actions;
 		private int				 _ActionIdx;
 		private SA_Action		 _Action;
+		private int[]			 _StitchIdxes=new int[8];
 		private int				 _StitchIdx;
+		private int[]			 _DistIdxes=new int[8];
 		private int				 _DistIdx;
 		private int				 _HeadNo;
 		private readonly double  _FindPos		= 20.0;
@@ -58,7 +60,7 @@ namespace RX_DigiPrint.Models
 		private List<ColorConversion.SpectroResultStruct> _DensityResult;
 		private List<List<ColorConversion.SpectroResultStruct>> _DensityResults = new List<List<ColorConversion.SpectroResultStruct>>();
 
-		private int				_HeadsPerColor=4;
+		private int				_HeadsPerColor=2;
 
 		public SA_StateMachine()
 		{
@@ -138,6 +140,10 @@ namespace RX_DigiPrint.Models
 						}
 						else
 						{
+							action.State	= ECamFunctionState.done;
+							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, axis={1}, steps={2} NOT STARTING (Development)", msg.headNo, msg.steps, msg.steps)));
+							break;
+
 							_Adjusted = true;
 							_RobotRunning[stepperNo] = true;
 
@@ -188,50 +194,52 @@ namespace RX_DigiPrint.Models
 
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
-
-			_Actions.Add(new SA_Action()
-			{
-				Function = ECamFunction.CamFindLines_Vertical,
-				Name="Find 3 Vert Lines",
-				ScanPos	= _FindPos,
-			});
-
-			_Actions.Add(new SA_Action()
-			{
-				Function = ECamFunction.CamFindLine_Horzizontal,
-				Name="Find Horiz Line",
-				WebMoveDist = 0,
-				ScanPos	    = _FindPos,
-			});
-
-			_Actions.Add(new SA_Action()
-			{
-				Function = ECamFunction.CamFindFirstAngle,
-				Name="Find First Angle",
-			//	WebMoveDist = 12.0,
-			//	WebPos		= 12.0,
-				WebMoveDist = 0,
-				WebPos		= 0,
-				ScanPos	    = _FindPos,
-			});
-
-			if (!_Confirmed)
-			{
-				_Actions.Add(new SA_Action()
-				{
-					Function = ECamFunction.CamConfirmFocus,
-					Name="Confirm",
-					WebMoveDist = 0,
-					WebPos = 0
-				});
-			}
-
 			//--- measurmentfunctions -----------------------------
 			for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
 			{
 				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
 				if (ink!=null)
 				{
+					_Actions.Add(new SA_Action()
+					{
+						PrintbarNo	= color,
+						Function = ECamFunction.CamFindLines_Vertical,
+						Name="Find 3 Vert Lines",
+						ScanPos	= _FindPos,
+					});
+
+					_Actions.Add(new SA_Action()
+					{
+						PrintbarNo	= color,
+						Function = ECamFunction.CamFindLine_Horzizontal,
+						Name="Find Horiz Line",
+						WebMoveDist = 0,
+						ScanPos	    = _FindPos,
+					});
+
+					_Actions.Add(new SA_Action()
+					{
+						PrintbarNo	= color,
+						Function = ECamFunction.CamFindFirstAngle,
+						Name="Find First Angle",
+					//	WebMoveDist = 12.0,
+					//	WebPos		= 12.0,
+						WebMoveDist = 0,
+						WebPos		= 0,
+						ScanPos	    = _FindPos,
+					});
+
+					if (!_Confirmed && color==0)
+					{
+						_Actions.Add(new SA_Action()
+						{
+							Function = ECamFunction.CamConfirmFocus,
+							Name="Confirm",
+							WebMoveDist = 0,
+							WebPos = 0
+						});
+					}
+
 				//	_HeadsPerColor = RxGlobals.PrintSystem.HeadsPerColor;
 					string colorName = new ColorCode_Str().Convert(ink.ColorCode, null, color*RxGlobals.PrintSystem.InkCylindersPerColor, null).ToString();
 					for (n=0; n<_HeadsPerColor; n++)
@@ -248,7 +256,7 @@ namespace RX_DigiPrint.Models
 						};						
 						_Actions.Add(action);
 					}
-					_StitchIdx = _Actions.Count();
+					_StitchIdxes[color] = _Actions.Count();
 					for (n=0; n<_HeadsPerColor-1; n++)
 					{
 						SA_Action action=new SA_Action()
@@ -264,7 +272,7 @@ namespace RX_DigiPrint.Models
 						_Actions.Add(action);
 					}
 
-					_DistIdx = _Actions.Count();
+					_DistIdxes[color] = _Actions.Count();
 					for (n=0; n<_HeadsPerColor-1; n++)
 					{
 						SA_Action action=new SA_Action()
@@ -282,7 +290,6 @@ namespace RX_DigiPrint.Models
 				}
 			}
 
-			_DistStepCnt = 0;
 			_ActionIdx	 = 0;
 			_HeadNo		 = 0;
 			_StartAction();
@@ -909,6 +916,9 @@ namespace RX_DigiPrint.Models
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Finding Mark"));
 			Console.WriteLine("_FindMark_1: _MarkFound = false");
 
+			_StitchIdx   = _StitchIdxes[_Action.PrintbarNo];
+			_DistIdx	 = _DistIdxes[_Action.PrintbarNo];
+
 			_MarkFound = false;
 			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 		}
@@ -990,6 +1000,8 @@ namespace RX_DigiPrint.Models
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("_CamMeasureDist_start"));
 
+			_DistStepCnt = 0;
+			_DistMeasureCnt = 0;
 			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
 			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 
@@ -997,6 +1009,25 @@ namespace RX_DigiPrint.Models
 
 			RxGlobals.SetupAssist.WebMove(_Action.WebPos-RxGlobals.SetupAssist.WebPos);
 		}
+
+		//--- _CamMeasureDist_done -----------------------------
+		private void _CamMeasureDist_done()
+		{
+		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
+			double corr=0;
+			for(int i=0; i+1<_HeadsPerColor; i++)
+			{
+				SA_Action action=_Actions[_DistIdx+i];
+				if (action.Correction!=null && Math.Abs((double)action.Correction)>0.010) 
+				{
+					corr += (double)action.Correction;
+					RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] -= corr;
+				}
+			}
+			RxGlobals.PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
+			ActionDone();
+		}
+
 
 		//--- _I1Calibrate_start -------------------
 		private void _I1Calibrate_start()
@@ -1108,24 +1139,6 @@ namespace RX_DigiPrint.Models
 				action.State = ECamFunctionState.waitRob;
 				_NextRobotCmd(action.StepperNo);
 			}
-			ActionDone();
-		}
-
-		//--- _CamMeasureDist_done -----------------------------
-		private void _CamMeasureDist_done()
-		{
-		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
-			double corr=0;
-			for(int i=0; i+1<_HeadsPerColor; i++)
-			{
-				SA_Action action=_Actions[_DistIdx+i];
-				if (action.Correction!=null && Math.Abs((double)action.Correction)>0.010) 
-				{
-					corr += (double)action.Correction;
-					RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] -= corr;
-				}
-			}
-			RxGlobals.PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
 			ActionDone();
 		}
 
