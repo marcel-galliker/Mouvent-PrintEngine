@@ -180,10 +180,6 @@ void robi_lb702_main(int ticks, int menu)
 
     if (_CmdRunning && ((robi_move_done() && !rc_isConnected()) || (rc_move_done() && rc_isConnected())) && (_CmdStarted || robi_not_started() || rc_isConnected()))
     {
-        int loc_new_cmd, loc_new_value;
-        int val;
-        uint8_t current;
-
         _CmdStarted = FALSE;
         _Search_Screw_Time = 0;
         _Loose_Screw_Time = 0;
@@ -325,8 +321,8 @@ void robi_lb702_main(int ticks, int menu)
         }
         if ((RX_StepperStatus.screwerinfo.ref_done && _NewCmd) || _NewCmd == CMD_ROBI_MOVE_Z_DOWN)
         {
-            loc_new_cmd = _NewCmd;
-            loc_new_value = _Value;
+            int loc_new_cmd = _NewCmd;
+            int loc_new_value = _Value;
             _NewCmd = 0;
 
             _Value = 0;
@@ -393,7 +389,7 @@ void robi_lb702_handle_menu(char *str)
 {
     int num = 0;
     int val = 0;
-    uint8_t current = 0;
+    int current = 0;
 
     if (robi_is_init() == FALSE)
 		return;
@@ -409,8 +405,7 @@ void robi_lb702_handle_menu(char *str)
         robi_set_output(num, val);
 		break;
 	case 'R':
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
-        /*robi_reference();*/ break;
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL); break;
 	case 'v':
         val = atoi(&str[1]);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_X, &val); break;
@@ -449,7 +444,7 @@ void robi_lb702_handle_menu(char *str)
     case 'c':
         current = atoi(&str[1]);
         if (rc_isConnected())   rc_set_screw_current(current);
-        else                    robi_set_screw_current(current);
+        else                    robi_set_screw_current((uint8_t)current);
         break;
     default:
         break;

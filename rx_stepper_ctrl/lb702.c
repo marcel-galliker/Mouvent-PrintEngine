@@ -777,6 +777,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 									motor_errors_reset();
+									if (rc_isConnected()) robot_clear_error();
                                     _ErrorFlags = 0;
                                     if (RX_StepperStatus.robot_used) robi_lb702_handle_ctrl_msg(INVALID_SOCKET, msgId, NULL);
 									break;
@@ -791,6 +792,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_ROB_FILL_CAP:
 	case CMD_HEAD_ADJUST:
 	case CMD_SEARCH_ALL_SCREWS:
+	case CMD_RESET_ALL_SCREWS:
 									if (RX_StepperStatus.robot_used)
 										Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId);
 									break;
