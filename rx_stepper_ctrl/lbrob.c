@@ -605,7 +605,7 @@ void lbrob_display_status(void)
         term_printf("x in cap: \t\t %d\n", RX_StepperStatus.info.x_in_cap);
         term_printf("Cap ready \t\t %d\n", RX_StepperStatus.robinfo.cap_ready);
         term_printf("Purge ready: \t\t %d\n", RX_StepperStatus.robinfo.purge_ready);
-        term_printf("actPos Robi: \t\t %dum\n", RX_StepperStatus.posY[0]);
+        term_printf("Slide pos: \t\t %dum\n", RX_StepperStatus.posY[0]);
         term_printf("Wipe-Speed: \t\t %d\n", RX_StepperCfg.wipe_speed);
         term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
         term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);

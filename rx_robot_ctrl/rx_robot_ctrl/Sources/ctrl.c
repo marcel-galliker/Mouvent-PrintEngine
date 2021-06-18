@@ -41,7 +41,8 @@ static void _set_serialNo(SBootloaderSerialNoCmd *pmsg)
 	{
 		flash_write_serialNo(pmsg->serialNo);
 
-		_download_reboot();
+	//	_download_reboot();
+		chip_reboot();
 	}
 }
 

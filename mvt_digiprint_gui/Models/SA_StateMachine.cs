@@ -140,9 +140,11 @@ namespace RX_DigiPrint.Models
 						}
 						else
 						{
+							/*
 							action.State	= ECamFunctionState.done;
 							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, axis={1}, steps={2} NOT STARTING (Development)", msg.headNo, msg.steps, msg.steps)));
 							break;
+							*/
 
 							_Adjusted = true;
 							_RobotRunning[stepperNo] = true;

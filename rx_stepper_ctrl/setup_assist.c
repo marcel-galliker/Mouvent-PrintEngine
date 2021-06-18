@@ -324,14 +324,11 @@ int  sa_handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 
     case CMD_SA_MOVE:				strcpy(_CmdName, "CMD_SA_MOVE_SCAN");
 									TrPrintfL(TRUE, "CMD_SA_MOVE");
-								//	if ((pcmd->pos!=_ScanPos_Act || !RX_StepperStatus.info.ref_done))
-									{
-										_ScanPos_New = pcmd->pos;
-										_ScanSpeed   = pcmd->speed;
-										TrPrintfL(TRUE, "CMD_SA_MOVE [%d]: from %d to %d, speed=%d", RX_StepperStatus.posY[0]+1, RX_StepperStatus.posX, _ScanPos_New, _ScanSpeed);
-                                        if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New, _ScanSpeed);
-										else								_sa_do_reference();
-									}
+									_ScanPos_New = pcmd->pos;
+									_ScanSpeed   = pcmd->speed;
+									TrPrintfL(TRUE, "CMD_SA_MOVE [%d]: from %d to %d, speed=%d", RX_StepperStatus.posY[0]+1, RX_StepperStatus.posX, _ScanPos_New, _ScanSpeed);
+                                    if (RX_StepperStatus.info.ref_done) _sa_move_to_pos(CMD_SA_MOVE, _ScanPos_New, _ScanSpeed);
+									else								_sa_do_reference();
 									break;
 
     case CMD_SA_UP:					strcpy(_CmdName, "CMD_SA_UP");
