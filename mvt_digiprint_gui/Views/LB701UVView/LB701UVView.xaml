@@ -5,11 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.LB701UVView"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:tex="clr-namespace:RX_DigiPrint.Views.TexView"
              xmlns:rx_uc="clr-namespace:RX_DigiPrint.Views.UserControls"
              xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1500">
+
+    <UserControl.Resources>
+        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">32</sys:Double>
+        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">32</sys:Double>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -63,36 +69,38 @@
                 </StackPanel>
 
                 <!-- TAB: Main __________________________________________________________________-->
-                <Grid Margin="10" Grid.Row="1" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
+                    <Grid Margin="10" Grid.Row="1" Visibility="{Binding ElementName=RB_Main, Path=IsChecked, Converter={StaticResource IntToVisible_Converter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <local:LB701UV_Par Grid.Column="0"/>
+                        <local:LB701UV_Par Grid.Column="0"/>
 
-                    <ScrollViewer Grid.Column="1" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
-                        <StackPanel Width="auto">
-                            <local:LB701UV_Status/>
-                            <local:LB701UV_Cmd/>
-                        </StackPanel>
-                    </ScrollViewer>
+                        <ScrollViewer Grid.Column="1" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                            <StackPanel Width="auto">
+                                <local:LB701UV_Status/>
+                                <local:LB701UV_Cmd/>
+                            </StackPanel>
+                        </ScrollViewer>
 
-                <ScrollViewer Grid.Column="2" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"></RowDefinition>
-                                <RowDefinition Height="*"></RowDefinition>
-                            </Grid.RowDefinitions>
+                        <ScrollViewer Grid.Column="2" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
 
-                            <rx_uc:StepperView Grid.Row="0"/>
-                            <rx_uc:UVLampView Grid.Row="1" Margin="0,10,0,0" />
-                        </Grid>
-                    </ScrollViewer>
-                </Grid>
+                                <rx_uc:StepperView Grid.Row="0"/>
+                                <rx_uc:UVLampView Grid.Row="1" Margin="0,10,0,0" />
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </ScrollViewer>
 
                 <!-- TAB: PLC Log ____________________________________________________________-->
                 <rx_uc:PlcLog Grid.Row="1" Margin="10"
