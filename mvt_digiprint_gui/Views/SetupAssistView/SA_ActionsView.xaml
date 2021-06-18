@@ -56,6 +56,10 @@
                                             Height="15" 
                                             Kind="{Binding IconKind}"
                                             Visibility="{Binding Function, Converter={StaticResource FunctionImageVisible_Converter}}"/>
+                                        <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                             Width ="15" Height ="15" Fill ="{Binding ColorBrush}"
+                                             Stroke="Transparent"/>
+
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </DataTemplate>

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using static rx_CamLib.RxCam;
 using RX_DigiPrint.Devices;
+using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
@@ -16,7 +17,7 @@ namespace RX_DigiPrint.Models
 		private const bool		 _Debug=true;
 
 		public const bool		 _SimuCamera  = false;
-		public bool				_SimuMachine  = false;
+		public bool				_SimuMachine  = true;
 
 		private enum ENAssistMode
 		{
@@ -202,9 +203,19 @@ namespace RX_DigiPrint.Models
 				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
 				if (ink!=null)
 				{
+					Brush colorBrush;
+					try
+					{
+						colorBrush = new SolidColorBrush(ink.Color);
+					}
+					catch(Exception)
+					{
+						colorBrush=Brushes.Transparent;
+					}
 					_Actions.Add(new SA_Action()
 					{
 						PrintbarNo	= color,
+						ColorBrush  = colorBrush,
 						Function = ECamFunction.CamFindLines_Vertical,
 						Name="Find 3 Vert Lines",
 						ScanPos	= _FindPos,
@@ -213,6 +224,7 @@ namespace RX_DigiPrint.Models
 					_Actions.Add(new SA_Action()
 					{
 						PrintbarNo	= color,
+						ColorBrush  = colorBrush,
 						Function = ECamFunction.CamFindLine_Horzizontal,
 						Name="Find Horiz Line",
 						WebMoveDist = 0,
@@ -222,6 +234,7 @@ namespace RX_DigiPrint.Models
 					_Actions.Add(new SA_Action()
 					{
 						PrintbarNo	= color,
+						ColorBrush  = colorBrush,
 						Function = ECamFunction.CamFindFirstAngle,
 						Name="Find First Angle",
 					//	WebMoveDist = 12.0,
@@ -249,6 +262,7 @@ namespace RX_DigiPrint.Models
 						SA_Action action=new SA_Action()
 						{
 							PrintbarNo	= color,
+							ColorBrush  = colorBrush,
 							StepperNo   = color/2,
 							HeadNo		= n,
 							WebMoveDist = n==0? 12.0 : 0,
@@ -264,6 +278,7 @@ namespace RX_DigiPrint.Models
 						SA_Action action=new SA_Action()
 						{
 							PrintbarNo	= color,
+							ColorBrush  = colorBrush,
 							StepperNo   = color/2,
 							HeadNo		= n,
 							Function	= ECamFunction.CamMeasureStitch,
@@ -280,6 +295,7 @@ namespace RX_DigiPrint.Models
 						SA_Action action=new SA_Action()
 						{
 							PrintbarNo	= color,
+							ColorBrush  = colorBrush,
 							StepperNo   = color/2,
 							HeadNo		= n,
 							Function	= ECamFunction.CamMeasureDist,

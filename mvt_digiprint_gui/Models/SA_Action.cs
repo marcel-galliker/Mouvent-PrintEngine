@@ -4,10 +4,7 @@ using RX_Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
@@ -21,6 +18,14 @@ namespace RX_DigiPrint.Models
 		{
 			get { return _Name; }
 			set { SetProperty(ref _Name,value); }
+		}
+
+		//--- Property Colorbrush ---------------------------------------
+		private Brush _ColorBrush = Brushes.Transparent;
+		public Brush ColorBrush
+		{
+			get { return _ColorBrush; }
+			set { SetProperty(ref _ColorBrush,value); }
 		}
 
 		//--- Property StepperNo ---------------------------------------
