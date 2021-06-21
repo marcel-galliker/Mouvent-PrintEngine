@@ -150,7 +150,7 @@ namespace RX_DigiPrint.Models
 							break;
 							*/
 
-							_Adjusted = true;
+							//_Adjusted = true;
 							_RobotRunning[stepperNo] = true;
 
 							action.State	= ECamFunctionState.runningRob;
@@ -967,8 +967,7 @@ namespace RX_DigiPrint.Models
 		private void _TestPrint_start()
         {
 			PrintQueueItem item = new PrintQueueItem();
-
-            if (InkSupply.AnyFlushed()) return;
+			if (InkSupply.AnyFlushed()) return;
 			_CamFunctions.Off();
 			Console.WriteLine("{0}: _TestPrint_start", RxGlobals.Timer.Ticks());
 			switch(_AssistMode)
