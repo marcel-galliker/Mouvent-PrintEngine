@@ -85,7 +85,6 @@ static int				_MotorInit;
 static SMotorConfig		_MotorCfg[MOTOR_CNT];
 static UINT8			_MoveId[MOTOR_CNT];
 
-static SVersion			_BinVersion;
 static SVersion			_FileVersion;
 static FILE				*_BinaryFile;
 static UINT32			_FilePos;
@@ -161,9 +160,6 @@ void rc_main(int ticks, int menu)
 {
     if (_RC_Socket!=INVALID_SOCKET)
 	{
-		if (menu)
-		{
-		}
         RX_StepperStatus.screwerinfo.z_in_down = ROB_IN(IN_Z_DOWN) ? TRUE : FALSE;
         RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP) ? TRUE : FALSE;
 		_robot_error_check();
