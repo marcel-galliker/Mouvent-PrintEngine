@@ -36,7 +36,7 @@
             </common:MvtButton>
 
             <common:MvtButton x:Name="StartButton" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Start_Clicked" Margin="15, 5, 15, 5" >
-                <TextBlock Text="Start" Foreground="White"/>
+                <TextBlock Text="Align" Foreground="White"/>
             </common:MvtButton>
 
             <common:MvtButton x:Name="StartDensityButton" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="StartDensity_Clicked" Margin="15, 5, 15, 5" >

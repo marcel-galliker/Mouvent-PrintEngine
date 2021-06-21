@@ -243,8 +243,9 @@ static void _sa_do_reference(void)
 	{
     case 0:	motors_stop(1<<MOTOR_SCAN);
 			motors_reset(1<<MOTOR_SCAN);
-		//	motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, 1);
-		//	motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
+			motors_init_reset();
+			motor_config(MOTOR_SCAN, CURRENT_HOLD_SCAN, STEPS_REV_SCAN, DIST_REV_SCAN, 1);
+			motor_config(MOTOR_LIFT, CURRENT_HOLD_LIFT, STEPS_REV_LIFT, DIST_REV_LIFT, STEPS);
 			RX_StepperStatus.info.z_in_up   = FALSE;
 			RX_StepperStatus.info.z_in_down = FALSE;
 			RX_StepperStatus.cmdRunning  = CMD_SA_REFERENCE;

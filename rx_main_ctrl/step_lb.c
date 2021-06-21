@@ -843,6 +843,8 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 //    SHeadAdjustment msg;
     int stepperno=0;    // Variable is not set!!!
 
+    Error(LOG, TRUE, "steplb_adjust_heads: printbar=%d, head=%d, axis=%d, steps=%d", headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
+
     if (RX_Config.inkSupplyCnt % 2 == 0)
         stepperno = headAdjustment->printbarNo / 2;
     else
@@ -872,11 +874,14 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         else
             headAdjustment->printbarNo = (headAdjustment->printbarNo + 1) % 2;
         _ScrewCnt[stepperno] = _Status[stepperno].screw_count + 1;
+        Error(LOG, TRUE, "Send To Stepper[%d]: printBar=%d, head=%d, axis=%d, steps=%d", stepperno, headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
         sok_send(&_step_socket[stepperno], headAdjustment);
     }   
     else
     {
         int i;
+
+        Error(LOG, TRUE, "steplb_adjust_heads: nothing sent to robot" );
         
         for (i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperno]); i++)
         {

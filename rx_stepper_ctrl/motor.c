@@ -143,6 +143,12 @@ int	motors_init_done(void)
 	return _init_done;			
 }
 
+//--- motors_init_reset ------------------
+int	motors_init_reset(void)
+{
+	_init_done = 0;
+}
+
 //--- motor_trace_move -----------------------------------------------------
 void motor_trace_move(int motor)
 {

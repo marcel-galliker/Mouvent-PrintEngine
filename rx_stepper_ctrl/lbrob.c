@@ -1004,6 +1004,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_HEAD_ADJUST:
         _ScrewFunction = CMD_HEAD_ADJUST;
         memcpy(&_ScrewPar, pdata, sizeof(_ScrewPar));
+        Error(LOG, TRUE, "lbrob_handle_ctrl_msg CMD_HEAD_ADJUST: PrintBar=%d, head%d, axis=%d, steps=%d", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps);
         _rob_state_machine();
         break;
 

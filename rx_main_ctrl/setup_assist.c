@@ -168,11 +168,14 @@ void sa_handle_gui_msg(RX_SOCKET socket, void *pmsg)
     case CMD_SA_REFERENCE:
     case CMD_SA_STOP:			
     case CMD_SA_MOVE:			
-    case CMD_SA_UP:
+//    case CMD_SA_UP:
     case CMD_SA_DOWN:
 								sok_send(&_SaSocket, pmsg);
 								break;
 
+    case CMD_SA_UP:
+								sok_send(&_SaSocket, pmsg);
+								break;
     case CMD_SA_WEB_MOVE:		// Error(LOG, 0, "Send CMD_SA_WEB_MOVE");
 								plc_move_web(pcmd->pos, 1);
 								break;

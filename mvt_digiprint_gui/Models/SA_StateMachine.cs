@@ -14,10 +14,12 @@ namespace RX_DigiPrint.Models
 {
 	public class SA_StateMachine : RxBindable
 	{
-		private const bool		 _Debug=true;
+		private const bool		_Debug=true;
 
-		public const bool		 _SimuCamera  = false;
-		public bool				_SimuMachine  = true;
+		public const bool		_SimuCamera  = false;
+		public bool				_SimuMachine = false;
+
+		private const int		_Adjustment_Tolerance = 3; // in 1/6 screw turns
 
 		private enum ENAssistMode
 		{
@@ -136,7 +138,7 @@ namespace RX_DigiPrint.Models
 						if      (action.Function==ECamFunction.CamMeasureAngle)  msg.axis = 0;
 						else if (action.Function==ECamFunction.CamMeasureStitch) msg.axis = 1;
 						msg.steps       = (Int32)(action.Correction * 6.0 + 0.5);
-						if (Math.Abs(msg.steps)<=3)
+						if (Math.Abs(msg.steps)<=_Adjustment_Tolerance)
 						{
 							action.State	= ECamFunctionState.done;
 						}
@@ -152,8 +154,8 @@ namespace RX_DigiPrint.Models
 							_RobotRunning[stepperNo] = true;
 
 							action.State	= ECamFunctionState.runningRob;
+							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Printbar={0}, Head={1}, axis={2}, steps={3}", msg.printbarNo, msg.headNo, msg.axis, msg.steps)));
 							RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
-						//	RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, axis={1}, steps={2}", msg.headNo, msg.steps, msg.steps)));
 						}
 					}
 					return;
