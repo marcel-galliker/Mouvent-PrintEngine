@@ -50,6 +50,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//	StartButton.IsEnabled = (state==EnPlcState.plc_stop || state==EnPlcState.plc_error)|| RxGlobals.SA_StateMachine.SimuMachine;
 			StartButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
 			StartDensityButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
+			StartRegisterButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
 		}
 
 		//--- Settings_Clicked -------------------------------------------
@@ -122,6 +123,13 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			SetupActions.StartDensity();
 		}
 
+		//--- StartRegister_Clicked -------------------------------------------
+		private void StartRegister_Clicked(object sender,RoutedEventArgs e)
+		{
+			BTN_CamSettings.IsChecked = false;
+			CamSettings.Hide();
+			SetupActions.StartRegister();
+		}
 
 		//--- Done_Clicked ----------------------------------------------
 		private void Done_Clicked(object sender,RoutedEventArgs e)

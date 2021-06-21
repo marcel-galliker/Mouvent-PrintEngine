@@ -43,6 +43,10 @@
                 <TextBlock Text="Density" Foreground="White"/>
             </common:MvtButton>
 
+            <common:MvtButton x:Name="StartRegisterButton" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="StartRegister_Clicked" Margin="15, 5, 15, 5" >
+                <TextBlock Text="Register" Foreground="White"/>
+            </common:MvtButton>
+
             <common:MvtButton x:Name="BTN_Continue" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Done_Clicked" IsChecked="{Binding CanContinue}" Margin="15, 5, 15, 5" >
                 <TextBlock Text="Done" Foreground="White"/>
             </common:MvtButton>

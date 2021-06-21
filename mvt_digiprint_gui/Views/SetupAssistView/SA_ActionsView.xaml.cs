@@ -31,7 +31,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			}
 		}
 
-		//--- Start -------------------------------------------------
+		//--- StartDensity -------------------------------------------------
 		public void StartDensity()
 		{
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
@@ -40,6 +40,14 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			}
 		}
 
+		//--- StartDensity -------------------------------------------------
+		public void StartRegister()
+		{
+			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
+			{
+				Actions.ItemsSource = RxGlobals.SA_StateMachine.StartRegister();
+			}
+		}
 
 		//--- ActionDone --------------------------------------------------------------
 		public void ActionDone()

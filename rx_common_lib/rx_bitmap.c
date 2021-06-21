@@ -38,7 +38,7 @@ int bmp_clear  (RX_Bitmap *pbmp, int x, int y, int width, int height)
 	if (x+width>pbmp->width) width=pbmp->width-x;
 	width /= pxPerByte;
 	if (y+height>pbmp->height) height=pbmp->height-y;
-	dst = &pbmp->buffer[y*pbmp->lineLen];
+	dst = &pbmp->buffer[y*pbmp->lineLen+x/pxPerByte];
 	for (; height>0; y++, height--, dst+=pbmp->lineLen)
 	{
 		memset(dst, 0x00, width);

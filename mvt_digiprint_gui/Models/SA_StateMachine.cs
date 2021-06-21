@@ -24,6 +24,7 @@ namespace RX_DigiPrint.Models
 			undef = 0,
 			align = 1,
 			density = 2,
+			register = 3,
 		};
 
 		private static double px2mm(int px)
@@ -405,6 +406,62 @@ namespace RX_DigiPrint.Models
 						};						
 						_Actions.Add(action);
 					}
+				}
+			}
+			_DistStepCnt = 0;
+			_ActionIdx	 = 0;
+			_HeadNo		 = 0;
+			_StartAction();
+			return _Actions;
+		}
+		//--- _InitActions -----------------------------
+		public List<SA_Action> StartRegister()
+		{
+			int color, n;
+
+			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
+
+			_AssistMode = ENAssistMode.register;
+			_Adjusted	= false;
+
+			_Actions = new List<SA_Action>();
+			_Actions.Add(new SA_Action(){Name="Print Image"});
+			
+			if (_SimuMachine==false)
+			{
+				_Actions.Add(new SA_Action()
+				{
+					Function = ECamFunction.CamFindLines_Vertical,
+					Name="Find 3 Vert Lines",
+					ScanPos	= _FindPos,
+				});
+
+				_Actions.Add(new SA_Action()
+				{
+					Function = ECamFunction.CamFindLine_Horzizontal,
+					Name="Find Horiz Line",
+					WebMoveDist = 0,
+					ScanPos	    = _FindPos,
+				});
+
+				_Actions.Add(new SA_Action()
+				{
+					Function = ECamFunction.CamFindFirstAngle,
+					Name="Find First Angle",
+					WebMoveDist = 12.0,
+					WebPos		= 12.0,
+					ScanPos	    = 0,
+				});
+
+				if (!_Confirmed)
+				{
+					_Actions.Add(new SA_Action()
+					{
+						Function = ECamFunction.CamConfirmFocus,
+						Name="Confirm",
+						WebMoveDist = 0,
+						WebPos = 0
+					});
 				}
 			}
 			_DistStepCnt = 0;
@@ -912,10 +969,12 @@ namespace RX_DigiPrint.Models
             if (InkSupply.AnyFlushed()) return;
 			_CamFunctions.Off();
 			Console.WriteLine("{0}: _TestPrint_start", RxGlobals.Timer.Ticks());
-			if (_AssistMode==ENAssistMode.density)
-				item.TestImage	= ETestImage.SA_Density;
-			else
-				item.TestImage	= ETestImage.SA_Alignment;
+			switch(_AssistMode)
+			{
+			case ENAssistMode.align:	item.TestImage	= ETestImage.SA_Alignment; break;
+			case ENAssistMode.density:	item.TestImage	= ETestImage.SA_Density; break;
+			case ENAssistMode.register:	item.TestImage	= ETestImage.SA_Register; break;
+			}
 			item.Dots		= "L";
 			item.Speed		= 50;
 			item.DistToStop = RxGlobals.Settings.SetupAssistCam.DistToStop;

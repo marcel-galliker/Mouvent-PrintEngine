@@ -727,7 +727,14 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 							static SBmpInfo _bmpInfo;
 							if (same==FALSE)
 							{
-								if (strstr(filepath, ".flz"))		ret=flz_load_simple(filepath, &buffer[color], 100000, &bmpInfo, id->id==PQ_TEST_SA_DENSITY); 
+								if (id->id==PQ_TEST_SA_REGISTER)
+								{
+									char path[MAX_PATH];
+									if (RX_Color[color].color.colorCode==0) sprintf(path, PATH_BIN_SPOOLER "SA_Register_K.tif"); 
+									else sprintf(path, PATH_BIN_SPOOLER "SA_Register_X.tif");
+									ret=tif_load_simple(path, &buffer[color], 100000, &bmpInfo); 
+								}
+								else if (strstr(filepath, ".flz"))	ret=flz_load_simple(filepath, &buffer[color], 100000, &bmpInfo, id->id==PQ_TEST_SA_DENSITY); 
 								else if (strstr(filepath, ".tif"))	ret=tif_load_simple(filepath, &buffer[color], 100000, &bmpInfo); 
 								else								ret=bmp_load(filepath, &buffer[color], 100000, &bmpInfo);
 								memcpy(&_bmpInfo, &bmpInfo, sizeof(_bmpInfo));
@@ -1321,10 +1328,20 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->same				= FALSE;
 				pInfo->data				= pBmpInfo->buffer[color];
 			
-				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY) && pInfo->data)
+				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY || (id->id==PQ_TEST_SA_REGISTER && RX_Color[color].color.colorCode!=0)) && pInfo->data)
 				{
-					_TestBuf[color][n] = (*pBmpInfo->buffer[color])+n*pBmpInfo->dataSize;
-					if ((id->copy|id->scan)==1 && (n!=0)) memcpy(_TestBuf[color][n], *pBmpInfo->buffer[color], pBmpInfo->dataSize);					pInfo->data	= &_TestBuf[color][n];
+					if (n==0 && (id->copy|id->scan)==1)
+					{
+                        for (int m=0; m<SIZEOF(RX_Spooler.headNo[color]); m++)
+						{
+							if (RX_Spooler.headNo[color][m]>0)
+							{
+								_TestBuf[color][m] = (*pBmpInfo->buffer[color])+m*pBmpInfo->dataSize;
+								memcpy(_TestBuf[color][m], *pBmpInfo->buffer[color], pBmpInfo->dataSize);
+							}
+						}
+					}
+					pInfo->data	= &_TestBuf[color][n];
 				}
 			
 				pInfo->used			= TRUE;
@@ -1397,8 +1414,23 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					bmp.lineLen		= pInfo->srcLineLen;
 					bmp.sizeUsed	= 0;
 					bmp.sizeAlloc	= 0;
-					bmp.buffer		=  *pInfo->data;
+					bmp.buffer		= *pInfo->data;
 					rip_test_data(&bmp, id->id, RX_TestData[head]);
+				}
+				else if (pInfo->data && (id->id==PQ_TEST_SA_REGISTER) && RX_Color[color].color.colorCode!=0)
+				{
+					RX_Bitmap bmp;
+					bmp.bppx		= pInfo->bitsPerPixel;
+					bmp.width		= pInfo->widthPx;
+					bmp.height		= pInfo->srcLineCnt;					
+					bmp.lineLen		= pInfo->srcLineLen;
+					bmp.sizeUsed	= 0;
+					bmp.sizeAlloc	= 0;
+					bmp.buffer		= *pInfo->data;
+					for (int m=0; m<RX_Spooler.headsPerColor; m++)
+					{
+						if (m!=color) bmp_clear(&bmp, 180+256*m, 0, 200, bmp.height);
+					}
 				}
 				if (pInfo->bitsPerPixel==8)
 				{

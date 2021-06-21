@@ -536,6 +536,10 @@ static int _print_next(void)
 												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
 											 }
 											 break;
+				case PQ_TEST_SA_REGISTER:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "SA_Register_K.tif");
+											 RX_TestImage.scansTotal = 1;
+											 break;
+
 				case PQ_TEST_JET_NUMBERS:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "jet_numbers.tif");
 											 if (rx_def_is_tx(RX_Config.printer.type)) 
 											 {

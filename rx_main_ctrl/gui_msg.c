@@ -1172,6 +1172,7 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 	||  RX_TestImage.testImage==PQ_TEST_DENSITY
 	||  RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT
 	||  RX_TestImage.testImage==PQ_TEST_SA_DENSITY
+	||  RX_TestImage.testImage==PQ_TEST_SA_REGISTER
 	))
 	{
 		RX_TestImage.copies = 1;
