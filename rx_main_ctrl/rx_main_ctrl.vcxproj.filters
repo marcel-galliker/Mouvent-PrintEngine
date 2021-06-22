@@ -135,9 +135,6 @@
     <ClInclude Include="step_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pe_main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cleaf_orders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -273,9 +270,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="step_test.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pe_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cleaf_orders.c">

@@ -34,7 +34,6 @@
 #include "ctrl_svr.h"
 #include "plc_ctrl.h"
 #include "lh702_ctrl.h"
-#include "pe_main.h"
 #include "machine_ctrl.h"
 #include "spool_svr.h"
 #include "print_ctrl.h"
@@ -232,7 +231,6 @@ int main(int argc, char* argv[])
 	fluid_init();
 	step_init();
 	chiller_init();
-	pem_init();
 	boot_start();
 	gui_start();
 	spool_start();
@@ -296,7 +294,6 @@ int main(int argc, char* argv[])
 	//--- end libraries ----------------------------
 	sa_end();
 	machine_end();
-	pem_end();
 	chiller_end();
 	step_end();
 	fluid_end();

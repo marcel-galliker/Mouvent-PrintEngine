@@ -34,8 +34,8 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := ../rx_ink_lib/rx_ink_common.c chiller.c cleaf_orders.c ctr.c drive_ctrl.c pe_main.c prod_log.c lh702_ctrl.c setup_assist.c step_dp.c step_lb.c args.c boot_svr.c ctrl_msg.c ctrl_svr.c datalogic.c enc_ctrl.c fluid_ctrl.c gui_msg.c gui_svr.c label.c machine_ctrl.c network.c plc_ctrl.c print_ctrl.c print_queue.c rfs.c rx_main_ctrl.c rx_rexroth_lib/app.cpp rx_rexroth_lib/ftplib/ftp.c rx_rexroth_lib/ftplib/ftplib.c rx_rexroth_lib/lc.cpp rx_rexroth_lib/mlpi.cpp rx_rexroth_lib/par.cpp rx_rexroth_lib/sys.cpp setup.c spool_svr.c step_cleaf.c step_ctrl.c step_std.c step_test.c step_tts.c step_tx.c version.c
-EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a ../rx_pecore_lib/$(BINARYDIR)/rx_pecore_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
+SOURCEFILES := ../rx_ink_lib/rx_ink_common.c chiller.c cleaf_orders.c ctr.c drive_ctrl.c prod_log.c lh702_ctrl.c setup_assist.c step_dp.c step_lb.c args.c boot_svr.c ctrl_msg.c ctrl_svr.c datalogic.c enc_ctrl.c fluid_ctrl.c gui_msg.c gui_svr.c label.c machine_ctrl.c network.c plc_ctrl.c print_ctrl.c print_queue.c rfs.c rx_main_ctrl.c rx_rexroth_lib/app.cpp rx_rexroth_lib/ftplib/ftp.c rx_rexroth_lib/ftplib/ftplib.c rx_rexroth_lib/lc.cpp rx_rexroth_lib/mlpi.cpp rx_rexroth_lib/par.cpp rx_rexroth_lib/sys.cpp setup.c spool_svr.c step_cleaf.c step_ctrl.c step_std.c step_test.c step_tts.c step_tx.c version.c
+EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -181,9 +181,6 @@ $(BINARYDIR)/rx_tif_lib.a : ../rx_tif_lib/$(BINARYDIR)/rx_tif_lib.a
 
 $(BINARYDIR)/rx_rip_lib.a : ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a
 	$(CP) ../rx_rip_lib/$(BINARYDIR)/rx_rip_lib.a $(BINARYDIR)/rx_rip_lib.a
-
-$(BINARYDIR)/rx_pecore_lib.a : ../rx_pecore_lib/$(BINARYDIR)/rx_pecore_lib.a
-	$(CP) ../rx_pecore_lib/$(BINARYDIR)/rx_pecore_lib.a $(BINARYDIR)/rx_pecore_lib.a
 
 $(BINARYDIR)/TinyXML.a : ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a
 	$(CP) ../Externals/TinyXML/$(BINARYDIR)/TinyXML.a $(BINARYDIR)/TinyXML.a

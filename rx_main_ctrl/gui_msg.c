@@ -34,7 +34,6 @@
 #include "setup.h"
 #include "chiller.h"
 #include "rx_setup_file.h"
-#include "pe_main.h"
 #include "rip_clnt.h"
 #include "step_ctrl.h"
 #include "boot_svr.h"
@@ -1154,8 +1153,8 @@ static void _do_pause_printing	(RX_SOCKET socket)
 static void _do_external_data	(RX_SOCKET socket, int state)
 {
 	RX_PrinterStatus.externalData = state;
-	if (state)	pem_set_config();
-	else        pem_end(); 
+//	if (state)	pem_set_config();
+//	else        pem_end(); 
 	gui_send_printer_status(&RX_PrinterStatus);
 }
 

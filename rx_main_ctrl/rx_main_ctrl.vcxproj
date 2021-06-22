@@ -48,7 +48,6 @@
     <ClInclude Include="cleaf_orders.h" />
     <ClInclude Include="ctr.h" />
     <ClInclude Include="drive_ctrl.h" />
-    <ClInclude Include="pe_main.h" />
     <ClInclude Include="prod_log.h" />
     <ClInclude Include="lh702_ctrl.h" />
     <ClInclude Include="rx_main_ctrl.h" />
@@ -96,7 +95,6 @@
     <ClCompile Include="cleaf_orders.c" />
     <ClCompile Include="ctr.c" />
     <ClCompile Include="drive_ctrl.c" />
-    <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
     <ClCompile Include="lh702_ctrl.c" />
     <ClCompile Include="setup_assist.c" />
