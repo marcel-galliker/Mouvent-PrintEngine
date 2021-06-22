@@ -166,12 +166,13 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 			
 		case CMD_GET_PRINT_ENV:		_do_get_print_env(socket);											break;
 			
-		case CMD_GET_INK_DEF:		_do_get_ink_def(socket);										break;
+		case CMD_GET_INK_DEF:		_do_get_ink_def(socket);											break;
 
         case CMD_GET_DENSITY:		_do_get_density(socket, (SDensityMsg*)pmsg);						break;
 		case CMD_SET_DENSITY:		_do_set_density(socket, (SDensityMsg*)pmsg);						break;
 
         case CMD_HEAD_ADJUST:		step_adjust_heads(socket, (SHeadAdjustmentMsg*)pmsg);				break;
+        case CMD_ROBI_MOVE_TO_GARAGE: step_robi_to_garage(socket); break;
 
 		case CMD_FLUID_STAT:		fluid_reply_stat(socket);											
 									chiller_reply_stat(socket);
@@ -1202,6 +1203,7 @@ static void _do_clean_start	(RX_SOCKET socket)
 {
 	machine_clean();
 }
+
 
 //--- _do_get_prn_stat ----------------------------------------------
 static void _do_get_prn_stat		(RX_SOCKET socket)

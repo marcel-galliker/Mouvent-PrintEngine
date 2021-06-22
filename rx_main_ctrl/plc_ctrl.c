@@ -521,9 +521,7 @@ int  plc_start_printing(void)
 	}
 	if (!_SimuPLC) _heads_to_print	= TRUE;
 
-//	Error(LOG, 0, "plc_start_printing: heads_to_print=%d, z_in_print=%d",_heads_to_print, RX_StepperStatus.info.z_in_print);
 	step_set_vent(_Speed);
-//	if (_SimuEncoder) ctrl_simu_encoder(_Speed);
 	return REPLY_OK;
 }
 

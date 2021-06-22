@@ -174,8 +174,6 @@ namespace RX_DigiPrint.Views.UserControls
             MvtButton button = sender as MvtButton;
             if (button!=null) 
             {
-                RxGlobals.Events.AddItem(new LogItem("Mouse down {0}", button.Name)); 
-                Debug.WriteLine("PreviewMouseDown", button.Name);
                 button.IsChecked = true;
                 RxGlobals.Plc.SetVar(button.Name, 1);
                 if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_test_table_seon) RxGlobals.Plc.SetVar(button.Name, 1);

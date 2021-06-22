@@ -361,7 +361,7 @@ static void _check_move(void)
 		{
 			SMotorStatus *stat=&_RobotStatus.motor[motor];
 			if (stat->isStalled)
-				TrPrintfL(TRUE, "ROBOT: Motor[%d].MoveId=%d, STALLED: motorPos=%d, encPos=%d, diff=%d", motor, 
+				Error(ERR_CONT, 0, "ROBOT: Motor[%d].MoveId=%d, STALLED: motorPos=%d, encPos=%d, diff=%d", motor, 
 					stat->moveIdDone, stat->motorPos, stat->encPos, stat->motorPos-stat->encPos);
 			else
 				TrPrintfL(TRUE, "ROBOT: Motor[%d].MoveId=%d, DONE", motor, stat->moveIdDone);
@@ -818,11 +818,11 @@ static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, 
 	{
 	    if (_RobotStatus.motor[motor].isMoving)  
         {
-                return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
+			return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
         }
 	    if (_RobotStatus.motor[motor].isStalled) 
         {
-                return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
+			return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isStalled", motor);
         }
     
 	    SRobotMotorsMoveCmd cmd;

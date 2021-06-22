@@ -866,7 +866,10 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         return;
     }
     
-    if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw) && _Status[stepperno].screw_count >= _ScrewCnt[stepperno])
+    if (_Status[stepperno].screwerinfo.screwer_ready 
+    && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 
+    && _Status[stepperno].info.z_in_screw) 
+    && _Status[stepperno].screw_count >= _ScrewCnt[stepperno])
     {
         _HeadAdjustment[stepperno] = *headAdjustment;
         if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
@@ -899,6 +902,15 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
                 i = SIZEOF(_HeadAdjustmentBuffer[stepperno]);
             }
         }
+    }
+}
+
+//--- steplb_robi_to_garage -------------------------------
+void steplb_robi_to_garage(void)
+{
+    for (int stepperno=0; stepperno<STEPPER_CNT; stepperno++)
+    {
+        sok_send_2(&_step_socket[stepperno], CMD_ROBI_MOVE_TO_GARAGE, 0, NULL);
     }
 }
 

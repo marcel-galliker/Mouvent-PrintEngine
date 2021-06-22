@@ -58,7 +58,6 @@ namespace RX_DigiPrint.Models
 		private bool			 _Adjusted;
 
 		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
-//		private readonly int[]	 _DensitiyDist   = { 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64,  48+32, 48, 48, 48+32};
 		private readonly int[]	 _DensitiyDist   = { 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64, 128, 64,  104, 48, 104};
 		private int				 _Jet;
 		private List<ColorConversion.SpectroResultStruct> _DensityResult;
@@ -811,19 +810,32 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- Abort ---------------------------------------
-		public void Abort()
+		public bool Abort()
 		{
+			bool running=false;
 			if (_Actions!=null)
 			{
 				foreach(SA_Action action in _Actions)
 				{
-					if (action.State==ECamFunctionState.runningCam) action.State = ECamFunctionState.aborted;
+					if (action.State==ECamFunctionState.printing || action.State==ECamFunctionState.runningCam) 
+					{
+						action.State = ECamFunctionState.aborted;
+						running=true;
+					}
+				}
+				_ActionIdx=_Actions.Count();
+				if (running)
+				{
+					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
+					Thread.Sleep(500);
+					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
 				}
 			}
-			_ActionIdx=_Actions.Count();
+			else _ActionIdx=1;
 			_Action = null;
 			RxGlobals.SetupAssist.ScanReference();
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
+			return running;
 		}
 
 		//--- Property Running ---------------------------------------
@@ -915,7 +927,7 @@ namespace RX_DigiPrint.Models
 					else _NextRobotCmd(stepperNo);
 					return;
 				}
-				RxGlobals.SetupAssist.ScanReference();
+				Abort();
 			}
 		}
 		
@@ -980,7 +992,6 @@ namespace RX_DigiPrint.Models
 		private void _TestPrint_start()
         {
 			PrintQueueItem item = new PrintQueueItem();
-
             if (InkSupply.AnyFlushed()) return;
 			_CamFunctions.Off();
 			Console.WriteLine("{0}: _TestPrint_start", RxGlobals.Timer.Ticks());
@@ -1113,13 +1124,12 @@ namespace RX_DigiPrint.Models
 				if (action.Correction!=null && Math.Abs((double)action.Correction)>0.010) 
 				{
 					corr += (double)action.Correction;
-					RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] -= corr;
+					RxGlobals.PrintSystem.HeadDist[action.PrintbarNo*RxGlobals.PrintSystem.HeadsPerColor+ action.HeadNo+1] += corr;
 				}
 			}
 			RxGlobals.PrintSystem.SendMsg(TcpIp.CMD_SET_PRINTER_CFG);
 			ActionDone();
 		}
-
 
 		//--- _I1Calibrate_start -------------------
 		private void _I1Calibrate_start()

@@ -588,6 +588,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_ROB_DRIP_PANS       = 0x01000721;
         public const UInt32 CMD_ROB_DRIP_PANS_CAP   = 0x01000725;
         public const UInt32 CMD_ROB_DRIP_PANS_REF   = 0x01000726;
+        public const UInt32 CMD_ROBI_MOVE_TO_GARAGE = 0x0100074b;
 
         public const UInt32 EVT_TRACE               = 0x03000100;
 

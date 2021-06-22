@@ -691,6 +691,20 @@ void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
     }
 }
 
+//--- step_robi_to_garage --------------------
+void step_robi_to_garage(RX_SOCKET socket)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        steplb_robi_to_garage();
+        break;
+    default:
+        break;
+    }
+}
+
+
 /*
 //--- step_get_StepperStatus ---------------------------------------------
 SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
