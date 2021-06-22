@@ -23,11 +23,11 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		}
 
 		//--- Start -------------------------------------------------
-		public void Start()
+		public void StartAlign()
 		{
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
 			{
-				Actions.ItemsSource = RxGlobals.SA_StateMachine.Start();
+				Actions.ItemsSource = RxGlobals.SA_StateMachine.StartAlign();
 			}
 		}
 

@@ -47,8 +47,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		private void PrinterStatusChanged(object sender,PropertyChangedEventArgs e)
 		{
 			EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-		//	StartButton.IsEnabled = (state==EnPlcState.plc_stop || state==EnPlcState.plc_error)|| RxGlobals.SA_StateMachine.SimuMachine;
-			StartButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
+		//	StartAlignButton.IsEnabled = (state==EnPlcState.plc_stop || state==EnPlcState.plc_error)|| RxGlobals.SA_StateMachine.SimuMachine;
+			StartAlignButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
 			StartDensityButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
 			StartRegisterButton.IsEnabled = (state==EnPlcState.plc_stop)|| RxGlobals.SA_StateMachine.SimuMachine;
 		}
@@ -107,12 +107,12 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			RxGlobals.SetupAssist.ScanMoveTo(20, 50);
 		}
 
-		//--- Start_Clicked -------------------------------------------
-		private void Start_Clicked(object sender,RoutedEventArgs e)
+		//--- StartAlign_Clicked -------------------------------------------
+		private void StartAlign_Clicked(object sender,RoutedEventArgs e)
 		{
 			BTN_CamSettings.IsChecked = false;
 			CamSettings.Hide();
-			SetupActions.Start();
+			SetupActions.StartAlign();
 		}
 
 		//--- StartDensity_Clicked -------------------------------------------

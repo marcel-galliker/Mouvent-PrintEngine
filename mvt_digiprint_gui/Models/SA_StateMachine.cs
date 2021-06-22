@@ -150,7 +150,7 @@ namespace RX_DigiPrint.Models
 							break;
 							*/
 
-							_Adjusted = true;
+						//	_Adjusted = true;
 							_RobotRunning[stepperNo] = true;
 
 							action.State	= ECamFunctionState.runningRob;
@@ -159,6 +159,15 @@ namespace RX_DigiPrint.Models
 						}
 					}
 					return;
+				}
+			}
+			if (_Adjusted)
+			{
+				RxGlobals.Events.AddItem(new LogItem("ROB DONE"));
+				if (_Action==null)
+				{
+					StartAlign();
+					RxGlobals.Events.AddItem(new LogItem("Print again"));
 				}
 			}
 		}
@@ -170,7 +179,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- _InitActions -----------------------------
-		public List<SA_Action> Start()
+		public List<SA_Action> StartAlign()
 		{
 			int color, n;
 
@@ -374,9 +383,8 @@ namespace RX_DigiPrint.Models
 				{
 					Function = ECamFunction.I1Calibrate,
 					Name="White Calibration",
-				//	WebMoveDist = 12.0,
 					WebMoveDist = 0,
-					WebPos = 12.0
+					WebPos = 0
 				});
 			}
 
@@ -884,6 +892,7 @@ namespace RX_DigiPrint.Models
 				if (_Debug && _Action!=_Actions.Last()) CanContinue = true;
 
 				ECamFunction function=_Action.Function;
+				int stepperNo = _Action.StepperNo;
 				_Action = null;
 				_ActionIdx++;
 				if (_ActionIdx<_Actions.Count())
@@ -893,13 +902,17 @@ namespace RX_DigiPrint.Models
 						_StartAction();
 						return;
 					}
+					/*
 					else if (_Adjusted)
 					{
 						RxGlobals.SetupAssist.ScanReference();
 						Start();
 						return;
 					}
-					_StartAction();
+					*/
+					if (!_Adjusted)
+						_StartAction();
+					else _NextRobotCmd(stepperNo);
 					return;
 				}
 				RxGlobals.SetupAssist.ScanReference();
