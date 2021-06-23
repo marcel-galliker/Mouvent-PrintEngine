@@ -635,7 +635,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										Error(ERR_ABORT, 0, "Reference Height front/back too differents (> 10mm)");									
 									else if(!RX_StepperStatus.cmdRunning || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE)
 									{
-                                        if ((!RX_StepperStatus.screwerinfo.y_in_ref || (!RX_RobiStatus.isInGarage && !rc_isConnected())) && RX_StepperStatus.robot_used)
+                                        if ((!RX_StepperStatus.screwerinfo.y_in_ref || !RX_StepperStatus.screwerinfo.robi_in_ref) && RX_StepperStatus.robot_used)
                                         {
                                             if (!RX_StepperStatus.info.z_in_ref || RX_StepperStatus.cmdRunning==CMD_LIFT_REFERENCE || !RX_StepperStatus.info.ref_done)
                                             {
