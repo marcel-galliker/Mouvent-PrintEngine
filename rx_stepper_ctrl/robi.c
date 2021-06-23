@@ -123,6 +123,7 @@ void robi_init(void)
 //--- robi_main -------------------------------------------------------------------------
 void robi_main(int ticks, int menu)
 {
+    RX_StepperStatus.screwerinfo.robi_in_ref = RX_RobiStatus.isInGarage;
     if (_isInit == FALSE) return;
     
     if (ticks > _tStatus)
