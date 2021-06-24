@@ -460,7 +460,7 @@ void lbrob_main(int ticks, int menu)
                 _RobFunction = rob_fct_move;
                 _CmdRunning = 0;
                 _CmdRunning_old = 0;
-                if (!RX_StepperStatus.screwerinfo.y_in_ref || (!RX_RobiStatus.isInGarage && !rc_isConnected()))
+                if (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_StepperStatus.screwerinfo.robi_in_ref)
                 {
                     _CmdRunning_Robi = CMD_ROBI_MOVE_TO_GARAGE;
                     _NewCmd = CMD_ROB_MOVE_POS;
