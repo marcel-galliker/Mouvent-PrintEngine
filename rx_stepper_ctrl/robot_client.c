@@ -166,9 +166,9 @@ void rc_main(int ticks, int menu)
 {
     if (_RC_Socket!=INVALID_SOCKET)
 	{
-        RX_StepperStatus.screwerinfo.robi_in_ref = ROB_IN(IN_GARAGE) ? TRUE : FALSE;
-        RX_StepperStatus.screwerinfo.z_in_down = ROB_IN(IN_Z_DOWN) ? TRUE : FALSE;
-        RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP) ? TRUE : FALSE;
+        RX_StepperStatus.screwerinfo.robi_in_ref = ROB_IN(IN_GARAGE);
+        RX_StepperStatus.screwerinfo.z_in_down = ROB_IN(IN_Z_DOWN);
+        RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP);
 		_robot_error_check();
 	}
 }

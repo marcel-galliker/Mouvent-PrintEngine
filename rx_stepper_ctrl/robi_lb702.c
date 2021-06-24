@@ -941,6 +941,7 @@ int robi_lb702_screw_edgeCnt(void)
 //--- _set_moving_variables ---------------------------------------------
 static void _set_moving_variables(void)
 {
+    RX_StepperStatus.screwerinfo.robi_in_ref = FALSE;
     RX_StepperStatus.screwerinfo.x_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_pos = FALSE;
     RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
