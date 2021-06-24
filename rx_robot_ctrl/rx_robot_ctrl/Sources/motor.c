@@ -1,3 +1,6 @@
+// stepper chip documentation: https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5130_datasheet_Rev1.17.pdf
+
+
 #include "rx_robot_def.h"
 #include "rx_robot_tcpip.h"
 

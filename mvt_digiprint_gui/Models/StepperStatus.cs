@@ -91,14 +91,14 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _Screwing,value); }
 		}
 
-		//--- Property ScrewCnt ---------------------------------------
-		private int _ScrewCnt;
-		public int ScrewCnt
+		//--- Property _AdjustDoneCnt ---------------------------------------
+		private int _AdjustDoneCnt;
+		public int AdjustDoneCnt
 		{
-			get { return _ScrewCnt; }
+			get { return _AdjustDoneCnt; }
 			set {
-                    if (SetProperty(ref _ScrewCnt, value)) 
-                        RxGlobals.Events.AddItem(new LogItem(string.Format("ScrewCnt={0}", _ScrewCnt)));
+                    if (SetProperty(ref _AdjustDoneCnt, value)) 
+                        RxGlobals.Events.AddItem(new LogItem(string.Format("_AdjustDoneCnt={0}", _AdjustDoneCnt)));
                 }
 		}
 
@@ -505,10 +505,15 @@ namespace RX_DigiPrint.Models
             RobotRefDone = (msg.robinfo & 0x00000001) != 0;
             Moving      = (msg.info & 0x00000002)!=0;
             RobMoving   = (msg.robinfo & 0x00000002) != 0;
-            ScrewedOk   = (msg.screwerinfo & (0x00001000 | 0x00002000 | 0x00040000))==0;
+            if (No==0) Console.WriteLine("ScrewerInfo: blockedleft={0}, blockedright={1}, ready={2}, ok={3}", 
+                (msg.screwerinfo&0x00001000)!=0,
+                (msg.screwerinfo&0x00002000)!=0,
+                (msg.screwerinfo&0x00040000)!=0,
+                (msg.screwerinfo&0x00000800)!=0);
+            ScrewedOk   = (msg.screwerinfo & 0x00000800) != 0;
             Screwing    = (msg.screwerinfo & 0x00000002) != 0;
             ScrewerReady= (msg.screwerinfo & 0x00004000) != 0; 
-            ScrewCnt  = msg.screw_count;
+            AdjustDoneCnt = msg.adjustDoneCnt;
             UV_On     = (msg.info & 0x00000004)!=0;
             UV_Ready  = (msg.info & 0x00000008)!=0;
             Z_in_ref  = (msg.info & 0x00000010)!=0;

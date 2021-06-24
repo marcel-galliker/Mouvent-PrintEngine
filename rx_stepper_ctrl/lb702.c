@@ -674,7 +674,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 											if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front < 90000) Error(WARN, 0, "Reference Height front small");
 											if ((!RX_StepperStatus.cmdRunning || RX_StepperStatus.cmdRunning == CMD_LIFT_REFERENCE) && (!RX_StepperStatus.info.ref_done || !RX_StepperStatus.info.z_in_print || val0 != _PrintPos_Act[MOTOR_Z_BACK] || val1 != _PrintPos_Act[MOTOR_Z_FRONT]))
 											{
-												TrPrintf(TRUE, "Start REF, _Cmd_New=0x%08x", _Cmd_New);
+												TrPrintfL(TRUE, "Start REF, _Cmd_New=0x%08x", _Cmd_New);
 												_PrintPos_New[MOTOR_Z_BACK]  = val0;
 												_PrintPos_New[MOTOR_Z_FRONT] = val1;
 												if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_PRINT_POS, _PrintPos_New[MOTOR_Z_BACK], _PrintPos_New[MOTOR_Z_FRONT]);
@@ -777,7 +777,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 									motor_errors_reset();
-									if (rc_isConnected()) robot_clear_error();
+									rc_clear_error();
                                     _ErrorFlags = 0;
                                     if (RX_StepperStatus.robot_used) robi_lb702_handle_ctrl_msg(INVALID_SOCKET, msgId, NULL);
 									break;

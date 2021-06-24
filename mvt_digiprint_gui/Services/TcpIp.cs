@@ -1337,7 +1337,7 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public Int32[]       alive;
 
-            public Int32        screw_count;
+            public Int32        adjustDoneCnt;
 
             public Int32			inputs;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]

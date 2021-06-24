@@ -11,6 +11,9 @@
 //
 // ****************************************************************************
 
+
+// stepper chip documentation: https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5130_datasheet_Rev1.17.pdf
+
 #include "rx_common.h"
 #include "rx_error.h"
 #include "rx_sok.h"
@@ -59,10 +62,13 @@
 #define ENCODER_TOL_XY				1000
 #define ENCODER_TOL_SCREW			220000
 
-#define SCREW_CURRENT_HIGH			(0b00000000000000010001110000000000)		// 0x00011C00
-#define SCREW_CURRENT_LOW			(0b00000000000000010001001000000000)		// 0x00011200
-#define Z_CURRENT_UP				(0b00000000000000010000101000000000)		// 0x00010A00
-#define Z_CURRENT_DOWN				(0b00000000000000010000111000000000)		// 0x00010E00
+//---													  ddddrrrrrhhhhh
+#define IHOLD_IRUN(hold, run, delay)	((((delay)&0xf)<<16) | (((run)&0x1f)<<8) | ((hold)&0x1f))
+#define SCREW_CURRENT_HIGH			IHOLD_IRUN(0, 28, 1)		// 0x00011C00
+#define SCREW_CURRENT_LOW			IHOLD_IRUN(0, 18, 1)		// 0x00011200
+#define XY_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00011200
+#define Z_CURRENT_UP				IHOLD_IRUN(0, 10, 1)		// 0x00010A00
+#define Z_CURRENT_DOWN				IHOLD_IRUN(0, 14, 1)		// 0x00010E00
 
 #define LOW		0
 #define HIGH	1
@@ -94,6 +100,7 @@ static int				_RC_State;
 static char				_RC_Error[MAX_PATH];
 
 static int				_Error_Written[MOTOR_CNT] = {FALSE};
+static int				_StallErrorEnabled = TRUE;
 
 #define RC_STATE_REF	1000
 
@@ -154,7 +161,6 @@ int	rc_isConnected(void)
 	return (_RC_Socket!=INVALID_SOCKET);
 }
 
-
 //--- rc_main -----------------------------------------------
 void rc_main(int ticks, int menu)
 {
@@ -164,6 +170,12 @@ void rc_main(int ticks, int menu)
         RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP) ? TRUE : FALSE;
 		_robot_error_check();
 	}
+}
+
+//--- rx_enable_stall_error ---------------------------------------
+void rx_enable_stall_error(int enable)
+{
+	_StallErrorEnabled = enable;
 }
 
 //--- _robot_error_check ---------------------------------------------
@@ -181,8 +193,8 @@ static void _robot_error_check(void)
     }
 }
 
-//--- robot_clear_error ---------------------------------------------------
-void robot_clear_error()
+//--- rc_clear_error ---------------------------------------------------
+void rc_clear_error()
 {
 	memset(_Error_Written, 0, sizeof(_Error_Written));
 }
@@ -361,8 +373,11 @@ static void _check_move(void)
 		{
 			SMotorStatus *stat=&_RobotStatus.motor[motor];
 			if (stat->isStalled)
-				Error(ERR_CONT, 0, "ROBOT: Motor[%d].MoveId=%d, STALLED: motorPos=%d, encPos=%d, diff=%d", motor, 
-					stat->moveIdDone, stat->motorPos, stat->encPos, stat->motorPos-stat->encPos);
+			{
+				if (_StallErrorEnabled)
+					Error(ERR_CONT, 0, "ROBOT: Motor[%d].MoveId=%d, STALLED: motorPos=%d, encPos=%d, diff=%d", motor, 
+						stat->moveIdDone, stat->motorPos, stat->encPos, stat->motorPos-stat->encPos);
+			}
 			else
 				TrPrintfL(TRUE, "ROBOT: Motor[%d].MoveId=%d, DONE", motor, stat->moveIdDone);
 			_movedIdDone[motor] = _RobotStatus.motor[motor].moveIdDone;
@@ -619,8 +634,7 @@ static void _configure_xy_motor(uint8_t motor)
 {
 	_MotorCfg[motor].gconf = 0;
 	_MotorCfg[motor].swmode = 0x03;
-    _MotorCfg[motor].iholdirun = SCREW_CURRENT_LOW;
-//	_MotorCfg[motor].iholdirun = SCREW_CURRENT_HIGH;
+    _MotorCfg[motor].iholdirun = XY_CURRENT;
 	_MotorCfg[motor].tpowerdown = 0;
 	_MotorCfg[motor].tpwmthrs = 0;
 	_MotorCfg[motor].rampmode = 0;
@@ -650,16 +664,14 @@ static void _configure_screw_motor(int current)
 {		
 	_MotorCfg[MOTOR_SCREW].gconf = 0;
 	_MotorCfg[MOTOR_SCREW].swmode = 0x03;
-//	_MotorCfg[MOTOR_SCREW].iholdirun = 0x11300;
 	_MotorCfg[MOTOR_SCREW].iholdirun = current;
 	_MotorCfg[MOTOR_SCREW].tpowerdown = 0;
 	_MotorCfg[MOTOR_SCREW].tpwmthrs = 0;
 	_MotorCfg[MOTOR_SCREW].rampmode = 0;
-	//_MotorCfg[MOTOR_SCREW].vmax = 178957;
-    _MotorCfg[MOTOR_SCREW].vmax = SCREW_SPEED;
+    _MotorCfg[MOTOR_SCREW].vmax = 2*SCREW_SPEED;
 	_MotorCfg[MOTOR_SCREW].v1 = 0;
-	_MotorCfg[MOTOR_SCREW].amax = 2932;
-	_MotorCfg[MOTOR_SCREW].dmax = 2932;
+	_MotorCfg[MOTOR_SCREW].amax = 8*2932;
+	_MotorCfg[MOTOR_SCREW].dmax = 8*2932;
 	_MotorCfg[MOTOR_SCREW].a1 = 2932;
 	_MotorCfg[MOTOR_SCREW].d1 = 2932;
 	_MotorCfg[MOTOR_SCREW].vstart = 0;
@@ -743,6 +755,8 @@ static void _rc_reset_motors(int motors)
 {
 	if (_AppRunning)
 	{
+		if (_RobotStatus.motor[MOTOR_SCREW].isStalled)
+			printf("test\n");
 	    SRobotMotorsResetCmd cmd;
 	    cmd.header.msgLen = sizeof(cmd);
 	    cmd.header.msgId  = CMD_MOTORS_RESET;
@@ -750,7 +764,7 @@ static void _rc_reset_motors(int motors)
 	    sok_send(&_RC_Socket, &cmd);
 	    TrPrintfL(TRUE, "sent CMD_MOTORS_RESET");
 	    for (int motor=0; motor<MOTOR_CNT; motor++)
-		    if (motors & (1<<motor)) _RobotStatus.motor[MOTOR_XY_0].isStalled = FALSE;
+		    if (motors & (1<<motor)) _RobotStatus.motor[motor].isStalled = FALSE;
 	}
 }
 
@@ -818,7 +832,7 @@ static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, 
 	{
 	    if (_RobotStatus.motor[motor].isMoving)  
         {
-			return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving", motor);
+			return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving, MoveId=%d, started=%d, done=%d", motor, _MoveId[motor], _RobotStatus.motor[motor].moveIdStarted, _RobotStatus.motor[motor].moveIdDone);
         }
 	    if (_RobotStatus.motor[motor].isStalled) 
         {
@@ -1049,7 +1063,7 @@ void rc_display_status(void)
 			_RobotStatus.motor[i].targetPos, 
 			_RobotStatus.motor[i].encPos, 
 			_MoveId[i],
-			_RobotStatus.motor[i].isMoving, 
+			_RobotStatus.motor[i].isMoving,
 			_RobotStatus.motor[i].isStalled, 
 			_RobotStatus.motor[i].moveIdStarted,
 			_RobotStatus.motor[i].moveIdDone,
@@ -1060,7 +1074,7 @@ void rc_display_status(void)
 		term_printf("State Machine: \t\t %d\t%s\n", _RC_State, _RC_Error);
 		term_printf("Screwer X-Pos: \t\t %d\n", RX_StepperStatus.screw_posX);
 		term_printf("Screwer Y-Pos: \t\t %d\n", RX_StepperStatus.screw_posY);
-        term_printf("Screwer Current: \t %d\n", rc_get_screw_current());
+        term_printf("Screwer Current: \t %d\n", rc_get_screwer_current());
     }	
 	term_printf("\n");
 	term_flush();
@@ -1135,8 +1149,8 @@ void rc_handle_menu(char *str)
 	}
 }
 
-//--- rc_in_ref ----------------------------------------------
-int rc_in_ref(void)
+//--- rc_in_garage ----------------------------------------------
+int rc_in_garage(void)
 {
     return _RobotStatus.gpio.inputs & (1UL << IN_GARAGE);
 }
@@ -1165,25 +1179,29 @@ void rc_turn_steps(int steps)
     _rc_motor_moveBy(MOTOR_SCREW, steps, _FL_);
 }
 
-//--- rc_set_screw_current ---------------------------------------------
-void rc_set_screw_current(int high)
+//--- rc_set_screwer_current ---------------------------------------------
+void rc_set_screwer_current(int high)
 {
-	rc_reset_motors(MOTOR_SCREW);
-	rx_sleep(50);
     if (high) _configure_screw_motor(SCREW_CURRENT_HIGH);
     else	  _configure_screw_motor(SCREW_CURRENT_LOW);
+}
+
+//--- rc_get_screwer_current --------------------------------------------------
+int rc_get_screwer_current(void)
+{
+    return (_MotorCfg[MOTOR_SCREW].iholdirun == SCREW_CURRENT_HIGH);
+}
+
+//--- rc_get_screwer_pos ------------------------------------------
+int rc_get_screwer_pos(void)
+{
+    return _RobotStatus.motor[MOTOR_SCREW].motorPos;
 }
 
 //--- rc_screwer_stalled -------------------------------------------------
 int rc_screwer_stalled(void)
 {
     return _RobotStatus.motor[MOTOR_SCREW].isStalled;
-}
-
-//--- rc_get_screw_current --------------------------------------------------
-int rc_get_screw_current(void)
-{
-    return (_MotorCfg[MOTOR_SCREW].iholdirun == SCREW_CURRENT_HIGH);
 }
 
 //--- rc_move_started ----------------------------------------------------------

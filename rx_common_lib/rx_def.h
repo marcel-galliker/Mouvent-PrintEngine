@@ -1372,6 +1372,7 @@ typedef struct SStepperCfg
 	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
 	INT32			material_thickness;
 	INT32			headsPerColor;
+	INT32			printbarUsed;		// bitset
 	
 	SRobotOffsets	robot[4];
 } SStepperCfg;
@@ -1540,7 +1541,7 @@ typedef struct EScrewerInfo
     UINT32 r_info_8 : 1;				//	0x00000100
     UINT32 r_info_9 : 1;				//	0x00000200
     UINT32 r_info_10 : 1;				//	0x00000400
-    UINT32 screwed_successfully : 1;	//	0x00000800
+    UINT32 screwed_OK : 1;				//	0x00000800
     UINT32 screwer_blocked_left : 1;	//	0x00001000
     UINT32 screwer_blocked_right : 1;   //	0x00002000
     UINT32 screwer_ready : 1;			//  0x00004000
@@ -1656,7 +1657,7 @@ typedef struct SStepperStat
 	
 	INT32		adjustmentProgress;
 	UINT32		alive[2];
-    INT32		screw_count;
+    INT32		adjustDoneCnt;
 
     INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];

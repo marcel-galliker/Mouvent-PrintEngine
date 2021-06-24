@@ -92,13 +92,14 @@ namespace RX_DigiPrint.Models
 				{
 					StepperStatus stepper = RxGlobals.StepperStatus[no];
 					Console.WriteLine("Stepper[{0}].{1}={2}", no, e.PropertyName, sender.GetType().GetProperty(e.PropertyName).GetValue(sender, null));
-					if (e.PropertyName.Equals("ScrewCnt") && _Actions!=null)
+					if (e.PropertyName.Equals("AdjustDoneCnt") && _Actions!=null)
 					{
 						foreach(SA_Action action in _Actions)
 						{	
 							if (action.StepperNo==no && action.State==ECamFunctionState.runningRob)
 							{
 								_RobotRunning[no]=false;
+								Console.WriteLine("ROBOT[{0}]: no, Screwing done, ok={1}", no, stepper.ScrewedOk);
 								if (stepper.ScrewedOk) action.State = ECamFunctionState.done;
 								else				   action.State = ECamFunctionState.error;
 								break;
@@ -108,7 +109,9 @@ namespace RX_DigiPrint.Models
 						_NextRobotCmd(no);
 					}
 					if (e.PropertyName.Equals("ScrewerReady"))
+					{
 						_NextRobotCmd(no);
+					}
 					return;
 				}
 			}
@@ -137,25 +140,19 @@ namespace RX_DigiPrint.Models
 						if      (action.Function==ECamFunction.CamMeasureAngle)  msg.axis = 0;
 						else if (action.Function==ECamFunction.CamMeasureStitch) msg.axis = 1;
 						msg.steps       = (Int32)(action.Correction * 6.0 + 0.5);
-						if (Math.Abs(msg.steps)<=_Adjustment_Tolerance)
-						{
-							action.State	= ECamFunctionState.done;
-						}
-						else
-						{
-							/*
-							action.State	= ECamFunctionState.done;
-							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, axis={1}, steps={2} NOT STARTING (Development)", msg.headNo, msg.steps, msg.steps)));
-							break;
-							*/
+						/*
+						action.State	= ECamFunctionState.done;
+						RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, axis={1}, steps={2} NOT STARTING (Development)", msg.headNo, msg.steps, msg.steps)));
+						break;
+						*/
 
-						//	_Adjusted = true;
-							_RobotRunning[stepperNo] = true;
+					//	_Adjusted = true;
+						_RobotRunning[stepperNo] = true;
 
-							action.State	= ECamFunctionState.runningRob;
-							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Printbar={0}, Head={1}, axis={2}, steps={3}", msg.printbarNo, msg.headNo, msg.axis, msg.steps)));
-							RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
-						}
+						action.State	= ECamFunctionState.runningRob;
+						Console.WriteLine("Stepper[{0}]: CMD_HEAD_ADJUST Printbar={1}, Head={2}, axis={3}, steps={4}", stepperNo, msg.printbarNo, msg.headNo, msg.axis, msg.steps);
+						RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Printbar={0}, Head={1}, axis={2}, steps={3}", msg.printbarNo, msg.headNo, msg.axis, msg.steps)));
+						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
 					}
 					return;
 				}
@@ -1209,8 +1206,13 @@ namespace RX_DigiPrint.Models
 		private void _CamMeasureAngle_done()
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Angle Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
-			_Action.State = ECamFunctionState.waitRob;
-			_NextRobotCmd(_Action.StepperNo);
+			int steps = (Int32)(_Action.Correction * 6.0 + 0.5);
+			if (Math.Abs(steps)<=_Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
+			else 										
+			{
+				_Action.State = ECamFunctionState.waitRob;
+				_NextRobotCmd(_Action.StepperNo);
+			}
 
 			if (_ActionIdx+1<_Actions.Count && _Actions[_ActionIdx+1].Function==ECamFunction.CamMeasureAngle && _Actions[_ActionIdx+1].HeadNo>0)
 			{

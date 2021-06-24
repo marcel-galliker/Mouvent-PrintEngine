@@ -512,8 +512,9 @@ static void _step_set_config(int no)
 	cfg.printerType		   = RX_Config.printer.type;
 	cfg.use_printhead_en   = (RX_Config.printer.type==printer_LH702) && str_start(RX_Hostname, "LH702");
 	cfg.material_thickness = RX_Config.stepper.material_thickness;
-	cfg.boardNo=no;
+	cfg.boardNo			   = no;
     cfg.headsPerColor	   = RX_Config.headsPerColor;
+	cfg.printbarUsed	   = 0;	
 		
 	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) cfg.printerType = printer_LB702_UV;
 
@@ -521,7 +522,8 @@ static void _step_set_config(int no)
 	{
 	case STEPPER_CLEAF:	stepc_init		(no, _step_Socket[no]); break;
 	case STEPPER_TX:	steptx_init		(no, _step_Socket[no]); break;
-	case STEPPER_LB:	steplb_init		(no, _step_Socket[no]); break;
+	case STEPPER_LB:	cfg.printbarUsed = steplb_printbarUsed(no);
+						steplb_init		(no, _step_Socket[no]); break;
 	case STEPPER_DP:	stepdp_init		(no, _step_Socket[no]); break;
 	case STEPPER_TEST:	steptest_init	(no, _step_Socket[no]); break;
     case STEPPER_TTS:   steptts_init	(no, _step_Socket[no]); break;
@@ -718,18 +720,6 @@ SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
     }
 }
 */
-//--- step_screw_in_Buffer ------------------------------------------
-int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
-{
-    switch (_StepperType)
-    {
-    case STEPPER_LB:
-        return steplb_screw_in_Buffer((SHeadAdjustmentMsg *)headAdjustment);
-    default:
-        break;
-    }
-	return FALSE;
-}
 
 //--- step_get_stitch_position ---------------------------------------------
 int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
