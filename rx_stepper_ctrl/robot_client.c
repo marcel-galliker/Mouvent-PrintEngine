@@ -54,7 +54,8 @@
 #define MOTOR_X_GARAGE_POS			20000 //28500
 
 #define SCREW_STEPS					213333
-#define SCREW_SPEED					640000			// steps/sec
+#define SCREW_SPEED_HIGH			1280000			// steps/sec
+#define SCREW_SPEED_LOW				320000			// steps/sec
 
 #define MAX_LENGTH_Z				5500000//550000
 
@@ -263,7 +264,7 @@ static int _config_motors(void)
 			{
             case MOTOR_XY_0:	_configure_xy_motor(motor);	break;
             case MOTOR_XY_1:	_configure_xy_motor(motor);	break;
-            case MOTOR_SCREW:	_configure_screw_motor(SCREW_CURRENT_LOW, 2 * SCREW_SPEED);	break;
+            case MOTOR_SCREW:	_configure_screw_motor(SCREW_CURRENT_LOW, SCREW_SPEED_HIGH);	break;
             case MOTOR_Z:		_configure_z_motor();		break;
 			}
 			_rc_reset_motors(1<<motor);
@@ -1202,14 +1203,14 @@ int rc_get_screwer_current(void)
 //--- _rc_set_screwer_speed -----------------------------------------------
 void _rc_set_screwer_speed(int high)
 {
-    if (high)	_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, 2 * SCREW_SPEED);
-    else		_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED / 2);
+    if (high)	_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED_HIGH);
+    else		_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED_LOW);
 }
 
 //--- _rc_set_screwer_speed -----------------------------------------------
 int _rc_get_screwer_speed(void)
 {
-    return _MotorCfg[MOTOR_SCREW].vmax == SCREW_SPEED * 2;
+    return _MotorCfg[MOTOR_SCREW].vmax == SCREW_SPEED_HIGH;
 }
 
 //--- rc_get_screwer_pos ------------------------------------------
