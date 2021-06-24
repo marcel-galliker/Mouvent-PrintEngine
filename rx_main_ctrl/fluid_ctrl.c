@@ -1343,6 +1343,9 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				if (sendToHeads)
 				{
 					int head = ctrl_singleHead();
+                    if (ctrlMode == ctrl_print && fluid_get_ctrlMode(i) == ctrl_purge_step4)
+                        head = -1;
+                    
 					if (head<0) ctrl_send_all_heads_fluidCtrlMode(i, cmd.ctrlMode);				
 					else ctrl_send_head_fluidCtrlMode(head, cmd.ctrlMode, FALSE, FALSE);
 				}
