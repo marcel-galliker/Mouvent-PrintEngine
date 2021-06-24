@@ -60,7 +60,7 @@
 
 #define ENCODER_TOL					250
 #define ENCODER_TOL_XY				1000
-#define ENCODER_TOL_SCREW			220000
+#define ENCODER_TOL_SCREW			230000
 
 //---													  ddddrrrrrhhhhh
 #define IHOLD_IRUN(hold, run, delay)	((((delay)&0xf)<<16) | (((run)&0x1f)<<8) | ((hold)&0x1f))
@@ -112,7 +112,7 @@ static int _connection_closed(RX_SOCKET socket, const char *peerName);
 static int  _config_motors(void);
 
 static void _configure_xy_motor(uint8_t motor);
-static void _configure_screw_motor(int current);
+static void _configure_screw_motor(int current, int speed);
 static void _configure_z_motor(void);
 static void _send_MotorCfg(int motor);
 
@@ -125,6 +125,8 @@ static int  _rc_moveto_x_stop(int x, int stop, const char *file, int line);
 static int  _rc_moveto_y_stop(int y, int stop, const char *file, int line);
 static int	_rc_move_xy_done(void);
 static int _rc_move_screw_done(void);
+static void _rc_set_screwer_speed(int high);
+static int _rc_get_screwer_speed(void);
 
 static void _rc_state_machine(void);
 static void _check_version(void);
@@ -140,6 +142,7 @@ static void _download_end(void);
 static void _setSerialNo(UINT16 no);
 static void _robot_error_check(void);
 static char *_motor_name(int no);
+
 
 //--- rc_init ----------------------------------------------------
 void rc_init(void)
@@ -260,7 +263,7 @@ static int _config_motors(void)
 			{
             case MOTOR_XY_0:	_configure_xy_motor(motor);	break;
             case MOTOR_XY_1:	_configure_xy_motor(motor);	break;
-            case MOTOR_SCREW:	_configure_screw_motor(SCREW_CURRENT_LOW);	break;
+            case MOTOR_SCREW:	_configure_screw_motor(SCREW_CURRENT_LOW, 2 * SCREW_SPEED);	break;
             case MOTOR_Z:		_configure_z_motor();		break;
 			}
 			_rc_reset_motors(1<<motor);
@@ -661,7 +664,7 @@ static void _configure_xy_motor(uint8_t motor)
 }
 
 //--- configure_screw_motor ------------------------
-static void _configure_screw_motor(int current)
+static void _configure_screw_motor(int current, int speed)
 {		
 	_MotorCfg[MOTOR_SCREW].gconf = 0;
 	_MotorCfg[MOTOR_SCREW].swmode = 0x03;
@@ -669,7 +672,7 @@ static void _configure_screw_motor(int current)
 	_MotorCfg[MOTOR_SCREW].tpowerdown = 0;
 	_MotorCfg[MOTOR_SCREW].tpwmthrs = 0;
 	_MotorCfg[MOTOR_SCREW].rampmode = 0;
-    _MotorCfg[MOTOR_SCREW].vmax = 2*SCREW_SPEED;
+    _MotorCfg[MOTOR_SCREW].vmax = speed;
 	_MotorCfg[MOTOR_SCREW].v1 = 0;
 	_MotorCfg[MOTOR_SCREW].amax = 8*2932;
 	_MotorCfg[MOTOR_SCREW].dmax = 8*2932;
@@ -1165,32 +1168,48 @@ int rc_screwer_in_ref(void)
 //--- rc_turn_ticks_left ------------------------------------------------
 void rc_turn_ticks_left(int ticks)
 {
+    if (!_rc_get_screwer_speed()) _rc_set_screwer_speed(TRUE);
     _rc_motor_moveBy(MOTOR_SCREW, - ticks * SCREW_STEPS, _FL_);
 }
 
 //--- rc_turn_ticks_right ------------------------------------------------
 void rc_turn_ticks_right(int ticks)
 {
+    if (!_rc_get_screwer_speed()) _rc_set_screwer_speed(TRUE);
     _rc_motor_moveBy(MOTOR_SCREW, ticks * SCREW_STEPS, _FL_);
 }
 
 //--- rc_turn_steps ------------------------------------------------
 void rc_turn_steps(int steps)
 {
+    if (_rc_get_screwer_speed()) _rc_set_screwer_speed(FALSE);
     _rc_motor_moveBy(MOTOR_SCREW, steps, _FL_);
 }
 
 //--- rc_set_screwer_current ---------------------------------------------
 void rc_set_screwer_current(int high)
 {
-    if (high) _configure_screw_motor(SCREW_CURRENT_HIGH);
-    else	  _configure_screw_motor(SCREW_CURRENT_LOW);
+    if (high) _configure_screw_motor(SCREW_CURRENT_HIGH, _MotorCfg[MOTOR_SCREW].vmax);
+    else	  _configure_screw_motor(SCREW_CURRENT_LOW, _MotorCfg[MOTOR_SCREW].vmax);
 }
 
 //--- rc_get_screwer_current --------------------------------------------------
 int rc_get_screwer_current(void)
 {
     return (_MotorCfg[MOTOR_SCREW].iholdirun == SCREW_CURRENT_HIGH);
+}
+
+//--- _rc_set_screwer_speed -----------------------------------------------
+void _rc_set_screwer_speed(int high)
+{
+    if (high)	_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, 2 * SCREW_SPEED);
+    else		_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED / 2);
+}
+
+//--- _rc_set_screwer_speed -----------------------------------------------
+int _rc_get_screwer_speed(void)
+{
+    return _MotorCfg[MOTOR_SCREW].vmax == SCREW_SPEED * 2;
 }
 
 //--- rc_get_screwer_pos ------------------------------------------

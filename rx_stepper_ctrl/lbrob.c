@@ -1272,12 +1272,12 @@ static void _rob_state_machine(void)
                     _ScrewPar.steps = -_turns;
                     Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
                 }
-                else if (_ScrewPar.axis==AXE_ANGLE && _ScrewPar.steps>MAX_STEPS_ANGLE-OVERTURN)
+                else if (_ScrewPar.axis==AXE_ANGLE && end>MAX_STEPS_ANGLE-OVERTURN)
                 {
                     _ScrewPar.steps = MAX_STEPS_ANGLE-OVERTURN-_turns;
                     Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
                 }
-                else if (_ScrewPar.axis==AXE_STITCH && _ScrewPar.steps>MAX_STEPS_STITCH-OVERTURN)
+                else if (_ScrewPar.axis==AXE_STITCH && end>MAX_STEPS_STITCH-OVERTURN)
                 {
                     _ScrewPar.steps = MAX_STEPS_STITCH-OVERTURN-_turns;
                     Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
