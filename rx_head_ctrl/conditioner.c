@@ -184,8 +184,11 @@ void cond_start_preslog(void)
 
 //--- _cond_preslog -----------------------------------------
 static void _cond_preslog(int ticks)
-{	
-	if (!_plog_on) 
+{
+    int valve_ink[4];
+    int valve_flush[4];
+
+    if (!_plog_on) 
 	{
 		if (_plog_file)
 		{
@@ -195,7 +198,7 @@ static void _cond_preslog(int ticks)
 		}
 		return;
 	}
-	int i;
+    int i;
 	if (_plog_file == NULL)
 	{
 		char name[100];
@@ -204,17 +207,24 @@ static void _cond_preslog(int ticks)
 		fprintf(_plog_file, "pump_ticks(ms)");
 		for (i = 0; i < 4; i++) 
 		{
-			fprintf(_plog_file, ";Pin %d; Meniscus %d;pump %d", i, i, i);
-			fprintf(_plog_file, ";TempHEAD %d;tempSTP %d; Heater %d", i, i, i);
+			fprintf(_plog_file, ";Pin %d; Meniscus %d; Pin 2 %d; Pout %d; pump %d", i, i, i, i, i);
+            fprintf(_plog_file, ";TempHEAD %d; tempIn %d; tempSTP %d; Heater %d", i, i, i, i);
+            fprintf(_plog_file, ";Fluid Pressure %d; Fluid Pressure Set %d", i, i);
+            fprintf(_plog_file, ";Valve Ink %d; Valve Flush %d", i, i);
 		}
 		fprintf(_plog_file, "\n");
 		_LogTimer = rx_get_ticks();
 	}
 
-	int time = rx_get_ticks() - _LogTimer;
-	
+    for (i = 0; i < 4; i++)
+    {
+        valve_ink[i] = RX_NiosStat.cond[i].info.valve_ink ? 1 : 0;
+        valve_flush[i] = RX_NiosStat.cond[i].info.valve_flush ? 1 : 0;
+    }
+
+    int time = rx_get_ticks() - _LogTimer;
 	fprintf(_plog_file, "%d", time);
-	for (i = 0; i < 4; i++) fprintf(_plog_file, ";%d;%d;%d;%d;%d;%d", _NiosStat->cond[i].pressure_in, _NiosStat->cond[i].meniscus, _NiosStat->cond[i].pump_measured, _NiosMem->cfg.cond[i].tempHead / 100, _NiosMem->cfg.cond[i].temp / 100, _NiosStat->cond[i].heater_percent);
+	for (i = 0; i < 4; i++) fprintf(_plog_file, ";%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d", _NiosStat->cond[i].pressure_in, _NiosStat->cond[i].meniscus, _NiosStat->cond[i].pressure_in2, _NiosStat->cond[i].pressure_out, _NiosStat->cond[i].pump_measured, _NiosMem->cfg.cond[i].tempHead / 100, _NiosStat->cond[i].tempIn / 100, _NiosMem->cfg.cond[i].temp / 100, _NiosStat->cond[i].heater_percent, RX_FluidStat[i].cylinderPressure, RX_FluidStat[i].cylinderPressureSet, valve_ink[i], valve_flush[i]);
 	fprintf(_plog_file, "\n");
 }
 
