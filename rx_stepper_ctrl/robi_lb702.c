@@ -845,7 +845,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_GARAGE:
-        if (rc_in_garage())
+        if (RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.screwerinfo.robi_in_ref)
         {
             Error(LOG, 0, "ROBOT already in garage");
             break;

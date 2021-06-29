@@ -74,6 +74,6 @@ void step_robi_to_garage(RX_SOCKET socket);
 SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment);
 int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment);
 int step_robot_used(int fluidNo);
-int step_stepper_to_fluid(int fluidno);
-int step_stepper_to_head(int headNo);
+int step_stepper_to_fluid(int fluidNo);
+int step_stepper_to_cluster(int clusterNo);
 int step_get_ScrewPos(int stepperNo);

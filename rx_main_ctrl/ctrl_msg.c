@@ -96,7 +96,7 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 {
 	int i;
 	
-//	TrPrintfL(TRUE, "_do_head_stat(%d)", headNo);
+	// TrPrintfL(TRUE, "_do_head_stat(%d)", headNo);
 	
 	if (headNo<HEAD_BOARD_CNT)
 	{
@@ -104,7 +104,7 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 		memcpy(&RX_HBStatus[headNo], pstat, sizeof(RX_HBStatus[0]));
         if (RX_StepperStatus.robot_used && !_RobPosSent[headNo])
 		{
-			step_get_ScrewPos(step_stepper_to_head(headNo+1));
+            step_get_ScrewPos(step_stepper_to_cluster(headNo));
 			_RobPosSent[headNo] = TRUE;
 		}
         

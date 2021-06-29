@@ -76,4 +76,4 @@ void steplb_set_fluid_off(int no);
 
 int steplb_robot_used(int fluidNo);
 int steplb_stepper_to_fluid(int fluidno);
-int steplb_stepper_to_head(int headNo);
+int steplb_stepper_to_cluster(int clusterNo);

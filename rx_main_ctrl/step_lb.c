@@ -168,7 +168,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     // received (after  a call of steplb_init())
     _StatReadCnt[no]++;
 
-    for (i = 0; i < STEPPER_CNT; i++)
+    for (i = 0; i < (RX_Config.inkSupplyCnt + 1)/2; i++)
     {
         if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
         {
@@ -178,7 +178,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
 
 	if (_Status[no].robot_used && !oldStatus[no].robot_used)
 	{
-		_set_screw_pos(no);
+        _set_screw_pos(no);
 	}
 
     memset(&info, 0, sizeof(info));
@@ -806,42 +806,68 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 }
 
 //--- _send_ctrlMode ---------------------------------------------
-static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no)
+static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int stepperNo)
 {
-    if (fluid_get_ctrlMode(2*no) != ctrlMode)
-        fluid_send_ctrlMode(2 * no, ctrlMode, TRUE);
+    // Change the IS-number to check according to the method _set_IS_Order in the class PrintSystem in the project mvt_digiprint_gui
+	switch (RX_Config.printer.type)
+	{
+	case printer_LB702_UV:
+		if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
+		{
+			if (RX_Config.inkSupplyCnt % 2 == 0)
+			{
+				fluid_send_ctrlMode((2 * stepperNo + 4) % RX_Config.colorCnt, ctrlMode, TRUE);
+				fluid_send_ctrlMode((2 * stepperNo + 5) % RX_Config.colorCnt, ctrlMode, TRUE);
+			}
+			else
+			{
+				fluid_send_ctrlMode((2 * stepperNo + 4) % RX_Config.colorCnt, ctrlMode, TRUE);
+				if (stepperNo != 0) fluid_send_ctrlMode((2 * stepperNo + 3) % RX_Config.colorCnt, ctrlMode, TRUE);
+			}
+			break;
+		}
+		// no break;
+		
+	case printer_LB702_WB:
+		fluid_send_ctrlMode(2 * stepperNo, ctrlMode, TRUE);
 
-    if (RX_Config.inkSupplyCnt % 2 == 0)
-    {
-        if (fluid_get_ctrlMode(2 * no + 1) != ctrlMode)
-            fluid_send_ctrlMode(2 * no + 1, ctrlMode, TRUE);
-    }
-    else if (no != 0)
-    {
-        if (fluid_get_ctrlMode(2 * no - 1) != ctrlMode)
-        fluid_send_ctrlMode(2 * no - 1, ctrlMode, TRUE);
-    }
+		if (RX_Config.inkSupplyCnt % 2 == 0)
+			fluid_send_ctrlMode(2 * stepperNo + 1, ctrlMode, TRUE);
+		else if (stepperNo != 0)
+			fluid_send_ctrlMode(2 * stepperNo - 1, ctrlMode, TRUE);
+        break;
+		
+	default:
+		break;
+	}
     
 }
 
 //--- _color2Robot ----------------------------------------
 static void _color2Robot(int color, int *pstepper, int *pprintbar)
 {
-    /*
-	if (RX_Config.inkSupplyCnt % 2 == 0)
-		stepperNo = headAdjustment->printbarNo / 2;
-	else
-		stepperNo = (headAdjustment->printbarNo + 1) / 2;
+    switch (RX_Config.printer.type)
+    {
+    case printer_LB702_UV:
+        if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
+        {
+            if (color < 4) color += RX_Config.colorCnt;
+            color -= 4;
+        }
+        // no break;
+        
+    case printer_LB702_WB:
+        if (RX_Config.inkSupplyCnt % 2 == 0) *pstepper = color / 2;
+        else                                 *pstepper = (color + 1) / 2;
 
-	if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && headAdjustment->printbarNo == 0))
-		printbarNo = headAdjustment->printbarNo % 2;
-	else
-		printbarNo = (headAdjustment->printbarNo + 1) % 2;
-    */
-    if (RX_Config.inkSupplyCnt % 2 == 0) *pstepper = color / 2;
-    else                                 *pstepper = (color + 1) / 2;
-
-    *pprintbar = color&1;    
+        if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && *pprintbar == 0))    *pprintbar = color&1;  
+        else                                                                                        *pprintbar = ((color&1)+1) % 2;
+        break;
+        
+    default:
+        break;
+    }
+                                                                                          
 }
 
 //--- steplb_printbarUsed -----------------------
@@ -1019,12 +1045,11 @@ int steplb_stepper_to_fluid(int fluidno)
     return stepperNo;
 }
 
-//--- steplb_stepper_to_head ----------------------------------------
-int steplb_stepper_to_head(int headNo)
+//--- steplb_stepper_to_cluster ----------------------------------------
+int steplb_stepper_to_cluster(int clusterNo)
 {
     if (RX_Config.inkSupplyCnt % 2 == 0)
-        return headNo / (RX_Config.headsPerColor * 2);
+        return clusterNo / (2 * RX_Config.headsPerColor / HEAD_CNT);
     else
-        return (headNo + RX_Config.headsPerColor) /
-               (RX_Config.headsPerColor * 2);
+        return (clusterNo + (RX_Config.headsPerColor / HEAD_CNT)) / (2 * RX_Config.headsPerColor / HEAD_CNT);
 }

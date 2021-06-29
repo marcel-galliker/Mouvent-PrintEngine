@@ -62,6 +62,7 @@ static int				_PurgeHeadNo = -1;
 static EnFluidCtrlMode	_EndCtrlMode[INK_SUPPLY_CNT] = {ctrl_off};
 static int				_Vacuum_Time[INK_SUPPLY_CNT] = {0};
 
+
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
 
@@ -80,6 +81,7 @@ static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
 static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
 static int _fluid_get_flush_time(int flush_cycle);
+static void _fluid2Robot(int fluidNo, int *stepperNo);
 
 //--- statics -----------------------------------------------------------------
 
@@ -358,7 +360,6 @@ void fluid_tick(void)
 	int tol=2;
 	int maxTempReady = 0;
 	int time=rx_get_ticks();
-    int ink_per_Robot = 2;
 	
 #define TIMEOUT 5000
 	SHeadStateLight state[INK_SUPPLY_CNT];
@@ -407,11 +408,14 @@ void fluid_tick(void)
 			_send_ctrlMode(i, ctrl_off, TRUE);
 					
 		state[i].canisterEmpty = (_FluidStatus[i].canisterErr >= LOG_TYPE_ERROR_CONT);
-        if (RX_Config.inkSupplyCnt % ink_per_Robot == 0)
-            state[i].act_pos_y = -1 * RX_StepperStatus.posY[i / ink_per_Robot];
-        else
-            state[i].act_pos_y = -1 * RX_StepperStatus.posY[(i+1) / ink_per_Robot];
-        }
+        
+        if (step_robot_used(i))
+		{
+            int stepperNo = 0;
+            _fluid2Robot(i, &stepperNo);
+            state[i].act_pos_y = -1 * RX_StepperStatus.posY[stepperNo];
+		}
+    }
         
 	RX_PrinterStatus.tempReady = maxTempReady;
 
@@ -1562,23 +1566,27 @@ void do_fluid_flush_pump(RX_SOCKET socket, SValue *pmsg)
 {
     int i;
     int power; // %
-	SValue value = *pmsg;
-	
+    SValue value = *pmsg;
+
     for (i = 0; i < FLUID_BOARD_CNT; i++)
     {
         if (_FluidThreadPar[i].socket != INVALID_SOCKET)
         {
-			if (_FluidStatus[i].flush_pump_val || RX_StepperStatus.inkinfo.flush_valve_0 || RX_StepperStatus.inkinfo.flush_valve_1 || RX_StepperStatus.inkinfo.flush_valve_2 || RX_StepperStatus.inkinfo.flush_valve_3)
-			{
-				power = 0;
-				value.value = 0;
+            if (_FluidStatus[i].flush_pump_val ||
+                RX_StepperStatus.inkinfo.flush_valve_0 ||
+                RX_StepperStatus.inkinfo.flush_valve_1 ||
+                RX_StepperStatus.inkinfo.flush_valve_2 ||
+                RX_StepperStatus.inkinfo.flush_valve_3)
+            {
+                power = 0;
+                value.value = 0;
 				steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
-			}
-			else
-			{
-				power = 75;
+            }
+            else
+            {
+                power = 75;
 				steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
-			}
+            }
             sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_FLUSH, sizeof(power), &power);
         }
     }
@@ -1618,4 +1626,30 @@ int _fluid_get_flush_time(int flush_cycle)
             time_s = RX_Config.inkSupply[i].ink.flushTime[flush_cycle];
     }
     return time_s;
+}
+
+/*	Change the IS-number to check according to the method _set_IS_Order in
+*	the class PrintSystem in the project mvt_digiprint_gui
+*/
+//--- _fluid2Robot --------------------------------------------
+static void _fluid2Robot(int fluidNo, int *stepperNo)
+{
+    int ink_per_Robot = 2;
+    switch (RX_Config.printer.type)
+    {
+    case printer_LB702_UV:
+        if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
+        {
+            if (fluidNo < 4) fluidNo += RX_Config.colorCnt;
+            fluidNo -= 4;
+        }
+        break;
+    default:
+        break;
+
+        if (RX_Config.inkSupplyCnt % ink_per_Robot == 0)
+            *stepperNo = fluidNo / ink_per_Robot;
+        else
+            *stepperNo = (fluidNo + 1) / ink_per_Robot;
+    }
 }

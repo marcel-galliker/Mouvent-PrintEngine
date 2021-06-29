@@ -565,12 +565,12 @@ int step_stepper_to_fluid(int fluidNo)
 	return 0;
 }
 
-//--- step_stepper_to_head ------------------------------------------
-int step_stepper_to_head(int headNo)
+//--- step_stepper_to_cluster ------------------------------------------
+int step_stepper_to_cluster(int clusterNo)
 {
 	switch (_StepperType)
 	{
-	case STEPPER_LB:	return steplb_stepper_to_head(headNo);
+	case STEPPER_LB:	return steplb_stepper_to_cluster(clusterNo);
 	}
 	return 0;
 }
@@ -578,7 +578,7 @@ int step_stepper_to_head(int headNo)
 //--- step_get_ScrewPos ------------------------------------------------
 int step_get_ScrewPos(int stepperNo)
 {
-	switch (_StepperType)
+    switch (_StepperType)
 	{
 	case STEPPER_LB:	return steplb_get_ScrewPos(stepperNo);
 	}
