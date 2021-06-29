@@ -715,7 +715,8 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     }
                                     else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
                                         _risingEdge[no] = TRUE;
-									break;
+                                    _AutoCapTimer = rx_get_ticks() + 5000;
+                                    break;
 		
 		case ctrl_cap_step4:		if (_Status[no].info.z_in_cap)
 									{
