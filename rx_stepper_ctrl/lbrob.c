@@ -1034,7 +1034,14 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         Error(WARN, 0, "CMD_RESET_ALL_SCREWS Starting at printbar 1");
         ctrl_send_2(CMD_GET_SCREW_POS, 0, NULL);
         _ScrewFunction = CMD_RESET_ALL_SCREWS;
-        _ScrewPar.printbar=val;
+        if (!(RX_StepperCfg.printbarUsed & (1 << 0)) && !(RX_StepperCfg.printbarUsed & (1 << 1)))
+            Error(ERR_CONT, 0, "No Prinbar used on this Stepperboard");
+        else if (val == 1 && !(RX_StepperCfg.printbarUsed & (1 << 1)))
+            Error(ERR_CONT, 0, "This Prinbar is not used on this Stepperboard");
+        if (val == 0 && !(RX_StepperCfg.printbarUsed & (1 << 0)) && RX_StepperCfg.printbarUsed & (1 << 1))
+            _ScrewPar.printbar = 1;
+        else
+            _ScrewPar.printbar=val;
         _ScrewPar.head=-1;
         _ScrewPar.axis=AXE_STITCH;
         _ScrewPar.steps=0;
