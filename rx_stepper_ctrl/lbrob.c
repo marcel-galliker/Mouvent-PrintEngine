@@ -547,6 +547,7 @@ void lbrob_main(int ticks, int menu)
                 break;
             case CMD_ROB_FILL_CAP:
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_RobFunction);
+				break;
             default:
                 Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", loc_new_cmd);
                 break;
@@ -722,6 +723,9 @@ void lbrob_handle_menu(char *str)
         case '8':
             pos = rob_fct_purge_head7;
             break;
+		default:
+			pos = rob_fct_purge_all;
+			break;
         }
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
         break;
@@ -854,7 +858,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _ScrewTime = 0;
         _CapIsWet = TRUE;
         RX_StepperStatus.robinfo.ref_done = FALSE;
-        int val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;
@@ -979,16 +982,13 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 if (RX_StepperCfg.wipe_speed == 0)
                     Error(ERR_CONT, 0, "Wipe-Speed is set 0, please chose another value");
 
-                if (!RX_StepperStatus.info.z_in_ref)
-                {
-                    if (!RX_StepperStatus.info.moving)
+                if (!RX_StepperStatus.info.z_in_ref && !RX_StepperStatus.info.moving)
                     {
                         _CmdRunning_Lift = CMD_LIFT_REFERENCE;
                         lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL);
                         _NewCmd = msgId;
                         break;
                     }
-                }
                 _vacuum_on();
                 RX_StepperStatus.robinfo.moving = TRUE;
                 _lbrob_move_to_pos(msgId, _micron_2_steps(CABLE_PURGE_POS_FRONT), TRUE);
@@ -1109,7 +1109,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_purge_head6:
         case rob_fct_purge_head7:
             _vacuum_on();
-            pos = (CABLE_PURGE_POS_BACK + (((int)_RobFunction - (int)rob_fct_purge_head0) * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
+            pos = (CABLE_PURGE_POS_BACK + (((int)_RobFunction - rob_fct_purge_head0) * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(pos), FALSE);
             break;
         case rob_fct_vacuum:
@@ -1158,7 +1158,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_screw_head5:
         case rob_fct_screw_head6:
         case rob_fct_screw_head7:
-            pos = (CABLE_SCREW_POS_BACK + (((int)_RobFunction - (int)rob_fct_screw_cluster) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8);
+            pos = (CABLE_SCREW_POS_BACK + (((int)_RobFunction - rob_fct_screw_cluster) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8);
             if (RX_StepperStatus.posY[0] < pos)
             {
 				_CmdRunning_old = msgId;
@@ -1182,7 +1182,7 @@ static void _rob_state_machine(void)
     int pos, distance = 0;
     int _turns = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].turns;
     
-    if ((!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving))
+    if (!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
     {
         /*
         if (_ScrewTime && rx_get_ticks() > _ScrewTime)
@@ -1608,7 +1608,7 @@ static void _set_ScrewPos(SScrewPositions *pos)
 //--- _save_ScrewPos ---------------------------------------
 static void _save_ScrewPos(int recalc)
 {
-    if (FALSE && recalc)
+    if (recalc)
     {
         if (_ScrewPar.axis == AXE_STITCH)
         {

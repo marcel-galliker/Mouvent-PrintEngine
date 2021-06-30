@@ -612,9 +612,7 @@ void ctrl_tick(void)
 		} // if (_HeadCtrl[i].running)
 	} // for
     
-    if (RX_StepperStatus.robot_used)
-    {
-        if (_BufferFluidCmd[0].used && rx_get_ticks() >= _PurgeTime + TIMEOUT && (!_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[0].headNo) || (_ctrl_stepper_in_purge4ever_pos(_BufferFluidCmd[0].headNo) && _BufferFluidCmd[0].ctrlMode == ctrl_purge4ever)))
+	if (RX_StepperStatus.robot_used && _BufferFluidCmd[0].used && rx_get_ticks() >= _PurgeTime + TIMEOUT && (!_ctrl_check_stepper_in_purgeMode(_BufferFluidCmd[0].headNo) || (_ctrl_stepper_in_purge4ever_pos(_BufferFluidCmd[0].headNo) && _BufferFluidCmd[0].ctrlMode == ctrl_purge4ever)))
         {
             _BufferFluidCmd[0].used = 0;
             ctrl_send_head_fluidCtrlMode(_BufferFluidCmd[0].headNo, _BufferFluidCmd[0].ctrlMode, _BufferFluidCmd[0].sendToFluid, _BufferFluidCmd[0].fromGui);
@@ -630,7 +628,6 @@ void ctrl_tick(void)
             return;
         }
     }
-}
 
 //--- _send_ink_def ------------------------------------------------
 static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)

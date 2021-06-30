@@ -777,7 +777,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 									motor_errors_reset();
-									rc_clear_error();
+                                    if (rc_isConnected()) rc_clear_error();
                                     _ErrorFlags = 0;
                                     if (RX_StepperStatus.robot_used) robi_lb702_handle_ctrl_msg(INVALID_SOCKET, msgId, NULL);
 									break;

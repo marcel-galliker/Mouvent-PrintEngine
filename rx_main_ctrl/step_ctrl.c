@@ -90,7 +90,6 @@ void step_tick(void)
 //--- _step_thread ---------------------------------------------
 static void* _step_thread(void *par)
 {
-    static int tmp = 0;
     while (_step_ThreadRunning)
 	{
 		int i;
@@ -99,10 +98,8 @@ static void* _step_thread(void *par)
 		{
 			if (_step_Socket[i]==INVALID_SOCKET && net_port_listening(dev_stepper, i, PORT_CTRL_STEPPER))
 			{
-                
                 net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
-                tmp = sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _step_socket_closed);
-                if (tmp == REPLY_OK)
+				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _step_socket_closed)== REPLY_OK)
                 {
                     ErrorEx(dev_stepper, i, LOG, 0, "Connected");
                     _step_set_config(i);

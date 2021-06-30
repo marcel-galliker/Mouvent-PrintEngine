@@ -929,7 +929,7 @@ int robi_lb702_screw_edgeCnt(void)
 {
     int pos;
 
-    if (rc_isConnected()) pos = rc_get_screw_pos();
+    if (rc_isConnected()) pos = rc_get_screwer_pos();
     else                  pos = RX_RobiStatus.motors[MOTOR_SCREW].motorPosition;
 
     int edgeCnt = (pos+(SCREW_STEPS/2)) / SCREW_STEPS;

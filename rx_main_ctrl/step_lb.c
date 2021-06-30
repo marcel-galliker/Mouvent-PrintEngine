@@ -56,7 +56,7 @@ static SHeadAdjustmentMsg   _HeadAdjustment[STEPPER_CNT] = {0};
 static void _steplb_rob_do_reference(int no);
 
 static void _check_fluid_back_pump(void);
-static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int no);
+static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int stepperNo);
 static int  _rob_get_printbar(int rob, int printbar);
 static int  _set_screw_pos(int stepperNo);
 
@@ -341,7 +341,9 @@ int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
 //--- steplb_get_ScrewPos ----------------------------------------------
 int steplb_get_ScrewPos(int stepperNo)
 {
-    _set_screw_pos(stepperNo);
+	if (_Status[stepperNo].robot_used)
+    	_set_screw_pos(stepperNo);
+    	
     return REPLY_OK;
 }
 
@@ -440,8 +442,7 @@ void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function)
 //--- steplb_rob_to_fct_pos_all ----------------------------------------------
 void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function)
 {
-    int i;
-    for (i = 0; i < STEPPER_CNT; i++)
+    for (int i = 0; i < STEPPER_CNT; i++)
     {
         if (_step_socket[i] != INVALID_SOCKET)
 			sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);
@@ -890,7 +891,6 @@ int	steplb_printbarUsed(int stepperNo)
 //--- steplb_adjust_heads ------------------------------------------------
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
-//    SHeadAdjustment msg;
     int stepperno, printbar;
     
     _color2Robot(headAdjustment->printbarNo, &stepperno, &printbar);
@@ -995,8 +995,6 @@ void steplb_set_autocapMode(int state)
 
 void steplb_set_fluid_off(int no)
 {
-  //  _color2Robot(color, &stepperNo, &printbarNo);
-
     if (_RobotCtrlMode[no/2] != ctrl_off && RX_Config.inkSupplyCnt % 2 == 0 && 
             ((no %2 == 0 && (fluid_get_ctrlMode(no+1) < ctrl_cap || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6))) || 
             (no %2 == 1 && (fluid_get_ctrlMode(no-1) < ctrl_cap || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6)))))
