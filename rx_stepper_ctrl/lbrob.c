@@ -1069,7 +1069,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
             robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
             return;
         }
-        else if (!(RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_screw) && !(_RobFunction == rob_fct_move && RX_StepperStatus.info.z_in_wash))
+        else if ((!(RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_screw) && !(_RobFunction == rob_fct_move && RX_StepperStatus.info.z_in_wash)) || !RX_StepperStatus.info.ref_done)
         {
             if (!RX_StepperStatus.info.moving)
             {

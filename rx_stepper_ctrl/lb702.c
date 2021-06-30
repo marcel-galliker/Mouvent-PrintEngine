@@ -172,7 +172,7 @@ void lb702_main(int ticks, int menu)
         RX_StepperStatus.info.printhead_en = TRUE;
 	
 	RX_StepperStatus.info.moving = (RX_StepperStatus.cmdRunning!=0);
-	if (RX_StepperStatus.info.moving)
+	if (RX_StepperStatus.info.moving || !RX_StepperStatus.info.ref_done)
 	{
 		RX_StepperStatus.info.z_in_ref   = FALSE;
 		RX_StepperStatus.info.z_in_up    = FALSE;
