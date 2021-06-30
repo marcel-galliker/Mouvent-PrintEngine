@@ -1237,11 +1237,16 @@ namespace RX_DigiPrint.Models
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
 			_CamFunctions.Off();
-			for(int i=0; i+1<_HeadsPerColor; i++)
+			int steps = (Int32)(_Action.Correction * 6.0 + 0.5);
+			if (Math.Abs(steps) <= _Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
+			else
 			{
-				SA_Action action=_Actions[_StitchIdx+i];
-				action.State = ECamFunctionState.waitRob;
-				_NextRobotCmd(action.StepperNo);
+				for (int i = 0; i + 1 < _HeadsPerColor; i++)
+				{
+					SA_Action action = _Actions[_StitchIdx + i];
+					action.State = ECamFunctionState.waitRob;
+					_NextRobotCmd(action.StepperNo);
+				}
 			}
 			ActionDone();
 		}

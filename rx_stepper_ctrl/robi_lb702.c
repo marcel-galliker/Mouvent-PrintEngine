@@ -877,10 +877,10 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _CmdRunning = msgId;
                 RX_StepperStatus.screwerinfo.moving = TRUE;
                 _set_moving_variables();
-                pos = 0;
+                pos = -100;         // Has to go to -0.1mm as the sensor is not always high when it goes directly to the position 0.0mm as on this position is the positive flag of the sensor
                 rx_sleep(50);
                 if (rc_isConnected())
-                    rc_moveto_y(pos, _FL_);
+                    rc_moveto_y(pos, _FL_);       
                 else
                 {
                     micron = pos - RX_StepperStatus.screw_posY;
