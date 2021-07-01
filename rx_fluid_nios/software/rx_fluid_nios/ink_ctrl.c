@@ -47,6 +47,7 @@
 
 #define 	DEGASSING_VACCUUM_UV		800
 #define 	DEGASSING_VACCUUM_WB		800
+#define 	DEGASSING_VACCUUM_CLEAF		450
 
 #define 	INK_PUMP_VAL_MAX			511 // 614
 
@@ -258,7 +259,8 @@ void ink_tick_10ms(void)
 		pRX_Status->ink_supply[isNo].fluid_PIDsetpoint_I 	= _InkSupply[isNo].pid_Setpoint.I;
 
 		//--- lung vacuum: UV when any heater is on ---
-		if (!(pRX_Status->ink_supply[isNo].error & err_heater_board)) _LungVacc = DEGASSING_VACCUUM_UV;
+		if (pRX_Config->printerType==printer_cleaf) _LungVacc = DEGASSING_VACCUUM_CLEAF;
+		else if (!(pRX_Status->ink_supply[isNo].error & err_heater_board)) _LungVacc = DEGASSING_VACCUUM_UV;
 
 		//---  check if message received from printhead ---------------------
 		if(pRX_Config->ink_supply[isNo].alive != _InkSupply[isNo].alive)
