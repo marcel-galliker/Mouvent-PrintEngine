@@ -212,6 +212,7 @@ int rx_def_is_test(EPrinterType printerType)
 	case printer_test_table:		return TRUE;
 	case printer_test_slide:		return TRUE;
 	case printer_test_slide_only:	return TRUE;
+    case printer_test_table_seon:	return TRUE;
 	default: return FALSE;
 	}
 }
