@@ -44,3 +44,4 @@ INT32 fluid_get_error          (int no);
 void undefine_PurgeCtrlMode(void);
 void do_fluid_flush_pump(RX_SOCKET socket, SValue *pmsg);
 int fluid_purgeCluster(int clusterNo, int state);
+void fluid2Robot(int fluidNo, int *stepperNo);

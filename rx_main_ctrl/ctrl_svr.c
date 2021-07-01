@@ -86,7 +86,6 @@ static void _send_head_cfg(int headNo);
 static void _send_ink_def(int headNo, char *drops, int screenOnPrinter);
 static int _ctrl_check_stepper_in_purgeMode(int fluidNo);
 static int _ctrl_stepper_in_purge4ever_pos(int headNo);
-static void _head2Robot(int head, int *stepperNo);
 
 //static void Data_Test_TCP();
 //static void Data_Test_UDP();
@@ -603,7 +602,7 @@ void ctrl_tick(void)
                     if (step_robot_used(inkSupply))
                     {
                         int stepperno = 0;
-                        _head2Robot(i, &stepperno);
+                        fluid2Robot(inkSupply, &stepperno);
                         stat[head].act_pos_y = -1 * RX_StepperStatus.posY[stepperno];
 					}
 				}
@@ -1303,36 +1302,4 @@ void ctrl_set_rob_pos(int headNo, INT32 angle, INT32 stitch)
 	msg.angle	= angle;
 	msg.stitch	= stitch;
 	sok_send_2(&_HeadCtrl[headNo/HEAD_CNT].socket, CMD_SET_ROB_POS, sizeof(msg), &msg);
-}
-
-/*	Change the IS - number to check according to the method _set_IS_Order in
- *	the class PrintSystem in the project mvt_digiprint_gui
- */ 
-//--- _head2Robot ----------------------------------------------
-static void _head2Robot(int head, int *stepperNo)
-{
-    int Colors_Per_Stepper = 2;
-    int Clusters_Per_Color = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
-    int Clusters_Per_Stepper = Colors_Per_Stepper * Clusters_Per_Color;
-    
-    switch (RX_Config.printer.type)
-    {
-    case printer_LB702_UV:
-        if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
-        {
-            if (head < Colors_Per_Stepper * Clusters_Per_Stepper)
-                head += Clusters_Per_Color * RX_Config.colorCnt;
-            
-            head -= Clusters_Per_Color * 4;
-        }
-        break;
-
-    default:
-        break;
-    }
-
-    if (RX_Config.inkSupplyCnt % 2 == 0)
-        *stepperNo = head / Clusters_Per_Stepper;
-    else
-        *stepperNo = (head + Clusters_Per_Stepper / Colors_Per_Stepper) / Clusters_Per_Stepper;
 }

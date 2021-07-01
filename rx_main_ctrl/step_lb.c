@@ -1025,6 +1025,7 @@ int steplb_robot_used(int fluidNo)
     case printer_LB702_WB:
     case printer_LB702_UV:
         _color2Robot(fluidNo, &stepperNo, &printbarNo);
+        if (stepperNo >= STEPPER_CNT) return FALSE;
         return (_Status[stepperNo].robot_used);
         break;
         

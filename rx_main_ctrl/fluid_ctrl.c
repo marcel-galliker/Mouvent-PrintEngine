@@ -81,7 +81,6 @@ static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
 static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
 static int _fluid_get_flush_time(int flush_cycle);
-static void _fluid2Robot(int fluidNo, int *stepperNo);
 
 //--- statics -----------------------------------------------------------------
 
@@ -412,7 +411,7 @@ void fluid_tick(void)
         if (step_robot_used(i))
 		{
             int stepperNo = 0;
-            _fluid2Robot(i, &stepperNo);
+            fluid2Robot(i, &stepperNo);
             state[i].act_pos_y = -1 * RX_StepperStatus.posY[stepperNo];
 		}
     }
@@ -1631,8 +1630,8 @@ int _fluid_get_flush_time(int flush_cycle)
 /*	Change the IS-number to check according to the method _set_IS_Order in
 *	the class PrintSystem in the project mvt_digiprint_gui
 */
-//--- _fluid2Robot --------------------------------------------
-static void _fluid2Robot(int fluidNo, int *stepperNo)
+//--- fluid2Robot --------------------------------------------
+void fluid2Robot(int fluidNo, int *stepperNo)
 {
     int ink_per_Robot = 2;
     switch (RX_Config.printer.type)
@@ -1646,10 +1645,10 @@ static void _fluid2Robot(int fluidNo, int *stepperNo)
         break;
     default:
         break;
-
-        if (RX_Config.inkSupplyCnt % ink_per_Robot == 0)
-            *stepperNo = fluidNo / ink_per_Robot;
-        else
-            *stepperNo = (fluidNo + 1) / ink_per_Robot;
     }
+
+    if (RX_Config.inkSupplyCnt % ink_per_Robot == 0)
+        *stepperNo = fluidNo / ink_per_Robot;
+    else
+        *stepperNo = (fluidNo + 1) / ink_per_Robot;
 }
