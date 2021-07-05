@@ -677,7 +677,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		case ctrl_cap:				if (!_Status[no].robot_used)
                                     {
                                         if (_AutoCapMode)
-                                            _RobotCtrlMode[no] = ctrl_print;
+                                            _RobotCtrlMode[no] = ctrl_prepareToPrint;
                                         else
                                         {
                                             steplb_lift_to_fct_pos(no, rob_fct_cap);
@@ -730,7 +730,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         }
                                         if (_AutoCapMode)
                                         {
-                                            _RobotCtrlMode[no] = ctrl_print;
+                                            _RobotCtrlMode[no] = ctrl_prepareToPrint;
                                         }
                                         else			
                                         {

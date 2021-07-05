@@ -170,7 +170,8 @@ typedef enum EnFluidCtrlMode
     ctrl_off,			 // 0x005:           
     ctrl_warmup,         // 0x006:
     ctrl_readyToPrint,   // 0x007:
-	ctrl_print,          // 0x008:
+	ctrl_prepareToPrint, // 0x008:
+	ctrl_print,          // 0x009:
     
 	
 	ctrl_check_step0		= 0x010,    // 0x010:

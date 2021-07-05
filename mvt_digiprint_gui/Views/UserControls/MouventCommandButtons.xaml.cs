@@ -181,7 +181,7 @@ namespace RX_DigiPrint.Views.UserControls
         //--- On_Clicked -------------------------------------------------
         private void On_Clicked(object sender, RoutedEventArgs e)
         {
-            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_print};
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_prepareToPrint};
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
         }
 
@@ -197,7 +197,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (!Button_Power.IsChecked) // Switch Power On
             {
-                TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd() { no = -1, ctrlMode = EFluidCtrlMode.ctrl_print };
+                TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd() { no = -1, ctrlMode = EFluidCtrlMode.ctrl_prepareToPrint };
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
             }
             else // Switch Power Off

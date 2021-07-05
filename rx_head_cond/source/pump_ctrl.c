@@ -313,6 +313,7 @@ void pump_tick_10ms(void)
 		case ctrl_undef:
 		case ctrl_error:
 		case ctrl_wait:
+		case ctrl_prepareToPrint:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						RX_Status.logCnt = 0;

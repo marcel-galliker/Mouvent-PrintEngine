@@ -212,14 +212,14 @@ namespace RX_DigiPrint.Services
 	        ctrl_undef,				//  0x000:
             ctrl_shutdown,          //  0x001:
             ctrl_shutdown_done,     //  0x002:
-	        ctrl_off,				//	0x003:
-	        ctrl_warmup,			//  0x004:
-	        ctrl_readyToPrint,		//  0x005:
-	        ctrl_print,				//  0x006:
-	        ctrl_bleed,				//  0x007:
-            ctrl_08,                //  0x008:
-            ctrl_09,        	    //  0x009:
-            ctrl_0a,      		    //	0x00a:
+            ctrl_error,             //  0x003:
+            ctrl_wait,              //  0x004:
+	        ctrl_off,				//	0x005:
+	        ctrl_warmup,			//  0x006:
+	        ctrl_readyToPrint,		//  0x007:
+            ctrl_prepareToPrint,    //  0x008:
+	        ctrl_print,				//  0x009:
+	        ctrl_bleed,				//  0x00a:
             ctrl_0b, 		        //  0x00b:
             ctrl_flush_0,	        //	0x010:
             ctrl_flush_1,	        //	0x011:

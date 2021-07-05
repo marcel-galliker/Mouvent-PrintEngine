@@ -379,6 +379,14 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_off;
 				break;
 
+			case ctrl_prepareToPrint:
+				pid_reset(&_InkSupply[isNo].pid_Pump);
+				pid_reset(&_InkSupply[isNo].pid_Setpoint);
+				_set_air_valve(isNo, PV_OPEN);
+				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= 100)
+					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				break;
+
 			case ctrl_print:
 				_set_bleed_valve(isNo, PV_CLOSED);
 				_set_air_valve(isNo, PV_CLOSED);

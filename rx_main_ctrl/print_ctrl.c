@@ -183,7 +183,6 @@ int pc_start_printing(void)
 		_BitsPerPixel = 0;
 		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
-//		fluid_start_printing();
 		spool_start_printing();
 		pq_start();
 		pc_print_next();

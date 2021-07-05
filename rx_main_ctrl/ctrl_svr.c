@@ -838,7 +838,8 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 				for (i = 0; i < HEAD_BOARD_CNT; i++)
 				{
 				    if (RX_Config.headBoard[i/HEAD_CNT].head[i%HEAD_CNT].inkSupply == RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply 
-				        && RX_HBStatus[i/HEAD_CNT].head[i%HEAD_CNT].ctrlMode == ctrl_print && i != headNo && fromGui == TRUE)
+				        && (RX_HBStatus[i/HEAD_CNT].head[i%HEAD_CNT].ctrlMode == ctrl_print || RX_HBStatus[i/HEAD_CNT].head[i%HEAD_CNT].ctrlMode == ctrl_prepareToPrint) 
+                        && i != headNo && fromGui == TRUE)
 				    {
 				        cmd.no = i % HEAD_CNT;
 				        cmd.ctrlMode = ctrl_off;
@@ -943,6 +944,7 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 {
 	int head;
 	SHeadCfg *pcfg;
+    if (ctrlMode == ctrl_prepareToPrint) _SingleHead = -1;
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
 		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];

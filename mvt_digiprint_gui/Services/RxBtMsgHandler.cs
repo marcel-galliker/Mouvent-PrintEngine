@@ -139,7 +139,7 @@ namespace RX_DigiPrint.Services
             RxStructConvert.ToStruct(out msg, buf);
             if (msg.reply!=0)
             {
-                TcpIp.SFluidCtrlCmd cmd = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_print};
+                TcpIp.SFluidCtrlCmd cmd = new TcpIp.SFluidCtrlCmd(){no=-1, ctrlMode = EFluidCtrlMode.ctrl_prepareToPrint};
                 RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref cmd);
             }
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_START_PRINTING);

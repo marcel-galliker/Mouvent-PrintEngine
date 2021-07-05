@@ -203,7 +203,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
         //--- Commands ------------------------------------
         private void OFF_Clicked        (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_off);          }
-        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_print);        }
+        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_prepareToPrint);        }
         private void PurgeSoft_Clicked  (object sender, RoutedEventArgs e) {_command("Purge", EFluidCtrlMode.ctrl_purge_soft);   }
         private void PurgeMicro_Clicked (object sender, RoutedEventArgs e) {_command("Purge", EFluidCtrlMode.ctrl_purge_soft);  }
         private void Purge_Clicked      (object sender, RoutedEventArgs e)
@@ -232,7 +232,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 for (int i = 0; i < 4; i++)
                 {
                     msg.no = cluster * 4 + i;
-                    msg.ctrlMode = EFluidCtrlMode.ctrl_print;
+                    msg.ctrlMode = EFluidCtrlMode.ctrl_prepareToPrint;
                     RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_FLUID_CTRL_MODE, ref msg);
                 }
                 CmdPopup.IsOpen = false;

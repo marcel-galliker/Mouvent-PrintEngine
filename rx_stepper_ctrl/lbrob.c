@@ -858,6 +858,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _ScrewTime = 0;
         _CapIsWet = TRUE;
         RX_StepperStatus.robinfo.ref_done = FALSE;
+        val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
         break;

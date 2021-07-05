@@ -21,7 +21,6 @@ int  fluid_end(void);
 void fluid_tick(void);
 void fluid_set_config(void);
 
-void fluid_start_printing	(void);
 void fluid_reply_stat		(RX_SOCKET socket);
 void fluid_error_reset		(void);
 void fluid_send_ctrlMode	(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);

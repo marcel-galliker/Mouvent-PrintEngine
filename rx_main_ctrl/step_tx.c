@@ -634,7 +634,7 @@ static void _steptx_rob_control(void)
 								{
 									_RobotDone = TRUE;
 									Error(LOG, 0, "ctrl_vacuum_step10 printState=%d", RX_PrinterStatus.printState);
-									if (_printing) _RobotCtrlMode = ctrl_print;
+									if (_printing) _RobotCtrlMode = ctrl_prepareToPrint;
 									else		   _RobotCtrlMode = ctrl_off;
 								}
 								break;
@@ -699,7 +699,7 @@ static void _steptx_rob_control(void)
 	case ctrl_cap_step6:		if (step_lift_in_wipe_pos(ctrl_cap))
 								{
 									_RobotDone = TRUE;
-                                    if (_AutoCapMode)	_RobotCtrlMode = ctrl_print;
+                                    if (_AutoCapMode)	_RobotCtrlMode = ctrl_prepareToPrint;
                                     else				_RobotCtrlMode = ctrl_off;
                                 }
 								break;
@@ -709,7 +709,7 @@ static void _steptx_rob_control(void)
 								undefine_PurgeCtrlMode();
 								break;
 
-	case ctrl_print:			_RobotDone = TRUE;
+	case ctrl_prepareToPrint:	_RobotDone = TRUE;
 								break;
 	default: return;
 	}

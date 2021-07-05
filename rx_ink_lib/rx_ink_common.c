@@ -33,7 +33,8 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_off:					return "OFF";		//  0x005:
 	case ctrl_warmup:				return "WARM ";		//  0x006:
 	case ctrl_readyToPrint:			return "READY";		//  0x007:
-	case ctrl_print:				return "PRINT";		//  0x008:
+	case ctrl_prepareToPrint:		return "PREPARE";	//	0x008:
+	case ctrl_print:				return "PRINT";		//  0x009:
     
 
 	case ctrl_check_step0:			return "CHECK/0";	//  0x010:

@@ -183,7 +183,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         private void ShutDown_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_off, false); }
         private void Check_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_check_step0, false); }
         private void Calibrate_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_cal_start, false); }
-        private void Print_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_print, false); }
+        private void Print_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_prepareToPrint, false); }
         private void Fill_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_fill, false); }
         private void Empty_Clicked(object sender, RoutedEventArgs e) { _command("Empty", EFluidCtrlMode.ctrl_empty, false); }
         private void Flush_Clicked_0(object sender, RoutedEventArgs e) { _command("Flush", EFluidCtrlMode.ctrl_flush_night, false); }

@@ -517,7 +517,7 @@ namespace RX_DigiPrint.Models
 				{
 					TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
 					msg.no = -1;
-					msg.ctrlMode = EFluidCtrlMode.ctrl_print;
+					msg.ctrlMode = EFluidCtrlMode.ctrl_prepareToPrint;
 
 					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
 				}
