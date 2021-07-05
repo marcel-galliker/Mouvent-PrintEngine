@@ -32,8 +32,6 @@
 #define ROBI_SHUTOFF_TIME           1000    // ms
 #define ROBI_CONNECTION_TIME        3500    // ms
 
-#define MIN_Y_POS                   31000
-
 #define MAX_VARIANCE                100     // um
 
 #define MAX_VAR_SCREW_POS           6000    // um
@@ -54,13 +52,14 @@ static int _steps_2_micron(int steps);
 static int _micron_2_steps(int micron);
 static void _check_robi_stalled(void);
 static void _set_moving_variables(void);
+static int _robi_lb702_screw_edgeCnt(void);
+static void _screwer_counter(void);
 
 
 static uint32_t _MsgsCaptured;
 
 
 static int _CmdRunning = 0;
-static int _BlockedCmd = 0;
 static int _NewCmd = 0;
 static int _Value = 0;
 static int _CmdStarted = FALSE;
@@ -76,6 +75,7 @@ static int _ScrewCorrect = FALSE;
 
 static int _RobiSteps;
 static int _UpNotReached = FALSE;
+static int _EdgeCnt = 0;
 
 //--- robi_lb702_init -----------------------------------------------------
 void robi_lb702_init(void)
@@ -151,6 +151,7 @@ void robi_lb702_main(int ticks, int menu)
     if (RX_StepperStatus.screwerinfo.z_in_down)
         _Loose_Screw_Time = 0;
     
+    
     if (_Loose_Screw_Time && rx_get_ticks() > _Loose_Screw_Time)
     {
         int val = 0;
@@ -170,6 +171,7 @@ void robi_lb702_main(int ticks, int menu)
     }
 
     _check_robi_stalled();
+    if (!rc_isConnected()) _screwer_counter();
 
     if (!_CmdRunning)
         _CmdStarted = FALSE;
@@ -219,7 +221,6 @@ void robi_lb702_main(int ticks, int menu)
                 }
                 _CmdRunning = 0;
                 _NewCmd = 0;
-                _BlockedCmd = 0;
                 _Value = 0;
             }
             break;
@@ -261,6 +262,7 @@ void robi_lb702_main(int ticks, int menu)
                 RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
             }
             _CmdRunning = 0;
+            _EdgeCnt += _robi_lb702_screw_edgeCnt();
             break;
 
         case CMD_ROBI_SCREW_TIGHT:
@@ -275,6 +277,7 @@ void robi_lb702_main(int ticks, int menu)
                 RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             }
             _CmdRunning = 0;
+            _EdgeCnt += _robi_lb702_screw_edgeCnt();
             break;
             
         case CMD_ROBI_MOVE_Z_DOWN:
@@ -553,7 +556,6 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         RX_StepperStatus.screwerinfo.y_in_ref = FALSE;
         RX_StepperStatus.screwerinfo.ref_done = FALSE;
         _NewCmd = FALSE;
-        _BlockedCmd = FALSE;
         lb702_reset_variables();
         if (rc_isConnected())   rc_stop(0x0f);
         else                    robi_stop();
@@ -674,6 +676,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _set_moving_variables();
             _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             _RobiSteps = 0;
+            _EdgeCnt = 0;
             if (rc_isConnected())   rc_move_top(_FL_);
             else                    robi_move_up();
         }
@@ -908,10 +911,6 @@ static void _check_robi_stalled(void)
     {
         RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_TIGHT;
         RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_LOOSE;
-        if (_CmdRunning == CMD_ROBI_SCREW_TIGHT)
-            _BlockedCmd = CMD_ROBI_SCREW_LOOSE;
-        else if (_CmdRunning == CMD_ROBI_SCREW_LOOSE)
-            _BlockedCmd = CMD_ROBI_SCREW_TIGHT;
     }
     
     /*
@@ -924,8 +923,8 @@ static void _check_robi_stalled(void)
     */
 }
 
-//--- robi_lb702_screw_edgeCnt ---------------------------------------------------------
-int robi_lb702_screw_edgeCnt(void)
+//--- _robi_lb702_screw_edgeCnt ---------------------------------------------------------
+static int _robi_lb702_screw_edgeCnt(void)
 {
     int pos;
 
@@ -936,6 +935,30 @@ int robi_lb702_screw_edgeCnt(void)
 
     if (_CmdRunning == CMD_ROBI_SCREW_TIGHT) return edgeCnt;
     else return -edgeCnt;
+}
+
+//--- _screwer_counter ------------------------------------------------------------
+static void _screwer_counter(void)
+{
+    static int _OldSensorState = 0;
+    if (_CmdRunning == CMD_ROBI_SCREW_TIGHT && !_OldSensorState && robi_screwer_in_ref())
+    {
+        _RobiSteps++;
+    }
+    if (_CmdRunning == CMD_ROBI_SCREW_LOOSE && !_OldSensorState && robi_screwer_in_ref())
+    {
+        _RobiSteps--;
+    }
+    _OldSensorState = robi_screwer_in_ref();
+}
+
+//--- robi_lb702_screw_edgeCnt ---------------------------------------
+int robi_lb702_screw_edgeCnt(void)
+{
+    if (!rc_isConnected())
+        return _RobiSteps;
+    else
+        return _EdgeCnt;
 }
 
 //--- _set_moving_variables ---------------------------------------------

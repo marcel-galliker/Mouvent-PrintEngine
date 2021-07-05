@@ -55,7 +55,7 @@
 
 #define SCREW_STEPS					213333
 #define SCREW_SPEED_HIGH			1280000			// steps/sec
-#define SCREW_SPEED_LOW				320000			// steps/sec
+#define SCREW_SPEED_LOW				160000			// steps/sec
 
 #define MAX_LENGTH_Z				5500000//550000
 

@@ -1225,7 +1225,7 @@ static void _rob_state_machine(void)
                             else                       _pos.x = SCREW_X_RIGHT + _ScrewPos.printbar[0].stitch.x - SCREW_X_LEFT;
                             TrPrintfL(TRUE, "Default _pos.x=%d", _pos.x);
                         }
-                        if (defaults || _pos.y==0)
+                        if (defaults || _pos.y<MIN_Y_POS)
                         {
 							if (_ScrewPar.printbar == 0 || _ScrewPos.printbar[0].stitch.y == 0) _pos.y = SCREW_Y_STITCH;
                             else                       _pos.y = _ScrewPos.printbar[0].stitch.y;
@@ -1247,7 +1247,7 @@ static void _rob_state_machine(void)
                         else _pos.x = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].x;
                         TrPrintfL(TRUE, "Default _pos.x=%d", _pos.x);
                     }
-                    if (defaults || _pos.y==0)                
+                    if (defaults || _pos.y < MIN_Y_POS)                
                     {                   
                         if (_ScrewPar.axis==AXE_ANGLE)
                         {

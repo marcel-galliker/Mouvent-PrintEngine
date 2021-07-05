@@ -149,8 +149,9 @@ void rx_def_init();
 #define SCREW_X_LEFT		-18200		// -17700	// um
 #define SCREW_X_RIGHT		74800		// 75300	// um       // SCREW_X_LEFT + 93000
 
-#define SCREW_Y_STITCH		51300 // um
-#define SCREW_Y_ANGLE		34900  // um       // SCREW_Y_STITCH - 16400
+#define SCREW_Y_STITCH		51300	// um
+#define SCREW_Y_ANGLE		34900	// um       // SCREW_Y_STITCH - 16400
+#define MIN_Y_POS			31000   // um 
 
 //--- simple value ----------------------------------------------	
 typedef struct SValue
