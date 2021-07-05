@@ -401,7 +401,7 @@ void ink_tick_10ms(void)
 
 				// --- Detect filter clogged -------
 				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual!=INVALID_VALUE
-				&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+				&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= _InkSupply[isNo].pid_Setpoint.val_max)
 				{
 					_FilterCloggedTime[isNo]++;
 					if(_FilterCloggedTime[isNo] > 6000)		// 1 minute over 900 mbars
