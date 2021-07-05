@@ -1636,6 +1636,7 @@ void fluid2Robot(int fluidNo, int *stepperNo)
     int ink_per_Robot = 2;
     switch (RX_Config.printer.type)
     {
+    case printer_LB701:
     case printer_LB702_UV:
         if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
         {

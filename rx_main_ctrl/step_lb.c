@@ -850,6 +850,7 @@ static void _color2Robot(int color, int *pstepper, int *pprintbar)
 {
     switch (RX_Config.printer.type)
     {
+    case printer_LB701:
     case printer_LB702_UV:
         if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
         {
