@@ -47,6 +47,7 @@
 
 #define 	DEGASSING_VACCUUM_UV		800
 #define 	DEGASSING_VACCUUM_WB		800
+#define 	DEGASSING_VACCUUM_CLEAF		450
 
 #define 	INK_PUMP_VAL_MAX			511 // 614
 
@@ -218,7 +219,7 @@ void ink_init(void)
 		_InkSupply[isNo].pid_Setpoint.P 				= 200;
 		_InkSupply[isNo].pid_Setpoint.I 				= 1500;
 		_InkSupply[isNo].pid_Setpoint.Start_Integrator	= 1;
-		_InkSupply[isNo].pid_Setpoint.val_max   		= 1000;	// Max IS pressure 1200 mbar
+		_InkSupply[isNo].pid_Setpoint.val_max   		= 1100;	// Max IS pressure 1200 mbar
 		_InkSupply[isNo].pid_Setpoint.val_min			= 0;	// Min not 0, just a little more
 
 		_InkSupply[isNo].pid_Calibration.val_max    	= 400;	// Max cond inlet pressure 30 mbars
@@ -270,7 +271,8 @@ void ink_tick_10ms(void)
 		pRX_Status->ink_supply[isNo].fluid_PIDsetpoint_I 	= _InkSupply[isNo].pid_Setpoint.I;
 
 		//--- lung vacuum: UV when any heater is on ---
-		if (!(pRX_Status->ink_supply[isNo].error & err_heater_board)) _LungVacc = DEGASSING_VACCUUM_UV;
+		if (pRX_Config->printerType==printer_cleaf) _LungVacc = DEGASSING_VACCUUM_CLEAF;
+		else if (!(pRX_Status->ink_supply[isNo].error & err_heater_board)) _LungVacc = DEGASSING_VACCUUM_UV;
 
 		//---  check if message received from printhead ---------------------
 		if(pRX_Config->ink_supply[isNo].alive != _InkSupply[isNo].alive)
@@ -424,7 +426,7 @@ void ink_tick_10ms(void)
 
 				// --- Detect filter clogged -------
 				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual!=INVALID_VALUE
-				&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+				&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= _InkSupply[isNo].pid_Setpoint.val_max)
 				{
 					_FilterCloggedTime[isNo]++;
 					if(_FilterCloggedTime[isNo] > 6000)		// 1 minute over 900 mbars
