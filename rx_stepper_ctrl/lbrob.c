@@ -1028,6 +1028,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 break;
             }
         }
+        Error(ERR_CONT, 0, "No Prinbar used on this Stepperboard");
         break;
         
     case CMD_RESET_ALL_SCREWS:
