@@ -1228,7 +1228,7 @@ static void _rob_state_machine(void)
                         }
                         if (defaults || _pos.y<MIN_Y_POS)
                         {
-							if (_ScrewPar.printbar == 0 || _ScrewPos.printbar[0].stitch.y == 0) _pos.y = SCREW_Y_STITCH;
+							if (_ScrewPar.printbar == 0 || _ScrewPos.printbar[0].stitch.y < MIN_Y_POS) _pos.y = SCREW_Y_STITCH;
                             else                       _pos.y = _ScrewPos.printbar[0].stitch.y;
                             TrPrintfL(TRUE, "Default _pos.y=%d", _pos.y);
                         }
@@ -1252,8 +1252,13 @@ static void _rob_state_machine(void)
                     {                   
                         if (_ScrewPar.axis==AXE_ANGLE)
                         {
-                            if (_ScrewPar.head==0) _pos.y = _ScrewPos.printbar[_ScrewPar.printbar].stitch.y - SCREW_Y_STITCH + SCREW_Y_ANGLE;
-                            else                   _pos.y = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head-1][AXE_ANGLE].y;
+							if ((_ScrewPar.head == 0 && _ScrewPos.printbar[_ScrewPar.printbar].stitch.y < MIN_Y_POS) 
+							        || (_ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head - 1][AXE_ANGLE].y < MIN_Y_POS && _ScrewPar.head != 0))
+								_pos.y = SCREW_Y_ANGLE;
+							else if (_ScrewPar.head==0)                                                             
+								_pos.y = _ScrewPos.printbar[_ScrewPar.printbar].stitch.y - SCREW_Y_STITCH + SCREW_Y_ANGLE;
+                            else                                            
+								_pos.y = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head-1][AXE_ANGLE].y;
                         }
                         else _pos.y = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].y - SCREW_Y_ANGLE + SCREW_Y_STITCH;
                         TrPrintfL(TRUE, "Default PosY=%d", _pos.y);
