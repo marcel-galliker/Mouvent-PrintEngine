@@ -688,7 +688,7 @@ static void _control(int fluidNo)
                                                 _send_ctrlMode(no, _EndCtrlMode[no], TRUE);
                                                 break;
                                             }
-											if (_lbrob && _PurgeCtrlMode == ctrl_purge_hard_wash)
+											if (_lbrob && _PurgeCtrlMode == ctrl_purge4ever)
 											{
                                                 if (!steplb_rob_in_fct_pos(step_stepper_to_fluid(no), rob_fct_purge4ever))
 													steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_purge4ever);
