@@ -243,10 +243,22 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
         {
-            if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
+            if (RxGlobals.PrintSystem.IsTx)
             {
-                _command("Purge+Wash", EFluidCtrlMode.ctrl_purge_hard_wash, true);
+                if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
+                {
+                    _command("Purge+Wash", EFluidCtrlMode.ctrl_purge_hard_wash, true);
+                }
             }
+            else
+            {
+                RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge + Wash", "Purge + Wash" + _InkSupply.InkType.Name + " ?");
+                if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+                {
+                    _command("Purge", EFluidCtrlMode.ctrl_purge_hard_wash, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+                }
+            }
+            
         }
 
         private void Done_Clicked(object sender, RoutedEventArgs e)
