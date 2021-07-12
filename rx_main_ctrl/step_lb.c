@@ -63,17 +63,27 @@ static int  _set_screw_pos(int stepperNo);
 
 //--- steplb_init ---------------------------------------------------
 void steplb_init(int no, RX_SOCKET socket)
-{	
-	setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);
+{
+    static int init_first_done = FALSE;
+    setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);
 	if (no>=0 && no<STEPPER_CNT)
 	{
 		_step_socket[no] = socket;
 		memset(&_Status[no], 0, sizeof(_Status[no]));
         memset(&_OldStatus[no], 0, sizeof(_OldStatus[no]));
     }
-	memset(_Status, 0, sizeof(_Status));
-	// All steppers board variables reset
-	for (int i = 0; i < STEPPER_CNT; i++) _StatReadCnt[i] = 0;
+    
+    // All steppers board variables reset
+    if (!init_first_done)
+    {
+        memset(_Status, 0, sizeof(_Status));
+        for (int i = 0; i < STEPPER_CNT; i++)
+            _StatReadCnt[i] = 0;
+    }
+    else
+        _StatReadCnt[no] = 0;
+
+    init_first_done = TRUE;
     RX_StepperStatus.robinfo.auto_cap = TRUE;
 }
 
