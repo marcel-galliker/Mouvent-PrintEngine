@@ -37,6 +37,7 @@
 static RX_SOCKET		    _step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		    _Status[STEPPER_CNT];
+static SStepperStat         _OldStatus[STEPPER_CNT];
 static int				    _AbortPrinting=FALSE;
 static int                  _WashStarted[STEPPER_CNT];
 static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
@@ -68,7 +69,8 @@ void steplb_init(int no, RX_SOCKET socket)
 	{
 		_step_socket[no] = socket;
 		memset(&_Status[no], 0, sizeof(_Status[no]));
-	}
+        memset(&_OldStatus[no], 0, sizeof(_OldStatus[no]));
+    }
 	memset(_Status, 0, sizeof(_Status));
 	// All steppers board variables reset
 	for (int i = 0; i < STEPPER_CNT; i++) _StatReadCnt[i] = 0;
@@ -156,9 +158,8 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     int robot_used = FALSE;
     ETestTableInfo info;
     ERobotInfo robinfo;
-
-    SStepperStat oldStatus[STEPPER_CNT];
-    memcpy(&oldStatus[no], &_Status[no], sizeof(oldStatus[no]));
+    
+    memcpy(&_OldStatus[no], &_Status[no], sizeof(_OldStatus[no]));
     memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
     
     _Status[no].no = no;
@@ -176,7 +177,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         }
     }
 
-	if (_Status[no].robot_used && !oldStatus[no].robot_used)
+	if (_Status[no].robot_used && !_OldStatus[no].robot_used)
 	{
         _set_screw_pos(no);
 	}
