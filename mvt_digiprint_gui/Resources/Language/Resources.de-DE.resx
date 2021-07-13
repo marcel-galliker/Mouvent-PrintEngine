@@ -980,6 +980,9 @@ Keine Klebestellen im Gerät?</value>
   <data name="Preview" xml:space="preserve">
     <value>Vorschau</value>
   </data>
+  <data name="PrepareToPrint" xml:space="preserve">
+    <value>Vorbereiten</value>
+  </data>
   <data name="Print" xml:space="preserve">
     <value>Drucken</value>
   </data>

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="RX_DigiPrint.Views.PrintSystemExtendedView.InkCylinderView"
+<UserControl x:Class="RX_DigiPrint.Views.PrintSystemExtendedView.InkCylinderView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -173,13 +173,13 @@
                 <GroupBox Width="150" Style="{StaticResource MvtGroupBox}" Header="^">
                     <StackPanel Margin="10,2">
 
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_OnOff" Content="OFF"  Margin="5" Click="OnOff_Clicked"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_OnOff" Content="{mvt:LocalizedBinding Off}"  Margin="5" Click="OnOff_Clicked"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Print}"       Click="Print_Clicked" Margin="5"    Padding="10" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40"  x:Name="FlushButton"  Content="{mvt:LocalizedBinding Flush}"  Margin="5"     Click="Flush_Clicked"     Padding="10" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                      Content="{mvt:LocalizedBinding Purge}" Margin="5"      Click="Purge_Clicked"     Padding="10"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"   Content="{mvt:LocalizedBinding PurgeAndVacuum}"  Margin="5"     Click="PurgeVacc_Clicked" Padding="10" x:Name="Button_PurgeVacc"/>
-                        <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                     Content="{mvt:LocalizedBinding PurgeAndWipe}"  Margin="5"   Click="PurgeWipe_Clicked" Padding="10" x:Name="Button_PurgeWipe"/>
+                        <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                     Content="mvt:LocalizedBinding PurgeAndWash"  Margin="5"   Click="PurgeWash_Clicked" Padding="10" x:Name="Button_PurgeWash"/>
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
                         <Button    Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                   Content="{mvt:LocalizedBinding Fill}"    Margin="5"    Click="Fill_Clicked"      Padding="10" />
                         <Button   Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                    Content="{mvt:LocalizedBinding Empty}"    Margin="5"   Click="Empty_Clicked"     Padding="10" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>

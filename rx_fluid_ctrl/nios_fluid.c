@@ -426,10 +426,11 @@ void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 }
 
 //--- nios_set_purge_par --------------------------------------
-void nios_set_purge_par(int isNo, int delay, int time)
+void nios_set_purge_par(int isNo, int delay_pos_y, int time)
 {
 	if (isNo<0 || isNo>NIOS_INK_SUPPLY_CNT) return;
 	_Cfg->ink_supply[isNo].purgeTime = time;
+    _Cfg->ink_supply[isNo].delay_pos_y = delay_pos_y;
 }
 
 //--- _set_testmode -----------------------------
@@ -452,15 +453,16 @@ static int _set_testmode(void)
 void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 {
 	if (!_Init || isNo<0 || isNo>NIOS_INK_SUPPLY_CNT) return;
-	RX_FluidBoardStatus.stat[isNo].info.condTempReady = pstat->condTempReady;
-	_Cfg->ink_supply[isNo].headTemp                   = pstat->temp;
-	_Cfg->ink_supply[isNo].condPumpSpeed			  = pstat->condPumpSpeed;
-	_Cfg->ink_supply[isNo].condPumpFeedback			  = pstat->condPumpFeedback;
-	_Cfg->ink_supply[isNo].condPresIn				  = pstat->condPresIn;
-	_Cfg->ink_supply[isNo].condPresOut				  = pstat->condPresOut;	
-	_Cfg->ink_supply[isNo].condMeniscus				  = pstat->condMeniscus;
-	_Cfg->ink_supply[isNo].condMeniscusDiff			  = pstat->condMeniscusDiff;
-	_Cfg->ink_supply[isNo].canisterEmpty			  = pstat->canisterEmpty;
+	RX_FluidBoardStatus.stat[isNo].info.condTempReady	= pstat->condTempReady;
+	_Cfg->ink_supply[isNo].headTemp						= pstat->temp;
+	_Cfg->ink_supply[isNo].condPumpSpeed				= pstat->condPumpSpeed;
+	_Cfg->ink_supply[isNo].condPumpFeedback				= pstat->condPumpFeedback;
+	_Cfg->ink_supply[isNo].condPresIn					= pstat->condPresIn;
+	_Cfg->ink_supply[isNo].condPresOut					= pstat->condPresOut;	
+	_Cfg->ink_supply[isNo].condMeniscus					= pstat->condMeniscus;
+	_Cfg->ink_supply[isNo].condMeniscusDiff				= pstat->condMeniscusDiff;
+	_Cfg->ink_supply[isNo].canisterEmpty				= pstat->canisterEmpty;
+    _Cfg->ink_supply[isNo].act_pos_y					= pstat->act_pos_y;
 	_Cfg->ink_supply[isNo].alive++;
 }
 
@@ -588,11 +590,13 @@ void _update_status(void)
 		pstat->cylinderPresSet	= _Stat->ink_supply[i].cylinderPresSet;		
 		pstat->cylinderSetpoint	= _Stat->ink_supply[i].IS_Pressure_Setpoint;
 		pstat->cylinderPres		= _Stat->ink_supply[i].IS_Pressure_Actual;
+		pstat->cylinderPresDiff = _Stat->ink_supply[i].IS_Pressure_Diff;
 		pstat->flushTime		= _Stat->ink_supply[i].flushTime;
 		pstat->airPressureTime	= _Stat->airPressureTime;
 		pstat->temp				= _Stat->ink_supply[i].heaterTemp;
 		pstat->pumpSpeedSet		= _Stat->ink_supply[i].inkPumpSpeed_set;		
 		pstat->pumpSpeed		= _Stat->ink_supply[i].inkPumpSpeed_measured;
+		pstat->flush_pump_val	= _Stat->flush_pump_val;
 
 		if (pstat->ctrlMode>ctrl_purge_step1 && pstat->ctrlMode<=ctrl_purge_step6) _Cfg->ink_supply[i].purge_putty_pressure=0;
 
@@ -687,7 +691,11 @@ static void _display_status(void)
 			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].test_cylinderPres);
 		else 
 //			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Cfg->ink_supply[i].cylinderPresSet);		
-			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%5s(%03d)  ", value_str(_Stat->ink_supply[i].IS_Pressure_Actual), _Stat->ink_supply[i].PIDsetpoint_Output);		
+			for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
+			{
+				term_printf("%5s", value_str(_Stat->ink_supply[i].IS_Pressure_Actual));
+				term_printf("(~%4s) ", value_str(_Stat->ink_supply[i].IS_Pressure_Diff));
+			}
 		term_printf("\n");
 		term_printf("inkPump:           ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%4s(%3d%%)  ", value_str(_Stat->ink_supply[i].inkPumpSpeed_measured), _Stat->ink_supply[i].inkPumpSpeed_set); term_printf("\n");
 				

@@ -77,8 +77,6 @@
                    <!-- <Button Content="Flush"         Click="Flush_Clicked"/>     - -->
 
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-
-                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Wipe}"          Click="Wipe_Clicked"        Padding="10" x:Name="Button_Wipe"/>
                     </StackPanel>
                 </GroupBox>
             </Grid>

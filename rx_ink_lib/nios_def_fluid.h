@@ -68,6 +68,9 @@ typedef struct
 	INT32	flushTime[3];
 	INT32	purgeTime;
 	
+	INT32	delay_pos_y;
+    INT32	act_pos_y;
+	
 //	INT32	fluid_PIDsetpoint_P;
 //	INT32	fluid_PIDsetpoint_I;
 //	INT32	fluid_PIDpump_P;
@@ -226,6 +229,7 @@ typedef struct
 	
 	INT32   IS_Pressure_Actual;
 	INT32   IS_Pressure_Setpoint;
+	INT32	IS_Pressure_Diff;
 	INT32   COND_Pressure_Actual;
 	INT32   COND_Pressure_Setpoint;
 	INT32	PIDsetpoint_Output;

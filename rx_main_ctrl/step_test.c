@@ -117,11 +117,12 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
 			info.z_in_print		&= _status[i].info.z_in_print;
 			info.z_in_cap		&= _status[i].info.z_in_cap;
 			info.x_in_cap		&= _status[i].info.x_in_cap;
+			RX_StepperStatus.posY[i] = _status[i].posY[0];
 			if (_status[i].info.moving) 
 			{
 				RX_StepperStatus.posX = _status[i].posX;
-				RX_StepperStatus.posY = _status[i].posY;
 				RX_StepperStatus.posZ = _status[i].posZ;
+				RX_StepperStatus.posZ_back = _status[i].posZ_back;
 			}
 		}
 	};
@@ -131,8 +132,8 @@ int steptest_handle_status(int no, SStepperStat *pStatus)
 	if (!info.moving) 
 	{
 		RX_StepperStatus.posX = _status[no].posX;
-		RX_StepperStatus.posY = _status[no].posY;
 		RX_StepperStatus.posZ = _status[no].posZ;
+		RX_StepperStatus.posZ_back = _status[no].posZ_back;
 	}
 	
 	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));

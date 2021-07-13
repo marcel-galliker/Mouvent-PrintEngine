@@ -195,15 +195,17 @@ typedef struct SConditionerCfg_mcu
 
 	INT32	headsPerColor;			// FOR CALCULATION OF P PARAMETER during start-up phase (OFF->PRINT)
     INT32 	meniscus_setpoint;		// DESIRED MENISCUS PRESSURE (1/10 mbar)
-	UINT32 	temp; 					// desired temperature (1/1000 �C)
-	UINT32 	tempMax; 				// desired temperature (1/1000 �C)
+	UINT32 	temp; 					// desired temperature (1/1000 °C)
+	UINT32 	tempMax; 				// desired temperature (1/1000 °C)
 	UINT32	tempHead;				// measured head temperature
 	UINT32	heater_percent_neighbour;		// Heater % neighbour if we need to switch vecaus eof a defected temperature sensor
 	UINT32	mode;					// EnFluidCtrlMode
 	UINT32	volume_printed;			// [ml/min]
 	UINT16	flowResistance;
-	UINT32	purgeDelay;				// ms wait before opening the valve
+	INT32	purgeDelayPos_y;		// um wait before opening the valve
 	UINT32	purgeTime;				// ms the valve is open
+	INT32	purgeDelayTime;			// ms wait before opening the valve
+	INT32	purge_pos_y;			// um the position of the cleaning robot referenced to the head 0
 		
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;
@@ -247,10 +249,10 @@ typedef struct SConditionerStat_mcu
 	
 	UINT32			pump;				// rpm (calculated based on actual/desired output pressure)
 	UINT32			pump_measured;		// measured ml/min
-	UINT32			tempIn;				// actual Temp (1/1000 �C)
-    UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 �C)
+	UINT32			tempIn;				// actual Temp (1/1000 °C)
+    UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 °C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
-	INT32			unused_tempReady;	// temp ink = setpoint +/- 1�C
+	INT32			unused_tempReady;	// temp ink = setpoint +/- 1°C
 	UINT32			mode;				// EnFluidCtrlMode
 	SCondStatus		gpio_state;			// state of GPIO Inputs
 	UINT32			error;

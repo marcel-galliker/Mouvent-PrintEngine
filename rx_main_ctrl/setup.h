@@ -26,3 +26,5 @@ int setup_network	 (HANDLE file, SRxNetwork *pnet,				EN_setup_Action action);
 int setup_print_queue(HANDLE file, SPrintQueueItem *item, int *cnt, EN_setup_Action action);
 
 int setup_fluid_system	(const char *filepath,	UINT32				*pflushed,		  EN_setup_Action  action);
+int setup_screw_positions(const char *filepath, SScrewPositions ppos[MAX_STEPPERS], EN_setup_Action action);
+

@@ -157,7 +157,7 @@
                     <views_al:AlignmentView x:Name="AlignmentView"/>
                 </Grid>
             </TabItem>
-
+            
             <TabItem x:Name="TabUsers">
                 <TabItem.Header>
                     <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabUsers}">

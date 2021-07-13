@@ -13,14 +13,14 @@ OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-objcopy.exe
 
 #Additional flags
 PREPROCESSOR_MACROS := NDEBUG RELEASE linux soc
-INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_common_lib/VisualGDBCache
+INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_common_lib/VisualGDBCache ../rx_robot_ctrl/includes
 LIBRARY_DIRS := 
 LIBRARY_NAMES := 
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 
-CFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt
-CXXFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt
+CFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt -std=gnu99
+CXXFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt -std=gnu99
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -pthread -lrt
 COMMONFLAGS := 

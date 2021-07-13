@@ -78,12 +78,13 @@ int		machine_end(void)
 //--- machine_tick -------------------------------
 int		machine_tick(void)
 {
-	if(rx_def_is_tx(RX_Config.printer.type))
+	if (rx_def_is_tx(RX_Config.printer.type) || (RX_StepperStatus.robot_used && !RX_Config.stepper.development_machine))
 	{
 		if (RX_StepperStatus.info.z_in_cap) machine_set_capping_timer(FALSE);  // reset timer if already in cap
-		else if (plc_get_state() == plc_error) machine_set_capping_timer(TRUE);	// start timer as long as machine is in error state
+		if ((RX_StepperStatus.info.z_in_screw && _CappingTimer) || plc_get_state() == plc_error) 
+			machine_set_capping_timer(TRUE); // start timer as long as machine is in error state
 
-		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks())
+		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks() && !RX_PrinterStatus.door_open)
 		{
 			_CappingTimer=0;
 			Error(LOG, 0, "Setting printhead to capping position. CtrlMode=%d %d", fluid_get_ctrlMode(0),fluid_get_ctrlMode(1));
@@ -174,7 +175,7 @@ int		machine_start_printing(void)
 //--- machine_pause_printing ----------------------
 int		machine_pause_printing(int fromGui)
 {
-	if (_CappingTimer==0) machine_set_capping_timer(TRUE);
+	if (_CappingTimer == 0) machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
 	{
 	case mi_none:	return REPLY_OK;
@@ -187,7 +188,7 @@ int		machine_pause_printing(int fromGui)
 //--- machine_stop_printing -----------------------
 int		machine_stop_printing(void)
 {
-	if (_CappingTimer==0) machine_set_capping_timer(TRUE);
+	if (_CappingTimer == 0) machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
 	{
 	case mi_none:	return enc_stop_printing();
@@ -200,7 +201,7 @@ int		machine_stop_printing(void)
 //--- machine_abort_printing -----------------------
 int		machine_abort_printing(void)
 {
-	if (_CappingTimer==0) machine_set_capping_timer(TRUE);
+	if (_CappingTimer == 0) machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
 	{
 	case mi_none:	return enc_abort_printing();

@@ -10,36 +10,34 @@ namespace RX_DigiPrint.Views.AlignmentView
     public partial class RobotHeadAdjustmentView : CustomWindow
     {
         private RX_DigiPrint.Models.HeadAdjustment _HeadAdjustment = RxGlobals.HeadAdjustment;
-       
-        private int _inkSupplyNo;
-        private int _headNo;
 
-        public RobotHeadAdjustmentView(int inkSupplyNo, int headNo, 
+        public RobotHeadAdjustmentView(double recommendedValuePrintbarNo, double recommendedValueHeadNo,
             double recommendedValueAngle, double recommendedValueStitch)
         {
             InitializeComponent();
 
-            _inkSupplyNo = inkSupplyNo;
-            _headNo = headNo;
-
-            _HeadAdjustment.Angle = recommendedValueAngle;
-            _HeadAdjustment.Stitch = recommendedValueStitch;
+            _HeadAdjustment.PrintbarNo = recommendedValuePrintbarNo;
+            _HeadAdjustment.HeadNo = recommendedValueHeadNo;
+            _HeadAdjustment.Axis = recommendedValueAngle;
+            _HeadAdjustment.Steps = recommendedValueStitch;
             _HeadAdjustment.ShowHelp = false;
-            
+
+            ColorCnt.DataContext = RxGlobals.PrintSystem;
+            HeadsPerColor.DataContext = RxGlobals.PrintSystem;
             DataContext = RxGlobals.HeadAdjustment;
         }
 
         private void AngleInfo_Clicked(object sender, RoutedEventArgs e)
         {
             HelpView.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeAngle,
-                _HeadAdjustment.Angle, true, _inkSupplyNo*RxGlobals.PrintSystem.HeadsPerColor+_headNo);
+                _HeadAdjustment.Axis, true, (int)_HeadAdjustment.PrintbarNo * RxGlobals.PrintSystem.HeadsPerColor + (int)_HeadAdjustment.HeadNo);
             _HeadAdjustment.ShowHelp = true;
         }
 
         private void StitchInfo_Clicked(object sender, RoutedEventArgs e)
         {
             HelpView.Init(HeadAdjustmentHelp.HeadAdjustmentType.TypeStitch,
-                _HeadAdjustment.Stitch, true, _inkSupplyNo*RxGlobals.PrintSystem.HeadsPerColor+_headNo);
+                _HeadAdjustment.Steps, true, (int)_HeadAdjustment.PrintbarNo * RxGlobals.PrintSystem.HeadsPerColor + (int)_HeadAdjustment.HeadNo);
             _HeadAdjustment.ShowHelp = true;
         }
 
@@ -50,7 +48,7 @@ namespace RX_DigiPrint.Views.AlignmentView
 
         private void Adjust_Clicked(object sender, RoutedEventArgs e)
         {
-            RxGlobals.HeadAdjustment.Adjust(_inkSupplyNo, _headNo);
+            RxGlobals.HeadAdjustment.Adjust();
 
             // Todo: Update ProgressBar!! (rep not implemented yet!)
             // When Adjustment is complete and successful, set correctionValues to 0!

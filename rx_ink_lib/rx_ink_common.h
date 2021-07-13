@@ -164,10 +164,12 @@ typedef enum EnFluidCtrlMode
 	ctrl_shutdown,	     //	0x001:
 	ctrl_shutdown_done,	 // 0x002:
 	ctrl_error,			 // 0x003:
-    ctrl_off,			 // 0x004:           
-    ctrl_warmup,         // 0x005:
-    ctrl_readyToPrint,   // 0x006:
-	ctrl_print,          // 0x007:
+	ctrl_wait,			 // 0x004:
+	ctrl_off,			 // 0x005:           
+	ctrl_warmup,         // 0x006:
+	ctrl_readyToPrint,   // 0x007:
+	ctrl_prepareToPrint, // 0x008:
+	ctrl_print,          // 0x009:
 	
 	ctrl_check_step0		= 0x010,    // 0x010:
 	ctrl_check_step1,			// 0x011
@@ -194,6 +196,8 @@ typedef enum EnFluidCtrlMode
 	ctrl_purge_hard,          // 0x102:
 	ctrl_purge_hard_wipe,	  // 0x103:
 	ctrl_purge_hard_vacc,	  // 0x104:
+	ctrl_purge_hard_wash,	  // 0x105:
+	ctrl_purge4ever,		  // 0x106:
     ctrl_purge_step1 = 0x111, // 0x111:
     ctrl_purge_step2,         // 0x112:
     ctrl_purge_step3,         // 0x113:
@@ -241,9 +245,6 @@ typedef enum EnFluidCtrlMode
 	ctrl_wash_step4		= 0x164,  	// 0x164:
 	ctrl_wash_step5		= 0x165,  	// 0x165:
 	ctrl_wash_step6		= 0x166,  	// 0x166:
-									   
-	ctrl_robi_out		= 0x170,	// 0x170:
-	ctrl_robi_out_step1	= 0x171,	// 0x171:
 
     ctrl_fill = 0x200,	//	0x200:
     ctrl_fill_step1,	//	0x201:
@@ -258,7 +259,8 @@ typedef enum EnFluidCtrlMode
     ctrl_empty_step3,   //	0x303:
     ctrl_empty_step4,   //	0x304:
     ctrl_empty_step5,   //	0x305:
-	
+	ctrl_empty_step6,   //	0x306:	
+
 	ctrl_cal_start = 0x400, // 0x400: 
 	ctrl_cal_step1,    		// 0x401: Evaluate PID-Offset to pump 40ml/min
     ctrl_cal_step2,  		// 0x402:
@@ -296,8 +298,9 @@ char *DownloadStateStr(EnDownloadState mode);
 typedef struct SPurgePar
 {
 	INT32 no;
-	INT32 delay;
-	INT32 time;
+	INT32 delay_pos_y;
+	INT32 time;					// ms
+	INT32 delay_time;
 } SPurgePar;
 
 int valid(int val);

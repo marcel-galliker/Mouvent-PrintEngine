@@ -45,9 +45,14 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
             RxGlobals.User.PropertyChanged += User_PropertyChanged;
             RxGlobals.Chiller.PropertyChanged += Chiller_PropertyChanged;
+            for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
+            {
+                RxGlobals.StepperStatus[i].PropertyChanged += Stepper_PropertyChanged;
+            }
             RxGlobals.InkSupply.List[Constants.Waste].PropertyChanged += InkSupply_PropertyChanged;
             User_PropertyChanged(null, null);
             InkSupply_PropertyChanged(null, null);
+            Stepper_PropertyChanged(null, null);
         }
 
         //--- Chiller_PropertyChanged ----------------------------------
@@ -56,15 +61,40 @@ namespace RX_DigiPrint.Views.PrintSystemView
             CmdButton.IsEnabled = RxGlobals.Chiller.Running && _InkSupply!=null && _InkSupply.InkType!=null;
         }
 
+        //--- Stepper_PropertyChanged ---------------------------------------
+        private void Stepper_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            Visibility visible;
+
+            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
+            ServiceGrid.Visibility = visibility;
+            Line_Calibrate.Visibility = visibility;
+            // Button_Calibrate.Visibility = visibility;
+            InkType.IsEnabled = (RxGlobals.User.UserType >= EUserType.usr_maintenance);
+            CB_RectoVerso.IsEnabled = (RxGlobals.User.UserType >= EUserType.usr_maintenance);
+
+            Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
+            visible = ((_RobotUsed() || RxGlobals.PrintSystem.IsTx) && !RxGlobals.Stepper.DevelopmentMachine) ? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeWash.Visibility = visible;
+            Button_PurgeVacc.Visibility = visible;
+        }
+
         //--- User_PropertyChanged --------------------------------------
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            Visibility visible;
+
             Visibility visibility  = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed; 
             ServiceGrid.Visibility = visibility;
             Line_Calibrate.Visibility = visibility;
             // Button_Calibrate.Visibility = visibility;
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
             CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
+
+            Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
+            visible = ((_RobotUsed() || RxGlobals.PrintSystem.IsTx) && !RxGlobals.Stepper.DevelopmentMachine) ? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeWash.Visibility = visible;
+            Button_PurgeVacc.Visibility = visible;
         }
 
         //--- InkSupply_PropertyChanged ----------------------------------
@@ -124,9 +154,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void _printertype_changed()
         {
             int i = 0;
+            Visibility visible;
+
             CB_RectoVerso.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803 ? Visibility.Visible : Visibility.Collapsed;
             HasSideSelection = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
-            
+
             SettingsGrid.RowDefinitions[3].Height = new GridLength(25/RxGlobals.Screen.Scale);
             
             switch (RxGlobals.PrintSystem.PrinterType)
@@ -143,9 +175,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (RxGlobals.PrintSystem.HasHeater) SettingsGrid.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Auto);
             else                                 SettingsGrid.RowDefinitions[6].Height = new GridLength(0);
 
-            Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
-
+            visible = ((_RobotUsed() || RxGlobals.PrintSystem.IsTx) && !RxGlobals.Stepper.DevelopmentMachine) ? Visibility.Visible : Visibility.Collapsed;
+            Button_PurgeWash.Visibility = visible;
+            Button_PurgeVacc.Visibility = visible;
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
@@ -238,6 +271,44 @@ namespace RX_DigiPrint.Views.PrintSystemView
             MsgPopup.IsOpen     = false;
         }
 
+        //--- _RobotUsed ------------------------------------
+        private bool _RobotUsed()
+        {
+            if (_InkSupply == null || !RxGlobals.PrintSystem.IsLb) return false;
+
+            int no = _InkSupply.No;
+            // Change the IS-number to check Stepper according to the method _set_IS_Order in the class PrintSystem
+            switch (RxGlobals.PrintSystem.PrinterType)
+            {
+                case EPrinterType.printer_LB702_UV:
+                    if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV && RxGlobals.PrintSystem.ColorCnt >= 5 && RxGlobals.PrintSystem.ColorCnt <= 7)
+                    {
+                        if (no < 5) no += RxGlobals.PrintSystem.ColorCnt;
+                        no -= 4;
+                    }
+                    break;
+
+                default: break;
+            }
+            
+            if (RxGlobals.PrintSystem.ColorCnt %2 == 0)
+            {
+                if ((no-1) / 2 < RxGlobals.StepperStatus.Length)
+                    return RxGlobals.StepperStatus[(no - 1) / 2].RobotUsed;
+                else
+                    return false;
+            }
+            else if (RxGlobals.PrintSystem.ColorCnt % 2 != 0)
+            {
+                if (no / 2 < RxGlobals.StepperStatus.Length)
+                    return RxGlobals.StepperStatus[(no) / 2].RobotUsed;
+                else
+                    return false;
+            }
+
+            return false;
+        }
+
         //--- OnOff_Clicked ----------------------------------------------------------
         private void OnOff_Clicked (object sender, RoutedEventArgs e)
         {
@@ -250,7 +321,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void ShutDown_Clicked   (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_off,            false);}
         private void Check_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_check_step0,    false);}
         private void Calibrate_Clicked  (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_cal_start,      false);}
-        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_print,          false);}
+        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_prepareToPrint, false);}
         private void Fill_Clicked       (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_fill,           false);}
         private void Empty_Clicked      (object sender, RoutedEventArgs e) {_command("Empty",   EFluidCtrlMode.ctrl_empty,          false);}
         private void Flush_Clicked_0    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_night,    false);}
@@ -281,9 +352,47 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
         private void PurgeWipe_Clicked(object sender, RoutedEventArgs e) 
         {
-            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ShortPurgeAndWipe, RX_DigiPrint.Resources.Language.Resources.PurgeAndWipeAllPrintheads,  MessageBoxImage.Question, true))
+            if (RxGlobals.PrintSystem.IsTx)
+            {
+            if (MvtMessageBox.YesNo("Purge + Wipe", "PURGE and WIPE all printheads?",  MessageBoxImage.Question, true))
             {
                 _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, true);
+                }
+            }
+            else
+            {
+                RX_Common.MvtMessageBox.EPurgeResult result =
+                MvtMessageBox.Purge("Purge", PrintSystemView.allowPurgeAll(), "Purge and Wipe " + _InkSupply.InkType.Name + " ?");
+                if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+                {
+                    _command("Purge+Wipe", EFluidCtrlMode.ctrl_purge_hard_wipe, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+                }
+            }
+        }
+
+        private void Purge4Ever_Clicked(object sender, RoutedEventArgs e)
+        {
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge", PrintSystemView.allowPurgeAll(), "Purge for ever " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            {
+                _command("Purge4Ever", EFluidCtrlMode.ctrl_purge4ever, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+            }
+        }
+
+        private void Wipe_Clicked(object sender, RoutedEventArgs e)
+        {
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Wipe", PrintSystemView.allowPurgeAll(), "Wipe " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            {
+                _command("Wipe", EFluidCtrlMode.ctrl_wipe, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
+            }
+        }
+
+        private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
+            {
+                _command("Purge+Wash", EFluidCtrlMode.ctrl_purge_hard_wash, true);
             }
         }
 

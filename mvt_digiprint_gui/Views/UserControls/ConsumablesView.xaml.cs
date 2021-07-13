@@ -48,9 +48,18 @@ namespace RX_DigiPrint.Views.UserControls
                     MainGrid.Children.Add(additionalLevel);
                 }
 
+                // Special CLEAF
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf) // Waste (without flush)
+                {
+                    InkLevel additionalLevel = new InkLevel() { DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt + 1] };
+                    Grid.SetColumn(additionalLevel, 0);
+                    MainGrid.Children.Add(additionalLevel);
+                    additionalInkLevels = 1;
+                }
+
                 for (int i=0; i<RxGlobals.PrintSystem.ColorCnt; i++)
                 {
-                    if ( RxGlobals.PrintSystem.IS_Order!=null)
+                    if (RxGlobals.PrintSystem.IS_Order!=null)
                     {
                         InkLevel ctrl = null;
                         int inkCylinderIndex = i * RxGlobals.PrintSystem.InkCylindersPerColor;

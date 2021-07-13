@@ -42,8 +42,8 @@
 #endif
 
 #define MAX_CONNECTIONS	5
-#define MSG_BUF_SIZE	256
-#define MSG_MSG_SIZE	256
+#define MSG_BUF_SIZE	2048
+#define MSG_MSG_SIZE	2048
 
 static RX_SOCKET	_MainSocket=INVALID_SOCKET;
 
@@ -77,9 +77,12 @@ static void _do_config			(SStepperCfg *pcfg);
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
 {
+    int errNo = 0;
 	_MsgBufIn  = 0;
 	_MsgBufOut = 0;
-	sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
+    
+    errNo = sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
+	TrPrintfL(1, "Fehler %d", errNo);
 
 	err_set_server(_HServer);
 	
@@ -149,6 +152,12 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 int  ctrl_main(int ticks, int menu)
 {
 	int cnt=0;
+    int errNo = 0;
+    if (!_HServer)
+    {
+        errNo = sok_start_server(&_HServer, NULL, PORT_CTRL_STEPPER, SOCK_STREAM, MAX_CONNECTIONS, _save_ctrl_msg, _ctrl_connected, _ctrl_deconnected);
+		TrPrintfL(1, "Fehler %d", errNo);
+    }
 	while (_MsgBufOut!=_MsgBufIn)
 	{
 		cnt++;

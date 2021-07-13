@@ -28,13 +28,13 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_undef:	    		return "---";		//  0x000:
 	case ctrl_shutdown:				return "SHUTDOWN";	//  0x001:
 	case ctrl_shutdown_done:		return "SD-done";	//  0x002:
-	case ctrl_off:					return "OFF";		//  0x003:
-	case ctrl_warmup:				return "WARM ";		//  0x004:
-	case ctrl_readyToPrint:			return "READY";		//  0x005:
-	case ctrl_print:				return "PRINT";		//  0x006:
-	case ctrl_bleed:				return "BLEED";		//  0x007:
+	case ctrl_wait:					return "WAIT";		//  0x003:
+	case ctrl_off:					return "OFF";		//  0x004:
+	case ctrl_warmup:				return "WARM ";		//  0x005:
+	case ctrl_readyToPrint:			return "READY";		//  0x006:
+	case ctrl_print:				return "PRINT";		//  0x007:
+	case ctrl_bleed:				return "BLEED";		//  0x008:
 
-	case ctrl_08:					return "ctrl_08";	//  0x008:
 	case ctrl_09:					return "ctrl_09";	//  0x009:
 	case ctrl_0a:					return "ctrl_0a";	//  0x00a:
 	case ctrl_0b:					return "ctrl_0b";	//  0x009:
@@ -64,6 +64,7 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_empty_step3:			return "EMPTY_s3";	//	0x303:
 	case ctrl_empty_step4:			return "EMPTY_s4";	//	0x304:
 	case ctrl_empty_step5:			return "EMPTY_s5";	//	0x305:
+	case ctrl_empty_step6:			return "EMPTY_s6";	//	0x306:
 
 	case ctrl_cal_start:			return "START CAL";	//  0x00a:
 	case ctrl_cal_step1:			return "CAL /1";	//  0x00b:

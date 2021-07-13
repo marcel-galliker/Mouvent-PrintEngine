@@ -52,6 +52,7 @@
     <ClInclude Include="prod_log.h" />
     <ClInclude Include="lh702_ctrl.h" />
     <ClInclude Include="rx_main_ctrl.h" />
+    <ClInclude Include="sa_tcp_ip.h" />
     <ClInclude Include="step_dp.h" />
     <ClInclude Include="step_lb.h" />
     <ClInclude Include="args.h" />

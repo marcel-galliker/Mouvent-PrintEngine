@@ -85,10 +85,12 @@ void rx_def_init();
 #define FIELNAME_STEPPER_RBF	"rx_stepper_rbf"
 #define FIELNAME_STEPPER_NIOS	"rx_stepper_nios"
 #define FILENAME_SPOOLER_CTRL	"rx_spooler_ctrl"
+#define FILENAME_ROBOT_CTRL		"rx_robot_ctrl"
 #define FILENAME_LOG			"log.log"
 #define FILENAME_NETWORK		"network.cfg"
 #define FILENAME_PQ				"print_queue.xml"
 #define FILENAME_CFG			"config.cfg"
+#define FILENAME_SCREW_POS		"screwpos.xml"
 #define FILENAME_FLUID_STATE	"fluid.xml"
 #define FILENAME_HEADS_FLUSHED	"heads_flushed.xml"
 #define FILENAME_PLC_CFG		"plc.cfg"
@@ -137,6 +139,19 @@ void rx_def_init();
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
+//--- robot ----------
+#define ROB_PRINTBAR_CNT		2
+#define ROB_HEADS_PER_BAR	   16
+#define ROB_SCREWS_PER_HEAD		2
+
+//--- coordinates: X in web direction, Y in slide direction
+#define SCREW_X_LEFT		-17700		// -17700	// um
+#define SCREW_X_RIGHT		75300		// 75300	// um       // SCREW_X_LEFT + 93000
+
+#define SCREW_Y_STITCH		51300	// um
+#define SCREW_Y_ANGLE		34900	// um       // SCREW_Y_STITCH - 16400
+#define MIN_Y_POS			31000	// um
+
 //--- simple value ----------------------------------------------	
 typedef struct SValue
 {
@@ -156,7 +171,7 @@ typedef enum EDevice
     dev_fluid,   // 05
     dev_6,       // 06
     dev_enc32,   // 07
-    dev_8,       // 08
+	dev_robot,	// 08
     dev_stepper, // 09
     dev_head,    // 10
     dev_spooler, // 11
@@ -192,25 +207,26 @@ typedef enum ERectoVerso
 	rv_verso,	// 02
 } ERectoVerso;
 
+//--- EnPlcState ---------------------------------
 typedef enum
 {
-	plc_undef,		//	00
-	plc_error,		//	01
-	plc_bootup,		//	02
-	plc_stop,		//	03
-	plc_prepare,	//	04
-	plc_pause,		//	05
-	plc_run,		//	06
-	plc_setup,		//	07
-	plc_warmup,		//	08
-	plc_webin,		//	09
-	plc_washing,	//	10
-	plc_cleaning,	//	11
-	plc_glue,		//	12
-	plc_referencing,//	13
-	plc_service,	//	14
-	plc_webout,		//  15
-	plc_maintenance	//  16
+	plc_undef,		 //	00
+	plc_error,		 //	01
+	plc_bootup,		 //	02
+	plc_stop,		 //	03
+	plc_prepare,	 //	04
+	plc_pause,		 //	05
+	plc_run,		 //	06
+	plc_setup,		 //	07
+	plc_warmup,		 //	08
+	plc_webin,		 //	09
+	plc_washing,	 //	10
+	plc_cleaning,	 //	11
+	plc_glue,		 //	12
+	plc_referencing, //	13
+	plc_service,	 //	14
+	plc_webout,		 // 15
+	plc_maintenance  // 16
 } EnPlcState;
 
 typedef struct SLogItem
@@ -801,6 +817,13 @@ typedef struct
 
 typedef struct
 {
+	INT16 angle;  // 0=undef
+	INT16 stitch; // 0=undef
+	UINT8 crc;
+} SRobInfo;
+
+typedef struct
+{
 	UINT16	clusterNo;			//	0x00
 	UINT16	flowResistance;		//	0x02
 	UINT8	flowResistanceCRC;	//	0x04
@@ -814,12 +837,10 @@ typedef struct
 	UINT8	voltageCRC;							// 0x65
 	UINT64	dropletsPrinted;					// 0x66..0x6d
 	UINT8	dropletsPrintedCRC;					// 0x6e
-	INT16	rob_angle;							// 0x6f..0x70	// 0=undef
-	INT16	rob_dist;							// 0x71..0x72	// 0=undef
-	UINT8	rob_CRC;							// 0x73
+	SRobInfo robot;
 	UINT8	res_74[0x80-0x74];	
 } SHeadEEpromMvt;	// size must be 0x80!!
-	
+
 typedef struct SHeadStat
 {	
 	SCondInfo		info;
@@ -1113,6 +1134,7 @@ typedef struct SHeadStateLight
 	INT32			condTempReady;
 	INT32			condFlowfactor_ok;
 	INT32			canisterEmpty;
+	INT32			act_pos_y;
 } SHeadStateLight;
 			
 typedef struct SFluidStateLight
@@ -1124,6 +1146,7 @@ typedef struct SFluidStateLight
 	INT32			amcTemp;
 	INT32			fluidErr;
 	UINT32			machineMeters;
+	INT32			act_pos_y;
 } SFluidStateLight;
 	
 typedef struct SInkSupplyInfo
@@ -1221,6 +1244,7 @@ typedef struct SInkSupplyStat
 	
 	INT32	cylinderPresSet;	//  Pressure intermediate Tank Set
 	INT32	cylinderPres;		//  Pressure intermediate Tank
+	INT32	cylinderPresDiff;
 	INT32	cylinderSetpoint;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
 	INT32	flushTime;
@@ -1235,6 +1259,7 @@ typedef struct SInkSupplyStat
 	INT32	pumpSpeed;			//	Consumption pump speed measured
 	INT32	canisterLevel;
 	INT32	canisterErr;
+	INT32	flush_pump_val;
 	char	scannerSN[16];
 	char	barcode[128];
 	EnFluidCtrlMode	ctrlMode;	//	EnFluidCtrlMode
@@ -1257,7 +1282,30 @@ typedef struct SChillerStat
 	INT32	pressure;
 	INT32	resistivity;
 	UINT32	status;
-} SChillerStat; 
+} SChillerStat;
+
+typedef enum ERobotVaccumState
+{
+	rob_vacuum_1_to_4,
+	rob_vacuum_5_to_8,
+	rob_vacuum_all,
+} ERobotVacuumState;
+
+typedef struct
+{
+	INT32	x;
+	INT32	y;
+	INT32	turns;
+} SScrewPos;
+
+typedef struct SScrewPositions
+{
+	struct
+	{
+		SScrewPos stitch;
+		SScrewPos head[ROB_HEADS_PER_BAR][ROB_SCREWS_PER_HEAD];
+	} printbar[ROB_PRINTBAR_CNT];
+} SScrewPositions;
 	
 typedef struct SRobotOffsets
 {
@@ -1287,16 +1335,20 @@ typedef enum ERobotFunctions
 	rob_fct_purge_head5,	// 14: Purge head 5
 	rob_fct_purge_head6,	// 15: Purge head 6
 	rob_fct_purge_head7,	// 16: Purge head 7
-	
+	rob_fct_purge4ever,		// 17: Purge Capping
+	rob_fct_move,			// 18: Wash heads
+	rob_fct_screw_cluster,	// 19: Screw Pos cluster
+	rob_fct_screw_head0,	// 20: Screw Pos head 0
+	rob_fct_screw_head1,	// 21: Screw Pos head 1
+	rob_fct_screw_head2,	// 22: Screw Pos head 2
+	rob_fct_screw_head3,	// 23: Screw Pos head 3
+	rob_fct_screw_head4,	// 24: Screw Pos head 4
+	rob_fct_screw_head5,	// 25: Screw Pos head 5
+	rob_fct_screw_head6,	// 26: Screw Pos head 6
+	rob_fct_screw_head7,	// 27: Screw Pos head 7
+	rob_fct_maintenance,	// 28: Maintenance Pos
 
 } ERobotFunctions;
-	
-typedef enum ERobotVaccumState
-{
-	rob_vacuum_1_to_4,
-	rob_vacuum_5_to_8,
-	rob_vacuum_all,
-} ERobotVacuumState;
 	
 //--- Stepper Board --------------------
 typedef struct SStepperCfg
@@ -1308,6 +1360,7 @@ typedef struct SStepperCfg
 	//		 capping	
 	
 	EPrinterType	printerType;
+	INT32			development_machine;
 	INT32			boardNo;
 			#define		step_lift	0
 			#define		step_clean	1
@@ -1322,6 +1375,7 @@ typedef struct SStepperCfg
 	INT32			use_printhead_en;	// if true use PRINTHEAD_EN to allow head going down
 	INT32			material_thickness;
 	INT32			headsPerColor;
+	INT32			printbarUsed;		// bitset
 	
 	SRobotOffsets	robot[4];
 } SStepperCfg;
@@ -1346,20 +1400,28 @@ typedef struct
 
 typedef struct 
 {
-    INT32	inkSupplyNo;
-    INT32   headNo;
-    INT32   angle;	// in µm
-    INT32   stitch; // in µm
+    INT32 printbar;
+#define LEFT		0
+#define RIGHT		1
+    INT32 head;
+	INT32 axis;
+#define AXE_ANGLE	0
+#define AXE_STITCH	1
+#define AXE_MAX		1
+
+	INT32 steps; // in steps
 } SHeadAdjustment;
 
-typedef struct SScrewAdjustment
+typedef struct SRobPosition
 {
-	INT32	nr;
-	INT32   rot;	// in rotations
-	INT32   bar;
-} SScrewAdjustment;
+	int printBar;
+	int head;
+	INT16 angle;
+	INT16 stitch;
+} SRobPosition;
 	
 
+	
 	//--- check also GUI: RX_DigiPrint.Models.TestTableStatus.Update
 typedef struct ETestTableInfo
 {
@@ -1370,15 +1432,15 @@ typedef struct ETestTableInfo
 	UINT32 z_in_ref			: 1;	//	0x00000010
 	UINT32 z_in_print		: 1;	//	0x00000020
 	UINT32 z_in_cap			: 1;	//	0x00000040
-	UINT32 z_in_up			: 1;	//	0x00000080
-	UINT32 x_in_cap			: 1;	//	0x00000100
-	UINT32 x_in_ref			: 1;	//	0x00000200
-	UINT32 printing			: 1;	//	0x00000400
-	UINT32 curing			: 1;	//	0x00000800
-	UINT32 info_12			: 1;	//	0x00001000
-	UINT32 info_13			: 1;	//	0x00002000
-	UINT32 info_14			: 1;	//	0x00004000
-	UINT32 info_15			: 1;	//	0x00008000
+	UINT32 z_in_wash		: 1;	//  0x00000080
+    UINT32 z_in_up			: 1;	//	0x00000100
+	UINT32 x_in_cap			: 1;	//	0x00000200
+	UINT32 x_in_ref			: 1;	//	0x00000400
+	UINT32 printing			: 1;	//	0x00000800
+	UINT32 curing			: 1;	//	0x00001000
+	UINT32 z_in_screw		: 1;	//	0x00002000
+	UINT32 z_in_jet			: 1;	//	0x00004000
+    UINT32 info_15			: 1;	//	0x00008000
 	UINT32 info_16			: 1;	//	0x00010000
 	UINT32 info_17			: 1;	//	0x00020000
 	UINT32 headUpInput_0	: 1;	//	0x00040000
@@ -1430,8 +1492,44 @@ typedef struct ERobotInfo
 	UINT32 wd_back_up		: 1;	//  0x10000000
 	UINT32 wrinkle_detected	: 1;	//	0x20000000
 	UINT32 wd_in_up			: 1;	//	0x40000000
-	UINT32 r_info_31		: 1;	//	0x80000000
+	UINT32 x_in_purge4ever	: 1;	//	0x80000000
 } ERobotInfo;
+
+typedef struct EScrewerInfo
+{
+    UINT32 ref_done					: 1;	//	0x00000001
+    UINT32 moving					: 1;	//	0x00000002
+    UINT32 y_in_ref					: 1;	//	0x00000004
+    UINT32 robi_in_ref				: 1;	//	0x00000008
+    UINT32 x_in_pos					: 1;	//	0x00000010
+    UINT32 y_in_pos					: 1;	//	0x00000020
+    UINT32 z_in_down				: 1;	//	0x00000040
+    UINT32 z_in_up					: 1;	//	0x00000080
+    UINT32 r_info_8					: 1;	//	0x00000100
+    UINT32 r_info_9					: 1;	//	0x00000200
+    UINT32 r_info_10				: 1;	//	0x00000400
+    UINT32 screwed_OK : 1;				//	0x00000800
+    UINT32 screwer_blocked_left		: 1;	//	0x00001000
+    UINT32 screwer_blocked_right	: 1;	//	0x00002000
+    UINT32 screwer_ready			: 1;	//  0x00004000
+    UINT32 r_info_15				: 1;	//	0x00008000
+    UINT32 r_info_16				: 1;	//	0x00010000
+    UINT32 r_info_17				: 1;	//	0x00020000
+    UINT32 r_info_18				: 1;	//	0x00040000
+    UINT32 r_info_19				: 1;	//	0x00080000
+    UINT32 r_info_20				: 1;	//	0x00100000
+    UINT32 r_info_21				: 1;	//	0x00200000
+    UINT32 r_info_22				: 1;	//	0x00400000
+    UINT32 r_info_23				: 1;	//	0x00800000
+    UINT32 r_info_24				: 1;	//	0x01000000
+    UINT32 r_info_25				: 1;	//	0x02000000
+    UINT32 r_info_26				: 1;	//  0x04000000
+    UINT32 r_info_27				: 1;	//  0x08000000
+    UINT32 r_info_28				: 1;	//  0x10000000
+    UINT32 r_info_29				: 1;	//	0x20000000
+    UINT32 r_info_30				: 1;	//	0x40000000
+    UINT32 r_info_31				: 1;	//	0x80000000
+} EScrewerInfo;
 
 typedef struct ETestTableWarn
 {
@@ -1505,8 +1603,9 @@ typedef struct SStepperStat
 	INT32		cmdRunning;
 
 	//--- warnings/errors ----------------
-	ETestTableInfo	info;		// UINT32
-	ERobotInfo		robinfo;	// UINT32
+	ETestTableInfo	info;			// UINT32
+	ERobotInfo		robinfo;		// UINT32
+	EScrewerInfo 	screwerinfo;	// UINT32
 
 	UINT32		warn;
 	
@@ -1520,11 +1619,17 @@ typedef struct SStepperStat
 		#define TT_ERR_COVER_OPEN		0x00000040
 
 	INT32		posX;
-	INT32		posY;
+	INT32		posY[4];
 	INT32		posZ;
+	INT32		posZ_back;
+
+	INT32		screw_posX;
+	INT32		screw_posY;
+	INT32		screw_posZ;
 	
 	INT32		adjustmentProgress;
 	UINT32		alive[2];
+    INT32		adjustDoneCnt;
 
 	INT32			inputs;
 	SStepperMotor	motor[MAX_STEPPER_MOTORS];

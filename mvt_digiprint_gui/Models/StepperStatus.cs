@@ -76,8 +76,8 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property PosY ---------------------------------------
-        private Int32 _PosY;
-        public Int32 PosY
+        private Int32[] _PosY = new int[4];
+        public Int32[] PosY
         {
             get { return _PosY; }
             set { SetProperty(ref _PosY, value); }
@@ -161,6 +161,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _Z_in_ref; }
             set { SetProperty(ref _Z_in_ref, value); }
+        }
+
+        //--- Property Z_in_wash ---------------------------------------
+        private bool _Z_in_wash;
+        public bool Z_in_wash
+        {
+            get { return _Z_in_wash; }
+            set { SetProperty(ref _Z_in_wash, value); }
         }
 
         //--- Property Z_in_up ---------------------------------------
@@ -318,9 +326,10 @@ namespace RX_DigiPrint.Models
             Z_in_ref  = (msg.info & 0x00000010)!=0;
             Z_in_print= (msg.info & 0x00000020)!=0;
             Z_in_cap  = (msg.info & 0x00000040)!=0;
-            Z_in_up   = (msg.info & 0x00000080)!=0;
-            X_in_cap  = (msg.info & 0x00000100)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
-            X_in_ref  = (msg.info & 0x00000200)!= 0;
+            Z_in_wash = (msg.info & 0x00000080) != 0;
+            Z_in_up   = (msg.info & 0x000000100)!=0;
+            X_in_cap  = (msg.info & 0x00000200)!=0 || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB701;
+            X_in_ref  = (msg.info & 0x00000400)!= 0;
             CoverOpen = (msg.info & 0x00001000)!=0;
             
             HeadUpInput_0 = (msg.info & 0x00040000)!=0;
@@ -339,8 +348,13 @@ namespace RX_DigiPrint.Models
             CmdRunning = msg.cmdRunning;
 
             PosX    = msg.posX;
-            PosY    = msg.posY;
             PosZ    = msg.posZ;
+
+            for (int i = 0; i < PosY.Length; i++)
+            {
+                PosY[i] = msg.posY[i];
+            }
+
 
             //--- LiftState ------------------          
             {
@@ -380,10 +394,7 @@ namespace RX_DigiPrint.Models
             //---- END OF CAPPING ----
             else
             {
-                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)
-                    cap_enabled = RefDone & RobotUsed;
-                else
-                    cap_enabled = RefDone;  // Testtable?
+                cap_enabled = RefDone;  // Testtable?
                 capDP803_enabled = false;
             }
 

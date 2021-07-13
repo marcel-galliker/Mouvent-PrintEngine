@@ -103,8 +103,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();}
                 catch (Exception) { FpVoltage.Text = "";};                
             }
-
-            Button_Wipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- _PrinterType_Changed ----------------------------------------------------
@@ -116,7 +114,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeHard.Visibility = collapsed;
             Button_PurgeSoft.Visibility = collapsed;
             Button_PurgeMicro.Visibility = collapsed;
-//          Button_Wipe.Visibility  = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
         }
 
@@ -175,7 +172,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
         //--- Commands ------------------------------------
         private void OFF_Clicked        (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_off);          }
-        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_print);        }
+        private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_prepareToPrint);        }
         private void PurgeSoft_Clicked  (object sender, RoutedEventArgs e) {_command("Purge", EFluidCtrlMode.ctrl_purge_soft);   }
         private void PurgeMicro_Clicked (object sender, RoutedEventArgs e) {_command("Purge", EFluidCtrlMode.ctrl_purge_soft);  }
         private void Purge_Clicked      (object sender, RoutedEventArgs e)

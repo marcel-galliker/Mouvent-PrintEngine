@@ -23,7 +23,6 @@ int  fluid_end(void);
 void fluid_tick(void);
 void fluid_set_config(void);
 
-void fluid_start_printing	(void);
 void fluid_reply_stat		(RX_SOCKET socket);
 void fluid_error_reset		(void);
 void fluid_send_ctrlMode	(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
@@ -45,3 +44,4 @@ INT32 fluid_get_error          (int no);
 INT32 moving_average_canisterLevel(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value);
 
 void undefine_PurgeCtrlMode(void);
+void fluid2Robot(int fluidNo, int *stepperNo);

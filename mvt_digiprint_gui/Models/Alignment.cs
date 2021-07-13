@@ -277,18 +277,16 @@ namespace RX_DigiPrint.Models
                 }
             }
         }
-
-
         public void ImportScanCheckValues()
-        {
+        {                
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
             if (openFileDialog.ShowDialog() == true)
             {
-                bool checkChanged = true;
-                var corrections = new List<ScanCheckImport.AlignmentCorrectionValues>();
-                string errorMessage = "";
                 bool result = false;
+                string errorMessage = "";
+                bool checkChanged = true;
+                var corrections = new List<ScanCheckImport.AlignmentCorrectionValues>();              
                 try
                 {
                     result = ScanCheckImport.ImportManager.GetCorrectionValues(

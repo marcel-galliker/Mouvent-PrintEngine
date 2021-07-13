@@ -71,14 +71,14 @@
                                                 Width="20" Height="20" Kind="ContentSave"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
 
-                <!--
+               
                 <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Robot"
                                  x:Name="Button_RobotDownload" Click="RobotDownloadButton_Click" Margin="0, 0, 15, 0" >
                     <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                                                 Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                                 Width="20" Height="20" Kind="RobotIndustrial"></iconPacks:PackIconMaterial>
                 </common:MvtButton>
-                -->
+                
             </StackPanel>
             <rx_uc:Splicing HorizontalAlignment="Center"></rx_uc:Splicing>
         </Grid>

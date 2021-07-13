@@ -97,6 +97,18 @@
     <ClCompile Include="tx404.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="comm.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="robi.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="robi_lb702.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="robot_client.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gcc_Debug.h">
@@ -187,6 +199,27 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="tx404.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="comm.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="robi.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="robi_def.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="robi_lb702.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="robot_client.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_def.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_tcpip.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

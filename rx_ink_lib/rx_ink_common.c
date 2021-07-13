@@ -29,10 +29,12 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_shutdown:				return "SHUTDOWN";	//  0x001:
 	case ctrl_shutdown_done:		return "SD-done";	//  0x002:
 	case ctrl_error:				return "ERROR";		//  0x003:
-	case ctrl_off:					return "OFF";		//  0x004:
-	case ctrl_warmup:				return "WARM ";		//  0x005:
-	case ctrl_readyToPrint:			return "READY";		//  0x006:
-	case ctrl_print:				return "PRINT";		//  0x007:
+	case ctrl_wait:					return "WAIT";		//  0x004:
+	case ctrl_off:					return "OFF";		//  0x005:
+	case ctrl_warmup:				return "WARM ";		//  0x006:
+	case ctrl_readyToPrint:			return "READY";		//  0x007:
+	case ctrl_prepareToPrint:		return "PREPARE";	//	0x008:
+	case ctrl_print:				return "PRINT";		//  0x009:
 
 	case ctrl_check_step0:			return "CHECK/0";	//  0x010:
 	case ctrl_check_step1:			return "CHECK/1";	// 	0x011
@@ -59,6 +61,7 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_purge_hard:			return "PRG-H";		//  0x102:
 	case ctrl_purge_hard_wipe:		return "PRG+WPE";	//  0x103:
 	case ctrl_purge_hard_vacc:		return "PRG+VAC";	//  0x104:
+	case ctrl_purge_hard_wash:		return "PRG+WASH";	//  0x105:
 	case ctrl_purge_step1:			return "PRG/1";		//  0x111:
 	case ctrl_purge_step2:			return "PRG/2";		//  0x112:
 	case ctrl_purge_step3:			return "PRG/3";		//  0x113:
@@ -105,8 +108,6 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_wash_step5:			return "WASH/5";  	// 0x165:
 	case ctrl_wash_step6:			return "WASH/6";  	// 0x166:
 		
-	case ctrl_robi_out:				return "ROBi OUT";	// 0x170:
-		
 	case ctrl_fill:					return "FILL";		//	0x200:
 	case ctrl_fill_step1:			return "FILL/1";	//	0x201:
 	case ctrl_fill_step2:			return "FILL/2";	//	0x202:
@@ -119,6 +120,7 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_empty_step3:			return "EMPTY/3";	//	0x303:
 	case ctrl_empty_step4:			return "EMPTY/4";	//	0x304:
 	case ctrl_empty_step5:			return "EMPTY/5";	//	0x305:
+	case ctrl_empty_step6:			return "EMPTY/6";	//	0x306:
 
 	case ctrl_cal_start:			return "START CAL";	//  0x00a:
 	case ctrl_cal_step1:			return "CAL/1";	//  0x00b:
@@ -214,8 +216,8 @@ char *value_str_u(int val)
 char *value_str_screw(INT16 val)
 {
 	static char str[32];
-	if (val<=0)	strcpy(str, "----");
-	else		sprintf(str, "%02d.%d", val/6, val%6);
+	if (val > -6 && val < 0) sprintf(str, "-%02d.%d", val / 6, abs(val) % 6);
+	else		sprintf(str, "%02d.%d", val/6, abs(val)%6);
 	return str;
 }
 
@@ -224,7 +226,9 @@ int str_to_screw(const char *str)
 {
 	int val=0;
 	int nachkomma=0;
+	int sign = 1;
 	const char *ch;
+	if (str[0] == '-') sign = -1;
 	for (ch=str; *ch; ch++)
 	{
 		if (*ch>='0' && *ch<='9') val=(val*10)+*ch-'0';
@@ -236,7 +240,7 @@ int str_to_screw(const char *str)
 		}
 	}
 	if (nachkomma>5) nachkomma=5;
-	return 6*val+nachkomma;
+	return sign * (6*val+nachkomma);
 }
 //--- value_str3 ---------------------------------------------
 char *value_str3(int val)

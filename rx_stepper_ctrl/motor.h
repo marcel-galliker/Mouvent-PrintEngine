@@ -70,7 +70,7 @@ void	motor_end (void);
 void	motor_main(int ticks, int menu);
 void	motor_errors_reset(void);
 int		motors_init_done(void);
-
+int		motors_init_reset(void);
 
 void	motor_trace_move(int motor);
 

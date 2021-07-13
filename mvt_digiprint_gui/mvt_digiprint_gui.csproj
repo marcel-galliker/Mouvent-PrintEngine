@@ -267,6 +267,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
@@ -281,6 +282,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
@@ -1656,7 +1658,9 @@
     <EmbeddedResource Include="Resources\Language\Resources.fr-FR.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Language\Resources.it-IT.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.it-IT.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Language\Resources.nl-NL.resx" />
     <EmbeddedResource Include="Resources\Language\Resources.pl-PL.resx" />
     <EmbeddedResource Include="Resources\Language\Resources.pt-PT.resx" />
@@ -1942,7 +1946,7 @@
       <Name>rx_common_lib_cs</Name>
     </ProjectReference>
     <ProjectReference Include="..\ScanCheckParser\ScanCheckParser\ScanCheckImport.csproj">
-      <Project>{16a35183-8406-462e-88b9-56ebc80cff05}</Project>
+      <Project>{f03dc326-6266-4ec4-9bb0-9e36cf3dc014}</Project>
       <Name>ScanCheckImport</Name>
     </ProjectReference>
   </ItemGroup>
@@ -1970,6 +1974,9 @@
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
       <Version>3.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Wpf.UI.Controls.WebView">
+      <Version>6.1.2</Version>
     </PackageReference>
     <PackageReference Include="QRCoder">
       <Version>1.4.1</Version>

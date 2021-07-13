@@ -34,7 +34,7 @@
 #define MAX_CONNECTIONS	5
 
 //--- buffer ---------------------------------------------------------
-#define MSG_BUF_SIZE	256
+#define MSG_BUF_SIZE	512			// 256
 #define MSG_MSG_SIZE	1024
 typedef struct
 {
@@ -269,7 +269,7 @@ static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 //--- _do_set_purge_par ---------------------------------------------
 static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 {
-	nios_set_purge_par(ppar->no, ppar->delay, ppar->time);
+	nios_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time);
 	return REPLY_OK;
 }
 

@@ -378,11 +378,11 @@ static void _update_clusterNo(void)
 		RX_HBStatus->head[condNo].printedDroplets = mvt->dropletsPrinted;
 		RX_HBStatus[0].head[condNo].dropVolume = 0.0000000000024;
 
-		if (mvt->rob_CRC != rx_crc8(&mvt->rob_angle, 2 * sizeof(UINT16))) // not used ?
+		if (mvt->robot.crc != rx_crc8(&mvt->robot.angle, 2 * sizeof(UINT16))) // not used ?
 		{
-			mvt->rob_angle = 0;
-			mvt->rob_dist = 0;
-			mvt->rob_CRC = rx_crc8(&mvt->rob_angle, 2 * sizeof(UINT16));
+			mvt->robot.angle = 0;
+			mvt->robot.stitch = 0;
+			mvt->robot.crc = rx_crc8(&mvt->robot.angle, 2 * sizeof(UINT16));
 		}
 
 	}
@@ -731,12 +731,14 @@ void cond_set_voltage(int headNo, UINT8 voltage)
 }
 
 //--- cond_set_purge_par -----------------------------------------
-void cond_set_purge_par (int headNo, int delay, int time)
+void cond_set_purge_par(int headNo, int delay_pos_y, int time, int delay_time)
+
 {
-	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
-	
-	_NiosMem->cfg.cond[headNo].purgeDelay = delay;
-	_NiosMem->cfg.cond[headNo].purgeTime  = time;		
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;
+
+    _NiosMem->cfg.cond[headNo].purgeDelayPos_y = delay_pos_y;
+    _NiosMem->cfg.cond[headNo].purgeTime = time;
+    _NiosMem->cfg.cond[headNo].purgeDelayTime = delay_time;
 }
 
 //--- cond_add_droplets_printed ---------------------------------------
@@ -774,15 +776,15 @@ void cond_reset_droplets_printed(int headNo)
 }
 
 //--- cond_set_rob_pos ------------------------------------
-void cond_set_rob_pos(int headNo, int angle, int dist)
+void cond_set_rob_pos(int headNo, int angle, int stitch)
 {
 	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
 
 	SHeadEEpromMvt *mvt = &RX_HBStatus[0].head[headNo].eeprom_mvt;
 
-	if (angle>0) mvt->rob_angle = angle;
-	if (dist>0)  mvt->rob_dist  = dist;
-	mvt->rob_CRC   = rx_crc8(&mvt->rob_angle, 2*sizeof(mvt->rob_angle));
+	mvt->robot.angle = angle;
+	mvt->robot.stitch  = stitch;
+	mvt->robot.crc = rx_crc8(&mvt->robot.angle, 2 * sizeof(mvt->robot.angle));
 }
 
 //--- cond_set_clusterNo --------------------------------

@@ -14,6 +14,7 @@ bin\gui\ControlzEx.dll
 bin\gui\Dragablz.dll
 bin\gui\id_rsa.ppk
 bin\gui\Google.Authenticator.dll
+bin\gui\Microsoft.Toolkit.Wpf.UI.Controls.WebView.dll
 bin\gui\InfragisticsWPF4.Controls.Editors.XamComboEditor.v17.2.dll
 bin\gui\InfragisticsWPF4.Controls.Grids.XamGrid.v17.2.dll
 bin\gui\InfragisticsWPF4.Controls.Menus.XamMenu.v17.2.dll
@@ -130,6 +131,8 @@ bin\spooler\scanning_8.tif
 bin\spooler\Telex-Regular-License.txt
 bin\spooler\Telex-Regular.ttf
 bin\stepper
+bin\stepper\robi.bin
+bin\stepper\rx_robot_ctrl
 bin\stepper\rx_stepper_ctrl
 bin\stepper\rx_stepper_rbf
 bin\win

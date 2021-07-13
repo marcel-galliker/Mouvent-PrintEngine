@@ -67,7 +67,7 @@ namespace RX_DigiPrint.Services
                     case TcpIp.REP_CHILLER_STAT:    handle_chiller_stat(msg);    break;
                     case TcpIp.REP_ENCODER_STAT:    handle_encoder_stat(msg);    break;
                     case TcpIp.REP_HEAD_STAT:       handle_head_stat(msg);       break;
-                    
+
                     case TcpIp.REP_PLC_GET_VAR:     handle_plc_var(msg);         break;
                     case TcpIp.REP_PLC_LOAD_PAR:    handle_plc_load_par(msg);    break;
 

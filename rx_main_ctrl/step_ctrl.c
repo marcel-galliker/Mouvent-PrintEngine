@@ -48,12 +48,11 @@ static int				_step_ThreadRunning;
 static RX_SOCKET		_step_Socket[STEPPER_CNT];
 static int				_StepperType=STEPPER_STD;
 static SPrintQueueItem	_PQItem;
-static int				_LB_Rob;
 	
 //--- prototypes -----------------------
 static void* _step_thread		(void *par);
 static int   _step_handle_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr	*sender, void *par);
-static int   _setp_socket_closed(RX_SOCKET socket, const char *peerName);
+static int   _step_socket_closed(RX_SOCKET socket, const char *peerName);
 static void  _step_set_config	(int no);
 
 //--- step_init --------------------------------------------------
@@ -61,7 +60,6 @@ int	 step_init(void)
 {	
 	int i;
 	_step_ThreadRunning = TRUE;
-	_LB_Rob = FALSE;
 	memset(&RX_StepperStatus, 0, sizeof(RX_StepperStatus));
 	//memset(&RX_ClnStatus, 0, sizeof(RX_ClnStatus));
 	for (i=0; i<SIZEOF(_step_Socket); i++)
@@ -100,7 +98,7 @@ static void* _step_thread(void *par)
 			if (_step_Socket[i]==INVALID_SOCKET && net_port_listening(dev_stepper, i, PORT_CTRL_STEPPER))
 			{
 				net_device_to_ipaddr(dev_stepper, i, addr, sizeof(addr));
-				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _setp_socket_closed)== REPLY_OK)
+				if (sok_open_client_2(&_step_Socket[i], addr, PORT_CTRL_STEPPER, SOCK_STREAM, _step_handle_msg, _step_socket_closed)== REPLY_OK)
 				{
 					ErrorEx(dev_stepper, i, LOG, 0, "Connected");
 					_step_set_config(i);
@@ -117,15 +115,15 @@ static void* _step_thread(void *par)
 	return NULL;
 }
 
-//--- _setp_socket_closed --------------------------------------------------
-static int _setp_socket_closed(RX_SOCKET socket, const char *peerName)
+//--- _step_socket_closed --------------------------------------------------
+static int _step_socket_closed(RX_SOCKET socket, const char *peerName)
 {
 	int i;
 	for (i=0; i<SIZEOF(_step_Socket); i++)
 	{
 		if (socket==_step_Socket[i])
 		{
-			Error(ERR_CONT, 0, "Stepper %d Socket %d closed", i, socket);
+			Error(ERR_CONT, 0, "Stepper %d Socket %d closed", i+1, socket);
 			sok_close(&_step_Socket[i]);
 			switch(_StepperType)
 			{
@@ -198,17 +196,20 @@ static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockadd
 									{
 									case STEPPER_CLEAF: ret = stepc_handle_status		(no, pStat); break;
 									case STEPPER_TX:	ret = steptx_handle_status		(no, pStat); break;
-									case STEPPER_LB:	_LB_Rob |= pStat->robot_used;
-														if (_LB_Rob && !pStat->robot_used) ErrorEx(dev_stepper, no, ERR_CONT, 0, "ROBOT_USED bridge not set");
-														ret = steplb_handle_status		(no, pStat); break;
+									case STEPPER_LB:	ret = steplb_handle_status		(no, pStat); break;
 									case STEPPER_DP:	ret = stepdp_handle_status		(no, pStat); break;
 									case STEPPER_TEST:	ret = steptest_handle_status	(no, pStat); break;
 									default:			ret = steps_handle_status		(	 pStat); break;
 									}
-									
-									// fluid_control_robot(_LB_Rob);
 									return ret;
                                    
+
+                case REP_SET_SCREW_POS:
+									steplb_set_ScrewPos(no, (SScrewPositions*)&phdr[1]);
+									break;
+                case CMD_GET_SCREW_POS:
+									steplb_get_ScrewPos(no);
+									break;
                 case REP_LIFT_CALIBRATE:
 									gui_set_stepper_offsets(no, (SRobotOffsets*)pStat);
 									return REPLY_OK;
@@ -297,18 +298,18 @@ void  step_lift_to_top_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
-	case STEPPER_LB:	steplb_lift_to_top_pos(); break;
+	case STEPPER_LB:	steplb_lift_to_top_pos_all(); break;
 	default:			break;
 	}
 }
 
 //--- step_lift_in_top_pos ----------------------------------------------
-int  step_lift_in_top_pos(void)
+int  step_lift_in_top_pos(int stepperno)
 {
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_lift_in_up_pos();
-	case STEPPER_LB:	return steplb_lift_in_top_pos();
+	case STEPPER_LB:	return steplb_lift_in_top_pos(stepperno);
 	default:			return TRUE;
 	}
 }
@@ -319,7 +320,7 @@ void  step_lift_to_up_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_lift_to_up_pos(); break;
-	case STEPPER_LB:	steplb_lift_to_up_pos(); break;
+	case STEPPER_LB:	steplb_lift_to_up_pos_all(); break;
 	default:			break;
 	}
 }
@@ -330,7 +331,7 @@ int  step_lift_in_up_pos(void)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_lift_in_up_pos();
-	case STEPPER_LB:	return steplb_lift_in_up_pos();
+	case STEPPER_LB:	return steplb_lift_in_up_pos_all();
 	default:			return TRUE;
 	}
 }
@@ -383,6 +384,7 @@ void step_rob_to_wipe_pos(ERobotFunctions rob_function)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_rob_to_wipe_pos(rob_function); break;
+	case STEPPER_LB:	steplb_rob_to_fct_pos_all(rob_function); break;
 	default:			break;
 	}	
 }
@@ -393,6 +395,7 @@ int step_rob_in_wipe_pos(ERobotFunctions rob_function)
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	return steptx_rob_in_wipe_pos(rob_function);
+	case STEPPER_LB:	return steplb_rob_in_fct_pos_all(rob_function);
 	default:			break;
 	}
 	return FALSE;
@@ -423,17 +426,17 @@ void step_rob_stop(void)
 	switch (_StepperType)
 	{
 	case STEPPER_TX:	steptx_rob_stop(); break;
-	case STEPPER_LB:	steplb_rob_stop(); break;
 	default: break;
 	}
 }
 
 //--- step_empty_waste ----------------------------------------
-void step_empty_waste(int time)
+void step_empty_waste(int time_s)
 {
     switch (_StepperType)
     {
-    case STEPPER_TX:	steptx_rob_empty_waste(time); break;
+    case STEPPER_TX:	steptx_rob_empty_waste(time_s); break;
+	case STEPPER_LB:	steplb_rob_empty_waste_all(time_s); break;
     default: break;
     }
 }
@@ -496,16 +499,20 @@ static void _step_set_config(int no)
 	cfg.printerType		   = RX_Config.printer.type;
 	cfg.use_printhead_en   = (RX_Config.printer.type==printer_LH702) && str_start(RX_Hostname, "LH702");
 	cfg.material_thickness = RX_Config.stepper.material_thickness;
-	cfg.boardNo=no;
-	cfg.headsPerColor = RX_Config.headsPerColor;
-		
+	cfg.boardNo			   = no;
+	cfg.headsPerColor 	   = RX_Config.headsPerColor;
+	cfg.printbarUsed	   = 0;
+	cfg.development_machine = (RX_Config.printer.type == printer_LB702_UV) && (str_start(RX_Hostname, "LB702UV-001"));
+	RX_Config.stepper.development_machine = cfg.development_machine;
+
 	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) cfg.printerType = printer_LB702_UV;
 
 	switch(_StepperType)
 	{
 	case STEPPER_CLEAF:	stepc_init		(no, _step_Socket[no]); break;
 	case STEPPER_TX:	steptx_init		(no, _step_Socket[no]); break;
-	case STEPPER_LB:	steplb_init		(no, _step_Socket[no]); break;
+	case STEPPER_LB:	cfg.printbarUsed = steplb_printbarUsed(no);
+						steplb_init		(no, _step_Socket[no]); break;
 	case STEPPER_DP:	stepdp_init		(no, _step_Socket[no]); break;
 	case STEPPER_TEST:	steptest_init	(no, _step_Socket[no]); break;
 	default: 			steps_init		(    _step_Socket[0]);
@@ -537,12 +544,46 @@ int step_set_config(void)
 	return REPLY_OK;
 }
 
+//--- step_stepper_to_fluid -----------------------------------
+int step_stepper_to_fluid(int fluidNo)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:	return steplb_stepper_to_fluid(fluidNo);
+	default:			break;
+    }
+	return 0;
+}
+
+//--- step_stepper_to_cluster ------------------------------------------
+int step_stepper_to_cluster(int clusterNo)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:	return steplb_stepper_to_cluster(clusterNo);
+	}
+	return 0;
+}
+
+//--- step_get_ScrewPos ------------------------------------------------
+int step_get_ScrewPos(int stepperNo)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:	return steplb_get_ScrewPos(stepperNo);
+	default:			break;
+	}
+	return 0;
+}
+
 //--- step_set_autocapMode ----------------------------------------------
 void step_set_autocapMode(int state)
 {
 	switch (_StepperType)
 	{
 	case STEPPER_TX:	steptx_set_autocapMode(state); break;
+	case STEPPER_LB:	steplb_set_autocapMode(state); break;
+	default:			break;
 	}
 }
 
@@ -628,4 +669,83 @@ int  tt_clean(void)
 void step_error_reset(void)
 {
 	for (int i=0; i<SIZEOF(_step_Socket); i++) sok_send_2(&_step_Socket[i], CMD_ERROR_RESET, 0, NULL);
+}
+
+//--- step_adjust_heads ---------------------------------------------------------
+void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg* headAdjustment)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:
+		steplb_adjust_heads(socket, (SHeadAdjustmentMsg*)headAdjustment);
+		break;
+	default:
+		break;
+	}
+}
+
+//--- step_robi_to_garage --------------------
+void step_robi_to_garage(RX_SOCKET socket)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        steplb_robi_to_garage();
+        break;
+    default:
+        break;
+    }
+}
+
+
+/*
+//--- step_get_StepperStatus ---------------------------------------------
+SStepperStat step_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:
+		return steplb_get_StepperStatus((SHeadAdjustmentMsg *)headAdjustment);
+	default:
+		break;
+	}
+}
+*/
+
+//--- step_screw_in_Buffer ------------------------------------------
+int step_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:
+		return steplb_screw_in_Buffer((SHeadAdjustmentMsg *)headAdjustment);
+	default:
+		break;
+	}
+}
+
+//--- step_get_stitch_position ---------------------------------------------
+int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:
+		return steplb_get_stitch_position((SHeadAdjustmentMsg *)headAdjustment);
+	default:
+		break;
+	}
+	return FALSE;
+}
+
+//--- step_robot_used ----------------------------------
+int step_robot_used(int fluidNo)
+{
+	switch (_StepperType)
+	{
+	case STEPPER_LB:
+		return steplb_robot_used(fluidNo);
+	default:
+		return FALSE;
+	}
+	return FALSE;
 }

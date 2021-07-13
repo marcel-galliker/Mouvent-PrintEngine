@@ -281,10 +281,10 @@ void steptx_rob_stop(void)
  * a time left running, it will take the longer time.
  * 
  * */
-void steptx_rob_empty_waste(int time)
+void steptx_rob_empty_waste(int time_s)
 {
     if (_step_socket[1] != INVALID_SOCKET)
-        sok_send_2(&_step_socket[1], CMD_ROB_EMPTY_WASTE, sizeof(time), &time);
+        sok_send_2(&_step_socket[1], CMD_ROB_EMPTY_WASTE, sizeof(time_s), &time_s);
 }
 
 //--- void _steptx_rob_vacuum_start ------------------------
@@ -633,7 +633,7 @@ static void _steptx_rob_control(void)
 				
 	case ctrl_vacuum_step14:	if ((_printing && step_lift_in_print_pos()) || (!_printing && step_lift_in_up_pos()))
 								{
-									if (_printing) _RobotCtrlMode = ctrl_print;
+									if (_printing) _RobotCtrlMode = ctrl_prepareToPrint;
 									else		   _RobotCtrlMode = ctrl_off;
                                     _RobotDone = TRUE;
                                 }
@@ -699,7 +699,7 @@ static void _steptx_rob_control(void)
 			
 	case ctrl_cap_step6:		if (step_lift_in_wipe_pos(ctrl_cap))
 								{
-                                    if (_AutoCapMode)	_RobotCtrlMode = ctrl_print;
+                                    if (_AutoCapMode)	_RobotCtrlMode = ctrl_prepareToPrint;
                                     else				_RobotCtrlMode = ctrl_off;
                                     _RobotDone = TRUE;
                                 }
@@ -710,7 +710,7 @@ static void _steptx_rob_control(void)
 								undefine_PurgeCtrlMode();
 								break;
                                 
-    case ctrl_print:			_RobotDone = TRUE;
+    case ctrl_prepareToPrint:	_RobotDone = TRUE;
 								break;
 	default: return;
 	}
