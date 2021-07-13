@@ -960,7 +960,7 @@ int steplb_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
 //--- _check_fluid_back_pump ---------------------------------------
 static void _check_fluid_back_pump(void)
 {
-	int stepperNo, printbarNo;
+//	int stepperNo, printbarNo;
 
   //  _color2Robot(color, &stepperNo, &printbarNo);
 
@@ -1060,8 +1060,11 @@ int steplb_stepper_to_fluid(int fluidno)
 //--- steplb_stepper_to_cluster ----------------------------------------
 int steplb_stepper_to_cluster(int clusterNo)
 {
+    int div=(2 * RX_Config.headsPerColor / HEAD_CNT);
+    if (div==0) return 0;
+
     if (RX_Config.inkSupplyCnt % 2 == 0)
-        return clusterNo / (2 * RX_Config.headsPerColor / HEAD_CNT);
+        return clusterNo / div;
     else
-        return (clusterNo + (RX_Config.headsPerColor / HEAD_CNT)) / (2 * RX_Config.headsPerColor / HEAD_CNT);
+        return (clusterNo + (RX_Config.headsPerColor / HEAD_CNT)) / div;
 }

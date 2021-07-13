@@ -1249,7 +1249,7 @@ static void _rob_state_machine(void)
                         if (defaults || _pos.y<MIN_Y_POS)
                         {
 							if (_ScrewPar.printbar == 0 || _ScrewPos.printbar[0].stitch.y < MIN_Y_POS) _pos.y = SCREW_Y_STITCH;
-                            else _pos.y = _ScrewPos.printbar[_ScrewPar.printbar].stitch.y;
+                            else _pos.y = _ScrewPos.printbar[0].stitch.y;
 
                             /*
                             if (_correction_step==0) 

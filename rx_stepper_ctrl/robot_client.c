@@ -42,7 +42,7 @@
 #define MOTORS_XY		((1<<MOTOR_XY_0) | (1<<MOTOR_XY_1))
 #define MOTOR_CNT		4
 
-#define ROB_IN(in) (_RobotStatus.gpio.inputs & 1<<(in))
+#define ROB_IN(in)   ((_RobotStatus.gpio.inputs>>(in)) & 1)
 
 // Outputs
 #define OUTPUT_Z_UP		1
@@ -168,11 +168,19 @@ int	rc_isConnected(void)
 void rc_main(int ticks, int menu)
 {
 	static int _z_in_up = FALSE;
+	static int _z_in_garage = FALSE;
     if (_RC_Socket!=INVALID_SOCKET)
 	{
-        RX_StepperStatus.screwerinfo.robi_in_ref = ROB_IN(IN_GARAGE) ? TRUE : FALSE;
-        RX_StepperStatus.screwerinfo.z_in_down = ROB_IN(IN_Z_DOWN) ? TRUE : FALSE;
-        RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP) ? TRUE : FALSE;
+        RX_StepperStatus.screwerinfo.robi_in_ref = ROB_IN(IN_GARAGE);
+        RX_StepperStatus.screwerinfo.z_in_down   = ROB_IN(IN_Z_DOWN);
+        RX_StepperStatus.screwerinfo.z_in_up     = ROB_IN(IN_Z_UP);
+
+		if (RX_StepperStatus.screwerinfo.robi_in_ref != _z_in_garage)
+		{
+			_z_in_garage=RX_StepperStatus.screwerinfo.robi_in_ref;
+			TrPrintfL(TRUE, "_z_in_garage=%d", RX_StepperStatus.screwerinfo.robi_in_ref);
+		}
+
 		if (RX_StepperStatus.screwerinfo.z_in_up && !_z_in_up)
 		{
 			TrPrintfL(TRUE, "_z_in_up");
@@ -1206,7 +1214,7 @@ void rc_handle_menu(char *str)
 //--- rc_in_garage ----------------------------------------------
 int rc_in_garage(void)
 {
-    return _RobotStatus.gpio.inputs & (1UL << IN_GARAGE);
+    return RX_StepperStatus.screwerinfo.robi_in_ref;
 }
 
 //--- rc_screwer_in_ref --------------------------------------
