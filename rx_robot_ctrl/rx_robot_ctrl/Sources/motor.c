@@ -116,7 +116,7 @@ static int8_t	_edgeCheckIn[MOTOR_CNT];
 static uint8_t	_edgeCheckLevel[MOTOR_CNT];
 static int32_t	_edgeCheckPos[MOTOR_CNT];
 static uint8_t  _stopBits[MOTOR_CNT];
-static uint8_t  _stopBitLevels[MOTOR_CNT];
+static uint8_t  _stopBitLevel[MOTOR_CNT];
 static uint8_t	_stoppedByInput[MOTOR_CNT];
 
 // Status Flags
@@ -140,7 +140,7 @@ void motor_init(void)
 	memset(_encoderTolerance, 0, sizeof(_encoderTolerance));
 	memset(_edgeCheckIn, 0xff, sizeof(_edgeCheckIn));
 	memset(_stopBits, 0, sizeof(_stopBits));
-	memset(_stopBitLevels, 0, sizeof(_stopBitLevels));
+	memset(_stopBitLevel, 0, sizeof(_stopBitLevel));
 
 	spi_init(SPIM, spi_dir_master, spi_mode_3, SPI_CLOCK_DIVIDER);
 	spi_option(SPIM, spi_option_fifo_size, SPI_FIFO_SIZE);
@@ -224,12 +224,14 @@ static void _move_motors(SRobotMotorsMoveCmd* cmd)
 	{
 		if (cmd->motors & (1<<motor))
 		{
+			RX_RobotStatus.motor[motor].isStalled = false;
+
 			_motors[motor]		 	 = cmd->motors;
 			_encoderCheck[motor] 	 = cmd->encoderCheck[motor];
 			_encoderTolerance[motor] = cmd->encoderTol[motor];
 			_edgeCheckIn[motor]		 = cmd->edgeCheckIn[motor];
 			_stopBits[motor]		 = cmd->stopBits[motor];
-			_stopBitLevels[motor] 	 = cmd->stopBitLevels[motor];
+			_stopBitLevel[motor] 	 = cmd->stopBitLevel[motor];
 			_stoppedByInput[motor]	 = FALSE;
 
 			gpio_enable_motor(motor, TRUE);
@@ -246,8 +248,10 @@ static void _move_motors(SRobotMotorsMoveCmd* cmd)
 			_spi_write_register(TMC_XTARGET_REG, cmd->targetPos[motor], motor);
 
 			_update_motor(motor);
-			TrPrintf(true, "Move Motor[%d].id=%d to %d (pos=%d enc=%d diff=%d)", motor, cmd->moveId[motor], cmd->targetPos[motor],
-					RX_RobotStatus.motor[motor].motorPos, RX_RobotStatus.motor[motor].encPos,
+			TrPrintf(true, "Move Motor[%d].id=%d from %d to %d (enc=%d diff=%d)", motor, cmd->moveId[motor],
+					RX_RobotStatus.motor[motor].motorPos,
+					cmd->targetPos[motor],
+					RX_RobotStatus.motor[motor].encPos,
 					RX_RobotStatus.motor[motor].motorPos-RX_RobotStatus.motor[motor].encPos);
 		}
 	}
@@ -315,8 +319,14 @@ static void _check_encoder(uint8_t motor)
 		case ENC_CHECK_IN:	isSet = gpio_get_input(_edgeCheckIn[motor]);
 							if (isSet && !_edgeCheckLevel[motor])
 							{
-				//				TrPrintf(true, "EdgeCheck[%d] pos=%d, diff=%d", motor, RX_RobotStatus.motor[motor].motorPos, abs(RX_RobotStatus.motor[motor].motorPos - _edgeCheckPos[motor]));
+							//	TrPrintf(true, "EdgeCheck[%d] pos=%d, diff=%d", motor, RX_RobotStatus.motor[motor].motorPos, abs(RX_RobotStatus.motor[motor].motorPos - _edgeCheckPos[motor]));
 								_edgeCheckPos[motor] = RX_RobotStatus.motor[motor].motorPos;
+								if (_stopBitLevel[motor]==STOP_ON_EDGE)
+								{
+									TrPrintf(true, "Motor[%d].MoveId=%d: STOP by in[%d]=EDGE", motor, RX_RobotStatus.motor[motor].moveIdStarted, _edgeCheckIn[motor]);
+									_stoppedByInput[motor]=TRUE;
+									_stop_motor(motor);
+								}
 							}
 							_edgeCheckLevel[motor] = isSet;
 							stalled = (abs(RX_RobotStatus.motor[motor].motorPos - _edgeCheckPos[motor]) > _encoderTolerance[motor]);
@@ -352,12 +362,20 @@ static void _check_stop_bits(uint8_t motor)
 			if (_stopBits[motor] & (1<<in))
 			{
 				uint8_t isSet = gpio_get_input(in);
-				if(isSet == _stopBitLevels[motor])
+				if(isSet == _stopBitLevel[motor])
 				{
 					_stopBits[motor] &= ~(1<<in); // stop only once
 					_stoppedByInput[motor]=TRUE;
-					_stop_motor(motor);
-					TrPrintf(true, "Motor[%d]. moveId=%d: STOP by in[%d]=%d", motor, RX_RobotStatus.motor[motor].moveIdStarted, in, isSet);
+
+					for(int m=0; m<MOTOR_CNT; m++)
+					{
+						if(_motors[motor] & (1<<m))
+						{
+							_stop_motor(m);
+						}
+					}
+
+					TrPrintf(true, "Motor[%d].MoveId=%d: STOP by in[%d]=%d", motor, RX_RobotStatus.motor[motor].moveIdStarted, in, isSet);
 					return;
 				}
 			}
@@ -385,6 +403,8 @@ static void _reset_motor(uint8_t motor)
 	if(motor >= MOTOR_CNT)
 			return;
 
+	TrPrintf(true, "_reset_motor[%d]", motor);
+
 	gpio_stop_motor(motor);
 
 	RX_RobotStatus.motor[motor].targetPos = 0;
@@ -398,9 +418,9 @@ static void _reset_motor(uint8_t motor)
 	_encoderCheck[motor]	 = 0;
 	_encoderTolerance[motor] = 0;
 	_stopBits[motor] 		 = 0;
-	_stopBitLevels[motor]    = 0;
+	_stopBitLevel[motor]     = 0;
 
-	RX_RobotStatus.motor[motor].isMoving = false;
+	RX_RobotStatus.motor[motor].isMoving  = false;
 	RX_RobotStatus.motor[motor].isStalled = false;
 
 	gpio_start_motor(motor);
@@ -479,8 +499,17 @@ static void _update_status(uint8_t status, uint8_t motor)
 		_encoderCheck[motor]= 0;
 		_encoderTolerance[motor] = 0;
 		_stopBits[motor] = 0;
-		_stopBitLevels[motor] = 0;
+		_stopBitLevel[motor] = 0;
 		gpio_enable_motor(motor, FALSE);
 		ctrl_send_status();
+
+		//--- stop all others ---
+		for(int m=0; m<MOTOR_CNT; m++)
+		{
+			if(_motors[motor] & (1<<m))
+			{
+				_stop_motor(m);
+			}
+		}
 	}
 }

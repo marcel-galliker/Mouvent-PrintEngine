@@ -112,7 +112,10 @@ typedef struct SRobotMotorsMoveCmd
 	UINT32 encoderTol[MOTOR_CNT];
 	INT8   edgeCheckIn[MOTOR_CNT];		// input for edge detection
 	UINT8  stopBits[MOTOR_CNT];			// bitset per motor
-	UINT8  stopBitLevels[MOTOR_CNT];	// one level per motor
+	UINT8  stopBitLevel[MOTOR_CNT];	// one level per motor
+		#define STOP_ON_LOW		0
+		#define STOP_ON_HIGH	1
+		#define STOP_ON_EDGE	2
 } SRobotMotorsMoveCmd;
 
 typedef struct SRobotMotorsStopCmd
