@@ -24,6 +24,7 @@
 #include "rx_def.h"
 #include "robi_def.h"
 #include "lb702.h"
+#include "robi.h"
 #include "robi_lb702.h"
 #include "robot_client.h"
 
@@ -49,7 +50,7 @@
 #define CURRENT_HOLD            200
 
 #define CAP_FILL_TIME           16000       // ms
-#define SCREW_SEARCHING_TIME    5000        // ms
+#define SCREW_SEARCHING_TIME    1000        // ms
 #define VACUUM_PUMP_TIME        25000       // ms
 #define WASTE_PUMP_TIME         30000       // ms
 
@@ -128,6 +129,8 @@ static int      _NewCmd = 0;
 static ERobotFunctions _RobFunction = 0;
 static ERobotFunctions _Old_RobFunction = 0;
 static int _ScrewFunction=0;
+static int _ScrewDist;  
+static int  _ScrewTurned;
 static int _RobStateMachine_Step = 0;
 static SHeadAdjustment _ScrewPar;
 
@@ -149,7 +152,7 @@ static int _PumpSpeed = 100;
 static int  _CapIsWet = TRUE;
 
 static SScrewPositions _ScrewPos;
-static int             _ScrewerSpalled;
+static int             _ScrewerStalled;
 
 //--- prototypes --------------------------------------------
 static void _lbrob_motor_z_test(int steps);
@@ -161,7 +164,7 @@ static int  _steps_2_micron(int steps);
 static void _cln_move_to(int msgId, ERobotFunctions fct);
 static void _rob_state_machine(void);
 static void _set_ScrewPos(SScrewPositions *pos);
-static void _save_ScrewPos(int recalc);
+static void _save_ScrewPos(int dist);
 static void _handle_waste_pump(void);
 static void _handle_flush_pump(void);
 static void _handle_ink_pump_back(void);
@@ -530,6 +533,11 @@ void lbrob_main(int ticks, int menu)
         int loc_new_cmd = 0;
         if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving)
         {
+            if (_CmdRunning_Robi==CMD_ROBI_MOVE_Z_DOWN && !RX_StepperStatus.screwerinfo.z_in_down)
+            {
+                Error(ERR_CONT, 0, "Screwer blocked in UP position");
+                lbrob_handle_menu("z5000");
+            }
             loc_new_cmd = _NewCmd;
             _NewCmd = FALSE;
             _CmdRunning_Lift = FALSE;
@@ -581,6 +589,7 @@ void lbrob_main(int ticks, int menu)
         j = 0;
 
     if (_RobStateMachine_Step) _rob_state_machine();
+    else _ScrewTurned = TRUE;
    
     _pump_main();
 }
@@ -614,7 +623,7 @@ void lbrob_display_status(void)
         term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
         term_printf("Wash done: \t\t %d\n", RX_StepperStatus.robinfo.wash_done);
         term_printf("adjustDoneCnt: \t\t %d\n", RX_StepperStatus.adjustDoneCnt);
-        term_printf("State:\t\t\t %d \thead=(%d/%d)@%d\n", _RobStateMachine_Step, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
+        term_printf("State:\t\t\t %d \tprintbar=%d head=%d screw=%s\n", _RobStateMachine_Step, _ScrewPar.printbar, _ScrewPar.head, _AxisName[_ScrewPar.axis]);
         term_printf("\n");
     }
     else
@@ -737,7 +746,7 @@ void lbrob_handle_menu(char *str)
         _lbrob_motor_test(str[1] - '0', atoi(&str[2]));
         break;
     case 'f':        
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_SEARCH_ALL_SCREWS, NULL);
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_FIND_ALL_SCREWS, NULL);
         break;
     case 'z':
         if (str[1] == 'r')
@@ -887,7 +896,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _CmdRunning_Robi = CMD_ROBI_MOVE_Z_DOWN;
             _NewCmd = msgId;
             robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
-
             break;
         }
         _CmdRunning = msgId;
@@ -1013,14 +1021,14 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         else Error(ERR_CONT, 0, "Robot reference not done");
         break;
 
-    case CMD_SEARCH_ALL_SCREWS:
-        Error(WARN, 0, "CMD_SEARCH_ALL_SCREWS Starting at printbar 1");
+    case CMD_FIND_ALL_SCREWS:
+        Error(WARN, 0, "CMD_FIND_ALL_SCREWS started");
         ctrl_send_2(CMD_GET_SCREW_POS, 0, NULL);
         for (_ScrewPar.printbar=0; _ScrewPar.printbar<2; _ScrewPar.printbar++)
         {
             if (RX_StepperCfg.printbarUsed & (1<<_ScrewPar.printbar))
             {
-                _ScrewFunction = CMD_SEARCH_ALL_SCREWS;
+                _ScrewFunction = CMD_FIND_ALL_SCREWS;
                 _ScrewPar.head=-1;
                 _ScrewPar.axis=AXE_STITCH;
                 _ScrewPar.steps=0;
@@ -1033,7 +1041,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         
     case CMD_RESET_ALL_SCREWS:
         val = (*(INT32 *)pdata);
-        Error(WARN, 0, "CMD_RESET_ALL_SCREWS Starting at printbar 1");
+        Error(WARN, 0, "CMD_RESET_ALL_SCREWS Started");
         ctrl_send_2(CMD_GET_SCREW_POS, 0, NULL);
         _ScrewFunction = CMD_RESET_ALL_SCREWS;
         if (!(RX_StepperCfg.printbarUsed & (1 << 0)) && !(RX_StepperCfg.printbarUsed & (1 << 1)))
@@ -1187,10 +1195,19 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
 static void _rob_state_machine(void)
 {
     static SScrewPos _pos;
-    static int _correction_value;
+    static int _correction_step;
+    static int _time=0;
+    int trace;
     int pos, distance = 0;
     int _turns = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].turns;
-    
+            
+    int t=rx_get_ticks();
+    if (t>_time)
+    {
+        trace=TRUE;
+        _time=t+1000;
+    }
+
     if (!RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
     {
         /*
@@ -1211,7 +1228,9 @@ static void _rob_state_machine(void)
             memset(&_pos, 0x00, sizeof(_pos));
             if (_ScrewPar.printbar<2)
             {
-                int defaults = (_ScrewFunction==CMD_SEARCH_ALL_SCREWS);
+                int defaults = (_ScrewFunction==CMD_FIND_ALL_SCREWS);
+                defaults = FALSE;
+                _ScrewDist=0;
                 if (_ScrewPar.head==-1)
                 {
                     if (_ScrewPar.axis==AXE_STITCH)
@@ -1223,19 +1242,28 @@ static void _rob_state_machine(void)
 								_pos.x = SCREW_X_LEFT;
 							else if (_ScrewPos.printbar[0].stitch.x == 0)
 								_pos.x = SCREW_X_RIGHT;
-                            else                       _pos.x = SCREW_X_RIGHT + _ScrewPos.printbar[0].stitch.x - SCREW_X_LEFT;
+                            else 
+                                _pos.x = SCREW_X_RIGHT + _ScrewPos.printbar[0].stitch.x - SCREW_X_LEFT;
                             TrPrintfL(TRUE, "Default _pos.x=%d", _pos.x);
                         }
                         if (defaults || _pos.y<MIN_Y_POS)
                         {
 							if (_ScrewPar.printbar == 0 || _ScrewPos.printbar[0].stitch.y < MIN_Y_POS) _pos.y = SCREW_Y_STITCH;
-                            else                       _pos.y = _ScrewPos.printbar[0].stitch.y;
+                            else _pos.y = _ScrewPos.printbar[_ScrewPar.printbar].stitch.y;
+
+                            /*
+                            if (_correction_step==0) 
+                            {
+                                Error(WARN, 0, "Test for searching screws");
+                                _pos.y -= 5000;
+                            }
+                            */
+
                             TrPrintfL(TRUE, "Default _pos.y=%d", _pos.y);
                         }
                     }
                 }
-                else if (_ScrewPar.head+1<RX_StepperCfg.headsPerColor 
-                ||      (_ScrewPar.head+1==RX_StepperCfg.headsPerColor && _ScrewPar.axis==AXE_ANGLE))
+                else 
                 {                
                     memcpy(&_pos, &_ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis], sizeof(_pos));
                     if (defaults || _pos.x==0)
@@ -1266,10 +1294,12 @@ static void _rob_state_machine(void)
                 }
             }
 
+            Error(LOG, 0, "Move to x=%d, y=%d", _pos.x, _pos.y);
+
             if (_pos.x)
             {
                 _RobStateMachine_Step++;
-                _correction_value = 0;
+                _correction_step = 0;
             }
             else
             {
@@ -1301,20 +1331,29 @@ static void _rob_state_machine(void)
             // no break here!
 
        case 1:  // move slide 
+            if (!rc_move_done()) break;
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
             pos = _ScrewPar.head + rob_fct_screw_head0;
             if (pos != _HeadScrewPos)
                 lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &pos);
-            _correction_value=0;
+            if (_ScrewTurned) rc_screwer_to_ref();
+            _ScrewTurned = FALSE;
+            _correction_step=0;
             _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME_SLEDGE;
             _RobStateMachine_Step++;
             // no break here!
 
         case 2: // move rob to y (move robi and slide simultanious)
             TrPrintfL(TRUE, "_rob_state_machine: State=%d, head=%d/%d", _RobStateMachine_Step, _ScrewPar.printbar, _ScrewPar.head);
-            if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && RX_StepperStatus.robinfo.ref_done && (RX_StepperStatus.info.z_in_screw || RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_wash || RX_StepperStatus.info.z_in_cap) && RX_StepperStatus.info.ref_done)
+            if (rc_move_xy_error())
+            {
+                Error(ERR_CONT, 0, "Motor stalled");
+                _RobStateMachine_Step=0;
+            }
+            else if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && RX_StepperStatus.robinfo.ref_done && (RX_StepperStatus.info.z_in_screw || RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_wash || RX_StepperStatus.info.z_in_cap) && RX_StepperStatus.info.ref_done)
             {
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y(%d)", _pos.y);
+                Error(LOG, 0, "CMD_ROBI_MOVE_TO_Y(%d)", _pos.y);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &_pos.y);
                 _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME;
                 _RobStateMachine_Step++;
@@ -1322,28 +1361,41 @@ static void _rob_state_machine(void)
             break;
 
         case 3: // move rob to x
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d, y_in_pos=%d, _HeadScrewPos=%d, head=%d/%d-%d, add=%d", _RobStateMachine_Step, RX_StepperStatus.screwerinfo.y_in_pos, _HeadScrewPos, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, rob_fct_screw_head0);
+            TrPrintfL(trace, "_rob_state_machine: State=%d, moveDone=%d, y_in_pos=%d, _HeadScrewPos=%d, head=%d/%d-%d, add=%d", _RobStateMachine_Step, rc_move_done(), RX_StepperStatus.screwerinfo.y_in_pos, _HeadScrewPos, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, rob_fct_screw_head0);
             if (rc_move_xy_error())
             {
                 Error(ERR_CONT, 0, "Motor stalled");
                 _RobStateMachine_Step=0;
             }
-            else if (RX_StepperStatus.screwerinfo.y_in_pos && _HeadScrewPos == _ScrewPar.head + rob_fct_screw_head0)
+            else if (rc_move_done() && _HeadScrewPos == _ScrewPar.head + rob_fct_screw_head0)
             {
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d, y_in_pos=%d, _HeadScrewPos=%d, head=%d/%d-%d, add=%d", _RobStateMachine_Step, RX_StepperStatus.screwerinfo.y_in_pos, _HeadScrewPos, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, rob_fct_screw_head0);
                 _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME;
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_X(%d)", _pos.x);
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &_pos.x);
+            //  robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &_pos.x);
+                rc_moveto_x(_pos.x, _FL_);
                 _RobStateMachine_Step++;
             }
             break;
 
         case 4:
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            if (RX_StepperStatus.screwerinfo.x_in_pos)
+            TrPrintfL(trace, "_rob_state_machine: State=%d, x_in_pos=%d, movedone=%d", _RobStateMachine_Step, RX_StepperStatus.screwerinfo.x_in_pos, rc_move_done());
+       //     if (RX_StepperStatus.screwerinfo.x_in_pos)
+            if (rc_move_done())
             {
-                _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME;
-                if (!RX_StepperStatus.info.z_in_screw) lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
-                _RobStateMachine_Step++;
+                if (rc_move_xy_error())
+                {
+                    TrPrintfL(TRUE, "_rob_state_machine: State=%d, Motor stalled", _RobStateMachine_Step);
+                    Error(ERR_CONT, 0, "Motor stalled");
+                    _RobStateMachine_Step=0;
+                }
+                else
+                {
+                    TrPrintfL(TRUE, "_rob_state_machine: State=%d, x_in_pos", _RobStateMachine_Step);
+                    _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME;
+                    if (!RX_StepperStatus.info.z_in_screw) lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL);
+                    _RobStateMachine_Step++;
+                }
             }
             break;
 
@@ -1353,59 +1405,142 @@ static void _rob_state_machine(void)
             {
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_Z_UP");
                 _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
+                if (rc_isConnected()) rc_move_top(_FL_);
+                else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
                 _RobStateMachine_Step++;
                 _TimeSearchScrew = rx_get_ticks();
             }
             break;
 
         case 6:
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            if (RX_StepperStatus.screwerinfo.z_in_up && !robi_lb702_screw_correction())
+            if (RX_StepperStatus.screwerinfo.z_in_up)
             {
-                TrPrintfL(TRUE, "z_in_up, ");
-                TrPrintfL(TRUE, "z_in_up=%d, screw_posY=%d", RX_StepperStatus.screwerinfo.z_in_up, RX_StepperStatus.screw_posY);
-                if (_ScrewPar.head<0)
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d, zpos=%d, z_in_up=%d", _RobStateMachine_Step, RX_StepperStatus.motor[3].motor_pos, RX_StepperStatus.screwerinfo.z_in_up);
+                _RobStateMachine_Step = 11;
+            }
+            else
+            {
+              //  TrPrintfL(TRUE, "z_in_up=%d, screw_posY=%d, turn screwer, movedone=%d", RX_StepperStatus.screwerinfo.z_in_up, RX_StepperStatus.screw_posY, rc_move_done());
+                if (rc_move_done())
                 {
-                    _ScrewPos.printbar[_ScrewPar.printbar].stitch.x = RX_StepperStatus.screw_posX;
-                    _ScrewPos.printbar[_ScrewPar.printbar].stitch.y = RX_StepperStatus.screw_posY;
-                }
-                else
-                {
-                    _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].x = RX_StepperStatus.screw_posX;
-                    _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].y = RX_StepperStatus.screw_posY;
-                }
-                //--- 
-                switch(_ScrewFunction)
-                {
-                case CMD_RESET_ALL_SCREWS:  _RobStateMachine_Step=100; break;
-                case CMD_HEAD_ADJUST:       _RobStateMachine_Step=200; break;
-                case CMD_SEARCH_ALL_SCREWS: _RobStateMachine_Step=900; break;
+                    TrPrintfL(TRUE, "_rob_state_machine: State=%d, zpos=%d, z_in_up=%d", _RobStateMachine_Step, RX_StepperStatus.motor[3].motor_pos, RX_StepperStatus.screwerinfo.z_in_up);
+                    TrPrintfL(TRUE, "Turn screw");
+                    if (rc_isConnected()) rc_find_screw(1);
+                    else
+                    {
+                        robi_set_screw_current(FALSE);
+                        robi_turn_screw_left(1);
+                    }
+                    _RobStateMachine_Step++;
                 }
             }
-            else if (_TimeSearchScrew && rx_get_ticks() > _TimeSearchScrew + SCREW_SEARCHING_TIME && !RX_StepperStatus.screwerinfo.z_in_up)
+            break;
+      
+        case 7:
+            if (rc_move_done())
             {
+                if (rc_isConnected()) rc_find_screw(-1);
+                else
+                {
+                    robi_set_screw_current(FALSE);
+                    robi_turn_screw_left(-1);
+                }
+                _RobStateMachine_Step++;
+            }
+            break;
+
+        case 8:
+            if (rc_move_done())
+            {
+                _ScrewTurned = TRUE;
+                if (RX_StepperStatus.screwerinfo.z_in_up)
+                {
+                    TrPrintfL(TRUE, "_rob_state_machine: State=%d, z_in_up", _RobStateMachine_Step);
+                    _RobStateMachine_Step = 10;
+                }
+                else
+                {                
+                    TrPrintfL(TRUE, "_rob_state_machine: State=%d, move done", _RobStateMachine_Step);             
+                    if (rc_isConnected()) 
+                    {
+                        rc_move_bottom(_FL_);
+                    }
+                    _RobStateMachine_Step++;
+                }
+            }
+            break;
+
+        case 9:
+            if (RX_StepperStatus.screwerinfo.z_in_down)
+            {
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d, screwer move done, posz=%d", _RobStateMachine_Step, RX_StepperStatus.motor[3].motor_pos);
+                if (_ScrewFunction==CMD_FIND_ALL_SCREWS || _ScrewFunction==CMD_RESET_ALL_SCREWS)
+                {
+                    if (_ScrewPar.head<0) ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, LOG, 0, "PrintBar %s: screw not found, trying again",  _AxisName[_ScrewPar.axis]);
+                    else                  ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, LOG, 0, "Head %d %s: screw not found (y=%d), trying again", _ScrewPar.head+1, _AxisName[_ScrewPar.axis], RX_StepperStatus.screw_posY);
+                }
+
                 TrPrintfL(TRUE, "z_in_up=%d, screw_posY=%d", RX_StepperStatus.screwerinfo.z_in_up, RX_StepperStatus.screw_posY);
-                TrPrintfL(TRUE, "z_in_up TIMEOUT");                
                 _ScrewTime = 0;
                 _TimeSearchScrew = 0;
-                if (_correction_value >= 2000)
+                _correction_step++;
+                if (_correction_step > 8)
                 {
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
                     Error(ERR_CONT, 0, "Screw (printbar %d, head %d, axis %d) not found", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
                     _RobStateMachine_Step = 0;
                     RX_StepperStatus.adjustDoneCnt++;
                     break;
                 }
-                else if (_correction_value>=0)
-                    _correction_value = -(_correction_value + 500);
-                else
-                    _correction_value = _correction_value * -1;
-                pos = _pos.y+_correction_value;
-                TrPrintfL(TRUE, "_correction_value=%d", _correction_value);
+                int dist = 500*((_correction_step+1)/2);
+                if (_correction_step&1) dist=-dist;
+
+                TrPrintfL(TRUE, "_correction_step=%d, dist=%d", _correction_step, dist);
+                pos = _pos.y+dist;
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y(%d)", pos);
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
+                Error(LOG, 0, "CMD_ROBI_MOVE_TO_Y(%d)", pos);
+                if (rc_isConnected())
+                    rc_moveto_y(pos, _FL_);        
+                else                 
+                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
                 _TimeSearchScrew = rx_get_ticks();
-                _RobStateMachine_Step -= 3;
+                _RobStateMachine_Step++;
+            }
+            break;
+
+        case 10:
+            if (rc_move_done())
+            {
+               TrPrintfL(TRUE, "_rob_state_machine: State=%d, Y move done", _RobStateMachine_Step);
+               if (rc_isConnected()) rc_move_top(_FL_);
+               _RobStateMachine_Step=6;
+            }
+            break;
+
+        case 11:    // screw found 
+            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
+
+            TrPrintfL(TRUE, "z_in_up=%d, screw_posY=%d", RX_StepperStatus.screwerinfo.z_in_up, RX_StepperStatus.screw_posY);
+            if (_ScrewPar.head<0)
+            {
+                if (TRUE || _ScrewFunction==CMD_FIND_ALL_SCREWS) ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, LOG, 0, "PrintBar %s: screw found",  _AxisName[_ScrewPar.axis]);
+                _ScrewPos.printbar[_ScrewPar.printbar].stitch.x = RX_StepperStatus.screw_posX;
+                _ScrewPos.printbar[_ScrewPar.printbar].stitch.y = RX_StepperStatus.screw_posY;
+            }
+            else
+            {
+                if (TRUE || _ScrewFunction==CMD_FIND_ALL_SCREWS) ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, LOG, 0, "Head %d %s: screw found (y=%d)", _ScrewPar.head+1, _AxisName[_ScrewPar.axis], RX_StepperStatus.screw_posY);
+                _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].x = RX_StepperStatus.screw_posX;
+                _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][_ScrewPar.axis].y = RX_StepperStatus.screw_posY;
+            }
+            //--- 
+            switch(_ScrewFunction)
+            {
+            case CMD_RESET_ALL_SCREWS:  _RobStateMachine_Step=100; break;
+            case CMD_HEAD_ADJUST:       _RobStateMachine_Step=200; break;
+            case CMD_FIND_ALL_SCREWS:   if (rc_isConnected()) rc_move_bottom(_FL_);
+                                        else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+                                        _RobStateMachine_Step=900; break;
             }
             break;
         
@@ -1413,6 +1548,7 @@ static void _rob_state_machine(void)
         case 100:
             rx_enable_stall_error(FALSE);
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
+            _ScrewTurned = TRUE;
             // turn right to mechanical stop
             if (_ScrewPar.axis==AXE_ANGLE) pos = MAX_STEPS_ANGLE  + 2*OVERTURN;
             else                           pos = MAX_STEPS_STITCH + 2*OVERTURN;
@@ -1425,6 +1561,10 @@ static void _rob_state_machine(void)
 
         case 101:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d, screwerPos=%d", _RobStateMachine_Step, rc_get_screwer_pos());
+        //  Error(LOG, 0, "Turn right to stop done, steps=%d", (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN);
+            TrPrintfL(TRUE, "Turn right to stop done, steps=%d", (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN);
+            _ScrewDist += (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
+
             // turn left to middle + 2 turns
             if (_ScrewPar.axis==AXE_ANGLE) pos = MAX_STEPS_ANGLE/2  + OVERTURN + LOOSE_TURN;
             else                           pos = MAX_STEPS_STITCH/2 + OVERTURN + LOOSE_TURN;
@@ -1436,7 +1576,11 @@ static void _rob_state_machine(void)
 
         case 102:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d, screwerPos=%d", _RobStateMachine_Step, rc_get_screwer_pos());
-            _ScrewerSpalled = rc_screwer_stalled();
+        //  Error(LOG, 0, "Turn left to center, steps=%d", (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN);
+            TrPrintfL(TRUE, "Turn left to center, steps=%d", (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN);
+            _ScrewDist += (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
+
+            _ScrewerStalled = rc_screwer_stalled();
             // turn right 2 turns
             pos = OVERTURN;
             TrPrintfL(TRUE, "Motor[2]: (PB=%d H=%d, A=%d) rc_turn_ticks_left(%d)", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, pos);
@@ -1448,22 +1592,27 @@ static void _rob_state_machine(void)
         case 103:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d, screwerPos=%d", _RobStateMachine_Step, rc_get_screwer_pos());
 
-            if (_ScrewerSpalled) 
+            if (_ScrewerStalled)
             {
                 if (_ScrewPar.head<0) ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, ERR_CONT, 0, "Centering PrintBar %s: Screwer  Blocked",  _AxisName[_ScrewPar.axis]);
                 else                  ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, ERR_CONT, 0, "Centering Head %d %s: Screwer Blocked", _ScrewPar.head+1, _AxisName[_ScrewPar.axis]);
             }
             else
             {
-                if (_ScrewPar.head<0) ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, LOG, 0, "Centering PrintBar %s: done",  _AxisName[_ScrewPar.axis]);
+                if (_ScrewPar.head<0) ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, LOG, 0, "Centering PrintBar %s: done", _AxisName[_ScrewPar.axis]);
                 else                  ErrorEx(dev_head, _ScrewPar.printbar*RX_StepperCfg.headsPerColor, LOG, 0, "Centering Head %d %s: done", _ScrewPar.head+1, _AxisName[_ScrewPar.axis]);
             }
+        //  Error(LOG, 0, "Turn right 2 turns, steps=%d", (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN);
+            TrPrintfL(TRUE, "Turn right 2 turns, steps=%d", (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN);
+            _ScrewDist += (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
 
             // save
             if (_ScrewPar.head<0) _ScrewPos.printbar[_ScrewPar.printbar].stitch.turns = -MAX_STEPS_STITCH/2;
             else if (_ScrewPar.axis==AXE_ANGLE) _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].turns = -MAX_STEPS_ANGLE/2;
             else _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_STITCH].turns = -MAX_STEPS_STITCH/2;
             
+            if (rc_isConnected()) rc_move_bottom(_FL_);
+            else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             _RobStateMachine_Step=900;
             break;
 
@@ -1471,6 +1620,7 @@ static void _rob_state_machine(void)
         case 200:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
             RX_StepperStatus.screwerinfo.screwed_OK = FALSE;
+            _ScrewTurned = TRUE;
             if (_ScrewPar.steps < 0)
             {
                 pos = abs(_ScrewPar.steps - 2*6);
@@ -1482,6 +1632,7 @@ static void _rob_state_machine(void)
 
         case 201:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d, blockedLeft=%d, blockedRight=%d", _RobStateMachine_Step, RX_StepperStatus.screwerinfo.screwer_blocked_left, RX_StepperStatus.screwerinfo.screwer_blocked_right);
+            _ScrewDist += (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
             if (_ScrewPar.steps < 0) pos = 2*6;
             else                     pos = _ScrewPar.steps;
             robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_TIGHT, &pos);
@@ -1493,7 +1644,7 @@ static void _rob_state_machine(void)
             TrPrintfL(TRUE, "_rob_state_machine: State=%d, blockedLeft=%d, blockedRight=%d", _RobStateMachine_Step, RX_StepperStatus.screwerinfo.screwer_blocked_left, RX_StepperStatus.screwerinfo.screwer_blocked_right);
 
             RX_StepperStatus.screwerinfo.screwed_OK = !RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right;
-
+            _ScrewDist += (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
             if (_ScrewPar.head<0 && RX_StepperStatus.screwerinfo.screwer_blocked_left)
                 _ScrewPos.printbar[_ScrewPar.printbar].stitch.turns = 0;
             else if (_ScrewPar.head<0 && RX_StepperStatus.screwerinfo.screwer_blocked_right)
@@ -1507,7 +1658,7 @@ static void _rob_state_machine(void)
                 _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_STITCH].turns = -MAX_STEPS_STITCH;
             else if (_ScrewPar.axis==AXE_ANGLE) _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].turns += _ScrewPar.steps;
             else _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_STITCH].turns += _ScrewPar.steps;
-            _save_ScrewPos(TRUE);
+            _save_ScrewPos(_ScrewDist);
             
             if (!RX_StepperStatus.screwerinfo.screwer_blocked_left && !RX_StepperStatus.screwerinfo.screwer_blocked_right)
             {
@@ -1532,7 +1683,8 @@ static void _rob_state_machine(void)
             
         case 203:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+            if (rc_isConnected()) rc_move_bottom(_FL_);
+            else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
              _RobStateMachine_Step++;
             break;
 
@@ -1542,11 +1694,11 @@ static void _rob_state_machine(void)
             _RobStateMachine_Step = 0; // wait for next command
             RX_StepperStatus.adjustDoneCnt++;
             break;
+
         //--------------- next screw ---------------
         case 900:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            _save_ScrewPos(TRUE);
-            robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+            _save_ScrewPos(_ScrewDist);
             _RobStateMachine_Step++;
             break;
 
@@ -1566,7 +1718,7 @@ static void _rob_state_machine(void)
                 _ScrewPar.head = -1;
                 _ScrewPar.printbar++;
             }
-         //   if (_ScrewPar.printbar<=1)
+
             if (RX_StepperCfg.printbarUsed & (1<<_ScrewPar.printbar))
             {
                 _RobStateMachine_Step = 0;
@@ -1577,34 +1729,64 @@ static void _rob_state_machine(void)
                 _ScrewPar.printbar = 0;
                 _RobStateMachine_Step = 1000;
                 _ScrewTime = 0;
-                Error(LOG, 0, "CMD_SEARCH_ALL_SCREWS suceeded");
+                switch(_ScrewFunction)
+                {
+                case CMD_RESET_ALL_SCREWS:  Error(LOG, 0, "CMD_RESET_ALL_SCREWS done"); break;
+                case CMD_HEAD_ADJUST:       Error(LOG, 0, "CMD_HEAD_ADJUST done");      break;
+                case CMD_FIND_ALL_SCREWS:   Error(LOG, 0, "CMD_FIND_ALL_SCREWS done");  break;
+                }
             }
             TrPrintfL(TRUE, "New Screw: printbar=%d, head=%d, axis=%d", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
             break;
 
         //---------------- move to garage ------------------------------------------------
         case 1000: 
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            if (RX_StepperStatus.screwerinfo.z_in_down)
+            if (rc_move_done())
             {
-                pos=0;
-                robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_X, &pos);
-                lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE, NULL);
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
+                if (RX_StepperStatus.screwerinfo.z_in_down)
+                {
+                    TrPrintfL(TRUE, "motorpos: x=%d, y=%d", RX_StepperStatus.screw_posX, RX_StepperStatus.screw_posY);
+                    TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y(%d)", RX_StepperStatus.screw_posY+2000);
+                    rc_moveto_y(RX_StepperStatus.screw_posY+2000, _FL_);
+                    _RobStateMachine_Step++;
+                }
+                else 
+                {
+                    rc_reference();
+                    _RobStateMachine_Step=0;
+                }
+            }
+            break;
+
+        case 1001: 
+            if (rc_move_done())
+            {
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
+                TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_X(%d)", 0);
+                rc_moveto_x(0, _FL_);
                 _RobStateMachine_Step++;
             }
             break;
 
-        case 1001: // move to garage ---
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            pos=0;
-            robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
-            _RobStateMachine_Step++;
+        case 1002: // move to garage ---
+            if (rc_move_done())
+            {
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
+              //  pos=0;
+              //  robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
+                rc_moveto_y(0, _FL_);
+                _RobStateMachine_Step++;
+            }
             break;
         
-        case 1002:
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            _RobStateMachine_Step=0;
-            RX_StepperStatus.adjustDoneCnt++;
+        case 1003:
+            if (rc_move_done())
+            {
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
+                _RobStateMachine_Step=0;
+                RX_StepperStatus.adjustDoneCnt++;
+            }
             break;
         }
     }
@@ -1620,19 +1802,22 @@ static void _set_ScrewPos(SScrewPositions *pos)
 }
 
 //--- _save_ScrewPos ---------------------------------------
-static void _save_ScrewPos(int recalc)
+static void _save_ScrewPos(int dist)
 {
-    if (recalc)
+    if (_ScrewPar.axis == AXE_STITCH)
     {
-        if (_ScrewPar.axis == AXE_STITCH)
+        // int distance = (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
+    //  Error(LOG, 0, "_save_ScrewPos: dist=%d", dist);
+
+        if (abs(dist)>10)
         {
-            int distance = (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
             int i;
             for (i = _ScrewPar.head + 1; i < RX_StepperCfg.headsPerColor; i++)
             {
-                _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_ANGLE].y += distance;
+                Error(LOG, 0, "Recalc Head[%d]", i);
+                _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_ANGLE].y += dist;
                 if (i != RX_StepperCfg.headsPerColor - 1)
-                    _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_STITCH].y += distance;
+                    _ScrewPos.printbar[_ScrewPar.printbar].head[i][AXE_STITCH].y += dist;
             }
         }
     }

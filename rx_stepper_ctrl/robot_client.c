@@ -50,14 +50,14 @@
 
 
 #define STEPS_PER_REV				51200
-#define DISTANCE_UM_PER_REV			36000   // mirco meters per revolutionR
-#define MOTOR_X_GARAGE_POS			20000 //28500
+#define DISTANCE_UM_PER_REV			36000   // mirco meters per revolution
+#define MOTOR_X_GARAGE_POS			20000
 
-#define SCREW_STEPS					213333
+#define SCREW_STEPS					213333			// 1/6 turn
 #define SCREW_SPEED_HIGH			1280000			// steps/sec
 #define SCREW_SPEED_LOW				160000			// steps/sec
 
-#define MAX_LENGTH_Z				5500000//550000
+#define MAX_LENGTH_Z				350000
 
 #define ENCODER_TOL					250
 #define ENCODER_TOL_XY				1000
@@ -68,11 +68,8 @@
 #define SCREW_CURRENT_HIGH			IHOLD_IRUN(0, 28, 1)		// 0x00011C00
 #define SCREW_CURRENT_LOW			IHOLD_IRUN(0, 18, 1)		// 0x00011200
 #define XY_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00011200
-#define Z_CURRENT_UP				IHOLD_IRUN(0, 10, 1)		// 0x00010A00
-#define Z_CURRENT_DOWN				IHOLD_IRUN(0, 14, 1)		// 0x00010E00
-
-#define LOW		0
-#define HIGH	1
+// #define Z_CURRENT					IHOLD_IRUN(0, 14, 1)		// 0x00010E00
+#define Z_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00010E00
 
 #define DRIVER_ERROR	0x02	
 
@@ -94,6 +91,7 @@ static UINT8			_MoveId[MOTOR_CNT];
 
 static SVersion			_FileVersion;
 static FILE				*_BinaryFile;
+static SVersion			_BinVersion;
 static UINT32			_FilePos;
 static UINT32			_FileSize;
 
@@ -102,6 +100,8 @@ static char				_RC_Error[MAX_PATH];
 
 static int				_Error_Written[MOTOR_CNT] = {FALSE};
 static int				_StallErrorEnabled = TRUE;
+
+static int				_SpeedFaxt_XY = 1;
 
 #define RC_STATE_REF	1000
 
@@ -120,14 +120,13 @@ static void _send_MotorCfg(int motor);
 static void _rc_error(const char *file, int line, char *msg);
 static void _rc_reset_motors(int motors);
 static void _rc_reset_edgeCtr(int inputs);
-static int  _rc_motor_moveBy(int motor, int steps, const char *file, int line);
+static int  _rc_motor_moveBy(int motor, int steps, int stopIn, const char *file, int line);
 static int  _rc_motor_moveToStop(int motor, int steps, int input, int level, const char *file, int line);
 static int  _rc_moveto_x_stop(int x, int stop, const char *file, int line);
 static int  _rc_moveto_y_stop(int y, int stop, const char *file, int line);
 static int	_rc_move_xy_done(void);
 static int _rc_move_screw_done(void);
 static void _rc_set_screwer_speed(int high);
-static int _rc_get_screwer_speed(void);
 
 static void _rc_state_machine(void);
 static void _check_version(void);
@@ -168,11 +167,17 @@ int	rc_isConnected(void)
 //--- rc_main -----------------------------------------------
 void rc_main(int ticks, int menu)
 {
+	static int _z_in_up = FALSE;
     if (_RC_Socket!=INVALID_SOCKET)
 	{
         RX_StepperStatus.screwerinfo.robi_in_ref = ROB_IN(IN_GARAGE) ? TRUE : FALSE;
         RX_StepperStatus.screwerinfo.z_in_down = ROB_IN(IN_Z_DOWN) ? TRUE : FALSE;
         RX_StepperStatus.screwerinfo.z_in_up = ROB_IN(IN_Z_UP) ? TRUE : FALSE;
+		if (RX_StepperStatus.screwerinfo.z_in_up && !_z_in_up)
+		{
+			TrPrintfL(TRUE, "_z_in_up");
+		}
+		_z_in_up=RX_StepperStatus.screwerinfo.z_in_up;
 		_robot_error_check();
 	}
 }
@@ -406,9 +411,9 @@ static void _check_version(void)
 		sscanf(_versionStr, "%lu.%lu.%lu.%lu", &_BinVersion.major, &_BinVersion.minor, &_BinVersion.revision, &_BinVersion.build);
 		if (_get_file_version(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, &_FileVersion)==REPLY_OK)	
 		{
-			int test=memcmp(&_BinVersion, &_FileVersion, sizeof(SVersion));
-			if (memcmp(&_BinVersion, &_FileVersion, sizeof(SVersion)))
+			if (_BinVersion.major!=_FileVersion.major || _BinVersion.minor!=_FileVersion.minor ||  _BinVersion.revision!=_FileVersion.revision || _BinVersion.build!=_FileVersion.build)
 				_download_start();
+			else _AppRunning = TRUE;
 		}
 		*/
 	}
@@ -483,7 +488,7 @@ static void _rc_state_machine(void)
     RX_StepperStatus.screw_posX = (_steps_2_micron(_RobotStatus.motor[MOTOR_XY_1].encPos + _RobotStatus.motor[MOTOR_XY_0].encPos))/2;
     RX_StepperStatus.screw_posY = (_steps_2_micron(_RobotStatus.motor[MOTOR_XY_1].encPos - _RobotStatus.motor[MOTOR_XY_0].encPos))/2;
 	RX_StepperStatus.screw_posZ = (_RobotStatus.motor[MOTOR_Z].motorPos);
-
+		
 	switch(_RC_State)
 	{        
 		case 0:					break;
@@ -497,11 +502,14 @@ static void _rc_state_machine(void)
 								break;
 
 		case RC_STATE_REF+1:	// z at bottom
+								_SpeedFaxt_XY = 1;
+								_configure_xy_motor(MOTOR_XY_0);
+								_configure_xy_motor(MOTOR_XY_1);
 								TrPrintfL(TRUE, "RC_STATE_REF+1: down=%d, moving=%d, start=%d, done=%d", ROB_IN(IN_Z_DOWN), _RobotStatus.motor[MOTOR_Z].isMoving, _RobotStatus.motor[MOTOR_Z].moveIdStarted, _RobotStatus.motor[MOTOR_Z].moveIdDone);
 								if (ROB_IN(IN_Z_DOWN))
 								{
                                     _rc_moveto_y_stop(1000000, IN_Y_END, _FL_);
-									_rc_motor_moveToStop(MOTOR_SCREW, 300000, IN_SCREW_EDGE, LOW, _FL_);
+									rc_screwer_to_ref();
 									_started = FALSE;
 									_RC_State++;
 								}
@@ -526,6 +534,7 @@ static void _rc_state_machine(void)
 											_rc_reset_motors(MOTORS_XY);
 											rc_moveto_x(RX_StepperStatus.screw_posX+5000, _FL_);
 										}
+									//	rc_move_top(_FL_);
 										_RC_State++;
 									}
 									else
@@ -536,12 +545,12 @@ static void _rc_state_machine(void)
 								}													
 								break;
 
-		case RC_STATE_REF+3:	if (_rc_move_xy_done() && _rc_move_screw_done())  
+		case RC_STATE_REF+3:	if (_rc_move_xy_done() && _rc_move_screw_done() )  
 								{
 									TrPrintfL(TRUE, "RC_STATE_REF+3: x-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_X_END), 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);
-									_rc_motor_moveToStop(MOTOR_SCREW, 300000, IN_SCREW_EDGE, HIGH, _FL_);
+								//	_rc_motor_moveToStop(MOTOR_SCREW, 300000, IN_SCREW_EDGE, HIGH, _FL_);
 									_rc_moveto_x_stop(-150000, IN_X_END, _FL_);
 									_RC_State++;
 								}
@@ -552,10 +561,13 @@ static void _rc_state_machine(void)
 								{
 									TrPrintfL(TRUE, "RC_STATE_REF+4: y-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_Y_END), 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
-										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);	
+										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);
 									if (ROB_IN(IN_X_END))
 									{
 										_rc_reset_motors(MOTORS_XY);
+										_SpeedFaxt_XY = 4;
+										_configure_xy_motor(MOTOR_XY_0);
+										_configure_xy_motor(MOTOR_XY_1);
 										_RC_State++;
 									}
 									else
@@ -643,7 +655,7 @@ static void _configure_xy_motor(uint8_t motor)
 	_MotorCfg[motor].tpowerdown = 0;
 	_MotorCfg[motor].tpwmthrs = 0;
 	_MotorCfg[motor].rampmode = 0;
-	_MotorCfg[motor].vmax = 26844;
+	_MotorCfg[motor].vmax = _SpeedFaxt_XY*26844;
 	_MotorCfg[motor].v1 = 0;
 	_MotorCfg[motor].amax = 440;
 	_MotorCfg[motor].dmax = 440;
@@ -675,8 +687,8 @@ static void _configure_screw_motor(int current, int speed)
 	_MotorCfg[MOTOR_SCREW].rampmode = 0;
     _MotorCfg[MOTOR_SCREW].vmax = speed;
 	_MotorCfg[MOTOR_SCREW].v1 = 0;
-	_MotorCfg[MOTOR_SCREW].amax = 8*2932;
-	_MotorCfg[MOTOR_SCREW].dmax = 8*2932;
+	_MotorCfg[MOTOR_SCREW].amax = 4*2932;
+	_MotorCfg[MOTOR_SCREW].dmax = 4*2932;
 	_MotorCfg[MOTOR_SCREW].a1 = 2932;
 	_MotorCfg[MOTOR_SCREW].d1 = 2932;
 	_MotorCfg[MOTOR_SCREW].vstart = 0;
@@ -699,12 +711,11 @@ static void _configure_z_motor(void)
 {
 	_MotorCfg[MOTOR_Z].gconf = 0;
 	_MotorCfg[MOTOR_Z].swmode = 0x03;
-//	_MotorCfg[MOTOR_Z].iholdirun = 0x10A00;
-	_MotorCfg[MOTOR_Z].iholdirun = Z_CURRENT_DOWN;
+	_MotorCfg[MOTOR_Z].iholdirun = Z_CURRENT;
 	_MotorCfg[MOTOR_Z].tpowerdown = 0;
 	_MotorCfg[MOTOR_Z].tpwmthrs = 0;
 	_MotorCfg[MOTOR_Z].rampmode = 0;
-	_MotorCfg[MOTOR_Z].vmax = 322122;
+	_MotorCfg[MOTOR_Z].vmax = 4*322122;
 	_MotorCfg[MOTOR_Z].v1 = 0;
 	_MotorCfg[MOTOR_Z].amax = 5277;
 	_MotorCfg[MOTOR_Z].dmax = 5277;
@@ -735,8 +746,8 @@ static void _rc_error(const char *file, int line, char *msg)
 	}
 }
 
-//--- rc_stop --------------------------------
-void rc_stop(int motors)
+//--- rc_stop_motors --------------------------------
+void rc_stop_motors(int motors)
 {
 	if (_AppRunning)
 	{
@@ -746,13 +757,17 @@ void rc_stop(int motors)
 	    cmd.motors = motors;
 	    sok_send(&_RC_Socket, &cmd);
 	    TrPrintfL(TRUE, "sent CMD_MOTORS_STOP");
-        _RC_State = 0;
 	}
 }
 
-void rc_reset_motors(int motors)
+//--- rc_stop --------------------------------
+void rc_stop(void)
 {
-    _rc_reset_motors(1 << motors);
+	if (_AppRunning)
+	{
+		rc_stop_motors(0xff);
+        _RC_State = 0;
+	}
 }
 
 //--- _rc_reset_motors --------------------------------
@@ -769,7 +784,13 @@ static void _rc_reset_motors(int motors)
 	    sok_send(&_RC_Socket, &cmd);
 	    TrPrintfL(TRUE, "sent CMD_MOTORS_RESET");
 	    for (int motor=0; motor<MOTOR_CNT; motor++)
-		    if (motors & (1<<motor)) _RobotStatus.motor[motor].isStalled = FALSE;
+		{
+		    if (motors & (1<<motor)) 
+			{
+				_RobotStatus.motor[motor].isMoving  = FALSE;
+				_RobotStatus.motor[motor].isStalled = FALSE;
+			}
+		}
 	}
 }
 
@@ -788,13 +809,12 @@ static void _rc_reset_edgeCtr(int inputs)
 }
 
 //--- _rc_motor_moveBy --------------------------
-static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
+static int _rc_motor_moveBy(int motor, int steps, int stopIn, const char *file, int line)
 {
 	if (_AppRunning)
 	{
 	    if (_RobotStatus.motor[motor].isMoving)  return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isMoving", motor);
 	    if (_RobotStatus.motor[motor].isStalled && motor != MOTOR_SCREW) return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveBy: Motor[%d].isStalled", motor);
-
         
         SRobotMotorsMoveCmd cmd;
 	    memset(&cmd, 0, sizeof(cmd));
@@ -805,12 +825,9 @@ static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
         if (motor == MOTOR_SCREW)
         {
             _rc_reset_motors(1 << MOTOR_SCREW);
-            rx_sleep(600);
+			cmd.targetPos[motor] = steps;
         }
-        /*if (motor == MOTOR_SCREW)
-            cmd.targetPos[motor] = _RobotStatus.motor[motor].motorPos + steps;
-        else*/
-            cmd.targetPos[motor] = _RobotStatus.motor[motor].targetPos + steps;
+		else cmd.targetPos[motor] = _RobotStatus.motor[motor].targetPos + steps;
 	    if (_MotorCfg[motor].encmode)
 	    {
             cmd.encoderCheck[motor] = ENC_CHECK_ENC;
@@ -818,9 +835,15 @@ static int _rc_motor_moveBy(int motor, int steps, const char *file, int line)
 	    }
 	    if (motor==MOTOR_SCREW)
 	    {
+			if (stopIn>=0)
+			{
+				cmd.stopBits[motor]     = 1<<stopIn;
+				cmd.stopBitLevel[motor] = STOP_ON_EDGE; 
+			}
+			else cmd.stopBits[motor] = 0;
 		    cmd.encoderCheck[motor] = ENC_CHECK_IN;
-		    cmd.edgeCheckIn[motor] = 0;
-		    cmd.encoderTol[motor]  = ENCODER_TOL_SCREW;		
+			cmd.edgeCheckIn[motor]  = IN_SCREW_EDGE;
+		    cmd.encoderTol[motor]   = ENCODER_TOL_SCREW;		
 	    }
 	    
         sok_send(&_RC_Socket, &cmd);
@@ -837,7 +860,8 @@ static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, 
 	{
 	    if (_RobotStatus.motor[motor].isMoving)  
         {
-			return Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving, MoveId=%d, started=%d, done=%d", motor, _MoveId[motor], _RobotStatus.motor[motor].moveIdStarted, _RobotStatus.motor[motor].moveIdDone);
+			Error(LOG_TYPE_ERROR_CONT, file, line, 0, "_rc_motor_moveToStop: Motor[%d].isMoving, MoveId=%d, started=%d, done=%d", motor, _MoveId[motor], _RobotStatus.motor[motor].moveIdStarted, _RobotStatus.motor[motor].moveIdDone);
+			return REPLY_OK;
         }
 	    if (_RobotStatus.motor[motor].isStalled) 
         {
@@ -849,10 +873,13 @@ static int _rc_motor_moveToStop(int motor, int steps, int stopInput, int level, 
 	    cmd.header.msgLen		 = sizeof(cmd);
 	    cmd.header.msgId		 = CMD_MOTORS_MOVE;
 	    cmd.motors				 = 1<<motor;
-	    cmd.targetPos[motor]	 =  steps;
-	    cmd.stopBits[motor]		 = 1<<stopInput;
-	    cmd.stopBitLevels[motor] = level;
 	    cmd.moveId[motor]		 = ++_MoveId[motor];
+	    cmd.targetPos[motor]	 =  steps;
+		if (stopInput>=0)
+		{
+			cmd.stopBits[motor] = (1<<stopInput);
+			cmd.stopBitLevel[motor]  = level;
+		}
     
 	    TrPrintfL(TRUE, "sent CMD_MOTORS_MOVE[%d].moveIdStarted=%d", motor, _MoveId[motor]);
     
@@ -873,6 +900,13 @@ int rc_moveto_y(int y, const char *file, int line)
 {
     y = _micron_2_steps(y);
     return _rc_moveto_y_stop(y, -1, file, line);
+}
+
+//--- rc_moveby_z ------------------------------------
+int  rc_moveby_z(int z, const char *file, int line)
+{
+    _rc_reset_motors(1<<MOTOR_Z);
+    return _rc_motor_moveToStop(MOTOR_Z, z, IN_Z_UP, STOP_ON_HIGH, _FL_);	
 }
 
 //--- _rc_moveto_x_stop -----------------------------------
@@ -908,7 +942,7 @@ static int _rc_moveto_x_stop(int x, int stop, const char *file, int line)
 	    if (stop>=0)
 	    {
 		    cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
-		    cmd.stopBitLevels[MOTOR_XY_0] = cmd.stopBitLevels[MOTOR_XY_1] = 1;
+		    cmd.stopBitLevel[MOTOR_XY_0] = cmd.stopBitLevel[MOTOR_XY_1] = STOP_ON_HIGH;
 	    }
 	    else 
 	    {
@@ -955,7 +989,7 @@ static int _rc_moveto_y_stop(int y, int stop, const char *file, int line)
 	    if (stop>=0)
 	    {
 		    cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
-		    cmd.stopBitLevels[MOTOR_XY_0] = cmd.stopBitLevels[MOTOR_XY_1] = 1;
+		    cmd.stopBitLevel[MOTOR_XY_0] = cmd.stopBitLevel[MOTOR_XY_1] = STOP_ON_HIGH;
 	    }
 	    else 
 	    {
@@ -984,17 +1018,33 @@ static int _rc_move_screw_done(void)
 //--- rc_move_top --------------------------------------
 int  rc_move_top(const char *file, int line)
 {
-    rc_reset_motors(MOTOR_Z);
-    rx_sleep(200);
-    return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, HIGH, _FL_);	
+    _rc_reset_motors(1<<MOTOR_Z);
+    return _rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, STOP_ON_HIGH, _FL_);	
 }
 
 //--- rc_move_bottom ---------------------------------------
 int  rc_move_bottom(const char *file, int line)
 {
-	return _rc_motor_moveToStop(MOTOR_Z, MAX_LENGTH_Z, IN_Z_DOWN, HIGH, _FL_);	
+	TrPrintfL(TRUE, "rc_move_bottom");
+	_rc_reset_motors(1<<MOTOR_Z);
+	return _rc_motor_moveToStop(MOTOR_Z, MAX_LENGTH_Z*2, IN_Z_DOWN, STOP_ON_HIGH, _FL_);	
 }
 
+//--- rc_find_screw --------------------------------
+int rc_find_screw(int steps)
+{
+	_rc_set_screwer_speed(0);
+	rc_set_screwer_current(0);
+
+	_rc_reset_motors(1 << MOTOR_Z);
+	_rc_motor_moveToStop(MOTOR_Z, -MAX_LENGTH_Z, IN_Z_UP, STOP_ON_HIGH, _FL_);
+	_rc_motor_moveBy(MOTOR_SCREW, steps*SCREW_STEPS, -1, _FL_);
+
+	return REPLY_OK;
+}
+
+
+//-------------------------------------------------
 static char _level(int l)
 {
 	if (l) return '*';
@@ -1052,7 +1102,7 @@ void rc_display_status(void)
 		term_printf("\n");
 
 		// Motor information
-		term_printf("Motors\tPos\t\tTarget Pos\tEnc Pos\t\tmoveId\tmoving\tstalled\tstarted\tdone\tconfigured\n");
+		term_printf("Motors\tPos\t\tTarget Pos\tEnc Pos\t\tmoveId\tdone\tmoving\tstalled\tconfigured\n");
 		for (i=0; i<MOTOR_CNT; i++)
 		{
 			term_printf("%d-", i);
@@ -1063,15 +1113,15 @@ void rc_display_status(void)
 			case MOTOR_Z:		term_printf("Z"); break;
 			case MOTOR_SCREW:	term_printf("Screw"); break;
 			}
-			term_printf("\t%010d\t%010d\t%010d\t  %1d\t  %1d\t  %1d\t%d\t%d\t%d\n", 
+			term_printf("\t%010d\t%010d\t%010d\t  %d\t%d\t  %1d\t  %d\t  %d\n", 
 			_RobotStatus.motor[i].motorPos, 
 			_RobotStatus.motor[i].targetPos, 
 			_RobotStatus.motor[i].encPos, 
-			_MoveId[i],
-			_RobotStatus.motor[i].isMoving,
-			_RobotStatus.motor[i].isStalled, 
+
 			_RobotStatus.motor[i].moveIdStarted,
 			_RobotStatus.motor[i].moveIdDone,
+			_RobotStatus.motor[i].isMoving,
+			_RobotStatus.motor[i].isStalled, 
 			_RobotStatus.motor[i].isConfigured);
 		}
 	
@@ -1135,19 +1185,18 @@ void rc_handle_menu(char *str)
 		switch (str[0])
 		{
 		case 'r':	_rc_reset_motors(MOTORS_ALL); break;
-		case 's':	_RC_State = 0;
-					rc_stop(0x0f); break;
+		case 's':	rc_stop(); break;
 		case 'R':	rc_reference(); break;
-		case 'm':	_rc_motor_moveBy(no, atoi(&str[2]), _FL_);	break;
+		case 'm':	_rc_motor_moveBy(no, atoi(&str[2]),0,  _FL_);	break;
 		case 'x':	rc_moveto_x(RX_StepperStatus.screw_posX+atoi(&str[1]), _FL_); break;
 		case 'y':	rc_moveto_y(RX_StepperStatus.screw_posY+atoi(&str[1]), _FL_); break;
         case 'e':	rc_moveto_x(atoi(&str[1]), _FL_); break;
         case 'f':	rc_moveto_y(atoi(&str[1]), _FL_); break;
-		case 'z':	_rc_motor_moveBy(MOTOR_Z, atoi(&str[1]), _FL_);		break;		
+		case 'z':	_rc_motor_moveBy(MOTOR_Z, atoi(&str[1]), 0, _FL_);		break;		
 		case 'd':	rc_move_bottom(_FL_); break;
 		case 'u':	rc_move_top(_FL_); break;
 		case 't':	val = atoi(&str[1]);
-					_rc_motor_moveBy(MOTOR_SCREW, val, _FL_); break;
+					_rc_motor_moveBy(MOTOR_SCREW, val, 0, _FL_); break;
 		default:
 			break;
 		}
@@ -1166,32 +1215,51 @@ int rc_screwer_in_ref(void)
     return _RobotStatus.gpio.inputs & (1UL << IN_SCREW_EDGE);
 }
 
+//--- rc_screwer_to_ref ------------------------------
+void rc_screwer_to_ref(void)
+{
+	_rc_motor_moveBy(MOTOR_SCREW, 2*SCREW_STEPS, IN_SCREW_EDGE, _FL_);
+}
+
 //--- rc_turn_ticks_left ------------------------------------------------
 void rc_turn_ticks_left(int ticks)
 {
-    if (!_rc_get_screwer_speed()) _rc_set_screwer_speed(TRUE);
-    _rc_motor_moveBy(MOTOR_SCREW, - ticks * SCREW_STEPS, _FL_);
+    _rc_set_screwer_speed(TRUE);
+    _rc_motor_moveBy(MOTOR_SCREW, - ticks * SCREW_STEPS, -1, _FL_);
 }
 
 //--- rc_turn_ticks_right ------------------------------------------------
 void rc_turn_ticks_right(int ticks)
 {
-    if (!_rc_get_screwer_speed()) _rc_set_screwer_speed(TRUE);
-    _rc_motor_moveBy(MOTOR_SCREW, ticks * SCREW_STEPS, _FL_);
+    _rc_set_screwer_speed(TRUE);
+    _rc_motor_moveBy(MOTOR_SCREW, ticks * SCREW_STEPS, -1, _FL_);
 }
+
+/*
+//--- rc_turn_ticks ------------------------------------------------
+void rc_turn_ticks(int ticks, int stopOnUp)
+{
+    _rc_set_screwer_speed(FALSE);
+	if (stopOnUp) _rc_motor_moveBy(MOTOR_SCREW, ticks*SCREW_STEPS/6, IN_Z_UP, _FL_);
+    else          _rc_motor_moveBy(MOTOR_SCREW, ticks*SCREW_STEPS/6, 0, _FL_);
+}
+*/
 
 //--- rc_turn_steps ------------------------------------------------
 void rc_turn_steps(int steps)
 {
-    if (_rc_get_screwer_speed()) _rc_set_screwer_speed(FALSE);
-    _rc_motor_moveBy(MOTOR_SCREW, steps, _FL_);
+    _rc_set_screwer_speed(FALSE);
+    _rc_motor_moveBy(MOTOR_SCREW, steps, 0, _FL_);
 }
 
 //--- rc_set_screwer_current ---------------------------------------------
 void rc_set_screwer_current(int high)
 {
-    if (high) _configure_screw_motor(SCREW_CURRENT_HIGH, _MotorCfg[MOTOR_SCREW].vmax);
-    else	  _configure_screw_motor(SCREW_CURRENT_LOW, _MotorCfg[MOTOR_SCREW].vmax);
+	if (high!=rc_get_screwer_current())
+	{
+		if (high) _configure_screw_motor(SCREW_CURRENT_HIGH, _MotorCfg[MOTOR_SCREW].vmax);
+		else	  _configure_screw_motor(SCREW_CURRENT_LOW, _MotorCfg[MOTOR_SCREW].vmax);
+	}
 }
 
 //--- rc_get_screwer_current --------------------------------------------------
@@ -1203,14 +1271,12 @@ int rc_get_screwer_current(void)
 //--- _rc_set_screwer_speed -----------------------------------------------
 void _rc_set_screwer_speed(int high)
 {
-    if (high)	_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED_HIGH);
-    else		_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED_LOW);
-}
-
-//--- _rc_set_screwer_speed -----------------------------------------------
-int _rc_get_screwer_speed(void)
-{
-    return _MotorCfg[MOTOR_SCREW].vmax == SCREW_SPEED_HIGH;
+	int h=_MotorCfg[MOTOR_SCREW].vmax == SCREW_SPEED_HIGH;
+	if (high!=h)
+	{
+		if (high)	_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED_HIGH);
+		else		_configure_screw_motor(_MotorCfg[MOTOR_SCREW].iholdirun, SCREW_SPEED_LOW);
+	}
 }
 
 //--- rc_get_screwer_pos ------------------------------------------
@@ -1230,7 +1296,7 @@ int rc_move_started(void)
 {
     for (int i = 0; i < MOTOR_CNT; i++)
     {
-        if (_RobotStatus.motor[i].moveIdStarted > _RobotStatus.motor[i].moveIdDone) return TRUE;
+        if (_RobotStatus.motor[i].moveIdStarted != _RobotStatus.motor[i].moveIdDone) return TRUE;
     }
     return FALSE;
 }
@@ -1241,9 +1307,16 @@ int rc_move_done(void)
     if (_RC_State) return FALSE;
     for (int i = 0; i < MOTOR_CNT; i++)
     {
-        if (_RobotStatus.motor[i].moveIdDone < _MoveId[i]) return FALSE;
+        if (_RobotStatus.motor[i].moveIdDone != _MoveId[i]) return FALSE;
     }
     return TRUE;
+}
+
+//--- rc_move_screw_done ---
+int rc_move_screw_done(void)
+{
+    if (_RC_State) return FALSE;
+	return (_RobotStatus.motor[MOTOR_SCREW].moveIdDone == _MoveId[MOTOR_SCREW]);
 }
 
 //--- rc_move_xy_error ------------------------------

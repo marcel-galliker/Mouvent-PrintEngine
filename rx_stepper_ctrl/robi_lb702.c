@@ -130,22 +130,27 @@ void robi_lb702_main(int ticks, int menu)
 
     if (!RX_StepperStatus.screwerinfo.ref_done) _Search_Screw_Time = 0;
 
-    if (RX_StepperStatus.screwerinfo.z_in_up) _Search_Screw_Time = 0;
-    if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time)
+    if (!rc_isConnected())
     {
-        int val = 0;
-        if ((RX_StepperStatus.screw_posY >= (SCREW_Y_ANGLE + SCREW_Y_STITCH) / 2 && _TurnDirection < TURN_RIGHT) || _TurnDirection == TURN_LEFT)
-		{
-			val = SCREW_STEPS;
-            _TurnDirection = TURN_RIGHT;
-		}
-		else
-		{
-            val = -SCREW_STEPS;
-            _TurnDirection = TURN_LEFT;
-		}
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_SCREW_STEPS, &val);
-        _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
+        if (RX_StepperStatus.screwerinfo.z_in_up) _Search_Screw_Time = 0;
+        if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time)
+        {
+            int val = 0;
+            if ((RX_StepperStatus.screw_posY >= (SCREW_Y_ANGLE + SCREW_Y_STITCH) / 2 && _TurnDirection < TURN_RIGHT) || _TurnDirection == TURN_LEFT)
+		    {
+			    val = SCREW_STEPS;
+                _TurnDirection = TURN_RIGHT;
+		    }
+		    else
+		    {
+                val = -SCREW_STEPS;
+                _TurnDirection = TURN_LEFT;
+		    }
+
+            robi_turn_screw_relative(val);
+
+            _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
+        }
     }
 
     if (RX_StepperStatus.screwerinfo.z_in_down)
@@ -178,7 +183,6 @@ void robi_lb702_main(int ticks, int menu)
     else if (!robi_move_done())
         _CmdStarted = TRUE;
     
-
     if (_CmdRunning && ((robi_move_done() && !rc_isConnected()) || (rc_move_done() && rc_isConnected())) && (_CmdStarted || robi_not_started() || rc_isConnected()))
     {
         _CmdStarted = FALSE;
@@ -295,6 +299,7 @@ void robi_lb702_main(int ticks, int menu)
             }
             _CmdRunning = 0;
             break;
+
         case CMD_ROBI_MOVE_Z_UP:
             _CmdRunning = 0;
             if (RX_StepperStatus.screwerinfo.z_in_up && _ScrewCorrection != 0)
@@ -557,7 +562,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         RX_StepperStatus.screwerinfo.ref_done = FALSE;
         _NewCmd = FALSE;
         lb702_reset_variables();
-        if (rc_isConnected())   rc_stop(0x0f);
+        if (rc_isConnected())   rc_stop();
         else                    robi_stop();
         break;
     case CMD_ROBI_REFERENCE:
@@ -683,13 +688,12 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
         
     case CMD_ROBI_MOVE_Z_DOWN:
-        if (!_CmdRunning)
+        if (!_CmdRunning && !RX_StepperStatus.screwerinfo.z_in_down)
         {
-            if (RX_StepperStatus.screwerinfo.z_in_down) {Error(ERR_CONT, 0, "Screwer is already down"); break;}
             _CmdRunning = msgId;
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
-            _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
+        //  _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             if (RX_StepperStatus.screwerinfo.ref_done)
             {
                 if (rc_isConnected()) rc_move_bottom(_FL_);

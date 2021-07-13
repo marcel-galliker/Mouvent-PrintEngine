@@ -791,7 +791,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 	case CMD_ROB_VACUUM:
 	case CMD_ROB_FILL_CAP:
 	case CMD_HEAD_ADJUST:
-	case CMD_SEARCH_ALL_SCREWS:
+	case CMD_FIND_ALL_SCREWS:
 	case CMD_RESET_ALL_SCREWS:
 									if (RX_StepperStatus.robot_used)
 										Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId);
