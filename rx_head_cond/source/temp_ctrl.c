@@ -384,7 +384,7 @@ static void _heater_ctrl(UINT32 percent)
 		}
 		else
 		{
-			if (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP_V3) RX_Status.heater_percent = 0;
+			if (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > RX_Config.tempMax) RX_Status.heater_percent = 0;
 		}
     }
 
