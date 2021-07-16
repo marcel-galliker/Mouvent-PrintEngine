@@ -155,13 +155,9 @@ void rc_init(void)
 //--- rc_config ------------------------------------------------
 void rc_config(int boardNo)
 {
+//	boardNo=1;
+//	Error(WARN, 0, "TEST: rc_config(%d)", boardNo);
 	sprintf(_IpAddr, RX_CTRL_SUBNET "%d", 50+10*boardNo);
-}
-
-//--- rc_isConnected -----------------------------------------
-int	rc_isConnected(void)
-{
-	return (_RC_Socket!=INVALID_SOCKET);
 }
 
 //--- rc_main -----------------------------------------------
