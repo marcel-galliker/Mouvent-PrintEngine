@@ -874,23 +874,22 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 //--- _ctrl_check_stepper_in_purgeMode ----------------------------------------
 static int _ctrl_check_stepper_in_purgeMode(int headNo)
 {
-    int inkSupply = RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply;
-    if (_SingleHead[inkSupply] == -1) return FALSE;
-    int fluidNo = headNo / RX_Config.headsPerColor;
+    int fluidNo = RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply;
+    int inkSupply = fluidNo;
+    
     int Cluster_Per_Stepper = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
     int i, j;
     if (RX_Config.inkSupplyCnt % 2 == 0)
     {
+        
         if (fluidNo % 2 != 0) fluidNo--;
         for (i = 0; i < Cluster_Per_Stepper; i++)
         {
             for (j = 0; j < HEAD_CNT; j++)
             {
-                //if ((fluidNo *2 +i)*HEAD_CNT+j)
-				if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (fluidNo * 2 +i)*HEAD_CNT+j != headNo)
-                return TRUE;
+                if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (inkSupply * 2 +i)*HEAD_CNT+j != headNo)
+					return TRUE;
             }
-            
         }
     }
     else
@@ -901,8 +900,7 @@ static int _ctrl_check_stepper_in_purgeMode(int headNo)
         {
             for (j = 0; j < HEAD_CNT; j++)
             {
-                //if ((fluidNo *2 +i)*HEAD_CNT+j)
-				if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (fluidNo * 2 +i)*HEAD_CNT+j != headNo)
+                if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (inkSupply * 2 +i)*HEAD_CNT+j != headNo)
 					return TRUE;
             }
         }

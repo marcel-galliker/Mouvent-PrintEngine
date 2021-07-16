@@ -930,8 +930,7 @@ static void _do_set_density	  (RX_SOCKET socket, SDensityMsg *pmsg)
 //--- _do_head_fluidCtrlMode ---
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 {
-    Error(LOG, 0, "Head no %d, ctrlMode %d", pmsg->no, pmsg->ctrlMode);
-	if(pmsg->ctrlMode == ctrl_wipe) step_rob_wipe_start(ctrl_wipe);
+    if(pmsg->ctrlMode == ctrl_wipe) step_rob_wipe_start(ctrl_wipe);
 	else if (pmsg->ctrlMode == ctrl_off) ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, FALSE, TRUE);
     else if (pmsg->ctrlMode == ctrl_toggle_meniscus) ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, FALSE, FALSE);
 	else ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, TRUE, TRUE);

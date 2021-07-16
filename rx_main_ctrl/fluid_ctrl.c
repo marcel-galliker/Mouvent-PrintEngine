@@ -637,8 +637,6 @@ static void _control(int fluidNo)
 	int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *pstat = &_FluidStatus[no];
 	
-	int HeadNo = ctrl_singleHead(fluidNo);
-    if (HeadNo != -1) HeadNo %= RX_Config.headsPerColor;
    // Error(LOG, 0, "_PurgeCtrlMode: %x", _PurgeCtrlMode);
 
 	for (i=0; i<INK_PER_BOARD; i++, pstat++, no++)
@@ -646,6 +644,8 @@ static void _control(int fluidNo)
         _lbrob = step_robot_used(no);
         if (ctrl_check_all_heads_in_fluidCtrlMode(no, pstat->ctrlMode))
 		{
+            int HeadNo = ctrl_singleHead(no);
+            if (HeadNo != -1) HeadNo %= RX_Config.headsPerColor;
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
 			switch(pstat->ctrlMode)
 			{
@@ -720,7 +720,7 @@ static void _control(int fluidNo)
 											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, FALSE, TIME_PURGE_DELAY); break;
                                             case ctrl_purge_hard_wash:	_send_purge_par(no, time, FALSE, TIME_PURGE_DELAY); break;
 											case ctrl_purge_hard:		_send_purge_par(no, time, _lbrob, TIME_PURGE_DELAY); _txrob=FALSE; break;
-                                            case ctrl_purge4ever:		_send_purge_par(no, 0, FALSE, TIME_PURGE_DELAY); 
+                                            case ctrl_purge4ever:		_send_purge_par(no, 0, _lbrob, TIME_PURGE_DELAY); 
 																		machine_set_capping_timer(FALSE); break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
@@ -1253,7 +1253,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;
 	if (ctrlMode != ctrl_cap) _send_ctrlMode(no, ctrlMode, sendToHeads);
-//	Error(LOG, 0, "fluid_send_ctrlMode 0X%04x", ctrlMode);
+
 	switch (RX_Config.printer.type)
 	{
 	case printer_TX801:
