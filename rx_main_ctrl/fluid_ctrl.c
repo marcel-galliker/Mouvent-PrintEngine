@@ -637,7 +637,7 @@ static void _control(int fluidNo)
 	int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *pstat = &_FluidStatus[no];
 	
-	int HeadNo = ctrl_singleHead();
+	int HeadNo = ctrl_singleHead(fluidNo);
     if (HeadNo != -1) HeadNo %= RX_Config.headsPerColor;
    // Error(LOG, 0, "_PurgeCtrlMode: %x", _PurgeCtrlMode);
 
@@ -839,7 +839,7 @@ static void _control(int fluidNo)
 											}
                                             else if (_lbrob)
                                             {
-                                                if (_PurgeCtrlMode != ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_prepareToPrint))
+                                                if ((_PurgeCtrlMode != ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_prepareToPrint)) || ctrl_singleHead(no) != -1)
                                                 {
                                                     if (_PurgeCtrlMode == ctrl_purge_hard_vacc || _PurgeCtrlMode == ctrl_purge_hard_wash)
                                                         fluid_send_ctrlMode(no, ctrl_vacuum, TRUE);
@@ -938,7 +938,7 @@ static void _control(int fluidNo)
                                                 _send_ctrlMode(no, _EndCtrlMode[no], TRUE); 
                                                 break;
                                             }*/
-												
+											machine_set_capping_timer(FALSE);	
 											if (_lbrob)
 											{
                                                 if (!steplb_rob_in_fct_pos(step_stepper_to_fluid(no), rob_fct_purge4ever))
@@ -1271,10 +1271,8 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
                             {
                                 if (no == -1) 
                                     steplb_rob_control_all(ctrlMode);
-                                else if (RX_Config.inkSupplyCnt % 2 == 0)
-                                    steplb_rob_control(ctrlMode, no / 2);
-                                else
-                                    steplb_rob_control(ctrlMode, (no + 1) / 2);
+                                else 
+                                    steplb_rob_control(ctrlMode, step_stepper_to_fluid(no));
                             }
 							break;
 	default:				break;
@@ -1347,7 +1345,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				//--- send mode to heads ---
 				if (sendToHeads)
 				{
-					int head = ctrl_singleHead();
+					int head = ctrl_singleHead(i);
                     if (ctrlMode == ctrl_prepareToPrint && fluid_get_ctrlMode(i) == ctrl_purge_step4)
                         head = -1;
                     
@@ -1368,10 +1366,10 @@ static void _send_purge_par(int fluidNo, int time, int position_check, int delay
 	par.no    =  fluidNo%INK_PER_BOARD;
     if (RX_StepperStatus.robot_used && position_check)
     {
-        if (ctrl_singleHead() == -1)
+        if (ctrl_singleHead(fluidNo) == -1)
             par.delay_pos_y = (RX_Config.headsPerColor - 1) * HEAD_WIDTH;
         else
-            par.delay_pos_y = (ctrl_singleHead()%RX_Config.headsPerColor) * HEAD_WIDTH;
+            par.delay_pos_y = (ctrl_singleHead(fluidNo)%RX_Config.headsPerColor) * HEAD_WIDTH;
     }
     else
     {

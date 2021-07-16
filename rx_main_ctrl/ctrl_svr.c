@@ -71,7 +71,7 @@ typedef struct SBufferFluidCmd
 SHeadCtrlPar _HeadCtrl[HEAD_BOARD_CNT];
 SBufferFluidCmd _BufferFluidCmd[INK_SUPPLY_CNT];
 static int	_HeadResetCnt;
-static int	 _SingleHead;
+static int	 _SingleHead[INK_SUPPLY_CNT];
 static int	 _AwaitHeadCfg;
 
 
@@ -721,9 +721,9 @@ UINT32 ctrl_headResetCnt(void)
 
 
 //--- ctrl_singleHead -------------------------------
-int  ctrl_singleHead(void)
+int  ctrl_singleHead(int fluidNo)
 {
-	return _SingleHead;
+	return _SingleHead[fluidNo];
 }
 
 //--- ctrl_empty_PurgeBuffer -----------------------------------------
@@ -815,10 +815,10 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 	{
 		if (ctrlMode>=ctrl_purge_soft && ctrlMode<ctrl_purge_step1 && !step_robot_used(inkSupply))
 			fluid_send_ctrlMode(RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply, ctrl_off, TRUE);
-		_SingleHead = headNo;
+		_SingleHead[inkSupply] = headNo;
         if (ctrlMode == ctrl_off) fluid_purgeCluster(headNo / 4, FALSE);
 	}
-	if (ctrlMode<=ctrl_print) _SingleHead=-1;
+	if (ctrlMode<=ctrl_print) _SingleHead[inkSupply]=-1;
 	if (_HeadCtrl[headNo/HEAD_CNT].socket!=INVALID_SOCKET)
 	{
 		SFluidCtrlCmd cmd;
@@ -829,7 +829,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
         
         if (!(ctrlMode == ctrl_off && mode == ctrl_wait))
         {
-			sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
+            sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
             // If Purgeg just one head, set all the Printheads of the same fluid system into off, which
             // are in print, because otherwise it will drop on the paper on the heads which are in print mode
             if ((ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_hard) || ctrlMode == ctrl_purge4ever)
@@ -874,7 +874,8 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 //--- _ctrl_check_stepper_in_purgeMode ----------------------------------------
 static int _ctrl_check_stepper_in_purgeMode(int headNo)
 {
-    if (_SingleHead == -1) return FALSE;
+    int inkSupply = RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply;
+    if (_SingleHead[inkSupply] == -1) return FALSE;
     int fluidNo = headNo / RX_Config.headsPerColor;
     int Cluster_Per_Stepper = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
     int i, j;
@@ -944,7 +945,7 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 {
 	int head;
 	SHeadCfg *pcfg;
-    if (ctrlMode == ctrl_prepareToPrint) _SingleHead = -1;
+    if (ctrlMode == ctrl_prepareToPrint) _SingleHead[fluidNo] = -1;
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
 		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
@@ -1022,9 +1023,9 @@ int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode
 		if (pcfg->enabled && pcfg->inkSupply==fluidNo)
 		{
 			mode = RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].ctrlMode;
-			if ((_SingleHead<0)  && (mode!=ctrlMode)) return FALSE;
-            if ((_SingleHead == head) && mode != ctrlMode) return FALSE;
-            if ((_SingleHead>=0) && (mode==ctrlMode)) return TRUE;
+			if ((_SingleHead[fluidNo]<0)  && (mode!=ctrlMode)) return FALSE;
+            if ((_SingleHead[fluidNo] == head) && mode != ctrlMode) return FALSE;
+            if ((_SingleHead[fluidNo]>=0) && (mode==ctrlMode)) return TRUE;
 		}
 	}
 	return TRUE;
