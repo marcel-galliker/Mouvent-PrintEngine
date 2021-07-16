@@ -49,7 +49,39 @@ Sources/robot_flash.o: ../Sources/robot_flash.c \
  C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/ft900_wdt.h \
  ../Includes/rx_trace.h ../Includes/robot_flash.h \
  ../../../rx_robot_ctrl/includes/rx_robot_tcpip.h \
- ../../../rx_robot_ctrl/includes/rx_robot_def.h
+ ../../../rx_robot_ctrl/includes/rx_robot_def.h \
+ ../lib/lwip/src/arch/net.h ../lib/lwip/src/include/lwip/inet.h \
+ ../lib/lwip/src/include/lwip/opt.h ../Includes/lwipopts.h \
+ ../lib/lwip/src/arch/ft900opts.h ../lib/lwip/src/include/lwip/debug.h \
+ ../lib/lwip/src/include/lwip/arch.h ../lib/lwip/src/arch/arch/cc.h \
+ ../lib/lwip/src/include/lwip/def.h \
+ ../lib/lwip/src/include/lwip/ip_addr.h \
+ ../lib/lwip/src/include/lwip/ip4_addr.h \
+ ../lib/lwip/src/arch/arch/bpstruct.h \
+ ../lib/lwip/src/arch/arch/epstruct.h \
+ ../lib/lwip/src/include/lwip/ip6_addr.h \
+ ../lib/lwip/src/include/lwip/def.h ../lib/lwip/src/include/lwip/udp.h \
+ ../lib/lwip/src/include/lwip/pbuf.h ../lib/lwip/src/include/lwip/err.h \
+ ../lib/lwip/src/include/lwip/netif.h \
+ ../lib/lwip/src/include/lwip/stats.h ../lib/lwip/src/include/lwip/mem.h \
+ ../lib/lwip/src/include/lwip/memp.h \
+ ../lib/lwip/src/include/lwip/priv/memp_std.h \
+ ../lib/lwip/src/include/lwip/priv/memp_priv.h \
+ ../lib/lwip/src/include/lwip/ip.h ../lib/lwip/src/include/lwip/ip4.h \
+ ../lib/lwip/src/include/lwip/prot/ip4.h \
+ ../lib/lwip/src/include/lwip/ip6.h \
+ ../lib/lwip/src/include/lwip/prot/ip.h \
+ ../lib/lwip/src/include/lwip/prot/udp.h \
+ ../lib/lwip/src/include/lwip/tcp.h ../lib/lwip/src/include/lwip/tcpip.h \
+ ../lib/lwip/src/include/lwip/timeouts.h \
+ ../lib/lwip/src/include/lwip/init.h ../lib/lwip/src/include/lwip/sys.h \
+ ../lib/lwip/src/include/lwip/igmp.h \
+ ../lib/lwip/src/include/netif/etharp.h \
+ ../lib/lwip/src/include/lwip/etharp.h \
+ ../lib/lwip/src/include/lwip/prot/ethernet.h \
+ ../lib/lwip/src/include/lwip/prot/etharp.h \
+ ../lib/lwip/src/include/netif/ethernet.h \
+ ../lib/lwip/src/include/lwip/dhcp.h ../lib/lwip/src/arch/netif_arch.h
 
 C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/ft900.h:
 
@@ -154,3 +186,89 @@ C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/f
 ../../../rx_robot_ctrl/includes/rx_robot_tcpip.h:
 
 ../../../rx_robot_ctrl/includes/rx_robot_def.h:
+
+../lib/lwip/src/arch/net.h:
+
+../lib/lwip/src/include/lwip/inet.h:
+
+../lib/lwip/src/include/lwip/opt.h:
+
+../Includes/lwipopts.h:
+
+../lib/lwip/src/arch/ft900opts.h:
+
+../lib/lwip/src/include/lwip/debug.h:
+
+../lib/lwip/src/include/lwip/arch.h:
+
+../lib/lwip/src/arch/arch/cc.h:
+
+../lib/lwip/src/include/lwip/def.h:
+
+../lib/lwip/src/include/lwip/ip_addr.h:
+
+../lib/lwip/src/include/lwip/ip4_addr.h:
+
+../lib/lwip/src/arch/arch/bpstruct.h:
+
+../lib/lwip/src/arch/arch/epstruct.h:
+
+../lib/lwip/src/include/lwip/ip6_addr.h:
+
+../lib/lwip/src/include/lwip/def.h:
+
+../lib/lwip/src/include/lwip/udp.h:
+
+../lib/lwip/src/include/lwip/pbuf.h:
+
+../lib/lwip/src/include/lwip/err.h:
+
+../lib/lwip/src/include/lwip/netif.h:
+
+../lib/lwip/src/include/lwip/stats.h:
+
+../lib/lwip/src/include/lwip/mem.h:
+
+../lib/lwip/src/include/lwip/memp.h:
+
+../lib/lwip/src/include/lwip/priv/memp_std.h:
+
+../lib/lwip/src/include/lwip/priv/memp_priv.h:
+
+../lib/lwip/src/include/lwip/ip.h:
+
+../lib/lwip/src/include/lwip/ip4.h:
+
+../lib/lwip/src/include/lwip/prot/ip4.h:
+
+../lib/lwip/src/include/lwip/ip6.h:
+
+../lib/lwip/src/include/lwip/prot/ip.h:
+
+../lib/lwip/src/include/lwip/prot/udp.h:
+
+../lib/lwip/src/include/lwip/tcp.h:
+
+../lib/lwip/src/include/lwip/tcpip.h:
+
+../lib/lwip/src/include/lwip/timeouts.h:
+
+../lib/lwip/src/include/lwip/init.h:
+
+../lib/lwip/src/include/lwip/sys.h:
+
+../lib/lwip/src/include/lwip/igmp.h:
+
+../lib/lwip/src/include/netif/etharp.h:
+
+../lib/lwip/src/include/lwip/etharp.h:
+
+../lib/lwip/src/include/lwip/prot/ethernet.h:
+
+../lib/lwip/src/include/lwip/prot/etharp.h:
+
+../lib/lwip/src/include/netif/ethernet.h:
+
+../lib/lwip/src/include/lwip/dhcp.h:
+
+../lib/lwip/src/arch/netif_arch.h:

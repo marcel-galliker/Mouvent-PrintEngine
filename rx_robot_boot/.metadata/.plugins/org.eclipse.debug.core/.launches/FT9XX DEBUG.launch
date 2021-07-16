@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="com.ftdichip.ft90x.ui.handlers.debug">
 <booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_DISPLAY_GDB_BRIDGE_CONSOLE" value="false"/>
-<booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_DOWNLOAD_TO_FLASH_DEBUG" value="false"/>
+<booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_DOWNLOAD_TO_FLASH_DEBUG" value="true"/>
 <booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_KEEP_EXISTING_BOOTLOADER" value="false"/>
 <booleanAttribute key="org.eclipse.cdt.dsf.gdb.AUTO_SOLIB" value="true"/>
 <listAttribute key="org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST"/>

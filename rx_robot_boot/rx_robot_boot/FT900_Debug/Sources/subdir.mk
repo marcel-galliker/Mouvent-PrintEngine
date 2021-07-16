@@ -5,7 +5,9 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Sources/bootloader.c \
+../Sources/gpio.c \
 ../Sources/main.c \
+../Sources/motor.c \
 ../Sources/network.c \
 ../Sources/robot_flash.c \
 ../Sources/rx_boot.c \
@@ -15,7 +17,9 @@ C_SRCS += \
 
 OBJS += \
 ./Sources/bootloader.o \
+./Sources/gpio.o \
 ./Sources/main.o \
+./Sources/motor.o \
 ./Sources/network.o \
 ./Sources/robot_flash.o \
 ./Sources/rx_boot.o \
@@ -25,7 +29,9 @@ OBJS += \
 
 C_DEPS += \
 ./Sources/bootloader.d \
+./Sources/gpio.d \
 ./Sources/main.d \
+./Sources/motor.d \
 ./Sources/network.d \
 ./Sources/robot_flash.d \
 ./Sources/rx_boot.d \

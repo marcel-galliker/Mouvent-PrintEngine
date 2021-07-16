@@ -7,6 +7,7 @@
 #include "rx_robot_tcpip.h"
 #include "network.h"
 #include "rx_boot.h"
+#include "robot_flash.h"
 #include "motor.h"
 #include "gpio.h"
 #include "ctrl.h"
@@ -39,6 +40,7 @@ bool network_init(void)
 
 	ip_addr_t gatewayAddress = 	{IP_ADDR(192, 168, 200, 1)};
 	ip_addr_t netMask = 		{IP_ADDR(255, 255, 255, 0)};
+	flash_read_ipAddr(&_ipAddress);
 	net_init(_ipAddress, gatewayAddress, netMask, USE_DHCP, "Robot", NULL);
 	return REPLY_OK;
 }
@@ -136,6 +138,7 @@ void network_end(void)
 
 }
 
+/*
 //--- network_change_ip ----------------------------------------
 void network_change_ip(ip_addr_t* newIpAddress)
 {
@@ -145,4 +148,4 @@ void network_change_ip(ip_addr_t* newIpAddress)
 		memcpy(&_ipAddress, newIpAddress, sizeof(_ipAddress));
 	}
 }
-
+*/

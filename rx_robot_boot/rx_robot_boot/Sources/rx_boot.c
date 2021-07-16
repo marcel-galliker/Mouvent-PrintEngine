@@ -10,6 +10,7 @@
 
 #include "rx_timer.h"
 #include "network.h"
+#include "motor.h"
 #include "rx_boot.h"
 #include "rx_boot_def.h"
 
@@ -94,9 +95,9 @@ static void _send_info(uint32_t id)
 void rx_boot_handle_msg(void* msg)
 {
 	SBootAddrSetCmd* commandData = NULL;
-	uint32_t *command = (uint32_t *)msg;
+	SBootAddrSetCmd *pcmd  = (SBootAddrSetCmd*)msg;
 
-	switch(*command)
+	switch(pcmd->id)
 	{
 	case CMD_BOOT_INFO_REQ:
 		_isAddressConfirmed = false;
@@ -108,9 +109,7 @@ void rx_boot_handle_msg(void* msg)
 		break;
 
 	case CMD_BOOT_ADDR_SET:
-		commandData = (SBootAddrSetCmd*)msg;
-
-		if(commandData->macAddr == _item.macAddr)
+		if(pcmd->macAddr == _item.macAddr)
 		{
 			// Convert incoming IP from ASCII to ip_addr struct
 			ip_addr_t newIp;
@@ -127,6 +126,8 @@ void rx_boot_handle_msg(void* msg)
 		break;
 
 	case CMD_BOOT_FLASH_ON:
+		if(pcmd->macAddr == _item.macAddr) motor_start();
+		else 							   motor_stop();
 		break;
 
 	default:

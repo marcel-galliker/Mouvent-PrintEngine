@@ -2,26 +2,27 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="_ipAddress" key="selection"/>
-		<item value="false" key="casesensitive"/>
+		<item value="_spi_read_register" key="selection"/>
+		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
-		<item value="false" key="wholeword"/>
+		<item value="true" key="wholeword"/>
 		<list key="findhistory">
-			<item value="_ipAddress"/>
-			<item value="_ctrl_addr"/>
-			<item value="APP_SECTOR"/>
-			<item value="APP_START"/>
-			<item value="init"/>
-			<item value="main_fct"/>
-			<item value="APP_TO_FLASH"/>
-			<item value="memc"/>
+			<item value="_spi_read_register"/>
+			<item value="MOTOR"/>
+			<item value="_motorConfigs"/>
+			<item value="TMC_XTARGET_REG"/>
+			<item value="_encoderCheck"/>
+			<item value="ctrl_send_status"/>
+			<item value="RX_RobotStatus"/>
+			<item value="_ctrl_port"/>
 		</list>
 		<list key="replacehistory">
+			<item value="MOTOR_SCREW"/>
+			<item value=""/>
 			<item value="network_send_ctrl_msg"/>
 			<item value="_rxBootPcb"/>
 			<item value="_tickts_ms"/>
-			<item value=""/>
 			<item value="{ asm(&quot;nop&quot;)"/>
 		</list>
 	</section>
@@ -29,7 +30,7 @@
 		<item value="284" key="DIALOG_WIDTH"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 		<item value="388" key="DIALOG_HEIGHT"/>
-		<item value="807" key="DIALOG_X_ORIGIN"/>
-		<item value="205" key="DIALOG_Y_ORIGIN"/>
+		<item value="1179" key="DIALOG_X_ORIGIN"/>
+		<item value="214" key="DIALOG_Y_ORIGIN"/>
 	</section>
 </section>

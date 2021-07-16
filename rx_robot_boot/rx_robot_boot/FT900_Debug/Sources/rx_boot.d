@@ -79,8 +79,8 @@ Sources/rx_boot.o: ../Sources/rx_boot.c \
  ../lib/lwip/src/include/lwip/prot/etharp.h \
  ../lib/lwip/src/include/netif/ethernet.h \
  ../lib/lwip/src/include/lwip/dhcp.h ../lib/lwip/src/arch/netif_arch.h \
- ../Includes/rx_timer.h ../Includes/network.h ../Includes/rx_boot.h \
- ../Includes/rx_types.h ../Includes/rx_boot_def.h \
+ ../Includes/rx_timer.h ../Includes/network.h ../Includes/motor.h \
+ ../Includes/rx_boot.h ../Includes/rx_types.h ../Includes/rx_boot_def.h \
  ../Includes/robot_flash.h \
  ../../../rx_robot_ctrl/includes/rx_robot_tcpip.h \
  ../../../rx_robot_ctrl/includes/rx_robot_def.h
@@ -270,6 +270,8 @@ C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/f
 ../Includes/rx_timer.h:
 
 ../Includes/network.h:
+
+../Includes/motor.h:
 
 ../Includes/rx_boot.h:
 
