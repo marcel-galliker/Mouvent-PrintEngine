@@ -409,17 +409,19 @@ static void _check_version(void)
 		memcpy(_versionStr, _RobotStatus.version, sizeof(_versionStr));
 		if (!strcmp(_RobotStatus.version, "0.0.0.0"))
 			_download_start();
-		else _AppRunning = TRUE;
-		/*
-		//---  get file version ---------------
-		sscanf(_versionStr, "%lu.%lu.%lu.%lu", &_BinVersion.major, &_BinVersion.minor, &_BinVersion.revision, &_BinVersion.build);
-		if (_get_file_version(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, &_FileVersion)==REPLY_OK)	
+		else
 		{
-			if (_BinVersion.major!=_FileVersion.major || _BinVersion.minor!=_FileVersion.minor ||  _BinVersion.revision!=_FileVersion.revision || _BinVersion.build!=_FileVersion.build)
-				_download_start();
-			else _AppRunning = TRUE;
+			//---  get file version ---------------
+			sscanf(_versionStr, "%lu.%lu.%lu.%lu", &_BinVersion.major, &_BinVersion.minor, &_BinVersion.revision, &_BinVersion.build);
+			if (_get_file_version(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, &_FileVersion)==REPLY_OK)	
+			{
+				if (_BinVersion.major!=_FileVersion.major || _BinVersion.minor!=_FileVersion.minor ||  _BinVersion.revision!=_FileVersion.revision || _BinVersion.build!=_FileVersion.build)
+				{
+					Error(ERR_CONT, 0, "Robot version changed: Repower robot board for download");
+				}
+			}
+			_AppRunning = TRUE;
 		}
-		*/
 	}
 }
 

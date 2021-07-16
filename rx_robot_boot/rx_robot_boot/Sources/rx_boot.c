@@ -94,7 +94,6 @@ static void _send_info(uint32_t id)
 //--- rx_boot_handle_msg -----------------------
 void rx_boot_handle_msg(void* msg)
 {
-	SBootAddrSetCmd* commandData = NULL;
 	SBootAddrSetCmd *pcmd  = (SBootAddrSetCmd*)msg;
 
 	switch(pcmd->id)
@@ -113,7 +112,7 @@ void rx_boot_handle_msg(void* msg)
 		{
 			// Convert incoming IP from ASCII to ip_addr struct
 			ip_addr_t newIp;
-			ipaddr_aton((const char*)commandData->ipAddr, &newIp);
+			ipaddr_aton((const char*)pcmd->ipAddr, &newIp);
 
 			// Change IP address
 			network_change_ip(&newIp);
