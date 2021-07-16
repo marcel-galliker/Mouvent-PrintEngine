@@ -1405,8 +1405,7 @@ static void _rob_state_machine(void)
             {
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_Z_UP");
                 _ScrewTime = rx_get_ticks() + MAX_WAIT_TIME;
-                if (rc_isConnected()) rc_move_top(_FL_);
-                else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_UP, NULL);
+                rc_move_top(_FL_);
                 _RobStateMachine_Step++;
                 _TimeSearchScrew = rx_get_ticks();
             }
@@ -1425,12 +1424,7 @@ static void _rob_state_machine(void)
                 {
                     TrPrintfL(TRUE, "_rob_state_machine: State=%d, zpos=%d, z_in_up=%d", _RobStateMachine_Step, RX_StepperStatus.motor[3].motor_pos, RX_StepperStatus.screwerinfo.z_in_up);
                     TrPrintfL(TRUE, "Turn screw");
-                    if (rc_isConnected()) rc_find_screw(1);
-                    else
-                    {
-                        robi_set_screw_current(FALSE);
-                        robi_turn_screw_left(1);
-                    }
+                    rc_find_screw(1);
                     _RobStateMachine_Step++;
                 }
             }
@@ -1439,12 +1433,7 @@ static void _rob_state_machine(void)
         case 7:
             if (rc_move_done())
             {
-                if (rc_isConnected()) rc_find_screw(-1);
-                else
-                {
-                    robi_set_screw_current(FALSE);
-                    robi_turn_screw_left(-1);
-                }
+                rc_find_screw(-1);
                 _RobStateMachine_Step++;
             }
             break;
@@ -1461,10 +1450,7 @@ static void _rob_state_machine(void)
                 else
                 {                
                     TrPrintfL(TRUE, "_rob_state_machine: State=%d, move done", _RobStateMachine_Step);             
-                    if (rc_isConnected()) 
-                    {
-                        rc_move_bottom(_FL_);
-                    }
+                    rc_move_bottom(_FL_);
                     _RobStateMachine_Step++;
                 }
             }
@@ -1499,10 +1485,7 @@ static void _rob_state_machine(void)
                 pos = _pos.y+dist;
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y(%d)", pos);
                 Error(LOG, 0, "CMD_ROBI_MOVE_TO_Y(%d)", pos);
-                if (rc_isConnected())
-                    rc_moveto_y(pos, _FL_);        
-                else                 
-                    robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_TO_Y, &pos);
+                rc_moveto_y(pos, _FL_);        
                 _TimeSearchScrew = rx_get_ticks();
                 _RobStateMachine_Step++;
             }
@@ -1512,7 +1495,7 @@ static void _rob_state_machine(void)
             if (rc_move_done())
             {
                TrPrintfL(TRUE, "_rob_state_machine: State=%d, Y move done", _RobStateMachine_Step);
-               if (rc_isConnected()) rc_move_top(_FL_);
+               rc_move_top(_FL_);
                _RobStateMachine_Step=6;
             }
             break;
@@ -1538,8 +1521,7 @@ static void _rob_state_machine(void)
             {
             case CMD_RESET_ALL_SCREWS:  _RobStateMachine_Step=100; break;
             case CMD_HEAD_ADJUST:       _RobStateMachine_Step=200; break;
-            case CMD_FIND_ALL_SCREWS:   if (rc_isConnected()) rc_move_bottom(_FL_);
-                                        else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+            case CMD_FIND_ALL_SCREWS:   rc_move_bottom(_FL_);
                                         _RobStateMachine_Step=900; break;
             }
             break;
@@ -1611,8 +1593,7 @@ static void _rob_state_machine(void)
             else if (_ScrewPar.axis==AXE_ANGLE) _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].turns = -MAX_STEPS_ANGLE/2;
             else _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_STITCH].turns = -MAX_STEPS_STITCH/2;
             
-            if (rc_isConnected()) rc_move_bottom(_FL_);
-            else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+            rc_move_bottom(_FL_);
             _RobStateMachine_Step=900;
             break;
 
@@ -1683,8 +1664,7 @@ static void _rob_state_machine(void)
             
         case 203:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            if (rc_isConnected()) rc_move_bottom(_FL_);
-            else robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
+            rc_move_bottom(_FL_);
              _RobStateMachine_Step++;
             break;
 

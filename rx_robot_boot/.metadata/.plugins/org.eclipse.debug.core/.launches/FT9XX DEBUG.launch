@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="com.ftdichip.ft90x.ui.handlers.debug">
 <booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_DISPLAY_GDB_BRIDGE_CONSOLE" value="false"/>
-<booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_DOWNLOAD_TO_FLASH_DEBUG" value="false"/>
+<booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_DOWNLOAD_TO_FLASH_DEBUG" value="true"/>
 <booleanAttribute key="com.ftdichip.ft90x.ui.handlers.ATTR_KEEP_EXISTING_BOOTLOADER" value="false"/>
 <booleanAttribute key="org.eclipse.cdt.dsf.gdb.AUTO_SOLIB" value="true"/>
 <listAttribute key="org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST"/>
@@ -25,12 +25,12 @@
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="remote"/>
 <booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="false"/>
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="FT900_Debug/rx_robot_boot.elf"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="rx_robot_boot"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value=""/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.636841948"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/rx_robot_boot"/>
+<listEntry value="/"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>

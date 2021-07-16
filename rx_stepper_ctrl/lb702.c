@@ -387,12 +387,8 @@ int lb702_menu(void)
 	if (_lift)	_lb702_display_status();
     if (RX_StepperStatus.robot_used)
     {
-        if (_rob)	lbrob_display_status();
-		if (_robClient)	
-		{
-			if (rc_isConnected()) rc_display_status();
-			else robi_lb702_display_status();
-		}
+        if (_rob)		lbrob_display_status();
+		if (_robClient)	rc_display_status();
     }
 
     if (_Menu == 1)
@@ -444,10 +440,7 @@ int lb702_menu(void)
     else if (_Menu == 2)
         lbrob_menu(_Help);
     else 
-	{
-		if (rc_isConnected()) rc_menu(_Help);
-        else                  robi_lb702_menu(_Help);
-	}
+		rc_menu(_Help);
 
 	term_printf(">");
 	term_flush();
@@ -467,10 +460,7 @@ int lb702_menu(void)
 				  else if (_Menu == 2)
 				      lbrob_handle_menu(str);
 				  else
-				  {
-						if (rc_isConnected()) rc_handle_menu(str);
-						else                  robi_lb702_handle_menu(str);
-				  }
+						rc_handle_menu(str);
 				  break;
 		}		
 	}
@@ -777,7 +767,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
 									motor_errors_reset();
-                                    if (rc_isConnected()) rc_clear_error();
+                                    rc_clear_error();
                                     _ErrorFlags = 0;
                                     if (RX_StepperStatus.robot_used) robi_lb702_handle_ctrl_msg(INVALID_SOCKET, msgId, NULL);
 									break;

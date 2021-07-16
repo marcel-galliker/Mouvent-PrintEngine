@@ -81,7 +81,8 @@ lib/lwip/src/arch/net.o: ../lib/lwip/src/arch/net.c \
  ../lib/lwip/src/include/lwip/dhcp.h ../lib/lwip/src/arch/netif_arch.h \
  ../Includes/robot_flash.h \
  ../../../rx_robot_ctrl/includes/rx_robot_tcpip.h \
- ../../../rx_robot_ctrl/includes/rx_robot_def.h
+ ../../../rx_robot_ctrl/includes/rx_robot_def.h \
+ ../lib/lwip/src/arch/net.h
 
 C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/ft900.h:
 
@@ -270,3 +271,5 @@ C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/f
 ../../../rx_robot_ctrl/includes/rx_robot_tcpip.h:
 
 ../../../rx_robot_ctrl/includes/rx_robot_def.h:
+
+../lib/lwip/src/arch/net.h:

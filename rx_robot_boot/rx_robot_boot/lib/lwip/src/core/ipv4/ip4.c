@@ -163,6 +163,9 @@ ip4_route(const ip4_addr_t *dest)
   /* iterate through netifs */
   for (netif = netif_list; netif != NULL; netif = netif->next) {
     /* is the netif up, does it have a link and a valid address? */
+	int net_is_up=netif_is_up(netif);
+	int link_is_up=netif_is_link_up(netif);
+	int match=ip4_addr_isany_val(*netif_ip4_addr(netif));
     if (netif_is_up(netif) && netif_is_link_up(netif) && !ip4_addr_isany_val(*netif_ip4_addr(netif))) {
       /* network mask matches? */
       if (ip4_addr_netcmp(dest, netif_ip4_addr(netif), netif_ip4_netmask(netif))) {

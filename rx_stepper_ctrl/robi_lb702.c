@@ -86,9 +86,7 @@ void robi_lb702_init(void)
         _Init = TRUE;
         RX_StepperStatus.screwerinfo.moving = FALSE;
         RX_StepperStatus.screwerinfo.ref_done = FALSE;
-
-        if (rc_isConnected())   rc_init();
-        else                    robi_init();
+        rc_init();
     }
 	
     return;
@@ -97,10 +95,10 @@ void robi_lb702_init(void)
 //--- robi_lb702_main -----------------------------------------------------------
 void robi_lb702_main(int ticks, int menu)
 {
-    if (rc_isConnected())   rc_main(ticks, menu);
-    else                    robi_main(ticks, menu);
+    rc_main(ticks, menu);
 
-    if (!robi_connected() && !rc_isConnected() && _RobiConnection_Time == 0)
+    /*
+    if (!rc_isConnected() && _RobiConnection_Time == 0)
     {
         _RobiConnection_Time = rx_get_ticks();
         Fpga.par->output &= ~RO_ROBI_POWER;
@@ -111,7 +109,7 @@ void robi_lb702_main(int ticks, int menu)
     }
     else if (rx_get_ticks() > _RobiConnection_Time + ROBI_CONNECTION_TIME && _RobiConnection_Time)
         _RobiConnection_Time = 0;
-
+    */
     if (robi_is_updating() && !_ErrorFlag)
     {
         Error(ERR_CONT, 0, "Robi Board is updating");
@@ -126,37 +124,7 @@ void robi_lb702_main(int ticks, int menu)
         _set_moving_variables();
     }
 
-    if (!rc_isConnected())
-    {
-        RX_StepperStatus.screwerinfo.ref_done = RX_RobiStatus.motors[MOTOR_XY_0].isReferenced && RX_RobiStatus.motors[MOTOR_XY_1].isReferenced && RX_RobiStatus.motors[MOTOR_SCREW].isReferenced;
-        RX_StepperStatus.screw_posX = (_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_0].motorEncoderPosition + RX_RobiStatus.motors[MOTOR_XY_1].motorEncoderPosition))/2;
-        RX_StepperStatus.screw_posY = (_steps_2_micron(RX_RobiStatus.motors[MOTOR_XY_1].motorEncoderPosition - RX_RobiStatus.motors[MOTOR_XY_0].motorEncoderPosition))/2;
-    }
-
     if (!RX_StepperStatus.screwerinfo.ref_done) _Search_Screw_Time = 0;
-
-    if (!rc_isConnected())
-    {
-        if (RX_StepperStatus.screwerinfo.z_in_up) _Search_Screw_Time = 0;
-        if (_Search_Screw_Time && rx_get_ticks() > _Search_Screw_Time)
-        {
-            int val = 0;
-            if ((RX_StepperStatus.screw_posY >= (SCREW_Y_ANGLE + SCREW_Y_STITCH) / 2 && _TurnDirection < TURN_RIGHT) || _TurnDirection == TURN_LEFT)
-		    {
-			    val = SCREW_STEPS;
-                _TurnDirection = TURN_RIGHT;
-		    }
-		    else
-		    {
-                val = -SCREW_STEPS;
-                _TurnDirection = TURN_LEFT;
-		    }
-
-            robi_turn_screw_relative(val);
-
-            _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
-        }
-    }
 
     if (RX_StepperStatus.screwerinfo.z_in_down)
         _Loose_Screw_Time = 0;
@@ -181,14 +149,14 @@ void robi_lb702_main(int ticks, int menu)
     }
 
     _check_robi_stalled();
-    if (!rc_isConnected()) _screwer_counter();
 
     if (!_CmdRunning)
         _CmdStarted = FALSE;
     else if (!robi_move_done())
         _CmdStarted = TRUE;
     
-    if (_CmdRunning && ((robi_move_done() && !rc_isConnected()) || (rc_move_done() && rc_isConnected())) && (_CmdStarted || robi_not_started() || rc_isConnected()))
+//    if (_CmdRunning && ((robi_move_done() && !rc_isConnected()) || (rc_move_done() && rc_isConnected())) && (_CmdStarted || robi_not_started() || rc_isConnected()))
+    if (_CmdRunning && rc_move_done())
     {
         _CmdStarted = FALSE;
         _Search_Screw_Time = 0;
@@ -202,7 +170,7 @@ void robi_lb702_main(int ticks, int menu)
             {
                 _CmdRunning = 0;
                 _ScrewCorrection = 0;
-                if (!robi_in_ref() && !rc_in_garage())
+                if (!rc_in_garage())
                 {
                     Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                     RX_StepperStatus.screwerinfo.ref_done = FALSE;
@@ -216,13 +184,7 @@ void robi_lb702_main(int ticks, int menu)
             }
             else
             {
-                if (!robi_connected() && !rc_isConnected())
-                {
-                    Error(ERR_CONT, 0, "Connection lost during reference");
-                    lb702_reset_variables();
-                    lbrob_reset_variables();
-                }
-                if (!robi_in_ref() && !rc_in_garage())
+                if (!rc_in_garage())
                 {
                     Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                     lb702_reset_variables();
@@ -260,12 +222,12 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_SCREW_LOOSE:
-            if (rc_get_screwer_current() && rc_isConnected())
+            if (rc_get_screwer_current())
             {
                 rc_set_screwer_current(FALSE);
                 RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
             }
-            else if (RX_RobiStatus.screwCurrent == TRUE && !rc_isConnected())
+            else if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
                 RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
@@ -275,12 +237,12 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_SCREW_TIGHT:
-            if (rc_get_screwer_current() && rc_isConnected())
+            if (rc_get_screwer_current())
             {
                 rc_set_screwer_current(FALSE);
                 RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
             }
-            else if (RX_RobiStatus.screwCurrent == TRUE && !rc_isConnected())
+            else if (RX_RobiStatus.screwCurrent == TRUE)
             {
                 robi_set_screw_current(FALSE);
                 RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
@@ -325,11 +287,6 @@ void robi_lb702_main(int ticks, int menu)
             break;
         default:
             break;
-        }
-        if (RX_StepperStatus.screwerinfo.ref_done && !rc_isConnected())
-        {
-            RX_StepperStatus.screwerinfo.screwer_blocked_left = FALSE;
-            RX_StepperStatus.screwerinfo.screwer_blocked_right = FALSE;
         }
         if ((RX_StepperStatus.screwerinfo.ref_done && _NewCmd) || _NewCmd == CMD_ROBI_MOVE_Z_DOWN)
         {
@@ -455,8 +412,7 @@ void robi_lb702_handle_menu(char *str)
         break;
     case 'c':
         current = atoi(&str[1]);
-        if (rc_isConnected())   rc_set_screwer_current(current);
-        else                    robi_set_screw_current((uint8_t)current);
+        rc_set_screwer_current(current);
         break;
     default:
         break;
@@ -547,15 +503,6 @@ static int _micron_2_steps(int micron)
 //--- robi_lb702_handle_ctrl_msg ----------------------------------------------
 int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
-    if ((robi_is_init() == FALSE || robi_connected() == FALSE) && rc_isConnected() == FALSE)
-    {
-        if (!robi_is_init()) Error(ERR_CONT, 0, "Robi is not initalized");
-        if (!robi_connected() && !rc_isConnected()) Error(ERR_CONT, 0, "Robi is not connected");
-        lb702_reset_variables();
-        lbrob_reset_variables();
-        return REPLY_ERROR;
-    }
-
     int micron, steps, ticks, pos;
     switch (msgId)
     {
@@ -567,8 +514,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         RX_StepperStatus.screwerinfo.ref_done = FALSE;
         _NewCmd = FALSE;
         lb702_reset_variables();
-        if (rc_isConnected())   rc_stop();
-        else                    robi_stop();
+        rc_stop();
         break;
     case CMD_ROBI_REFERENCE:
         if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
@@ -579,8 +525,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = msgId;
         RX_StepperStatus.screwerinfo.moving = TRUE;
         _set_moving_variables();
-        if (rc_isConnected())   rc_reference();
-        else                    robi_reference();
+        rc_reference();
         break;
     case CMD_ROBI_MOVE_X:
         if (RX_StepperStatus.info.moving || (!RX_StepperStatus.info.z_in_cap && !RX_StepperStatus.info.z_in_wash && !RX_StepperStatus.info.z_in_screw && !RX_StepperStatus.info.z_in_ref) || !RX_StepperStatus.info.ref_done)
@@ -687,8 +632,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _Search_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             _RobiSteps = 0;
             _EdgeCnt = 0;
-            if (rc_isConnected())   rc_move_top(_FL_);
-            else                    robi_move_up();
+            rc_move_top(_FL_);
         }
         break;
         
@@ -699,16 +643,8 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
         //  _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
-            if (RX_StepperStatus.screwerinfo.ref_done)
-            {
-                if (rc_isConnected()) rc_move_bottom(_FL_);
-                else                  robi_move_down();
-            }
-            else
-            {
-                if (rc_isConnected()) rc_reference();
-                else                  robi_reference();                
-            }
+            if (RX_StepperStatus.screwerinfo.ref_done)  rc_move_bottom(_FL_);
+            else                                        rc_reference();
         }
         break;
         
@@ -717,8 +653,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         {
             if (!_CmdRunning) _CmdRunning = msgId;
             steps = *((INT32 *)pdata);
-            if (rc_isConnected())   rc_turn_steps(steps);
-            else                    robi_turn_screw_relative(steps);
+            rc_turn_steps(steps);
         }
         break;
 
@@ -728,17 +663,13 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         {
             if (RX_StepperStatus.screwerinfo.screwer_blocked_right)
             {
-                if (rc_isConnected())   rc_set_screwer_current(TRUE);
-                else                    robi_set_screw_current(TRUE);
+                rc_set_screwer_current(TRUE);
             }
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
             _CmdRunning = msgId;
             TrPrintfL(TRUE, "Motor[2]: rc_turn_ticks_left(%d)", ticks);
-            if (rc_isConnected())
-                rc_turn_ticks_left(ticks);
-            else
-                robi_turn_screw_left(ticks);
+            rc_turn_ticks_left(ticks);
             _TurnDirection = TURN_LEFT;
             break; 
         }
@@ -750,16 +681,12 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         {
             if (RX_StepperStatus.screwerinfo.screwer_blocked_left)
             {
-                if (rc_isConnected())   rc_set_screwer_current(TRUE);
-                else                    robi_set_screw_current(TRUE);
+                rc_set_screwer_current(TRUE);
             }
             RX_StepperStatus.screwerinfo.moving = TRUE;
             _set_moving_variables();
             _CmdRunning = msgId;
-            if (rc_isConnected())
-                rc_turn_ticks_right(ticks);
-            else
-                robi_turn_screw_right(ticks);
+            rc_turn_ticks_right(ticks);
             _TurnDirection = TURN_RIGHT;
             break; 
         }
@@ -799,14 +726,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _set_moving_variables();
                 RX_StepperStatus.screwerinfo.moving = TRUE;
                 rx_sleep(50);
-                if (rc_isConnected())
-                    rc_moveto_x(pos, _FL_);
-                else
-                {
-                    micron = pos - RX_StepperStatus.screw_posX;
-                    steps = _micron_2_steps(micron);
-                    robi_move_X_relative_steps(steps);
-                }
+                rc_moveto_x(pos, _FL_);
             }
             break;
         }
@@ -844,14 +764,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _set_moving_variables();
                 RX_StepperStatus.screwerinfo.moving = TRUE;
                 rx_sleep(100);
-                if (rc_isConnected())
-                    rc_moveto_y(pos, _FL_);
-                else
-                {
-                    micron = pos - RX_StepperStatus.screw_posY;
-                    steps = _micron_2_steps(micron);
-                    robi_move_Y_relative_steps(steps);
-                }
+                rc_moveto_y(pos, _FL_);
             }
         }
         break;
@@ -892,14 +805,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 _set_moving_variables();
                 pos = -100;         // Has to go to -0.1mm as the sensor is not always high when it goes directly to the position 0.0mm as on this position is the positive flag of the sensor
                 rx_sleep(50);
-                if (rc_isConnected())
-                    rc_moveto_y(pos, _FL_);       
-                else
-                {
-                    micron = pos - RX_StepperStatus.screw_posY;
-                    steps = _micron_2_steps(micron);
-                    robi_move_Y_relative_steps(steps);
-                }
+                rc_moveto_y(pos, _FL_);       
             }
         }
         break;
@@ -938,8 +844,7 @@ static int _robi_lb702_screw_edgeCnt(void)
 {
     int pos;
 
-    if (rc_isConnected()) pos = rc_get_screwer_pos();
-    else                  pos = RX_RobiStatus.motors[MOTOR_SCREW].motorPosition;
+    pos = rc_get_screwer_pos();
 
     int edgeCnt = (pos+(SCREW_STEPS/2)) / SCREW_STEPS;
 
@@ -965,10 +870,7 @@ static void _screwer_counter(void)
 //--- robi_lb702_screw_edgeCnt ---------------------------------------
 int robi_lb702_screw_edgeCnt(void)
 {
-    if (!rc_isConnected())
-        return _RobiSteps;
-    else
-        return _EdgeCnt;
+    return _EdgeCnt;
 }
 
 //--- _set_moving_variables ---------------------------------------------

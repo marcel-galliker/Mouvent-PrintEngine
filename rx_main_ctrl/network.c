@@ -413,7 +413,8 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 						}
 						break;
 
-	case dev_robot:		sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_ROBOT_0+10*no);
+	case dev_robot:		if (no>=0) sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_ROBOT_0+10*no);
+						else       return REPLY_ERROR;
 						break;
 	case dev_spooler:
 					if (no<=0 || no>=255)	sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200); 

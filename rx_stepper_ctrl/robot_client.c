@@ -155,13 +155,9 @@ void rc_init(void)
 //--- rc_config ------------------------------------------------
 void rc_config(int boardNo)
 {
+//	boardNo=1;
+//	Error(WARN, 0, "TEST: rc_config(%d)", boardNo);
 	sprintf(_IpAddr, RX_CTRL_SUBNET "%d", 50+10*boardNo);
-}
-
-//--- rc_isConnected -----------------------------------------
-int	rc_isConnected(void)
-{
-	return (_RC_Socket!=INVALID_SOCKET);
 }
 
 //--- rc_main -----------------------------------------------
@@ -413,17 +409,19 @@ static void _check_version(void)
 		memcpy(_versionStr, _RobotStatus.version, sizeof(_versionStr));
 		if (!strcmp(_RobotStatus.version, "0.0.0.0"))
 			_download_start();
-		else _AppRunning = TRUE;
-		/*
-		//---  get file version ---------------
-		sscanf(_versionStr, "%lu.%lu.%lu.%lu", &_BinVersion.major, &_BinVersion.minor, &_BinVersion.revision, &_BinVersion.build);
-		if (_get_file_version(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, &_FileVersion)==REPLY_OK)	
+		else
 		{
-			if (_BinVersion.major!=_FileVersion.major || _BinVersion.minor!=_FileVersion.minor ||  _BinVersion.revision!=_FileVersion.revision || _BinVersion.build!=_FileVersion.build)
-				_download_start();
-			else _AppRunning = TRUE;
+			//---  get file version ---------------
+			sscanf(_versionStr, "%lu.%lu.%lu.%lu", &_BinVersion.major, &_BinVersion.minor, &_BinVersion.revision, &_BinVersion.build);
+			if (_get_file_version(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, &_FileVersion)==REPLY_OK)	
+			{
+				if (_BinVersion.major!=_FileVersion.major || _BinVersion.minor!=_FileVersion.minor ||  _BinVersion.revision!=_FileVersion.revision || _BinVersion.build!=_FileVersion.build)
+				{
+					Error(ERR_CONT, 0, "Robot version changed: Repower robot board for download");
+				}
+			}
+			_AppRunning = TRUE;
 		}
-		*/
 	}
 }
 
