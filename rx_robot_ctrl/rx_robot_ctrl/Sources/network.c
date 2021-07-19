@@ -18,10 +18,8 @@
 #define IP_ADDR(a,b,c,d)		PP_HTONL(LWIP_MAKEU32((a), (b), (c), (d)))
 
 #define BROADCAST_ADDRESS       IP_ADDR(192, 168, 200, 255)
-#define WILDCARD_IP_ADDRESS		IP_ADDR(192, 168, 200, 50)
 
-// static ip_addr_t _wildcardIpAddress = 	{WILDCARD_IP_ADDRESS};
-static ip_addr_t _ipAddress 	= 	{IP_ADDR(192,168,200,50)};
+static ip_addr_t _ipAddress 	= 	{IP_ADDR(192,168,200,9)}; // not confirmed address
 static ip_addr_t _ipAddress_new = 	{IP_ADDR(0,0,0,0)};
 static ip_addr_t _ctrl_addr 	= 	{IP_ADDR(0,0,0,0)};
 static UINT16	 _ctrl_port		= 0;
@@ -41,6 +39,7 @@ bool network_init(void)
 
 	ip_addr_t gatewayAddress = 	{IP_ADDR(192, 168, 200, 1)};
 	ip_addr_t netMask = 		{IP_ADDR(255, 255, 255, 0)};
+	_ipAddress.addr   = IP_ADDR(192,168,200,9);
 	flash_read_ipAddr(&_ipAddress);
 	net_init(_ipAddress, gatewayAddress, netMask, USE_DHCP, "Robot", NULL);
 	return REPLY_OK;

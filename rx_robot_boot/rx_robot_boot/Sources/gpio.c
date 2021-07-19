@@ -7,7 +7,6 @@
 #include <ft900.h>
 #include <gpio.h>
 #include <network.h>
-#include <ctrl.h>
 
 #include "rx_robot_def.h"
 #include "rx_robot_tcpip.h"
@@ -81,13 +80,6 @@ static void _toggle_watchdog(void);
 static void _init_inputs(void);
 static void _init_outputs(void);
 
-static void _update_outputs(void);
-static void _update_inputs(void);
-static int  _update_input(int no);
-static void _gpio_set_outputs(uint8_t outputs, int value);
-static void _gpio_reset_edgeCnt(uint8_t inputs);
-
-
 bool gpio_init(void)
 {
 	_init_voltage_watchdog();
@@ -104,18 +96,10 @@ void gpio_set_output(uint8_t output, bool value)
 	if(output < OUTPUT_CNT) gpio_write(_outputs[output], value);
 }
 
-bool gpio_get_input(uint8_t input)
-{
-	if(input < INPUT_CNT)
-		return _update_input(input);
-	else return 0;
-}
-
 void gpio_enable_motor(uint8_t motor, int enable)
 {
 	if(motor<MOTOR_CNT) gpio_write(_motorDisable[motor], !enable);
 }
-
 
 void gpio_start_motor(uint8_t motor)
 {
@@ -135,28 +119,10 @@ void gpio_stop_motor(uint8_t motor)
 	}
 }
 
-bool gpio_handle_msg(void* message)
-{
-	SGpioSetCmd* cmd = (SGpioSetCmd*)message;
-
-	switch(cmd->header.msgId)
-	{
-	case CMD_GPIO_OUT_SETLOW:	_gpio_set_outputs(cmd->outputs, 0);	return TRUE;
-	case CMD_GPIO_OUT_SETHIGH:	_gpio_set_outputs(cmd->outputs, 1);	return TRUE;
-	case CMD_GPIO_IN_RESET:		_gpio_reset_edgeCnt(cmd->outputs);	return TRUE;
-
-	default:
-		break;
-	}
-	return FALSE;
-}
-
 //--- gpio_tick ----------------------------------------
 void gpio_tick(int tick)
 {
 	_toggle_watchdog();
-	_update_outputs();
-	_update_inputs();
 }
 
 static void _init_voltage_watchdog(void)
@@ -250,59 +216,3 @@ static void _toggle_watchdog(void)
 	gpio_write(WATCHDOG_IO, !gpio_read(WATCHDOG_IO));
 }
 
-static void _update_outputs(void)
-{
-	static uint8_t count;
-	static int8_t val;
-
-	for(count = 0; count < OUTPUT_CNT; count++)
-	{
-		val = gpio_read(_outputs[count]);
-		RX_RobotStatus.gpio.outputs = (RX_RobotStatus.gpio.outputs & ~(1 << count)) | (val << count);
-	}
-}
-
-static void _update_inputs(void)
-{
-	int count;
-	for(count = 0; count < INPUT_CNT; count++)
-	{
-		_update_input(count);
-	}
-}
-
-static int _update_input(int no)
-{
-	uint8_t val;
-
-	val = gpio_read(_inputs[no]);
-
-#ifdef INVERTED_INPUTS
-	val = !val;
-#endif
-
-	if(val && !(RX_RobotStatus.gpio.inputs & (1 << no)))
-	{
-		RX_RobotStatus.gpio.inputEdges[no]++;
-	}
-
-	if (val) RX_RobotStatus.gpio.inputs |=  (1 << no);
-	else	 RX_RobotStatus.gpio.inputs &= ~(1 << no);
-	return (val!=0);
-}
-
-static void _gpio_set_outputs(uint8_t outputs, int value)
-{
-	for(int out = 0; out < OUTPUT_CNT; out++)
-	{
-		if (outputs & (1<<out)) gpio_write(_outputs[out], value);
-	}
-}
-
-static void _gpio_reset_edgeCnt(uint8_t inputs)
-{
-	for(int in = 0; in < INPUT_CNT; in++)
-	{
-		if (inputs & (1<<in)) RX_RobotStatus.gpio.inputEdges[in]=0;
-	}
-}
