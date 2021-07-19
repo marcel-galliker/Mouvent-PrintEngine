@@ -32,7 +32,7 @@
 //#define LOG_TEMP    TRUE
 #define TEMP_MAX_LOW_PUMP		50000						// maximal valid conditioner temperature for pump speed < 10%
 #define TEMP_MAX_HIGH_PUMP		70000						// maximal valid conditioner temperature for pump speed > 10%
-#define TEMP_MAX_HIGH_PUMP_V3	80000						// maximal valid conditioner temperature for pump speed > 10%
+// #define TEMP_MAX_HIGH_PUMP_V3	80000						// maximal valid conditioner temperature for pump speed > 10%
 #define TEMP_ERROR       		TEMP_MAX_HIGH_PUMP + 5000  	// in 1/1000 °C = 90 °C -> compare to thermistor value directly
 #define TEMP_TOLERANCE			1000
 
@@ -332,12 +332,14 @@ void temp_init(void)
 void temp_ctrl_on(int turn_on)
 {
     if (turn_on != _heater_running)
-	{ 			
+	{ 		
+		/*
 		if(RX_Status.pcb_rev>='n')
 		{
-			_HeatPID.val_max = 100;
-			_HeatPID.P 		 = 100;
+			_HeatPID.val_max = 80;
+			_HeatPID.P 		 = 80;
 		}
+		*/
 
         _heater_running = turn_on;
 		if (!_heater_running) 
@@ -384,7 +386,7 @@ static void _heater_ctrl(UINT32 percent)
 		}
 		else
 		{
-			if (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP_V3) RX_Status.heater_percent = 0;
+			if (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > RX_Config.tempMax) RX_Status.heater_percent = 0;
 		}
     }
 
