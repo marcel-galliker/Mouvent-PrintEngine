@@ -35,6 +35,7 @@ int  net_port_listening		(EDevice dev, int no, int port);
 //void net_connected			(EDevice dev, int no);§
 //void net_device_disconnected(EDevice dev, int no);
 int  net_get_ipaddr			(SNetworkItem *item, char *ipAddr, int size);
+int  net_get_serialNo		(EDevice dev, int no);
 int  net_device_to_ipaddr	(EDevice dev, int no, char *ipAddr, int size);
 void net_ipaddr_to_device	(const char *ipAddr, EDevice *pdev, int *pno);
 

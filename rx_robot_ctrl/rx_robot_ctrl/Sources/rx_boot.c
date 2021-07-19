@@ -10,9 +10,9 @@
 
 #include "rx_timer.h"
 #include "network.h"
+#include "motor.h"
 #include "rx_boot.h"
 #include "rx_boot_def.h"
-#include "motor.h"
 
 #include "robot_flash.h"
 
@@ -26,6 +26,7 @@
 #define DEVICE_NAME				"Robot"
 
 // UDP boot commands
+#define CMD_BOOT_INFO_REQ		0x11000001
 #define REP_BOOT_INFO			0x12000001
 
 #define CMD_BOOT_ADDR_SET		0x11000002
@@ -93,29 +94,25 @@ static void _send_info(uint32_t id)
 //--- rx_boot_handle_msg -----------------------
 void rx_boot_handle_msg(void* msg)
 {
-
-	SBootAddrSetCmd *pcmd = (uint32_t *)msg;
+	SBootAddrSetCmd *pcmd  = (SBootAddrSetCmd*)msg;
 
 	switch(pcmd->id)
 	{
-	/*
 	case CMD_BOOT_INFO_REQ:
 		_isAddressConfirmed = false;
 		_send_info(REP_BOOT_INFO);
 		break;
-	 */
+
 	case CMD_BOOT_PING:
 		_send_info(REP_BOOT_PING);
 		break;
-/*
-	case CMD_BOOT_ADDR_SET:
-		SBootAddrSetCmd* commandData = (SBootAddrSetCmd*)msg;
 
-		if(commandData->macAddr == _item.macAddr)
+	case CMD_BOOT_ADDR_SET:
+		if(pcmd->macAddr == _item.macAddr)
 		{
 			// Convert incoming IP from ASCII to ip_addr struct
 			ip_addr_t newIp;
-			ipaddr_aton((const char*)commandData->ipAddr, &newIp);
+			ipaddr_aton((const char*)pcmd->ipAddr, &newIp);
 
 			// Change IP address
 			network_change_ip(&newIp);
@@ -126,7 +123,7 @@ void rx_boot_handle_msg(void* msg)
 			_isAddressConfirmed = true;
 		}
 		break;
-*/
+
 	case CMD_BOOT_FLASH_ON:
 		if(pcmd->macAddr == _item.macAddr) motor_flash_start();
 		else 							   motor_flash_stop();

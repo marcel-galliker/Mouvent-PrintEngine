@@ -511,7 +511,8 @@ static void _step_set_config(int no)
 	cfg.material_thickness = RX_Config.stepper.material_thickness;
 	cfg.boardNo			   = no;
     cfg.headsPerColor	   = RX_Config.headsPerColor;
-	cfg.printbarUsed	   = 0;	
+	cfg.printbarUsed	   = 0;
+	cfg.robotSerialNo	   = net_get_serialNo(dev_robot, no);
 		
 	if (RX_Config.printer.type==printer_LH702 && !str_start(RX_Hostname, "LH702")) cfg.printerType = printer_LB702_UV;
 

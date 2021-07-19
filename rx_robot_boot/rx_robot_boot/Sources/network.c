@@ -40,6 +40,7 @@ bool network_init(void)
 
 	ip_addr_t gatewayAddress = 	{IP_ADDR(192, 168, 200, 1)};
 	ip_addr_t netMask = 		{IP_ADDR(255, 255, 255, 0)};
+	flash_read_ipAddr(&_ipAddress);
 	net_init(_ipAddress, gatewayAddress, netMask, USE_DHCP, "Robot", NULL);
 	return REPLY_OK;
 }
@@ -166,4 +167,3 @@ void network_change_ip(ip_addr_t* newIpAddress)
 		// wait net_is_link_up()==FALSE
 	}
 }
-

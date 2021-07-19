@@ -19,6 +19,6 @@ void 	flash_init(void);
 int		flash_serialNo_Valid(void);
 UINT16 	flash_read_serialNo(void);
 void 	flash_write_serialNo(UINT16 serialNo);
-void 	flash_read_ipAddr(ip_addr_t *pipAddr, ip_addr_t ipAddrDefault);
+void 	flash_read_ipAddr(ip_addr_t *pipAddr);
 void	flash_write_ipAddr(ip_addr_t *pipAddr);
 

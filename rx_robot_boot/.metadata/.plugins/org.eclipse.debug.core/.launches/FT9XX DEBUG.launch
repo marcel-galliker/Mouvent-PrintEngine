@@ -25,12 +25,12 @@
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="remote"/>
 <booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="false"/>
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value=""/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="FT900_Debug/rx_robot_boot.elf"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="rx_robot_boot"/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.636841948"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/"/>
+<listEntry value="/rx_robot_boot"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>

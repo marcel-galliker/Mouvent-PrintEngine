@@ -136,6 +136,7 @@ typedef struct SBootloaderStatusMsg
 {
 	SMsgHdr header;
 	char	version[32];	// must match SRobotStatusMsg !!
+	UINT16  serialNo;
 } SBootloaderStatusMsg;
 
 typedef struct SBootloaderStartCmd

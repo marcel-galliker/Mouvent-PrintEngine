@@ -1375,6 +1375,7 @@ typedef struct SStepperCfg
 	INT32			headsPerColor;
 	INT32			printbarUsed;		// bitset
 	
+	UINT16			robotSerialNo;	
 	SRobotOffsets	robot[4];
 } SStepperCfg;
 	

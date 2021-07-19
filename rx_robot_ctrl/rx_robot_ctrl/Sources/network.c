@@ -22,6 +22,7 @@
 
 // static ip_addr_t _wildcardIpAddress = 	{WILDCARD_IP_ADDRESS};
 static ip_addr_t _ipAddress 	= 	{IP_ADDR(192,168,200,50)};
+static ip_addr_t _ipAddress_new = 	{IP_ADDR(0,0,0,0)};
 static ip_addr_t _ctrl_addr 	= 	{IP_ADDR(0,0,0,0)};
 static UINT16	 _ctrl_port		= 0;
 struct udp_pcb *_rxBootPcb;
@@ -56,11 +57,28 @@ void network_tick(int tick)
 	{
 		 net_set_link_up();
 	}
+	if (!up && _ethernet_is_up)
+	{
+		printf("link went down\n");
+	}
 	_ethernet_is_up = up;
 	up = net_is_link_up();
 	if (up && !_link_is_up)
 	{
 		_net_is_up();
+	}
+	if (!up && _link_is_up)
+	{
+		//--- changing IP-Address ---------------------------------------------
+		struct netif* my_netif=net_get_netif();
+
+		udp_netif_ip_addr_changed(&_ipAddress, &_ipAddress_new);
+		memcpy(&_ipAddress, &_ipAddress_new, sizeof(_ipAddress));
+
+		memcpy(&my_netif->ip_addr, &_ipAddress_new, sizeof(my_netif->ip_addr));
+		udp_netif_ip_addr_changed(&_ipAddress, &_ipAddress_new);
+
+		net_set_link_up();
 	}
 	_link_is_up = up;
 }
@@ -68,11 +86,14 @@ void network_tick(int tick)
 //--- _net_is_up ---------------------------------
 static void _net_is_up(void)
 {
+	if (_rxBootPcb==NULL)
+	{
 	_rxBootPcb = udp_new();
 	udp_bind(_rxBootPcb, IP_ADDR_ANY, PORT_UDP_BOOT_CLNT);
 	udp_recv(_rxBootPcb, _handle_boot_msg, NULL);
+	}
 
-	_rxCtrlPcb = udp_new();
+	if (_rxCtrlPcb==NULL) _rxCtrlPcb = udp_new();
 	udp_bind(_rxCtrlPcb, &_ipAddress, PORT_UDP_CTRL);
 	udp_recv(_rxCtrlPcb, _handle_ctrl_msg, NULL);
 }
@@ -138,14 +159,15 @@ void network_end(void)
 
 }
 
-/*
 //--- network_change_ip ----------------------------------------
 void network_change_ip(ip_addr_t* newIpAddress)
 {
 	if (newIpAddress->addr != _ipAddress.addr)
 	{
-		udp_netif_ip_addr_changed(&_ipAddress, newIpAddress);
-		memcpy(&_ipAddress, newIpAddress, sizeof(_ipAddress));
+		flash_write_ipAddr(newIpAddress);
+
+		memcpy(&_ipAddress_new, newIpAddress, sizeof(_ipAddress_new));
+		net_set_link_down();
+		// wait net_is_link_up()==FALSE
 	}
 }
-*/

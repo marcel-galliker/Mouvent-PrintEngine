@@ -497,6 +497,22 @@ int net_get_ipaddr(SNetworkItem *item, char *ipAddr, int size)
 	return REPLY_ERROR;
 }
 
+//--- net_get_serialNo ----------------------------------------------------
+int  net_get_serialNo(EDevice dev, int no)
+{
+	int i;
+
+	//---  check if already registered ---
+	for (i = 0; i < SIZEOF(_Network.item); i++)
+	{
+		if (_Network.item[i].deviceType==dev && _Network.item[i].deviceNo==no)
+		{
+			return atoi(_Network.item[i].serialNo);
+		}
+	}
+	return 0;
+}
+
 //--- _send_item ---------------------------------------------------------------------
 static void _send_item(RX_SOCKET socket, int i)
 {

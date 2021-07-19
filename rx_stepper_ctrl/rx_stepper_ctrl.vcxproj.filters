@@ -109,9 +109,6 @@
     <ClCompile Include="robi_lb702.c">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="robi.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="robot_client.c">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -223,9 +220,6 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="robi_lb702.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="robi.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="rob_tcp_ip.h">

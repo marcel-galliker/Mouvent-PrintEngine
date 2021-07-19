@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="bootloader_handle_msg" key="selection"/>
+		<item value="_download_get_status" key="selection"/>
 		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="true" key="wholeword"/>
 		<list key="findhistory">
+			<item value="_download_get_status"/>
 			<item value="bootloader_handle_msg"/>
+			<item value="hold"/>
 			<item value="_spi_read_register"/>
 			<item value="MOTOR"/>
 			<item value="_motorConfigs"/>
 			<item value="TMC_XTARGET_REG"/>
 			<item value="_encoderCheck"/>
-			<item value="ctrl_send_status"/>
-			<item value="RX_RobotStatus"/>
 		</list>
 		<list key="replacehistory">
 			<item value="MOTOR_SCREW"/>

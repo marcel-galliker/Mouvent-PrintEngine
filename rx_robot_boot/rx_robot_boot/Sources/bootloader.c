@@ -116,6 +116,7 @@ static void _download_get_status(void)
 	cmd.header.msgId  = CMD_STATUS_GET;
 	cmd.header.msgLen = sizeof(cmd);
 	strcpy(cmd.version, "0.0.0.0");
+	cmd.serialNo = flash_read_serialNo();
 	network_send_ctrl_msg(&cmd, sizeof(cmd));
 }
 

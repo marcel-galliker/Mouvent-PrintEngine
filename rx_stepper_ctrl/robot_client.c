@@ -403,7 +403,7 @@ static void _check_move(void)
 static void _check_version(void)
 {
 	static char _versionStr[32]="";
-	if (strcmp(_RobotStatus.version, _versionStr))
+	if (strcmp(_RobotStatus.version, _versionStr) && (_RobotStatus.serialNo==RX_StepperCfg.robotSerialNo || RX_StepperCfg.boardNo>0))
 	{
 		TrPrintf(TRUE, "new Version %s", _RobotStatus.version);
 		memcpy(_versionStr, _RobotStatus.version, sizeof(_versionStr));
@@ -429,6 +429,7 @@ static void _check_version(void)
 static void _download_start(void)
 {
 	TrPrintfL(TRUE, "_download_start");
+	Error(LOG, 0, "Robot #%d download start", _RobotStatus.serialNo);
 	_BinaryFile = fopen(PATH_BIN_STEPPER FILENAME_ROBOT_CTRL, "rb");
 	if (_BinaryFile)
 	{

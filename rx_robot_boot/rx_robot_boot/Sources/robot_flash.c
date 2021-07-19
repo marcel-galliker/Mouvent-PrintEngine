@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <ft900.h>
 
 #include "rx_trace.h"
@@ -80,13 +81,11 @@ void 	flash_write_serialNo(UINT16 serialNo)
 }
 
 //--- flash_read_ipAddr -----------------------------------
-void flash_read_ipAddr(ip_addr_t *pipAddr, ip_addr_t ipAddrDefault)
+void flash_read_ipAddr(ip_addr_t *pipAddr)
 {
 	flash_init();
 	if (_chk(&_UserData.ipAddr, sizeof(ip_addr_t)) == _UserData.ipAddrChk)
 		memcpy(pipAddr, &_UserData.ipAddr, sizeof(ip_addr_t));
-	else
-		memcpy(pipAddr, &ipAddrDefault, sizeof(ip_addr_t));
 }
 
 //--- flash_write_ipAddr --------------------------------
