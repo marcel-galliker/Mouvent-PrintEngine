@@ -974,6 +974,8 @@ namespace RX_DigiPrint.Services
             public Int32        headsPerColor;
             public Int32        printbarUsed;
 
+            public UInt16       robotSerialNo;
+
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;
         }
