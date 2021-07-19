@@ -77,11 +77,10 @@ static const uint8_t _motorStopRight[MOTOR_CNT] = {
 static void _init_voltage_watchdog(void);
 static void _init_motor_gpios(void);
 static void _init_spi_gpios(void);
+static void _toggle_watchdog(void);
 static void _init_inputs(void);
 static void _init_outputs(void);
 
-// Update functions
-static void _toggle_watchdog(void);
 static void _update_outputs(void);
 static void _update_inputs(void);
 static int  _update_input(int no);

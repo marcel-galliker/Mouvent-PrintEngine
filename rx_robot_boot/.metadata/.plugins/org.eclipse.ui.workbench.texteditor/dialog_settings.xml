@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="_download_get_status" key="selection"/>
+		<item value="_init_inputs" key="selection"/>
 		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="true" key="wholeword"/>
 		<list key="findhistory">
-			<item value="_download_get_status"/>
+			<item value="_init_inputs"/>
 			<item value="bootloader_handle_msg"/>
+			<item value="_init_outputs"/>
+			<item value="WILDCARD_IP_ADDRESS"/>
+			<item value="IP_ADDR"/>
+			<item value=".50"/>
+			<item value="_download_get_status"/>
 			<item value="hold"/>
-			<item value="_spi_read_register"/>
-			<item value="MOTOR"/>
-			<item value="_motorConfigs"/>
-			<item value="TMC_XTARGET_REG"/>
-			<item value="_encoderCheck"/>
 		</list>
 		<list key="replacehistory">
 			<item value="MOTOR_SCREW"/>
