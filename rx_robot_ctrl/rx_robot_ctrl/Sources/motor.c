@@ -118,6 +118,7 @@ static int32_t	_edgeCheckPos[MOTOR_CNT];
 static uint8_t  _stopBits[MOTOR_CNT];
 static uint8_t  _stopBitLevel[MOTOR_CNT];
 static uint8_t	_stoppedByInput[MOTOR_CNT];
+static int		_flash_running=FALSE;
 
 // Status Flags
 static void _set_config(SRobotMotorSetCfgCmd* config);
@@ -191,19 +192,19 @@ static void _set_config(SRobotMotorSetCfgCmd* configCommand)
 	if (pact->gconf 	!= pcfg->gconf) 	_spi_write_register(TMC_GCONF_REG, 		pcfg->gconf, 	 motor);
 	if (pact->swmode 	!= pcfg->swmode) 	_spi_write_register(TMC_SWMODE_REG,		pcfg->swmode, 	 motor);
 	if (pact->iholdirun != pcfg->iholdirun) _spi_write_register(TMC_IHOLDIRUN_REG, 	pcfg->iholdirun, motor);
-	if (pact->tpowerdown!= pcfg->tpowerdown)_spi_write_register(TMC_TPOWERDOWN_REG, 	pcfg->tpowerdown,motor);
+	if (pact->tpowerdown!= pcfg->tpowerdown)_spi_write_register(TMC_TPOWERDOWN_REG, pcfg->tpowerdown,motor);
 	if (pact->tpwmthrs 	!= pcfg->tpwmthrs) 	_spi_write_register(TMC_TPWMTHRS_REG, 	pcfg->tpwmthrs,  motor);
 	if (pact->rampmode 	!= pcfg->rampmode) 	_spi_write_register(TMC_RAMPMODE_REG, 	pcfg->rampmode,  motor);
 	if (pact->vmax 		!= pcfg->vmax) 		_spi_write_register(TMC_VMAX_REG, 		pcfg->vmax, 	 motor);
-	if (pact->v1 		!= pcfg->v1) 		_spi_write_register(TMC_V1_REG, 			pcfg->v1, 		 motor);
+	if (pact->v1 		!= pcfg->v1) 		_spi_write_register(TMC_V1_REG, 		pcfg->v1, 		 motor);
 	if (pact->amax 		!= pcfg->amax) 		_spi_write_register(TMC_AMAX_REG, 		pcfg->amax, 	 motor);
 	if (pact->dmax 		!= pcfg->dmax) 		_spi_write_register(TMC_DMAX_REG, 		pcfg->dmax, 	 motor);
-	if (pact->a1 		!= pcfg->a1) 		_spi_write_register(TMC_A1_REG, 			pcfg->a1, 		 motor);
-	if (pact->d1 		!= pcfg->d1) 		_spi_write_register(TMC_D1_REG, 			pcfg->d1, 		 motor);
-	if (pact->vstart 	!= pcfg->vstart) 	_spi_write_register(TMC_VSTART_REG, 		pcfg->vstart, 	 motor);
+	if (pact->a1 		!= pcfg->a1) 		_spi_write_register(TMC_A1_REG, 		pcfg->a1, 		 motor);
+	if (pact->d1 		!= pcfg->d1) 		_spi_write_register(TMC_D1_REG, 		pcfg->d1, 		 motor);
+	if (pact->vstart 	!= pcfg->vstart) 	_spi_write_register(TMC_VSTART_REG, 	pcfg->vstart, 	 motor);
 	if (pact->vstop 	!= pcfg->vstop) 	_spi_write_register(TMC_VSTOP_REG, 		pcfg->vstop, 	 motor);
 	if (pact->tzerowait != pcfg->tzerowait) _spi_write_register(TMC_TZEROWAIT_REG, 	pcfg->tzerowait, motor);
-	if (pact->vdcmin 	!= pcfg->vdcmin) 	_spi_write_register(TMC_VDCMIN_REG, 		pcfg->vdcmin, 	 motor);
+	if (pact->vdcmin 	!= pcfg->vdcmin) 	_spi_write_register(TMC_VDCMIN_REG, 	pcfg->vdcmin, 	 motor);
 	if (pact->chopconf 	!= pcfg->chopconf) 	_spi_write_register(TMC_CHOPCONF_REG, 	pcfg->chopconf,  motor);
 	if (pact->coolconf 	!= pcfg->coolconf) 	_spi_write_register(TMC_COOLCONF_REG, 	pcfg->coolconf,  motor);
 	if (pact->pwmconf 	!= pcfg->pwmconf) 	_spi_write_register(TMC_PWMCONF_REG, 	pcfg->pwmconf, 	 motor);
@@ -513,3 +514,39 @@ static void _update_status(uint8_t status, uint8_t motor)
 		}
 	}
 }
+
+#define MOTOR_SCREW	2
+#define IHOLD_IRUN(hold, run, delay)	((((delay)&0xf)<<16) | (((run)&0x1f)<<8) | ((hold)&0x1f))
+
+//--- motor_flash_start -----------------------------------------------
+void motor_flash_start(void)
+{
+	SRobotMotorSetCfgCmd cfg;
+	cfg.motor = MOTOR_SCREW;
+	memcpy(&cfg.config, &_motorConfigs[MOTOR_SCREW], sizeof(cfg.config));
+	cfg.config.iholdirun = IHOLD_IRUN(0, 18, 1);
+	cfg.config.vmax = 160000;
+	_set_config(&cfg);
+	gpio_enable_motor(MOTOR_SCREW, TRUE);
+	gpio_stop_motor(MOTOR_SCREW);
+	_spi_write_register(TMC_XACTUAL_REG, 0, MOTOR_SCREW);
+	_spi_write_register(TMC_XTARGET_REG, 0x7fffffff, MOTOR_SCREW);
+	gpio_start_motor(MOTOR_SCREW);
+	_flash_running = TRUE;
+}
+
+//--- motor_flash_stop -------------------------------------------------------
+void motor_flash_stop(void)
+{
+	if (_flash_running)
+	{
+		gpio_stop_motor(MOTOR_SCREW);
+
+		_spi_write_register(TMC_XTARGET_REG, 0, MOTOR_SCREW);
+		_spi_write_register(TMC_XACTUAL_REG, 0, MOTOR_SCREW);
+
+		gpio_enable_motor(MOTOR_SCREW, FALSE);
+	}
+	_flash_running = FALSE;
+}
+

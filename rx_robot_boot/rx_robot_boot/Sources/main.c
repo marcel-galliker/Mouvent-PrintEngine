@@ -6,6 +6,7 @@
 #include "rx_types.h"
 #include "network.h"
 #include "rx_timer.h"
+#include "gpio.h"
 
 
 // Prototypes
@@ -45,6 +46,7 @@ int main(void)
 		{
 			network_tick(tick);
 			rx_boot_main(tick);
+			gpio_tick(tick);
 			tick_old = tick;
 		}
 	}

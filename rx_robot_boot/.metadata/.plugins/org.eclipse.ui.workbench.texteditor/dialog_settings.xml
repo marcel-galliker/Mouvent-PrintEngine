@@ -2,12 +2,13 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="_spi_read_register" key="selection"/>
+		<item value="bootloader_handle_msg" key="selection"/>
 		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="true" key="wholeword"/>
 		<list key="findhistory">
+			<item value="bootloader_handle_msg"/>
 			<item value="_spi_read_register"/>
 			<item value="MOTOR"/>
 			<item value="_motorConfigs"/>
@@ -15,7 +16,6 @@
 			<item value="_encoderCheck"/>
 			<item value="ctrl_send_status"/>
 			<item value="RX_RobotStatus"/>
-			<item value="_ctrl_port"/>
 		</list>
 		<list key="replacehistory">
 			<item value="MOTOR_SCREW"/>

@@ -125,8 +125,8 @@ void rx_boot_handle_msg(void* msg)
 		break;
 
 	case CMD_BOOT_FLASH_ON:
-		if(pcmd->macAddr == _item.macAddr) motor_start();
-		else 							   motor_stop();
+		if(pcmd->macAddr == _item.macAddr) motor_flash_start();
+		else 							   motor_flash_stop();
 		break;
 
 	default:

@@ -12,6 +12,7 @@
 #include "network.h"
 #include "rx_boot.h"
 #include "rx_boot_def.h"
+#include "motor.h"
 
 #include "robot_flash.h"
 
@@ -93,9 +94,9 @@ static void _send_info(uint32_t id)
 void rx_boot_handle_msg(void* msg)
 {
 
-	uint32_t *command = (uint32_t *)msg;
+	SBootAddrSetCmd *pcmd = (uint32_t *)msg;
 
-	switch(*command)
+	switch(pcmd->id)
 	{
 	/*
 	case CMD_BOOT_INFO_REQ:
@@ -127,6 +128,8 @@ void rx_boot_handle_msg(void* msg)
 		break;
 */
 	case CMD_BOOT_FLASH_ON:
+		if(pcmd->macAddr == _item.macAddr) motor_flash_start();
+		else 							   motor_flash_stop();
 		break;
 
 	default:

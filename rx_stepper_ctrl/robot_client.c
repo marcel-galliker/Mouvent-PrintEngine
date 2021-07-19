@@ -243,7 +243,7 @@ static void* _robot_ctrl_thread(void* lpParameter)
 			errNo=sok_open_client_2(&_RC_Socket, _IpAddr, PORT_UDP_CTRL, SOCK_DGRAM, _handle_robot_ctrl_msg, _connection_closed);
 			if (errNo == REPLY_OK)
 			{
-				Error(LOG, 0, "Robot Connected");
+				Error(LOG, 0, "Robot Connected %s", _IpAddr);
 			}
 		}
 		rx_sleep(1000);

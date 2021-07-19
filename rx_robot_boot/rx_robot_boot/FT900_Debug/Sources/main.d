@@ -79,7 +79,7 @@ Sources/main.o: ../Sources/main.c \
  ../lib/lwip/src/include/lwip/prot/etharp.h \
  ../lib/lwip/src/include/netif/ethernet.h \
  ../lib/lwip/src/include/lwip/dhcp.h ../lib/lwip/src/arch/netif_arch.h \
- ../Includes/rx_timer.h
+ ../Includes/rx_timer.h ../Includes/gpio.h
 
 C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/ft900.h:
 
@@ -268,3 +268,5 @@ C:/Program\ Files\ (x86)/Bridgetek/FT9xx\ Toolchain/Toolchain/hardware/include/f
 ../lib/lwip/src/arch/netif_arch.h:
 
 ../Includes/rx_timer.h:
+
+../Includes/gpio.h:
