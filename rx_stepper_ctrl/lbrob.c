@@ -24,7 +24,6 @@
 #include "rx_def.h"
 #include "robi_def.h"
 #include "lb702.h"
-#include "robi.h"
 #include "robi_lb702.h"
 #include "robot_client.h"
 

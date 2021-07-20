@@ -973,6 +973,7 @@ namespace RX_DigiPrint.Services
             public Int32        material_thickness;
             public Int32        headsPerColor;
             public Int32        printbarUsed;
+            public Int16		robotSerialNo;	
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;

@@ -6,7 +6,6 @@
 #include "rx_error.h"
 #include "lb702.h"
 #include "lbrob.h"
-#include "robi.h"
 #include "fpga_stepper.h"
 
 #include <stdio.h>

@@ -44,7 +44,7 @@ namespace RX_DigiPrint.Models
 		private int[]			 _DistIdxes=new int[8];
 		private int				 _DistIdx;
 		private int				 _HeadNo;
-		private readonly double  _FindPos		= 20.0;
+		private readonly double  _FindPos		= 30.0;
 		private readonly double	 _AngleDist		= px2mm(128);
 		private readonly double	 _StitchWebDist = px2mm(2*140);
 		private readonly double	 _DistWebDist   = Math.Round((24.0*25.4)/1200, 3);	// 
@@ -146,7 +146,7 @@ namespace RX_DigiPrint.Models
 						break;
 						*/
 
-					//	_Adjusted = true;
+						// _Adjusted = true;
 						_RobotRunning[stepperNo] = true;
 
 						action.State	= ECamFunctionState.runningRob;
@@ -160,11 +160,13 @@ namespace RX_DigiPrint.Models
 			if (_Adjusted)
 			{
 				RxGlobals.Events.AddItem(new LogItem("ROB DONE"));
+				/*
 				if (_Action==null)
 				{
 					StartAlign();
 					RxGlobals.Events.AddItem(new LogItem("Print again"));
 				}
+				*/
 			}
 		}
 
@@ -423,7 +425,7 @@ namespace RX_DigiPrint.Models
 		//--- _InitActions -----------------------------
 		public List<SA_Action> StartRegister()
 		{
-			int color, n;
+			int n;
 
 			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
@@ -823,7 +825,7 @@ namespace RX_DigiPrint.Models
 				_ActionIdx=_Actions.Count();
 				if (running)
 				{
-					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+				//	RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
 					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
 					Thread.Sleep(500);
 					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
@@ -832,6 +834,9 @@ namespace RX_DigiPrint.Models
 			else _ActionIdx=1;
 			_Action = null;
 			RxGlobals.SetupAssist.ScanReference();
+
+			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+
 			return running;
 		}
 
