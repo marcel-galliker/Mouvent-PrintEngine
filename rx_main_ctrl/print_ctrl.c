@@ -212,7 +212,6 @@ int pc_stop_printing(int userStop)
 	}
 
     iq500_stop_printing();
-	lh702_stop_printing();
     
 	return REPLY_OK;
 }

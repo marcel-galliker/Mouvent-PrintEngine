@@ -31,6 +31,7 @@
 #include "print_ctrl.h"
 #include "machine_ctrl.h"
 #include "fluid_ctrl.h"
+#include "lh702_ctrl.h"
 
 //--- SIMULATION ----------------------------------------------
 
@@ -509,7 +510,11 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 	for (int i=0; i<INK_PER_BOARD; i++)
 	{
 		int flowFactor_ok = FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok;
-		memcpy(&FluidStatus[fluidNo*INK_PER_BOARD+i], &pstat->stat[i], sizeof(FluidStatus[i]));
+
+		// For some historical reason, pstat->stat[i].canisterLevel is always 0. In order to avoid resetting FluidStatus[...].canisterLevel we copy the correct value before the memcpy.
+		pstat->stat[i].canisterLevel = FluidStatus[fluidNo * INK_PER_BOARD + i].canisterLevel;
+		
+		memcpy(&FluidStatus[fluidNo*INK_PER_BOARD+i], &pstat->stat[i], sizeof(FluidStatus[0]));
 		FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok = flowFactor_ok;
 	}
 		
@@ -1081,7 +1086,10 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 						switch (errHandlingMode)
 						{
 							case err_handling_mode_pause: pc_pause_printing(FALSE); break;
-							case err_handling_mode_stop: pc_stop_printing(FALSE); break;
+							case err_handling_mode_stop:
+								pc_stop_printing(FALSE);
+								lh702_stop_printing();
+								break;
 							default: break;
 						}
 					}
@@ -1542,10 +1550,10 @@ INT32 moving_average_canisterLevel(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_
 	sum[canisterNumber] = sum[canisterNumber] - buffer[canisterNumber][pos] + value;
 	buffer[canisterNumber][pos] = value;
 	static int measurementNumber = 1;
-	INT32 avergage = sum[canisterNumber] / measurementNumber;
+	INT32 average = sum[canisterNumber] / measurementNumber;
 	if (canisterNumber == INK_SUPPLY_CNT && measurementNumber < MEASUREMENT_NUMBER) 
 		measurementNumber++;
-	return avergage;
+	return average;
 }
 
 /*	Change the IS-number to check according to the method _set_IS_Order in
