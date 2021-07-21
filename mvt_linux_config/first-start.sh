@@ -3,6 +3,7 @@
 # Changes eth names.
 python3 /home/mouvent/update-eth-names.py
 rm /home/mouvent/update-eth-names.py
+sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"/' /etc/default/grub
 
 # Configures user root.
 echo root:radex | chpasswd
