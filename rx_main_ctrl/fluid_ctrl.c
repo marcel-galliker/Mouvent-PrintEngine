@@ -873,10 +873,10 @@ static void _control(int fluidNo)
                                                             _PurgeClusterNo = -1;
                                                             _PurgeCluster = FALSE;
                                                             _PurgeHeadNo = -1;
-												}
+														}
                                                         else
                                                             ctrl_send_head_fluidCtrlMode(++_PurgeHeadNo, ctrl_purge_hard, TRUE, TRUE);
-                                            }
+                                                    }
 												}
 											}
 											break;
@@ -1289,8 +1289,8 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 		for (i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, TRUE);				
 		return;		
 	}
-
-	for (i=0; i<INK_SUPPLY_CNT; i++)
+    
+    for (i=0; i<INK_SUPPLY_CNT; i++)
 	{
 		if (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET)
 		{
@@ -1348,9 +1348,14 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 					int head = ctrl_singleHead(i);
                     if (ctrlMode == ctrl_prepareToPrint && fluid_get_ctrlMode(i) == ctrl_purge_step4)
                         head = -1;
-                    
-					if (head<0) ctrl_send_all_heads_fluidCtrlMode(i, cmd.ctrlMode);				
-					else ctrl_send_head_fluidCtrlMode(head, cmd.ctrlMode, FALSE, FALSE);
+
+                    if (head < 0)
+                        ctrl_send_all_heads_fluidCtrlMode(i, cmd.ctrlMode);
+                    else 
+                    {
+                        head += i * RX_Config.headsPerColor;
+                        ctrl_send_head_fluidCtrlMode(head, cmd.ctrlMode, FALSE, FALSE);
+                    }
 				}
 			}
 		}			
