@@ -547,23 +547,48 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
 		_NewCmd = cmd;
 	}
-    else if (((cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) && ((RX_StepperStatus.screwerinfo.robi_in_ref && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref) || !RX_StepperStatus.robot_used)) ||
-                 ((cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS) && ((RX_StepperStatus.screwerinfo.robi_in_ref && RX_StepperStatus.screwerinfo.y_in_ref) || !RX_StepperStatus.robot_used)) || 
-				 (cmd == CMD_LIFT_SCREW && !RX_StepperStatus.screwerinfo.moving) || cmd == CMD_LIFT_REFERENCE)
+    else 
 	{
-        RX_StepperStatus.info.moving = TRUE;
-		_PrintPos_New[MOTOR_Z_BACK]  = pos0;
-		_PrintPos_New[MOTOR_Z_FRONT] = pos1;
-		motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0);
-		motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1);
-		motors_start(MOTOR_Z_BITS, TRUE);	
-	} 
-	else 
-    {
-        Error(WARN, 0, "Command %08x needs to wait", cmd);
-        RX_StepperStatus.cmdRunning = 0;
-        _NewCmd = cmd;
-    }
+		int ok=FALSE;
+		if (RX_StepperStatus.robot_used)
+		{
+			if (cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) 
+			{
+				ok = (RX_StepperStatus.screwerinfo.robi_in_ref && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref); 
+			}
+			else if (cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS)
+			{
+				ok = (RX_StepperStatus.screwerinfo.robi_in_ref && RX_StepperStatus.screwerinfo.y_in_ref);
+			}
+			else if (cmd == CMD_LIFT_SCREW)
+			{
+				ok = !RX_StepperStatus.screwerinfo.moving;
+			}
+			else if (cmd == CMD_LIFT_REFERENCE)
+			{ 
+				ok = TRUE;
+			}
+		}
+		else
+		{ 
+			ok = TRUE;
+		}
+		if (ok)
+		{
+			RX_StepperStatus.info.moving = TRUE;
+			_PrintPos_New[MOTOR_Z_BACK]  = pos0;
+			_PrintPos_New[MOTOR_Z_FRONT] = pos1;
+			motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0);
+			motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1);
+			motors_start(MOTOR_Z_BITS, TRUE);	
+		} 
+		else 
+		{
+			Error(WARN, 0, "Command %08x needs to wait: Robot not in secure position (screwer.robi_in_ref=%d, screwer.y_in_ref=%d, x_in_ref=%d)", cmd, RX_StepperStatus.screwerinfo.robi_in_ref, RX_StepperStatus.screwerinfo.y_in_ref, RX_StepperStatus.info.x_in_ref);
+			RX_StepperStatus.cmdRunning = 0;
+			_NewCmd = cmd;
+		}
+	}
 }
 
 //--- lb702_handle_ctrl_msg -----------------------------------
