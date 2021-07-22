@@ -751,6 +751,7 @@ void ctrl_empty_PurgeBuffer(int fluidNo)
 //--- ctrl_send_head_fluidCtrlMode --------------------------------------------------------------
 void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int sendToFluid, int fromGui)
 {
+    if (ctrlMode == ctrl_prepareToPrint && fluid_in_ctrlMode(headNo / RX_Config.headsPerColor, ctrl_print)) ctrlMode = ctrl_print;
     int inkSupply = RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply;
     if ((ctrlMode >= ctrl_purge_soft && ctrlMode <= ctrl_purge_step6 && ctrlMode != ctrl_purge4ever && _ctrl_check_stepper_in_purgeMode(headNo) && step_robot_used(inkSupply) && fromGui) || (!_ctrl_stepper_in_purge4ever_pos(headNo) && ctrlMode == ctrl_purge4ever  && _ctrl_check_stepper_in_purgeMode(headNo)))
     {
@@ -815,7 +816,7 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 		_SingleHead[inkSupply] = headNo;
         if (ctrlMode == ctrl_off) fluid_purgeCluster(headNo / 4, FALSE);
 	}
-	if (ctrlMode<=ctrl_print) _SingleHead[inkSupply]=-1;
+	if (ctrlMode<=ctrl_print && ctrlMode != ctrl_prepareToPrint) _SingleHead[inkSupply]=-1;
 	if (_HeadCtrl[headNo/HEAD_CNT].socket!=INVALID_SOCKET)
 	{
 		SFluidCtrlCmd cmd;
