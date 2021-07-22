@@ -46,6 +46,7 @@ static double                _Vacuum_Cleaner_Time = 0;
 static int                  _AutoCapMode = FALSE;
 
 static int                  _AutoCapTimer = 0;
+static int                  _StepperPreventDripping[STEPPER_CNT];
 
 
 static int				    _StatReadCnt[STEPPER_CNT];
@@ -135,6 +136,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 		
 			case CMD_LIFT_PRINT_POS:
 						_AbortPrinting=FALSE;
+                        memset(_StepperPreventDripping, 0, sizeof(_StepperPreventDripping));
 						int height=RX_Config.stepper.print_height+RX_Config.stepper.material_thickness;
 						sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
 						break;
@@ -264,7 +266,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     }
 
     if (_AbortPrinting && RX_StepperStatus.info.z_in_print)
-        steplb_lift_to_up_pos_all();
+        steplb_abort_printing();
 
     memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
     memcpy(&RX_StepperStatus.robinfo, &robinfo, sizeof(RX_StepperStatus.robinfo));
@@ -370,11 +372,26 @@ int	 steplb_to_print_pos(void)
 	return REPLY_OK;									
 }
 
+//--- steplb_prevent_dripping -----------------------------------
+void steplb_prevent_dripping(int clusterNo)
+{
+    _StepperPreventDripping[steplb_stepper_to_cluster(clusterNo)] = TRUE;
+}
+
 //--- steplb_abort_printing -----------------------------------------
 void  steplb_abort_printing(void)
 {
-	if(RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos_all();
-	else _AbortPrinting = TRUE;
+	for (int i = 0; i < STEPPER_CNT; i++)
+	{
+		if (_StepperPreventDripping[i] && !_Status[i].robinfo.rob_in_cap && _Status[i].robot_used) steplb_rob_to_fct_pos(i, rob_fct_cap);
+	}
+	if (RX_StepperStatus.info.z_in_print)
+	{
+		steplb_lift_to_up_pos_all();
+		memset(_StepperPreventDripping, 0, sizeof(_StepperPreventDripping));
+	}
+	else
+		_AbortPrinting = TRUE;
 }
 
 //--- steplb_lift_to_top_pos_all ---------------------------
@@ -391,6 +408,7 @@ void steplb_lift_to_top_pos_all(void)
             sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
         }
         _AbortPrinting = FALSE;
+        memset(_StepperPreventDripping, 0, sizeof(_StepperPreventDripping));
     }
 }
 
@@ -421,6 +439,7 @@ void steplb_lift_to_up_pos_all(void)
         sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
 	}
 	_AbortPrinting = FALSE;
+    memset(_StepperPreventDripping, 0, sizeof(_StepperPreventDripping));
 }
 
 //--- steplb_lift_in_up_pos_all --------------
