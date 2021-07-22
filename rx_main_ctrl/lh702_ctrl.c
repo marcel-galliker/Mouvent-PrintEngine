@@ -53,6 +53,8 @@ static RX_SOCKET _Socket=INVALID_SOCKET;
 static int _lh702ThreadRunning=FALSE;
 static SLH702_State _Status;
 static SLH702_State2 _Status2;
+static SLH702_State3 _Status3;
+
 static SLH702_Materials _Materials;
 static SPrintQueueItem	*_pItem;
 static int		_Manipulated=FALSE;
@@ -84,6 +86,8 @@ typedef struct
 //--- lh702_init -------------------------------------------------
 void lh702_init(void)
 {
+	if (RX_Config.printer.type != printer_LH702) return; // No init/thread if it's not an LH702
+	
 	memset(&_Status, 0, sizeof(_Status));
 	_Status.hdr.msgLen = sizeof(_Status);
 	_Status.hdr.msgId  = EVT_STATE;
@@ -92,6 +96,12 @@ void lh702_init(void)
 	_Status2.hdr.msgLen = sizeof(_Status2);
 	_Status2.hdr.msgId = EVT_STATE2;
 	_Status2.protocol_version_number = 2;
+
+	memset(&_Status3, 0, sizeof(_Status3));
+	_Status3.hdr.msgLen = sizeof(_Status3);
+	_Status3.hdr.msgId = EVT_STATE3;
+	_Status3.nb_cluster_per_color = RX_Config.headsPerColor / MAX_HEADS_BOARD;
+	_Status3.protocol_version_number = 3;
 
 	memset(&_Materials, 0, sizeof(_Materials));
 	_Materials.hdr.msgLen = sizeof(_Materials);
@@ -183,6 +193,7 @@ void lh702_set_printpar(SPrintQueueItem *pitem)
 		_Status.id				= pitem->id.id;
 		_Status.dist			= pitem->printGoDist;
 		_Status2.print_go_mode  = pitem->printGoMode;
+		_Status3.print_go_mode = pitem->printGoMode;
 		_Status.lateral			= pitem->pageMargin;
 		_Status.printState		= PS_STARTING;
 	}
@@ -192,6 +203,7 @@ void lh702_set_printpar(SPrintQueueItem *pitem)
 void lh702_stop_printing()
 {
 	_Status2.stop_printing_request = TRUE;
+	_Status3.stop_printing_request = TRUE;
 }
 
 //--- _lh702_thread ------------------------------------------------------------
@@ -201,32 +213,29 @@ static void *_lh702_thread(void *lpParameter)
 	int first=TRUE;
 	
 	while (_lh702ThreadRunning)
-	{
-		if (RX_Config.printer.type==printer_LH702)
+	{		
+		if (first)
 		{
-			if (first)
+			_set_network_config();
+			first=FALSE;					
+		}
+		if (_Socket==INVALID_SOCKET)
+		{
+			errNo=sok_open_client_2(&_Socket, RX_Config.master_ip_address, RX_Config.master_ip_port, SOCK_STREAM, _lh702_handle_msg, _lh702_closed);
+			if (errNo)
 			{
-				_set_network_config();
-				first=FALSE;					
+				char str[256];
+				Error(ERR_CONT, 0, "Socket Error >>%s<<", err_system_error(errNo, str,  sizeof(str)));
 			}
-			if (_Socket==INVALID_SOCKET)
+			else
 			{
-				errNo=sok_open_client_2(&_Socket, RX_Config.master_ip_address, RX_Config.master_ip_port, SOCK_STREAM, _lh702_handle_msg, _lh702_closed);
-				if (errNo)
-				{
-					char str[256];
-					Error(ERR_CONT, 0, "Socket Error >>%s<<", err_system_error(errNo, str,  sizeof(str)));
-				}
-				else
-				{
-					TrPrintfL(TRUE, "Connected");
-					ErrorEx(dev_plc, -1, LOG, 0, "Connected");
-				}
+				TrPrintfL(TRUE, "Connected");
+				ErrorEx(dev_plc, -1, LOG, 0, "Connected");
 			}
 		}
-		
 		rx_sleep(1000);
 	}
+	
 	return NULL;
 }
 
@@ -262,24 +271,40 @@ static void _lh702_send_status(void)
 		_Status.meters_k	   = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_K]/1000;
 		_Status.meters_color   = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_COLOR]/1000;
 		_Status.meters_color_w = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_COLOR_W]/1000;
-		sok_send(&_Socket, &_Status); 
+		sok_send(&_Socket, &_Status);
 
+		static int order[LH702_NB_COLORS] = {4, 5, 6, 0, 1, 2, 3};
+		
 		// Protocol version 2
-		if (RX_Config.lh702_protocol_version >= 2)
-		{
-			static int order[LH702_NB_COLORS] = {4, 5, 6, 0, 1, 2, 3};
+		if (RX_Config.lh702_protocol_version == 2)
+		{			
 			for (int i=0; i<LH702_NB_COLORS; i++)
 			{
-				for (int j=0; j<LH702_NB_CLUSTER_PER_COLORS; j++)
+				for (int j=0; j<LH702_NB_CLUSTER_PER_COLORS_STATE2; j++)
 				{
-					int index = i * LH702_NB_CLUSTER_PER_COLORS + j;
-					int colorIndex = order[i] * LH702_NB_CLUSTER_PER_COLORS + j;
+					int index = i * LH702_NB_CLUSTER_PER_COLORS_STATE2 + j;
+					int colorIndex = order[i] * LH702_NB_CLUSTER_PER_COLORS_STATE2 + j;
 					//_Status2.cluster_hours[index] = RX_HBStatus[index].clusterTime / 3600;
 					_Status2.cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
 				}
 				_Status2.ink_level[i] = FluidStatus[i].canisterLevel;
 			}
 			sok_send(&_Socket, &_Status2);
+		}
+
+		if (RX_Config.lh702_protocol_version >= 3)
+		{
+			for (int i = 0; i < LH702_NB_COLORS; i++)
+			{
+				for (int j = 0; j < LH702_NB_CLUSTER_PER_COLORS_STATE3; j++)
+				{
+					int index = i * LH702_NB_CLUSTER_PER_COLORS_STATE3 + j;
+					int colorIndex = order[i] * LH702_NB_CLUSTER_PER_COLORS_STATE3 + j;
+					_Status3.cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
+				}
+				_Status3.ink_level[i] = FluidStatus[i].canisterLevel;
+			}
+			sok_send(&_Socket, &_Status3);			
 		}
 
 		TrPrintfL(TRUE, "SendToLH702: version=%d, printState=%d, id=%d, copies=%d", RX_Config.lh702_protocol_version, _Status.printState, _Status.id, _Status.copies_printed);
@@ -382,6 +407,7 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 		case CMD_ACK_STOP_REQUEST:  Error(LOG, 0, "DM5 -> CMD_ACK_STOP_REQUEST");
 									machine_error_reset();
 									_Status2.stop_printing_request = FALSE;
+									_Status3.stop_printing_request = FALSE;
 									break;
 
 		case CMD_LIST_MATERIALS:	Error(LOG, 0, "DM5 -> CMD_LIST_MATERIALS");

@@ -17,7 +17,8 @@
 
 //--- -------------------------------------------
 #define LH702_NB_COLORS 7
-#define LH702_NB_CLUSTER_PER_COLORS 2
+#define LH702_NB_CLUSTER_PER_COLORS_STATE2 2
+#define LH702_NB_CLUSTER_PER_COLORS_STATE3 3
 
 //--- -------------------------------------------
 #define CMD_START_PRINTING		0x01000201
@@ -41,6 +42,7 @@
 #define EVT_WARN				0x01001002
 #define EVT_ERROR				0x01001003
 #define EVT_STATE2				0x01001004
+#define EVT_STATE3				0x01001005
 
 //--- message header --------------------------------------------
 typedef struct SLH702_MsgHdr
@@ -99,11 +101,23 @@ typedef struct SLH702_State2
 	SLH702_MsgHdr hdr;
 	// msgId: EVT_STATE2
 	UINT32 protocol_version_number;
-	UINT32 cluster_hours[LH702_NB_COLORS*LH702_NB_CLUSTER_PER_COLORS];
+	UINT32 cluster_hours[LH702_NB_COLORS*LH702_NB_CLUSTER_PER_COLORS_STATE2];
 	UINT32 print_go_mode;
 	UINT32 stop_printing_request;
 	UINT32 ink_level[LH702_NB_COLORS];
 } SLH702_State2;
+
+typedef struct SLH702_State3
+{
+	SLH702_MsgHdr hdr;
+	// msgId: EVT_STATE2
+	UINT32 protocol_version_number;
+	UINT32 nb_cluster_per_color;
+	UINT32 cluster_hours[LH702_NB_COLORS * LH702_NB_CLUSTER_PER_COLORS_STATE3];
+	UINT32 print_go_mode;
+	UINT32 stop_printing_request;
+	UINT32 ink_level[LH702_NB_COLORS];
+} SLH702_State3;
 
 //--- SLH702_Materials --------------------------------------
 typedef struct SLH702_Materials
