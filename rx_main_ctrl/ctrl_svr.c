@@ -744,11 +744,8 @@ void ctrl_empty_PurgeBuffer(int fluidNo)
                 cmd.ctrlMode = ctrl_off;
                 sok_send(&_HeadCtrl[_BufferFluidCmd[j].headNo / HEAD_CNT].socket, &cmd);
             }
-            
         }
-        
     }
-    
 }
 
 //--- ctrl_send_head_fluidCtrlMode --------------------------------------------------------------

@@ -377,7 +377,7 @@ void cond_error_check(int ticks)
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_too_low)		    ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_tank_too_low,		0, "Conditioner %s: temp_tank_too_low", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR(abort),	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level = ERR(cont),  perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_sum);
+        	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level = ERR(abort),  perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_sum);
 			if (_NiosStat->cond[head].error&COND_ERR_valve)						ErrorFlag(level = ERR(abort), perr, COND_ERR_valve, 0, "Conditioner %s: valve not switching to INK", headName);
 	    	if (_NiosStat->cond[head].error&COND_ERR_return_pipe)				ErrorFlag(level = ERR(abort), perr, COND_ERR_return_pipe, 0, "Conditioner %s: Return pipe clogged or disconnected", headName);
 	    	
@@ -703,7 +703,7 @@ int _cond_load(const char *exepath)
 //--- cond_ctrlMode -----------------------------------------
 void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 {
-	if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
+    if (headNo<0 || headNo>=MAX_HEADS_BOARD) return;
 
 	SHeadEEpromMvt *mem=&_NiosStat->eeprom_mvt[headNo];
 	if (mem->flowResistanceCRC==rx_crc8(&mem->flowResistance, sizeof(mem->flowResistance)))
