@@ -181,7 +181,7 @@ namespace RX_DigiPrint.Views.UserControls
             }
             else if (e.PropertyName.Equals(UnitID))
             {
-                _update_controls();
+                if (RxGlobals.Plc.Connected) _update_controls();
             }
         }
 
