@@ -52,11 +52,12 @@ class TCPProtocol(network.AbstractTCPProtocol):
 
         
     def mgt_CMD_FLUID_CTRL_MODE(self, msg):
-        logging.info("CMD_FLUID_CTRL_MODE")
-        for i in range(4):
-            if msg.ctrlMode == 0x001: #shutdown
-                msg.ctrlMode = 0x004 # off
-            self.board.config["REP_FLUID_STAT"]["stat"][i]["ctrlMode"] = msg.ctrlMode
+        logging.info(f"CMD_FLUID_CTRL_MODE {msg.ctrlMode}")
+        ctrl_conv = {
+            message_mgr.enums["ctrl_shutdown"]: message_mgr.enums["ctrl_off"],
+            message_mgr.enums["ctrl_prepareToPrint"]: message_mgr.enums["ctrl_readyToPrint"],
+        }
+        self.board.config["REP_FLUID_STAT"]["stat"][msg.no]["ctrlMode"] = ctrl_conv.get(msg.ctrlMode, msg.ctrlMode)
         #_do_fluid_ctrlMode(socket, (SFluidCtrlCmd*)msg);
         
     def mgt_CMD_FLUID_DEGASSER(self, msg):
@@ -101,7 +102,7 @@ class Board(network.AbstractBoard):
 
         for i in range(4):
             self.config["REP_FLUID_STAT"]["stat"][i]["canisterLevel"] = 10000
-            self.config["REP_FLUID_STAT"]["stat"][i]["ctrlMode"] = 0x007
+            self.config["REP_FLUID_STAT"]["stat"][i]["ctrlMode"] = message_mgr.enums["ctrl_readyToPrint"]
             self.config["REP_FLUID_STAT"]["stat"][i]["condTemp"] = 30000
             self.config["REP_FLUID_STAT"]["stat"][i]["temp"] = 45000
 

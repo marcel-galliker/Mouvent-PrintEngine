@@ -11,9 +11,11 @@ defines = {}
 structs = {
     "SCondInfo": "UINT32 info;\n" # union define in cond_def_head.h
 }
+enums={}
 def read_header(header_dir, header):
     "read .h file and set global dictionaries defines and structs"
     in_struct = False
+    in_enum = False
     # read all lines of the file
     header_file = open(os.path.join(header_dir, header))
     for (n,line) in enumerate(header_file):
@@ -43,6 +45,22 @@ def read_header(header_dir, header):
                 raise struct.error(f"struct in struct line {n} of {header}")
             in_struct = True
             struct_cont = ""
+        
+        if in_enum:
+            ends = re.match(r"}\s*(\w+);", line)
+            if ends:
+                in_enum = False
+            else:
+                e = re.match(r"\s*(\w+)(\s*=\s*([0-9x.]+))?,", line)
+                if e:
+                    if e.group(2):
+                        enum = eval(e.group(3))
+                    enums[e.group(1)] = enum
+                    enum += 1
+        if re.match(r"\s*typedef\s+enum\s*(\w+)?", line):
+            in_enum = True
+            enum = 0
+
     header_file.close()
 
 

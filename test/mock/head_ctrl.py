@@ -79,10 +79,7 @@ class UDPProtocol:
         msg = struct.unpack("=I%ds" % (len(data) - 4), data)
         logging.debug(f"Received udp message {msg[0]} of size {len(data)}")
         if msg[0] != 0xffffffff:
-            if len(msg[1]) == 1440:
-                self.board.add_block(msg[0], msg[1])
-            else:
-                logging.error(f"UDP Bad block {msg[0]} size: {len(data)}")
+            self.board.add_block(msg[0], msg[1])
             self.count += 1
             if self.count % 1000 == 0:
                 logging.info(f"UDP {len(self.board.blocks)} blocks/{self.count} on board {self.board.no}")
@@ -125,7 +122,7 @@ class TCPProtocol(network.AbstractTCPProtocol):
         msg.headCnt = 4
         msg.head = ({}, {}, {}, {})
         for i in range(4):
-                msg.head[i]["ctrlMode"] = 0x006 # ctrl_readyToPrint
+                msg.head[i]["ctrlMode"] = message_mgr.enums["ctrl_readyToPrint"]
                 msg.head[i]["clusterNo"] = self.board.no + i + 1
                 if self.board.config["disabled_jets"][i] is not None:
                     msg.head[i]["disabledJets"] = self.board.config["disabled_jets"][i]
