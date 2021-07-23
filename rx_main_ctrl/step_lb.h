@@ -23,6 +23,7 @@ int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos);
 int steplb_get_ScrewPos(int stepperNo);
 
 int	 steplb_to_print_pos(void);
+void steplb_prevent_dripping(int clusterNo);
 void steplb_abort_printing(void);
 
 void steplb_lift_to_top_pos_all(void);
@@ -65,7 +66,6 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 
 // SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment);
 int steplb_get_stitch_position(SHeadAdjustmentMsg *headAdjustment);
-void steplb_cluster_Screw_Turned(int stepperNo);
 
 void steplb_pump_back_fluid(int fluidNo, int state);
 void steplb_set_autocapMode(int state);

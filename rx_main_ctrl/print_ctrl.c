@@ -102,7 +102,7 @@ int pc_end(void)
 //--- _on_error -----------------------------------------------------------------
 static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 {
-	if (type==LOG_TYPE_UNDEF)
+    if (type == LOG_TYPE_UNDEF)
 	{
 		RX_PrinterStatus.error = LOG_TYPE_LOG;
 	}
@@ -121,7 +121,9 @@ static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 										break;
 			case LOG_TYPE_ERROR_ABORT:	
 										Error(LOG, 0, "ABORT Printing after LOG_TYPE_ERROR_ABORT");
-										pc_abort_printing(); 
+                                        if (str_start(deviceStr, "Head") && RX_StepperStatus.robot_used)
+											step_prevent_dripping(no);
+										pc_abort_printing();
 										break;
 		default: break;
 		}

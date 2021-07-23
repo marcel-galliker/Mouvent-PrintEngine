@@ -450,6 +450,16 @@ void step_empty_waste(int time_s)
     }
 }
 
+//--- step_prevent_dripping -----------------------------------
+void step_prevent_dripping(int clusterNo)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:	steplb_prevent_dripping(clusterNo); break;
+    default: break;
+    }
+}
+
 //--- tt_cap_to_print_pos --------------------------------
 int	 tt_cap_to_print_pos(void)
 {
