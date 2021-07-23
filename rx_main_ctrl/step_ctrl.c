@@ -236,7 +236,7 @@ int	 step_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
 	case STEPPER_LB:	return steplb_handle_gui_msg  (socket, cmd, data, dataLen);
 	case STEPPER_DP:	return stepdp_handle_gui_msg  (socket, cmd, data, dataLen);
 	case STEPPER_TEST:	return steptest_handle_gui_msg(socket, cmd, data, dataLen);
-    case STEPPER_TTS:   return steptts_handle_gui_msg(socket, cmd, data, dataLen);
+    case STEPPER_TTS:   return steptts_handle_gui_msg (socket, cmd, data, dataLen);
 	default:			return steps_handle_gui_msg   (socket, cmd, data, dataLen);
 	}
 }
@@ -690,20 +690,6 @@ void step_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         break;
     }
 }
-
-//--- step_robi_to_garage --------------------
-void step_robi_to_garage(RX_SOCKET socket)
-{
-    switch (_StepperType)
-    {
-    case STEPPER_LB:
-        steplb_robi_to_garage();
-        break;
-    default:
-        break;
-    }
-}
-
 
 /*
 //--- step_get_StepperStatus ---------------------------------------------

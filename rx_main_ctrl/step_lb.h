@@ -61,8 +61,6 @@ void steplb_rob_start_cap_all(void);
 
 int	steplb_printbarUsed(int stepperNo);
 
-void steplb_robi_to_garage(void);
-
 void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment);
 
 // SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment);

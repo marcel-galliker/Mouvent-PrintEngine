@@ -58,6 +58,7 @@ namespace RX_DigiPrint.Models
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
+		private bool			 _RobotUsed=false;
 		private bool			 _Adjusted;
 
 		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
@@ -151,6 +152,7 @@ namespace RX_DigiPrint.Models
 
 						// _Adjusted = true;
 						_RobotRunning[stepperNo] = true;
+						_RobotUsed = true;
 
 						action.State	= ECamFunctionState.runningRob;
 						Console.WriteLine("Stepper[{0}]: CMD_HEAD_ADJUST Printbar={1}, Head={2}, axis={3}, steps={4}", stepperNo, msg.printbarNo, msg.headNo, msg.axis, msg.steps);
@@ -207,6 +209,7 @@ namespace RX_DigiPrint.Models
 
 			_AssistMode = ENAssistMode.align;
 			_Adjusted   = false;
+			_RobotUsed  = false;
 
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
@@ -838,8 +841,8 @@ namespace RX_DigiPrint.Models
 			else _ActionIdx=1;
 			_Action = null;
 			RxGlobals.SetupAssist.ScanReference();
-
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+			if (_RobotUsed) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+			_RobotUsed = false;
 
 			return running;
 		}

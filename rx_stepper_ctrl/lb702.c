@@ -518,6 +518,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 {
     RX_StepperStatus.cmdRunning = cmd;
     if (cmd == _NewCmd) _NewCmd = 0;
+	TrPrintfL(TRUE, "_lb702_move_to_pos cmd=0x%08x, pos0=%d, pos1=%d", cmd, pos0, pos1);
     if (RX_StepperStatus.robot_used && !RX_StepperStatus.screwerinfo.z_in_down)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_Z_DOWN;

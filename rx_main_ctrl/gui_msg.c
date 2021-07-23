@@ -171,7 +171,6 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_SET_DENSITY:		_do_set_density(socket, (SDensityMsg*)pmsg);						break;
 
         case CMD_HEAD_ADJUST:		step_adjust_heads(socket, (SHeadAdjustmentMsg*)pmsg);				break;
-        case CMD_ROBI_MOVE_TO_GARAGE: step_robi_to_garage(socket); break;
 
 		case CMD_FLUID_STAT:		fluid_reply_stat(socket);											
 									chiller_reply_stat(socket);
