@@ -1184,12 +1184,14 @@ static void _cln_move_to(int msgId, ERobotFunctions fct)
         case rob_fct_screw_head6:
         case rob_fct_screw_head7:
             pos = (CABLE_SCREW_POS_BACK + (((int)_RobFunction - rob_fct_screw_cluster) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8);
+            /* not needed
             if (RX_StepperStatus.posY[0] < pos)
             {
 				_CmdRunning_old = msgId;
                 _lbrob_do_reference();
                 return;
             }
+            */
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(pos), FALSE);
             break;
 
