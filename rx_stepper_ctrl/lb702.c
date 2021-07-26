@@ -257,7 +257,7 @@ void lb702_main(int ticks, int menu)
 			else
                 RX_StepperStatus.cmdRunning = FALSE;
         }
-        else if (RX_StepperStatus.cmdRunning == CMD_LIFT_CAPPING_POS || RX_StepperStatus.cmdRunning == CMD_LIFT_WASH_POS || RX_StepperStatus.cmdRunning == CMD_LIFT_SCREW)
+        else if (RX_StepperStatus.cmdRunning == CMD_LIFT_CAPPING_POS || RX_StepperStatus.cmdRunning == CMD_LIFT_WASH_POS || RX_StepperStatus.cmdRunning == CMD_LIFT_SCREW || RX_StepperStatus.cmdRunning == CMD_LIFT_CLUSTER_CHANGE)
         {
             if (motors_error(MOTOR_Z_BITS, &motor))
             {
@@ -785,6 +785,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_CLUSTER_CHANGE, val0, val1);
                                         else if (RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE)								
                                         {
+                                            _PrintPos_New[MOTOR_Z_BACK] = val0;
+                                            _PrintPos_New[MOTOR_Z_FRONT] = val1;
                                             _Cmd_New = msgId;
                                             _lb702_do_reference();
                                         }

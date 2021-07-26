@@ -45,6 +45,8 @@
 
 #define		TIME_CALIBRATE				30000
 
+#define		TIME_PREPARE				60000
+
 #define 	DEGASSING_VACCUUM_UV		800
 #define 	DEGASSING_VACCUUM_WB		800
 #define 	DEGASSING_VACCUUM_CLEAF		450
@@ -138,6 +140,7 @@ static UINT32 _PumpSpeed1000[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_FlushTimeISPresStable[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_FlushISPressureStable[NIOS_INK_SUPPLY_CNT] = {0};
 static int  _TimeEmpty[NIOS_INK_SUPPLY_CNT] = {0};
+static int  _TimePrepare[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_EmptyDetecTEndState[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_EmptyPressureStored[NIOS_INK_SUPPLY_CNT] = {0};
 
@@ -317,6 +320,9 @@ void ink_tick_10ms(void)
 		else if (pRX_Config->ink_supply[isNo].ctrl_mode < ctrl_purge_step1 || pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_purge_step4)
 			_Purge4Ever[isNo] = FALSE;
 
+		if (pRX_Config->ink_supply[isNo].ctrl_mode != ctrl_prepareToPrint)
+					_TimePrepare[isNo] = 0;
+
 		switch(pRX_Config->ink_supply[isNo].ctrl_mode)
 		{
 			case ctrl_shutdown:
@@ -385,7 +391,13 @@ void ink_tick_10ms(void)
 				pid_reset(&_InkSupply[isNo].pid_Pump);
 				pid_reset(&_InkSupply[isNo].pid_Setpoint);
 				_set_air_valve(isNo, PV_OPEN);
-				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= 100)
+				_TimePrepare[isNo]++;
+				if (_TimePrepare[isNo] >= TIME_PREPARE)
+				{
+					pRX_Status->ink_supply[isNo].error |= err_pressure_too_high;
+					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				}
+				else if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= 100)
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
