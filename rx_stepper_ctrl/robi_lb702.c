@@ -160,8 +160,10 @@ void robi_lb702_main(int ticks, int menu)
         switch (_CmdRunning)
         {
         case CMD_ROBI_REFERENCE:
-            if (RX_StepperStatus.screwerinfo.ref_done)
+            TrPrintfL(TRUE, "CMD_ROBI_REFERENCE move done, screwer.ref_done=%d, in_garage=%d", RX_StepperStatus.screwerinfo.ref_done, rc_in_garage());
+            if (RX_StepperStatus.screwerinfo.ref_done || rc_in_garage() /* runtime condition! */) 
             {
+                TrPrintfL(TRUE, "_NewCmd=0x%08x, value=%d", _NewCmd, _Value);
                 _CmdRunning = 0;
                 _ScrewCorrection = 0;
                 if (!rc_in_garage())
@@ -191,16 +193,12 @@ void robi_lb702_main(int ticks, int menu)
             break;
 
         case CMD_ROBI_MOVE_TO_GARAGE:
-            if (!rc_in_garage())
-            {
-                Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
-                RX_StepperStatus.screwerinfo.ref_done = FALSE;
-            }
-            else
+            TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_GARAGE move done, in_garage=%d", rc_in_garage());
+            if (rc_in_garage())
             {
                 RX_StepperStatus.screwerinfo.y_in_ref = TRUE;
+                _CmdRunning = 0;
             }
-            _CmdRunning = 0;
             break;
 
         case CMD_ROBI_MOVE_TO_Y:
@@ -496,6 +494,7 @@ static int _micron_2_steps(int micron)
 int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
     int micron, steps, ticks, pos;
+    TrPrintfL(TRUE, "robi_lb702_handle_ctrl_msg msgId=0x%08x", msgId);
     switch (msgId)
     {
     case CMD_ROBI_STOP:
@@ -765,6 +764,9 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_GARAGE:
+        _CmdRunning = msgId;
+        lbrob_to_garage();
+        /*
         if (RX_StepperStatus.screwerinfo.robi_in_ref && RX_StepperStatus.screwerinfo.y_in_ref)
         {
             Error(LOG, 0, "ROBOT already in garage");
@@ -803,6 +805,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 rc_moveto_y(pos, _FL_);       
             }
         }
+        */
         break;
 
     case CMD_ERROR_RESET:

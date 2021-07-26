@@ -131,6 +131,7 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_ROB_REFERENCE:
             case CMD_ROB_SERVICE:
             case CMD_RESET_ALL_SCREWS:
+            case CMD_ROBI_MOVE_TO_GARAGE:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
@@ -951,15 +952,6 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
         Error(LOG, TRUE, "Send To Stepper[%d]: printBar=%d, head=%d, axis=%d, steps=%d", stepperno, headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
         sok_send(&_step_socket[stepperno], headAdjustment);
     }   
-}
-
-//--- steplb_robi_to_garage -------------------------------
-void steplb_robi_to_garage(void)
-{
-    for (int stepperno=0; stepperno<STEPPER_CNT; stepperno++)
-    {
-        sok_send_2(&_step_socket[stepperno], CMD_ROBI_MOVE_TO_GARAGE, 0, NULL);
-    }
 }
 
 //--- steplb_get_stitch_position --------------------------------------------

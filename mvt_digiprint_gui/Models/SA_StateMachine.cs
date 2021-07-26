@@ -34,15 +34,18 @@ namespace RX_DigiPrint.Models
 			return (px*25.4/1200.0);
 		}
 
+		private const int		 _MaxPrintbars=8;
+
 		private ENAssistMode	 _AssistMode=ENAssistMode.undef;
 		private RxCamFunctions	 _CamFunctions;
 		private List<SA_Action>  _Actions;
 		private int				 _ActionIdx;
 		private SA_Action		 _Action;
-		private int[]			 _StitchIdxes=new int[8];
+		private int[]			 _StitchIdxes=new int[_MaxPrintbars];
 		private int				 _StitchIdx;
-		private int[]			 _DistIdxes=new int[8];
+		private int[]			 _DistIdxes=new int[_MaxPrintbars];
 		private int				 _DistIdx;
+		private ECamFunction[]	 _AdjustFunction=new ECamFunction[_MaxPrintbars];
 		private int				 _HeadNo;
 		private readonly double  _FindPos		= 30.0;
 		private readonly double	 _AngleDist		= px2mm(128);
@@ -55,6 +58,7 @@ namespace RX_DigiPrint.Models
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
+		private bool			 _RobotUsed=false;
 		private bool			 _Adjusted;
 
 		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
@@ -148,6 +152,7 @@ namespace RX_DigiPrint.Models
 
 						// _Adjusted = true;
 						_RobotRunning[stepperNo] = true;
+						_RobotUsed = true;
 
 						action.State	= ECamFunctionState.runningRob;
 						Console.WriteLine("Stepper[{0}]: CMD_HEAD_ADJUST Printbar={1}, Head={2}, axis={3}, steps={4}", stepperNo, msg.printbarNo, msg.headNo, msg.axis, msg.steps);
@@ -204,6 +209,7 @@ namespace RX_DigiPrint.Models
 
 			_AssistMode = ENAssistMode.align;
 			_Adjusted   = false;
+			_RobotUsed  = false;
 
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
@@ -211,6 +217,7 @@ namespace RX_DigiPrint.Models
 			for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
 			{
 				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
+				_AdjustFunction[color]= ECamFunction.CamNoFunction;
 				if (ink!=null)
 				{
 					Brush colorBrush;
@@ -834,8 +841,8 @@ namespace RX_DigiPrint.Models
 			else _ActionIdx=1;
 			_Action = null;
 			RxGlobals.SetupAssist.ScanReference();
-
-			RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+			if (_RobotUsed) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+			_RobotUsed = false;
 
 			return running;
 		}
@@ -907,11 +914,16 @@ namespace RX_DigiPrint.Models
 
 				ECamFunction function=_Action.Function;
 				int stepperNo = _Action.StepperNo;
+				int printBar  = _Action.PrintbarNo;
 				_Action = null;
-				_ActionIdx++;
-				if (_ActionIdx<_Actions.Count())
+				while (++_ActionIdx<_Actions.Count())
 				{
 					if (_Actions[_ActionIdx].Function==function)
+					{
+						_StartAction();
+						return;
+					}
+					if (_AdjustFunction[printBar]==ECamFunction.CamNoFunction || _Actions[_ActionIdx].PrintbarNo!=printBar)
 					{
 						_StartAction();
 						return;
@@ -924,10 +936,12 @@ namespace RX_DigiPrint.Models
 						return;
 					}
 					*/
+					/*
 					if (!_Adjusted)
 						_StartAction();
 					else _NextRobotCmd(stepperNo);
-					return;
+					*/
+					// return;
 				}
 				Abort();
 			}
@@ -1216,6 +1230,7 @@ namespace RX_DigiPrint.Models
 			else 										
 			{
 				_Action.State = ECamFunctionState.waitRob;
+				_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
 				_NextRobotCmd(_Action.StepperNo);
 			}
 
@@ -1250,6 +1265,7 @@ namespace RX_DigiPrint.Models
 				{
 					SA_Action action = _Actions[_StitchIdx + i];
 					action.State = ECamFunctionState.waitRob;
+					_AdjustFunction[action.PrintbarNo] = action.Function;
 					_NextRobotCmd(action.StepperNo);
 				}
 			}

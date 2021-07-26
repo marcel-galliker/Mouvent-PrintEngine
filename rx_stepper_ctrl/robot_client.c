@@ -576,6 +576,15 @@ static void _rc_state_machine(void)
 										_configure_xy_motor(MOTOR_XY_0);
 										_configure_xy_motor(MOTOR_XY_1);
 										_RC_State++;
+										/* --- not moving to garage after reference ---
+										if (TRUE)
+										{
+											_rc_reset_motors(MOTORS_XY);
+											_RC_State=0;
+											Error(LOG, 0, "Reference done");
+											RX_StepperStatus.screwerinfo.ref_done = TRUE;
+										}
+										*/
 									}
 									else
 									{
@@ -585,7 +594,7 @@ static void _rc_state_machine(void)
 								}
 								break;
 
-		case RC_STATE_REF+5:	// XY-Axex reseted
+		case RC_STATE_REF+5:	// XY-Axes reseted
 								if (!_RobotStatus.motor[MOTOR_XY_0].isStalled && !_RobotStatus.motor[MOTOR_XY_1].isStalled)
 								{
 									rc_moveto_x(MOTOR_X_GARAGE_POS, _FL_);
