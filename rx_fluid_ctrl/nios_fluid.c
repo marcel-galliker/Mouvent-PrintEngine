@@ -267,7 +267,9 @@ static void _nios_check_errors(void)
 			if (_Stat->ink_supply[isNo].error&err_ink_not_heating)		 
 				ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_ink_not_heating, 0, "Fluid[%d-%s]: Check4 heater board error, ink not heating", isNo + 1, RX_ColorNameShort(isNo));
 			if (_Stat->ink_supply[isNo].error&err_ink_too_hot)		 
-				ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_ink_too_hot, 0, "Fluid[%d-%s]: Check4 heater board error, ink too hot", isNo + 1, RX_ColorNameShort(isNo));        
+				ErrorFlag(ERR_CONT, (UINT32 *)&_Error[isNo], err_ink_too_hot, 0, "Fluid[%d-%s]: Check4 heater board error, ink too hot", isNo + 1, RX_ColorNameShort(isNo));     
+            if (_Stat->ink_supply[isNo].error&err_pressure_too_high)
+				ErrorFlag(WARN, (UINT32 *)&_Error[isNo], err_pressure_too_high, 0, "Fluid[%d-%s]: Ink Tank Pressure still > 100mbar after 1 minute", isNo + 1, RX_ColorNameShort(isNo));
 		}
 	}
 }
