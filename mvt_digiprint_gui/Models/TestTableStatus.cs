@@ -293,7 +293,7 @@ namespace RX_DigiPrint.Models
             drip_pans_enabled = Z_in_ref;
 
             PosX    = msg.posX;
-            PosY    = msg.posY[0];
+            PosY    = msg.posY;
             PosZ    = msg.posZ;
             Error   = msg.err;
 

@@ -133,7 +133,6 @@ static EDevice  _get_device(char *deviceStr, UINT64 mac)
 	if ((mac & MAC_ID_MASK)  == MAC_ENC32_CTRL)		return dev_enc32;
 	if ((mac & MAC_ID_MASK)  == MAC_FLUID_CTRL)		return dev_fluid;
 	if ((mac & MAC_ID_MASK)  == MAC_STEPPER_CTRL)	return dev_stepper;
-	if ((mac & MAC_ID_MASK)  == MAC_ROBOT_CTRL)		return dev_robot;
 	return dev_undef;
 }
 
@@ -408,8 +407,6 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 						}
 						break;
 
-	case dev_robot:		sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_ROBOT_0+10*no);
-						break;
 	case dev_spooler:
 					if (no<=0 || no>=255)	sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200); 
 					else					sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, 200+no); 

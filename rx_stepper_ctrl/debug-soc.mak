@@ -13,14 +13,14 @@ OBJCOPY := F:/Compiler/altera/13.1/DS-5/bin/arm-linux-gnueabihf-objcopy.exe
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG linux soc
-INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../rx_robot_ctrl/includes
+INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib
 LIBRARY_DIRS := 
 LIBRARY_NAMES := 
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 
-CFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt -std=gnu99
-CXXFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt -std=gnu99
+CFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt
+CXXFLAGS := -ggdb -ffunction-sections -O0 -pthread -lrt
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -pthread -lrt
 COMMONFLAGS := 

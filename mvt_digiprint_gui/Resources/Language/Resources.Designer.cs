@@ -4185,15 +4185,6 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to OFF.
-        /// </summary>
-        public static string Off {
-            get {
-                return ResourceManager.GetString("Off", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Offsets.
         /// </summary>
         public static string Offsets {
@@ -4995,15 +4986,6 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Purge and wash.
-        /// </summary>
-        public static string PurgeAndWash {
-            get {
-                return ResourceManager.GetString("PurgeAndWash", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Purge and wipe.
         /// </summary>
         public static string PurgeAndWipe {
@@ -5146,18 +5128,7 @@ namespace RX_DigiPrint.Resources.Language {
                 return ResourceManager.GetString("ReadyToPrint", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Ready to Print.
-        /// </summary>
-        public static string PrepareToPrint
-        {
-            get
-            {
-                return ResourceManager.GetString("PrepareToPrint", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Recto.
         /// </summary>
@@ -7155,15 +7126,6 @@ namespace RX_DigiPrint.Resources.Language {
         public static string Volume {
             get {
                 return ResourceManager.GetString("Volume", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Wait.
-        /// </summary>
-        public static string Wait {
-            get {
-                return ResourceManager.GetString("Wait", resourceCulture);
             }
         }
         

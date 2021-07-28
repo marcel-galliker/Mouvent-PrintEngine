@@ -622,16 +622,6 @@ int	plc_to_cap_pos(void)
 	return REPLY_OK;
 }
 
-//--- plc_move_web ------------------------------------------
-int plc_move_web(int dist)
-{
-	lc_set_value_by_name_FLOAT(UnitID ".PAR_RELATIVE_POS", (float)dist / 1000.0);
-	rx_sleep(200);
-	_plc_set_command("CMD_PRODUCTION", "CMD_RUN");
-	return REPLY_OK;
-}
-
-
 //--- plc_pause_printing ---------------------------------------
 int plc_pause_printing(int fromGui)
 {

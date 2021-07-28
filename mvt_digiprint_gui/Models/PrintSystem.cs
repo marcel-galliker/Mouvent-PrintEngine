@@ -370,8 +370,8 @@ namespace RX_DigiPrint.Models
             get { return _AllInkSupplies; }
             set { SetProperty(ref _AllInkSupplies, value); }
         }
-
-        //--- Property HeadFpVoltage ---------------------------------------
+        
+        //--- Property HeadDist ---------------------------------------
         private Int32[] _HeadFpVoltage;
         public Int32[] HeadFpVoltage
         {

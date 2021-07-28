@@ -167,7 +167,6 @@ namespace RX_DigiPrint.Models
                                                     return "Encoder";
                     case EDeviceType.dev_fluid:     return string.Format("Fluid{0}", noStr);
                     case EDeviceType.dev_stepper:   return string.Format("Stepper{0}", noStr);
-                    case EDeviceType.dev_robot:     return string.Format("Robot{0}", noStr);
                     case EDeviceType.dev_head:      try
                                                     {
                                                         if (RxGlobals.PrintSystem.HeadsPerColor<1) return "";

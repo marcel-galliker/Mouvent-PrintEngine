@@ -21,7 +21,6 @@
 #include "pid.h"
 #include "pio.h"
 #include "pres.h"
-#include "pvalve.h"
 #include "ink_ctrl.h"
 #include "fpga_def_fluid.h"
 #include "version.h"
@@ -176,13 +175,9 @@ int main()
 	IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_2, 0x0000);	// Pumpe IS3
 	IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_3, 0x0000);	// Pumpe IS4
 
-	// GPIO (Selenoids / Sensor Power) of IS Adapter Board
-	IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, 0x0000);
-
 	// Watchdog
 	IOWR_32DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, WATCHDOG_FREQ, WATCHDOG_PERIOD_10MS);
 
-	pvalve_init();
 	pres_init();
 	ink_init();
 	timer_init();

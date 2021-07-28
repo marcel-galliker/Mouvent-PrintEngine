@@ -157,7 +157,6 @@ C_SRCS += heater.c
 C_SRCS += trprintf.c
 C_SRCS += comm.c
 C_SRCS += fifo.c
-C_SRCS += pvalve.c
 CXX_SRCS :=
 ASM_SRCS :=
 

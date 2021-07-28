@@ -139,13 +139,27 @@ int pc_start_printing(void)
 	{
         spool_start_printing();
 		step_set_config();
-		if (!RX_StepperStatus.info.z_in_print && (rx_def_is_tx(RX_Config.printer.type) || (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.info.z_in_cap)))
+		if (!RX_StepperStatus.info.z_in_print 
+		&& (rx_def_is_tx(RX_Config.printer.type) || (RX_Config.printer.type==printer_LH702 && plc_in_simu())))
 		{
 			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);				
 		}
 		
 		TrPrintfL(TRUE, "pc_start_printing: ref_done=%d", RX_StepperStatus.info.ref_done);		
 		
+		if (rx_def_is_lb(RX_Config.printer.type))
+		{
+			if(!RX_StepperStatus.info.ref_done)
+			{
+				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_REFERENCE");		
+				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE, NULL, 0);					
+			}
+			else if (RX_StepperStatus.info.z_in_cap)
+			{
+				TrPrintfL(TRUE, "pc_start_printing: CMD_LIFT_UP_POS");		
+				step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);										
+			}
+		}
 		_Scanning = rx_def_is_scanning(RX_Config.printer.type);
 		_PreloadCnt = 5;
 		memset(&_Item, 0, sizeof(_Item));
@@ -168,6 +182,7 @@ int pc_start_printing(void)
 		_BitsPerPixel = 0;
 		_PrintDoneFlags = spool_head_board_used_flags();
 		_SetPrintPar   = TRUE;
+//		fluid_start_printing();
 		pq_start();
 		pc_print_next();
 		gui_send_printer_status(&RX_PrinterStatus);
@@ -314,9 +329,6 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
 			len += sprintf(&str[len], "Temp=%d.%d°C / Waveform=%s\n", pstat->tempHead / 1000, (pstat->tempHead% 1000) / 100, RX_Config.inkSupply[color].ink.name);
-			len += sprintf(&str[len], "Angle=%s ", value_str_screw(pstat->eeprom_mvt.robot.angle));
-			len += sprintf(&str[len], "Stitch=%s", value_str_screw(pstat->eeprom_mvt.robot.stitch));
-			len += sprintf(&str[len], "\n");
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{
 				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);
@@ -625,7 +637,7 @@ static int _print_next(void)
 				_CopiesStart = _Item.copiesPrinted;
 				if (RX_Config.printer.type==printer_DP803 && _Item.lastPage!=_Item.firstPage)
 					_CopiesStart = (_Item.copiesPrinted* (_Item.lastPage - _Item.firstPage + 1) + _Item.start.page)-1;
-
+				
 				_set_src_size(&_Item, _FilePathLocal);
 				if (_Item.srcWidth==0 || _Item.srcHeight==0)
 				{

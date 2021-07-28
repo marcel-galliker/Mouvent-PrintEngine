@@ -22,47 +22,25 @@ namespace RX_DigiPrint.Models
             Progress = 0;
         }
 
-        //--- Property PrintbarNo ---------------------------------------
-        private double _PrintbarNo = 0;
-        public double PrintbarNo
+        //--- Property Stitch ---------------------------------------
+        private double _Stitch=0;
+        public double Stitch    
         {
-            get { return _PrintbarNo; }
-            set
-            {
-                SetProperty(ref _PrintbarNo, value);
-            }
-        }
-
-        //--- Property HeadNo ---------------------------------------
-        private double _HeadNo = 0;
-        public double HeadNo
-        {
-            get { return _HeadNo; }
-            set
-            {
-                SetProperty(ref _HeadNo, value);
-            }
-        }
-
-        //--- Property Steps ---------------------------------------
-        private double _Steps=0;
-        public double Steps   
-        {
-            get { return _Steps; }
+            get { return _Stitch; }
             set 
             {
-                SetProperty(ref _Steps, value); 
+                SetProperty(ref _Stitch, value); 
             }
         }
 
-        //--- Property Axis ---------------------------------------
-        private double _Axis=0;
-        public double Axis
+        //--- Property Angle ---------------------------------------
+        private double _Angle=0;
+        public double Angle
         {
-            get { return _Axis; }
+            get { return _Angle; }
             set 
             { 
-                SetProperty(ref _Axis, value); 
+                SetProperty(ref _Angle, value); 
             }
         }
 
@@ -106,7 +84,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Adjust -------------------------------------
-        public void Adjust()
+        public void Adjust(int inkSupplyNo, int headNo)
         {
             Progress= 0;
             Done    = false;
@@ -114,14 +92,11 @@ namespace RX_DigiPrint.Models
 
             TcpIp.SHeadAdjustmentMsg msg = new  TcpIp.SHeadAdjustmentMsg();
 
-            msg.printbarNo = (Int32)(PrintbarNo-1);
-            msg.headNo = (Int32)(HeadNo-1);
-            msg.axis = (Int32)(Axis);
-            if (Steps >= 0)
-                msg.steps = (Int32)(((Int32)Steps * 6 + (Steps - (Int32)Steps) * 6) + 0.5);
-            else
-                msg.steps = (Int32)(((Int32)Steps * 6 + (Steps - (Int32)Steps) * 6) - 0.5);
-            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
+            msg.inkSupplyNo = inkSupplyNo;
+            msg.headNo      = headNo;
+            msg.angle       = (Int32)(Angle*1000);
+            msg.stitch      = (Int32)(Stitch*1000);
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_ROB_ADJUST, ref msg);
         }
 
     }

@@ -2106,9 +2106,6 @@ No Splices in the machine?</value>
   <data name="Wash6" xml:space="preserve">
     <value>Wash /6</value>
   </data>
-  <data name="Wait" xml:space="preserve">
-    <value>Wait</value>
-  </data>
   <data name="White1W1" xml:space="preserve">
     <value>White 1 (W1)</value>
   </data>
@@ -2162,12 +2159,6 @@ No Splices in the machine?</value>
   </data>
   <data name="Mark" xml:space="preserve">
     <value>Mark</value>
-  </data>
-  <data name="MarkVerso" xml:space="preserve">
-    <value>MarkVerso</value>
-  </data>
-  <data name="MarkVersoI" xml:space="preserve">
-    <value>MarkVersoI</value>
   </data>
   <data name="MarkI" xml:space="preserve">
     <value>MarkI</value>
@@ -2688,6 +2679,12 @@ No Splices in the machine?</value>
   <data name="SpliceMode" xml:space="preserve">
     <value>Splice Mode</value>
   </data>
+  <data name="MarkVerso" xml:space="preserve">
+    <value>MarkVerso</value>
+  </data>
+  <data name="MarkVersoI" xml:space="preserve">
+    <value>MarkVersoI</value>
+  </data>
   <data name="ShuttingDown" xml:space="preserve">
     <value>Shutting down...</value>
   </data>
@@ -2724,11 +2721,5 @@ Options: </value>
   </data>
   <data name="NoFlush" xml:space="preserve">
     <value>No Flush</value>
-  </data>
-  <data name="Off" xml:space="preserve">
-    <value>OFF</value>
-  </data>
-  <data name="PurgeAndWash" xml:space="preserve">
-    <value>Purge and wash</value>
   </data>
 </root>

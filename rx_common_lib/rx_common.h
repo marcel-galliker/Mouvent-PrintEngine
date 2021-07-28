@@ -168,7 +168,6 @@
 
 #define SIZEOF(x) (sizeof((x))/sizeof((*x)))
 #define ReleasePtr(X)	{if (X) { free(X); X=NULL; } }
-#define _FL_	__FILE__, __LINE__
 
 #ifdef __cplusplus
 extern "C"{

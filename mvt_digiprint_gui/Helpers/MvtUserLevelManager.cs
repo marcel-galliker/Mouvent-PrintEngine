@@ -333,7 +333,7 @@ namespace RX_DigiPrint.Helpers
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    MessageBox.Show("Database Path Problem, directory creation failed " + Path.GetDirectoryName(dbPath));
+                    MessageBox.Show("Database Path Problem, directory creation failed");
                     return sups;
                 }
             }

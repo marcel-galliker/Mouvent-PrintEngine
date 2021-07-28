@@ -9,9 +9,6 @@
 //
 // ****************************************************************************
 
-#include <string.h>
-#include <stdlib.h>
-
 #include "rx_error.h"
 #include "rx_def.h"
 #include "rx_error.h"
@@ -26,1036 +23,468 @@
 #include "enc_ctrl.h"
 #include "gui_svr.h"
 #include "step_ctrl.h"
-#include "ctrl_svr.h"
 #include "step_lb.h"
 #include "fluid_ctrl.h"
 #include "setup.h"
 
-#define STEPPER_CNT		    4
+#define STEPPER_CNT		4
 
-#define VACUUM_DELAY        10 * 1000           // ms -> 10 seconds
+static RX_SOCKET		_step_socket[STEPPER_CNT]={0};
 
-static RX_SOCKET		    _step_socket[STEPPER_CNT] = { 0 };
+static SStepperStat		_Status[STEPPER_CNT];
+static int				_AbortPrinting=FALSE;
+static UINT32			_Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 
-static SStepperStat		    _Status[STEPPER_CNT];
-static SStepperStat         _OldStatus[STEPPER_CNT];
-static int				    _AbortPrinting = FALSE;
-static int                  _WashStarted[STEPPER_CNT];
-static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
-static int                  _AutoCapMode = FALSE;
+static int				_StatReadCnt[STEPPER_CNT];
 
-static int                  _AutoCapTimer = 0;
-
-
-static int				    _StatReadCnt[STEPPER_CNT];
-static int                  _ScrewCnt[STEPPER_CNT] = {0};
-
-static EnFluidCtrlMode	    _RobotCtrlMode[STEPPER_CNT] = { ctrl_undef };
-
-static SHeadAdjustmentMsg   _HeadAdjustment[STEPPER_CNT] = { 0 };
-
-static SHeadAdjustmentMsg   _HeadAdjustmentBuffer[STEPPER_CNT][MAX_HEAD_DIST];
-
-static void _steplb_rob_do_reference(int no);
-static void _check_screwer(int stepperNo);
-static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int stepperNo);
-static int  _rob_get_printbar(int rob, int printbar);
-static int _set_screw_pos(int stepperNo);
-
-static int _empty_screwerBuffer(int stepperNo);
+static EnFluidCtrlMode	_RobotCtrlMode[STEPPER_CNT] = {ctrl_undef};
 
 //--- steplb_init ---------------------------------------------------
-void steplb_init(int no, RX_SOCKET socket)
+void steplb_init(int no, RX_SOCKET psocket)
 {
-	static int init_first_done = FALSE;
-	setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);
-    if (no >= 0 && no < STEPPER_CNT)
-    {
-		_step_socket[no] = socket;
-        memset(&_Status[no], 0, sizeof(_Status[no]));
-		memset(&_OldStatus[no], 0, sizeof(_OldStatus[no]));
-		_ScrewCnt[no] = 0;
-	}
+	int i;
 	
+	setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, READ);
+	if (no>=0 && no<STEPPER_CNT)
+	{
+		_step_socket[no] = psocket;
+		memset(&_Status[no], 0, sizeof(_Status[no]));
+	}
+	memset(_Status, 0, sizeof(_Status));
 	// All steppers board variables reset
-	if (!init_first_done)
-	{
-		memset(_Status, 0, sizeof(_Status));
-		for (int i = 0; i < STEPPER_CNT; i++)
-		{
-			_StatReadCnt[i] = 0;
-			_empty_screwerBuffer(i);
-		}
-	}
-	else
-	{
-		_StatReadCnt[no] = 0;
-		_empty_screwerBuffer(no);
-	}
-
-	init_first_done = TRUE;
+	for (i = 0; i < STEPPER_CNT; i++) _StatReadCnt[i] = 0;
 }
 
 //--- steplb_handle_gui_msg------------------------------------------------------------------
-int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void* data, int dataLen)
-{
-    int no;
-    for (no = 0; no < SIZEOF(_step_socket); no++)
-    {
-        if (_step_socket[no] && _step_socket[no] != INVALID_SOCKET)
-        {
-			TrPrintfL(TRUE, "LIFT: %s : cmd = 0x%8x", __func__, cmd);
-            switch (cmd)
-            {
-            case CMD_TT_STOP:
-            case CMD_TT_START_REF:
-            case CMD_TT_MOVE_TABLE:
-            case CMD_TT_MOVE_LOAD:
-            case CMD_TT_MOVE_CAP:
-            case CMD_TT_MOVE_PURGE:
-            case CMD_TT_MOVE_ADJUST:
-            case CMD_TT_SCAN_RIGHT:
-            case CMD_TT_SCAN_LEFT:
-            case CMD_TT_VACUUM:
-                sok_send_2(&_step_socket[no], cmd, 0, NULL);
-                break;
-
-            case CMD_TT_SCAN:
-            {
-                STestTableScanPar par;
-                par.speed = 5;
-                par.scanCnt = 5;
-                par.scanMode = PQ_SCAN_STD;
-                par.yStep = 10000;
-
-                sok_send_2(&_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
-            }
-            break;
-
-            //--- cappping ---------------------------------------------------------
-            case CMD_LIFT_STOP:
-            case CMD_LIFT_UP_POS:
-            case CMD_LIFT_CAPPING_POS:
-            case CMD_LIFT_REFERENCE:
-            case CMD_ROB_REFERENCE:
-			case CMD_ROB_SERVICE:
-			case CMD_RESET_ALL_SCREWS:
-				_empty_screwerBuffer(no);
-                sok_send_2(&_step_socket[no], cmd, 0, NULL);
-                break;
-
-            case CMD_LIFT_PRINT_POS:
-                _AbortPrinting = FALSE;
-				_empty_screwerBuffer(no);
-                int height = RX_Config.stepper.print_height + RX_Config.stepper.material_thickness;
-                sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
-                break;
-            }
-        }
-    }
-    return REPLY_OK;
-}
-
-//--- _rob_get_printbar ------------------------------------------
-static int _rob_get_printbar(int rob, int printbar)
-{
-    switch(RX_Config.printer.type)
-    {
-    case printer_LB702_WB:  return rob*2+printbar;
-	case printer_LB702_UV:  if (RX_Config.colorCnt < 5 || RX_Config.colorCnt >7)
-		                        return rob*2+printbar;
-		                    else if (RX_Config.inkSupplyCnt % 2 == 1)
-								return (2 * rob + printbar - 1 + 4)%RX_Config.colorCnt;
-		                    else
-								return 2 * rob + printbar - 1;
-	default:                Error(ERR_CONT, 0, "Not implemented");
-                            return printbar;
-    }
-}
-
-//--- steplb_handle_status ----------------------------------------------------------------------
-int steplb_handle_status(int no, SStepperStat* pStatus)
-{
-    int i;
-    int robot_used = FALSE;
-    ETestTableInfo info;
-    ERobotInfo robinfo;
-	
-	memcpy(&_OldStatus[no], &_Status[no], sizeof(_OldStatus[no]));
-    memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
-
-    _Status[no].no = no;
-    gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &_Status[no]);
-
-    // Don't refresh the main variable until all steppers board status have been
-    // received (after  a call of steplb_init())
-    _StatReadCnt[no]++;
-
-    for (i = 0; i < (RX_Config.inkSupplyCnt + 1)/2; i++)
-    {
-        if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
-        {
-            if (_StatReadCnt[i] == 0) return REPLY_OK;
-        }
-    }
-
-	if (_Status[no].robot_used && !_OldStatus[no].robot_used)
+int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen)
+{	
+	int no;
+	for (no=0; no<SIZEOF(_step_socket); no++)
 	{
-		_set_screw_pos(no);
+		if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET)
+		{
+			TrPrintfL(TRUE, "LIFT: %s : cmd = 0x%8x", __func__, cmd);
+			switch(cmd)
+			{
+			case CMD_TT_STOP:
+			case CMD_TT_START_REF:
+			case CMD_TT_MOVE_TABLE:
+			case CMD_TT_MOVE_LOAD:
+			case CMD_TT_MOVE_CAP:
+			case CMD_TT_MOVE_PURGE:
+			case CMD_TT_MOVE_ADJUST:
+			case CMD_TT_SCAN_RIGHT:
+			case CMD_TT_SCAN_LEFT:
+			case CMD_TT_VACUUM:
+						sok_send_2(&_step_socket[no], cmd, 0, NULL);
+						break;
+
+			case CMD_TT_SCAN:
+						{
+							STestTableScanPar par;
+							par.speed	= 5;
+							par.scanCnt = 5;
+							par.scanMode= PQ_SCAN_STD;
+							par.yStep   = 10000;
+
+							sok_send_2(&_step_socket[no], CMD_TT_SCAN, sizeof(par), &par);
+						}
+						break;
+
+			//--- cappping ---------------------------------------------------------
+			case CMD_LIFT_STOP:
+			case CMD_LIFT_UP_POS:
+			case CMD_LIFT_CAPPING_POS:
+			case CMD_LIFT_REFERENCE:
+			case CMD_ROB_REFERENCE:
+						sok_send_2(&_step_socket[no], cmd, 0, NULL);
+						break;
+		
+			case CMD_LIFT_PRINT_POS:
+						_AbortPrinting=FALSE;
+						int height=RX_Config.stepper.print_height+RX_Config.stepper.material_thickness;
+						sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
+						break;
+			}
+		}
 	}
-
-    memset(&info, 0, sizeof(info));
-    memset(&robinfo, 0, sizeof(robinfo));
-    info.printhead_en = TRUE;
-    info.ref_done = TRUE;
-    info.z_in_ref = TRUE;
-    info.z_in_print = TRUE;
-    info.z_in_cap = TRUE;
-    info.x_in_cap = TRUE;
-    info.x_in_ref = TRUE;
-    robinfo.rob_in_cap = TRUE;
-    robinfo.ref_done = TRUE;
-    robinfo.purge_ready = TRUE;
-
-    for (i = 0; i < STEPPER_CNT; i++)
-    {
-        if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
-        {
-            
-
-            info.ref_done &= _Status[i].info.ref_done;
-            info.printhead_en &= _Status[i].info.printhead_en;
-            info.moving |= _Status[i].info.moving;
-            info.z_in_ref &= _Status[i].info.z_in_ref;
-            info.z_in_print &= _Status[i].info.z_in_print;
-            info.z_in_cap &= _Status[i].info.z_in_cap;
-            info.z_in_screw |= _Status[i].info.z_in_screw;
-            info.x_in_cap &= _Status[i].info.x_in_cap || !_Status[i].robot_used;
-			info.x_in_ref &= _Status[i].info.x_in_ref;
-            robot_used |= _Status[i].robot_used;
-			robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap || !_Status[i].robot_used;
-			robinfo.ref_done &= _Status[i].robinfo.ref_done || !_Status[i].robot_used;
-            robinfo.moving |= _Status[i].robinfo.moving;
-			robinfo.purge_ready &= _Status[i].robinfo.purge_ready || !_Status[i].robot_used;
-            RX_StepperStatus.posY[i] = _Status[i].posY[1];
-            if (_Status[i].info.moving)
-            {
-                RX_StepperStatus.posX = _Status[i].posX;
-                RX_StepperStatus.posZ = _Status[i].posZ;
-                RX_StepperStatus.posZ_back = _Status[i].posZ_back;
-            }
-        }
-    };
-
-    if (RX_Config.printer.type == printer_LB701)
-    {
-        info.headUpInput_0 = _Status[0].info.headUpInput_0;
-        info.headUpInput_1 = _Status[1].info.headUpInput_0;
-        info.headUpInput_2 = _Status[2].info.headUpInput_0;
-        info.headUpInput_3 = _Status[3].info.headUpInput_0;
-    }
-    else if (RX_Config.printer.type == printer_LB702_WB ||
-             RX_Config.printer.type == printer_LB702_UV)
-    {
-        info.headUpInput_0 = _Status[0].info.z_in_ref;
-        info.headUpInput_1 = _Status[1].info.z_in_ref;
-        info.headUpInput_2 = _Status[2].info.z_in_ref;
-        info.headUpInput_3 = _Status[3].info.z_in_ref;
-    }
-    RX_StepperStatus.robot_used = robot_used;
-
-    if (!info.moving)
-    {
-        RX_StepperStatus.posX = _Status[no].posX;
-        RX_StepperStatus.posZ = _Status[no].posZ;
-        RX_StepperStatus.posZ_back = _Status[no].posZ_back;
-    }
-
-    if (_AbortPrinting && RX_StepperStatus.info.z_in_print)
-        steplb_lift_to_up_pos_all();
-
-    memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
-    memcpy(&RX_StepperStatus.robinfo, &robinfo, sizeof(RX_StepperStatus.robinfo));
-    RX_StepperStatus.robinfo.rob_in_cap = robinfo.rob_in_cap;
-
-    if (_step_socket[no] && _step_socket[no] != INVALID_SOCKET)
-        steplb_rob_control(_RobotCtrlMode[no], no);
-
-    if (rx_get_ticks() >= _AutoCapTimer && _AutoCapTimer)
-    {
-        _AutoCapTimer = 0;
-        _AutoCapMode = FALSE;
-    }
-
-	_check_screwer(no);
-
-    return REPLY_OK;
+	return REPLY_OK;
 }
 
-//--- _set_screw_pos -----------------------------------------
-static int _set_screw_pos(int stepperNo)
+//--- steplb_handle_Status ----------------------------------------------------------------------
+int steplb_handle_status(int no, SStepperStat *pStatus)
 {
-    SScrewPositions pos[STEPPER_CNT];
-	memset(&pos, 0, sizeof(pos));
-	setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, READ);
-    for (int printbar=0; printbar<2; printbar++)
-    {
-        for (int head=0; head<RX_Config.headsPerColor; head++)
-        {
-            int no = _rob_get_printbar(stepperNo, printbar)*RX_Config.headsPerColor+head;
-            pos[stepperNo].printbar[printbar].head[head][AXE_ANGLE].turns  = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.angle;
-            pos[stepperNo].printbar[printbar].head[head][AXE_STITCH].turns = RX_HBStatus[no/HEAD_CNT].head[no%HEAD_CNT].eeprom_mvt.robot.stitch;
-        }
-    }
-    sok_send_2(&_step_socket[stepperNo], CMD_SET_SCREW_POS, sizeof(pos[stepperNo]), &pos[stepperNo]);
-    return REPLY_OK;
-}
+	int i;
+	int robot_used=FALSE;
+	ETestTableInfo info;
+	ERobotInfo		robinfo;
+ 
+	memcpy(&_Status[no], pStatus, sizeof(_Status[no]));
+	_Status[no].no=no;
+	gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &_Status[no]);
 
-//--- steplb_set_ScrewPos -----------------------------------------
-int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
-{
-    SScrewPositions pos[STEPPER_CNT];
-    memset(&pos, 0, sizeof(pos));
+	// Don't refresh the main variable until all steppers board status have been received (after  a call of steplb_init())
+	_StatReadCnt[no]++;
 
-    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, READ);
-    memcpy(&pos[no], ppos, sizeof(pos[no]));
-    
-    setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, WRITE);
-    for (int printbar=0; printbar<2; printbar++)
-    {
-        for (int head=0; head<RX_Config.headsPerColor; head++)
-        {
-            int headNo=_rob_get_printbar(no, printbar)*RX_Config.headsPerColor+head;
-            ctrl_set_rob_pos(headNo, ppos->printbar[printbar].head[head][AXE_ANGLE].turns, ppos->printbar[printbar].head[head][AXE_STITCH].turns);
-        }
-    }
+	for (i = 0; i < STEPPER_CNT; i++)
+	{
+		if (_step_socket[i] && _step_socket[i] != INVALID_SOCKET)
+		{
+			if (_StatReadCnt[i]==0) return REPLY_OK;
+		}
+	}	
+	
+	memset(&info, 0, sizeof(info));
+	memset(&robinfo, 0, sizeof(robinfo));
+	info.printhead_en	= TRUE;
+	info.ref_done		= TRUE;
+	info.z_in_ref		= TRUE;
+	info.z_in_print		= TRUE;
+	info.z_in_cap		= TRUE;
+	info.x_in_cap		= TRUE;
+	info.x_in_ref		= TRUE;
+	robinfo.rob_in_cap = TRUE;
+	robinfo.ref_done = TRUE;
+				
+//	TrPrintf(TRUE, "steplb_handle_Status(%d)", no);
+	for (i=0; i<STEPPER_CNT; i++)
+	{
+		if (_step_socket[i] && _step_socket[i]!=INVALID_SOCKET)
+		{
+			//TrPrintf(TRUE, "Stepper[%d]: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", i, _Status[i].info.ref_done, _Status[i].info.moving, _Status[i].info.z_in_print, _Status[i].info.z_in_ref);
+			info.ref_done		&= _Status[i].info.ref_done;
+			info.printhead_en	&= _Status[i].info.printhead_en;
+			info.moving			|= _Status[i].info.moving;
+			info.z_in_ref		&= _Status[i].info.z_in_ref;
+			info.z_in_print		&= _Status[i].info.z_in_print;
+			info.z_in_cap		&= _Status[i].info.z_in_cap;
+			info.x_in_cap		&= _Status[i].info.x_in_cap;
+			info.x_in_ref		&= _Status[i].info.x_in_ref;
+			robot_used			|= _Status[i].robot_used;
+			robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap;
+			robinfo.ref_done &= _Status[i].robinfo.ref_done;
+			robinfo.moving |= _Status[i].robinfo.moving;
+			if (_Status[i].info.moving) 
+			{
+				RX_StepperStatus.posX = _Status[i].posX;
+				RX_StepperStatus.posY = _Status[i].posY;
+				RX_StepperStatus.posZ = _Status[i].posZ;
+			}
+		}
+	};
+	if (RX_Config.printer.type==printer_LB701) 
+	{
+		info.headUpInput_0 =  _Status[0].info.headUpInput_0;
+		info.headUpInput_1 =  _Status[1].info.headUpInput_0;
+		info.headUpInput_2 =  _Status[2].info.headUpInput_0;
+		info.headUpInput_3 =  _Status[3].info.headUpInput_0;
+	}
+	else if (RX_Config.printer.type==printer_LB702_WB || RX_Config.printer.type==printer_LB702_UV || RX_Config.printer.type==printer_LB703_UV) 
+	{
+		info.headUpInput_0 = _Status[0].info.z_in_ref; //_Status[0].info.headUpInput_0 && _Status[0].info.headUpInput_1;
+		info.headUpInput_1 = _Status[1].info.z_in_ref; //_Status[1].info.headUpInput_0 && _Status[1].info.headUpInput_1;
+		info.headUpInput_2 = _Status[2].info.z_in_ref; //_Status[2].info.headUpInput_0 && _Status[2].info.headUpInput_1;
+		info.headUpInput_3 = _Status[3].info.z_in_ref; //_Status[3].info.headUpInput_0 && _Status[3].info.headUpInput_1;
+	
+	}
+	RX_StepperStatus.robot_used = robot_used;
+	
+//	TrPrintf(TRUE, "STEPPER: ref_done=%d moving=%d  z_in_print=%d  z_in_ref=%d", info.ref_done, info.moving, info.z_in_print, info.z_in_ref);
+	
+	/*
+	if (RX_StepperStatus.info.printhead_en  != info.printhead_en)	Error(LOG, 0, "Steppers.printhead_en=%d",	info.printhead_en);
+	if (RX_StepperStatus.info.z_in_ref		!= info.z_in_ref)		Error(LOG, 0, "Steppers.z_in_ref=%d",		info.z_in_ref);
+	if (RX_StepperStatus.info.z_in_print    != info.z_in_print)		Error(LOG, 0, "Steppers.z_in_print=%d",		info.z_in_print);
+	*/
 
-    return REPLY_OK;
-}
+	if (!info.moving) 
+	{
+		RX_StepperStatus.posX = _Status[no].posX;
+		RX_StepperStatus.posY = _Status[no].posY;
+		RX_StepperStatus.posZ = _Status[no].posZ;
+	}
+	
+	if (_AbortPrinting && RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
+		
+	memcpy(&RX_StepperStatus.info, &info, sizeof(RX_StepperStatus.info));
+	memcpy(&RX_StepperStatus.robinfo, &robinfo, sizeof(RX_StepperStatus.robinfo));
+	// if (rx_def_is_tx(RX_Config.printer.type)) RX_StepperStatus.info.x_in_cap = plc_in_cap_pos();
+	RX_StepperStatus.robinfo.rob_in_cap = robinfo.rob_in_cap;
+	
+	/*
+	for (int no = 0; no < STEPPER_CNT; no++)
+	{
+		if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
+	}
+	*/
 
-//--- steplb_get_ScrewPos ----------------------------------------------
-int steplb_get_ScrewPos(int stepperNo)
-{
-	if (_Status[stepperNo].robot_used)
-        _set_screw_pos(stepperNo);
-        
-    return REPLY_OK;
+	if (_step_socket[no] && _step_socket[no]!=INVALID_SOCKET) steplb_rob_control(_RobotCtrlMode[no], no);
+	return REPLY_OK;
 }
 
 //--- steplb_to_print_pos --------------------------------
 int	 steplb_to_print_pos(void)
 {
-    _AbortPrinting = FALSE;
-    for (int no = 0; no < SIZEOF(_step_socket); no++)
-    {
-		_empty_screwerBuffer(no);
-        int height = RX_Config.stepper.print_height + RX_Config.stepper.material_thickness;
-        sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
-    }
-    return REPLY_OK;
+	_AbortPrinting = FALSE;
+	for (int no=0; no<SIZEOF(_step_socket); no++)
+	{
+		int height=RX_Config.stepper.print_height+RX_Config.stepper.material_thickness;
+		sok_send_2(&_step_socket[no], CMD_LIFT_PRINT_POS, sizeof(height), &height);
+	}
+	return REPLY_OK;									
 }
 
 //--- steplb_abort_printing -----------------------------------------
 void  steplb_abort_printing(void)
 {
-    if (RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos_all();
-    else _AbortPrinting = TRUE;
+	if(RX_StepperStatus.info.z_in_print) steplb_lift_to_up_pos();
+	else _AbortPrinting = TRUE;
 }
 
-//--- steplb_lift_to_top_pos_all ---------------------------
-void steplb_lift_to_top_pos_all(void)
+//--- steplb_lift_to_top_pos ---------------------------
+void steplb_lift_to_top_pos(void)
 {
-    if (_AutoCapTimer == 0 && RX_StepperStatus.info.z_in_cap && _AutoCapMode)
-    {
-        _AutoCapTimer = rx_get_ticks() + 5000;
-    }
-    else if (!(_AutoCapMode && RX_StepperStatus.info.z_in_cap))
-    {
-        for (int no = 0; no < SIZEOF(_step_socket); no++)
-        {
-			_empty_screwerBuffer(no);
-            sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
-        }
-        _AbortPrinting = FALSE;
-    }
-}
-
-//--- steplb_lift_to_top_pos -------------------------------------------
-void steplb_lift_to_top_pos(int stepperNo)
-{
-	_empty_screwerBuffer(stepperNo);
-	if (_step_socket[stepperNo] != INVALID_SOCKET)
-		sok_send_2(&_step_socket[stepperNo], CMD_LIFT_REFERENCE, 0, NULL);
-}
-
-//--- steplb_lift_in_top_pos_all --------------
-int	 steplb_lift_in_top_pos_all(void)
-{
-    return RX_StepperStatus.info.z_in_ref;
+	for (int no=0; no<SIZEOF(_step_socket); no++)
+	{
+		sok_send_2(&_step_socket[no], CMD_LIFT_REFERENCE, 0, NULL);
+	}
+	_AbortPrinting = FALSE;
 }
 
 //--- steplb_lift_in_top_pos --------------
-int steplb_lift_in_top_pos(int stepperNo)
+int	 steplb_lift_in_top_pos(void)
 {
-	return _Status[stepperNo].info.z_in_ref;
+	return RX_StepperStatus.info.z_in_ref;
 }
 
-//--- steplb_lift_to_up_pos_all ---------------------------
-void steplb_lift_to_up_pos_all(void)
+//--- steplb_lift_to_up_pos ---------------------------
+void steplb_lift_to_up_pos(void)
 {
-    for (int no = 0; no < SIZEOF(_step_socket); no++)
-    {
-		_empty_screwerBuffer(no);
-        sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
-    }
-    _AbortPrinting = FALSE;
-}
-
-//--- steplb_lift_in_up_pos_all --------------
-int steplb_lift_in_up_pos_all(void)
-{
-    return RX_StepperStatus.info.z_in_ref;
-}
-
-//--- steplb_lift_to_up_pos -------------------
-void steplb_lift_to_up_pos(int no)
-{
-	_empty_screwerBuffer(no);
-    sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
-}
-
-//--- steplb_lift_in_up_pos -------------------
-int steplb_lift_in_up_pos(int no)
-{
-	if (no == -1) return steplb_lift_in_up_pos_all();
-    if (_step_socket[no] == INVALID_SOCKET) return TRUE;
-    return _Status[no].info.z_in_ref;
-}
-
-//--- steplb_rob_to_fct_pos --------------------------
-void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function)
-{
-	_empty_screwerBuffer(no);
-    if (_step_socket[no] == INVALID_SOCKET) return;
-    sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);
-}
-
-//--- steplb_rob_to_fct_pos_all ----------------------------------------------
-void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function)
-{
-    for (int i = 0; i < STEPPER_CNT; i++)
-    {
-		_empty_screwerBuffer(i);
-		if (_step_socket[i] != INVALID_SOCKET)
-            sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);
-    }
-}
-
-//--- steplb_rob_in_fct_pos --------------------------
-int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function)
-{
-    if (_step_socket[no] == INVALID_SOCKET) return TRUE;
-
-    switch (rob_function)
-    {
-    case rob_fct_cap: 			return _Status[no].robinfo.rob_in_cap && _Status[no].robinfo.moving == FALSE;
-    case rob_fct_wash: 			return _Status[no].robinfo.wash_ready && _Status[no].robinfo.moving == FALSE;
-    case rob_fct_vacuum: 		return _Status[no].robinfo.vacuum_ready && _Status[no].robinfo.moving == FALSE;
-    case rob_fct_wipe: 			return _Status[no].robinfo.wipe_ready && _Status[no].robinfo.moving == FALSE;
-    case rob_fct_vacuum_change: return _Status[no].robinfo.vacuum_in_change && _Status[no].robinfo.moving == FALSE;
-    case rob_fct_purge_all:		return _Status[no].robinfo.purge_ready && _Status[no].robinfo.moving == FALSE;// && _Status[no].robinfo.rob_in_cap
-    case rob_fct_purge_head0:
-    case rob_fct_purge_head1:
-    case rob_fct_purge_head2:
-    case rob_fct_purge_head3:
-    case rob_fct_purge_head4:
-    case rob_fct_purge_head5:
-    case rob_fct_purge_head6:
-    case rob_fct_purge_head7:	return _Status[no].robinfo.purge_ready && _Status[no].robinfo.moving == FALSE;
-    case rob_fct_purge4ever:    return _Status[no].robinfo.x_in_purge4ever && _Status[no].robinfo.moving == FALSE;
-    default: return FALSE; break;
-    }
-}
-
-//--- steplb_rob_in_fct_pos_all ------------------------
-int steplb_rob_in_fct_pos_all(ERobotFunctions rob_function)
-{
-    switch (rob_function)
-    {
-    case rob_fct_cap:			return RX_StepperStatus.robinfo.rob_in_cap && RX_StepperStatus.robinfo.moving == FALSE;
-    case rob_fct_purge_head7:	return RX_StepperStatus.robinfo.purge_ready && RX_StepperStatus.robinfo.moving == FALSE;
-    default: return FALSE; break;
-    }
-}
-
-//--- steplb_rob_fct_start -------------------------------------
-void steplb_rob_fct_start(int no, ERobotFunctions rob_function)
-{
-	_empty_screwerBuffer(no);
-	if (_step_socket[no] == INVALID_SOCKET) return;
-    sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
-}
-
-//--- steplb_rob_fct_done --------------------------------------
-int	 steplb_rob_fct_done(int no, ERobotFunctions rob_function)
-{
-    if (_step_socket[no] == INVALID_SOCKET) return TRUE;
-    switch (rob_function)
-    {
-    case rob_fct_wash:		return _Status[no].robinfo.wash_done;
-    case rob_fct_vacuum:	return _Status[no].robinfo.vacuum_done;
-    case rob_fct_cap:		return _Status[no].robinfo.cap_ready;
-    default:				return FALSE;
-    }
-}
-
-//--- steplb_rob_stop_all ------------------------------
-void steplb_rob_stop_all(void)
-{
-	for (int no = 0; no < SIZEOF(_step_socket); no++)
+	for (int no=0; no<SIZEOF(_step_socket); no++)
 	{
-		_empty_screwerBuffer(no);
-		if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
-		sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
+		sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
+	}
+	_AbortPrinting = FALSE;
+}
+
+//--- steplb_lift_is_up --------------
+int	 steplb_lift_in_up_pos(void)
+{
+	return RX_StepperStatus.info.z_in_ref;
+}
+
+//--- steplb_lift_to_up_pos_individually -------------------
+void steplb_lift_to_up_pos_individually(int no)
+{
+	sok_send_2(&_step_socket[no], CMD_LIFT_UP_POS, 0, NULL);
+}
+
+//--- steplb_lift_in_up_pos_individually -------------------
+int	 steplb_lift_in_up_pos_individually(int no)
+{
+	if (no == -1) return steplb_lift_in_up_pos();
+	if (_step_socket[no] == INVALID_SOCKET) return TRUE;
+	return _Status[no].info.z_in_ref;
+}
+
+//--- steplb_rob_to_wipe_pos --------------------------
+void steplb_rob_to_wipe_pos(int no, ERobotFunctions rob_function)
+{
+	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);		
+}
+
+//--- steplb_rob_in_wipe_pos --------------------------
+int	 steplb_rob_in_wipe_pos(int no, ERobotFunctions rob_function)
+{
+	if (_step_socket[no]==INVALID_SOCKET) return TRUE;
+	
+	switch (rob_function)
+	{
+	case rob_fct_cap: 			return _Status[no].robinfo.rob_in_cap		&& _Status[no].robinfo.moving == FALSE; break;
+	case rob_fct_wash: 			return _Status[no].robinfo.wash_ready		&& _Status[no].robinfo.moving == FALSE; break;
+	case rob_fct_vacuum: 		return _Status[no].robinfo.vacuum_ready		&& _Status[no].robinfo.moving == FALSE; break;
+	case rob_fct_wipe: 			return _Status[no].robinfo.wipe_ready		&& _Status[no].robinfo.moving == FALSE; break;
+	case rob_fct_vacuum_change: return _Status[no].robinfo.vacuum_in_change	&& _Status[no].robinfo.moving == FALSE; break;
+	case rob_fct_purge_all:		return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break; // && _Status[no].robinfo.rob_in_cap
+	case rob_fct_purge_head0:
+	case rob_fct_purge_head1:
+	case rob_fct_purge_head2:
+	case rob_fct_purge_head3:
+	case rob_fct_purge_head4:
+	case rob_fct_purge_head5:
+	case rob_fct_purge_head6:
+	case rob_fct_purge_head7:	return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break;
+	default: return FALSE; break;
 	}
 }
 
-//--- steplb_rob_stop -------------------------------------------------
-void steplb_rob_stop(int no)
+//--- steplb_rob_in_wipe_pos_all ------------------------
+int steplb_rob_in_wipe_pos_all(ERobotFunctions rob_function)
 {
-	if (_step_socket[no] == INVALID_SOCKET) return;
-	_empty_screwerBuffer(no);
-	if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
-	sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
+	switch (rob_function)
+	{
+	case rob_fct_cap:	return RX_StepperStatus.robinfo.rob_in_cap	&& RX_StepperStatus.robinfo.moving == FALSE; break;
+	default: return FALSE; break;
+	}
+}
+
+//--- steplb_rob_wipe_start -------------------------------------
+void steplb_rob_wipe_start(int no, ERobotFunctions rob_function)
+{
+	if (_step_socket[no]==INVALID_SOCKET) return;
+	sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
+}
+
+//--- steplb_rob_wipe_done --------------------------------------
+int	 steplb_rob_wipe_done(int no, ERobotFunctions rob_function)
+{
+	if (_step_socket[no]==INVALID_SOCKET) return TRUE;
+	switch (rob_function)
+	{
+	case rob_fct_wipe:		return _Status[no].robinfo.wipe_done;
+	case rob_fct_wash:		return _Status[no].robinfo.wash_done;
+	case rob_fct_vacuum:	return _Status[no].robinfo.vacuum_done;
+	case rob_fct_cap:		return _Status[no].robinfo.cap_ready;
+	default:				return FALSE;
+	}	
+}
+
+//--- steplb_rob_stop ------------------------------
+void steplb_rob_stop(void)
+{
+	for (int no = 0; no<SIZEOF(_step_socket); no++)
+	{
+		if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
+		sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
+	}	
 }
 
 //--- steplb_rob_do_reference -----------------------
 void steplb_rob_do_reference(void)
 {
-    for (int no = 0; no < SIZEOF(_step_socket); no++)
-    {
-		_empty_screwerBuffer(no);
-        if (_step_socket[no] != INVALID_SOCKET)
-            sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
-    }
-}
-
-//--- steplb_rob_empty_waste_all ---------------------------------------
-/*
- * If time <= 0, then a defined time on the Stepperboard will used for the pump time.
- * The pump time can't be decreased , if it gets set a time here and it has already
- * a time left running, it will take the longer time.
- *
- * */
-void steplb_rob_empty_waste_all(int time_s)
-{
-	for (int i = 0; i < STEPPER_CNT; i++)
+	for (int no = 0; no < SIZEOF(_step_socket); no++)
 	{
-        if (_step_socket[i] != INVALID_SOCKET)
-            sok_send_2(&_step_socket[i], CMD_ROB_VACUUM, sizeof(time_s), &time_s);
+		//if (_step_socket[no] != INVALID_SOCKET)
+		sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
 	}
-    
-}
-
-//---steplb_rob_empty_waste -----------------------------------------------
-void steplb_rob_empty_waste(int stepperNo, int time_s)
-{
-	if (_step_socket[stepperNo] != INVALID_SOCKET)
-		sok_send_2(&_step_socket[stepperNo], CMD_ROB_VACUUM, sizeof(time_s), &time_s);
-}
-
-//--- _steplb_rob_do_reference ---------------------------------------------------
-static void _steplb_rob_do_reference(int no)
-{
-	_empty_screwerBuffer(no);
-    sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
 }
 
 //--- steplb_rob_reference_done ---------------------
 int steplb_rob_reference_done(void)
 {
-    return RX_StepperStatus.robinfo.ref_done;
+	return RX_StepperStatus.robinfo.ref_done;
 }
 
-//--- steplb_lift_to_fct_pos ----------------------------
-void steplb_lift_to_fct_pos(int no, ERobotFunctions rob_function)
+//--- steplb_lift_to_wipe_pos ----------------------------
+void steplb_lift_to_wipe_pos(int no, ERobotFunctions rob_function)
 {
-	_empty_screwerBuffer(no);
 	switch (rob_function)
-    {
-    case rob_fct_cap: sok_send_2(&_step_socket[no], CMD_LIFT_CAPPING_POS, 0, NULL); break;
-    default: break;
-    }
+	{
+	case rob_fct_cap: sok_send_2(&_step_socket[no], CMD_LIFT_CAPPING_POS, 0, NULL); break;
+	default: break;
+	}
 }
 
-//--- steplb_lift_in_fct_pos -------------------------------
-int  steplb_lift_in_fct_pos(int no, ERobotFunctions rob_function)
+//--- steplb_lift_in_wipe_pos -------------------------------
+int  steplb_lift_in_wipe_pos(int no, ERobotFunctions rob_function)
 {
-    if (_step_socket[no] == INVALID_SOCKET) return TRUE;
-    switch (rob_function)
-    {
-    case rob_fct_cap: return _Status[no].info.z_in_cap; break;
-    default: return FALSE; break;
-    }
+	if (_step_socket[no] == INVALID_SOCKET) return TRUE;
+	switch (rob_function)
+	{
+	case rob_fct_cap: return _Status[no].info.z_in_cap; break;
+	default: return FALSE; break;
+	}
 }
 
 //--- steplb_rob_control -------------------------------
 void steplb_rob_control_all(EnFluidCtrlMode ctrlMode)
 {
-    for (int no = 0; no < SIZEOF(_step_socket); no++)
-    {
-        if (_step_socket[no] != INVALID_SOCKET)		steplb_rob_control(ctrlMode, no);
-    }
+	for (int no = 0; no < SIZEOF(_step_socket); no++)
+	{
+		if (_step_socket[no] != INVALID_SOCKET)		steplb_rob_control(ctrlMode, no);
+	}
 }
 
 
-//--- steplb_rob_start_cap_all -------------------------------
+//--- steplb_rob_control -------------------------------
 void steplb_rob_start_cap_all(void)
 {
-    for (int no = 0; no < SIZEOF(_step_socket); no++)
-    {
-        if (_step_socket[no] != INVALID_SOCKET)		_RobotCtrlMode[no] = ctrl_cap;
-    }
+	for (int no = 0; no < SIZEOF(_step_socket); no++)
+	{
+		if (_step_socket[no] != INVALID_SOCKET)		_RobotCtrlMode[no] = ctrl_cap;
+	}
 }
 
 //--- steplb_rob_control ------------------------------
 void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
-{
-    static int _risingEdge[STEPPER_CNT] = { 0 };
-	static int _time[STEPPER_CNT] = {0};
-	ERobotFunctions function;
-
-	if (ctrlMode != ctrl_vacuum && ctrlMode != ctrl_vacuum_step1) _time[no] = 0;
-
-	if (_Status[no].robot_used || ctrlMode == ctrl_cap || ctrlMode == ctrl_cap_step4)
-    {
-        EnFluidCtrlMode	old = _RobotCtrlMode[no];
-        switch (ctrlMode)
-        {
-        case ctrl_cap:				if (!_Status[no].robot_used)
-                                    {
-                                        if (_AutoCapMode)
-                                            _RobotCtrlMode[no] = ctrl_prepareToPrint;
-                                        else
-                                        {
-                                        steplb_lift_to_fct_pos(no, rob_fct_cap);
-                                        _RobotCtrlMode[no] = ctrl_cap_step4;
-                                        }
-                                        
-                                        break;
-                                    }
-                
-                                    if (!_Status[no].robinfo.ref_done) _steplb_rob_do_reference(no);
-                                    _RobotCtrlMode[no] = ctrl_cap_step1;
-                                    break;
-
-        case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done && !_Status[no].robinfo.moving)
-                                    {
-                                        steplb_rob_to_fct_pos(no, rob_fct_cap);
-                                        if (_AutoCapMode || RX_Config.printer.type == printer_LB702_UV)   _RobotCtrlMode[no] = ctrl_cap_step3;
-                                        else                _RobotCtrlMode[no] = ctrl_cap_step2;
-                                    }
-                                    _risingEdge[no] = FALSE;
-                                    break;
-
-        case ctrl_cap_step2:		if (steplb_rob_in_fct_pos(no, rob_fct_cap) && _risingEdge[no])
-                                    {
-                                        steplb_rob_fct_start(no, rob_fct_cap);
-                                        _RobotCtrlMode[no] = ctrl_cap_step3;
-                                    }
-                                    else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
-                                        _risingEdge[no] = TRUE;
-                                    break;
-
-        case ctrl_cap_step3:		if (steplb_rob_fct_done(no, rob_fct_cap) || (steplb_rob_in_fct_pos(no, rob_fct_cap) && _risingEdge[no] && (_AutoCapMode || RX_Config.printer.type == printer_LB702_UV)))
-                                    {
-                                        steplb_lift_to_fct_pos(no, rob_fct_cap);
-                                        _RobotCtrlMode[no] = ctrl_cap_step4;
-                                    }
-                                    else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))
-                                        _risingEdge[no] = TRUE;
-                                    _AutoCapTimer = rx_get_ticks() + 5000;
-                                    break;
-
-        case ctrl_cap_step4:		if (RX_StepperStatus.info.z_in_cap)
-                                    {
-                                        if (!rx_def_is_lb(RX_Config.printer.type))
-                                        {
-                                            _Flushed |= (0x3 << (no * 2));
-                                            Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d", no, _Flushed);
-                                            setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
-                                            fluid_init_flushed();
-                                        }
-                                        if (_AutoCapMode)
-                                        {
-                                            _RobotCtrlMode[no] = ctrl_prepareToPrint;
-                                        }
-										else
-										{
-											_RobotCtrlMode[no] = ctrl_off;
-											_send_ctrlMode(_RobotCtrlMode[no], no);
-										}
-                                    }
-                                    break;
-
-        case ctrl_wash:             if (!_Status[no].robinfo.moving)
+{		
+	if (_Status[no].robot_used)
+	{
+		EnFluidCtrlMode	old = _RobotCtrlMode[no];
+		switch (ctrlMode)
+		{
+		case ctrl_cap:				if (!steplb_rob_reference_done()) steplb_rob_do_reference();
+									_RobotCtrlMode[no] = ctrl_cap_step1;
+									break;
+		
+		case ctrl_cap_step1:		if (steplb_rob_reference_done())
 									{
-										function = rob_fct_wash;
-										sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
-										_RobotCtrlMode[no] = ctrl_wash_step1;
-										_WashStarted[no] = FALSE;
-								    }
-									else _RobotCtrlMode[no] = ctrl_wash;
-                                    
-                                    break;
-
-        case ctrl_wash_step1:		if (_Status[no].robinfo.moving && !_Status[no].robinfo.wash_done) _WashStarted[no] = TRUE;
-                                    if (_Status[no].robinfo.wash_done && _WashStarted[no])
-                                    {
-                                        _RobotCtrlMode[no] = ctrl_wash_step2;
-										steplb_lift_to_top_pos(no);
-                                    }
-                                    break;
-									
-		case ctrl_wash_step2:       if (steplb_lift_in_top_pos(no))
-                                    {
-                                        _RobotCtrlMode[no] = ctrl_wash_step3; 
-                                    }
-                                    _WashStarted[no] = FALSE;
+										steplb_rob_to_wipe_pos(no, rob_fct_cap);
+										_RobotCtrlMode[no] = ctrl_cap_step2;
+									}
+									break;
+		
+		case ctrl_cap_step2:		if (steplb_rob_in_wipe_pos_all(rob_fct_cap))
+									{
+										int i;
+										for (i = 0; i < STEPPER_CNT; i++)
+										{
+											if (_step_socket[i] != INVALID_SOCKET)
+											{
+												steplb_rob_wipe_start(i, rob_fct_cap);
+												_RobotCtrlMode[i] = ctrl_cap_step3;
+                                                fluid_send_ctrlMode(2 * i, _RobotCtrlMode[i], TRUE);
+												fluid_send_ctrlMode(2 * i + 1, _RobotCtrlMode[i], TRUE);
+											}
+										}
+										
+									}
+									break;
+		
+		case ctrl_cap_step3:		if (steplb_rob_wipe_done(no, rob_fct_cap))
+									{
+										steplb_lift_to_wipe_pos(no, rob_fct_cap);
+										_RobotCtrlMode[no] = ctrl_cap_step4;
+									}
+									break;
+		
+		case ctrl_cap_step4:		if (steplb_lift_in_wipe_pos(no, rob_fct_cap))
+									{
+										//_Flushed |= (0x3 << (no*2));
+										//Error(LOG, 0, "ctrl_cap_step4 OK, no=%d, _Flushed=%d",no,_Flushed);
+										//setup_fluid_system(PATH_USER FILENAME_FLUID_STATE, &_Flushed, WRITE);
+										//fluid_init_flushed();
+										_RobotCtrlMode[no] = ctrl_off;
+									}										 
+									break;
+		
+		case ctrl_robi_out:			sok_send_2(&_step_socket[no], CMD_ROB_REFERENCE, 0, NULL);
+									_RobotCtrlMode[no] = ctrl_robi_out_step1;
+									break;
+	
+		case ctrl_robi_out_step1:	if (RX_StepperStatus.info.x_in_ref && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving)	_RobotCtrlMode[no] = ctrl_off;
 									break;
 
-        case ctrl_wash_step3:       _RobotCtrlMode[no] = ctrl_off;
-                                    break;
-									
-		case ctrl_vacuum:           _RobotCtrlMode[no] = ctrl_vacuum_step1;
-                                    _time[no] = rx_get_ticks() + VACUUM_DELAY;
-                                    break;
-
-        case ctrl_vacuum_step1:		if (!_Status[no].robinfo.moving && rx_get_ticks() >= _time[no])
-				                    {
-										function = rob_fct_vacuum;
-                                        if (ctrl_vacuum_step2 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
-                                        _RobotCtrlMode[no] = ctrl_vacuum_step2;
-									}
-									else if (_RobotCtrlMode[no] != ctrl_vacuum_step2)_RobotCtrlMode[no] = ctrl_vacuum_step1;
-                                    break;
-
-        case ctrl_vacuum_step2:     if (_Status[no].robinfo.vacuum_done)
-                                    {
-                                        _RobotCtrlMode[no] = ctrl_vacuum_step3;
-                                        steplb_rob_to_fct_pos(no, rob_fct_cap);
-                                    }
-                                    break;
-
-        case ctrl_vacuum_step3:		if (steplb_rob_in_fct_pos(no, rob_fct_cap)) _RobotCtrlMode[no] = ctrl_vacuum_step4;
-                                    break;
-
-        case ctrl_vacuum_step4:		_RobotCtrlMode[no] = ctrl_off;
-                                    break;
-
-        case ctrl_off:				_RobotCtrlMode[no] = ctrl_off;
-                                    break;
-        default: return;
-
-        }
-
-		if (_RobotCtrlMode[no] != old && _RobotCtrlMode[no] != ctrl_off)
-		{
-			_send_ctrlMode(_RobotCtrlMode[no], no);
+		case ctrl_off:				_RobotCtrlMode[no] = ctrl_off;
+									break;
+		default: return;
+		
 		}
-    }
-}
-
-//--- _send_ctrlMode ---------------------------------------------
-static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int stepperNo)
-{
-	// Change the IS-number to check according to the method _set_IS_Order in the class PrintSystem in the project mvt_digiprint_gui
-	switch (RX_Config.printer.type)
-	{
-	case printer_LB702_UV:
-		if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
+		if (_RobotCtrlMode[no] != old && _RobotCtrlMode[no] != ctrl_cap_step3)
 		{
-			if (RX_Config.inkSupplyCnt % 2 == 0)
-			{
-				fluid_send_ctrlMode((2 * stepperNo + 4) % RX_Config.colorCnt, ctrlMode, TRUE);
-				fluid_send_ctrlMode((2 * stepperNo + 5) % RX_Config.colorCnt, ctrlMode, TRUE);
-			}
-			else
-			{
-				fluid_send_ctrlMode((2 * stepperNo + 4) % RX_Config.colorCnt, ctrlMode, TRUE);
-				if (stepperNo != 0) fluid_send_ctrlMode((2 * stepperNo + 3) % RX_Config.colorCnt, ctrlMode, TRUE);
-			}
-			break;
-		}
-		// no break;
-
-	case printer_LB702_WB:
-		fluid_send_ctrlMode(2 * stepperNo, ctrlMode, TRUE);
-
-		if (RX_Config.inkSupplyCnt % 2 == 0)
-			fluid_send_ctrlMode(2 * stepperNo + 1, ctrlMode, TRUE);
-		else if (stepperNo != 0)
-			fluid_send_ctrlMode(2 * stepperNo - 1, ctrlMode, TRUE);
-		break;
-
-	default:
-		break;
+			fluid_send_ctrlMode(2 * no, _RobotCtrlMode[no], TRUE);
+			fluid_send_ctrlMode(2 * no + 1, _RobotCtrlMode[no], TRUE);
+		}		
 	}
 }
 
-
-//--- _color2Robot ----------------------------------------
-static void _color2Robot(int color, int *pstepper, int *pprintbar)
-{
-    switch (RX_Config.printer.type)
-    {
-    case printer_LB701:
-    case printer_LB702_UV:
-        if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
-        {
-            if (color < 4) color += RX_Config.colorCnt;
-            color -= 4;
-        }
-        // no break;
-        
-    case printer_LB702_WB:
-        if (RX_Config.inkSupplyCnt % 2 == 0) *pstepper = color / 2;
-        else                                 *pstepper = (color + 1) / 2;
-
-        if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && *pprintbar == 0))    *pprintbar = color&1;  
-        else                                                                                        *pprintbar = ((color&1)+1) % 2;
-        break;
-        
-    default:
-        break;
-    }
-                                                                                          
-}
-
-//--- steplb_printbarUsed -----------------------
-int	steplb_printbarUsed(int stepperNo)
-{
-    int used=0;
-    int bar, no;
-    for (int color=0; color<MAX_COLORS; color++)
-    {
-        if (*RX_Color[color].color.fileName)
-        {            
-            _color2Robot(color, &no, &bar);
-            if (no==stepperNo) used |= (1<< bar);
-        }
-    }
-    return used;
-}
-
-//--- steplb_adjust_heads ------------------------------------------------
-void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg* headAdjustment)
-{
-    int stepperno, printbar;
-
-    _color2Robot(headAdjustment->printbarNo, &stepperno, &printbar);
-
-    Error(LOG, TRUE, "steplb_adjust_heads: printbar=%d, head=%d, axis=%d, steps=%d", headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
-
-	if (headAdjustment->printbarNo < 0 || headAdjustment->printbarNo >= RX_Config.colorCnt)
-	{
-		Error(ERR_CONT, 0, "Printbar %d is not existing", headAdjustment->printbarNo + 1);
-		return;
-	}
-	if (headAdjustment->headNo == -1 && headAdjustment->axis == AXE_ANGLE)
-	{
-		Error(ERR_CONT, 0, "Angle-Screw is not existing at Head-No: %d", headAdjustment->headNo + 1);
-		return;
-	}
-	if (headAdjustment->headNo == RX_Config.headsPerColor - 1 && headAdjustment->axis >= AXE_STITCH)
-	{
-		Error(ERR_CONT, 0, "Last screw of each color is pointless to turn");
-		return;
-	}
-
-	if (_Status[stepperno].screwerinfo.screwer_ready && !(_HeadAdjustmentBuffer[stepperno][0].printbarNo != -1 && _Status[stepperno].info.z_in_screw) && _Status[stepperno].adjustDoneCnt >= _ScrewCnt[stepperno])
-    {
-        _HeadAdjustment[stepperno] = *headAdjustment;
-        headAdjustment->printbarNo = printbar;
-        Error(LOG, TRUE, "Send To Stepper[%d]: printBar=%d, head=%d, axis=%d, steps=%d", stepperno, headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
-
-		_ScrewCnt[stepperno] = _Status[stepperno].adjustDoneCnt + 1;
-		sok_send(&_step_socket[stepperno], headAdjustment);
-    }
-    else
-    {
-        for (int i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperno]); i++)
-        {
-            if (_HeadAdjustmentBuffer[stepperno][i].printbarNo == -1 || (_HeadAdjustmentBuffer[stepperno][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperno][i].headNo == headAdjustment->headNo &&
-                _HeadAdjustmentBuffer[stepperno][i].printbarNo == headAdjustment->printbarNo))
-            {
-                if (_HeadAdjustmentBuffer[stepperno][i].printbarNo != -1)
-                    Error(LOG, 0, "Delete Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, _HeadAdjustmentBuffer[stepperno][i].steps);
-                _HeadAdjustmentBuffer[stepperno][i].axis = headAdjustment->axis;
-                _HeadAdjustmentBuffer[stepperno][i].headNo = headAdjustment->headNo;
-                _HeadAdjustmentBuffer[stepperno][i].printbarNo = headAdjustment->printbarNo;
-                _HeadAdjustmentBuffer[stepperno][i].steps = headAdjustment->steps;
-                _HeadAdjustmentBuffer[stepperno][i].hdr = headAdjustment->hdr;
-                Error(LOG, 0, "Save Screw-Movement of Printbar %d, Head %d and Axis %d with %d Steps", headAdjustment->printbarNo+1, headAdjustment->headNo+1, headAdjustment->axis, headAdjustment->steps);
-                i = SIZEOF(_HeadAdjustmentBuffer[stepperno]);
-            }
-        }
-    }
-}
-
-//--- steplb_robi_to_garage -------------------------------
-void steplb_robi_to_garage(void)
-{
-    for (int stepperno=0; stepperno<STEPPER_CNT; stepperno++)
-    {
-        sok_send_2(&_step_socket[stepperno], CMD_ROBI_MOVE_TO_GARAGE, 0, NULL);
-    }
-}
-
-//--- steplb_screw_in_Buffer ---------------------------------------------------------
-int steplb_screw_in_Buffer(SHeadAdjustmentMsg *headAdjustment)
-{
-	int stepperNo;
-
-	if (RX_Config.inkSupplyCnt % 2 == 0)
-		stepperNo = headAdjustment->printbarNo / 2;
-	else
-		stepperNo = (headAdjustment->printbarNo + 1) / 2;
-
-	for (int i = 0; i < SIZEOF(_HeadAdjustmentBuffer[stepperNo]); i++)
-	{
-		if (_HeadAdjustmentBuffer[stepperNo][i].axis == headAdjustment->axis && _HeadAdjustmentBuffer[stepperNo][i].headNo == headAdjustment->headNo && _HeadAdjustmentBuffer[stepperNo][i].printbarNo == headAdjustment->printbarNo)
-		{
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-//--- steplb_get_StepperStatus ---------------------------------------------------------
-SStepperStat steplb_get_StepperStatus(SHeadAdjustmentMsg *headAdjustment)
-{
-	int stepperNo;
-
-	if (RX_Config.inkSupplyCnt % 2 == 0)
-		stepperNo = headAdjustment->printbarNo / 2;
-	else
-		stepperNo = (headAdjustment->printbarNo + 1) / 2;
-
-	return _Status[stepperNo];
-}
-
-//--- steplb_get_stitch_position --------------------------------------------
-int steplb_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
-{
-	SScrewPositions pos[STEPPER_CNT];
-	int stepperNo;
-	int printbarNo = 0;
-	memset(&pos, 0, sizeof(pos));
-
-	setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, READ);
-
-    _color2Robot(headAdjustment->printbarNo, &stepperNo, &printbarNo);
-
-	return pos[stepperNo].printbar[printbarNo].stitch.turns;
-}
-
-
-//--- _check_screwer --------------------------------------------------
-static void _check_screwer(int stepperNo)
-{
-    SHeadAdjustmentMsg headAdjustment;
-	for (int j = 1; j < SIZEOF(_HeadAdjustmentBuffer[stepperNo]); j++)
-    {
-		if (_HeadAdjustmentBuffer[stepperNo][j - 1].printbarNo == -1 && _HeadAdjustmentBuffer[stepperNo][j].printbarNo != -1)
-        {
-			_HeadAdjustmentBuffer[stepperNo][j - 1] = _HeadAdjustmentBuffer[stepperNo][j];
-			_HeadAdjustmentBuffer[stepperNo][j].printbarNo = -1;
-        }
-    }
-
-	if (_HeadAdjustmentBuffer[stepperNo][0].printbarNo != -1 && RX_PrinterStatus.printState == ps_ready_power && (_RobotCtrlMode[stepperNo] == ctrl_off || _RobotCtrlMode[stepperNo] == ctrl_undef) &&
-        _Status[stepperNo].info.z_in_screw && _Status[stepperNo].info.ref_done && _Status[stepperNo].screwerinfo.screwer_ready && _Status[stepperNo].adjustDoneCnt >= _ScrewCnt[stepperNo])
-    {
-		headAdjustment = _HeadAdjustmentBuffer[stepperNo][0];
-		_HeadAdjustmentBuffer[stepperNo][0].printbarNo = -1;
-        steplb_adjust_heads(INVALID_SOCKET, &headAdjustment);
-    }
-}
-
-//--- steplb_set_autocapMode --------------------------------------------------------
-void steplb_set_autocapMode(int state)
-{
-    _AutoCapMode = state;
-}
-
-void steplb_set_fluid_off(int no)
-{
-	if (_RobotCtrlMode[no/2] != ctrl_off && RX_Config.inkSupplyCnt % 2 == 0 && 
-            ((no %2 == 0 && (fluid_get_ctrlMode(no+1) < ctrl_cap || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6))) || 
-            (no %2 == 1 && (fluid_get_ctrlMode(no-1) < ctrl_cap || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6)))))
-    {
-        _RobotCtrlMode[no / 2] = ctrl_off;
-        _send_ctrlMode(ctrl_off, no/2);
-		steplb_rob_control(ctrl_off, no / 2);
-        steplb_rob_stop(no / 2);
-    }
-	else if (_RobotCtrlMode[(no+1)/2] != ctrl_off && RX_Config.inkSupplyCnt % 2 == 1 && 
-                 (no == 0 || (no %2 == 0 && (fluid_get_ctrlMode(no-1) < ctrl_cap || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6))) || 
-            (no %2 == 1 && (fluid_get_ctrlMode(no+1) < ctrl_cap || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6)))))
-    {
-        _RobotCtrlMode[(no+1) / 2] = ctrl_off;
-        _send_ctrlMode(ctrl_off, (no+1) / 2);
-        steplb_rob_control(ctrl_off, (no + 1) / 2);
-        steplb_rob_stop((no + 1) / 2);
-    }
-}
-
-//--- steplb_robot_used --------------------------
-int steplb_robot_used(int fluidNo)
-{
-    int stepperNo, printbarNo;
-
-    switch (RX_Config.printer.type)
-    {
-    case printer_LB702_WB:
-	case printer_LB702_UV:
-        _color2Robot(fluidNo, &stepperNo, &printbarNo);
-        if (stepperNo >= STEPPER_CNT) return FALSE;
-        return (_Status[stepperNo].robot_used);
-		break;
-
-	default:
-        return FALSE;
-        break;
-    }
-	return FALSE;
-}
-
-//--- steplb_stepper_to_fluid ----------------------------------
-int steplb_stepper_to_fluid(int fluidno)
-{
-    int stepperNo, printbarNo;
-    _color2Robot(fluidno, &stepperNo, &printbarNo);
-    
-    return stepperNo;
-}
-
-//--- steplb_stepper_to_cluster ----------------------------------------
-int steplb_stepper_to_cluster(int clusterNo)
-{
-	if (RX_Config.inkSupplyCnt % 2 == 0)
-		return clusterNo / (2 * RX_Config.headsPerColor / HEAD_CNT);
-	else
-		return (clusterNo + (RX_Config.headsPerColor / HEAD_CNT)) / (2 * RX_Config.headsPerColor / HEAD_CNT);
-}
-
-//--- _empty_screwerBuffer ------------------------------------------
-static int _empty_screwerBuffer(int stepperNo)
-{
-	if (_HeadAdjustmentBuffer[stepperNo][0].printbarNo != -1) Error(LOG, 0, "Empty Screwer-Buffer of Steppper %d", stepperNo);
-	for (int j = 0; j < MAX_HEAD_DIST; j++)
-	{
-		_HeadAdjustmentBuffer[stepperNo][j].printbarNo = -1;
-	}
-}

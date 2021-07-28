@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Delete resource &apos;rx_robot_expander&apos;" deleteContents="true" description="Delete resource &apos;rx_robot_expander&apos;" element1="/rx_robot_expander" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1617095229501"/>
-</session>

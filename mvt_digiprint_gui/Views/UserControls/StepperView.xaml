@@ -23,7 +23,6 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>
@@ -54,19 +53,18 @@
                 <CheckBox x:Name="Button_Ref"   Grid.Row="2" Content="{mvt:LocalizedBinding Ref}"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapReference_clicked" />
                 <CheckBox x:Name="Button_Up"    Grid.Row="3" Content="{mvt:LocalizedBinding Up}"    Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapUp_clicked" />
                 <CheckBox x:Name="Button_Print" Grid.Row="4" Content="{mvt:LocalizedBinding Print}" Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapPrint_clicked" />
-                <CheckBox x:Name="Button_Cap"   Grid.Row="5" Content="{mvt:LocalizedBinding Cap}"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapCapping_clicked"     IsEnabled="{Binding cap_enabled}" HorizontalAlignment="Left" Width="80"/>
-                <CheckBox x:Name="Button_Wash"  Grid.Row="6" Content="{mvt:LocalizedBinding Wash}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Wash_clicked"           HorizontalAlignment="Left" Width="80"/>
-                <CheckBox x:Name="Button_Vacuum"  Grid.Row="7" Content="{mvt:LocalizedBinding Vacuum}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Vacuum_clicked"     HorizontalAlignment="Left" Width="80"/>
-                <CheckBox x:Name="Button_RefRobot"   Grid.Row="8" Content="{mvt:LocalizedBinding RefRobot}"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapRefRobot_clicked"     HorizontalAlignment="Left" Width="80" />
-                <CheckBox x:Name="Button_Service" Grid.Row="9" Content="Service" Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Service_clicked" HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_Cap"   Grid.Row="5" Content="{mvt:LocalizedBinding Cap}"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapCapping_clicked"     IsEnabled="{Binding cap_enabled}" HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_Wash"  Grid.Row="6" Content="{mvt:LocalizedBinding Wash}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Wash_clicked"           HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_Vacuum"  Grid.Row="7" Content="{mvt:LocalizedBinding Vacuum}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Vacuum_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_Wipe"  Grid.Row="8" Content="{mvt:LocalizedBinding Wipe}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Wipe_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
+                <CheckBox x:Name="Button_RefRobot"   Grid.Row="9" Content="{mvt:LocalizedBinding RefRobot}"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapRefRobot_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
                 <CheckBox x:Name="Button_DripPans" Grid.Row="10" Content="{mvt:LocalizedBinding DripPans}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPans_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
                 <CheckBox x:Name="Button_DripPansCAP" Grid.Row="10" Content="{mvt:LocalizedBinding CarriageCap}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPansCAP_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
                 <CheckBox x:Name="Button_DripPansREF" Grid.Row="10" Grid.Column="1" Content="{mvt:LocalizedBinding CarriageRef}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapDripPansREF_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
                 <CheckBox x:Name="Button_Fill" Grid.Row="11" Content="{mvt:LocalizedBinding Fill5Sec}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapFill_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
                 <CheckBox x:Name="Button_Empty" Grid.Row="11" Grid.Column="1" Content="{mvt:LocalizedBinding Empty2Min}"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapEmpty_clicked"        IsEnabled="{Binding capDP803_enabled}"/>
-                <CheckBox x:Name="Button_Robot_Zeroing" Grid.Row="12" Content="Zeroing Screws" Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="RobotZeroing_clicked" IsEnabled="{Binding RobotUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
 
-                <Grid x:Name="Leds_DripPans" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="10">
+                <Grid x:Name="Leds_DripPans" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="10">
                     <StackPanel Orientation="Horizontal">
                         <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding DripPans_InfeedDOWN,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left"/>
                         <Image  Source="../../Resources/Bitmaps/LED_GREY.ico"  Visibility="{Binding DripPans_InfeedDOWN,   Converter={StaticResource BoolToInVisible_Converter}}" HorizontalAlignment="Left"/>

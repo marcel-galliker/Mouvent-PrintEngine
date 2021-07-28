@@ -125,8 +125,8 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 	//	TrPrintf(TRUE, "steptest_handle_status(%d)", no);
 
 	RX_StepperStatus.posX = 0;
+	RX_StepperStatus.posY = 0;
 	RX_StepperStatus.posZ = 0;
-	RX_StepperStatus.posZ_back = 0;
 	
 	info.DripPans_InfeedDOWN	= _status[0].info.DripPans_InfeedDOWN;
 	info.DripPans_InfeedUP		= _status[0].info.DripPans_InfeedUP;
@@ -152,9 +152,8 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 			info.x_in_cap		= TRUE;
 
 			RX_StepperStatus.posX += _status[i].posX;
-			RX_StepperStatus.posY[i] = _status[i].posY[0];
+			RX_StepperStatus.posY += _status[i].posY;
 			RX_StepperStatus.posZ += _status[i].posZ;
-			RX_StepperStatus.posZ_back += _status[i].posZ_back;
 			if (_status[i].cmdRunning) RX_StepperStatus.cmdRunning = _status[i].cmdRunning;
 			
 			if (allowed != _allow_stepper_move_down)
@@ -175,8 +174,8 @@ int stepc_handle_status(int no, SStepperStat *pStatus)
 	if (cnt)
 	{
 		RX_StepperStatus.posX /= cnt;
-		RX_StepperStatus.posZ /= cnt;
-		RX_StepperStatus.posZ_back /= cnt;
+		RX_StepperStatus.posY /= cnt;
+		RX_StepperStatus.posZ /= cnt;		
 	}
 	
 	if (change) TrPrintfL(TRUE, "Splice changed: _splicing=%d, info.splicing=%d", _splicing, info.splicing);

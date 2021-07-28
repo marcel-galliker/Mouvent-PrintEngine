@@ -23,7 +23,6 @@ namespace RX_DigiPrint.Views.UserControls
         private Image[] _LedUp    = new Image[STEPPER_CNT];
         private Image[] _LedPrint = new Image[STEPPER_CNT];
         private Image[] _LedCap   = new Image[STEPPER_CNT];
-        private Image[] _LedRobRef = new Image[STEPPER_CNT];
 
         private static ImageSource _GreenLedImg;
         private static ImageSource _GreyLedImg;
@@ -38,10 +37,6 @@ namespace RX_DigiPrint.Views.UserControls
             DataContext = RxGlobals.StepperStatus;
             RxGlobals.PrintSystem.PropertyChanged    += PrintSystem_PropertyChanged;
             RxGlobals.Network.List.CollectionChanged += Network_CollectionChanged;
-            RxGlobals.Plc.PropertyChanged += Plc_PropertyChanged;
-            RxGlobals.User.PropertyChanged += User_PropertyChanged;
-
-            User_PropertyChanged(null, null);
 
             {
                 _GreenLedImg  = new BitmapImage(new Uri("..\\..\\Resources\\Bitmaps\\LED_GREEN.ico", UriKind.RelativeOrAbsolute));
@@ -78,12 +73,9 @@ namespace RX_DigiPrint.Views.UserControls
                     Grid.SetColumn(_LedCap[i], 1+i);
                     StepperGrid.Children.Add(_LedCap[i]);
 
-                    _LedRobRef[i] = new Image();
-                    Grid.SetRow(_LedRobRef[i], 8);
-                    Grid.SetColumn(_LedRobRef[i], 1+i);
-                    StepperGrid.Children.Add(_LedRobRef[i]);
-
                     RxGlobals.StepperStatus[i].PropertyChanged += Stepper_PropertyChanged;
+
+                    RxGlobals.PrinterStatus.PropertyChanged += PrinterStatus_PropertyChanged;
                 }
             }
             PrinterType_changed();
@@ -95,7 +87,7 @@ namespace RX_DigiPrint.Views.UserControls
             bool[] used = new bool[STEPPER_CNT];
             foreach(NetworkItem item in RxGlobals.Network.List)
             {
-                if (item.DeviceType==EDeviceType.dev_stepper && !RxGlobals.PrintSystem.IsCLEAF && item.DeviceNo-1 < used.Length) used[item.DeviceNo-1]=true;
+                if (item.DeviceType==EDeviceType.dev_stepper && !RxGlobals.PrintSystem.IsCLEAF) used[item.DeviceNo-1]=true;
             }
             for (int i=0; i<STEPPER_CNT; i++) _RefDone[i].Visibility = used[i]? Visibility.Visible : Visibility.Collapsed;
         }
@@ -105,9 +97,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             StepperStatus stat = sender as StepperStatus;
 
-            _LedRobRef[stat.No].Source = (stat.X_in_ref && RxGlobals.StepperStatus[1].RobotUsed && RxGlobals.User.UserType == EUserType.usr_engineer) ? _GreenLedImg : null;
-
-            if(e.PropertyName.Equals("CmdRunning") || e.PropertyName.Equals("X_in_ref")) 
+            if(e.PropertyName.Equals("CmdRunning")) 
             {
                 if(stat.CmdRunning==0)
                 {
@@ -116,26 +106,14 @@ namespace RX_DigiPrint.Views.UserControls
                     _LedUp   [stat.No].Source = (stat.Z_in_up)   ? _GreenLedImg : null;
                     _LedPrint[stat.No].Source = (stat.Z_in_print)? _GreenLedImg : null;
                     _LedCap  [stat.No].Source = (stat.Z_in_cap)  ? _GreenLedImg : null;
-                    
+
                     bool refDone=RxGlobals.StepperStatus[0].RefDone;
-                    Visibility visible = (RxGlobals.StepperStatus[0].RobotUsed && RxGlobals.User.UserType == EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
                     for (int i=0; i<RxGlobals.StepperStatus.Length; i++)
                     {
                         if (RxGlobals.StepperStatus[i].CmdRunning==0 && RxGlobals.StepperStatus[i].RefDone) refDone=true;
-                        if (RxGlobals.StepperStatus[i].RobotUsed && RxGlobals.User.UserType == EUserType.usr_engineer) visible = Visibility.Visible;
                     }
                     Button_Up.IsEnabled     = refDone;
                     Button_Print.IsEnabled  = refDone;
-                    Button_RefRobot.Visibility = visible;
-                    Button_Robot_Zeroing.Visibility = visible;
-
-                    if (visible == Visibility.Visible && !RxGlobals.Stepper.DevelopmentMachine) visible = Visibility.Visible;
-                    else                                                                        visible = Visibility.Collapsed;
-
-                    Button_Wash.Visibility = visible;
-                    Button_Vacuum.Visibility = visible;
-                    //Button_Wipe.Visibility = visible;
-                   
                 }
                 else
                 {
@@ -146,39 +124,15 @@ namespace RX_DigiPrint.Views.UserControls
                 }
             }
         }
-        
-        //--- Plc_PropertyChanged ----------------------------
-        private EN_MachineStateList _machineStates = new EN_MachineStateList();
-        private void Plc_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+
+        //--- PrinterStatus_PropertyChanged ---------------------------------------
+        private void PrinterStatus_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            try
-            {
-                StepperGrid.IsEnabled = (MachineStateEnum)Convert.ToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE")) != MachineStateEnum.Run;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        //--- User_PropertyChanged --------------------------------------
-        private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            Visibility visible = (RxGlobals.StepperStatus[0].RobotUsed && RxGlobals.User.UserType == EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
-            for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
-            {
-                if (RxGlobals.StepperStatus[i].RobotUsed && RxGlobals.User.UserType == EUserType.usr_engineer) visible = Visibility.Visible;
-            }
-
-            Button_RefRobot.Visibility = visible;
-            Button_Service.Visibility = visible;
-            Button_Robot_Zeroing.Visibility = visible;
-
-            if (visible == Visibility.Visible && !RxGlobals.Stepper.DevelopmentMachine) visible = Visibility.Visible;
-            else visible = Visibility.Collapsed;
-
-            Button_Wash.Visibility = visible;
-            Button_Vacuum.Visibility = visible;
+            bool isPrinting = RxGlobals.PrinterStatus.PrintState == EPrintState.ps_printing ||
+                              RxGlobals.PrinterStatus.PrintState == EPrintState.ps_stopping ||
+                              RxGlobals.PrinterStatus.PrintState == EPrintState.ps_pause ||
+                              RxGlobals.PrinterStatus.PrintState == EPrintState.ps_goto_pause;
+            StepperGrid.IsEnabled = !isPrinting;
         }
 
         //--- _button_active -----------------------------
@@ -208,7 +162,6 @@ namespace RX_DigiPrint.Views.UserControls
             Leds_DripPans.Visibility      = visibility;
             LaserTX.Visibility            = visibility; 
             LaserVal.Visibility           = visibility;
-            Button_Cap.Visibility         = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf/* || RxGlobals.PrintSystem.IsTx*/) ? Visibility.Collapsed : Visibility.Visible;
 
             visibility = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803) ? Visibility.Visible : Visibility.Collapsed;
             Button_DripPans.Visibility    = visibility;
@@ -277,13 +230,8 @@ namespace RX_DigiPrint.Views.UserControls
         {
             _button_active(sender as CheckBox);
             if (RxMessageBox.YesNo("Capping", "Goto Capping position?",  MessageBoxImage.Question, false))
-            {
-                bool RobotUsed = RxGlobals.StepperStatus[0].RobotUsed && !RxGlobals.Stepper.DevelopmentMachine;
-                for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
-                {
-                    if (RxGlobals.StepperStatus[i].RobotUsed) RobotUsed = true;
-                }
-                if (RobotUsed || RxGlobals.PrintSystem.IsTx)
+            {   
+                if (RxGlobals.StepperStatus[0].RobotUsed || RxGlobals.PrintSystem.IsTx)
                 {
                     TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
                     msg.no       = -1;
@@ -316,6 +264,16 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
         }
 
+        //--- Wipe_clicked -------------------------------------------
+        private void Wipe_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+            msg.no = -1;
+            msg.ctrlMode = EFluidCtrlMode.ctrl_wipe;
+            RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+        }
+
         //--- CapUp_clicked -------------------------------------------
         private void CapRefRobot_clicked(object sender, RoutedEventArgs e)
         {
@@ -337,6 +295,13 @@ namespace RX_DigiPrint.Views.UserControls
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_LIFT_EMPTY);
         }
 
+        //--- CapWiping_clicked -------------------------------------------
+        private void CapWiping_clicked(object sender, RoutedEventArgs e)
+        {
+            _button_active(sender as CheckBox);
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROB_WIPE);
+        }
+
         //--- CapDripPans_clicked -------------------------------------------
         private void CapDripPans_clicked(object sender, RoutedEventArgs e)
         {
@@ -356,19 +321,6 @@ namespace RX_DigiPrint.Views.UserControls
         {
             _button_active(sender as CheckBox);
             RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROB_DRIP_PANS_REF);
-        }
-
-        //--- Service_clicked --------------------------------------------------------
-        private void Service_clicked(object sender, RoutedEventArgs e)
-        {
-            _button_active(sender as CheckBox);
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROB_SERVICE);
-        }
-
-        private void RobotZeroing_clicked(object sender, RoutedEventArgs e)
-        {
-            _button_active(sender as CheckBox);
-            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_RESET_ALL_SCREWS);
         }
     }
 }

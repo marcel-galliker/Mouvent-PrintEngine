@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Delete resource &apos;robi/FT900_Release/robi_27.bin.bak&apos;" deleteContents="false" description="Delete resource &apos;robi/FT900_Release/robi_27.bin.bak&apos;" element1="/robi/FT900_Release/robi_27.bin.bak" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1600438585194"/>
-</session>

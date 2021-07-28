@@ -134,7 +134,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         }
 
         private void OFF_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_off); }
-        private void Print_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_prepareToPrint); }
+        private void Print_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_print); }
         private void PurgeSoft_Clicked(object sender, RoutedEventArgs e) { _command("Purge", EFluidCtrlMode.ctrl_purge_soft); }
         private void PurgeMicro_Clicked(object sender, RoutedEventArgs e) { _command("Purge", EFluidCtrlMode.ctrl_purge_soft); }
         private void Purge_Clicked(object sender, RoutedEventArgs e)

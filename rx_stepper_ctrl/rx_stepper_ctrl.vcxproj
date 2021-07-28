@@ -29,6 +29,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F3D0BE1B-1F74-4EC5-8233-7C204F0FEEED}</ProjectGuid>
     <ProjectName>rx_stepper_ctrl</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-baw|Win32'" Label="Configuration">
@@ -52,7 +53,7 @@
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="VisualGDBPackageDefinitions">
@@ -86,7 +87,7 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Release-soc.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\arm-linux-gnueabihf;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\backward;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include-fixed;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include\arm-linux-gnueabihf;..\rx_ink_lib;..\rx_common_lib;..\rx_common_lib\VisualGDBCache;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;../rx_common_lib;../rx_common_lib/VisualGDBCache;../rx_ink_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
@@ -116,7 +117,7 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_stepper_ctrl-Debug-soc.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\arm-linux-gnueabihf;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include\c++\4.7.3\backward;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include;f:\compiler\altera\13.1\ds-5\sw\gcc\lib\gcc\arm-linux-gnueabihf\4.7.3\include-fixed;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include;f:\compiler\altera\13.1\ds-5\sw\gcc\arm-linux-gnueabihf\libc\usr\include\arm-linux-gnueabihf;..\rx_ink_lib;..\rx_common_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\include\c++\4.7.1\backward;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include;f:\compiler\linaro-tools\lib\gcc\arm-linux-gnueabi\4.7.1\include-fixed;f:\compiler\linaro-tools\arm-linux-gnueabi\include;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include\arm-linux-gnueabi;f:\compiler\linaro-tools\arm-linux-gnueabi\libc\usr\include;..\rx_common_lib;..\rx_ink_lib;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-soc.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(SolutionDir)_out\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
@@ -188,7 +189,6 @@
   <ItemGroup>
     <ClCompile Include="args.c" />
     <ClCompile Include="cleaf.c" />
-    <ClCompile Include="comm.c" />
     <ClCompile Include="dp803.c" />
     <ClCompile Include="fpga_stepper.c" />
     <ClCompile Include="lb701.c" />
@@ -196,9 +196,6 @@
     <ClCompile Include="lbrob.c" />
     <ClCompile Include="motor.c" />
     <ClCompile Include="power_step.c" />
-    <ClCompile Include="robi_lb702.c" />
-    <ClCompile Include="robi.c" />
-    <ClCompile Include="robot_client.c" />
     <ClCompile Include="rx_stepper_ctrl.c" />
     <ClCompile Include="stepper_ctrl.c" />
     <ClCompile Include="slide.c" />
@@ -211,11 +208,8 @@
     <ClCompile Include="version.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_def.h" />
-    <ClInclude Include="..\rx_robot_ctrl\includes\rx_robot_tcpip.h" />
     <ClInclude Include="args.h" />
     <ClInclude Include="cleaf.h" />
-    <ClInclude Include="comm.h" />
     <ClInclude Include="dp803.h" />
     <ClInclude Include="fpga_def_stepper.h" />
     <ClInclude Include="fpga_stepper.h" />
@@ -235,11 +229,6 @@
     <ClInclude Include="power_step.h" />
     <ClInclude Include="ps_common.h" />
     <ClInclude Include="ps_motor.h" />
-    <ClInclude Include="robi_lb702.h" />
-    <ClInclude Include="robi_def.h" />
-    <ClInclude Include="robi.h" />
-    <ClInclude Include="robot_client.h" />
-    <ClInclude Include="rob_tcp_ip.h" />
     <ClInclude Include="stepper_ctrl.h" />
     <ClInclude Include="slide.h" />
     <ClInclude Include="test.h" />

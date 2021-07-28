@@ -94,7 +94,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         {
             if (_InkSupply != null && e.PropertyName.Equals("CtrlMode"))
             {
-                if (_InkSupply.CtrlMode == EFluidCtrlMode.ctrl_fill)
+                if (_InkSupply.CtrlMode == EFluidCtrlMode.ctrl_fill_step1)
                 {
                     MsgText.Text = RX_DigiPrint.Resources.Language.Resources.PutNewInkCanister;
                     MsgPopup.IsOpen = true;
@@ -184,7 +184,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         private void ShutDown_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_off, false); }
         private void Check_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_check_step0, false); }
         private void Calibrate_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_cal_start, false); }
-        private void Print_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_prepareToPrint, false); }
+        private void Print_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_print, false); }
         private void Fill_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_fill, false); }
         private void Empty_Clicked(object sender, RoutedEventArgs e) { _command("Empty", EFluidCtrlMode.ctrl_empty, false); }
         private void Flush_Clicked_0(object sender, RoutedEventArgs e) { _command("Flush", EFluidCtrlMode.ctrl_flush_night, false); }
@@ -231,7 +231,8 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
         {
             RX_Common.MvtMessageBox.EPurgeResult result =
                MvtMessageBox.Purge(RX_DigiPrint.Resources.Language.Resources.Purge, PrintSystemView.PrintSystemView.allowPurgeAll(), RX_DigiPrint.Resources.Language.Resources.PurgeAndVacuum + _InkSupply.InkType.Name + " ?");
-            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes
+                || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
             {
                 _command(RX_DigiPrint.Resources.Language.Resources.ShortPurgeAndVacc, EFluidCtrlMode.ctrl_purge_hard_vacc, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
@@ -242,26 +243,6 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
             if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ShortPurgeAndWipe, RX_DigiPrint.Resources.Language.Resources.PurgeAndWipeAllPrintheads, MessageBoxImage.Question, true))
             {
                 _command("Purge+Wipe", EFluidCtrlMode.ctrl_purge_hard_wipe, true);
-            }
-        }
-
-        private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
-        {
-            if (RxGlobals.PrintSystem.IsTx)
-            {
-                if (MvtMessageBox.YesNo("Purge + Wash", "PURGE and WASH all printheads?", MessageBoxImage.Question, true))
-                {
-                    _command("Purge+Wash", EFluidCtrlMode.ctrl_purge_hard_wash, true);
-                }
-            }
-            else
-            {
-                RX_Common.MvtMessageBox.EPurgeResult result =
-                    MvtMessageBox.Purge(RX_DigiPrint.Resources.Language.Resources.Purge, PrintSystemView.PrintSystemView.allowPurgeAll(), RX_DigiPrint.Resources.Language.Resources.PurgeAndWash + _InkSupply.InkType.Name + " ?");
-                if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
-                {
-                    _command(RX_DigiPrint.Resources.Language.Resources.ShortPurgeAndVacc, EFluidCtrlMode.ctrl_purge_hard_vacc, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
-                }
             }
         }
 

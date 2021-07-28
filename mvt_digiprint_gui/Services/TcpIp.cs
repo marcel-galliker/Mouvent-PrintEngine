@@ -30,7 +30,7 @@ namespace RX_DigiPrint.Services
 	    dev_fluid,	// 05
         dev_6,      // 06
         dev_7,      // 07
-        dev_robot,  // 08
+        dev_8,      // 08
         dev_stepper,// 09
 	    dev_head,	// 10
 	    dev_spool,	// 11
@@ -144,12 +144,10 @@ namespace RX_DigiPrint.Services
         ctrl_shutdown,          //  0x001:
         ctrl_shutdown_done,     //  0x002:
         ctrl_error,             //  0x003:
-        ctrl_wait,              //  0x004:
-	    ctrl_off,               //  0x005:
-	    ctrl_warmup,			//  0x006:
-	    ctrl_readyToPrint,		//  0x007:
-        ctrl_prepareToPrint,    //  0x008:
-	    ctrl_print,			    //  0x009:
+	    ctrl_off,               //  0x004:
+	    ctrl_warmup,			//  0x005:
+	    ctrl_readyToPrint,		//  0x006:
+	    ctrl_print,			    //  0x007:
 	    
         ctrl_check_step0 = 0x010,   // 0x010:
 	    ctrl_check_step1,			// 0x011
@@ -176,8 +174,6 @@ namespace RX_DigiPrint.Services
 	    ctrl_purge_hard,		//  0x102:
 	    ctrl_purge_hard_wipe,	//  0x103:
 	    ctrl_purge_hard_vacc,	//  0x104:
-        ctrl_purge_hard_wash,   //  0x105:
-        ctrl_purge4ever,        //  0x106:
 	    ctrl_purge_step1=0x111,	//	0x111:
 	    ctrl_purge_step2,		//	0x112:
 	    ctrl_purge_step3,		//	0x113:
@@ -226,6 +222,9 @@ namespace RX_DigiPrint.Services
         ctrl_wash_step5	= 0x165,    // 0x165:
         ctrl_wash_step6	= 0x166,    // 0x166:
 
+        ctrl_robi_out       = 0x170,    // 0x170:
+        ctrl_robi_out_step1 = 0x171,    // 0x171:
+
 	    ctrl_fill	    =0x200,	//	0x200:
 	    ctrl_fill_step1,		//	0x201:
 	    ctrl_fill_step2,		//	0x202:
@@ -239,9 +238,8 @@ namespace RX_DigiPrint.Services
 	    ctrl_empty_step3,		//	0x303:
 	    ctrl_empty_step4,		//	0x304:
 	    ctrl_empty_step5,		//	0x305:
-        ctrl_empty_step6,       //	0x306:
 
-        ctrl_cal_start = 0x400, // 0x400:
+	    ctrl_cal_start = 0x400, // 0x400:
 	    ctrl_cal_step1,    	    // 0x401:
         ctrl_cal_step2,  	    // 0x402:
         ctrl_cal_step3,   	    // 0x403:
@@ -374,17 +372,13 @@ namespace RX_DigiPrint.Services
         public const UInt32  CMD_HEAD_FLUID_CTRL_MODE = 0x01000104;
         public const UInt32  REP_HEAD_FLUID_CTRL_MODE = 0x02000104;
         
-        public const UInt32  CMD_GET_DISABLED_JETS  = 0x01000105;
-        public const UInt32  REP_GET_DISABLED_JETS  = 0x02000105;
-        public const UInt32  CMD_SET_DISABLED_JETS  = 0x01000106;
+        public const UInt32  CMD_GET_DISABLED_JETS=	0x01000105;
+        public const UInt32  REP_GET_DISABLED_JETS=	0x02000105;
+        public const UInt32  CMD_SET_DISABLED_JETS=	0x01000106;
 
-        public const UInt32 CMD_GET_DENSITY_VAL     = 0x01000107;
-        public const UInt32 REP_GET_DENSITY_VAL     = 0x02000107;
-        public const UInt32 CMD_SET_DENSITY_VAL     = 0x01000108;
-
-        public const UInt32 CMD_SET_ROB_POS         = 0x01000109;
-        public const UInt32 CMD_HEAD_ADJUST         = 0x0100010a;
-		public const UInt32 CMD_HEAD_OUT_OF_RANGE   = 0x0100010c;
+        public const UInt32 CMD_GET_DENSITY_VAL = 0x01000107;
+        public const UInt32 REP_GET_DENSITY_VAL = 0x02000107;
+        public const UInt32 CMD_SET_DENSITY_VAL = 0x01000108;
         
         public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
         public const UInt32 REP_ENCODER_CFG			= 0x02000111;
@@ -427,15 +421,6 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_BCSCANNER_TRIGGER	= 0x01000148;
 
         public const UInt32 REP_CHILLER_STAT		= 0x02000152;
-
-        public const UInt32 CMD_SETUP_ASSIST_STAT	= 0x01000170;
-        public const UInt32 REP_SETUP_ASSIST_STAT	= 0x02000170;
-        public const UInt32 CMD_SA_REFERENCE	    = 0x01000171;
-        public const UInt32 CMD_SA_MOVE	            = 0x01000172;
-        public const UInt32 CMD_SA_STOP	            = 0x01000173;
-        public const UInt32 CMD_SA_OUT_TRIGGER	    = 0x01000174;
-        public const UInt32 CMD_SA_WEB_MOVE	        = 0x01000175;
-        public const UInt32 CMD_SA_WEB_STOP	        = 0x01000176;
 
         public const UInt32 CMD_START_PRINTING		= 0x01000201;
         public const UInt32 REP_START_PRINTING		= 0x02000201;
@@ -526,15 +511,18 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_ROB_STOP			= 0x01000701;
         public const UInt32 CMD_ROB_REFERENCE		= 0x01000702;
         public const UInt32 CMD_ROB_MOVE_POS		= 0x01000703;
-        public const UInt32 CMD_ROB_TURN_SCREW		= 0x01000704;
-        public const UInt32 CMD_SEARCH_ALL_SCREWS	= 0x01000705;
-        public const UInt32 CMD_RESET_ALL_SCREWS    = 0x01000706;
-        public const UInt32 CMD_ROB_SERVICE         = 0x01000707;
+        public const UInt32 CMD_ROB_SCREW_REF		= 0x01000704;
+        public const UInt32 CMD_ROB_SCREW_0_POS		= 0x01000705;
+        public const UInt32 CMD_ROB_SCREW_1_POS		= 0x01000706;
+        public const UInt32 CMD_ROB_SCREW_2_POS		= 0x01000707;
+        public const UInt32 CMD_ROB_SCREW_3_POS		= 0x01000708;
+        public const UInt32 CMD_ROB_WIPE			= 0x01000709;
+
+        public const UInt32 CMD_ROB_ADJUST			= 0x01000710;
 
         public const UInt32 CMD_ROB_DRIP_PANS       = 0x01000721;
         public const UInt32 CMD_ROB_DRIP_PANS_CAP   = 0x01000725;
         public const UInt32 CMD_ROB_DRIP_PANS_REF   = 0x01000726;
-        public const UInt32 CMD_ROBI_MOVE_TO_GARAGE = 0x0100074b;
 
         public const UInt32 EVT_TRACE               = 0x03000100;
 
@@ -892,22 +880,13 @@ namespace RX_DigiPrint.Services
             public Int32        ref_height_back;
             public Int32        ref_height_front;
             public Int32        cap_height;
-
         }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SScrewPositions
-        {
-            public Int32 posX;
-            public Int32 posY;
-        }
-
+        
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SStepperCfgMsg
         {
             public SMsgHdr      hdr;
         	public EPrinterType	printerType;    // used in background only
-            public Int32        development_machine;
 	        public Int32		boardNo;        // used in background only
 	        public Int32		ref_height;
 	        public Int32		print_height;
@@ -920,7 +899,6 @@ namespace RX_DigiPrint.Services
 	        public Int32		use_printhead_en;
             public Int32        material_thickness;
             public Int32        headsPerColor;
-            public Int32        printbarUsed;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst =4)]
             public SRobotOffsets[] robot;
@@ -939,10 +917,10 @@ namespace RX_DigiPrint.Services
         public struct SHeadAdjustmentMsg
         {
             public SMsgHdr      hdr;
-            public Int32        printbarNo;
+            public Int32        inkSupplyNo;
             public Int32        headNo;
-            public Int32        axis;
-            public Int32        steps;
+            public Int32        angle;
+            public Int32        stitch;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -961,7 +939,6 @@ namespace RX_DigiPrint.Services
 
 	        public Int32	cylinderPresSet;	//  Pressure intermediate Tank
 	        public Int32	cylinderPres;	    //  Pressure intermediate Tank
-            public Int32    cylinderPresDiff;
             public Int32    cylinderSetpoint;	 //  Pressure intermediate Tank
             public Int32    airPressureTime;
             public Int32	flushTime;
@@ -976,7 +953,6 @@ namespace RX_DigiPrint.Services
 	        public Int32	pumpSpeed;			//	Consumption pump speed
 	        public Int32	canisterLevel;
 	        public Int32	canisterErr;
-            public Int32    flush_pump_val;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
             public string   scannerSN;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
@@ -1245,57 +1221,23 @@ namespace RX_DigiPrint.Services
 
             public UInt32		info;
             public UInt32		robinfo;
-            public UInt32       screwerinfo;
 	        public UInt32		warn;
 	        public UInt32		err;
 
 	        public Int32		posX;
-	        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public Int32[]		posY;
+	        public Int32		posY;
 	        public Int32		posZ;
-            public Int32        posZ_back;
-
-            public Int32        screw_posX;
-            public Int32        screw_posY;
-            public Int32		screw_posZ;
 
             public Int32        adjustmentProgress;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public Int32[]       alive;
 
-            public Int32        adjustDoneCnt;
-
             public Int32			inputs;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
 	        public SStepperMotor[]	motor;
-        };
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SSetupAssistStatMsg
-        {
-            public SMsgHdr          hdr;
-            
-            public UInt32	powerStepStatus;	
-	        public Int32	motorPosition;
-            public Int32	stopPos;
-	        public UInt32	motorVoltage;
-	        public UInt32	motorMoveCurrent;
-	        public UInt32	motorHoldCurrent;
-	        public byte	    moveCnt;
-	        public byte	    refDone;
-	        public byte	    moving;	
-	        public byte	    inputs;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SetupAssist_MoveCmd
-        {
-	        SMsgHdr         header;
-	        public Int32    steps;
-	        public UInt32   speed;
-	        public UInt32   acc;
-	        public UInt32   current;
+  //          public Int32		set_io_cnt;
         };
 
         //--- CLEAF Orders ------------------------------------------------------

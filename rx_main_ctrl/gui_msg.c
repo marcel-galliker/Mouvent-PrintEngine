@@ -172,9 +172,6 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
         case CMD_GET_DISABLED_JETS:	_do_get_disalbled_jets(socket, (SDisabledJetsMsg*)pmsg);		break;
         case CMD_SET_DISABLED_JETS:	ctrl_set_disalbled_jets((SDisabledJetsMsg*)pmsg);				break;
 
-        case CMD_HEAD_ADJUST:		step_adjust_heads(socket, (SHeadAdjustmentMsg*)pmsg);				break;
-        case CMD_ROBI_MOVE_TO_GARAGE: step_robi_to_garage(socket); break;
-
 		case CMD_FLUID_STAT:		fluid_reply_stat(socket);											
 									chiller_reply_stat(socket);
 									break;
@@ -224,9 +221,9 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_ENCODER_UV_ON:		enc_uv_on();														break;
 		case CMD_ENCODER_UV_OFF:	enc_uv_off();														break;
 
-		case CMD_CO_SET_ORDER:		co_set_order((char*)pdata);											break;
-		case CMD_CO_SET_ROLL:		co_set_roll((SValue*)pdata);										break;
-		case CMD_CO_SET_OPERATOR:	co_set_operator((char*)pdata);										break;
+		case CMD_CO_SET_ORDER:		co_set_order((char*)pdata);										break;
+		case CMD_CO_SET_ROLL:		co_set_roll((SValue*)pdata);									break;
+		case CMD_CO_SET_OPERATOR:	co_set_operator((char*)pdata);									break;
 			
 		default: Error(WARN, 0, "Unknown Command 0x%08x", phdr->msgId);
 		}
@@ -521,7 +518,6 @@ static void _do_export_log(RX_SOCKET socket, SLogReqMsg *pmsg)
 							break;
         case dev_fluid:     sprintf(message, "Fluid%d", item.deviceNo+1); break;
         case dev_stepper:   sprintf(message, "Stepper%d", item.deviceNo+1); break;
-        case dev_robot:     sprintf(message, "Robot%d", item.deviceNo+1); break;
 	    case dev_head:      {
 								/*
 								int head0 = (_DevNo*(int)TcpIp.HEAD_CNT)%RxGlobals.PrintSystem.HeadCnt;
@@ -949,7 +945,6 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 //--- _do_fluidCtrlMode ---
 static void _do_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 {
-	if (pmsg->ctrlMode == ctrl_off) ctrl_empty_PurgeBuffer(pmsg->no);
 	fluid_send_ctrlMode(pmsg->no, pmsg->ctrlMode, TRUE);
 }
 
@@ -1115,7 +1110,6 @@ static void _do_set_stepper_cfg (RX_SOCKET socket, SStepperCfg *pmsg)
 	int print_height = RX_Config.stepper.print_height;
 	int material_thickness = RX_Config.stepper.material_thickness;
 	memcpy(&RX_Config.stepper, pmsg, sizeof(RX_Config.stepper));
-	RX_Config.stepper.development_machine = (RX_Config.printer.type == printer_LB702_UV) && (str_start(RX_Hostname, "LB702UV-001"));
 	RX_Config.stepper.print_height = print_height;
 	RX_Config.stepper.material_thickness = material_thickness;
 	

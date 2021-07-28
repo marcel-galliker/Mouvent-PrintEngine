@@ -1064,7 +1064,7 @@ static void* _server_thread(void* lpParameter)
 			}
 			if (thread>=pserver->maxConnections)
 			{
-				if (!errTooMany) Error(ERR_CONT, 0, "Too many connections");
+				if (!errTooMany) Error(ERR_CONT, 0, "Too many conenctions");
 				errTooMany = TRUE;
 				sok_close(&clientSocket);
 			}

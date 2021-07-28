@@ -55,7 +55,7 @@ int steptx_rob_cap_flush_prepared(void);
 
 void steptx_rob_stop(void);
 
-void steptx_rob_empty_waste(int time_s);
+void steptx_rob_empty_waste(int time);
 
 void steptx_set_autocapMode(int state);
 

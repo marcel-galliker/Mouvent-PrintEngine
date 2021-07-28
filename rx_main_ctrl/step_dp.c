@@ -141,13 +141,11 @@ int stepdp_handle_status(int no, SStepperStat *pStatus)
 			info.z_in_cap		&= _Status[i].info.z_in_cap;
 			info.x_in_cap		&= _Status[i].info.x_in_cap;
 			info.x_in_ref		&= _Status[i].info.x_in_ref;
-			RX_StepperStatus.posY[i] = _Status[i].posY[0];
-
-			if (_Status[i].info.moving)
+			if (_Status[i].info.moving) 
 			{
 				RX_StepperStatus.posX = _Status[i].posX;
+				RX_StepperStatus.posY = _Status[i].posY;
 				RX_StepperStatus.posZ = _Status[i].posZ;
-				RX_StepperStatus.posZ_back = _Status[i].posZ_back;
 			}
 		}
 	};
@@ -158,8 +156,8 @@ int stepdp_handle_status(int no, SStepperStat *pStatus)
 	if (!info.moving) 
 	{
 		RX_StepperStatus.posX = _Status[no].posX;
+		RX_StepperStatus.posY = _Status[no].posY;
 		RX_StepperStatus.posZ = _Status[no].posZ;
-		RX_StepperStatus.posZ_back = _Status[no].posZ_back;
 	}
 	
 	if (_AbortPrinting && RX_StepperStatus.info.z_in_print) stepdp_to_up_pos();

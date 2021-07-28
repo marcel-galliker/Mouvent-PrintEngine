@@ -20,14 +20,6 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Changed, value); }
         }
 
-        //--- Property DevelopmentMachine ---------------------------------------
-        private bool _DevelopmentMachine;
-        public bool DevelopmentMachine
-        {
-            get { return _DevelopmentMachine; }
-            set { Changed |= SetProperty(ref _DevelopmentMachine, value); }
-        }
-
         //--- Property RefHeight ---------------------------------------
         private double _RefHeight;
         public double RefHeight
@@ -91,7 +83,6 @@ namespace RX_DigiPrint.Models
         //--- SetStepperCfg ----------------------------------------
         public void SetStepperCfg(TcpIp.SStepperCfgMsg msg)
         {
-            DevelopmentMachine = msg.development_machine == 1;
             RefHeight   = (msg.ref_height   /1000.0);
             PrintHeight = (msg.print_height /1000.0);
             WipeHeight  = (msg.wipe_height  /1000.0);

@@ -158,10 +158,7 @@
     </ClInclude>
     <ClInclude Include="iQ500.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sa_tcp_ip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    </ClInclude>    
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">

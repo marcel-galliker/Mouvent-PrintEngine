@@ -42,13 +42,11 @@
 #include "motor.h"
 #include "test_table.h"
 #include "fpga_stepper.h"
-#include "robi_def.h"
 	
 
 //--- globals ------------------------------------------------------------
 SStepperStat	RX_StepperStatus;
 SStepperCfg		RX_StepperCfg;
-SRobiStatus		RX_RobiStatus;
 
 static int		_AppRunning;
 

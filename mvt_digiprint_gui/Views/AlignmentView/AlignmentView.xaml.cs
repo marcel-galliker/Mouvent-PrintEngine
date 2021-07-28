@@ -389,8 +389,7 @@ namespace RX_DigiPrint.Views.Alignment
 
         private void RobotDownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            RobotHeadAdjustmentView view = new RobotHeadAdjustmentView(0, 0, 0, 0);
-            view.ShowDialog();
+            MvtMessageBox.Information(RX_DigiPrint.Resources.Language.Resources.Robot, RX_DigiPrint.Resources.Language.Resources.RobotFunctionalityNotImplementedYet);
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)

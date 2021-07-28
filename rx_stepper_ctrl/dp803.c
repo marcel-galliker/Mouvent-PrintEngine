@@ -410,7 +410,7 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		}
 		break;
 		
-	case CMD_LIFT_FILL:		strcpy(_CmdName, "CMD_LIFT_FILL");
+	case CMD_LIFT_FILL:		strcpy(_CmdName, "CMD_ROB_FILL_CAP");
 		if (!RX_StepperStatus.cmdRunning)//&&(RX_StepperStatus.info.x_in_cap))
 		{
 			Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;
@@ -419,7 +419,7 @@ int  dp803_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			_TimeCntPumpsCAP = 5000;
 		}		
 		break;
-	case CMD_LIFT_EMPTY:		strcpy(_CmdName, "CMD_LIFT_EMPTY");
+	case CMD_LIFT_EMPTY:		strcpy(_CmdName, "CMD_ROB_EMPTY_CAP");
 		if (!RX_StepperStatus.cmdRunning)//&&(RX_StepperStatus.info.x_in_cap))
 		{
 			Fpga.par->output &= ~OUT_CAP_FLUSH_OFF;

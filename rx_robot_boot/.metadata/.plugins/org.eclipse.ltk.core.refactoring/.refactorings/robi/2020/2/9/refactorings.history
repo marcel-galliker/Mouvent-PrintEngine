@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;robi/gpio.cpp&apos; to &apos;gpio.c&apos;" description="Rename resource &apos;gpio.cpp&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="gpio.cpp" name="gpio.c" stamp="1582583535338" updateReferences="true"/>
-</session>

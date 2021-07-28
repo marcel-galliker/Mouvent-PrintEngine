@@ -369,10 +369,15 @@ static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
 
 	memcpy(RX_FluidStat, pmsg, sizeof(RX_FluidStat));
 
-	for (int head = 0; head < MAX_HEADS_BOARD; head++)
+	/*
+	int head;
+	for (head = 0; head < MAX_HEADS_BOARD; head++)
 	{
-        _NiosMem->cfg.cond[head].purge_pos_y		 = RX_FluidStat[head].act_pos_y;
+		_NiosMem->cfg.cond[head].cylinderPressure    = RX_FluidStat[head].cylinderPressure;
+		_NiosMem->cfg.cond[head].cylinderPressureSet = RX_FluidStat[head].cylinderPressureSet;
+    	_NiosMem->cfg.cond[head].fluidErr            = RX_FluidStat[head].fluidErr;
 	}
+	*/
 	_rep_head_stat(socket);
 	return REPLY_OK;
 }
@@ -413,7 +418,7 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 //--- _do_set_purge_par -------------------------------------
 static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 {
-	cond_set_purge_par(ppar->no, ppar->delay_pos_y, ppar->time, ppar->delay_time);
+	cond_set_purge_par(ppar->no, ppar->delay, ppar->time);
 	return REPLY_OK;
 }
 
@@ -437,7 +442,7 @@ static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg)
 //--- _do_rob_pos -------------------------------------------------------------
 static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg)
 {
-	cond_set_rob_pos(pmsg->head, pmsg->angle, pmsg->stitch);
+	cond_set_rob_pos(pmsg->head, pmsg->angle, pmsg->dist);
 	return REPLY_OK;	
 }
 

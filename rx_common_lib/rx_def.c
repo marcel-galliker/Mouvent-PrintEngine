@@ -29,7 +29,7 @@ char *DeviceStr[] =
 	"Fluid",			// 05
 	"dev_6",			// 06
 	"dev_7",			// 07
-	"Robot",			// 08
+	"dev_8",			// 08
 	"Stepper",			// 09
 	"Head",				// 10
 	"Spooler",			// 11
