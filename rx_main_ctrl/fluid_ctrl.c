@@ -148,6 +148,9 @@ int	fluid_init(void)
     // To adjust the file to the size of _RecoveryData
     setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, WRITE);
 
+    for (int i = 0; i < SIZEOF(_EndCtrlMode); i++)
+        _EndCtrlMode[i] = ctrl_off;
+
     return REPLY_OK;
 }
 
@@ -806,6 +809,8 @@ static void _control(int fluidNo)
 											else if (_lbrob && _PurgeCtrlMode != ctrl_purge4ever)
 											{
 											    steplb_rob_fct_start(step_stepper_to_fluid(no), HeadNo + rob_fct_purge_head0);
+                                                if (_Vacuum_Time[no]) steplb_rob_empty_waste(step_stepper_to_fluid(no), _Vacuum_Time[no] / 1000);
+  												_Vacuum_Time[no] = 0;
                                             }
                     
 											break;
@@ -1252,7 +1257,11 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 
     _FluidCtrlMode = ctrlMode;
 	_RobotCtrlMode = ctrlMode;
-	if (ctrlMode != ctrl_cap) _send_ctrlMode(no, ctrlMode, sendToHeads);
+	if (ctrlMode != ctrl_cap)
+  	{
+  		if (!RX_StepperStatus.robot_used || !(ctrlMode >= ctrl_vacuum && ctrlMode <= ctrl_wash_step6 && !step_robot_used(no)))
+  			_send_ctrlMode(no, ctrlMode, sendToHeads);
+  	}
 
 	switch (RX_Config.printer.type)
 	{

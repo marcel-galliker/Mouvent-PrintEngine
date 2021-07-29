@@ -26,7 +26,7 @@
 
 #define STEPS_PER_REV				51200
 #define DISTANCE_UM_PER_REV			36000   // 36000
-#define TIME_BEFORE_TURN_SCREWER    2600    // ms
+#define TIME_BEFORE_TURN_SCREWER    2500    // ms
 
 #define ROBI_SHUTOFF_TIME           1000    // ms
 #define ROBI_CONNECTION_TIME        3500    // ms

@@ -894,8 +894,8 @@ static void _color2Robot(int color, int *pstepper, int *pprintbar)
         if (RX_Config.inkSupplyCnt % 2 == 0) *pstepper = color / 2;
         else                                 *pstepper = (color + 1) / 2;
 
-        if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && *pprintbar == 0))    *pprintbar = color&1;  
-        else                                                                                        *pprintbar = ((color&1)+1) % 2;
+        if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && color == 0))    *pprintbar = color&1;  
+        else                                                                                   *pprintbar = ((color&1)+1) % 2;
         break;
         
     default:
