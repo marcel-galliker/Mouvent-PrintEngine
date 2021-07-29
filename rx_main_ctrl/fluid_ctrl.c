@@ -1361,10 +1361,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
                     if (head < 0)
                         ctrl_send_all_heads_fluidCtrlMode(i, cmd.ctrlMode);
                     else 
-                    {
-                        head += i * RX_Config.headsPerColor;
                         ctrl_send_head_fluidCtrlMode(head, cmd.ctrlMode, FALSE, FALSE);
-                    }
 				}
 			}
 		}			
