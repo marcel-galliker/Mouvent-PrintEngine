@@ -77,7 +77,9 @@ static INT32	_TimePIDstable;
 static INT32	_Meniscus_Timeout;
 static INT32	_PurgeDelay;
 static INT32	_PurgeTime;
-static INT32	_SetpointShutdown;
+static INT32	_PurgeReleasePressure;
+static INT32	_PurgeReleaseTime=1000;
+static INT32	_SetpointShutdown=150;
 
 // ---- NEW : flow resistance  -----
 // static INT32	_TimeFlowResistancestablePRINT;
@@ -258,13 +260,14 @@ void pump_tick_10ms(void)
 				}
 				if(RX_Config.meniscus_setpoint < 180) _SetpointShutdown = 100;		// WB machine setpoint -10 mbars
 				else _SetpointShutdown = 180;										// UV machine setpoint -18 mbars (to avoid leakage on the paper after 1 night OFF)
+				if (RX_Status.mode == ctrl_error) _ShutdownPrint = 0;				// STOP shutdown if ERROR before
 				RX_Status.mode = RX_Config.mode;
 				break;
 		
 		case ctrl_shutdown_done:	
 		
 				// Bring Meniscus to Setpoint (WF) + 15mbars
-				if((_ShutdownPrint > 0)&&(RX_Status.info.valve == TO_INK))	// valve on TO_FLUSH if Error detected, so no shutdown phase
+				if(_ShutdownPrint > 0)	
 				{
 					_ShutdownPrint++;
 					_NbPresShutdown++;
@@ -310,7 +313,7 @@ void pump_tick_10ms(void)
 //						_TimeSwitchingOFF = 0;
 						_Meniscus_Timeout = MENISCUS_TIMEOUT;
 						_ShutdownPrint = 0;
-					
+						if(_PurgeReleasePressure > _PurgeReleaseTime * 2) _PurgeReleasePressure = 0;
 						RX_Status.mode = RX_Config.mode;
 											
 						break;
@@ -353,6 +356,8 @@ void pump_tick_10ms(void)
 							_PumpPID.start_integrator = 0;
 							// Meniscus setpoint in WF (if 0, setpoint=default)
 							_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+							// if purge just before
+							if(_PurgeReleasePressure) _PumpPID.Setpoint = -RX_Status.meniscus;
 							if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
 							pid_reset(&_PumpPID);
 							RX_Status.pressure_in_max=INVALID_VALUE;
@@ -367,6 +372,23 @@ void pump_tick_10ms(void)
                         max_pressure = MBAR_500;
 						_ShutdownPrint = 1;
         
+						// if purge just before, ramps up of the meniscus setpoint
+						if(_PurgeReleasePressure) 
+						{
+							_PurgeReleasePressure++;
+							// increase by 1 mbar the setpoint, every 10 seconds
+							_PurgeReleaseTime = 1000;
+							if(_PurgeReleasePressure > _PurgeReleaseTime) 
+							{
+								_PurgeReleasePressure = 1;
+								_PumpPID.Setpoint += 10;
+								if(_PumpPID.Setpoint > RX_Config.meniscus_setpoint)
+ 								{
+									_PurgeReleasePressure = 0;
+									_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+								}
+							}
+						}	  	
 						_pump_pid(TRUE);
 						
 						RX_Status.mode = RX_Config.mode; 		
@@ -712,6 +734,7 @@ void pump_tick_10ms(void)
 						_set_pump_speed(0);
 						max_pressure = MBAR_500;
 						RX_Status.mode = RX_Config.mode;
+						_PurgeReleasePressure = 1;
 						break;
 		/*
 		case ctrl_purge_step5:
