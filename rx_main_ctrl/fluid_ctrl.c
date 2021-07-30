@@ -1235,7 +1235,7 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
         }
     }
 
-    if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft || ctrlMode == ctrl_purge_hard_wash) 
+    if (ctrlMode==ctrl_purge_hard || ctrlMode == ctrl_purge_hard_wipe || ctrlMode == ctrl_purge_hard_vacc || ctrlMode == ctrl_purge || ctrlMode == ctrl_purge_soft || ctrlMode == ctrl_purge_hard_wash || (ctrlMode >= ctrl_vacuum && ctrlMode <= ctrl_wash_step6)) 
 	{
 		_PurgeFluidNo=no;
 		_InitDone = 0;
@@ -1243,16 +1243,12 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 		{
 			for (int i = 0; i < SIZEOF(_EndCtrlMode); i++)
 			{
-				if (fluid_get_ctrlMode(i) == ctrl_print || fluid_get_ctrlMode(i) == ctrl_prepareToPrint)
-                    _EndCtrlMode[i] = ctrl_prepareToPrint;
-				else
-					_EndCtrlMode[i] = ctrl_off;
+				if (fluid_get_ctrlMode(i) == ctrl_print || fluid_get_ctrlMode(i) == ctrl_off)
+					_EndCtrlMode[i] = fluid_get_ctrlMode(i);
 			}
 		}
-        else if (fluid_get_ctrlMode(no) == ctrl_print || fluid_get_ctrlMode(no) == ctrl_prepareToPrint)
-            _EndCtrlMode[no] = ctrl_prepareToPrint;
-		else
-			_EndCtrlMode[no] = ctrl_off;
+        else if (fluid_get_ctrlMode(no) == ctrl_print || fluid_get_ctrlMode(no) == ctrl_off)
+			_EndCtrlMode[no] = fluid_get_ctrlMode(no);
 	}
 
     _FluidCtrlMode = ctrlMode;
@@ -1352,7 +1348,7 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
 				
 				//--- send mode to heads ---
-				if (sendToHeads)
+                if (sendToHeads && *RX_Config.inkSupply[i].ink.fileName)
 				{
 					int head = ctrl_singleHead(i);
                     if (ctrlMode == ctrl_prepareToPrint && fluid_get_ctrlMode(i) == ctrl_purge_step4)
