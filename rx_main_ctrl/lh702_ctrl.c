@@ -58,6 +58,7 @@ static SLH702_State3 _Status3;
 static SLH702_Materials _Materials;
 static SPrintQueueItem	*_pItem;
 static int		_Manipulated=FALSE;
+static int		_lastQuery; // ticks of the last query received from LH702 PLC to timeout
 
 //--- Prototypes --------------------------------------------------------------
 static void _set_network_config(void);
@@ -231,6 +232,16 @@ static void *_lh702_thread(void *lpParameter)
 			{
 				TrPrintfL(TRUE, "Connected");
 				ErrorEx(dev_plc, -1, LOG, 0, "Connected");
+				_lastQuery = rx_get_ticks();
+			}
+		}
+		else
+		{
+			// as the socket is a client, we should time out on our side
+			if (rx_get_ticks() - _lastQuery > 10000) // 10 seconds
+			{
+				Error(ERR_CONT, 0, "Time out on communication with PLC");
+				sok_close(&_Socket);
 			}
 		}
 		rx_sleep(1000);
@@ -380,7 +391,7 @@ static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct socka
 	SMsgHdr		 *phdr = (SMsgHdr*)pmsg;
 	SLH702_Value *val  = (SLH702_Value*)pmsg;
 	SLH702_Str   *str  = (SLH702_Str*)pmsg;
-	
+	_lastQuery = rx_get_ticks();
 	if (len)
 	{
 		net_register_by_device(dev_plc, -1);
