@@ -1,9 +1,14 @@
 #!/bin/bash
 
 # Changes eth names.
+# https://wiki.debian.org/NetworkInterfaceNames
+# https://askubuntu.com/questions/1245054/netplan-set-name-option-not-working-on-freshly-installed-ubuntu-18-04-lts-deskto
 python3 /home/mouvent/update-eth-names.py
 rm /home/mouvent/update-eth-names.py
 sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"/' /etc/default/grub
+netplan apply
+cp /run/systemd/network/*.link /etc/systemd/network/
+update-initramfs -u
 
 # Configures user root.
 echo root:radex | chpasswd

@@ -43,26 +43,17 @@ if os.path.isfile(eth_path):
 else:
       print("WARNING: No file '{0}' to modify".format(eth_path))
 
-rules_path = '/etc/udev/rules.d/70-persistent-net.rules'
-if not os.path.exists(rules_path):
-      fr = open(rules_path, "w")
-      for interface in interfaces:
-            print (interface)
-            mac = netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]['addr']
-            config = 'SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{{address}}=="{0}", '\
-                        'ATTR{{dev_id}}=="0x0", ATTR{{type}}=="1", NAME="{1}"\n'
-            if interface in change:
-                  newi = change[interface]
-                  fr.write(config.format(mac,  newi))
-                  print("Changed {0} to {1}".format(interface, newi))
-                  # add the match by macaddress as workaround on bug on mtu
-                  if newi in network and "mtu" in network[newi]:
-                        network[newi]["match"] = {"macaddress": mac}
-            else:
-                  print('-> Interface not changed')
-      fr.close()
-      if ethconf:
-            # write the new netplan configuration
-            open(eth_path,"wt").write(yaml.dump(ethconf))
-else:
-     print("File '{0}' already exists, do nothing...".format(rules_path))
+for interface in interfaces:
+      print (interface)
+      mac = netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]['addr']
+      if interface in change:
+            newi = change[interface]
+            print("Changed {0} to {1}".format(interface, newi))
+            # add the match by macaddress as workaround on bug on mtu
+            if newi in network:
+                  network[newi]["match"] = {"macaddress": mac}
+      else:
+            print('-> Interface not changed')
+if ethconf:
+      # write the new netplan configuration
+      open(eth_path,"wt").write(yaml.dump(ethconf))
