@@ -508,9 +508,6 @@
     <Compile Include="Views\LH702View\LH702_Counters.xaml.cs">
       <DependentUpon>LH702_Counters.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UserControls\PowerOff.xaml.cs">
-      <DependentUpon>PowerOff.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\UserControls\ShutDown.xaml.cs">
       <DependentUpon>ShutDown.xaml</DependentUpon>
     </Compile>
@@ -1046,10 +1043,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\LH702View\LH702_Counters.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\UserControls\PowerOff.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

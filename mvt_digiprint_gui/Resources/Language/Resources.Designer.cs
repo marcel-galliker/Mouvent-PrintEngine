@@ -6535,12 +6535,11 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The machine is about to shut down. 
-        ///Options: .
+        ///   Looks up a localized string similar to The machine is about to shut down..
         /// </summary>
-        public static string TheMachineIsAboutToShutDownOptions {
+        public static string TheMachineIsAboutToShutDown {
             get {
-                return ResourceManager.GetString("TheMachineIsAboutToShutDownOptions", resourceCulture);
+                return ResourceManager.GetString("TheMachineIsAboutToShutDown", resourceCulture);
             }
         }
         
@@ -6599,7 +6598,7 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Turn Off Heads.
+        ///   Looks up a localized string similar to Do you want to turn off all heads?.
         /// </summary>
         public static string TurnOffHeads {
             get {

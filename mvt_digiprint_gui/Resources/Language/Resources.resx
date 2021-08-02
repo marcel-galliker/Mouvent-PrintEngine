@@ -2688,12 +2688,11 @@ No Splices in the machine?</value>
   <data name="ShuttingDown" xml:space="preserve">
     <value>Shutting down...</value>
   </data>
-  <data name="TheMachineIsAboutToShutDownOptions" xml:space="preserve">
-    <value>The machine is about to shut down. 
-Options: </value>
+  <data name="TheMachineIsAboutToShutDown" xml:space="preserve">
+    <value>The machine is about to shut down.</value>
   </data>
   <data name="TurnOffHeads" xml:space="preserve">
-    <value>Turn Off Heads</value>
+    <value>Do you want to turn off all heads?</value>
   </data>
   <data name="NightFlush" xml:space="preserve">
     <value>Night Flush</value>

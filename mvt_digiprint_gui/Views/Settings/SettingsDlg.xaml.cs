@@ -91,7 +91,6 @@ namespace RX_DigiPrint.Views.Settings
             FactoryNework.Visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
             WlanButton.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
             WinScpButton.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
-            ShutdownCommand.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
             WindowsUpdateCommand.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
             if (RxGlobals.User.UserType != _UserType) IpAddress.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_engineer;
             if (RxGlobals.User.UserType != _UserType) FactoryNework.IsEnabled = RxGlobals.User.UserType >= EUserType.usr_engineer;
@@ -244,12 +243,26 @@ namespace RX_DigiPrint.Views.Settings
             }
         }
 
-        //--- ShutDown_Clicked ---------------------------------------------
-        private void ShutDown_Clicked(object sender, RoutedEventArgs e)
+        //--- ShutDownGui_Clicked ---------------------------------------------
+        private void ShutDownGui_Clicked(object sender, RoutedEventArgs e)
         {
             if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ShutDown, RX_DigiPrint.Resources.Language.Resources.ShuttingDownTheGui, MessageBoxImage.Question, false))
             {
                 Rx.StartProcess("shutdown", "/s /t 0");
+            }
+        }
+
+        //--- ShutDown_Clicked -------------------------------------------------
+        private void ShutDown_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ShutDown, RX_DigiPrint.Resources.Language.Resources.TheMachineIsAboutToShutDown, MessageBoxImage.Question, false))
+            {
+                Close();
+                TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd() { no = -1, ctrlMode = EFluidCtrlMode.ctrl_shutdown };
+                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+                RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ENCODER_UV_OFF);
+                ShuttingDown sdn = new ShuttingDown();
+                sdn.ShowDialog();
             }
         }
 

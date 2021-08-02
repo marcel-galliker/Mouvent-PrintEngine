@@ -54,8 +54,8 @@ class TCPProtocol(network.AbstractTCPProtocol):
     def mgt_CMD_FLUID_CTRL_MODE(self, msg):
         logging.info(f"CMD_FLUID_CTRL_MODE {msg.ctrlMode}")
         ctrl_conv = {
-            message_mgr.enums["ctrl_shutdown"]: message_mgr.enums["ctrl_off"],
-            message_mgr.enums["ctrl_prepareToPrint"]: message_mgr.enums["ctrl_readyToPrint"],
+            message_mgr.enums.get("ctrl_shutdown"): message_mgr.enums["ctrl_off"],
+            message_mgr.enums.get("ctrl_prepareToPrint"): message_mgr.enums["ctrl_readyToPrint"],
         }
         self.board.config["REP_FLUID_STAT"]["stat"][msg.no]["ctrlMode"] = ctrl_conv.get(msg.ctrlMode, msg.ctrlMode)
         #_do_fluid_ctrlMode(socket, (SFluidCtrlCmd*)msg);
