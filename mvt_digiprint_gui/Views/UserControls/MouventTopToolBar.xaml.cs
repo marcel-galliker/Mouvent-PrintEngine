@@ -36,11 +36,10 @@ namespace RX_DigiPrint.Views.UserControls
         private void _SetButtonStates()
         {
             Button_Test.IsChecked = RxGlobals.PrinterStatus.TestMode;
-            
-            //--- size --------------------------------------------------------
-       //   Button_JogFwd.IsEnabled = RxGlobals.Plc.IsReadyForProduction && !RxGlobals.Plc.IsRunning;
-       //   Button_JogBwd.IsEnabled = RxGlobals.Plc.IsReadyForProduction && !RxGlobals.Plc.IsRunning;
-       //   Button_Clean.IsEnabled  = (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_pause || RxGlobals.PrinterStatus.PrintState==EPrintState.ps_off);
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_undef || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702)
+                this.uc.Visibility = Visibility.Hidden;
+            else
+                this.uc.Visibility = Visibility.Visible;
 
         }
 

@@ -54,12 +54,21 @@ namespace RX_DigiPrint.Views.PrintQueueView
             PrintQueueItem item = DataContext as PrintQueueItem;
             if (item != null)
             {
+                CB_PrintGoMode.ItemsSource = new EN_PgModeList();
+
                 LengthUnit.Content = new CUnit("m").Name;
                 SpeedUnit.Text = new CUnit("m/min").Name;
                 MarginUnit.Text = DistUnit.Text = new CUnit("mm").Name;
 
                 // Limit length selection to "Copies" for VDP jobs
                 LengthUnit.Visibility = item.Variable ? Visibility.Collapsed : Visibility.Visible;
+
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702)
+                {
+                    SpeedLabel.Visibility = Visibility.Collapsed;
+                    CB_Speed.Visibility = Visibility.Collapsed;
+                    SpeedUnit.Visibility = Visibility.Collapsed;
+                }
 
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.getInk(), item.SrcHeight);
                 if (!item.Variable && item.SrcPages > 1)

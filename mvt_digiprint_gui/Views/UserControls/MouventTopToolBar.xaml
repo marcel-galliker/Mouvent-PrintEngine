@@ -21,7 +21,8 @@
 
         <rx_uc:MouventUVToolBar Grid.Column="1" HorizontalAlignment="Left"></rx_uc:MouventUVToolBar>
 
-        <rx_uc:MouventSetupButtons Margin="15,0,15,0" Grid.Column="2"></rx_uc:MouventSetupButtons>
+        <rx_uc:MouventSetupButtons Margin="15,0,15,0" Grid.Column="2" x:Name="uc" Visibility="Hidden"/>
+        
         <common:MvtButton Grid.Column="3" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" x:Name="Button_Test" Click="Test_Clicked" ToolTip="{mvt:LocalizedBinding Test}" Margin="15, 0, 15, 0">
          <!--   <iconPacks:PackIconMaterial Kind="FolderTableOutline" Foreground="White" Width="25" Height="25" HorizontalAlignment="Stretch" VerticalAlignment="Center"/> -->
             <iconPacks:PackIconMaterial Kind="Ruler" Foreground="White" Width="25" Height="25"/>

@@ -217,10 +217,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             int i;
             _row_height = height;
             for (i=0; i<DirGrid.Rows.Count; i++)
-            {
-                if (_dir[i].IsDirectory) DirGrid.Rows[i].Height = _dir_height;
-                else DirGrid.Rows[i].Height = _row_height;
-            }
+                DirGrid.Rows[i].Height = _row_height;
         }
         
         //---  _preview_changed -----------------------------------------
