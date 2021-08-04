@@ -5,55 +5,47 @@ import shutil
 import os.path
 import netifaces
 import yaml
-interfaces = netifaces.interfaces()
 
-# list to rename 
-change = {
-      'em3': 'p1p1',
-      'em4': 'p1p2',
-      'em5': 'p1p3',
-      'em6': 'p1p4',
+# list of main interfaces
+main_interface = {
       'eno1': 'em1',
       'eno2': 'em2',
-      'eno3': 'p1p1',
-      'eno4': 'p1p2',
-      'eno5': 'p1p3',
-      'eno6': 'p1p4',
-      'em49': 'p1p1',
-      'em50': 'p1p2',
-      'em51': 'p1p3',
-      'em52': 'p1p4',
-      'ens2f0': 'p2p1',
-      'ens2f1': 'p2p2',
-      'ens2f2': 'p2p3',
-      'ens2f3': 'p2p4',
+      'lo': 'lo',    
 }
-# add values as keys to themselve
-v=list(change.values())
-change.update(zip(v,v))
+# add values as keys to themselve to be able to relaunch .py
+v=list(main_interface.values())
+main_interface.update(zip(v,v))
 
-# read the netplan config to solve the mtu bug
+# read the netplan config for ip address setting
 eth_path = '/etc/netplan/01-eth-config.yaml'
-ethconf = None
-network = {}
-if os.path.isfile(eth_path):
-      with open(eth_path) as fe:
-            ethconf = yaml.load(fe.read(), Loader=yaml.Loader)
-            network = ethconf["network"]["ethernets"]
-else:
-      print("WARNING: No file '{0}' to modify".format(eth_path))
+ethconf = yaml.load(open(eth_path, "rt").read(), Loader=yaml.Loader)
+network = ethconf["network"]["ethernets"]
 
-for interface in interfaces:
+# rename interfaces by adding the mac adress in the yaml file of netplan configuration
+# p1p1 to p2p4 interfaces for UDP are the other interfaces in the list
+card=1
+port=1
+for interface in netifaces.interfaces():
       print (interface)
+      # "main" inteface
+      if interface in main_interface:
+            newi = main_interface[interface]
+      else: # or "pxpx" UDP
+            newi = f"p{card}p{port}"
+            port += 1
+            # there are only 4 ports by card
+            if port == 5:
+                  port = 1
+                  card += 1
       mac = netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]['addr']
-      if interface in change:
-            newi = change[interface]
+      if newi in network:
             print("Changed {0} to {1}".format(interface, newi))
-            # add the match by macaddress as workaround on bug on mtu
-            if newi in network:
-                  network[newi]["match"] = {"macaddress": mac}
-      else:
-            print('-> Interface not changed')
-if ethconf:
-      # write the new netplan configuration
-      open(eth_path,"wt").write(yaml.dump(ethconf))
+            network[newi]["match"] = {"macaddress": mac}
+
+# and remove not existing interfaces from netplan
+for interface in list(network.keys()):
+      if "match" not in network[interface]:
+            del network[interface]
+
+# write the new netplan configuration
+open(eth_path,"wt").write(yaml.dump(ethconf))
