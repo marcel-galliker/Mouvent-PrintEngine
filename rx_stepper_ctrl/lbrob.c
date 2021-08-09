@@ -1069,6 +1069,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         lb702_handle_ctrl_msg(socket, msgId, pdata);
         break;
     }
+    return REPLY_OK;
 }
 
 //--- _cln_move_to ---------------------------------------

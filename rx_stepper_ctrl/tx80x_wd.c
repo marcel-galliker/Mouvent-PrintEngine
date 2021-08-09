@@ -19,6 +19,7 @@
 #include "rx_error.h"
 #include "rx_term.h"
 #include "rx_trace.h"
+#include "txrob.h"
 #include "tx801.h"
 #include "tx80x_wd.h"
 
