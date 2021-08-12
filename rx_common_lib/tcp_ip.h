@@ -427,7 +427,6 @@
 #define CMD_ROB_END					0x010007ff
 
 
-
 //--- Data Spooler -------------------------------------------------
 #define CMD_SET_SPOOL_CFG		0x01003001
 #define REP_SET_SPOOL_CFG		0x02003001

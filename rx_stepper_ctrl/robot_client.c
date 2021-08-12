@@ -48,7 +48,6 @@
 #define OUTPUT_Z_UP		1
 #define OUTPUT_Z_DOWN	0
 
-
 #define STEPS_PER_REV				51200
 #define DISTANCE_UM_PER_REV			36000   // mirco meters per revolution
 #define MOTOR_X_GARAGE_POS			20000
@@ -57,7 +56,7 @@
 #define SCREW_SPEED_HIGH			1280000			// steps/sec
 #define SCREW_SPEED_LOW				160000			// steps/sec
 
-#define MAX_LENGTH_Z				350000
+#define MAX_LENGTH_Z				440000
 
 #define ENCODER_TOL					250
 #define ENCODER_TOL_XY				1000

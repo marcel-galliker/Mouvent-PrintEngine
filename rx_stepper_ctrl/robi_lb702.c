@@ -566,7 +566,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in y-Axis, Moving: %d, Cap: %d, Wash: %d, Screw: %d, Ref: %d, Ref Done: %d", RX_StepperStatus.info.moving, RX_StepperStatus.info.z_in_cap, RX_StepperStatus.info.z_in_wash, RX_StepperStatus.info.z_in_screw, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.ref_done);
             break;
         }
-        if (!_CmdRunning || (_CmdRunning == CMD_ROBI_MOVE_Z_UP && !RX_StepperStatus.screwerinfo.z_in_down))
+        if (!_CmdRunning || (_CmdRunning == CMD_ROBI_MOVE_Z_UP && !RX_StepperStatus.screwerinfo.z_in_down) || _CmdRunning == CMD_ROBI_MOVE_Z_DOWN)
         {
             if (!RX_StepperStatus.screwerinfo.ref_done)
             {
@@ -595,6 +595,8 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                 rc_moveto_y(pos, _FL_);
             }
         }
+        else
+            TrPrintfL(TRUE, "Error");
         break;
 
     case CMD_ROBI_MOVE_TO_GARAGE:
