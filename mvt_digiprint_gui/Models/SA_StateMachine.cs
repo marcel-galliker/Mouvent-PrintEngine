@@ -214,7 +214,8 @@ namespace RX_DigiPrint.Models
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
 			//--- measurmentfunctions -----------------------------
-			for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
+		//	for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
+			for (color=RxGlobals.PrintSystem.ColorCnt-1; color>=0; color--)	// reverse order!
 			{
 				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
 				_AdjustFunction[color]= ECamFunction.CamNoFunction;
@@ -401,7 +402,8 @@ namespace RX_DigiPrint.Models
 			}
 
 			//--- measurmentfunctions -----------------------------
-			for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
+		//	for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
+			for (color=RxGlobals.PrintSystem.ColorCnt-1; color>=0; color--)	// reverse order!
 			{
 				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
 				if (ink!=null)
