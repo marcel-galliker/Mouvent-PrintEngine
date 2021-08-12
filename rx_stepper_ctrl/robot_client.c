@@ -730,7 +730,7 @@ static void _configure_z_motor(void)
 	_MotorCfg[MOTOR_Z].tpowerdown = 0;
 	_MotorCfg[MOTOR_Z].tpwmthrs = 0;
 	_MotorCfg[MOTOR_Z].rampmode = 0;
-	_MotorCfg[MOTOR_Z].vmax = 4*322122;
+	_MotorCfg[MOTOR_Z].vmax = 6*322122;
 	_MotorCfg[MOTOR_Z].v1 = 0;
 	_MotorCfg[MOTOR_Z].amax = 5277;
 	_MotorCfg[MOTOR_Z].dmax = 5277;

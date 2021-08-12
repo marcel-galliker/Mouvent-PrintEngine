@@ -281,6 +281,7 @@ void robi_lb702_main(int ticks, int menu)
         {
             int loc_new_cmd = _NewCmd;
             int loc_new_value = _Value;
+            TrPrintfL(TRUE, "robi_lb702_main call cmd=0x%08x, val=%d", _NewCmd, _Value);
             _NewCmd = 0;
 
             _Value = 0;
@@ -566,28 +567,34 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             Error(ERR_CONT, 0, "Basket lift is not in position to move Robi in y-Axis, Moving: %d, Cap: %d, Wash: %d, Screw: %d, Ref: %d, Ref Done: %d", RX_StepperStatus.info.moving, RX_StepperStatus.info.z_in_cap, RX_StepperStatus.info.z_in_wash, RX_StepperStatus.info.z_in_screw, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.info.ref_done);
             break;
         }
+        TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y 1");
         if (!_CmdRunning || (_CmdRunning == CMD_ROBI_MOVE_Z_UP && !RX_StepperStatus.screwerinfo.z_in_down) || _CmdRunning == CMD_ROBI_MOVE_Z_DOWN)
         {
+            TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y 2");
             if (!RX_StepperStatus.screwerinfo.ref_done)
             {
+                TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y 3");
                 _NewCmd = msgId;
                 _Value = *((INT32 *)pdata);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_REFERENCE, NULL);
             }
             else if (!RX_StepperStatus.screwerinfo.z_in_down)
             {
+                TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y 4");
                 _NewCmd = msgId;
                 _Value = *((INT32 *)pdata);
                 robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_MOVE_Z_DOWN, NULL);
             }
             else
             {
+                TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y 5");
                 pos = *((INT32 *)pdata);
                 if (pos < 0)
                 {
                     Error(ERR_CONT, 0, "Unreachable position %d in y-Axis of Robi", pos); 
                     break;
                 }
+                TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_Y 6");
                 _CmdRunning = msgId;
                 _set_moving_variables();
                 RX_StepperStatus.screwerinfo.moving = TRUE;
@@ -596,7 +603,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             }
         }
         else
-            TrPrintfL(TRUE, "Error");
+            TrPrintfL(TRUE, "Error: _CmdRunning=0x%08x", _CmdRunning);
         break;
 
     case CMD_ROBI_MOVE_TO_GARAGE:
