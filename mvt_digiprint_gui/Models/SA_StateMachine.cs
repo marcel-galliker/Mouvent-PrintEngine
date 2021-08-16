@@ -58,7 +58,7 @@ namespace RX_DigiPrint.Models
 		private RxCam.CallBackDataStruct	_CallbackData;
 		private int				 _StopTime;
 		private bool[]			 _RobotRunning= new bool[4];
-		private bool			 _RobotUsed=false;
+		private bool[]			 _RobotUsed=new bool[4];
 		private bool			 _Adjusted;
 
 		private readonly int[]	 _DensitiyLevels = { 20, 30, 40, 50};
@@ -152,7 +152,7 @@ namespace RX_DigiPrint.Models
 
 						// _Adjusted = true;
 						_RobotRunning[stepperNo] = true;
-						_RobotUsed = true;
+						_RobotUsed[stepperNo] = true;
 
 						action.State	= ECamFunctionState.runningRob;
 						Console.WriteLine("Stepper[{0}]: CMD_HEAD_ADJUST Printbar={1}, Head={2}, axis={3}, steps={4}", stepperNo, msg.printbarNo, msg.headNo, msg.axis, msg.steps);
@@ -160,6 +160,13 @@ namespace RX_DigiPrint.Models
 						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
 					}
 					return;
+				}
+				else if (action.StepperNo!=stepperNo)
+				{
+					TcpIp.SValue msg = new TcpIp.SValue();
+					msg.no=stepperNo;
+					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_ROBI_MOVE_TO_GARAGE, ref msg);
+					_RobotUsed[stepperNo] = false;
 				}
 			}
 			if (_Adjusted)
@@ -205,11 +212,14 @@ namespace RX_DigiPrint.Models
 			}
 			*/
 
-			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
+			for (n=0; n<_RobotRunning.Length; n++) 
+			{
+				_RobotRunning[n]=false;
+				_RobotUsed[n]  = false;
+			}
 
 			_AssistMode = ENAssistMode.align;
 			_Adjusted   = false;
-			_RobotUsed  = false;
 
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
@@ -843,8 +853,11 @@ namespace RX_DigiPrint.Models
 			else _ActionIdx=1;
 			_Action = null;
 			RxGlobals.SetupAssist.ScanReference();
-			if (_RobotUsed) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
-			_RobotUsed = false;
+			for(int n=0; n<_RobotUsed.Length; n++)
+			{
+				if (_RobotUsed[n]) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
+				_RobotUsed[n] = false;
+			}
 
 			return running;
 		}

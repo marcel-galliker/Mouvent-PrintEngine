@@ -130,6 +130,17 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_cal_step4:			return "CAL/4";	//  0x00e:
 	case ctrl_cal_done:				return "CAL DONE";	//  0x00f:
 
+    case ctrl_recovery_start:		return "REC";	// 0x500
+    case ctrl_recovery_step1:		return "REC/1";	// 0x501
+    case ctrl_recovery_step2:		return "REC/2";	// 0x502
+    case ctrl_recovery_step3:		return "REC/3";	// 0x503
+    case ctrl_recovery_step4:		return "REC/4";	// 0x504
+    case ctrl_recovery_step5:		return "REC/5";	// 0x505
+    case ctrl_recovery_step6:		return "REC/6";	// 0x506
+    case ctrl_recovery_step7:		return "REC/7";	// 0x507
+    case ctrl_recovery_step8:		return "REC/8";	// 0x508
+    case ctrl_recovery_step9:		return "REC/9";	// 0x509
+
 	case ctrl_test_watchdog:		return "WATCHDOG";	//0x10000,
 	case ctrl_test:					return "TEST";		//0x10001,
     	

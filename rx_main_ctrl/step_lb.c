@@ -131,10 +131,14 @@ int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen
 			case CMD_ROB_REFERENCE:
             case CMD_ROB_SERVICE:
             case CMD_RESET_ALL_SCREWS:
-            case CMD_ROBI_MOVE_TO_GARAGE:
 						sok_send_2(&_step_socket[no], cmd, 0, NULL);
 						break;
 		
+            case CMD_ROBI_MOVE_TO_GARAGE:
+                        if (no==*(INT32*)data)
+						    sok_send_2(&_step_socket[no], cmd, 0, NULL);
+						break;
+
 			case CMD_LIFT_PRINT_POS:
 						_AbortPrinting=FALSE;
                         memset(_StepperPreventDripping, 0, sizeof(_StepperPreventDripping));

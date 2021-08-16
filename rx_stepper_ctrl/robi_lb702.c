@@ -198,6 +198,7 @@ void robi_lb702_main(int ticks, int menu)
                 RX_StepperStatus.screwerinfo.y_in_ref = TRUE;
                 _CmdRunning = 0;
             }
+            else rc_reference();
             break;
 
         case CMD_ROBI_MOVE_TO_Y:
@@ -277,7 +278,7 @@ void robi_lb702_main(int ticks, int menu)
         default:
             break;
         }
-        if ((RX_StepperStatus.screwerinfo.ref_done && _NewCmd) || _NewCmd == CMD_ROBI_MOVE_Z_DOWN)
+        if (((RX_StepperStatus.screwerinfo.ref_done || rc_in_garage()) && _NewCmd) || _NewCmd == CMD_ROBI_MOVE_Z_DOWN)
         {
             int loc_new_cmd = _NewCmd;
             int loc_new_value = _Value;

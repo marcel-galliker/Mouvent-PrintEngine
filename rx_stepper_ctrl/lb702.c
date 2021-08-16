@@ -206,6 +206,7 @@ void lb702_main(int ticks, int menu)
 						int pos = -1*_micron_2_steps(DIST_MECH_REF);
 						_lb702_move_to_pos(CMD_LIFT_REFERENCE, pos, pos);
                         RX_StepperStatus.cmdRunning = FALSE;
+						if (!rc_in_garage()) rc_reference();
 					}
 				}
 				else if (ps_get_power() < 20000)
@@ -538,8 +539,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
         RX_StepperStatus.cmdRunning = 0;
-        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);
-        
+        robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);  
     }
 	else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW) 
 	{
@@ -559,7 +559,16 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 			}
 			else if (cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS)
 			{
-				ok = (RX_StepperStatus.screwerinfo.robi_in_ref && RX_StepperStatus.screwerinfo.y_in_ref);
+				ok = (RX_StepperStatus.screwerinfo.robi_in_ref);
+				if (!ok)
+				{
+					_Cmd_New = cmd;
+					_PrintPos_New[MOTOR_Z_BACK] = pos0;
+					_PrintPos_New[MOTOR_Z_FRONT] = pos1;
+					_CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
+					RX_StepperStatus.cmdRunning = 0;
+					robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);  
+				}
 			}
 			else if (cmd == CMD_LIFT_SCREW)
 			{
@@ -702,6 +711,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 											}
 										}
 									}
+									else Error(ERR_CONT, 0, "CMD_LIFT_PRINT_POS but Command 0x%08x still running", RX_StepperStatus.cmdRunning);
 									break;
 		
 	case CMD_LIFT_UP_POS:			TrPrintfL(TRUE, "CMD_LIFT_UP_POS");
@@ -721,6 +731,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                                             _lb702_do_reference();
                                         }
 									}
+									else Error(ERR_CONT, 0, "CMD_LIFT_UP_POS but Command 0x%08x still running", RX_StepperStatus.cmdRunning);
 									break;
 
 	case CMD_LIFT_CAPPING_POS:		if (RX_StepperStatus.cmdRunning == CMD_LIFT_CAPPING_POS || _Cmd_New == CMD_LIFT_CAPPING_POS) break;
