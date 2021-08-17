@@ -34,7 +34,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
             LengthBox.ShowRolls = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf);
 
-            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702 && !RxGlobals.PrintSystem.LH702_simulation) SpeedHeight.Height = new GridLength(0);
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702) SpeedHeight.Height = new GridLength(0);
             else SpeedHeight.Height = GridLength.Auto;
         }
 

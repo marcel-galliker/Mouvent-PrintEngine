@@ -121,7 +121,7 @@ BOOL setup_write_config()
 		rx_file_copy(PATH_USER FILENAME_CFG, PATH_USER FILENAME_CFG ".save");
 		_SaveConfig = FALSE;
 		_setup_config(PATH_USER FILENAME_CFG, &RX_Config, WRITE);
-		Error(WARN, 0, "Save new configuration");
+		Error(LOG, 0, "Save new configuration");
 		return TRUE;
 	}
 	return FALSE;
@@ -132,9 +132,9 @@ void setup_read_config()
 	_setup_config(PATH_USER FILENAME_CFG, &RX_Config, READ);
 	if (RX_Config.printer.type == printer_undef)
 	{
-		// try to retreive the saved config
+		// try to retrieve the saved config
 		_setup_config(PATH_USER FILENAME_CFG ".save", &RX_Config, READ);
-		Error(WARN, 0, "Retreive configuration from backup");
+		Error(WARN, 0, "Retrieve configuration from backup");
 	}
 	
 }
@@ -147,8 +147,23 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
 	HANDLE file = setup_create();
 
 	setup_load(file, filepath);
-	
-	if (setup_chapter(file, "Configuration", -1, action)!=REPLY_OK) return REPLY_ERROR;
+
+	if (setup_chapter(file, "Configuration", -1, action)!=REPLY_OK) 
+	{
+		if (action == READ) // if could not read configuration, set default values in config to avoid setting null values ar first write
+		{
+			strcpy(pcfg->master_ip_address, MASTER_IP_ADDR_SERVER);
+			pcfg->master_ip_port = MASTER_IP_PORT_SERVER;
+			strcpy(pcfg->em2_1_address, EM2_1_IP_ADDRESS);
+			strcpy(pcfg->em2_1_mask, EM2_1_IP_SUBMASK);
+			pcfg->lh702_protocol_version = 2;
+			pcfg->print_queue_buffer = 64;
+			pcfg->mark_reader_ignore_size = 80;
+			pcfg->mark_reader_window_size = 25;
+		}
+
+		return REPLY_ERROR;
+	}
 
 	setup_uchar (file, "Simulation", action, &pcfg->simulation, 0);
 	setup_str   (file, "material", action,  pcfg->material,	sizeof(pcfg->material),	"");

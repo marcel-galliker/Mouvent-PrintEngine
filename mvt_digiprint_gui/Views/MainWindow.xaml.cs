@@ -288,7 +288,6 @@ namespace RX_DigiPrint.Views
                 TabCtrl.SelectedItem=TabPrintQueue;
                 if (type==EPrinterType.printer_LH702)
 				{
-                    _ShowTab(RxGlobals.PrintSystem.LH702_simulation, TabMachine, AddLocationHint.After);
                     _ShowTab(true, TabLH702, AddLocationHint.After);
                     _ShowTab(false, TabMachine, AddLocationHint.After);
                 }

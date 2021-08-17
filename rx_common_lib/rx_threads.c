@@ -13,6 +13,16 @@
 #include "rx_error.h"
 #include "rx_threads.h"
 
+static int _rx_core_cnt();
+#define THREAD_CNT 256
+
+//--- rx_get_maxinumthreads -------------------------
+int rx_get_maxinumthreads()
+{
+	// use the number of core but not more than a quarter of the Thread Cnt
+	return min(THREAD_CNT / 4, _rx_core_cnt());
+}
+
 #ifdef WIN32
 #include <Windows.h>
 #include <psapi.h>
@@ -367,17 +377,11 @@ int rx_process_execute(const char *process, const char *outPath, int timeout)
 }
 
 //--- rx_core_cnt -----------------------
-int rx_core_cnt(void)
+int _rx_core_cnt(void)
 {
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
 	return sysinfo.dwNumberOfProcessors;	
-}
-
-//--- rx_get_maxnumthreads -------------------------
-int	   rx_get_maxnumthreads(void *dummy)
-{
-	return rx_core_cnt();
 }
 
 #else
@@ -395,8 +399,6 @@ int	   rx_get_maxnumthreads(void *dummy)
 #include <sys/resource.h>
 #include <dirent.h>
 
-
-#define THREAD_CNT	128
 
 static HANDLE _ThreadMutex;
 
@@ -687,19 +689,13 @@ int rx_process_execute(const char *process, const char *outPath, int timeout)
 }
 
 //--- rx_core_cnt -----------------------------
-int rx_core_cnt(void)
+int _rx_core_cnt(void)
 {
 	char str[64];
 	FILE *file = popen("nproc", "r");
 	fgets(str, sizeof(str), file);
 	pclose(file);
 	return atoi(str);	
-}
-
-//--- rx_get_maxnumthreads -------------------------
-int	   rx_get_maxnumthreads(void *dummy)
-{
-	return rx_core_cnt();
 }
 
 //--- rx_sleep ----------------------------------------

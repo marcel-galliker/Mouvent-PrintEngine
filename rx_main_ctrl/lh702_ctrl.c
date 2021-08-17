@@ -318,7 +318,7 @@ static void _lh702_send_status(void)
 			sok_send(&_Socket, &_Status3);			
 		}
 
-		TrPrintfL(TRUE, "SendToLH702: version=%d, printState=%d, id=%d, copies=%d", RX_Config.lh702_protocol_version, _Status.printState, _Status.id, _Status.copies_printed);
+		//TrPrintfL(TRUE, "SendToLH702: version=%d, printState=%d, id=%d, copies=%d", RX_Config.lh702_protocol_version, _Status.printState, _Status.id, _Status.copies_printed);
 	}
 }
 

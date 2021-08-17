@@ -83,7 +83,7 @@ void flz_init(void)
 		_FlzInit = TRUE;
 	
 		int i;
-		_ThreadCnt = rx_core_cnt();
+		_ThreadCnt = rx_get_maxinumthreads();
 		_ThreadPar = rx_malloc(_ThreadCnt*sizeof(SFlzThreadPar));
 		_sem_decompress_start = rx_sem_create();
 		rx_thread_start(_flz_decompress_master_thread, NULL, 0, "_flz_decompress_master_thread");

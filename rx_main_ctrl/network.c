@@ -217,6 +217,18 @@ int net_register(SNetworkItem *item)	// register and calculate IP-Address
 	return 0;
 }
 
+BOOL net_is_connected(EDevice dev, int no) 
+{
+	for (int i = 0; i < SIZEOF(_Network.item); i++)
+	{
+		if (dev == _Network.item[i].deviceType && no == _Network.item[i].deviceNo)
+		{
+			return _Connected[i];
+		}
+	}
+	return FALSE; // not register
+}
+
 //--- net_register_by_device --------------------------------------
 void net_register_by_device(EDevice dev, int no)
 {

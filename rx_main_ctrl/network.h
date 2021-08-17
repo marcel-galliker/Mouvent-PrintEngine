@@ -27,6 +27,7 @@ int  net_register			(SNetworkItem *item);
 int	 net_booted				(UINT64 macAddr);
 int	 net_is_booted			(UINT64 macAddr);
 void net_register_by_device	(EDevice dev, int no);
+BOOL net_is_connected		(EDevice dev, int no);
 int	 net_is_registered		(EDevice dev, int no);
 void net_unregister			(SNetworkItem *item);
 void net_disconnnected		(SNetworkItem *item);

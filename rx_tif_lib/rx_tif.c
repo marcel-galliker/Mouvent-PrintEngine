@@ -339,7 +339,7 @@ int tif_load_mt(SPageId *id, const char *filedir, const char *filename, int prin
 			if (psplit[c].lastLine<height) height=psplit[c].lastLine;
 			
 			y = psplit[c].firstLine;
-			if (compression==COMPRESSION_NONE) 	threadCnt = rx_core_cnt();	// seeking only allowed for uncompressed files
+			if (compression==COMPRESSION_NONE) 	threadCnt = rx_get_maxinumthreads();	// seeking only allowed for uncompressed files
 			else								threadCnt = 1;
 			
 			h = height/threadCnt;

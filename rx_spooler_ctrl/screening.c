@@ -111,7 +111,7 @@ void scr_init(void)
 		_SemScreeningDone	= rx_sem_create();
 		
 		_ScrThreadRunning = TRUE;
-		_ScrThreadCnt = (_GPU)? gpu_stream_cnt():rx_core_cnt();
+		_ScrThreadCnt = (_GPU) ? gpu_stream_cnt() : rx_get_maxinumthreads();
 		for (int i=0; i<_ScrThreadCnt; i++)
 		{
 			char name[MAX_PATH];

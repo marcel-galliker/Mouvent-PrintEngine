@@ -191,7 +191,7 @@ int	plc_init(void)
 	if (_SimuPLC)     Error(WARN, 0, "PLC in Simulation");
 	if (_SimuEncoder) Error(WARN, 0, "Encoder in Simulation");
 	
-	if (RX_Config.printer.type==printer_LH702 && str_start(RX_Hostname, "LH702")) _SimuPLC = TRUE;
+	if (RX_Config.printer.type==printer_LH702) _SimuPLC = TRUE;
 	
 	if (_SimuPLC) rx_thread_start(_plc_simu_thread, NULL, 0, "_plc_simu_thread");
 	else		  rx_thread_start(_plc_thread, NULL, 0, "_plc_thread");
@@ -739,7 +739,7 @@ static void _simu_init(void)
 	net_device_to_ipaddr(_NetItem.deviceType, _NetItem.deviceNo, _NetItem.ipAddr, sizeof(_NetItem.ipAddr));
 	_NetItem.connected = TRUE;
 
-	if (!str_start(RX_Hostname, "LH702")) net_register(&_NetItem);
+	if (RX_Config.printer.type != printer_LH702) net_register(&_NetItem);
 }
 
 //--- plc_simu_thread ---------------------------------------------

@@ -137,7 +137,7 @@ class TCPProtocol(network.AbstractTCPProtocol):
     def mgt_CMD_GET_BLOCK_USED(self, msg):
         # send response
         msg.msgtype = "REP_GET_BLOCK_USED"
-        msg.blockOutIdx = self.board.blockOutIdx[msg.headNo] 
+        msg.blockOutIdx = self.board.blockOutIdx[msg.headNo]
         if rec_blocks:        
             msg.used = self.board.used.flags(msg.blkNo, msg.blkCnt, self.board.blk_end[msg.headNo], self.board.blkNo0[msg.headNo]) 
         else:
@@ -209,7 +209,7 @@ def save_image(board, fpga_images):
                 if fpga.clearBlockUsed:
                     del blocks[n0]
                     board.used.free(n0)
-            board.blockOutIdx[fpga.head] = fpga.blkNo+fpga.blkCnt
+            board.blockOutIdx[fpga.head] = fpga.blkNo+fpga.blkCnt - 1
             from PIL import Image
             # the width is align to 256 bits
             align = 256 // fpga.bitPerPixel # so it depends on the bit per pixel

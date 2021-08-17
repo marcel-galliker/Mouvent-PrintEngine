@@ -193,7 +193,7 @@ void data_init(RX_SOCKET socket, int headCnt)
 	//--- MultiCopy Threads ---------------
 	if (_MultiCopyPar==NULL)
 	{
-		_MultiCopyThreadCnt = rx_core_cnt();
+		_MultiCopyThreadCnt = rx_get_maxinumthreads();
 		_MultiCopyPar = (SMultiCopyPar*)malloc(_MultiCopyThreadCnt*sizeof(SMultiCopyPar));
 		for (i=0; i<_MultiCopyThreadCnt; i++)
 		{

@@ -121,7 +121,7 @@ namespace RX_DigiPrint.Views.UserControls
         public void Send()
         {
             _send_children(Children);
-            if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LH702 || RxGlobals.PrintSystem.LH702_simulation)
+            if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_LH702)
             {
                 string str = string.Format("{0}\n{1}={2}\n", UnitID, "CMD_SET_PARAMETER", 1);
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_VAR, str);

@@ -574,29 +574,31 @@ void ctrl_tick(void)
 #define TIMEOUT 3000
 	for (i=0; i<SIZEOF(_HeadCtrl); i++)
 	{
-		if (_HeadCtrl[i].running)
+		if (_HeadCtrl[i].running && _HeadCtrl[i].socket != INVALID_SOCKET)
 		{
-			if (_HeadCtrl[i].aliveTime && _HeadCtrl[i].aliveTime + TIMEOUT < time && _HeadCtrl[i].socket != INVALID_SOCKET)	
+			if (!net_is_connected(dev_head, i)) 
+			{
+				sok_close(&_HeadCtrl[i].socket);
+				_HeadCtrl[i].aliveTime = 0;
+			}
+			if (_HeadCtrl[i].aliveTime && _HeadCtrl[i].aliveTime + TIMEOUT < time)
 			{
 				Error(WARN, 0, "Head[%d]: Status Response TIMEOUT: time=%d", i, time - _HeadCtrl[i].aliveTime);
 			}
-			else
+			else if (_HeadCtrl[i].aliveTime && _HeadCtrl[i].aliveTime+TIMEOUT-1000<time)
 			{
-				if (_HeadCtrl[i].aliveTime && _HeadCtrl[i].aliveTime+TIMEOUT-1000<time && _HeadCtrl[i].socket!=INVALID_SOCKET)
-				{
-					ErrorEx(dev_head, i, WARN, 0, "Status Response Late: time=%d", time-_HeadCtrl[i].aliveTime);					
-				}		
+				ErrorEx(dev_head, i, WARN, 0, "Status Response Late: time=%d", time-_HeadCtrl[i].aliveTime);
+			}		
 		
-				for (head = 0; head < MAX_HEADS_BOARD; head++)
-				{
-					inkSupply = RX_Config.headBoard[i].head[head].inkSupply;
-					stat[head].cylinderPressure    = fluid_get_cylinderPres(inkSupply);
-					stat[head].cylinderPressureSet = fluid_get_cylinderPresSet(inkSupply);
-					stat[head].fluidErr            = fluid_get_error(inkSupply);
-					stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
-				}
-				sok_send_2(&_HeadCtrl[i].socket, CMD_HEAD_STAT, sizeof(stat), stat);
-			} //if (_HeadCtrl[i].aliveTime && ..
+			for (head = 0; head < MAX_HEADS_BOARD; head++)
+			{
+				inkSupply = RX_Config.headBoard[i].head[head].inkSupply;
+				stat[head].cylinderPressure    = fluid_get_cylinderPres(inkSupply);
+				stat[head].cylinderPressureSet = fluid_get_cylinderPresSet(inkSupply);
+				stat[head].fluidErr            = fluid_get_error(inkSupply);
+				stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
+			}
+			sok_send_2(&_HeadCtrl[i].socket, CMD_HEAD_STAT, sizeof(stat), stat);
 		} // if (_HeadCtrl[i].running)
 	} // for
 }
