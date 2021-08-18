@@ -521,7 +521,7 @@ static void _rc_state_machine(void)
 								}
 								else if (_RobotStatus.motor[MOTOR_Z].moveIdDone == _MoveId[MOTOR_Z]) 
 								{
-									_rc_error(_FL_, "Z-Axis down sensor not found");
+									_rc_error(_FL_, "Robot Z-Axis down sensor not found");
 								}
 								break;
 
@@ -545,7 +545,7 @@ static void _rc_state_machine(void)
 									}
 									else
 									{
-										_rc_error(_FL_, "Y-Axis end sensor not found");
+										_rc_error(_FL_, "Robot Y-Axis end sensor not found");
 										_RC_State = RC_STATE_REF;
 									}
 								}													
@@ -609,7 +609,7 @@ static void _rc_state_machine(void)
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);	
 									if (_RobotStatus.motor[MOTOR_XY_0].isStalled || _RobotStatus.motor[MOTOR_XY_1].isStalled)
 									{
-										_rc_error(_FL_, "X-Axis blocked");
+										_rc_error(_FL_, "Robot X-Axis blocked");
 										_RC_State=RC_STATE_REF+3;
 									}
 									else 
@@ -630,10 +630,10 @@ static void _rc_state_machine(void)
 									{
 										_rc_reset_motors(MOTORS_XY);
 										_RC_State=0;
-										Error(LOG, 0, "Reference done");
+										Error(LOG, 0, "Robot Reference done");
                                         RX_StepperStatus.screwerinfo.ref_done = TRUE;
                                     }
-									else _rc_error(_FL_, "Y-Axis garage sensor not found");
+									else _rc_error(_FL_, "Robot Y-Axis garage sensor not found");
 								}
 								break;		
 		
@@ -1233,6 +1233,7 @@ int rc_screwer_in_ref(void)
 //--- rc_screwer_to_ref ------------------------------
 void rc_screwer_to_ref(void)
 {
+	_rc_set_screwer_speed(TRUE);
 	_rc_motor_moveBy(MOTOR_SCREW, 2*SCREW_STEPS, IN_SCREW_EDGE, _FL_);
 }
 
