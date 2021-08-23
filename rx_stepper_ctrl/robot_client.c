@@ -948,21 +948,23 @@ static int _rc_moveto_x_stop(int x, int stop, const char *file, int line)
 	    memset(&cmd, 0, sizeof(cmd));
 	    cmd.header.msgLen	 = sizeof(cmd);
 	    cmd.header.msgId	 = CMD_MOTORS_MOVE;
+
 	    cmd.motors			|= 1<<MOTOR_XY_0;
 	    cmd.targetPos[MOTOR_XY_0] = _RobotStatus.motor[MOTOR_XY_0].encPos+dx;
+	    cmd.moveId [MOTOR_XY_0] = ++_MoveId[MOTOR_XY_0];
+
 	    cmd.motors			|= 1<<MOTOR_XY_1;
 	    cmd.targetPos[MOTOR_XY_1] = _RobotStatus.motor[MOTOR_XY_1].encPos+dx;
-	    cmd.moveId [MOTOR_XY_0] = ++_MoveId[MOTOR_XY_0];
 	    cmd.moveId [MOTOR_XY_1] = ++_MoveId[MOTOR_XY_1];
 	    if (stop>=0)
 	    {
-		    cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
+		    cmd.stopBits[MOTOR_XY_0]     = cmd.stopBits[MOTOR_XY_1]     = 1<<stop;
 		    cmd.stopBitLevel[MOTOR_XY_0] = cmd.stopBitLevel[MOTOR_XY_1] = STOP_ON_HIGH;
 	    }
 	    else 
 	    {
 		    cmd.encoderCheck[MOTOR_XY_0] = cmd.encoderCheck[MOTOR_XY_1] = ENC_CHECK_ENC;
-		    cmd.encoderTol[MOTOR_XY_0] = cmd.encoderTol[MOTOR_XY_1] = ENCODER_TOL_XY;
+		    cmd.encoderTol[MOTOR_XY_0]   = cmd.encoderTol[MOTOR_XY_1]   = ENCODER_TOL_XY;
 	    }
         sok_send(&_RC_Socket, &cmd);
 	    
@@ -997,19 +999,20 @@ static int _rc_moveto_y_stop(int y, int stop, const char *file, int line)
 	    cmd.header.msgId	 = CMD_MOTORS_MOVE;
 	    cmd.motors			|= 1<<MOTOR_XY_0;
 	    cmd.targetPos[MOTOR_XY_0] = _RobotStatus.motor[MOTOR_XY_0].encPos-dy;
+	    cmd.moveId   [MOTOR_XY_0] = ++_MoveId[MOTOR_XY_0];
+
 	    cmd.motors			|= 1<<MOTOR_XY_1;
 	    cmd.targetPos[MOTOR_XY_1] = _RobotStatus.motor[MOTOR_XY_1].encPos+dy;
-	    cmd.moveId [MOTOR_XY_0] = ++_MoveId[MOTOR_XY_0];
-	    cmd.moveId [MOTOR_XY_1] = ++_MoveId[MOTOR_XY_1];
+	    cmd.moveId   [MOTOR_XY_1] = ++_MoveId[MOTOR_XY_1];
 	    if (stop>=0)
 	    {
-		    cmd.stopBits[MOTOR_XY_0] = cmd.stopBits[MOTOR_XY_1] = 1<<stop;
+		    cmd.stopBits[MOTOR_XY_0]     = cmd.stopBits[MOTOR_XY_1]     = 1<<stop;
 		    cmd.stopBitLevel[MOTOR_XY_0] = cmd.stopBitLevel[MOTOR_XY_1] = STOP_ON_HIGH;
 	    }
 	    else 
 	    {
             cmd.encoderCheck[MOTOR_XY_0] = cmd.encoderCheck[MOTOR_XY_1] = ENC_CHECK_ENC;
-		    cmd.encoderTol[MOTOR_XY_0] = cmd.encoderTol[MOTOR_XY_1] = ENCODER_TOL_XY;
+		    cmd.encoderTol[MOTOR_XY_0]   = cmd.encoderTol[MOTOR_XY_1]   = ENCODER_TOL_XY;
 	    }
         sok_send(&_RC_Socket, &cmd);
 	    
