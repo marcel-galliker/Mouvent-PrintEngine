@@ -22,7 +22,7 @@ void rc_handle_menu(char *str);
 
 void rx_enable_stall_error(int enable);
 
-void rc_reference(void);
+void rc_reference(int x);
 int  rc_moveto_x(int x, const char *file, int line);
 int  rc_moveto_y(int y, const char *file, int line);
 int  rc_moveby_z(int z, const char *file, int line);

@@ -198,7 +198,7 @@ void robi_lb702_main(int ticks, int menu)
                 RX_StepperStatus.screwerinfo.y_in_ref = TRUE;
                 _CmdRunning = 0;
             }
-            else rc_reference();
+            else rc_reference(0);
             break;
 
         case CMD_ROBI_MOVE_TO_Y:
@@ -352,7 +352,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning = msgId;
         RX_StepperStatus.screwerinfo.moving = TRUE;
         _set_moving_variables();
-        rc_reference();
+        rc_reference(0);
         break;
 
         /*
@@ -474,7 +474,7 @@ int robi_lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             _set_moving_variables();
         //  _Loose_Screw_Time = rx_get_ticks() + TIME_BEFORE_TURN_SCREWER;
             if (RX_StepperStatus.screwerinfo.ref_done)  rc_move_bottom(_FL_);
-            else                                        rc_reference();
+            else                                        rc_reference(0);
         }
         break;
         

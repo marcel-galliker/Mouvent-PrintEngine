@@ -206,7 +206,7 @@ void lb702_main(int ticks, int menu)
 						int pos = -1*_micron_2_steps(DIST_MECH_REF);
 						_lb702_move_to_pos(CMD_LIFT_REFERENCE, pos, pos);
                         RX_StepperStatus.cmdRunning = FALSE;
-						if (!rc_in_garage()) rc_reference();
+						if (!rc_in_garage()) rc_reference(0);
 					}
 				}
 				else if (ps_get_power() < 20000)

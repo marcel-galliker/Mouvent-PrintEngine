@@ -96,6 +96,7 @@ static UINT32			_FileSize;
 
 static int				_RC_State;
 static char				_RC_Error[MAX_PATH];
+static int				_PosX_ref;
 
 static int				_Error_Written[MOTOR_CNT] = {FALSE};
 static int				_StallErrorEnabled = TRUE;
@@ -320,9 +321,10 @@ static int _handle_robot_ctrl_msg(RX_SOCKET socket, void *msg, int len, struct s
 }
 
 //---- rc_reference -----------------------
-void rc_reference(void)
+void rc_reference(int x)
 {
 	TrPrintfL(TRUE, "rc_reference");
+	_PosX_ref = x;
 	_rc_reset_motors(MOTORS_ALL);
 	_rc_reset_edgeCtr(0xff);
 	_RC_State = RC_STATE_REF;
@@ -1204,7 +1206,7 @@ void rc_handle_menu(char *str)
 		{
 		case 'r':	_rc_reset_motors(MOTORS_ALL); break;
 		case 's':	rc_stop(); break;
-		case 'R':	rc_reference(); break;
+		case 'R':	rc_reference(0); break;
 		case 'm':	_rc_motor_moveBy(no, atoi(&str[2]),0,  _FL_);	break;
 		case 'x':	rc_moveto_x(RX_StepperStatus.screw_posX+atoi(&str[1]), _FL_); break;
 		case 'y':	rc_moveto_y(RX_StepperStatus.screw_posY+atoi(&str[1]), _FL_); break;
