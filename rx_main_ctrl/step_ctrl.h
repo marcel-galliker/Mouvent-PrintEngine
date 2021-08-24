@@ -49,7 +49,7 @@ void step_rob_do_reference(void);
 
 void step_rob_to_center_pos(void);
 
-void step_rob_to_wipe_pos(ERobotFunctions rob_function);
+void step_rob_to_wipe_pos(ERobotFunctions rob_function, INT32 position);
 int  step_rob_in_wipe_pos(ERobotFunctions rob_function);
 
 void step_rob_wipe_start(EnFluidCtrlMode mode);
@@ -77,3 +77,4 @@ int step_robot_used(int fluidNo);
 int step_stepper_to_fluid(int fluidNo);
 int step_stepper_to_cluster(int clusterNo);
 int step_get_ScrewPos(int stepperNo);
+void step_set_flush_to_fluid(int fluidNo);

@@ -32,8 +32,6 @@
 #include "setup.h"
 
 #define STEPPER_CNT		    4
-
-#define VACUUM_DELAY        10 * 1000       // ms -> 10 seconds
 static RX_SOCKET		    _step_socket[STEPPER_CNT]={0};
 
 static SStepperStat		    _Status[STEPPER_CNT];
@@ -388,7 +386,7 @@ void  steplb_abort_printing(void)
 {
 	for (int i = 0; i < STEPPER_CNT; i++)
 	{
-		if (_StepperPreventDripping[i] && !_Status[i].robinfo.rob_in_cap && _Status[i].robot_used) steplb_rob_to_fct_pos(i, rob_fct_cap);
+		if (_StepperPreventDripping[i] && !_Status[i].robinfo.rob_in_cap && _Status[i].robot_used) steplb_rob_to_fct_pos(i, rob_fct_cap, 0);
 	}
 	if (RX_StepperStatus.info.z_in_print)
 	{
@@ -468,19 +466,25 @@ int	 steplb_lift_in_up_pos(int no)
 }
 
 //--- steplb_rob_to_fct_pos --------------------------
-void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function)
+void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function, INT32 position)
 {
+    SRobMovePos rob_movepos;
+    rob_movepos.function = rob_function;
+    rob_movepos.position = position;
     if (_step_socket[no] == INVALID_SOCKET) return;
-	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);		
+	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);		
 }
 
 //--- steplb_rob_to_fct_pos_all ----------------------------------------------
-void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function)
+void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function, INT32 position)
 {
+    SRobMovePos rob_movepos;
+    rob_movepos.function = rob_function;
+    rob_movepos.position = position;
     for (int i = 0; i < STEPPER_CNT; i++)
     {
         if (_step_socket[i] != INVALID_SOCKET)
-			sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(rob_function), &rob_function);
+		    sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);
     }
 }
 
@@ -496,16 +500,8 @@ int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function)
 	case rob_fct_vacuum: 		return _Status[no].robinfo.vacuum_ready		&& _Status[no].robinfo.moving == FALSE; break;
 	case rob_fct_wipe: 			return _Status[no].robinfo.wipe_ready		&& _Status[no].robinfo.moving == FALSE; break;
 	case rob_fct_vacuum_change: return _Status[no].robinfo.vacuum_in_change	&& _Status[no].robinfo.moving == FALSE; break;
-	case rob_fct_purge_all:		return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break; // && _Status[no].robinfo.rob_in_cap
-	case rob_fct_purge_head0:
-	case rob_fct_purge_head1:
-	case rob_fct_purge_head2:
-	case rob_fct_purge_head3:
-	case rob_fct_purge_head4:
-	case rob_fct_purge_head5:
-	case rob_fct_purge_head6:
-	case rob_fct_purge_head7:	return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break;
-    case rob_fct_purge4ever:    return _Status[no].robinfo.x_in_purge4ever     && _Status[no].robinfo.moving == FALSE; break;
+	case rob_fct_move_purge:	return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break; // && _Status[no].robinfo.rob_in_cap
+    case rob_fct_purge4ever:    return _Status[no].robinfo.x_in_purge4ever  && _Status[no].robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }
@@ -516,7 +512,7 @@ int steplb_rob_in_fct_pos_all(ERobotFunctions rob_function)
 	switch (rob_function)
 	{
 	case rob_fct_cap:			return RX_StepperStatus.robinfo.rob_in_cap	&& RX_StepperStatus.robinfo.moving == FALSE; break;
-    case rob_fct_purge_head7:	return RX_StepperStatus.robinfo.purge_ready && RX_StepperStatus.robinfo.moving == FALSE; break;
+    case rob_fct_move_purge:	return RX_StepperStatus.robinfo.purge_ready && RX_StepperStatus.robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }
@@ -728,7 +724,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		
 		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done && !_Status[no].robinfo.moving)
 									{
-										steplb_rob_to_fct_pos(no, rob_fct_cap);
+										steplb_rob_to_fct_pos(no, rob_fct_cap, 0);
                                         if (_AutoCapMode || RX_Config.printer.type == printer_LB702_UV)   _RobotCtrlMode[no] = ctrl_cap_step3;
                                         else                _RobotCtrlMode[no] = ctrl_cap_step2;
 									}
@@ -804,30 +800,26 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
         case ctrl_wash_step3:		_RobotCtrlMode[no] = ctrl_off;
 									break;
                                     
-        case ctrl_vacuum:           _RobotCtrlMode[no] = ctrl_vacuum_step1;
-                                    _time[no] = rx_get_ticks() + VACUUM_DELAY;
+        case ctrl_vacuum:           if (!_Status[no].robinfo.moving)
+				                    {
+										function = rob_fct_vacuum;
+                                        if (ctrl_vacuum_step1 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
+                                        _RobotCtrlMode[no] = ctrl_vacuum_step1;
+									}
+									else if (_RobotCtrlMode[no] != ctrl_vacuum_step1)_RobotCtrlMode[no] = ctrl_vacuum;
                                     break;
 
-        case ctrl_vacuum_step1:		if (!_Status[no].robinfo.moving && rx_get_ticks() >= _time[no])
+        case ctrl_vacuum_step1:		if (_Status[no].robinfo.vacuum_done)
                                     {
-                                        function = rob_fct_vacuum;
-									    if (ctrl_vacuum_step2 != _RobotCtrlMode[no]) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(function), &function);
                                         _RobotCtrlMode[no] = ctrl_vacuum_step2;
-                                    }
-                                    else if (_RobotCtrlMode[no] != ctrl_vacuum_step2) _RobotCtrlMode[no] = ctrl_vacuum_step1;
-                                    break;
-                                    
-        case ctrl_vacuum_step2:     if (_Status[no].robinfo.vacuum_done)
-                                    {
-                                        _RobotCtrlMode[no] = ctrl_vacuum_step3;
-                                        steplb_rob_to_fct_pos(no, rob_fct_cap);
+                                        steplb_rob_to_fct_pos(no, rob_fct_cap, 0);
                                     }
                                     break;
                                     
-        case ctrl_vacuum_step3:		if (steplb_rob_in_fct_pos(no, rob_fct_cap)) _RobotCtrlMode[no] = ctrl_vacuum_step4;
+        case ctrl_vacuum_step2:     if (steplb_rob_in_fct_pos(no, rob_fct_cap)) _RobotCtrlMode[no] = ctrl_vacuum_step3;
 									break;
                                     
-        case ctrl_vacuum_step4:		 _RobotCtrlMode[no] = ctrl_off;
+        case ctrl_vacuum_step3:		 _RobotCtrlMode[no] = ctrl_off;
 									break;
 
 		case ctrl_off:              _RobotCtrlMode[no] = ctrl_off;
@@ -1082,4 +1074,19 @@ int steplb_stepper_to_cluster(int clusterNo)
         return clusterNo / div;
     else
         return (clusterNo + (RX_Config.headsPerColor / HEAD_CNT)) / div;
+}
+
+//--- steplb_set_flush_to_fluid ------------------------------------------------
+void steplb_set_flush_to_fluid(int fluidNo)
+{
+    int stepperNo = steplb_stepper_to_fluid(fluidNo);
+    if (RX_Config.inkSupplyCnt % 2 == 0)
+        fluidNo %= 2;
+    else if (RX_Config.inkSupplyCnt == 7 && stepperNo == 0)
+        fluidNo = 0;
+    else
+        fluidNo = (fluidNo + 1) % 2;
+
+    sok_send_2(&_step_socket[stepperNo], CMD_ROB_SET_FLUSH_VALVE,
+               sizeof(fluidNo), &fluidNo);
 }

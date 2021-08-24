@@ -387,12 +387,12 @@ void step_rob_do_reference(void)
 }
 
 //--- step_rob_to_wipe_pos ----------------------------------
-void step_rob_to_wipe_pos(ERobotFunctions rob_function)
+void step_rob_to_wipe_pos(ERobotFunctions rob_function, INT32 position)
 {
 	switch(_StepperType)
 	{
 	case STEPPER_TX:	steptx_rob_to_wipe_pos(rob_function); break;
-    case STEPPER_LB:	steplb_rob_to_fct_pos_all(rob_function); break;
+    case STEPPER_LB:	steplb_rob_to_fct_pos_all(rob_function, position); break;
 	default:			break;
 	}	
 }
@@ -739,4 +739,18 @@ int step_robot_used(int fluidNo)
         return FALSE;
     }
     return FALSE;
+}
+
+//--- step_set_flush_to_fluid ---------------------------------------
+void step_set_flush_to_fluid(int fluidNo)
+{
+    switch (_StepperType)
+    {
+    case STEPPER_LB:
+        steplb_set_flush_to_fluid(fluidNo);
+        break;
+    default:
+        return;
+    }
+    return;
 }

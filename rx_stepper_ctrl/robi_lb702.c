@@ -184,10 +184,10 @@ void robi_lb702_main(int ticks, int menu)
                     Error(ERR_CONT, 0, "Robi-Sensor in Garage not high");
                     lb702_reset_variables();
                     lbrob_reset_variables();
+                    _NewCmd = 0;
+                    _Value = 0;
                 }
                 _CmdRunning = 0;
-                _NewCmd = 0;
-                _Value = 0;
             }
             break;
 
@@ -664,15 +664,6 @@ static void _check_robi_stalled(void)
         RX_StepperStatus.screwerinfo.screwer_blocked_left = _CmdRunning == CMD_ROBI_SCREW_TIGHT;
         RX_StepperStatus.screwerinfo.screwer_blocked_right = _CmdRunning == CMD_ROBI_SCREW_LOOSE;
     }
-    
-    /*
-    int printhead = (2 * RX_StepperCfg.boardNo) + (RX_StepperStatus.screw_posX > (SCREW_X_LEFT + SCREW_X_RIGHT) / 2) + 1;
-    int axis = RX_StepperStatus.screw_posY > (SCREW_Y_STITCH + SCREW_Y_ANGLE) / 2;
-    if ((robi_screwer_stalled() && RX_RobiStatus.screwCurrent == 1) || (rc_screwer_stalled() && rc_get_screw_current()))
-    {
-        Error(ERR_CONT, 0, "Screwer stalled on Screw of printhead %d, Head %d, Axis %d", printhead, _head_screw_pos() - rob_fct_screw_cluster, axis);
-    }
-    */
 }
 
 //--- _robi_lb702_screw_edgeCnt ---------------------------------------------------------

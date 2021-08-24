@@ -298,7 +298,7 @@ void lb702_main(int ticks, int menu)
 	if (RX_StepperStatus.robot_used && _CmdRunningRobi)
 	{
 		int loc_new_cmd = 0;
-        if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving)
+        if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && (rc_move_done() || !RX_StepperStatus.robot_used))
 		{
 			//
 			loc_new_cmd = _NewCmd;
@@ -534,7 +534,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
         _PrintPos_New[MOTOR_Z_FRONT] = pos1;
         _lb702_do_reference();
     }
-    else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_StepperStatus.screwerinfo.robi_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
+    else if (RX_StepperStatus.robot_used && !_CmdRunningRobi && (!RX_StepperStatus.screwerinfo.y_in_ref || !RX_StepperStatus.screwerinfo.robi_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         _CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
         _NewCmd = cmd;
@@ -557,24 +557,11 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 			{
 				ok = (RX_StepperStatus.screwerinfo.robi_in_ref && RX_StepperStatus.screwerinfo.y_in_ref && RX_StepperStatus.info.x_in_ref); 
 			}
-			else if (cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS)
-			{
-				ok = (RX_StepperStatus.screwerinfo.robi_in_ref);
-				if (!ok)
-				{
-					_Cmd_New = cmd;
-					_PrintPos_New[MOTOR_Z_BACK] = pos0;
-					_PrintPos_New[MOTOR_Z_FRONT] = pos1;
-					_CmdRunningRobi = CMD_ROBI_MOVE_TO_GARAGE;
-					RX_StepperStatus.cmdRunning = 0;
-					robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunningRobi, NULL);  
-				}
-			}
-			else if (cmd == CMD_LIFT_SCREW)
+            else if (cmd == CMD_LIFT_SCREW)
 			{
 				ok = !RX_StepperStatus.screwerinfo.moving;
 			}
-			else if (cmd == CMD_LIFT_REFERENCE)
+			else if (cmd == CMD_LIFT_REFERENCE || cmd == CMD_LIFT_CAPPING_POS || cmd == CMD_LIFT_WASH_POS)
 			{ 
 				ok = TRUE;
 			}

@@ -65,7 +65,7 @@ static void set_interface(void)
 }
 
 //--- machine_init ------------------------------
-int		machine_init(void)
+int	machine_init(void)
 {
 	plc_init();
     drive_init();
@@ -75,7 +75,7 @@ int		machine_init(void)
 }
 
 //--- machine_end --------------------------------
-int		machine_end(void)
+int	machine_end(void)
 {
 	plc_end();
 	lh702_end();
@@ -83,14 +83,14 @@ int		machine_end(void)
 }
 
 //--- machine_tick -------------------------------
-int		machine_tick(void)
+int machine_tick(void)
 {
 	if(rx_def_is_tx(RX_Config.printer.type) || RX_StepperStatus.robot_used)
 	{
 		if (RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.robinfo.auto_cap) machine_set_capping_timer(FALSE);  // reset timer if already in cap
         else if (plc_get_state() == plc_error || (RX_StepperStatus.info.z_in_screw && _CappingTimer)) machine_set_capping_timer(TRUE);	// start timer as long as machine is in error state
 
-		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks() && !RX_PrinterStatus.door_open)
+		if (_CappingTimer>0 && _CappingTimer<rx_get_ticks() && !RX_PrinterStatus.door_open && !RX_StepperStatus.info.moving && !RX_StepperStatus.robinfo.moving && !RX_StepperStatus.screwerinfo.moving)
 		{
 			_CappingTimer=0;
 			Error(LOG, 0, "Setting printhead to capping position. CtrlMode=%d %d", fluid_get_ctrlMode(0),fluid_get_ctrlMode(1));
@@ -108,7 +108,7 @@ void machine_reset(void)
 }
 
 //--- machine_error_reset -------------------------
-void	machine_error_reset(void)
+void machine_error_reset(void)
 {
 	chiller_error_reset();
 	plc_error_reset();
@@ -122,7 +122,7 @@ void	machine_error_reset(void)
 }
 
 //--- machine_set_printpar -----------------------
-int		machine_set_printpar(SPrintQueueItem *pItem)
+int	machine_set_printpar(SPrintQueueItem *pItem)
 {
 	TrPrintfL(TRUE, "machine_set_printpar");
 	set_interface();
@@ -143,7 +143,7 @@ int		machine_set_printpar(SPrintQueueItem *pItem)
 }
 
 //--- machine_set_scans ----------------------------------
-int		machine_set_scans(int scans)
+int	machine_set_scans(int scans)
 {
 	switch(_MInterface) 
 	{
@@ -157,7 +157,7 @@ int		machine_set_scans(int scans)
 
 
 //--- machine_get_scanner_pos ---------------------
-UINT32	machine_get_scanner_pos(void)
+UINT32 machine_get_scanner_pos(void)
 {
 	switch(_MInterface) 
 	{
@@ -171,7 +171,7 @@ UINT32	machine_get_scanner_pos(void)
 }
 
 //--- machine_start_printing ----------------------
-int		machine_start_printing(void)
+int	machine_start_printing(void)
 {
 	TrPrintfL(TRUE, "machine_start_printing printState=%d", RX_PrinterStatus.printState);
 	machine_set_capping_timer(FALSE);
@@ -188,7 +188,7 @@ int		machine_start_printing(void)
 }
 
 //--- machine_pause_printing ----------------------
-int		machine_pause_printing(int fromGui)
+int	machine_pause_printing(int fromGui)
 {
 	machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
@@ -201,7 +201,7 @@ int		machine_pause_printing(int fromGui)
 }
 
 //--- machine_stop_printing -----------------------
-int		machine_stop_printing(void)
+int	machine_stop_printing(void)
 {
 	machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
@@ -215,7 +215,7 @@ int		machine_stop_printing(void)
 }
 
 //--- machine_abort_printing -----------------------
-int		machine_abort_printing(void)
+int	machine_abort_printing(void)
 {
 	machine_set_capping_timer(TRUE);
 	switch(_MInterface) 
@@ -230,7 +230,7 @@ int		machine_abort_printing(void)
 }
 
 //--- machine_clean -------------------------------
-int		machine_clean(void)
+int	machine_clean(void)
 {
 	switch(_MInterface) 
 	{

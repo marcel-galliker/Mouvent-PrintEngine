@@ -874,18 +874,19 @@ static int _ctrl_check_stepper_in_purgeMode(int headNo)
 {
     int fluidNo = RX_Config.headBoard[headNo/HEAD_CNT].head[headNo%HEAD_CNT].inkSupply;
     int inkSupply = fluidNo;
-    
     int Cluster_Per_Stepper = 2 * RX_Config.headsPerColor / MAX_HEADS_BOARD;
-    int i, j;
+    
+    if (headNo == -1) return FALSE;
+
     if (RX_Config.inkSupplyCnt % 2 == 0)
     {
         
         if (fluidNo % 2 != 0) fluidNo--;
-        for (i = 0; i < Cluster_Per_Stepper; i++)
+        for (int i = 0; i < Cluster_Per_Stepper; i++)
         {
-            for (j = 0; j < HEAD_CNT; j++)
+            for (int j = 0; j < HEAD_CNT; j++)
             {
-                if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (inkSupply * 2 +i)*HEAD_CNT+j != headNo)
+                if (RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6 && (inkSupply * 2 +i)*HEAD_CNT+j != headNo)
 					return TRUE;
             }
         }
@@ -894,9 +895,9 @@ static int _ctrl_check_stepper_in_purgeMode(int headNo)
     {
         if (fluidNo != 0 && fluidNo % 2 == 0) fluidNo--;
         if (fluidNo == 0) Cluster_Per_Stepper /= 2;
-        for (i = 0; i < Cluster_Per_Stepper; i++)
+        for (int i = 0; i < Cluster_Per_Stepper; i++)
         {
-            for (j = 0; j < HEAD_CNT; j++)
+            for (int j = 0; j < HEAD_CNT; j++)
             {
                 if ((RX_HBStatus[fluidNo * 2 + i].head[j].ctrlMode >= ctrl_purge_soft && RX_HBStatus[fluidNo*2 + i].head[j].ctrlMode <= ctrl_purge_step6) && (inkSupply * 2 +i)*HEAD_CNT+j != headNo)
 					return TRUE;
@@ -955,7 +956,6 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 //--- ctrl_send_purge_par ----------------------------------------------
 int ctrl_send_purge_par(int fluidNo, int time, int position_check, int delay_time_ms)
 {
-#define HEAD_WIDTH	43000
 	int head;
     int number_of_heads = RX_Config.headsPerColor * RX_Config.colorCnt;
     int delay_pos_y;
