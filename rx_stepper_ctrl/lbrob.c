@@ -303,6 +303,7 @@ void lbrob_main(int ticks, int menu)
                 {
                     motors_reset(MOTOR_X_BITS);
                     RX_StepperStatus.robinfo.ref_done = TRUE;
+                    Error(ERR_CONT, 0, "LBROB: Command CMD_ROB_REFERENCE: done");
                     _CapIsWet = FALSE;
                 }
                 else if (_CmdRunning_old != CMD_ROB_REFERENCE)
@@ -747,11 +748,7 @@ static void _lbrob_do_reference()
     }
 	else 
     {
-//        _lbrob_move_to_pos(CMD_ROB_REFERENCE, _micron_2_steps(3000), FALSE);
-        motor_reset(MOTOR_X_0);
-        motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
-        RX_StepperStatus.robinfo.ref_done = FALSE;
-        motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
+        _lbrob_move_to_pos(CMD_ROB_REFERENCE, _micron_2_steps(3000), FALSE);
     }
 }
 
@@ -1222,6 +1219,8 @@ static void _rob_state_machine(void)
 
             if (_pos.x)
             {
+            //    if (abs(_pos.x-RX_StepperStatus.screw_posX)>5000)
+            //        RX_StepperStatus.screwerinfo.ref_done = FALSE;
                 _RobStateMachine_Step++;
                 _correction_step = 0;
             }
@@ -1352,6 +1351,7 @@ static void _rob_state_machine(void)
             if (RX_StepperStatus.screwerinfo.z_in_up)
             {
                 TrPrintfL(TRUE, "_rob_state_machine: State=%d, zpos=%d, z_in_up=%d", _RobStateMachine_Step, RX_StepperStatus.motor[3].motor_pos, RX_StepperStatus.screwerinfo.z_in_up);
+                
                 _RobStateMachine_Step = 12;
             }
             else
