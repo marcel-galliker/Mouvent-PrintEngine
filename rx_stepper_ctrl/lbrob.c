@@ -320,14 +320,15 @@ void lbrob_main(int ticks, int menu)
                     Error(ERR_CONT, 0, "LIFT: Command %s - 1000 steps: Motor %s blocked",_CmdName, _MotorName[motor]);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                 }
-                else if (!RX_StepperStatus.info.x_in_ref && _CmdRunning_old != CMD_ROB_REFERENCE)
+                else if (!RX_StepperStatus.info.x_in_ref)
                 {
                     Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor REF NOT HIGH", _CmdName);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                     _CmdRunning_old = FALSE;
                 }
-                else if (RX_StepperStatus.info.x_in_ref)
+                else
                     _CapIsWet = FALSE;
+                
                 RX_StepperStatus.cmdRunning = FALSE;
             }
         }
@@ -807,10 +808,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
             robi_lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Robi, NULL);
             break;
         }
-        else if (fpga_input(CABLE_PULL_REF))
+        else if (fpga_input(CABLE_PULL_REF) && !RX_StepperStatus.robinfo.ref_done)
         {
             _CmdRunning = msgId;
-            motors_move_by_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(-3000), TRUE);
+            motors_move_by_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(-4000), TRUE);
             _CmdRunning_old = CMD_ROB_REFERENCE;
             break;
         }
