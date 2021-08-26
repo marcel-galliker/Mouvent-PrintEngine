@@ -151,7 +151,10 @@ void rx_def_init();
 
 #define SCREW_Y_STITCH		51300	// um
 #define SCREW_Y_ANGLE		34900	// um       // SCREW_Y_STITCH - 16400
-#define MIN_Y_POS			31000   // um 
+#define MIN_Y_POS			31000   // um
+
+//--- Head Data
+#define HEAD_WIDTH 43000 // um
 
 //--- simple value ----------------------------------------------	
 typedef struct SValue
@@ -1319,28 +1322,11 @@ typedef enum ERobotFunctions
 	rob_fct_vacuum_change,	//  5: Vaccum change
 	rob_fct_tilt,			//  6: Tilt for Capping
 	rob_fct_vacuum_all,		//  7: Vacuum all heads
-	rob_fct_purge_all,		//  8: Purge all heads
-	rob_fct_purge_head0,	//  9: Purge head 0
-	rob_fct_purge_head1,	// 10: Purge head 1
-	rob_fct_purge_head2,	// 11: Purge head 2
-	rob_fct_purge_head3,	// 12: Purge head 3
-	rob_fct_purge_head4,	// 13: Purge head 4
-	rob_fct_purge_head5,	// 14: Purge head 5
-	rob_fct_purge_head6,	// 15: Purge head 6
-	rob_fct_purge_head7,	// 16: Purge head 7
-    rob_fct_purge4ever,		// 17: Purge Capping
-    rob_fct_move,			// 18: Wash heads
-    rob_fct_screw_cluster,	// 19: Screw Pos cluster
-    rob_fct_screw_head0,	// 20: Screw Pos head 0
-    rob_fct_screw_head1,	// 21: Screw Pos head 1
-    rob_fct_screw_head2,	// 22: Screw Pos head 2
-    rob_fct_screw_head3,	// 23: Screw Pos head 3
-    rob_fct_screw_head4,	// 24: Screw Pos head 4
-    rob_fct_screw_head5,	// 25: Screw Pos head 5
-    rob_fct_screw_head6,	// 26: Screw Pos head 6
-    rob_fct_screw_head7,	// 27: Screw Pos head 7
-	rob_fct_move_to_pos,	// 28: Move to absomute position
-	rob_fct_maintenance,	// 29: Maintenance Pos
+    rob_fct_move_purge,		//  8: Move to Purge position
+    rob_fct_purge4ever,		//  9: Purge Capping
+    rob_fct_move,			// 10: Wash heads
+	rob_fct_move_to_pos,	// 11: Move to absomute position
+	rob_fct_maintenance,	// 12: Maintenance Pos
 } ERobotFunctions;
 
 typedef enum ERobotVaccumState
@@ -1420,7 +1406,11 @@ typedef struct SRobPosition
     INT16 stitch;
 } SRobPosition;
 
-
+typedef struct SRobMovePos
+{
+    ERobotFunctions function;
+    INT32 position;
+} SRobMovePos;
 	
 	//--- check also GUI: RX_DigiPrint.Models.TestTableStatus.Update
 typedef struct ETestTableInfo

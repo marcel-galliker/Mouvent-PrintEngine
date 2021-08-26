@@ -1009,7 +1009,9 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
 		if (RX_StepperStatus.cmdRunning && RX_StepperStatus.cmdRunning != CMD_FLUID_CTRL_MODE)
 		{ 
-            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL); _NewCmd = CMD_ROB_REFERENCE; break; 
+            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL); 
+            _NewCmd = CMD_ROB_REFERENCE; 
+            break; 
         }
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
@@ -1029,9 +1031,12 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		
 	case CMD_ROB_SHIFT_REF:			strcpy(_CmdName, "CMD_ROB_SHIFT_REF");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-		if (RX_StepperStatus.cmdRunning && RX_StepperStatus.cmdRunning != CMD_FLUID_CTRL_MODE){ 
-            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL); _NewCmd = CMD_ROB_SHIFT_REF; break; 
-            }
+		if (RX_StepperStatus.cmdRunning && RX_StepperStatus.cmdRunning != CMD_FLUID_CTRL_MODE)
+        { 
+            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL); 
+            _NewCmd = CMD_ROB_SHIFT_REF; 
+            break; 
+        }
 		motor_reset(MOTOR_SHIFT); // to recover from move count missalignment
 		Fpga.par->output &= ~RO_ALL_OUTPUTS;
 		RX_StepperStatus.robinfo.ref_done = FALSE;
@@ -1044,9 +1049,12 @@ int  txrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		
 	case CMD_ROB_ROT_REF:			strcpy(_CmdName, "CMD_ROB_ROT_REF");
 		TrPrintfL(TRUE, "SOCKET[%d]: %s", socket, _CmdName);
-		if (RX_StepperStatus.cmdRunning && RX_StepperStatus.cmdRunning != CMD_FLUID_CTRL_MODE){
-            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL); _NewCmd = CMD_ROB_ROT_REF; break;
-            }
+		if (RX_StepperStatus.cmdRunning && RX_StepperStatus.cmdRunning != CMD_FLUID_CTRL_MODE)
+        {
+            txrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL); 
+            _NewCmd = CMD_ROB_ROT_REF; 
+            break;
+        }
 		motor_reset(MOTOR_ROT); // to recover from move count missalignment
 		Fpga.par->output &= ~RO_ALL_OUTPUTS;
 		RX_StepperStatus.robinfo.ref_done = FALSE;

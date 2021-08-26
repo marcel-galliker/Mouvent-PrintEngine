@@ -19,5 +19,5 @@ void lb702_init(void);
 int  lb702_menu(void);
 void lb702_main(int ticks, int menu);
 
-int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
+int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file, int line);
 void lb702_reset_variables(void);

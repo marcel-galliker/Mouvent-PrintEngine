@@ -40,8 +40,8 @@ int	 steplb_lift_in_up_pos(int no);
 void steplb_lift_to_fct_pos(int no, ERobotFunctions rob_function); 
 int  steplb_lift_in_fct_pos(int no, ERobotFunctions rob_function);
 
-void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function);
-void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function);
+void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function, INT32 position);
+void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function, INT32 position);
 int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function);
 int	 steplb_rob_in_fct_pos_all(ERobotFunctions rob_function);
 
@@ -75,3 +75,4 @@ void steplb_set_fluid_off(int no);
 int steplb_robot_used(int fluidNo);
 int steplb_stepper_to_fluid(int fluidno);
 int steplb_stepper_to_cluster(int clusterNo);
+void steplb_set_flush_to_fluid(int fluidNo);

@@ -57,6 +57,7 @@
 #define SCREW_SPEED_LOW				160000			// steps/sec
 
 #define MAX_LENGTH_Z				440000
+// #define MAX_LENGTH_Z				350000
 
 #define ENCODER_TOL					250
 #define ENCODER_TOL_XY				1000
@@ -916,7 +917,8 @@ int rc_moveto_x(int x, const char *file, int line)
 int rc_moveto_y(int y, const char *file, int line)
 {
     y = _micron_2_steps(y);
-    return _rc_moveto_y_stop(y, -1, file, line);
+	if (y>=0) return _rc_moveto_y_stop(y, -1, file, line);
+	else	  return _rc_moveto_y_stop(-200000, IN_GARAGE, file, line);
 }
 
 //--- rc_moveby_z ------------------------------------

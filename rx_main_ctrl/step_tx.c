@@ -369,7 +369,7 @@ static void _empty_cap(void)
     }
     else if (_Status[1].robinfo.rob_in_cap && rx_get_ticks() >= time + waitTime && time)
     {
-        step_rob_to_wipe_pos(rob_fct_wipe);
+        step_rob_to_wipe_pos(rob_fct_wipe, 0);
         time = 0;
     }
 }
@@ -409,7 +409,7 @@ static void _steptx_rob_control(void)
 	case ctrl_wash_step2:		if (step_rob_reference_done())
 								{
 									_RobotCtrlMode = ctrl_wash_step3;
-									step_rob_to_wipe_pos(rob_fct_wash);
+									step_rob_to_wipe_pos(rob_fct_wash, 0);
 								}
 								break;
 			
@@ -461,7 +461,7 @@ static void _steptx_rob_control(void)
 	case ctrl_wipe_step2:		if (step_rob_reference_done())
 								{
 									_RobotCtrlMode=ctrl_wipe_step3;										
-									step_rob_to_wipe_pos(rob_fct_wipe);
+									step_rob_to_wipe_pos(rob_fct_wipe, 0);
 								}
 								break;
 				
@@ -509,7 +509,7 @@ static void _steptx_rob_control(void)
 	case ctrl_vacuum_step2:		if (step_rob_reference_done())
 								{
 									_RobotCtrlMode=ctrl_vacuum_step3;										
-									step_rob_to_wipe_pos(rob_fct_vacuum_all);
+									step_rob_to_wipe_pos(rob_fct_vacuum_all, 0);
 								}
 								break;
 
@@ -552,7 +552,7 @@ static void _steptx_rob_control(void)
 	case ctrl_vacuum_step6:		if (_steptx_lift_in_clean_wait_pos())
 								{
 									_RobotCtrlMode=ctrl_vacuum_step7;
-									step_rob_to_wipe_pos(rob_fct_vacuum_change);
+									step_rob_to_wipe_pos(rob_fct_vacuum_change, 0);
 									_RisingEdge = FALSE;
 								}
 								break;
@@ -596,7 +596,7 @@ static void _steptx_rob_control(void)
 								{
 									_RobotCtrlMode = ctrl_vacuum_step11;
 									_RisingEdge = FALSE;
-									step_rob_to_wipe_pos(rob_fct_vacuum_change);
+									step_rob_to_wipe_pos(rob_fct_vacuum_change, 0);
 								}
 								break;
 		
@@ -657,14 +657,14 @@ static void _steptx_rob_control(void)
 									{
 										_RobotCtrlMode = ctrl_cap_step3;
 										plc_to_wipe_pos();
-										step_rob_to_wipe_pos(rob_fct_cap_empty);
+										step_rob_to_wipe_pos(rob_fct_cap_empty, 0);
 									}
 								}
 								break;	 
 				
 	case ctrl_cap_step2:		if (plc_in_fill_cap_pos() && step_rob_reference_done()) 
 								{
-									if (!_Status[1].robinfo.moving) step_rob_to_wipe_pos(rob_fct_cap);
+									if (!_Status[1].robinfo.moving) step_rob_to_wipe_pos(rob_fct_cap, 0);
                                     if (!step_rob_in_wipe_pos(rob_fct_cap))
                                     {
                                         _RobotCtrlMode = ctrl_cap_step3;
