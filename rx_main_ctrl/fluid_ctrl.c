@@ -839,7 +839,7 @@ static void _control(int fluidNo)
 											}
 											else if (_txrob)
 											{
-												if (_PurgeCtrlMode!=ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_prepareToPrint))
+												if (_PurgeCtrlMode!=ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_readyToPrint))
 												{
 													fluid_send_ctrlMode(-1, ctrl_vacuum, TRUE);
 													_PurgeCtrlMode = ctrl_undef;
@@ -847,7 +847,7 @@ static void _control(int fluidNo)
 											}
                                             else if (_lbrob)
                                             {
-                                                if ((_PurgeCtrlMode != ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_prepareToPrint)) || ctrl_singleHead(no) != -1)
+                                                if ((_PurgeCtrlMode != ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_readyToPrint)) || ctrl_singleHead(no) != -1)
                                                 {
                                                     if (_PurgeCtrlMode == ctrl_purge_hard_vacc || _PurgeCtrlMode == ctrl_purge_hard_wash)
                                                         fluid_send_ctrlMode(no, ctrl_vacuum, TRUE);
@@ -859,7 +859,7 @@ static void _control(int fluidNo)
                                             }
  											else if (RX_PrinterStatus.printState==ps_pause)
                                             {
-												if (_PurgeCtrlMode!=ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_prepareToPrint))
+												if (_PurgeCtrlMode!=ctrl_undef && _all_fluids_in_4fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print, ctrl_readyToPrint))
 												{
 	                                                _send_ctrlMode(-1, _EndCtrlMode[no], TRUE);
 													_PurgeCtrlMode = ctrl_undef;
@@ -925,7 +925,8 @@ static void _control(int fluidNo)
 											break;
 				
 				//--- ctrl_print -------------------------------------------------------------------
-                case ctrl_prepareToPrint:	_send_ctrlMode(no, ctrl_print, TRUE); break;
+//              case ctrl_prepareToPrint:	_send_ctrlMode(no, ctrl_print, TRUE); break;
+				case ctrl_readyToPrint:		_send_ctrlMode(no, ctrl_print, TRUE); break;
 				case ctrl_print:			_PurgeAll=FALSE;
 											break;
                                             

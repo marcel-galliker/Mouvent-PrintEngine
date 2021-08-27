@@ -313,7 +313,6 @@ void pump_tick_10ms(void)
 		case ctrl_undef:
 		case ctrl_error:
 		case ctrl_wait:
-		case ctrl_prepareToPrint:
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
 						RX_Status.logCnt = 0;
@@ -328,10 +327,12 @@ void pump_tick_10ms(void)
 						_TimePIDstable = 0;
 //						_TimeSwitchingOFF = 0;
 						_Meniscus_Timeout = MENISCUS_TIMEOUT;
-						_ShutdownPrint = 0;
-					
+						_ShutdownPrint = 0;							
 						RX_Status.mode = RX_Config.mode;
-											
+						break;
+
+		case ctrl_prepareToPrint:
+						RX_Status.mode = ctrl_readyToPrint;
 						break;
 		
 		case ctrl_warmup:

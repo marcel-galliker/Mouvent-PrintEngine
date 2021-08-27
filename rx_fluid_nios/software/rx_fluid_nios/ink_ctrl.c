@@ -398,7 +398,9 @@ void ink_tick_10ms(void)
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				}
 				else if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= 100)
-					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_readyToPrint;
+				else
+					pRX_Status->ink_supply[isNo].ctrl_state = ctrl_prepareToPrint;
 				break;
 
 			case ctrl_print:
@@ -546,6 +548,7 @@ void ink_tick_10ms(void)
 				break;
 
 			case ctrl_readyToPrint:
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
 			case ctrl_check_step0:
