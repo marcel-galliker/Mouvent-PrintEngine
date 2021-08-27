@@ -237,6 +237,9 @@ void lbrob_main(int ticks, int menu)
 
     RX_StepperStatus.posY[0] = _steps_2_micron(motor_get_step(MOTOR_X_0));
     RX_StepperStatus.posY[1] = _steps_2_micron(motor_get_step(MOTOR_X_0)) - CABLE_PURGE_POS_BACK;
+    RX_StepperStatus.info.x_in_ref = fpga_input(CABLE_PULL_REF);
+    RX_StepperStatus.info.x_in_cap = fpga_input(CAPPING_ENDSTOP);
+
     SStepperStat oldSatus;
     memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
 
@@ -253,8 +256,6 @@ void lbrob_main(int ticks, int menu)
     RX_StepperStatus.robinfo.moving = (_CmdRunning != 0);
     if (RX_StepperStatus.robinfo.moving)
     {
-        RX_StepperStatus.info.x_in_ref = FALSE;
-        RX_StepperStatus.info.x_in_cap = FALSE;
         RX_StepperStatus.robinfo.cap_ready = FALSE;
         RX_StepperStatus.robinfo.rob_in_cap = FALSE;
         RX_StepperStatus.robinfo.purge_ready = FALSE;
@@ -273,7 +274,6 @@ void lbrob_main(int ticks, int menu)
     {
         _CapIsWet = TRUE;
     }
-    
 
     if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
     {
@@ -283,11 +283,7 @@ void lbrob_main(int ticks, int menu)
 			lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
 		}
         RX_StepperStatus.robinfo.moving = FALSE;
-
-
-        RX_StepperStatus.info.x_in_ref = fpga_input(CABLE_PULL_REF);
-        RX_StepperStatus.info.x_in_cap = fpga_input(CAPPING_ENDSTOP);
-
+       
         if (_CmdRunning == CMD_ROB_REFERENCE)
         {
             if (!RX_StepperStatus.robinfo.ref_done)
@@ -747,7 +743,6 @@ static void _lbrob_do_reference()
     {
         if (fpga_input(CABLE_PULL_REF))
         {
-            Error(LOG, 0, "Move slide out of refenence");
             _CmdRunning_old = CMD_ROB_REFERENCE;
             motors_move_by_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(-5000), TRUE);
         }
@@ -790,7 +785,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CapIsWet = TRUE;
         _RO_Flush = 0;
         RX_StepperStatus.robinfo.ref_done = FALSE;
-        RX_StepperStatus.info.x_in_ref = FALSE;
         val = 0;
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
         robi_lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_ROBI_STOP, NULL);
