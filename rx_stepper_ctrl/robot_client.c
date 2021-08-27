@@ -61,7 +61,8 @@
 
 #define ENCODER_TOL					250
 #define ENCODER_TOL_XY				1000
-#define ENCODER_TOL_SCREW			230000
+// #define ENCODER_TOL_SCREW			230000
+#define ENCODER_TOL_SCREW			(3*SCREW_STEPS/2)
 
 //---													  ddddrrrrrhhhhh
 #define IHOLD_IRUN(hold, run, delay)	((((delay)&0xf)<<16) | (((run)&0x1f)<<8) | ((hold)&0x1f))
@@ -71,7 +72,7 @@
 // #define Z_CURRENT					IHOLD_IRUN(0, 14, 1)		// 0x00010E00
 #define Z_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00010E00
 
-#define DRIVER_ERROR	0x02	
+#define DRIVER_ERROR	0x02		
 
 //--- Modlue Globals -----------------------------------------------------------------
 static char _IpAddr[32]="";
@@ -1240,6 +1241,7 @@ int rc_screwer_in_ref(void)
 //--- rc_screwer_to_ref ------------------------------
 void rc_screwer_to_ref(void)
 {
+	TrPrintfL(TRUE, "rc_screwer_to_ref");
 	_rc_set_screwer_speed(TRUE);
 	_rc_motor_moveBy(MOTOR_SCREW, 2*SCREW_STEPS, IN_SCREW_EDGE, _FL_);
 }
