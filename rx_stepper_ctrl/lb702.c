@@ -184,6 +184,7 @@ void lb702_main(int ticks, int menu)
 	{
         int cmd = RX_StepperStatus.cmdRunning;
         RX_StepperStatus.info.moving = FALSE;
+//		TrPrintfL(TRUE, "Lift-Move-done: cmd=0x%08x", RX_StepperStatus.cmdRunning);
         if (RX_StepperStatus.cmdRunning == CMD_LIFT_REFERENCE)
 		{
 			if (!RX_StepperStatus.info.ref_done)

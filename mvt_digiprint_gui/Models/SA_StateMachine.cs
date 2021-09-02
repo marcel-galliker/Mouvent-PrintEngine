@@ -127,9 +127,7 @@ namespace RX_DigiPrint.Models
 			if (_Actions==null) return;
 			if (_RobotRunning[stepperNo]) return;
 
-			StepperStatus stepper = RxGlobals.StepperStatus[stepperNo];
-
-			if (!stepper.ScrewerReady) return;
+			if (!RxGlobals.StepperStatus[stepperNo].ScrewerReady) return;
 
 			foreach(SA_Action action in _Actions)
 			{	
@@ -161,13 +159,13 @@ namespace RX_DigiPrint.Models
 					}
 					return;
 				}
-				else if (action.StepperNo!=stepperNo)
-				{
-					TcpIp.SValue msg = new TcpIp.SValue();
-					msg.no=stepperNo;
-					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_ROBI_MOVE_TO_GARAGE, ref msg);
-					_RobotUsed[stepperNo] = false;
-				}
+			}
+			if (_RobotUsed[stepperNo] && !_RobotRunning[stepperNo])
+			{
+				TcpIp.SValue msg = new TcpIp.SValue();
+				msg.no=stepperNo;
+				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_ROBI_MOVE_TO_GARAGE, ref msg);
+				_RobotUsed[stepperNo] = false;	
 			}
 			if (_Adjusted)
 			{

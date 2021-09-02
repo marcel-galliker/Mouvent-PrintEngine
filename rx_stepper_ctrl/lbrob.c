@@ -27,14 +27,14 @@
 #include "robi_lb702.h"
 #include "robot_client.h"
 
-#define MOTOR_X_0               4
+#define MOTOR_SLIDE               4
 
-#define MOTOR_X_BITS            0x10
+#define MOTOR_SLIDE_BITS        0x10
 #define MOTOR_ALL_BITS          0x13
 
-#define X_STEPS_PER_REV         3200.0
-#define X_INC_PER_REV           16000.0
-#define X_DIST_PER_REV          54000   // 36000
+#define SLIDE_STEPS_PER_REV     3200.0
+#define SLIDE_INC_PER_REV       16000.0
+#define SLIDE_DIST_PER_REV      54000   // 36000
 
 #define CORR_STEP                500
 #define CORR_MAX                1000
@@ -184,7 +184,7 @@ void lbrob_init(void)
     _ParCable_ref.stop_mux = 0;
     _ParCable_ref.dis_mux_in = 0;
     _ParCable_ref.estop_level = TRUE;
-    _ParCable_ref.estop_in_bit[MOTOR_X_0] = (1 << CABLE_PULL_REF);
+    _ParCable_ref.estop_in_bit[MOTOR_SLIDE] = (1 << CABLE_PULL_REF);
     _ParCable_ref.enc_bwd = TRUE;
     _ParCable_ref.encCheck = chk_lb_ref1;
 
@@ -221,7 +221,7 @@ void lbrob_init(void)
     _ParCable_drive_purge.enc_bwd = TRUE;
     _ParCable_drive_purge.encCheck = chk_std;
 
-    motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
+    motor_config(MOTOR_SLIDE, CURRENT_HOLD, SLIDE_STEPS_PER_REV, SLIDE_INC_PER_REV, STEPS);
 
     robi_lb702_init();
     rc_init();
@@ -252,8 +252,8 @@ void lbrob_main(int ticks, int menu)
     int motor;
     int pos, val;
 
-    RX_StepperStatus.posY[0] = _steps_2_micron(motor_get_step(MOTOR_X_0));
-    RX_StepperStatus.posY[1] = _steps_2_micron(motor_get_step(MOTOR_X_0)) - CABLE_PURGE_POS_BACK;
+    RX_StepperStatus.posY[0] = _steps_2_micron(motor_get_step(MOTOR_SLIDE));
+    RX_StepperStatus.posY[1] = _steps_2_micron(motor_get_step(MOTOR_SLIDE)) - CABLE_PURGE_POS_BACK;
     RX_StepperStatus.info.x_in_ref = fpga_input(CABLE_PULL_REF);
     RX_StepperStatus.info.x_in_cap = fpga_input(CAPPING_ENDSTOP);
 
@@ -292,7 +292,7 @@ void lbrob_main(int ticks, int menu)
         _CapIsWet = TRUE;
     }
 
-    if (_CmdRunning && motors_move_done(MOTOR_X_BITS))
+    if (_CmdRunning && motors_move_done(MOTOR_SLIDE_BITS))
     {
 		if (_CapIsWet)
 		{
@@ -305,7 +305,7 @@ void lbrob_main(int ticks, int menu)
         {
             if (!RX_StepperStatus.robinfo.ref_done)
             {
-                if (motors_error(MOTOR_X_BITS, &motor))
+                if (motors_error(MOTOR_SLIDE_BITS, &motor))
                 {
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                     Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", _CmdName, motor + 1);
@@ -316,7 +316,7 @@ void lbrob_main(int ticks, int menu)
                 }
                 if (RX_StepperStatus.info.x_in_ref)
                 {
-                    motors_reset(MOTOR_X_BITS);
+                    motors_reset(MOTOR_SLIDE_BITS);
                     RX_StepperStatus.robinfo.ref_done = TRUE;
                     Error(LOG, 0, "LBROB: Command CMD_ROB_REFERENCE: done");
                     _CapIsWet = FALSE;
@@ -330,7 +330,7 @@ void lbrob_main(int ticks, int menu)
             }
             else
             {
-                if (motors_error(MOTOR_X_BITS, &motor))
+                if (motors_error(MOTOR_SLIDE_BITS, &motor))
                 {
                     Error(ERR_CONT, 0, "LIFT: Command %s - 1000 steps: Motor %s blocked",_CmdName, _MotorName[motor]);
                     RX_StepperStatus.robinfo.ref_done = FALSE;
@@ -349,7 +349,7 @@ void lbrob_main(int ticks, int menu)
 
         if (_CmdRunning != CMD_ROB_REFERENCE)
         {
-            if (motors_error(MOTOR_X_BITS, &motor))
+            if (motors_error(MOTOR_SLIDE_BITS, &motor))
             {
                 RX_StepperStatus.robinfo.ref_done = FALSE;
                 Error(ERR_CONT, 0, "Stepper: Command %s: Motor %s blocked", _CmdName, _MotorName[motor]);
@@ -571,13 +571,13 @@ void lbrob_main(int ticks, int menu)
 //---_micron_2_steps --------------------------------------------------------------
 static int _micron_2_steps(int micron)
 {
-    return (int)(0.5 + X_STEPS_PER_REV / X_DIST_PER_REV * micron);
+    return (int)(0.5 + SLIDE_STEPS_PER_REV / SLIDE_DIST_PER_REV * micron);
 }
 
 //--- _steps_2_micron -------------------------------------------------------------
 static int _steps_2_micron(int steps)
 {
-    return (int)(0.5 + (double)steps / X_STEPS_PER_REV * X_DIST_PER_REV);
+    return (int)(0.5 + (double)steps / SLIDE_STEPS_PER_REV * SLIDE_DIST_PER_REV);
 }
 
 //--- _lbrob_display_status --------------------------------------------------------
@@ -640,10 +640,17 @@ void lbrob_handle_menu(char *str)
 {
     int pos = 10000;
     int val;
-    SHeadAdjustment screw_head;
+    SHeadAdjustment adjust;
     SRobMovePos srobmovepos;
     switch (str[0])
     {
+    case 'a':
+        adjust.printbar = 0;
+        adjust.head     = 0;
+        adjust.axis     = 0;
+        adjust.steps    = 0;
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_HEAD_ADJUST, &adjust);
+        break;
     case 's':
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL);
         break;
@@ -712,7 +719,7 @@ static void _lbrob_move_to_pos(int cmd, int pos, int wipe_state)
 {
     _CmdRunning = cmd;
     RX_StepperStatus.robinfo.moving = TRUE;
-    int actual_pos = motor_get_step(MOTOR_X_0);
+    int actual_pos = motor_get_step(MOTOR_SLIDE);
     int moving_forward = FALSE;
     if (pos < actual_pos) moving_forward = TRUE;
 
@@ -724,19 +731,19 @@ static void _lbrob_move_to_pos(int cmd, int pos, int wipe_state)
             _ParCable_drive_purge.speed = _micron_2_steps(1000 * RX_StepperCfg.wipe_speed); // multiplied with 1000 to get from mm/s to um/s
         else
             _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
-        motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_purge, pos);
+        motors_move_to_step(MOTOR_SLIDE_BITS, &_ParCable_drive_purge, pos);
     }
     else if (_CapIsWet && !moving_forward)
     {
         _vacuum_on();
-        motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, pos);
+        motors_move_to_step(MOTOR_SLIDE_BITS, &_ParCable_drive_slow, pos);
     }      
     else
     {
         if (abs(pos-actual_pos)<20)
-             motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive_slow, pos);
+             motors_move_to_step(MOTOR_SLIDE_BITS, &_ParCable_drive_slow, pos);
         else        
-            motors_move_to_step(MOTOR_X_BITS, &_ParCable_drive, pos);
+            motors_move_to_step(MOTOR_SLIDE_BITS, &_ParCable_drive, pos);
     }
 }
 
@@ -761,20 +768,28 @@ static void _lbrob_do_reference()
         if (fpga_input(CABLE_PULL_REF))
         {
             _CmdRunning_old = CMD_ROB_REFERENCE;
-            motors_move_by_step(MOTOR_X_BITS, &_ParCable_drive, _micron_2_steps(-5000), TRUE);
+            motors_move_by_step(MOTOR_SLIDE_BITS, &_ParCable_drive, _micron_2_steps(-5000), TRUE);
         }
         else
         {
             _vacuum_on();
-            motor_reset(MOTOR_X_0);
-            motor_config(MOTOR_X_0, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
+            motor_reset(MOTOR_SLIDE);
+            motor_config(MOTOR_SLIDE, CURRENT_HOLD, SLIDE_STEPS_PER_REV, SLIDE_INC_PER_REV, STEPS);
             RX_StepperStatus.robinfo.ref_done = FALSE;
-            motors_move_by_step(1 << MOTOR_X_0, &_ParCable_ref, 1000000, TRUE);
+            motors_move_by_step(MOTOR_SLIDE_BITS, &_ParCable_ref, 1000000, TRUE);
         }
+    }
+    else if (_CapIsWet)
+    {
+            _vacuum_on();
+            motor_reset(MOTOR_SLIDE);
+            motor_config(MOTOR_SLIDE, CURRENT_HOLD, SLIDE_STEPS_PER_REV, SLIDE_INC_PER_REV, STEPS);
+            RX_StepperStatus.robinfo.ref_done = FALSE;
+            motors_move_by_step(MOTOR_SLIDE_BITS, &_ParCable_ref, 1000000, TRUE);
     }
 	else 
     {
-        _lbrob_move_to_pos(MOTOR_X_BITS, _micron_2_steps(-3000), FALSE);
+        _lbrob_move_to_pos(CMD_ROB_REFERENCE, _micron_2_steps(-3000), FALSE);
     }
 }
 
@@ -788,7 +803,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     {
     case CMD_ROB_STOP:
         strcpy(_CmdName, "CMD_ROB_STOP");
-        motors_stop(MOTOR_X_BITS);
+        motors_stop(MOTOR_SLIDE_BITS);
         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
         if (_CmdRunning == CMD_HEAD_ADJUST)
         {
@@ -1994,7 +2009,7 @@ static void _lbrob_motor_test(int motorNo, int steps)
         _CmdRunning = 1; // TEST
         RX_StepperStatus.info.moving = TRUE;
 
-        motors_config(motors, CURRENT_HOLD, X_STEPS_PER_REV, X_INC_PER_REV, STEPS);
+        motors_config(motors, CURRENT_HOLD, SLIDE_STEPS_PER_REV, SLIDE_INC_PER_REV, STEPS);
         motors_move_by_step(motors, &par, steps, FALSE);
     }
     else if (motorNo >= 2 && motorNo <= 3)
