@@ -33,7 +33,6 @@ void rc_stop(void);
 void rc_stop_motors(int motors);
 
 int rc_in_garage(void);
-int rc_screwer_in_ref(void);
 void rc_screwer_to_ref(void);
 void rc_turn_ticks_left(int ticks);
 void rc_turn_ticks_right(int ticks);

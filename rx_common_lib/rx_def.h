@@ -146,8 +146,8 @@ void rx_def_init();
 #define ROB_SCREWS_PER_HEAD		2
 
 //--- coordinates: X in web direction, Y in slide direction
-#define SCREW_X_LEFT		-18200		// -17700	// um
-#define SCREW_X_RIGHT		74800		// 75300	// um       // SCREW_X_LEFT + 93000
+#define SCREW_X_LEFT		-15700 // -18200		// -17700	// um
+#define SCREW_X_RIGHT		(SCREW_X_LEFT + 93000) // 74800		// um       // SCREW_X_LEFT + 93000
 
 #define SCREW_Y_STITCH		51300	// um
 #define SCREW_Y_ANGLE		34900	// um       // SCREW_Y_STITCH - 16400
@@ -1525,10 +1525,10 @@ typedef struct EScrewerInfo
 {
     UINT32 ref_done : 1;				//	0x00000001
     UINT32 moving : 1;					//	0x00000002
-    UINT32 y_in_ref : 1;				//	0x00000004
-    UINT32 robi_in_ref : 1;				//	0x00000008
-    UINT32 x_in_pos : 1;				//	0x00000010
-    UINT32 y_in_pos: 1;					//	0x00000020
+    UINT32 in_garage : 1;				//	0x00000004
+    UINT32 ref_x_done : 1;				//	0x00000008
+    UINT32 ref_y_done : 1;				//	0x00000010
+    UINT32 r_info_5: 1;					//	0x00000020
     UINT32 z_in_down : 1;				//	0x00000040
     UINT32 z_in_up : 1;					//	0x00000080
     UINT32 r_info_8 : 1;				//	0x00000100

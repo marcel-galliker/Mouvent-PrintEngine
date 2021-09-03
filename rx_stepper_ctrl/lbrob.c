@@ -49,7 +49,8 @@
 #define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    
 #define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
 
-#define ROB_POSY_FREE           40000   // minimum y-position to allow moving in x
+// #define ROB_POSY_FREE           40000   // minimum y-position to allow moving in x
+#define ROB_POSY_FREE           30000   // minimum y-position to allow moving in x
 
 #define CURRENT_HOLD            200
 
@@ -1082,7 +1083,7 @@ static void _cln_move_to(int msgId, ERobotFunctions fct, int position)
             break;
             
         case rob_fct_maintenance:
-            RX_StepperStatus.screwerinfo.ref_done = FALSE;
+            rc_stop();
             _lbrob_move_to_pos(_CmdRunning, _micron_2_steps(CABLE_MAINTENANCE_POS), FALSE);
             break;
 
@@ -1250,7 +1251,8 @@ static void _rob_state_machine(void)
             if (_pos.x)
             {
             //    if (abs(_pos.x-RX_StepperStatus.screw_posX)>5000)
-            //        RX_StepperStatus.screwerinfo.ref_done = FALSE;
+            //        rx_stop();
+                
                 _RobStateMachine_Step++;
             }
             else
@@ -1315,7 +1317,7 @@ static void _rob_state_machine(void)
             TrPrintfL(trace, "_rob_state_machine: State=%d, screw_posY=%d, _posy=%d, diff=%d", _RobStateMachine_Step, RX_StepperStatus.screw_posY, _posy, abs(RX_StepperStatus.screw_posY-_posy));
             if (abs(RX_StepperStatus.screw_posY-_posy)>1000) break;
 
-            TrPrintfL(trace, "_rob_state_machine: State=%d, moveDone=%d, y_in_pos=%d, head=%d/%d-%d", _RobStateMachine_Step, rc_move_done(), RX_StepperStatus.screwerinfo.y_in_pos, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
+            TrPrintfL(trace, "_rob_state_machine: State=%d, moveDone=%d, head=%d/%d-%d", _RobStateMachine_Step, rc_move_done(), _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
             if (rc_move_xy_error())
             {
                 Error(ERR_CONT, 0, "Motor stalled");
@@ -1323,7 +1325,7 @@ static void _rob_state_machine(void)
             }
             else if (rc_move_done())
             {
-                TrPrintfL(TRUE, "_rob_state_machine: State=%d, y_in_pos=%d, head=%d/%d-%d", _RobStateMachine_Step, RX_StepperStatus.screwerinfo.y_in_pos, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d, head=%d/%d-%d", _RobStateMachine_Step, _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis);
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_TO_X(%d), y=%d", _pos.x, RX_StepperStatus.screw_posY);
                 rc_moveto_x(_pos.x, _FL_);
                 _RobStateMachine_Step++;
@@ -1346,8 +1348,7 @@ static void _rob_state_machine(void)
             break;
 
         case 6:
-            TrPrintfL(trace, "_rob_state_machine: State=%d, x_in_pos=%d, movedone=%d", _RobStateMachine_Step, RX_StepperStatus.screwerinfo.x_in_pos, rc_move_done());
-       //     if (RX_StepperStatus.screwerinfo.x_in_pos)
+            TrPrintfL(trace, "_rob_state_machine: State=%d, movedone=%d", _RobStateMachine_Step, rc_move_done());
             if (rc_move_done())
             {
                 if (rc_move_xy_error())
@@ -1358,7 +1359,7 @@ static void _rob_state_machine(void)
                 }
                 else
                 {
-                    TrPrintfL(TRUE, "_rob_state_machine: State=%d, x_in_pos", _RobStateMachine_Step);
+                    TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
                     if (!RX_StepperStatus.info.z_in_screw) lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL, _FL_);
                     _RobStateMachine_Step++;
                 }
@@ -1751,7 +1752,7 @@ void lbrob_to_garage(void)
     {
         if (!rc_in_garage())
         {
-            if (!RX_StepperStatus.screwerinfo.ref_done) 
+            if (!RX_StepperStatus.screwerinfo.ref_done)
             {
                 rc_reference(0);
             }

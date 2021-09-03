@@ -69,8 +69,8 @@
 #define SCREW_CURRENT_HIGH			IHOLD_IRUN(0, 28, 1)		// 0x00011C00
 #define SCREW_CURRENT_LOW			IHOLD_IRUN(0, 18, 1)		// 0x00011200
 #define XY_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00011200
-// #define Z_CURRENT					IHOLD_IRUN(0, 14, 1)		// 0x00010E00
-#define Z_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00010E00
+// #define Z_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00010E00
+#define Z_CURRENT					IHOLD_IRUN(0, 14, 1)		// 0x00010E00
 
 #define DRIVER_ERROR	0x02		
 
@@ -149,6 +149,11 @@ static char *_motor_name(int no);
 //--- rc_init ----------------------------------------------------
 void rc_init(void)
 {
+	RX_StepperStatus.screwerinfo.moving = FALSE;
+	RX_StepperStatus.screwerinfo.ref_done = FALSE;
+	RX_StepperStatus.screwerinfo.ref_x_done = FALSE;
+	RX_StepperStatus.screwerinfo.ref_y_done = FALSE;
+
 	_MotorInit = 0;
     if (!_RobotHdl)
 		_RobotHdl  = rx_thread_start(_robot_ctrl_thread, NULL, 0, "RC_Client");
@@ -165,25 +170,12 @@ void rc_config(int boardNo)
 //--- rc_main -----------------------------------------------
 void rc_main(int ticks, int menu)
 {
-	static int _z_in_up = FALSE;
-	static int _z_in_garage = FALSE;
     if (_RC_Socket!=INVALID_SOCKET)
 	{
-        RX_StepperStatus.screwerinfo.robi_in_ref = ROB_IN(IN_GARAGE);
+        RX_StepperStatus.screwerinfo.in_garage   = ROB_IN(IN_GARAGE);
         RX_StepperStatus.screwerinfo.z_in_down   = ROB_IN(IN_Z_DOWN);
         RX_StepperStatus.screwerinfo.z_in_up     = ROB_IN(IN_Z_UP);
 
-		if (RX_StepperStatus.screwerinfo.robi_in_ref != _z_in_garage)
-		{
-			_z_in_garage=RX_StepperStatus.screwerinfo.robi_in_ref;
-			TrPrintfL(TRUE, "_z_in_garage=%d", RX_StepperStatus.screwerinfo.robi_in_ref);
-		}
-
-		if (RX_StepperStatus.screwerinfo.z_in_up && !_z_in_up)
-		{
-			TrPrintfL(TRUE, "_z_in_up");
-		}
-		_z_in_up=RX_StepperStatus.screwerinfo.z_in_up;
 		_robot_error_check();
 	}
 }
@@ -509,9 +501,11 @@ static void _rc_state_machine(void)
 								if (!ROB_IN(IN_Z_DOWN))
                                     rc_move_bottom(_FL_);
 								_RC_State++;
+							//	_RC_State = RC_STATE_REF +101;
 								break;
 
 		case RC_STATE_REF+1:	// z at bottom
+								_started = FALSE;
 								_SpeedFaxt_XY = 1;
 								_configure_xy_motor(MOTOR_XY_0);
 								_configure_xy_motor(MOTOR_XY_1);
@@ -520,7 +514,6 @@ static void _rc_state_machine(void)
 								{
                                     _rc_moveto_y_stop(1000000, IN_Y_END, _FL_);
 									rc_screwer_to_ref();
-									_started = FALSE;
 									_RC_State++;
 								}
 								else if (_RobotStatus.motor[MOTOR_Z].moveIdDone == _MoveId[MOTOR_Z]) 
@@ -560,7 +553,6 @@ static void _rc_state_machine(void)
 									TrPrintfL(TRUE, "RC_STATE_REF+3: x-end=%d, start=%d %d, done=%d %d", ROB_IN(IN_X_END), 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdStarted, _RobotStatus.motor[MOTOR_XY_1].moveIdStarted, 
 										_RobotStatus.motor[MOTOR_XY_0].moveIdDone, _RobotStatus.motor[MOTOR_XY_1].moveIdDone);
-								//	_rc_motor_moveToStop(MOTOR_SCREW, 300000, IN_SCREW_EDGE, HIGH, _FL_);
 									_rc_moveto_x_stop(-150000, IN_X_END, _FL_);
 									_RC_State++;
 								}
@@ -579,15 +571,6 @@ static void _rc_state_machine(void)
 										_configure_xy_motor(MOTOR_XY_0);
 										_configure_xy_motor(MOTOR_XY_1);
 										_RC_State++;
-										/* --- not moving to garage after reference ---
-										if (TRUE)
-										{
-											_rc_reset_motors(MOTORS_XY);
-											_RC_State=0;
-											Error(LOG, 0, "Reference done");
-											RX_StepperStatus.screwerinfo.ref_done = TRUE;
-										}
-										*/
 									}
 									else
 									{
@@ -639,8 +622,8 @@ static void _rc_state_machine(void)
                                     }
 									else _rc_error(_FL_, "Robot Y-Axis garage sensor not found");
 								}
-								break;		
-		
+								break;				
+
 		default:				Error(WARN, 0, "rc_state_machine: State %d not implemented", _RC_State);
 								break;
 	}
@@ -786,6 +769,9 @@ void rc_stop(void)
 	{
 		rc_stop_motors(0xff);
         _RC_State = 0;
+		RX_StepperStatus.screwerinfo.ref_done = FALSE;
+		RX_StepperStatus.screwerinfo.ref_x_done = FALSE;
+		RX_StepperStatus.screwerinfo.ref_y_done = FALSE;
 	}
 }
 
@@ -1229,13 +1215,7 @@ void rc_handle_menu(char *str)
 //--- rc_in_garage ----------------------------------------------
 int rc_in_garage(void)
 {
-    return RX_StepperStatus.screwerinfo.robi_in_ref;
-}
-
-//--- rc_screwer_in_ref --------------------------------------
-int rc_screwer_in_ref(void)
-{
-    return _RobotStatus.gpio.inputs & (1UL << IN_SCREW_EDGE);
+    return RX_StepperStatus.screwerinfo.in_garage;
 }
 
 //--- rc_screwer_to_ref ------------------------------
@@ -1352,6 +1332,8 @@ int rc_move_xy_error(void)
         if ((MOTORS_XY & (1<<motor)) && (_RobotStatus.motor[motor].moveIdDone==_MoveId[motor]) && _RobotStatus.motor[motor].isStalled)
 		{
 			RX_StepperStatus.screwerinfo.ref_done = FALSE;
+			RX_StepperStatus.screwerinfo.ref_x_done = FALSE;
+			RX_StepperStatus.screwerinfo.ref_y_done = FALSE;
 			return TRUE;
 		}
     }
