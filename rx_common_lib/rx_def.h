@@ -146,7 +146,7 @@ void rx_def_init();
 #define ROB_SCREWS_PER_HEAD		2
 
 //--- coordinates: X in web direction, Y in slide direction
-#define SCREW_X_LEFT		-15700 // -18200		// -17700	// um
+#define SCREW_X_LEFT		-15200 // -18200		// -17700	// um
 #define SCREW_X_RIGHT		(SCREW_X_LEFT + 93000) // 74800		// um       // SCREW_X_LEFT + 93000
 
 #define SCREW_Y_STITCH		51300	// um
