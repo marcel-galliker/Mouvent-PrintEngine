@@ -556,7 +556,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1, char *file, int line
 		{
 			if (cmd == CMD_LIFT_PRINT_POS || cmd == CMD_LIFT_UP_POS || cmd == CMD_LIFT_CLUSTER_CHANGE) 
 			{
-				ok = (RX_StepperStatus.screwerinfo.in_garage && RX_StepperStatus.info.x_in_ref); 
+				ok = RX_StepperStatus.info.x_in_ref; 
 			}
             else if (cmd == CMD_LIFT_SCREW)
 			{
@@ -582,7 +582,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1, char *file, int line
 		} 
 		else 
 		{
-			Error(WARN, 0, "Command %08x needs to wait: Robot not in secure position (screwer.in_garage=%d, x_in_ref=%d)", cmd, RX_StepperStatus.screwerinfo.in_garage, RX_StepperStatus.info.x_in_ref);
+			Error(WARN, 0, "Command 0x%08x needs to wait: Robot not in secure position (screwer.in_garage=%d, x_in_ref=%d)", cmd, RX_StepperStatus.screwerinfo.in_garage, RX_StepperStatus.info.x_in_ref);
 			RX_StepperStatus.cmdRunning = 0;
 			_NewCmd = cmd;
 		}

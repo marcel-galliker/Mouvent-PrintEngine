@@ -252,6 +252,7 @@ void lbrob_main(int ticks, int menu)
 {
     int motor;
     int pos, val;
+    static int _x_in_ref_old=0;
 
     RX_StepperStatus.posY[0] = _steps_2_micron(motor_get_step(MOTOR_SLIDE));
     RX_StepperStatus.posY[1] = _steps_2_micron(motor_get_step(MOTOR_SLIDE)) - CABLE_PURGE_POS_BACK;
@@ -288,10 +289,13 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.cap_ready = FALSE;
     }
 
-    if (!RX_StepperStatus.robinfo.ref_done)
+    if (!RX_StepperStatus.robinfo.ref_done) _CapIsWet = TRUE;
+    if (RX_StepperStatus.info.x_in_ref)    
     {
-        _CapIsWet = TRUE;
+        if (!_x_in_ref_old) _vacuum_off();
+        _CapIsWet = FALSE;
     }
+    _x_in_ref_old = RX_StepperStatus.info.x_in_ref;
 
     if (_CmdRunning && motors_move_done(MOTOR_SLIDE_BITS))
     {
@@ -301,7 +305,7 @@ void lbrob_main(int ticks, int menu)
 			lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_VACUUM, &val);
 		}
         RX_StepperStatus.robinfo.moving = FALSE;
-       
+    
         if (_CmdRunning == CMD_ROB_REFERENCE)
         {
             if (!RX_StepperStatus.robinfo.ref_done)
@@ -319,8 +323,8 @@ void lbrob_main(int ticks, int menu)
                 {
                     motors_reset(MOTOR_SLIDE_BITS);
                     RX_StepperStatus.robinfo.ref_done = TRUE;
+                    TrPrintfL(TRUE, "LBROB: Command CMD_ROB_REFERENCE: done, _CmdRunning_old=0x%08x", _CmdRunning_old);
                     Error(LOG, 0, "LBROB: Command CMD_ROB_REFERENCE: done");
-                    _CapIsWet = FALSE;
                 }
                 else if (_CmdRunning_old != CMD_ROB_REFERENCE)
                 {
@@ -342,8 +346,6 @@ void lbrob_main(int ticks, int menu)
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                     _CmdRunning_old = FALSE;
                 }
-                else if (RX_StepperStatus.info.x_in_ref)
-                    _CapIsWet = FALSE;
                 RX_StepperStatus.cmdRunning = FALSE;
             }
         }
@@ -479,7 +481,7 @@ void lbrob_main(int ticks, int menu)
                 _CmdRunning_old = 0;
                 _CmdRunning = 0;
             }
-
+            TrPrintfL(TRUE, "CALL _CmdRunning_old=0x%08x", _CmdRunning_old);
             switch (loc_new_cmd)
             {
             case CMD_ROB_MOVE_POS:
@@ -646,11 +648,11 @@ void lbrob_handle_menu(char *str)
     switch (str[0])
     {
     case 'a':
-        adjust.printbar = 0;
-        adjust.head     = 0;
-        adjust.axis     = 0;
-        adjust.steps    = 0;
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_HEAD_ADJUST, &adjust);
+            adjust.printbar = 0;
+            adjust.head     = 0;
+            adjust.axis     = 0;
+            adjust.steps    = 0;
+            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_HEAD_ADJUST, &adjust);
         break;
     case 's':
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_STOP, NULL);
@@ -721,8 +723,6 @@ static void _lbrob_move_to_pos(int cmd, int pos, int wipe_state)
     _CmdRunning = cmd;
     RX_StepperStatus.robinfo.moving = TRUE;
     int actual_pos = motor_get_step(MOTOR_SLIDE);
-    int moving_forward = FALSE;
-    if (pos < actual_pos) moving_forward = TRUE;
 
     TrPrintfL(TRUE, "_lbrob_move_to_pos cmd=0x%08x, pos=%d, wipe_state=%d", cmd, pos, wipe_state);
 
@@ -734,7 +734,7 @@ static void _lbrob_move_to_pos(int cmd, int pos, int wipe_state)
             _ParCable_drive_purge.speed = _micron_2_steps(1000 * 10); // multiplied with 1000 to get from mm/s to um/s
         motors_move_to_step(MOTOR_SLIDE_BITS, &_ParCable_drive_purge, pos);
     }
-    else if (_CapIsWet && !moving_forward)
+    else if (_CapIsWet && (pos > actual_pos)) // move backwards
     {
         _vacuum_on();
         motors_move_to_step(MOTOR_SLIDE_BITS, &_ParCable_drive_slow, pos);
@@ -768,7 +768,7 @@ static void _lbrob_do_reference()
     {
         if (fpga_input(CABLE_PULL_REF))
         {
-            _CmdRunning_old = CMD_ROB_REFERENCE;
+         //   _CmdRunning_old = CMD_ROB_REFERENCE;
             motors_move_by_step(MOTOR_SLIDE_BITS, &_ParCable_drive, _micron_2_steps(-5000), TRUE);
         }
         else
@@ -815,7 +815,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         _CmdRunning_Lift = 0;
         _CmdRunning = 0;
         _RobStateMachine_Step = 0;
-        _CapIsWet = TRUE;
         _RO_Flush = 0;
         RX_StepperStatus.robinfo.ref_done = FALSE;
         val = 0;
@@ -911,7 +910,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         
         if (_WastePumpTimer < rx_get_ticks() + val || !_WastePumpTimer || !RX_StepperStatus.info.vacuum_running)
         {
-            _vacuum_on();
+        _vacuum_on();
             _WastePumpTimer = rx_get_ticks() + val;
         }
         break;
@@ -950,7 +949,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
                         _NewCmd = msgId;
                         break;
                     }
-                _vacuum_on();
+               // _vacuum_on();
                 RX_StepperStatus.robinfo.moving = TRUE;
                 _lbrob_move_to_pos(msgId, _micron_2_steps(CABLE_PURGE_POS_FRONT), TRUE);
                 break;
@@ -1037,10 +1036,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 static void _cln_move_to(int msgId, ERobotFunctions fct, int position)
 {
     int val, pos, head;
+    TrPrintfL(TRUE, "_cln_move_to msgId=0x%08x, fct=%d, _CmdRunning=0x%08x, position=%d, _NewPos=%d", msgId, fct, _CmdRunning, position, _RobMovePos.position);
     if (!_CmdRunning)
     {
         _RobMovePos.function = fct;
-        TrPrintfL(TRUE, "_cln_move_to msgId=0x%08x, fct=%d, position=%d, _NewPos=%d", msgId, fct, position, _RobMovePos.position);
         
         if (_RobMovePos.position==0) _RobMovePos.position = position;
 
@@ -1164,6 +1163,7 @@ static void _rob_state_machine(void)
     static SPoint    _corr; 
     static int       _posy_base;
     static int       _posy;
+    static int       _printbar = 0;
     static int _time=0;
     int trace;
     int pos, distance = 0;
@@ -1281,7 +1281,13 @@ static void _rob_state_machine(void)
                     Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
                 }
             }
-            
+            if (_printbar==0 && _ScrewPar.printbar==1)
+            {
+                _cln_move_to(CMD_ROB_MOVE_POS, rob_fct_move_to_pos, _pos.y);
+                _printbar = _ScrewPar.printbar;
+                break;
+            }
+            _printbar = _ScrewPar.printbar;
             // no break here!
 
        case 2:  // move slide 
@@ -1332,7 +1338,7 @@ static void _rob_state_machine(void)
             }
             break;
 
-        case 5: // move rob to y (move robi and slide simultanious)
+        case 5: 
             if (!rc_move_done()) break;
             TrPrintfL(TRUE, "_rob_state_machine: State=%d, head=%d/%d", _RobStateMachine_Step, _ScrewPar.printbar, _ScrewPar.head);
             if (rc_move_xy_error())
@@ -1748,6 +1754,8 @@ static void _rob_state_machine(void)
 //--- lbrob_to_garage --------------------------------
 void lbrob_to_garage(void)
 {
+    TrPrintfL(TRUE, "lbrob_to_garage: _RobStateMachine_Step=%d, rc_in_garage=%d, screwerinfo.ref_done=%d", _RobStateMachine_Step, rc_in_garage(), RX_StepperStatus.screwerinfo.ref_done);
+    
     if (_RobStateMachine_Step==0)
     {
         if (!rc_in_garage())
@@ -1978,7 +1986,7 @@ static void _vacuum_on()
     {
         Fpga.par->output |= RO_WASTE_VAC;
         Fpga.par->output |= RO_VACUUM_CLEANER;
-        _WastePumpTimer = 0;
+        _WastePumpTimer  = 0;
     }
 }
 

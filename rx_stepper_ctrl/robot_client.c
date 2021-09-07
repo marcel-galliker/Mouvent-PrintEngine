@@ -61,15 +61,13 @@
 
 #define ENCODER_TOL					250
 #define ENCODER_TOL_XY				1000
-// #define ENCODER_TOL_SCREW			230000
-#define ENCODER_TOL_SCREW			(3*SCREW_STEPS/2)
+#define ENCODER_TOL_SCREW			230000
 
 //---													  ddddrrrrrhhhhh
 #define IHOLD_IRUN(hold, run, delay)	((((delay)&0xf)<<16) | (((run)&0x1f)<<8) | ((hold)&0x1f))
 #define SCREW_CURRENT_HIGH			IHOLD_IRUN(0, 28, 1)		// 0x00011C00
 #define SCREW_CURRENT_LOW			IHOLD_IRUN(0, 18, 1)		// 0x00011200
 #define XY_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00011200
-// #define Z_CURRENT					IHOLD_IRUN(0, 18, 1)		// 0x00010E00
 #define Z_CURRENT					IHOLD_IRUN(0, 14, 1)		// 0x00010E00
 
 #define DRIVER_ERROR	0x02		
