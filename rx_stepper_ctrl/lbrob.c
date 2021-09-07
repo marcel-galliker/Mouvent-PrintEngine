@@ -1640,14 +1640,21 @@ static void _rob_state_machine(void)
                 _RobStateMachine_Step++;    
             }
             break;
-            
+          
         case 203:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            rc_move_bottom(_FL_);
+            rc_screwer_to_ref();
              _RobStateMachine_Step++;
             break;
 
         case 204:
+            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
+            if (!rc_move_done()) break;
+            rc_move_bottom(_FL_);
+             _RobStateMachine_Step++;
+            break;
+
+        case 205:
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
             _RobStateMachine_Step = 0; // wait for next command
             RX_StepperStatus.adjustDoneCnt++;
