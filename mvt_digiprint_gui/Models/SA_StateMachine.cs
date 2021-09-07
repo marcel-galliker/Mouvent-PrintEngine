@@ -124,40 +124,41 @@ namespace RX_DigiPrint.Models
 		//--- _NextRobotCmd ---------------------------------------
 		private void _NextRobotCmd(int stepperNo)
 		{
-			if (_Actions==null) return;
 			if (_RobotRunning[stepperNo]) return;
 
 			if (!RxGlobals.StepperStatus[stepperNo].ScrewerReady) return;
-
-			foreach(SA_Action action in _Actions)
-			{	
-				if (action.StepperNo==stepperNo && action.State==ECamFunctionState.waitRob)
-				{
-					if (action.Correction!=null)
+			if (_Actions!=null)
+			{
+				foreach(SA_Action action in _Actions)
+				{	
+					if (action.StepperNo==stepperNo && action.State==ECamFunctionState.waitRob)
 					{
-						TcpIp.SHeadAdjustmentMsg msg = new  TcpIp.SHeadAdjustmentMsg();
+						if (action.Correction!=null)
+						{
+							TcpIp.SHeadAdjustmentMsg msg = new  TcpIp.SHeadAdjustmentMsg();
 
-						msg.printbarNo  = action.PrintbarNo;
-						msg.headNo      = action.HeadNo;
-						if      (action.Function==ECamFunction.CamMeasureAngle)  msg.axis = 0;
-						else if (action.Function==ECamFunction.CamMeasureStitch) msg.axis = 1;
-						msg.steps       = (Int32)(action.Correction * 6.0 + 0.5);
-						/*
-						action.State	= ECamFunctionState.done;
-						RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, axis={1}, steps={2} NOT STARTING (Development)", msg.headNo, msg.steps, msg.steps)));
-						break;
-						*/
+							msg.printbarNo  = action.PrintbarNo;
+							msg.headNo      = action.HeadNo;
+							if      (action.Function==ECamFunction.CamMeasureAngle)  msg.axis = 0;
+							else if (action.Function==ECamFunction.CamMeasureStitch) msg.axis = 1;
+							msg.steps       = (Int32)(action.Correction * 6.0 + 0.5);
+							/*
+							action.State	= ECamFunctionState.done;
+							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Head={0}, axis={1}, steps={2} NOT STARTING (Development)", msg.headNo, msg.steps, msg.steps)));
+							break;
+							*/
 
-						// _Adjusted = true;
-						_RobotRunning[stepperNo] = true;
-						_RobotUsed[stepperNo] = true;
+							// _Adjusted = true;
+							_RobotRunning[stepperNo] = true;
+							_RobotUsed[stepperNo] = true;
 
-						action.State	= ECamFunctionState.runningRob;
-						Console.WriteLine("Stepper[{0}]: CMD_HEAD_ADJUST Printbar={1}, Head={2}, axis={3}, steps={4}", stepperNo, msg.printbarNo, msg.headNo, msg.axis, msg.steps);
-						RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Printbar={0}, Head={1}, axis={2}, steps={3}", msg.printbarNo, msg.headNo, msg.axis, msg.steps)));
-						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
+							action.State	= ECamFunctionState.runningRob;
+							Console.WriteLine("Stepper[{0}]: CMD_HEAD_ADJUST Printbar={1}, Head={2}, axis={3}, steps={4}", stepperNo, msg.printbarNo, msg.headNo, msg.axis, msg.steps);
+							RxGlobals.Events.AddItem(new LogItem(string.Format("ROB Command, Printbar={0}, Head={1}, axis={2}, steps={3}", msg.printbarNo, msg.headNo, msg.axis, msg.steps)));
+							RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ADJUST, ref msg);
+						}
+						return;
 					}
-					return;
 				}
 			}
 			if (_RobotUsed[stepperNo] && !_RobotRunning[stepperNo])
@@ -1238,13 +1239,16 @@ namespace RX_DigiPrint.Models
 		private void _CamMeasureAngle_done()
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Angle Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
-			int steps = (Int32)(_Action.Correction * 6.0 + 0.5);
-			if (Math.Abs(steps)<=_Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
-			else 										
+			if (_Action.Correction!=null)
 			{
-				_Action.State = ECamFunctionState.waitRob;
-				_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
-				_NextRobotCmd(_Action.StepperNo);
+				int steps = (Int32)(_Action.Correction * 6.0 + 0.5);
+				if (Math.Abs(steps)<=_Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
+				else 										
+				{
+					_Action.State = ECamFunctionState.waitRob;
+					_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
+					_NextRobotCmd(_Action.StepperNo);
+				}
 			}
 
 			if (_ActionIdx+1<_Actions.Count && _Actions[_ActionIdx+1].Function==ECamFunction.CamMeasureAngle && _Actions[_ActionIdx+1].HeadNo>0)

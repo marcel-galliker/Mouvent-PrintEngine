@@ -1160,10 +1160,10 @@ static void _rob_state_machine(void)
 {
     static SScrewPos _pos;
     static SPoint    _default;
-    static SPoint    _corr; 
+    static SPoint    _corr;
+    static int       _corrMax_X;
     static int       _posy_base;
     static int       _posy;
-    static int       _printbar = 0;
     static int _time=0;
     int trace;
     int pos, distance = 0;
@@ -1212,6 +1212,8 @@ static void _rob_state_machine(void)
 
                         if (_ScrewPar.printbar == 0 || _ScrewPos.printbar[0].stitch.y < MIN_Y_POS)  _default.y = _posy_base-SCREW_Y_STITCH;
                         else                                                                        _default.y = _ScrewPos.printbar[0].stitch.y;
+
+                        _corrMax_X = 3*CORR_MAX;
                     }
                 }
                 else 
@@ -1235,9 +1237,10 @@ static void _rob_state_machine(void)
 							_default.y = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head-1][AXE_ANGLE].y;
                     }
                     else _default.y = _ScrewPos.printbar[_ScrewPar.printbar].head[_ScrewPar.head][AXE_ANGLE].y + SCREW_Y_ANGLE - SCREW_Y_STITCH;
+                    _corrMax_X = CORR_MAX;
                 }
 
-                if ( abs(_pos.x - _default.x)>(CORR_MAX+3*CORR_STEP)) _pos.x = _default.x;
+                if ( abs(_pos.x - _default.x)>(_corrMax_X+3*CORR_STEP)) _pos.x = _default.x;
                 if ( abs(_pos.y - _default.y)>(CORR_MAX+3*CORR_STEP)) _pos.y = _default.y;
                 
                 if (FALSE)
@@ -1281,13 +1284,11 @@ static void _rob_state_machine(void)
                     Error(WARN, 0, "Screw (printbar=%d, head=%d, axis=%d) adjustment limited to %d.%d turns", _ScrewPar.printbar, _ScrewPar.head, _ScrewPar.axis, _ScrewPar.steps/6, abs(_ScrewPar.steps)%6);
                 }
             }
-            if (_printbar==0 && _ScrewPar.printbar==1)
+            if (RX_StepperStatus.posY[0]-1000 < _pos.y)
             {
                 _cln_move_to(CMD_ROB_MOVE_POS, rob_fct_move_to_pos, _pos.y);
-                _printbar = _ScrewPar.printbar;
                 break;
             }
-            _printbar = _ScrewPar.printbar;
             // no break here!
 
        case 2:  // move slide 
@@ -1445,7 +1446,7 @@ static void _rob_state_machine(void)
                 if (_corr.y>0) _corr.y = -_corr.y;
                 else           _corr.y = (-_corr.y)+CORR_STEP;
 
-                if (abs(_corr.y)>CORR_MAX && _ScrewPar.head<0 && abs(_corr.x)<=CORR_MAX)
+                if (abs(_corr.y)>CORR_MAX && _ScrewPar.head<0 && abs(_corr.x)<=_corrMax_X)
                 {
                     if (_corr.x>0) _corr.x = -_corr.x;
                     else           _corr.x = (-_corr.x)+CORR_STEP;
