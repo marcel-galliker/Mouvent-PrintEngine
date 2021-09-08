@@ -55,11 +55,6 @@ static int _ALL=FALSE;	// show all registers
 
 #define WATCHDOG_CNT	0x7fffffff
 
-#define DIG_OUT_0 0x0001
-#define DIG_OUT_1 0x0002
-#define DIG_OUT_2 0x0004
-#define DIG_OUT_3 0x0008
-
 #define UV_ISOLATOR_OUT	0x0001		
 #define UV_POWER_OUT	0x0002	// Power-Bits= 0x04
 #define UV_SHUTTER_OUT	0x0004
@@ -293,6 +288,8 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		_pg_ctrl();
 		_corr_ctrl();
 		if (RX_EncoderCfg.simulation) _simu_markreader();
+
+		//--- count marks --------
 		{
 			static int _in=0;
 			if (FpgaQSys->in&1 && !_in&1) _InCnt++;
@@ -333,15 +330,7 @@ void  fpga_main(int ticks, int menu, int showCorrection, int showParam)
 		test_do(ticks);
 		if (_Init) _fpga_poslog();
 	}
-	
-	if (_Init && rx_def_is_tx(RX_EncoderCfg.printerType))
-	{
-		if (Fpga->stat.encOut[0].fp_en == 0) FpgaQSys->out &= ~DIG_OUT_1;
-		else FpgaQSys->out |= DIG_OUT_1;
-		if (Fpga->stat.encOut[7].fp_en == 0) FpgaQSys->out &= ~DIG_OUT_2;
-		else FpgaQSys->out |= DIG_OUT_2;
-	}
-	
+		
 	if (_Init) Fpga->cfg.general.watchdog_cnt  = WATCHDOG_CNT;
 	if (menu)
 	{
@@ -415,7 +404,6 @@ static void _fpga_poslog(void)
 		_poslog_file = fopen(name, "w");
 		fprintf(_poslog_file, "time(ms)");
 		for (i = 0; i < 4; i++) fprintf(_poslog_file, ";position enc %d", i);
-		for (i = 0; i < 4; i++) fprintf(_poslog_file, ";DigIn %d", i);
 		fprintf(_poslog_file, "\n");
 		_poslog_timer = rx_get_ticks();
 		_poslog_cnt++;
@@ -426,7 +414,6 @@ static void _fpga_poslog(void)
 	
 	fprintf(_poslog_file, "%d", time);
 	for (i = 0; i < 4; i++) fprintf(_poslog_file, ";%d", (int)Fpga->stat.encIn[i].position);
-	for (i = 0; i < 4; i++) fprintf(_poslog_file, ";%d", (int)(FpgaQSys->in &(1<<i)));
 	fprintf(_poslog_file, "\n");
 }
 
@@ -490,7 +477,8 @@ static void  _uv_ctrl(void)
 			{
 				_UV_Stopping = FALSE;
 				_UV_Printing = FALSE;
-			}
+                fpga_encoder_enable(FALSE, FALSE);
+            }
 			_UV_Speed = actPos- _UV_LastPos;
 			_UV_LastPos = actPos;
 			if (_UV_Printing && actPos > UV_POS_LEFT && actPos < UV_POS_RIGHT)
@@ -534,16 +522,20 @@ void fpga_stop_printing(void)
 void fpga_abort_printing(void)
 {
 	int i;
-	if (RX_EncoderCfg.printerType==printer_test_table) _UV_Stopping = TRUE;
-	else FpgaQSys->out = 0;
+    if (RX_EncoderCfg.printerType == printer_test_table && _UV_Printing)
+        _UV_Stopping = TRUE;
+    else
+    {
+        if (RX_EncoderCfg.printerType != printer_test_table)
+            FpgaQSys->out = 0;
 
-	if (Fpga->cfg.general.shift_delay == 0)
-	{
-		for (i = 0; i < SIZEOF(Fpga->cfg.encIn); i++)
-		{
-			Fpga->cfg.encIn[i].enable = _Enabled[i] = FALSE;
-		}
-	}
+        if (Fpga->cfg.general.shift_delay == 0)
+        {
+            for (i = 0; i < SIZEOF(Fpga->cfg.encIn); i++)
+                 Fpga->cfg.encIn[i].enable = _Enabled[i] = FALSE;
+        }
+
+    }
 }
 
 //--- fpga_enc_config ---------------------------------------------------
@@ -569,7 +561,6 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 	if (pCfg->printerType==printer_TX801 || pCfg->printerType==printer_TX802 
 	||  pCfg->printerType==printer_TX404 ||  pCfg->printerType==printer_LB701 
 	||  pCfg->printerType==printer_LB702_UV || pCfg->printerType==printer_LB702_WB
-	||  pCfg->printerType==printer_LB703_UV
 	||  pCfg->printerType==printer_LH702
 	||  pCfg->printerType==printer_DP803	) 
 	{
@@ -643,7 +634,7 @@ void fpga_enc_config(int inNo, SEncoderCfg *pCfg, int restart)
 		Fpga->cfg.encIn[inNo].enable			= _Enabled[inNo] =TRUE;
 	}
 	if(RX_EncoderCfg.printerType == printer_test_table) _uv_init();
-	else FpgaQSys->out |= ENC_READY_OUT;
+	else FpgaQSys->out = ENC_READY_OUT;
 	
 //	_scan_check_init();
 	Fpga->cfg.general.reset_errors = TRUE;
@@ -703,7 +694,9 @@ void  fpga_encoder_enable(int enable, int test)
 	
 	if (_Init)
 	{
-		for(i=0; i<4; i++)
+        if (_UV_Printing) return;
+        
+        for(i=0; i<4; i++)
 		{
 			// 	Problem in CLEAF!!! Fpga->cfg.encOut[i].dist_ratio		= 0x80000000;  // 101455920; // 0x80000000; 
 			//	Problem in CLEAF!!! Fpga->cfg.encIn[i].index_on_b		= TRUE;
@@ -960,13 +953,8 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		_FirstMarkPos=0;		
 	}
 	
-//	if (pcfg->printGoMode==PG_MODE_MARK || pcfg->printGoMode==PG_MODE_MARK_FILTER || RX_EncoderCfg.printGoMode==PG_MODE_MARK_VRT)
 	if (pcfg->ftc)
 	{
-		//	Fpga->cfg.general.min_mark_len	  = 1000;
-		if (pcfg->printGoDist<0) Fpga->cfg.general.shift_delay_tel = 0;
-		else					 Fpga->cfg.general.shift_delay_tel = (int)((pcfg->printGoDist)/_FirePulseDist);				
-		TrPrintfL(TRUE, "fpga_pg_config.shift_delay_tel=%d", Fpga->cfg.general.shift_delay_tel);
 		//--- flight time compensation of Mark Reader ----------------------------	
 		double ftc_strokes = pcfg->ftc/_FirePulseDist;
 		double hz		   = 100.0/60.0*1000000.0/_FirePulseDist;// fix 100 m/min
@@ -975,27 +963,26 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 		
 		Fpga->cfg.general.ftc_speed = (int)speed;
 		Fpga->cfg.general.ftc_ratio = (int)ratio;
-	//	TrPrintfL(TRUE, "fpga_pg_config start: set ftc_speed=%d", (int)speed);
-	//	TrPrintfL(TRUE, "fpga_pg_config start: set ftc_ratio=%d", (int)ratio);
-	//	Error(LOG, 0, "ftc_speed=%d,  ftc_ratio=%d", Fpga->cfg.general.ftc_speed, Fpga->cfg.general.ftc_ratio);
 	}
 	else
 	{
-	//	Fpga->cfg.general.shift_delay_tel	= 0;	// must be done in fpgha_pg_init!						
 		Fpga->cfg.general.ftc_speed			= 0;
 		Fpga->cfg.general.ftc_ratio			= 0;
 	}
 	
 	{
-		// Configure output number 3 (synchronization with external system)
-		Fpga->cfg.general.min_mark_len = 20000;
-		Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len*11)/10;
-		Fpga->cfg.general.shift_delay = 0;
-		if (pcfg->printGoOutDist > Fpga->cfg.general.min_mark_len)
-		{
-			Fpga->cfg.general.shift_delay = (int)((pcfg->printGoOutDist - Fpga->cfg.general.min_mark_len) / _FirePulseDist);
+		// Configure output number 3 (synchronization with external system)	
+		Fpga->cfg.general.shift_delay = 1;
+		if (pcfg->printGoOutDist > 0)
+		{			
+			if (pcfg->printGoOutDist > Fpga->cfg.general.min_mark_len)
+			{
+				Fpga->cfg.general.min_mark_len = 20000;
+				Fpga->cfg.general.shift_delay_pulse_len = (Fpga->cfg.general.min_mark_len * 11) / 10;
+				Fpga->cfg.general.shift_delay = (int)((pcfg->printGoOutDist - Fpga->cfg.general.min_mark_len) / _FirePulseDist);
+			}
+			TrPrintfL(TRUE, "Fpga->cfg.general.shift_delay=%d; shift_delay_pulse_len=%d; min_mark_len=%d; printGoOutDist=%d", Fpga->cfg.general.shift_delay, Fpga->cfg.general.shift_delay_pulse_len, Fpga->cfg.general.min_mark_len, pcfg->printGoOutDist);
 		}
-		TrPrintfL(TRUE, "Fpga->cfg.general.shift_delay=%d; shift_delay_pulse_len=%d; min_mark_len=%d; printGoOutDist=%d", Fpga->cfg.general.shift_delay, Fpga->cfg.general.shift_delay_pulse_len, Fpga->cfg.general.min_mark_len, pcfg->printGoOutDist);
 	}
 
 	for (pgNo=0; pgNo<SIZEOF(Fpga->cfg.pg); pgNo++)
@@ -1057,7 +1044,7 @@ int  fpga_pg_config(RX_SOCKET socket, SEncoderCfg *pcfg, int restart)
 			case PG_MODE_MARK_VRT:			Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
 			case PG_MODE_MARK_VERSO:		Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=FALSE; break;
 			case PG_MODE_MARK_VERSO_INV:	Fpga->cfg.pg[pgNo].fifos_used = FIFOS_MARKFILTER; Fpga->cfg.pg[pgNo].dig_in_sel=1; Fpga->cfg.pg[pgNo].printgo_n=TRUE;  break;
-			default:						Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST;
+			default:						Fpga->cfg.general.shift_delay_tel = 0; Fpga->cfg.pg[pgNo].fifos_used = FIFOS_DIST; break;
 			}
 		}
 	}
@@ -1327,7 +1314,7 @@ static void  _pg_ctrl(void)
 			if (_PM_Cnt<RX_EncoderStatus.distTelCnt && Fpga->stat.encOut[0].mark_edge_warn!=_PM_Filtered_Cnt)
 			{				 
 				TrPrintfL(TRUE, "Mark near PrintMark %d Filtered, InPos=%06d, OutPos=%06d", RX_EncoderStatus.PG_cnt, Fpga->stat.encIn[0].position, Fpga->stat.encOut[0].position);
-				TrPrintfL(TRUE, "Fpga->stat.encOut[0].mark_edge_warn=%d _PM_Filtered_Cnt=%d, _PM_Cnt=%d, distTelCnt=%d", Fpga->stat.encOut[0].mark_edge_warn, _PM_Filtered_Cnt, _PM_Cnt, RX_EncoderStatus.distTelCnt);
+				TrPrintfL(TRUE, "Fpga->stat.encOut[0].mark_edge_warn=%d _PM_Filtered_Cnt=%d, _PM_Cnt=%d, distTelCnt=%d, window_mark_pos=%d", Fpga->stat.encOut[0].mark_edge_warn, _PM_Filtered_Cnt, _PM_Cnt, RX_EncoderStatus.distTelCnt, Fpga->stat.encOut[0].window_mark_pos);
 								
 				if (FpgaQSys->window_status.fill_level && (Fpga->stat.encIn[0].position > _FirstMarkPos)) Error(WARN, 0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
 			//	else                                    Error(LOG,  0, "Mark near PrintMark %d Filtered", RX_EncoderStatus.PG_cnt);
@@ -1459,63 +1446,52 @@ static void _simu_markreader(void)
 {
 	static UINT32 _PM_LastPos=0;
 	static UINT32 _digin_edge_dist;
-
-	switch (RX_EncoderCfg.printGoMode)
+	
+	if(RX_EncoderCfg.printGoMode==PG_MODE_MARK || RX_EncoderCfg.printGoMode==PG_MODE_MARK_FILTER || RX_EncoderCfg.printGoMode==PG_MODE_MARK_VRT)
 	{
-		case PG_MODE_MARK:
-		case PG_MODE_MARK_FILTER:
-		case PG_MODE_MARK_VRT:
-		case PG_MODE_MARK_INV:
-		case PG_MODE_MARK_VERSO:
-		case PG_MODE_MARK_VERSO_INV:
-			//		FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
-			if (Fpga->cfg.encOut[0].synthetic_freq)
+//		FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
+		if (Fpga->cfg.encIn[0].enable)
+		{						
+			/*			
+			if (Fpga->stat.encIn[0].digin_edge_dist!=_digin_edge_dist)
 			{
-				/*
-				if (Fpga->stat.encIn[0].digin_edge_dist!=_digin_edge_dist)
+				TrPrintfL(TRUE, "pos[%d]: digin_edge_dist=%06d", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist);
+				_digin_edge_dist = Fpga->stat.encIn[0].digin_edge_dist;
+			}			
+			*/
+			
+//			if(!Fpga->stat.dig_in_cnt[0])// && !_PM_SimuCnt)
+			if (!_PM_Cnt)
+			{
+				if(_PM_LastPos == 0 && Fpga->stat.encOut[0].position > 1000)
 				{
-					TrPrintfL(TRUE, "pos[%d]: digin_edge_dist=%06d", Fpga->stat.encOut[0].position, Fpga->stat.encIn[0].digin_edge_dist);
-					_digin_edge_dist = Fpga->stat.encIn[0].digin_edge_dist;
+					TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d)", _PM_Cnt+1, Fpga->stat.encOut[0].position);
+					FpgaQSys->out |= MARKREADER_SIMU_OUT;
+					_PM_SimuCnt++;
+					_PM_LastPos = Fpga->stat.encOut[0].position;				
 				}
-				*/
-
-				//			if(!Fpga->stat.dig_in_cnt[0])// && !_PM_SimuCnt)
-				if (!_PM_Cnt)
-				{
-					if (_PM_LastPos == 0 && Fpga->stat.encOut[0].position > 1000)
-					{
-						TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d)", _PM_Cnt + 1, Fpga->stat.encOut[0].position);
-						FpgaQSys->out |= MARKREADER_SIMU_OUT;
-						_PM_SimuCnt++;
-						_PM_LastPos = Fpga->stat.encOut[0].position;
-					}
-				}
-				else
-				{
-					UINT32 dist = ((Fpga->stat.encOut[0].position - _PM_LastPos) & 0x1ffff);
-					if (_Ignore && dist > (_Ignore + _Window / 2))
-					{
-						TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d, dist=%d, shift_delay_tel=%d) FIFO=%d", _PM_Cnt + 1, Fpga->stat.encOut[0].position, dist, Fpga->cfg.general.shift_delay_tel, FpgaQSys->window_status.fill_level);
-						FpgaQSys->out |= MARKREADER_SIMU_OUT;
-						_PM_SimuCnt++;
-						_PM_LastPos = Fpga->stat.encOut[0].position;
-					}
-					else if (dist > 1000 && (FpgaQSys->out & MARKREADER_SIMU_OUT))
-					{
-						FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
-					}
-				}
-			}
+			} 
 			else
 			{
-				_digin_edge_dist = 0;
-				_PM_LastPos = 0;
+				UINT32 dist = ((Fpga->stat.encOut[0].position - _PM_LastPos) & 0x1ffff); 
+				if(_Ignore && dist > (_Ignore + _Window / 2))
+				{
+					TrPrintfL(TRUE, "PM[%d]: Set Output (Pos=%d, dist=%d, shift_delay_tel=%d) FIFO=%d", _PM_Cnt+1, Fpga->stat.encOut[0].position, dist, Fpga->cfg.general.shift_delay_tel, FpgaQSys->window_status.fill_level);
+					FpgaQSys->out |= MARKREADER_SIMU_OUT;
+					_PM_SimuCnt++;
+					_PM_LastPos = Fpga->stat.encOut[0].position;		
+				}
+				else if(dist>1000 && (FpgaQSys->out & MARKREADER_SIMU_OUT))
+				{
+					FpgaQSys->out &= ~MARKREADER_SIMU_OUT;
+				}				
 			}
-			break;
-		case PG_MODE_LENGTH:
-		case PG_MODE_GAP:
-		default:
-			break;
+		} 
+		else
+		{
+			_digin_edge_dist = 0;
+			_PM_LastPos		 = 0;
+		}			
 	}
 }
 
