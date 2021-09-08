@@ -113,15 +113,15 @@
 
     <!--    <CheckBox x:Name="CheckBox" Checked="CheckBox_Checked" IsChecked="{Binding IsChecked}" Style="{StaticResource CheckBoxStyle_OFF}"> -->
     <CheckBox x:Name="CheckBox" Click="CheckBox_Clicked" IsChecked="{Binding IsChecked}" Style="{StaticResource CheckBoxStyle_OFF}">
-        <Grid x:Name="SettingsGrid" Width="100"  Margin="0">
+        <Grid x:Name="SettingsGrid" Width="100"  Margin="0" LayoutUpdated="SettingsGrid_LayoutUpdated">
             <Grid.RowDefinitions>
                 <RowDefinition Height="26"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto" x:Name="RowHeight_Side"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto" x:Name="RowHeight_Heater"/>
-                <RowDefinition Height="auto"/>
+                <RowDefinition Height="0"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 

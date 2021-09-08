@@ -10,7 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="26"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto" x:Name="RowHeight_Side"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -27,15 +27,15 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Ink Color"  VerticalAlignment="Center"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Ink"  VerticalAlignment="Center"/>
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Side" VerticalAlignment="Center" x:Name="TX_Side"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Side" VerticalAlignment="Center"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Control Mode"/>
         
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Pressure Lung" />
         <TextBlock Grid.Row="4" Grid.Column="1" Text="mbar" />
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="Temperature InkSupply" Visibility="{Binding HasHeater, Converter={StaticResource BooleanToVisibleConverter}}"/>
-        <TextBlock Grid.Row="5" Grid.Column="1" Text="°C"                    Visibility="{Binding HasHeater, Converter={StaticResource BooleanToVisibleConverter}}"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Temperature InkSupply" x:Name="InkSuplyGrid_5_0"/>
+        <TextBlock Grid.Row="5" Grid.Column="1" Text="°C"                    x:Name="InkSuplyGrid_5_1"/>
         
         <!--
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature Head"/>

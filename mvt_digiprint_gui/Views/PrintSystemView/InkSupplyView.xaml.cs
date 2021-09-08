@@ -108,16 +108,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
             {
                 _set_checkbox_style();
             }
-            if (e.PropertyName.Equals("PrinterType"))
-            {
-                _printertype_changed();
-            }
         }
 
-        //--- _printertype_changed -----------------------------------------
-        private void _printertype_changed()
+        //--- PrinterType_Changed -----------------------------------------
+        public void PrinterType_Changed()
         {
-            int i = 0;
+            int i;
             Visibility visible;
             CB_RectoVerso.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803 ? Visibility.Visible : Visibility.Collapsed;
             HasSideSelection = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
@@ -132,11 +128,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                             break;
                 default:
                     for (i = 5; i < SettingsGrid.RowDefinitions.Count; i++) SettingsGrid.RowDefinitions[i].Height = new GridLength(1, GridUnitType.Auto);
-                    NotConnected.Foreground = Brushes.Red;
+                    NotConnected.Foreground = Rx.BrushError;
                     break;
             }
-            if (RxGlobals.PrintSystem.HasHeater) SettingsGrid.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Auto);
-            else                                 SettingsGrid.RowDefinitions[6].Height = new GridLength(0);
+            if (RxGlobals.PrintSystem.HasHeater) RowHeight_Heater.Height = new GridLength(1, GridUnitType.Auto);
+            else                                 RowHeight_Heater.Height = new GridLength(0);
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
@@ -151,6 +147,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 && RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
             Button_Recovery.Visibility = visible;
         }
+
+        //--- GetRowDefinitions ----------------------
+        public RowDefinitionCollection GetRowDefinitions()
+		{
+            return  SettingsGrid.RowDefinitions;
+		}
 
         //--- OnInkSupplyPropertyChanged -------------------------
         private void OnInkSupplyPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -278,7 +280,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 _command("Purge+Vacc", EFluidCtrlMode.ctrl_purge_hard_vacc, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
         }
-
         private void PurgeWipe_Clicked(object sender, RoutedEventArgs e)
         {
             if (RxGlobals.PrintSystem.IsTx)
@@ -377,6 +378,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
-
-    }
+        public Action LayoutUpdated = null;
+		private void SettingsGrid_LayoutUpdated(object sender,EventArgs e)
+		{
+            if (LayoutUpdated!=null) LayoutUpdated();
+		}
+	}
 }

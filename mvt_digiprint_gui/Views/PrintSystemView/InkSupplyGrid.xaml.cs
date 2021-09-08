@@ -61,25 +61,40 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _printertype_changed -----------------------------------------
         private void _printertype_changed()
         {
-            int i = 0;
-            TX_Side.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803? Visibility.Visible : Visibility.Collapsed;
+            int i;
+            bool first=true;
 
-            InkSuplyGrid.RowDefinitions[3].Height = new GridLength(25/RxGlobals.Screen.Scale);
+            for (i=0; i<_InkSupplyView.Count; i++)
+			{
+                if (_InkSupplyView[i]!=null) 
+                {
+                    _InkSupplyView[i].PrinterType_Changed();
+                    if (first) _InkSupplyView[i].LayoutUpdated = rows_changed;
+                    first=false;
+                }
+			}
 
-            switch (RxGlobals.PrintSystem.PrinterType)
-            {
-                case EPrinterType.printer_test_slide_only:
-                    for (i = 5; i < InkSuplyGrid.RowDefinitions.Count; i++) InkSuplyGrid.RowDefinitions[i].Height = new GridLength(0);
-                    break;
-
-                default:
-                    for (i = 5; i < InkSuplyGrid.RowDefinitions.Count; i++) InkSuplyGrid.RowDefinitions[i].Height = new GridLength(1, GridUnitType.Auto);
-                    break;
-            }
-            
-            RowHeight_Side.  Height = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803)? GridLength.Auto : new GridLength(0);
             _assign_inksupply(RxGlobals.PrintSystem.ColorCnt * RxGlobals.PrintSystem.InkCylindersPerColor);
         }
+
+		//--- rows_changed --------------------------------------
+        private void rows_changed()
+		{
+            for (int i=0; i<_InkSupplyView.Count; i++)
+			{
+                if (_InkSupplyView[i]!=null) 
+                {
+                    RowDefinitionCollection rows = _InkSupplyView[i].GetRowDefinitions();
+                    for (int r=0; r<rows.Count; r++)
+			        {
+                        InkSuplyGrid.RowDefinitions[r].Height = new GridLength(rows[r].ActualHeight);
+			        }
+                    if (rows[5].Height.Value==0) InkSuplyGrid_5_0.Visibility = InkSuplyGrid_5_1.Visibility = Visibility.Collapsed;
+                    else                         InkSuplyGrid_5_0.Visibility = InkSuplyGrid_5_1.Visibility = Visibility.Visible;
+                    return;
+                }
+            }
+		}
 
         //--- _assign_inksupply --------------------------------------------------------
         private void _assign_inksupply(int cnt)
@@ -113,6 +128,5 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 _InkSupplyView[i].Visibility = (i<cnt)? Visibility.Visible : Visibility.Collapsed;
             }
         }
-
-    }
+	}
 }
