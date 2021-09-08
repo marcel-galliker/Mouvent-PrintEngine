@@ -253,39 +253,6 @@ void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUE
 		_ScrMem[board][head].fact[128]  = 10;
 	}
 
-	//--- disabled jets -----------------------------------------------------
-	if (TRUE)
-	{
-		char logStr[MAX_DISABLED_JETS*5+1];
-		logStr[0] = 0;
-		int logLen = 0;
-		int jet;
-		for (int i=0; i<MAX_DISABLED_JETS; i++)
-		{
-			if ((jet=RX_DisabledJets[headNo][i]) >= 0)
-			{
-				logLen += sprintf(&logStr[logLen], "%d ", jet);
-				double d=_ScrMem[board][head].fact[jet];
-				if (jet>0)						_ScrMem[board][head].fact[jet-1] += RX_Spooler.jc_ratio * d/200.0;
-												_ScrMem[board][head].fact[jet]    = 0.0;
-				if (jet+1<MAX_DENSITY_FACTORS)	_ScrMem[board][head].fact[jet+1] += RX_Spooler.jc_ratio * d/200.0;
-
-				// stitching zone
-				if (jet <= 128 && head > 0)
-				{
-					_ScrMem[board][head - 1].fact[2048 + jet - 1] += RX_Spooler.jc_ratio * d / 200.0;
-					if (jet < 127) _ScrMem[board][head - 1 ].fact[2048 + jet + 1] += RX_Spooler.jc_ratio * d / 200.0;
-				}
-				if (jet >= 2047 && head < RX_Spooler.headsPerBoard - 1)
-				{
-					if (jet > 2048) _ScrMem[board][head + 1].fact[jet - 2048 - 1] += RX_Spooler.jc_ratio * d / 200.0;
-					_ScrMem[board][head + 1].fact[jet - 2048 + 1] += RX_Spooler.jc_ratio * d / 200.0;
-				}
-			}
-		}
-		if (logStr[0]) Error(LOG, 0, "Disable Jet board=%d, head=%d, jet=%s", board, head, logStr);
-
-	}
 }
 
 //--- _write_tif --------------------------------------------------------------
@@ -549,17 +516,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			time=rx_get_ticks();
 			_scr_fill_blk(pInfo, linplane.lineLen, _ScrMem[b][h].separated);
 			if (trace) Error(LOG, 0, "scr_load time2=%d", rx_get_ticks()-time);
-			if (FALSE && pInfo->board==2 && pInfo->head==1)
-			{
-				SBmpSplitInfo info;
-				memcpy(&info, pInfo, sizeof(info));
-				info.widthPx = linplane.widthPx;
-				_write_tif("org", &info, &_ScrMem[b][h].separated, linplane.lineLen);
-			}
 
-		//	ret=_rx_screen_write_ta(&_PlaneScreenConfig[no]);
-		//	ret = rx_screen_slice_FMS_1x3g(&linplane, &loutplane, &_PlaneScreenConfig[no]);
-		//	ret = rx_screen_slice_FMS_1x3g_mag(&linplane, &loutplane, &_PlaneScreenConfig[no]);
 			ret = gpu_screen_FMS_1x3g(&linplane, &loutplane, &_PlaneScreenConfig[no], pInfo->pListItem->dots, threadNo);
 
 			_TimeTotal += rx_get_ticks()-time;
@@ -591,17 +548,18 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			pInfo->widthBt		= pInfo->srcWidthBt;
 			pInfo->blkCnt		= (pInfo->dstLineLen * pInfo->srcLineCnt + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 
+			// jet correction for the head
+			if (rx_def_is_scanning(RX_Spooler.printerType) || !pInfo->same)
+			{
+				jc_head_correct(pInfo, RX_DisabledJets[no], 0, loutplane.lengthPx, loutplane.lineLen);
+			}
+
 			if (pInfo->blkCnt!=blkCnt)
 			{				
-		//	if (_Id.copy==4 && _Id.scan==36 && pInfo->board==3 && pInfo->head==1)
-		//		TrPrintfL(TRUE, "BLK2: srcLineCnt=%d, lengthPx=%d, widthPx=%d, dstLineLen=%d, blkCnt=%d\n",  pInfo->srcLineCnt, pInfo->srcLineCnt, pInfo->widthPx, pInfo->dstLineLen, pInfo->blkCnt);
 				TrPrintfL(TRUE, "Screening[%d][%d] ERROR: blk0=%d, blkCnt=%d, blk0=%d, blkCnt=%d", b, h, blk0, blkCnt, pInfo->blk0, pInfo->blkCnt);
 				TrPrintfL(TRUE, "SrcBlkCnt[%d][%d]: dstLineLen=%d, lengthPx=%d, blkCnt=%d", pInfo->board, pInfo->head, pInfo->dstLineLen, pInfo->srcLineCnt, pInfo->blkCnt);
 				Error(ERR_CONT, 0,"BlkCnt Mismatch, (id=%d, page=%d, copy=%d, scan=%d) time=%d ms (board=%d, head=%d)", _Id.id, _Id.page, _Id.copy, _Id.scan, pInfo->board, pInfo->head);
 			}
-
-		//	_ScrMem[b][h].screenedIdx = (_ScrMem[b][h].screenedIdx+1) % SCR_BUF_SIZE;
-		//	Error(LOG, 0, "Head[%d.%d]:widthPx=%d, bitsPerPixel=%d, srcWidthBt=%d, widthBt=%d, srcLineLen=%d, dstLineLen=%d, blkCnt=%d", b, h, pInfo->widthPx, pInfo->bitsPerPixel, pInfo->srcWidthBt, pInfo->widthBt, pInfo->srcLineLen, pInfo->dstLineLen, pInfo->blkCnt);
 			
 			TrPrintfL(TRUE, "Screening[%d][%d]: blk0=%d, blkCnt=%d, blk0=%d, blkCnt=%d", b, h, blk0, blkCnt, pInfo->blk0, pInfo->blkCnt);
 

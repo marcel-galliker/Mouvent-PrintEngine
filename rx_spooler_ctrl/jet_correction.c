@@ -24,7 +24,6 @@ static int _Active;
 static int _Changed;
 static int _MaxDropSize=3;
 static int _First;
-static int _Log;
 
 //--- prototypes --------------------------------------------------------
 
@@ -70,7 +69,6 @@ void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 		}
 	}
 	_First = TRUE;
-	_Log   = TRUE;
 }
 
 //--- jc_active ---------------------------------------------------
@@ -78,18 +76,21 @@ int  jc_active(void)
 {
 	if (_First)
 	{
-		int head, n, m;
-		for (head=0; head<SIZEOF(RX_DisabledJets); head++)
+		int m;
+		for (int head=0; head<SIZEOF(RX_DisabledJets); head++)
 		{
-			for (n=0; n<MAX_DISABLED_JETS; n++)
+			for (int n=0; n<MAX_DISABLED_JETS; n++)
 			{
 				//--- disable jet in left overlap ---
 				if (RX_DisabledJets[head][n]>0 && RX_DisabledJets[head][n]<=HEAD_OVERLAP_SAMBA && head>0) 
 				{
 					for (m=0; m<MAX_DISABLED_JETS; m++)
 					{
-						if (RX_DisabledJets[head-1][m]<0) RX_DisabledJets[head-1][m] = RX_DisabledJets[head][n]+HEAD_WIDTH_SAMBA;
-						break;
+						if (RX_DisabledJets[head - 1][m] < 0 || RX_DisabledJets[head - 1][m] == RX_DisabledJets[head][n] + HEAD_WIDTH_SAMBA)
+						{
+							RX_DisabledJets[head - 1][m] = RX_DisabledJets[head][n] + HEAD_WIDTH_SAMBA;
+							break;
+						}
 					}					
 				}
 
@@ -98,8 +99,11 @@ int  jc_active(void)
 				{
 					for (m=0; m<MAX_DISABLED_JETS; m++)
 					{
-						if (RX_DisabledJets[head+1][m]<0) RX_DisabledJets[head-1][m] = RX_DisabledJets[head][n]-HEAD_WIDTH_SAMBA;
-						break;
+						if (RX_DisabledJets[head + 1][m] < 0 || RX_DisabledJets[head + 1][m] == RX_DisabledJets[head][n] - HEAD_WIDTH_SAMBA)
+						{
+							RX_DisabledJets[head + 1][m] = RX_DisabledJets[head][n] - HEAD_WIDTH_SAMBA;
+							break;
+						}
 					}					
 				}
 
@@ -116,20 +120,11 @@ int jc_changed(void)
 	return _Changed;
 }
 
-//--- _jet_correction --------------------------------------------------
-int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
+void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, int lengthPx, int lineLen)
 {
-	int color, n, head, jet, logLen;
 	int pixelPerByte;
-	char logStr[MAX_PATH];
-	SBmpSplitInfo	*pInfo; 
 
-	_Changed = FALSE;
-
-	if (pBmpInfo->bitsPerPixel>=8) return REPLY_OK;	// correction whils screening 
-    if (rx_def_is_tx(RX_Spooler.printerType)) return REPLY_OK;
-
-	if (pBmpInfo->bitsPerPixel<2)
+	if (pInfo->bitsPerPixel<2)
 	{
 		_GetPixel = _get_pixel1;
 		_SetPixel = _set_pixel1;
@@ -142,6 +137,30 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 		pixelPerByte = 4;
 	}
 
+	if (pInfo->data && pInfo->bitsPerPixel)
+	{
+		for (int n = 0; n < MAX_DISABLED_JETS; n++)
+		{
+			int jet = disabledJets[n];
+			if (jet < 0) break;
+			jet += (pInfo->startBt - pInfo->fillBt) * pixelPerByte + pInfo->jetPx0;
+			if (jet >= 0) _disable_jet(*pInfo->data, pInfo->bitsPerPixel, lengthPx, lineLen, jet, fromLine);
+		}
+	}
+}
+
+//--- _jet_correction --------------------------------------------------
+int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
+{
+	int color, head;
+	SBmpSplitInfo	*pInfo; 
+
+	_Changed = FALSE;
+
+	if (pBmpInfo->bitsPerPixel>=8) return REPLY_OK;	// correction after screening 
+    if (rx_def_is_tx(RX_Spooler.printerType)) return REPLY_OK;
+
+
 	for (color=0; color<SIZEOF(pBmpInfo->buffer); color++)
 	{
 		for (head=0; head<RX_Spooler.headsPerColor; head++)
@@ -149,28 +168,11 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 			if (RX_Spooler.headNo[color][head])
 			{
 				pInfo = &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
-				if (pInfo->data && pBmpInfo->buffer[color] && pBmpInfo->bitsPerPixel)
-				{
-					logLen=0;
-					for (n=0; n<MAX_DISABLED_JETS; n++)
-					{
-						jet = RX_DisabledJets[color*RX_Spooler.headsPerColor+head][n];
-						if (jet>=0)
-						{
-							
-							if(_Log) logLen += sprintf(&logStr[logLen], "%d ", jet);
-							jet += (pInfo->startBt - pInfo->fillBt) * pixelPerByte + pInfo->jetPx0;
-							if (jet >= 0) _disable_jet(*pInfo->data, pBmpInfo->bitsPerPixel, pBmpInfo->lengthPx, pBmpInfo->lineLen, jet, fromLine);
-						}
-					}
-					if (logLen) Error(LOG, 0, "Disable Jet color=%d, head=%d, jet=%s", color, head, logStr);
-				}
+				jc_head_correct(pInfo, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen);
 			}
-		//	if (pBmpInfo->printMode==PM_SCANNING || pBmpInfo->printMode==PM_SINGLE_PASS) break;
 		}
 	}
-	_Log = FALSE;
-	return REPLY_OK;							
+	return REPLY_OK;
 }
 
 //--- _get_pixel1 -------------------------------
@@ -188,7 +190,8 @@ static int _get_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y)
 //--- _set_pixel1 -------------------------------
 static void _set_pixel1(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 {
-	int shift=(7-(x%8));
+	if (x < 0 || x >= 8 * bytesPerLine) return; // do not modify outside the image
+	int shift = (7 - (x % 8));
 	if (val>1) val=1;
 	pBuffer += y*bytesPerLine + x/8;
 	*pBuffer &= ~(0x01<<shift);
@@ -198,6 +201,7 @@ static void _set_pixel1(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 //--- _set_pixel2 --------------------------------------------
 static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 {
+	if (x < 0 || x >= 4 * bytesPerLine) return; // do not modify outside the image
 	int shift=(2*(3-(x%4)));
 	if (val>3) val=3;
 	pBuffer += y*bytesPerLine + x/4;
