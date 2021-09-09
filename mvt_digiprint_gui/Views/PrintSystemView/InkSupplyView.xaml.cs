@@ -14,25 +14,8 @@ using System.Windows.Media;
 
 namespace RX_DigiPrint.Views.PrintSystemView
 {
-    public partial class InkSupplyView : UserControl, INotifyPropertyChanged
+    public partial class InkSupplyView : UserControl
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string name)
-        {
-            if(PropertyChanged != null)
-            {
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(name));
-            }
-        }
-
-        private bool _HasSideSelection;
-        public bool HasSideSelection
-        {
-            get { return _HasSideSelection; }
-            set { _HasSideSelection = value; OnPropertyChanged("HasSideSelection"); }
-        }
-
-
         private InkSupply   _InkSupply;
         private static int  _ActiveItem=0;
 
@@ -64,9 +47,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_service);
             CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_service);
 
-            visibility = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB || RxGlobals.PrintSystem.IsLb)
-                && RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
-            Button_Recovery.Visibility = visibility;
+            _set_recovery_visible();
         }
 
         //--- UserControl_Loaded -----------------------------------------------
@@ -100,6 +81,17 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
+        //--- _set_recovery_visible ---------------
+        private void _set_recovery_visible()
+		{
+            bool visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide 
+                         || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_HB 
+                         || RxGlobals.PrintSystem.IsLb);
+                
+            visible &= (RxGlobals.User.UserType >= EUserType.usr_service); 
+            Button_Recovery.Visibility = visible? Visibility.Visible : Visibility.Collapsed;
+		}
+
         //--- PrintSystem_PropertyChanged ----------------------------------
         void PrintSystem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -116,7 +108,6 @@ namespace RX_DigiPrint.Views.PrintSystemView
             int i;
             Visibility visible;
             CB_RectoVerso.Visibility = RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_DP803 ? Visibility.Visible : Visibility.Collapsed;
-            HasSideSelection = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_DP803;
             
             SettingsGrid.RowDefinitions[3].Height = new GridLength(25/RxGlobals.Screen.Scale);
             
@@ -143,9 +134,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             Button_PurgeWash.Visibility = visible;
 
-            visible = ((RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide || RxGlobals.PrintSystem.PrinterType== EPrinterType.printer_test_slide_HB || RxGlobals.PrintSystem.IsLb) 
-                && RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
-            Button_Recovery.Visibility = visible;
+            _set_recovery_visible();
         }
 
         //--- GetRowDefinitions ----------------------
@@ -378,10 +367,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
         }
 
-        public Action LayoutUpdated = null;
+        //--- SettingsGrid_LayoutUpdated --------------------------------
+        public Action SettingsGridUpdated = null;
 		private void SettingsGrid_LayoutUpdated(object sender,EventArgs e)
 		{
-            if (LayoutUpdated!=null) LayoutUpdated();
+            if (SettingsGridUpdated!=null) SettingsGridUpdated();
 		}
 	}
 }

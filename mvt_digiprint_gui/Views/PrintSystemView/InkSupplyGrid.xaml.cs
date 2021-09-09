@@ -69,7 +69,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 if (_InkSupplyView[i]!=null) 
                 {
                     _InkSupplyView[i].PrinterType_Changed();
-                    if (first) _InkSupplyView[i].LayoutUpdated = rows_changed;
+                    if (first) _InkSupplyView[i].SettingsGridUpdated = rows_changed;
                     first=false;
                 }
 			}
