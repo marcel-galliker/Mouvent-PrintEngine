@@ -46,6 +46,8 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 #define CAL_TOOL_HEIGHT	25000
 #define DIST_MECH_REF		500
 
+#define UP_POS			20000
+
 static SMovePar	_ParRef;
 static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_calibrate;
@@ -130,7 +132,7 @@ void lb702_init(void)
 void lb702_main(int ticks, int menu)
 {
 	int motor;
-	int cmd = RX_StepperStatus.cmdRunning; 
+	int cmd = RX_StepperStatus.cmdRunning;
 
 	SStepperStat oldSatus;
 	memcpy(&oldSatus, &RX_StepperStatus, sizeof(RX_StepperStatus));
@@ -500,10 +502,9 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1)
 		if (cmd == CMD_LIFT_UP_POS) adjust=60;
 		else if (cmd==CMD_LIFT_PRINT_POS) adjust=-60;
 		else adjust=0;
-		motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0+adjust);
-		motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1+adjust);
-
-		motors_start(MOTOR_Z_BITS, TRUE);	
+		
+		if (motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0+adjust) && motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1+adjust))
+			motors_start(MOTOR_Z_BITS, TRUE);	
 	} 
 	else RX_StepperStatus.cmdRunning = 0;
 }
@@ -599,10 +600,16 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 										Error(ERR_ABORT, 0, "LIFT: Reference Height front/back too differents (> 10mm)");									
 									else if (!RX_StepperStatus.cmdRunning)
 									{
-										val0 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back - 20000);
-										val1 = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - 20000);
+										val0 = -1 * _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back - UP_POS);
+										val1 = -1 * _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - UP_POS);
 										if (RX_StepperStatus.info.ref_done) _lb702_move_to_pos(CMD_LIFT_UP_POS, val0, val1);
-										//else								_lb702_do_reference();
+										else
+										{
+											_PrintPos_New[MOTOR_Z_BACK] = val0;
+											_PrintPos_New[MOTOR_Z_FRONT] = val1;
+											_Cmd_New = msgId;
+											_lb702_do_reference();
+										}
 									}
 									break;
 

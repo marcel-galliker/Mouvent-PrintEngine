@@ -624,9 +624,9 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 			{
 				if (REF_HEIGHT<87000) Error(WARN, 0, "Reference Height is only %d.02d mm", REF_HEIGHT/100, REF_HEIGHT%100);
 				RX_StepperStatus.cmdRunning = CMD_LIFT_PRINT_POS;
-				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos));
-				motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos + HEAD_ALIGN));
-				motors_start(MOTOR_Z_BITS, TRUE);
+				if (motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos)) && motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_down, _z_micron_2_steps(REF_HEIGHT - _PrintPos + HEAD_ALIGN)))
+					motors_start(MOTOR_Z_BITS, TRUE);
+				
 				Fpga.par->output &= ~LASER_BEFORE_HEAD_OUT;		// Laser for supervision on
 				
 			}
@@ -638,9 +638,8 @@ int  cleaf_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 		if (!RX_StepperStatus.cmdRunning && RX_StepperStatus.info.ref_done)
 		{
 			RX_StepperStatus.cmdRunning = msgId;
-			motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT));		
-			motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT));		
-			motors_start(MOTOR_Z_BITS, FALSE);
+			if (motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT)) &&	motor_move_to_step(MOTOR_Z_BACK,  &_ParZ_cap, _z_micron_2_steps(CAPPING_HEIGHT)))	
+				motors_start(MOTOR_Z_BITS, FALSE);
 		}
 		break;
 	*/

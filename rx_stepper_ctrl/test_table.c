@@ -394,8 +394,8 @@ static int _ref_started(int cmd)
 		RX_StepperStatus.cmdRunning = CMD_TT_MOVE_CAP+110;
 		_CmdWaiting = cmd;
 		if (motor_error(MOTOR_Z)) motor_reset(MOTOR_Z);
-		motors_move_by_step	(MOTOR_Z_BITS,  &_ParZ_down, -100000, TRUE);
-		motors_start(MOTOR_Z_BITS, FALSE);
+		if (motors_move_by_step	(MOTOR_Z_BITS,  &_ParZ_down, -100000, TRUE));
+			motors_start(MOTOR_Z_BITS, FALSE);
 		return TRUE;
 	}
 	return FALSE;
@@ -625,9 +625,8 @@ static void _scan_start(void)
 	if (_ScanPar.scanMode==PQ_SCAN_RTL) slide_scan_right();
 	else							    slide_scan_left();
 	Fpga.par->output |= TT_VACUUM_OUT;	
-	motor_move_to_step	(MOTOR_Y_LEFT,  &_ParY_print, POSY_PRINT);
-	motor_move_to_step	(MOTOR_Y_RIGHT, &_ParY_print, POSY_PRINT+_ScanPar.offsetAngle);
-	motors_start(MOTOR_Y_BITS, TRUE);
+	if (motor_move_to_step	(MOTOR_Y_LEFT,  &_ParY_print, POSY_PRINT) && motor_move_to_step	(MOTOR_Y_RIGHT, &_ParY_print, POSY_PRINT+_ScanPar.offsetAngle))
+		motors_start(MOTOR_Y_BITS, TRUE);
 }
 
 //--- _scan_state_machine -------------------------

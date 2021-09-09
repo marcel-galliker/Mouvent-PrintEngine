@@ -290,9 +290,8 @@ static void _dp803_move_to_pos(int cmd, int pos)
 	RX_StepperStatus.info.moving = TRUE;
 	if(cmd == CMD_LIFT_PRINT_POS)
 	{
-		motor_move_to_step(MOTOR_Z_0, &_ParZ_down, pos);
-		motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos + _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align));
-		motors_start(MOTOR_Z_BITS, TRUE);			
+		if (motor_move_to_step(MOTOR_Z_0, &_ParZ_down, pos) && motor_move_to_step(MOTOR_Z_1, &_ParZ_down, pos + _micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].head_align)))
+			motors_start(MOTOR_Z_BITS, TRUE);			
 	} 
 	else 
 	{

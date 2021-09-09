@@ -43,6 +43,8 @@ static int		_current_hold[MOTOR_CNT];
 static double	_enc_mot_ratio[MOTOR_CNT];
 static int		_message_written = FALSE;
 
+static int		_SetMotorMovement = 0;
+
 //--- motor_get_step ------------------------
 INT32	motor_get_step(int motor)
 {
@@ -180,10 +182,12 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	SMove		*move;
 	int			microsteps;
     int			minSpeed;
-	
+
 	// 	t = v/a
 	//	d = (a*t^2)/2 = (v^2/a)/2
 	//  v = sqrt(2*a/d)
+
+	_SetMotorMovement &=  ~(1 << motor);
 
 	//--- make sure motor is idle!
 	if (abs(steps) <= 1) return 0;
@@ -415,12 +419,16 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 			
 		Fpga.par->cfg[motor].moveCnt = 3;		
 	}
+
+	_SetMotorMovement |= (1 << motor);
+	
 	return 1 << motor;
 }
 
 //--- motors_start ---------------------------------------
 void motors_start(UINT32 motors, UINT32 errorCheck)
-{	
+{
+	motors &= _SetMotorMovement;
 	Fpga.par->cmd_estop |= motors;
 	Fpga.par->cmd_start  = motors;
 	if (errorCheck) _ErrorCheck |= motors;
