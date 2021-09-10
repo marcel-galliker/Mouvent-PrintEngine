@@ -767,7 +767,7 @@ void rc_stop(void)
 	{
 		rc_stop_motors(0xff);
         _RC_State = 0;
-		RX_StepperStatus.screwerinfo.ref_done = FALSE;
+		RX_StepperStatus.screwerinfo.ref_done   = FALSE;
 		RX_StepperStatus.screwerinfo.ref_x_done = FALSE;
 		RX_StepperStatus.screwerinfo.ref_y_done = FALSE;
 	}

@@ -49,7 +49,6 @@
 #define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    
 #define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
 
-// #define ROB_POSY_FREE           40000   // minimum y-position to allow moving in x
 #define ROB_POSY_FREE           30000   // minimum y-position to allow moving in x
 
 #define CURRENT_HOLD            200
@@ -1374,9 +1373,9 @@ static void _rob_state_machine(void)
             break;
 
         case 7:
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
             if (RX_StepperStatus.info.z_in_screw)
             {
+                TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
                 TrPrintfL(TRUE, "CMD_ROBI_MOVE_Z_UP X=%d, Y=%d", RX_StepperStatus.posY[0], RX_StepperStatus.screw_posX, RX_StepperStatus.posY[0]-RX_StepperStatus.screw_posY);
                 rc_move_top(_FL_);
                 _RobStateMachine_Step++;
@@ -1461,6 +1460,7 @@ static void _rob_state_machine(void)
                     RX_StepperStatus.adjustDoneCnt++;
                     break;
                 }
+                rc_screwer_to_ref();
 
                 TrPrintfL(TRUE, "_rob_state_machine: State=%d head=%d, axis=%d, _posy_base=%d, posy=%d", _RobStateMachine_Step, _ScrewPar.head, _ScrewPar.axis, _posy_base, _pos.y+_corr.y);            
                 TrPrintfL(TRUE, "CMD_ROB_MOVE_POS(%d)", pos+ROB_POSY_FREE);
@@ -1648,8 +1648,8 @@ static void _rob_state_machine(void)
             break;
 
         case 204:
-            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
             if (!rc_move_done()) break;
+            TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
             rc_move_bottom(_FL_);
              _RobStateMachine_Step++;
             break;
@@ -1793,6 +1793,7 @@ static void _set_ScrewPos(SScrewPositions *pos)
 //--- _save_ScrewPos ---------------------------------------
 static void _save_ScrewPos(int dist)
 {
+    /*
     if (_ScrewPar.axis == AXE_STITCH)
     {
         // int distance = (robi_lb702_screw_edgeCnt() * DISTANCE_PER_TURN) / STEPS_PER_TURN;
@@ -1810,6 +1811,7 @@ static void _save_ScrewPos(int dist)
             }
         }
     }
+    */
     ctrl_send_2(REP_SET_SCREW_POS, sizeof(_ScrewPos), &_ScrewPos);
 }
 

@@ -103,7 +103,7 @@ namespace RX_DigiPrint.Models
 							if (action.StepperNo==no && action.State==ECamFunctionState.runningRob)
 							{
 								_RobotRunning[no]=false;
-								Console.WriteLine("ROBOT[{0}]: no, Screwing done, ok={1}", no, stepper.ScrewedOk);
+								Console.WriteLine("ROBOT[{0}]: Screwing done, ok={1}", no, stepper.ScrewedOk);
 								if (stepper.ScrewedOk) action.State = ECamFunctionState.done;
 								else				   action.State = ECamFunctionState.error;
 								break;
@@ -179,6 +179,7 @@ namespace RX_DigiPrint.Models
 				}
 				*/
 			}
+			if (_Actions==null) Abort();
 		}
 
 		//--- Property SimuMachine ---------------------------------------
@@ -191,6 +192,7 @@ namespace RX_DigiPrint.Models
 		public List<SA_Action> StartAlign()
 		{
 			int color, n;
+			bool confirm_added=false;
 
 			/*
 			{
@@ -271,8 +273,9 @@ namespace RX_DigiPrint.Models
 						ScanPos	    = _FindPos,
 					});
 
-					if (!_Confirmed && color==0)
+					if (!_Confirmed && !confirm_added)
 					{
+						confirm_added = true;
 						_Actions.Add(new SA_Action()
 						{
 							Function = ECamFunction.CamConfirmFocus,
@@ -345,6 +348,7 @@ namespace RX_DigiPrint.Models
 		public List<SA_Action> StartDensity()
 		{
 			int color, n;
+			bool confirm_added=false;
 
 			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
@@ -380,8 +384,9 @@ namespace RX_DigiPrint.Models
 					ScanPos	    = 0,
 				});
 
-				if (!_Confirmed)
+				if (!_Confirmed && !confirm_added)
 				{
+					confirm_added = true;
 					_Actions.Add(new SA_Action()
 					{
 						Function = ECamFunction.CamConfirmFocus,
@@ -444,6 +449,7 @@ namespace RX_DigiPrint.Models
 		public List<SA_Action> StartRegister()
 		{
 			int n;
+			bool confirm_added=false;
 
 			for (n=0; n<_RobotRunning.Length; n++) _RobotRunning[n]=false;
 
@@ -479,8 +485,9 @@ namespace RX_DigiPrint.Models
 					ScanPos	    = 0,
 				});
 
-				if (!_Confirmed)
+				if (!_Confirmed && !confirm_added)
 				{
+					confirm_added=true;
 					_Actions.Add(new SA_Action()
 					{
 						Function = ECamFunction.CamConfirmFocus,
@@ -523,12 +530,17 @@ namespace RX_DigiPrint.Models
 		private void CallBackfromCam(RxCam.ENCamCallBackInfo CallBackInfo, RxCam.CallBackDataStruct CallBackData)
         {
 			bool handled=false;
+			bool ok;
 			SA_Action action;
 
 			Console.WriteLine("CALLBACK 1: info={0} Action[{1}].function={2}", CallBackInfo.ToString(), _ActionIdx, _Action?.Function.ToString());
 
-
-			callbackMutex.WaitOne();
+			ok=callbackMutex.WaitOne(100);
+			if (!ok)
+			{
+				Console.WriteLine("Callback Timeout");
+				return;
+			}
 
 			if (_Action!=null)
 			{
@@ -744,8 +756,9 @@ namespace RX_DigiPrint.Models
 								if (_HeadNo+1==_HeadsPerColor) // end of line
 								{								
 									if (_DistStepCnt==25) // end of measurment
-									{										
-										Abort();
+									{			
+										action.State = ECamFunctionState.error;
+										ActionDone();
 										break;
 									}
 									// new line 
@@ -829,7 +842,7 @@ namespace RX_DigiPrint.Models
 		//--- Abort ---------------------------------------
 		public bool Abort()
 		{
-			bool running=false;
+			Console.WriteLine("Abort");
 			if (_Actions!=null)
 			{
 				foreach(SA_Action action in _Actions)
@@ -837,20 +850,18 @@ namespace RX_DigiPrint.Models
 					if (action.State==ECamFunctionState.printing || action.State==ECamFunctionState.runningCam) 
 					{
 						action.State = ECamFunctionState.aborted;
-						running=true;
 					}
 				}
 				_ActionIdx=_Actions.Count();
-				if (running)
-				{
-				//	RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
-					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
-					Thread.Sleep(500);
-					RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
-				}
 			}
-			else _ActionIdx=1;
+			else  _ActionIdx=1;
 			_Action = null;
+			if (RxGlobals.PrinterStatus.PrintState!=EPrintState.ps_off)
+			{
+				RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
+				Thread.Sleep(500);
+				RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
+			}
 			RxGlobals.SetupAssist.ScanReference();
 			for(int n=0; n<_RobotUsed.Length; n++)
 			{
@@ -858,7 +869,7 @@ namespace RX_DigiPrint.Models
 				_RobotUsed[n] = false;
 			}
 
-			return running;
+			return false;
 		}
 
 		//--- Property Running ---------------------------------------
@@ -957,7 +968,12 @@ namespace RX_DigiPrint.Models
 					*/
 					// return;
 				}
-				Abort();
+				Console.WriteLine("All Actions done");
+				bool robrunning=false;
+				foreach(bool running in _RobotRunning)
+					robrunning|=running;
+				if (!robrunning)
+					Abort();
 			}
 		}
 		
@@ -1311,6 +1327,7 @@ namespace RX_DigiPrint.Models
 							SA_Action action=_Actions[idx];
 							switch(action.Function)
 							{
+								case ECamFunction.CamConfirmFocus:  action.ConfirmVisibile = true; idx=1000; break;
 								case ECamFunction.CamMeasureAngle:  RxGlobals.SetupAssist.ScanMoveTo(RxGlobals.SetupAssist.ScanPos + _CallbackData.DPosX/1000); idx=1000; break;
 								case ECamFunction.I1Measure:  action.ScanPos = RxGlobals.SetupAssist.ScanPos + _CallbackData.DPosX/1000 - px2mm(286); break;
 								default: break;
@@ -1327,18 +1344,18 @@ namespace RX_DigiPrint.Models
 					}
 					break;
 
+					/*
 			case ECamFunction.CamConfirmFocus: // _ScanMoveDone
 					Console.WriteLine("Action[{0}].CamConfirmFocus, ScanPos={1}", _ActionIdx, RxGlobals.SetupAssist.ScanPos);
-					/*
 					if (RxGlobals.SetupAssist.ScanPos+2<_Action.ScanPos)
 					{
 						_Action.ScanMoveDone=false;
 						RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 					}
 					else 
-					*/
 					_Action.ConfirmVisibile = true;
 					break;
+					*/
 
 			case ECamFunction.CamMeasureAngle: // _ScanMoveDone
 					Console.WriteLine("Action[{0}].CamMeasureAngle, HeadNo={1}, ScanPos={2}, _CamMeasureAngle_Step={3}", _ActionIdx, _Action.HeadNo, RxGlobals.SetupAssist.ScanPos, _CamMeasureAngle_Step);
