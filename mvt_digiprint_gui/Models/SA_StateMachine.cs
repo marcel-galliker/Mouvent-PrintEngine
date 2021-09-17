@@ -36,6 +36,8 @@ namespace RX_DigiPrint.Models
 
 		private const int		 _MaxPrintbars=8;
 
+		private DateTime		 _TimePrimted;
+		private bool			 _SA_Running = false;
 		private ENAssistMode	 _AssistMode=ENAssistMode.undef;
 		private RxCamFunctions	 _CamFunctions;
 		private List<SA_Action>  _Actions;
@@ -75,9 +77,6 @@ namespace RX_DigiPrint.Models
 			RxGlobals.SetupAssist.OnWebMoveDone  = _WebMoveDone;
 			RxGlobals.SetupAssist.OnScanMoveDone = _ScanMoveDone;
 			RxGlobals.SetupAssist.Simu			 = _SimuMachine;
-			#if DEBUG
-	//		_SimuMachine |= (RxGlobals.PrinterProperties.Host_Name==null);
-			#endif
 
 			foreach (var state in RxGlobals.StepperStatus)
 			{
@@ -85,6 +84,18 @@ namespace RX_DigiPrint.Models
 			}				
 			_CamFunctions = new RxCamFunctions(RxGlobals.Camera);
 			if (_SimuCamera) _CamFunctions.SimuCallback	+= CallBackfromCam;
+		}
+
+		//--- GetActions ------------------------
+		public List<SA_Action> GetActions()
+		{
+			return _Actions;
+		}
+
+		//--- TimePrinted ----------------------------------
+		public DateTime TimePrinted()
+		{
+			return _TimePrimted;
 		}
 
 		//--- SA_StateMachine_PropertyChanged --------------------------------------
@@ -185,7 +196,12 @@ namespace RX_DigiPrint.Models
 		//--- Property SimuMachine ---------------------------------------
 		public bool SimuMachine
 		{
-			get { return _SimuMachine; }
+			get 
+			{
+				if (RxGlobals.PrintSystem.HostName!=null)
+					_SimuMachine = RxGlobals.PrintSystem.HostName.Equals("TEST-0001");
+				return _SimuMachine; 
+			}
 		}
 
 		//--- _InitActions -----------------------------
@@ -224,6 +240,7 @@ namespace RX_DigiPrint.Models
 
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
+
 			//--- measurmentfunctions -----------------------------
 		//	for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
 			for (color=RxGlobals.PrintSystem.ColorCnt-1; color>=0; color--)	// reverse order!
@@ -285,7 +302,7 @@ namespace RX_DigiPrint.Models
 						});
 					}
 
-				//	_HeadsPerColor = RxGlobals.PrintSystem.HeadsPerColor;
+					_HeadsPerColor = RxGlobals.PrintSystem.HeadsPerColor;
 					string colorName = new ColorCode_Str().Convert(ink.ColorCode, null, color*RxGlobals.PrintSystem.InkCylindersPerColor, null).ToString();
 					for (n=0; n<_HeadsPerColor; n++)
 					{
@@ -842,6 +859,8 @@ namespace RX_DigiPrint.Models
 		//--- Abort ---------------------------------------
 		public bool Abort()
 		{
+			if (!_SA_Running) return false;
+			_SA_Running = false;
 			Console.WriteLine("Abort");
 			if (_Actions!=null)
 			{
@@ -892,6 +911,7 @@ namespace RX_DigiPrint.Models
 			if (_Action.State==ECamFunctionState.undef)
 				_Action.State = (_Action.Function<ECamFunction.CamFindLines_Vertical)? ECamFunctionState.printing : ECamFunctionState.runningCam;			
 			
+			_SA_Running = true;
 			switch(_Action.Function)
 			{
 				case ECamFunction.CamNoFunction:			_TestPrint_start();					break;
@@ -1261,9 +1281,13 @@ namespace RX_DigiPrint.Models
 				if (Math.Abs(steps)<=_Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
 				else 										
 				{
-					_Action.State = ECamFunctionState.waitRob;
-					_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
-					_NextRobotCmd(_Action.StepperNo);
+					if (RxGlobals.PrintSystem.IsRobotConnected)
+					{ 
+						_Action.State = ECamFunctionState.waitRob;
+						_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
+						_NextRobotCmd(_Action.StepperNo);
+					}
+					else _Action.State = (steps>0) ? ECamFunctionState.manualCw : ECamFunctionState.manualCcw;
 				}
 			}
 
@@ -1297,9 +1321,16 @@ namespace RX_DigiPrint.Models
 				for (int i = 0; i + 1 < _HeadsPerColor; i++)
 				{
 					SA_Action action = _Actions[_StitchIdx + i];
-					action.State = ECamFunctionState.waitRob;
-					_AdjustFunction[action.PrintbarNo] = action.Function;
-					_NextRobotCmd(action.StepperNo);
+					if (RxGlobals.PrintSystem.IsRobotConnected)
+					{
+						action.State = ECamFunctionState.waitRob;
+						_AdjustFunction[action.PrintbarNo] = action.Function;
+						_NextRobotCmd(action.StepperNo);
+					}
+					else
+					{
+						action.State = (steps>0) ? ECamFunctionState.manualCw : ECamFunctionState.manualCcw;
+					}
 				}
 			}
 			ActionDone();
@@ -1420,6 +1451,7 @@ namespace RX_DigiPrint.Models
 				switch (_Action.Function)
 				{
 					case ECamFunction.CamNoFunction:	ActionDone();
+														_TimePrimted = DateTime.Now;
 														break;
 
 					case ECamFunction.CamFindLines_Vertical:	

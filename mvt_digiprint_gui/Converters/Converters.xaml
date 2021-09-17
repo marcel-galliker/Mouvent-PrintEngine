@@ -88,6 +88,9 @@
     <converters:PuttyDbgVisible_Converter   x:Key="PuttyDbgVisible_Converter"/>
     <converters:RotateRect_Converter        x:Key="RotateRect_Converter"/>
     <converters:ScanLength_Converter        x:Key="ScanLength_Converter"/>
+
+    <converters:SA_StateImage_Converter     x:Key="SA_StateImage_Converter"/>
+
     <converters:StepperStateImg_Converter   x:Key="StepperStateImg_Converter"/>
     <converters:ToString_Converter          x:Key="ToString_Converter"/>
     <converters:Test_Converter              x:Key="Test_Converter"/>

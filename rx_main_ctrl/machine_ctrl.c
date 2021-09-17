@@ -85,7 +85,7 @@ int	machine_end(void)
 //--- machine_tick -------------------------------
 int machine_tick(void)
 {
-	if(rx_def_is_tx(RX_Config.printer.type) || RX_StepperStatus.robot_used)
+	if(rx_def_is_tx(RX_Config.printer.type) || RX_StepperStatus.cln_used)
 	{
 		if (RX_StepperStatus.info.z_in_cap || !RX_StepperStatus.robinfo.auto_cap) machine_set_capping_timer(FALSE);  // reset timer if already in cap
         else if (plc_get_state() == plc_error || (RX_StepperStatus.info.z_in_screw && _CappingTimer)) machine_set_capping_timer(TRUE);	// start timer as long as machine is in error state

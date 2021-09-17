@@ -117,8 +117,16 @@ namespace RX_DigiPrint.Models
             }
         }
 
-        //--- Property IsCLEAF ---------------------------------------
-        public bool IsCLEAF
+		//--- Property IsRobotConnected ---------------------------------------
+		private bool _IsRobotConnected=false;
+		public bool IsRobotConnected
+		{
+			get { return _IsRobotConnected; }
+			set { SetProperty(ref _IsRobotConnected,value); }
+		}
+
+		//--- Property IsCLEAF ---------------------------------------
+		public bool IsCLEAF
         {
             get
             {

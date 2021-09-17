@@ -254,12 +254,15 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _X_in_ref, value); }
         }
 
-        //--- Property RobotUsed ---------------------------------------
-        private bool _RobotUsed;
-        public bool RobotUsed
+        //--- Property ClnUsed ---------------------------------------
+        private bool _ClnUsed;
+        public bool ClnUsed
         {
-            get { return _RobotUsed; }
-            set { SetProperty(ref _RobotUsed, value); }
+            get { return _ClnUsed; }
+            set { 
+                    SetProperty(ref _ClnUsed, value); 
+                    if (_ClnUsed) RxGlobals.PrintSystem.IsRobotConnected=true;
+                }
         }
 
         //--- Property _HeadUpInput_0 ---------------------------------------
@@ -534,7 +537,7 @@ namespace RX_DigiPrint.Models
             DripPans_InfeedDOWN     = (msg.info & 0x20000000) != 0;
             DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
             DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
-            RobotUsed               = (msg.robot_used!=0) || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404;
+            ClnUsed               = (msg.cln_used!=0) || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404;
 
             TTS_Valve_C1_Waste = (msg.inkinfo & 0x00000001) != 0;
             TTS_Valve_C2_Waste = (msg.inkinfo & 0x00000002) != 0;
@@ -603,7 +606,7 @@ namespace RX_DigiPrint.Models
             else
             {
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)
-                    cap_enabled = /*RefDone &*/ RobotUsed;
+                    cap_enabled = /*RefDone &*/ ClnUsed;
                 else
                     cap_enabled = RefDone;  // Testtable?
                 capDP803_enabled = false;

@@ -15,13 +15,29 @@
 
 #include "rx_sok.h"
 
-void lbrob_init(void);
+#define CABLE_MAINTENANCE_POS   -770000     //  um LB702
+#define CABLE_CAP_POS           -687000     //	um LB702
+#define CABLE_WASH_POS_FRONT    -634000     //	um LB702
+#define CABLE_WASH_POS_BACK     -221000     //	um LB702
+#define CABLE_PURGE_POS_BACK    -311000     //  um LB702
+#define VACUUM_POS              -400000     //  um LB702
+#define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 ->  HEAD_WIDTH = 43000
+#define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    
+#define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
+
+void lbrob_init(int robotUsed);
 void lbrob_display_status(void);	
 void lbrob_menu(int help);
 void lbrob_handle_menu(char *str);
 void lbrob_main(int ticks, int menu);
 	
 int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
+
+void lbrob_reference_slide(void);
+void lbrob_cln_move_to(int pos);
+void lbrob_move_to_pos(int cmd, int pos, int wipe_state);
+
 void lbrob_reset_variables(void);
 void lbrob_to_garage(void);
+void lbrob_stop(void);
 

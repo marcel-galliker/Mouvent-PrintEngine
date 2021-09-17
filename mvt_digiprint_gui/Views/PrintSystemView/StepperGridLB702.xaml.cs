@@ -132,7 +132,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     _numbox[no, 1].Text = (RxGlobals.Stepper.Robot[no].ref_height_front / 1000.0).ToString();
                     _numbox[no, 2].Text = (RxGlobals.Stepper.Robot[no].cap_height / 1000.0).ToString();
                 }
-                if (RxGlobals.StepperStatus[0].RobotUsed || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB)
+                if (RxGlobals.StepperStatus[0].ClnUsed || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB)
                 {
                     WipingDelay_Height.Height = GridLength.Auto;
                     WipingSpeed_Height.Height = GridLength.Auto;
@@ -159,7 +159,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     _numbox[no, 1].Text = (stepperValues.Robot[no].ref_height_front / 1000.0).ToString();
                     _numbox[no, 2].Text = (stepperValues.Robot[no].cap_height / 1000.0).ToString();
                 }
-                if (RxGlobals.StepperStatus[0].RobotUsed || CurrentPrinterType == EPrinterType.printer_LB702_WB)
+                if (RxGlobals.StepperStatus[0].ClnUsed || CurrentPrinterType == EPrinterType.printer_LB702_WB)
                 {
                     WipingDelay_Height.Height = GridLength.Auto;
                     WipingSpeed_Height.Height = GridLength.Auto;

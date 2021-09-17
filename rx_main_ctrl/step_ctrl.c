@@ -728,13 +728,13 @@ int step_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
 	return FALSE;
 }
 
-//--- step_robot_used ----------------------------------
-int step_robot_used(int fluidNo)
+//--- step_cln_used ----------------------------------
+int step_cln_used(int fluidNo)
 {
     switch (_StepperType)
     {
     case STEPPER_LB:
-        return steplb_robot_used(fluidNo);
+        return steplb_cln_used(fluidNo);
     default:
         return FALSE;
     }

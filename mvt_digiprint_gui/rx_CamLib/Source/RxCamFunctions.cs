@@ -19,7 +19,9 @@ namespace rx_CamLib
 		runningRob,
 		done,
 		aborted,
-		error
+		error,
+		manualCw,
+		manualCcw
 	};
 
 	public enum ECamFunction

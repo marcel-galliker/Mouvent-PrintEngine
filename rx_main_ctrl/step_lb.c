@@ -170,7 +170,7 @@ static int _rob_get_printbar(int rob, int printbar)
 int steplb_handle_status(int no, SStepperStat *pStatus)
 {
     int i;
-    int robot_used = FALSE;
+    int cln_used = FALSE;
     ETestTableInfo info;
     ERobotInfo robinfo;
     
@@ -180,6 +180,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     _Status[no].no = no;
     gui_send_msg_2(0, REP_STEPPER_STAT, sizeof(RX_StepperStatus), &_Status[no]);
 
+    /*
     // Don't refresh the main variable until all steppers board status have been
     // received (after  a call of steplb_init())
     _StatReadCnt[no]++;
@@ -191,8 +192,9 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             if (_StatReadCnt[i] == 0) return REPLY_OK;
         }
     }
+    */
 
-	if (_Status[no].robot_used && !_OldStatus[no].robot_used)
+	if (_Status[no].cln_used && !_OldStatus[no].cln_used)
 	{
         _set_screw_pos(no);
 	}
@@ -223,13 +225,13 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             info.z_in_print &= _Status[i].info.z_in_print;
             info.z_in_cap &= _Status[i].info.z_in_cap;
             info.z_in_screw |= _Status[i].info.z_in_screw;
-            info.x_in_cap &= _Status[i].info.x_in_cap || !_Status[i].robot_used;
+            info.x_in_cap &= _Status[i].info.x_in_cap || !_Status[i].cln_used;
             info.x_in_ref &= _Status[i].info.x_in_ref ;
-            robot_used |= _Status[i].robot_used;
-            robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap || !_Status[i].robot_used;
-            robinfo.ref_done &= _Status[i].robinfo.ref_done || !_Status[i].robot_used;
+            cln_used |= _Status[i].cln_used;
+            robinfo.rob_in_cap &= _Status[i].robinfo.rob_in_cap || !_Status[i].cln_used;
+            robinfo.ref_done &= _Status[i].robinfo.ref_done || !_Status[i].cln_used;
             robinfo.moving |= _Status[i].robinfo.moving;
-            robinfo.purge_ready &= _Status[i].robinfo.purge_ready || !_Status[i].robot_used;
+            robinfo.purge_ready &= _Status[i].robinfo.purge_ready || !_Status[i].cln_used;
             RX_StepperStatus.posY[i] = _Status[i].posY[1];
             if (_Status[i].info.moving)
             {
@@ -259,7 +261,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
         info.headUpInput_2 = _Status[2].info.z_in_ref; 
         info.headUpInput_3 = _Status[3].info.z_in_ref; 
     }
-    RX_StepperStatus.robot_used = robot_used;
+    RX_StepperStatus.cln_used = cln_used;
 
     if (!info.moving)
     {
@@ -357,7 +359,7 @@ int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos)
 //--- steplb_get_ScrewPos ----------------------------------------------
 int steplb_get_ScrewPos(int stepperNo)
 {
-	if (_Status[stepperNo].robot_used)
+	if (_Status[stepperNo].cln_used)
     	_set_screw_pos(stepperNo);
     	
     return REPLY_OK;
@@ -386,7 +388,7 @@ void  steplb_abort_printing(void)
 {
 	for (int i = 0; i < STEPPER_CNT; i++)
 	{
-		if (_StepperPreventDripping[i] && !_Status[i].robinfo.rob_in_cap && _Status[i].robot_used) steplb_rob_to_fct_pos(i, rob_fct_cap, 0);
+		if (_StepperPreventDripping[i] && !_Status[i].robinfo.rob_in_cap && _Status[i].cln_used) steplb_rob_to_fct_pos(i, rob_fct_cap, 0);
 	}
 	if (RX_StepperStatus.info.z_in_print)
 	{
@@ -502,6 +504,7 @@ int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function)
 	case rob_fct_vacuum_change: return _Status[no].robinfo.vacuum_in_change	&& _Status[no].robinfo.moving == FALSE; break;
 	case rob_fct_move_purge:	return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break; // && _Status[no].robinfo.rob_in_cap
     case rob_fct_purge4ever:    return _Status[no].robinfo.x_in_purge4ever  && _Status[no].robinfo.moving == FALSE; break;
+    case rob_fct_move_startup:  return _Status[no].info.x_in_cap		    && _Status[no].robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }
@@ -542,7 +545,7 @@ void steplb_rob_stop_all(void)
 {
 	for (int no = 0; no<SIZEOF(_step_socket); no++)
 	{
-		if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
+		if (_Status[no].cln_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
 		sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
 	}	
 }
@@ -551,7 +554,7 @@ void steplb_rob_stop_all(void)
 void steplb_rob_stop(int no)
 {
     if (_step_socket[no] == INVALID_SOCKET) return;
-    if (_Status[no].robot_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
+    if (_Status[no].cln_used) sok_send_2(&_step_socket[no], CMD_ROB_STOP, 0, NULL);
 	sok_send_2(&_step_socket[no], CMD_LIFT_STOP, 0, NULL);
 }
 
@@ -650,11 +653,11 @@ void steplb_pump_back_fluid(int fluidNo, int state)
     {
         for (int no = 0; no < SIZEOF(_step_socket); no++)
         {
-            if (_step_socket[no] != INVALID_SOCKET && state == FALSE && _Status[no].robot_used)
+            if (_step_socket[no] != INVALID_SOCKET && state == FALSE && _Status[no].cln_used)
             {
                 sok_send_2(&_step_socket[no], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
             } 
-            else if (_step_socket[no] != INVALID_SOCKET && state == TRUE && _Status[no].robot_used)
+            else if (_step_socket[no] != INVALID_SOCKET && state == TRUE && _Status[no].cln_used)
             {
                 val = 5;
                 sok_send_2(&_step_socket[no], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
@@ -667,7 +670,7 @@ void steplb_pump_back_fluid(int fluidNo, int state)
             val = ((fluidNo % 2) + 1) * 2;
         else
             val = ((fluidNo % 2) + 1) * 2 - 1;
-        if (_Status[fluidNo/2].robot_used)
+        if (_Status[fluidNo/2].cln_used)
             sok_send_2(&_step_socket[fluidNo/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
     }
     else
@@ -686,7 +689,7 @@ void steplb_pump_back_fluid(int fluidNo, int state)
             else
                 val = 1;
         }
-        if (_Status[(fluidNo + 1) / 2].robot_used)
+        if (_Status[(fluidNo + 1) / 2].cln_used)
             sok_send_2(&_step_socket[(fluidNo+1)/2], CMD_ROB_EMPTY_WASTE, sizeof(val), &val);
     }
 }
@@ -700,12 +703,12 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 
     if (ctrlMode != ctrl_vacuum && ctrlMode != ctrl_vacuum_step1) _time[no] = 0;
     
-	if (_Status[no].robot_used || ctrlMode == ctrl_cap || ctrlMode == ctrl_cap_step4)
+	if (_Status[no].cln_used || ctrlMode == ctrl_cap || ctrlMode == ctrl_cap_step4)
 	{
 		EnFluidCtrlMode	old = _RobotCtrlMode[no];
 		switch (ctrlMode)
 		{
-		case ctrl_cap:				if (!_Status[no].robot_used)
+		case ctrl_cap:				if (!_Status[no].cln_used)
                                     {
                                         if (_AutoCapMode)
                                             _RobotCtrlMode[no] = ctrl_prepareToPrint;
@@ -718,7 +721,13 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         break;
                                     }
                 
-                                    if (!_Status[no].robinfo.ref_done) _steplb_rob_do_reference(no);
+                                    if (!_Status[no].robinfo.ref_done) 
+                                    {
+                                    //    _steplb_rob_do_reference(no);
+                                        Error(ERR_CONT, 0, "Can not cap: need to reference first!");
+                                        _RobotCtrlMode[no] = 0;
+                                        return;
+                                    }
 									_RobotCtrlMode[no] = ctrl_cap_step1;
                                     break;
 		
@@ -1034,8 +1043,8 @@ void steplb_set_fluid_off(int no)
     }
 }
 
-//--- steplb_robot_used --------------------------
-int steplb_robot_used(int fluidNo)
+//--- steplb_cln_used --------------------------
+int steplb_cln_used(int fluidNo)
 {
     int stepperNo, printbarNo;
 
@@ -1045,7 +1054,7 @@ int steplb_robot_used(int fluidNo)
     case printer_LB702_UV:
         _color2Robot(fluidNo, &stepperNo, &printbarNo);
         if (stepperNo >= STEPPER_CNT) return FALSE;
-        return (_Status[stepperNo].robot_used);
+        return (_Status[stepperNo].cln_used);
         break;
         
     default:

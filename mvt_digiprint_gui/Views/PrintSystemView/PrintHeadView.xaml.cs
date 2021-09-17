@@ -181,6 +181,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             CmdPopup.IsOpen = false;
         }
 
+        /*
         private bool _RobotUsed()
         {
             HeadStat stat = DataContext as HeadStat;
@@ -190,7 +191,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                     if (RxGlobals.PrintSystem.ColorCnt % 2 == 0 && stat != null)
                     {
                         if ((stat.InkSupply.No - 1) / 2 < RxGlobals.StepperStatus.Length)
-                            return RxGlobals.StepperStatus[(stat.InkSupply.No - 1) / 2].RobotUsed;
+                            return RxGlobals.StepperStatus[(stat.InkSupply.No - 1) / 2].ClnUsed;
                         else
                             return false;
                     }
@@ -200,6 +201,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             return false;
         }
+        */
 
         //--- Commands ------------------------------------
         private void OFF_Clicked        (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_off);          }

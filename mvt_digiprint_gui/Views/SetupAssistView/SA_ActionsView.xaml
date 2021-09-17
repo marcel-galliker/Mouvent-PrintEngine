@@ -11,7 +11,6 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <local:StateBusy_Converter              x:Key="StateBusy_Converter"/>
-        <local:StateImage_Converter             x:Key="StateImage_Converter"/>
         <local:FunctionImageVisible_Converter   x:Key="FunctionImageVisible_Converter"/>
     </UserControl.Resources>
     
@@ -37,7 +36,7 @@
                                             Margin="5"
                                             Width="20" 
                                             Height="20" 
-                                            Kind="{Binding State, Converter={StaticResource StateImage_Converter}}"/>
+                                            Kind="{Binding State, Converter={StaticResource SA_StateImage_Converter}}"/>
                                     </common:MvtButton>
                                 </DataTemplate>
                             </ig:TemplateColumn.ItemTemplate>
@@ -73,7 +72,7 @@
                                 <DataTemplate>
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0" MinWidth="30"/>
+                                            <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0" MinWidth="30" />
                                             <TextBlock Text="{Binding ValueStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Visibility="{Binding ConfirmVisibile, Converter={StaticResource BooleanToVisibleConverter}}">

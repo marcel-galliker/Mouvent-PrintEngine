@@ -78,13 +78,13 @@ namespace RX_DigiPrint.Models
 
         private bool _FluidInRecovery()
         {
-            bool robot_used = true;
+            bool cln_used = true;
             for (int i = 0; i < RxGlobals.StepperStatus.Length; i++)
             {
-                robot_used = robot_used && (RxGlobals.StepperStatus[i].RobotUsed || !RxGlobals.StepperStatus[i].Connected);
+                cln_used = cln_used && (RxGlobals.StepperStatus[i].ClnUsed || !RxGlobals.StepperStatus[i].Connected);
             }
 
-            if (robot_used) return false;
+            if (cln_used) return false;
 
             for (int i = 0; i < RxGlobals.InkSupply.List.Count(); i++)
             {

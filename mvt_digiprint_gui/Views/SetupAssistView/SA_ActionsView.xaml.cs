@@ -55,6 +55,13 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			RxGlobals.SA_StateMachine.Continue();
 		}
 
+		//--- PrintReport --------------------------------
+		public void PrintReport()
+		{
+			new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted());
+		}
+
+		//--- Test -----------------------------
 		public void Test()
 		{
 			List<SA_Action> actions=RxGlobals.SA_StateMachine.Test();
@@ -90,28 +97,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			return 	((ECamFunctionState)value==ECamFunctionState.printing 
 				  || (ECamFunctionState)value==ECamFunctionState.runningCam);
-		}
-		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return null;
-        }
-	}
-
-	//--- StateImage_Converter ----------------------------------------------------
-	public class StateImage_Converter : IValueConverter
-	{
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-		{
-			switch((ECamFunctionState)value)
-			{
-				case ECamFunctionState.runningCam:	return "VideoOutline";
-				case ECamFunctionState.waitRob:		return "VideoCheckOutline";
-				case ECamFunctionState.runningRob:	return "RobotIndustrial";
-				case ECamFunctionState.done:		return "Check";
-				case ECamFunctionState.aborted:		return "Cancel";
-				case ECamFunctionState.error:		return "AlertCircleOutline";
-				default: return null;
-			}
 		}
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {

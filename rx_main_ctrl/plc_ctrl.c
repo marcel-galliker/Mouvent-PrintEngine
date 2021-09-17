@@ -151,7 +151,7 @@ static int				_BeltOn;
 static int				_UnwinderLenMin;
 static UINT32			_ActSpeed;
 static double			_StartPos;
-static int				_TestPrint=FALSE;
+static int				_SetupAssist=FALSE;
 
 static int				_MpliStarting;
 static int				_Speed;
@@ -168,7 +168,6 @@ static int				_PAR_WINDER_2_ON=TRUE;
 
 static int				_heads_to_print=FALSE;
 static int				_head_was_up=FALSE;
-static int				_DistToStop=0;
 
 //--- GUI msg fifo -------------
 #define FIFO_SIZE	64
@@ -445,6 +444,7 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 
 	lc_set_value_by_name_UINT32(UnitID ".PAR_PRINTING_SPEED",		pPlcPar->speed);
 	lc_set_value_by_name_FLOAT(UnitID ".PAR_DISTANCE_TO_STOP",		(float)pPlcPar->distToStop);
+	Error(LOG, 0, "PAR_DISTANCE_TO_STOP = %d", (int)(1000*pPlcPar->distToStop));
 
 	if(rx_def_is_scanning(RX_Config.printer.type))
 	{
@@ -491,7 +491,7 @@ int  plc_set_printpar(SPrintQueueItem *pItem)
 	TrPrintfL(TRUE, "_plc_send_par");
 	_plc_send_par(&par);
 	memcpy(&_StartEncoderItem, pItem, sizeof(_StartEncoderItem));
-	_TestPrint = (_StartEncoderItem.testImage==PQ_TEST_SA_ALIGNMENT || _StartEncoderItem.testImage==PQ_TEST_SA_DENSITY || _StartEncoderItem.testImage==PQ_TEST_SA_REGISTER);
+	_SetupAssist = (_StartEncoderItem.testImage==PQ_TEST_SA_ALIGNMENT || _StartEncoderItem.testImage==PQ_TEST_SA_DENSITY || _StartEncoderItem.testImage==PQ_TEST_SA_REGISTER);
 	_Speed = _StartEncoderItem.speed;
 	step_set_vent(_Speed);
 //	_SendPause = 1;
@@ -548,9 +548,9 @@ int  plc_stop_printing(void)
 	else
 	{
 		// Error(LOG, 0, "plc_stop_printing: send CMD_STOP");
-		if (_TestPrint)	_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
+		if (_SetupAssist)	_plc_set_command("CMD_PRODUCTION", "CMD_PAUSE");
 		else			_plc_set_command("CMD_PRODUCTION", "CMD_STOP");
-		_TestPrint = FALSE;
+		_SetupAssist = FALSE;
 		/*
 		if (RX_Config.printer.type==printer_TX801 || RX_Config.printer.type==printer_TX802)
 		{

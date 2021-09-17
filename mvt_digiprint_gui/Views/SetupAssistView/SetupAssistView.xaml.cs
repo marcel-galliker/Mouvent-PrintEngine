@@ -19,7 +19,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			InitializeComponent();
 
 			DataContext				 = RxGlobals.SetupAssist;
-			BTN_Continue.DataContext = RxGlobals.SA_StateMachine;
 			RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
 			PrinterStatusChanged(this, null);
 		}
@@ -70,14 +69,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			if (BTN_CamSettings.IsChecked) CamSettings.Hide();
 			else						   CamSettings.Show(RxGlobals.Camera);
 			BTN_CamSettings.IsChecked = ! BTN_CamSettings.IsChecked;
-		}
-
-		//--- Trigger_Clicked -------------------------------------------
-		private void Trigger_Clicked(object sender,RoutedEventArgs e)
-		{
-			// RxGlobals.RxInterface.SendCommand(TcpIp.CMD_SA_OUT_TRIGGER);
-			CamSettings.Hide();
-			SetupActions.Test();
 		}
 
 		//--- Reference_Clicked -------------------------------------------
@@ -131,10 +122,10 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			SetupActions.StartRegister();
 		}
 
-		//--- Done_Clicked ----------------------------------------------
-		private void Done_Clicked(object sender,RoutedEventArgs e)
+		//--- Report_Clicked ----------------------------------------------
+		private void Report_Clicked(object sender,RoutedEventArgs e)
 		{
-			SetupActions.ActionDone();
+			SetupActions.PrintReport();
 		}
 
 		//--- Move_Clicked -------------------------------------------

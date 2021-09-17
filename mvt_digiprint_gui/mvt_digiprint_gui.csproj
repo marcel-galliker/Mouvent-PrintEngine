@@ -262,6 +262,7 @@
       <HintPath>..\Externals\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero2" />
+    <Reference Include="ReachFramework" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -343,6 +344,7 @@
     <Compile Include="Converters\PrintQueueCheckVisible_Converter.cs" />
     <Compile Include="Converters\PuttyVisible_Converter.cs" />
     <Compile Include="Converters\RotateRect_Converter.cs" />
+    <Compile Include="Converters\SA_StateImage_Converter.cs" />
     <Compile Include="Converters\ScanLengt_Converter.cs" />
     <Compile Include="Converters\StepperStateImg_Converter.cs" />
     <Compile Include="Converters\Test_Converter.cs" />
@@ -390,6 +392,7 @@
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
+    <Compile Include="Models\SA_Report.cs" />
     <Compile Include="Models\SA_StateMachine.cs" />
     <Compile Include="Models\SA_Action.cs" />
     <Compile Include="Models\SA_Base.cs" />

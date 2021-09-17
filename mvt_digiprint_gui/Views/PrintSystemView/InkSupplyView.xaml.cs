@@ -127,10 +127,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
-            visible = RxGlobals.StepperStatus[0].RobotUsed ? Visibility.Visible : Visibility.Collapsed;
+            visible = RxGlobals.StepperStatus[0].ClnUsed ? Visibility.Visible : Visibility.Collapsed;
             for (i = 0; i < RxGlobals.StepperStatus.Length; i++)
             {
-                if (RxGlobals.StepperStatus[i].RobotUsed) visible = Visibility.Visible;
+                if (RxGlobals.StepperStatus[i].ClnUsed) visible = Visibility.Visible;
             }
             Button_PurgeWash.Visibility = visible;
 
@@ -318,7 +318,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
         private void PurgeWash_Clicked(object sender, RoutedEventArgs e)
         {
-            if (RxGlobals.StepperStatus[0].RobotUsed)
+            if (RxGlobals.StepperStatus[0].ClnUsed)
             {
                 RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge("Purge + Wash", "Purge + Wash " + _InkSupply.InkType.Name + " ?");
                 if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)

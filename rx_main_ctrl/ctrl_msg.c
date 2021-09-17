@@ -102,7 +102,7 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 	{
 		ctrl_head_alive(headNo);
 		memcpy(&RX_HBStatus[headNo], pstat, sizeof(RX_HBStatus[0]));
-        if (RX_StepperStatus.robot_used && !_RobPosSent[headNo])
+        if (RX_StepperStatus.cln_used && !_RobPosSent[headNo])
 		{
             step_get_ScrewPos(step_stepper_to_cluster(headNo));
 			_RobPosSent[headNo] = TRUE;

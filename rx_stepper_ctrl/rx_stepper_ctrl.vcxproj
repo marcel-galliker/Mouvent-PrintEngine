@@ -196,7 +196,6 @@
     <ClCompile Include="lbrob.c" />
     <ClCompile Include="motor.c" />
     <ClCompile Include="power_step.c" />
-    <ClCompile Include="robi_lb702.c" />
     <ClCompile Include="robot_client.c" />
     <ClCompile Include="rx_stepper_ctrl.c" />
     <ClCompile Include="setup_assist.c" />
@@ -237,7 +236,6 @@
     <ClInclude Include="power_step.h" />
     <ClInclude Include="ps_common.h" />
     <ClInclude Include="ps_motor.h" />
-    <ClInclude Include="robi_lb702.h" />
     <ClInclude Include="robi_def.h" />
     <ClInclude Include="robot_client.h" />
     <ClInclude Include="rob_tcp_ip.h" />

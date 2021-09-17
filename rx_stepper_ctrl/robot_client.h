@@ -13,12 +13,14 @@
 
 #pragma once
 
-void rc_init(void);
+void rc_init(int used);
+int  rc_used(void);
 void rc_config(int boardNo);
 void rc_main(int ticks, int menu);
 void rc_display_status(void);	
 void rc_menu(int help);
 void rc_handle_menu(char *str);
+int rc_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
 
 void rx_enable_stall_error(int enable);
 
@@ -43,6 +45,7 @@ void rc_set_screwer_current(int high);
 int rc_screwer_stalled(void);
 int rc_get_screwer_current(void);
 int rc_get_screwer_pos(void);
+int rc_get_screwer_steps(int steps_per_turn);
 int rc_move_started(void);
 int rc_move_done(void);
 int rc_move_screw_done(void);

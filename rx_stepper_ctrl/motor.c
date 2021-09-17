@@ -195,6 +195,12 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 	//--- make sure motor is idle!
 	if (abs(steps) <= 1) return 0;
 
+	if (!motor_move_done(motor))
+	{
+		Error(ERR_CONT, 0, "motor_move_by_step: motor[%d] still running!", motor);
+		return 0;
+	}
+
 	_motor_start_cnt[motor]++;
 	
 	Fpga.par->cfg[motor].estopIn			= par->estop_in_bit[motor];
@@ -245,7 +251,7 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 
     if (speed<min_speed_hz+min) 
     {
-        if (speed<1000 && microsteps!=MICROSTEPS && (!RX_StepperStatus.robot_used || motor != 4)) 
+        if (speed<1000 && microsteps!=MICROSTEPS && (!RX_StepperStatus.cln_used || motor != 4)) 
 			Error(ERR_CONT, 0, "Stepper motor[%d]: Speed=%d, too low", motor, speed);
 		if (Fpga.par->cfg[motor].enc_mot_ratio>100000)
 			minSpeed = speed-min;

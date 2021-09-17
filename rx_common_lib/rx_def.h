@@ -1327,6 +1327,7 @@ typedef enum ERobotFunctions
     rob_fct_move,			// 10: Wash heads
 	rob_fct_move_to_pos,	// 11: Move to absomute position
 	rob_fct_maintenance,	// 12: Maintenance Pos
+    rob_fct_move_startup,	// 13: Lift in Reference, Slide underneath cluster
 } ERobotFunctions;
 
 typedef enum ERobotVaccumState
@@ -1526,8 +1527,8 @@ typedef struct EScrewerInfo
     UINT32 ref_done : 1;				//	0x00000001
     UINT32 moving : 1;					//	0x00000002
     UINT32 in_garage : 1;				//	0x00000004
-    UINT32 ref_x_done : 1;				//	0x00000008
-    UINT32 ref_y_done : 1;				//	0x00000010
+    UINT32 _ref_x_done : 1;				//	0x00000008
+    UINT32 _ref_y_done : 1;				//	0x00000010
     UINT32 r_info_5: 1;					//	0x00000020
     UINT32 z_in_down : 1;				//	0x00000040
     UINT32 z_in_up : 1;					//	0x00000080
@@ -1616,7 +1617,7 @@ typedef struct SStepperStat
 	SVersion	swVersion;
 	SVersion	fpgaVersion;
 
-	INT32		robot_used;
+	INT32		cln_used;	// cleaning station
 	
 	INT32		cmdRunning;
 

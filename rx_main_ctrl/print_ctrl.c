@@ -121,7 +121,7 @@ static void _on_error(ELogItemType type, char *deviceStr, int no, char *msg)
 										break;
 			case LOG_TYPE_ERROR_ABORT:	
 										Error(LOG, 0, "ABORT Printing after LOG_TYPE_ERROR_ABORT");
-                                        if (str_start(deviceStr, "Head") && RX_StepperStatus.robot_used)
+                                        if (str_start(deviceStr, "Head") && RX_StepperStatus.cln_used)
 											step_prevent_dripping(no);
 										pc_abort_printing();
 										break;

@@ -60,6 +60,7 @@ namespace RX_DigiPrint.Models
             return diff;
         }
 
+        //--- AddItem -------------------------------------------
         public void AddItem(NetworkItem item)
         {   
             Console.WriteLine("NetworkItem: {0} s# {1} d#{2}", item.DeviceType.ToString(), item.SerialNo, item.DeviceNo);

@@ -21,10 +21,6 @@
             <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="Settings" x:Name="Button_Settings" Click="Settings_Clicked" Margin="15, 5, 15, 5" >
                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="CogOutline"></iconPacks:PackIconMaterial>
             </common:MvtButton>
-
-            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Trigger_Clicked" Margin="15, 5, 15, 5" >
-                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="CameraOutline"></iconPacks:PackIconMaterial>
-            </common:MvtButton>
             
             <Rectangle StrokeThickness="1" Stroke="Black" />
 
@@ -54,8 +50,8 @@
 
             <Rectangle StrokeThickness="1" Stroke="Black" />
 
-            <common:MvtButton x:Name="BTN_Continue" HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Done_Clicked" IsChecked="{Binding CanContinue}" Margin="15, 5, 15, 5" >
-                <TextBlock Text="Done" Foreground="White"/>
+            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="Report_Clicked" IsChecked="{Binding CanContinue}" Margin="15, 5, 15, 5" >
+                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Printer"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
         </StackPanel>

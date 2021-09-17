@@ -302,7 +302,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
                         RxGlobals.Stepper.Robot[i].ref_height_front = StepperValues.Robot[i].ref_height_front;
                     }
                     RxGlobals.PrintSystem.ManualFlightTimeComp = StepperValues.ManualFlightTimeComp;
-                    if (RxGlobals.StepperStatus[0].RobotUsed || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB)
+                    if (RxGlobals.StepperStatus[0].ClnUsed || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_WB)
                     {
                         if (RxGlobals.Stepper.WipeDelay != StepperValues.WipeDelay) changed = true;
                         RxGlobals.Stepper.WipeDelay = StepperValues.WipeDelay;
