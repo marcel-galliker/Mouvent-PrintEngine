@@ -1732,9 +1732,8 @@ static void _rob_state_machine(void)
     if (_RobStateMachine_Step==0) rx_enable_stall_error(TRUE);
 }
 
-
-//--- lbrob_to_garage --------------------------------
-void lbrob_to_garage(void)
+//--- rc_to_garage --------------------------------
+void rc_to_garage(void)
 {
     TrPrintfL(TRUE, "lbrob_to_garage: _RobStateMachine_Step=%d, rc_in_garage=%d, screwerinfo.ref_done=%d", _RobStateMachine_Step, rc_in_garage(), RX_StepperStatus.screwerinfo.ref_done);
     
@@ -1755,7 +1754,6 @@ void lbrob_to_garage(void)
         }
     }
 }
-
 
 //--- _set_ScrewPos ---------------------------------------
 static void _set_ScrewPos(SScrewPositions *pos)
@@ -1920,7 +1918,7 @@ int rc_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROBI_MOVE_TO_GARAGE:
-        lbrob_to_garage();
+        rc_to_garage();
         break;
 
     default:
@@ -2136,15 +2134,10 @@ static char *_motor_name(int no)
 {
 	switch (no)
 	{
-	case MOTOR_XY_1:
-		return "XY-1";
-	case MOTOR_XY_0:
-		return "XY-0";
-	case MOTOR_SCREW:
-		return "Screwer";
-	case MOTOR_Z:
-		return "Z";
-	default:
-		return "";
+	case MOTOR_XY_1:	return "XY-1";
+	case MOTOR_XY_0:	return "XY-0";
+	case MOTOR_SCREW:	return "Screwer";
+	case MOTOR_Z:		return "Z";
+	default:			return "";
 	}
 }

@@ -41,7 +41,7 @@ static char		*_MotorName[2] = {"BACK", "FRONT"};
 
 #define MAX_ALIGN				10000		// microns
 
-#define SCR_USED_IN				9
+#define SCEWER_USED_IN			 9
 #define CLN_USED_IN				10
 #define PRINTHEAD_EN			11			// Input from SPS // '1' Allows Head to go down
 
@@ -99,7 +99,8 @@ void lb702_init(void)
 //	RX_StepperStatus.cln_used = (RX_StepperCfg.printerType==printer_LB702_WB);
 	RX_StepperStatus.cln_used = fpga_input(CLN_USED_IN);
 #else
-	RX_StepperStatus.cln_used = fpga_input(CLN_USED_IN);
+	RX_StepperStatus.cln_used		= fpga_input(CLN_USED_IN);
+	RX_StepperStatus.screwer_used	= fpga_input(SCEWER_USED_IN);
 #endif
 
     motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
@@ -144,7 +145,7 @@ void lb702_init(void)
 	_ParZ_cap.encCheck		= chk_std;
 	_ParZ_cap.enc_bwd		= TRUE;	
 		
-	if (RX_StepperStatus.cln_used) lbrob_init(fpga_input(SCR_USED_IN));
+	lbrob_init(RX_StepperStatus.screwer_used);
         
     RX_StepperStatus.robinfo.auto_cap = TRUE;
 }
@@ -176,7 +177,7 @@ void lb702_main(int ticks, int menu)
 	
 	RX_StepperStatus.info.moving = (RX_StepperStatus.cmdRunning!=0);
 
-	if (RX_StepperStatus.info.moving || !RX_StepperStatus.info.ref_done)
+	if (RX_StepperStatus.info.moving || !RX_StepperStatus.info.ref_done || _lift_ref_running)
 	{
 		RX_StepperStatus.info.z_in_ref   = FALSE;
 		RX_StepperStatus.info.z_in_up    = FALSE;

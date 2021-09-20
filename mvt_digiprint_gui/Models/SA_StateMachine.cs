@@ -881,6 +881,12 @@ namespace RX_DigiPrint.Models
 				Thread.Sleep(500);
 				RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
 			}
+			
+			if (!RxGlobals.PrintSystem.IsRobotConnected)
+			{
+				new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted());
+			}
+
 			RxGlobals.SetupAssist.ScanReference();
 			for(int n=0; n<_RobotUsed.Length; n++)
 			{

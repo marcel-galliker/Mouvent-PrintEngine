@@ -850,8 +850,6 @@ int rx_process_running_cnt(const char *process, const char *arg )
 //--- rx_process_kill --------------------------------------
 int rx_process_kill(const char *process, const char *arg)
 {
-	int ret;
-
 	unsigned int pid=rx_process_get_id(process, arg);
 	if (pid)
 	{

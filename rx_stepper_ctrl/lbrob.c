@@ -128,9 +128,8 @@ static void _set_ink_back_pump_right(int voltage);
 static void _vacuum_on();
 static void _pump_main();
 
-static int  _slide_pos_start_sm(ERobotFunctions fct, int pos);
-static void _slide_pos_sm(void);
-static int _lbrob_slide_sm(void);
+static int  _lbrob_start_sm(ERobotFunctions fct, int pos);
+static void _lbrob_sm(void);    // state machine 
 
 //--- lbrob_init --------------------------------------
 void lbrob_init(int robotUsed)
@@ -155,7 +154,7 @@ void lbrob_init(int robotUsed)
     _ParCable_ref.estop_level = TRUE;
     _ParCable_ref.estop_in_bit[MOTOR_SLIDE] = (1 << CABLE_PULL_REF);
     _ParCable_ref.enc_bwd = TRUE;
-    _ParCable_ref.encCheck = chk_lb_ref1;
+    _ParCable_ref.encCheck = chk_std;
 
     // config for moving normal with cable pull motor (motor 4)
     // This commands that use this config need to start the motor with the
@@ -267,7 +266,7 @@ void lbrob_main(int ticks, int menu)
         _x_in_ref_old=RX_StepperStatus.info.x_in_ref;
         RX_StepperStatus.robinfo.moving = FALSE;
     
-        if (_CmdRunning == CMD_ROB_REFERENCE)
+        if (_CmdRunning == CMD_ROB_REFERENCE || !RX_StepperStatus.robinfo.ref_done)
         {
             if (!RX_StepperStatus.robinfo.ref_done)
             {
@@ -479,8 +478,93 @@ void lbrob_main(int ticks, int menu)
     else
         j = 0;
    
-    _lbrob_slide_sm();
     _pump_main();
+    _lbrob_sm();
+}
+
+//--- _lbrob_start_sm -------------------------------------
+static int _lbrob_start_sm(ERobotFunctions fct, int pos)
+{    
+    if (_RobMovePos.function==0)
+    {
+        RX_StepperStatus.robinfo.purge_ready = FALSE;
+        switch(fct)
+        {
+        case rob_fct_move_purge:    _RobMovePos.function = fct; 
+                                    _RobMovePos.position = (CABLE_PURGE_POS_BACK + (pos* (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7); 
+                                    TrPrintfL(TRUE, "_lbrob_start_sm rob_fct_move_purge: head=%d, pos=%d", pos, _RobMovePos.position);
+                                    break;
+
+        case rob_fct_move_startup:  
+        case rob_fct_cap:       
+                                    _RobMovePos.function = fct; 
+                                    _RobMovePos.position = CABLE_CAP_POS;
+                                    break;
+
+        default:                    _Step=0;
+                                    return FALSE;
+        }
+        _Step=1;
+        _lbrob_sm();
+        return TRUE;
+    }
+    return FALSE;
+}
+
+//--- _lbrob_sm ----------------------------------------------
+static void _lbrob_sm(void)
+{
+    static int time=0;
+    if (_Step && rx_get_ticks()>time)
+    {
+        time=rx_get_ticks()+1000;
+        TrPrintfL(TRUE, "_lbrob_sm[%s %d]", RobFunctionStr[_RobMovePos.function], _Step);
+    }
+    switch(_Step)
+    {
+    case 0: break;
+
+    case 1: TrPrintfL(TRUE, "_lbrob_sm[%s %d]", RobFunctionStr[_RobMovePos.function], _Step);
+            _CmdRunning = CMD_ROB_MOVE_POS;
+            _Step++;
+            if (!RX_StepperStatus.info.z_in_ref) lb702_do_reference();
+            _lbrob_sm();
+			break;
+
+    case 2: if (!RX_StepperStatus.robinfo.ref_done)
+                lbrob_reference_slide();
+            _Step++;
+            _lbrob_sm();
+            break;
+
+    case 3: if (RX_StepperStatus.info.ref_done && RX_StepperStatus.info.z_in_ref && RX_StepperStatus.robinfo.ref_done && motors_move_done(MOTOR_SLIDE_BITS))
+            {
+                TrPrintfL(TRUE, "_lbrob_sm[%s %d]", RobFunctionStr[_RobMovePos.function], _Step);
+                lbrob_move_to_pos(0, _micron_2_steps(_RobMovePos.position), FALSE);
+                _Step++;
+            }
+            break;
+
+    case 4: if (motors_move_done(MOTOR_SLIDE_BITS)) 
+            {
+                TrPrintfL(TRUE, "_lbrob_sm[%s %d] moveDone=%d", RobFunctionStr[_RobMovePos.function], _Step, motors_move_done(MOTOR_SLIDE_BITS));
+                Error(LOG, 0, "SlideMove fct=%s done",  RobFunctionStr[_RobMovePos.function]);
+                switch(_RobMovePos.function)
+                {
+                case rob_fct_move_purge: _CapIsWet=TRUE;
+                                         RX_StepperStatus.robinfo.purge_ready = TRUE;   
+                                         break;
+
+                case rob_fct_cap:        RX_StepperStatus.robinfo.rob_in_cap = TRUE; break;
+                default: break;
+                }
+                
+                _CmdRunning = 0;
+                _Step=0;
+                _RobMovePos.function=0;
+            }
+            break;            
+    }
 }
 
 //---_micron_2_steps --------------------------------------------------------------
@@ -671,7 +755,7 @@ void	 lbrob_reference_slide(void)
     }
 	else 
     {
-        lbrob_move_to_pos(CMD_ROB_REFERENCE, _micron_2_steps(-3000), FALSE);
+        lbrob_move_to_pos(CMD_ROB_REFERENCE, _micron_2_steps(-1000), FALSE);
     }
 }
 
@@ -703,6 +787,133 @@ void lbrob_move_to_pos(int cmd, int pos, int wipe_state)
         else        
             motors_move_to_step(MOTOR_SLIDE_BITS, &_ParCable_drive, pos);
     }
+}
+
+//--- lbrob_cln_move_to ------------------------
+void lbrob_cln_move_to(int pos)
+{
+    _cln_move_to(CMD_ROB_MOVE_POS, rob_fct_move_to_pos, pos);
+}
+
+//--- _cln_move_to ---------------------------------------
+static void _cln_move_to(int msgId, ERobotFunctions fct, int position)
+{
+    int val, pos, head;
+    TrPrintfL(TRUE, "_cln_move_to msgId=0x%08x, fct=%s, _CmdRunning=0x%08x, position=%d, _NewPos=%d", msgId, RobFunctionStr[fct], _CmdRunning, position, _RobMovePos.position);
+    if (!_CmdRunning)
+    {        
+        if (_RobMovePos.position==0) _RobMovePos.position = position;
+
+        if (_lbrob_start_sm(fct, position)) return;
+
+        if (!RX_StepperStatus.screwerinfo.z_in_down)
+        {
+            Error(ERR_CONT, 0, "_cln_move_to: screwer not down!");
+            return;
+        }
+        else if ((!(RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_screw) && !(_RobMovePos.function == rob_fct_move && RX_StepperStatus.info.z_in_wash)) || !RX_StepperStatus.info.ref_done)
+        {
+            if (!RX_StepperStatus.info.moving)
+            {
+                _CmdRunning_Lift = CMD_LIFT_REFERENCE;
+                lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL, _FL_);
+                _NewCmd = msgId;
+                _RobMovePos.position = position;
+            }
+            else TrPrintfL(TRUE, "Error");
+            return;
+        }
+        /*
+        else if (!RX_StepperStatus.robinfo.ref_done || (_CapIsWet && _RobMovePos.function != rob_fct_vacuum && _RobMovePos.function != rob_fct_wash && _RobMovePos.function != rob_fct_move && _RobMovePos.function != rob_fct_move_purge))
+        {
+            Error(ERR_CONT, 0, "REFEREMCE SLIDE first msg=0x%08x", msgId);
+            _CmdRunning_old = msgId;
+            _RobMovePos.position = position;
+            lbrob_reference_slide();
+            return;
+        }
+        */
+
+        RX_StepperStatus.robinfo.moving = TRUE;
+        _CmdRunning = msgId;
+        switch (_RobMovePos.function)
+        {
+        case rob_fct_purge4ever:
+        case rob_fct_cap:
+            lbrob_move_to_pos(0, _micron_2_steps(CABLE_CAP_POS), FALSE);
+            break;
+            
+        case rob_fct_maintenance:
+            rc_stop();
+            lbrob_move_to_pos(0, _micron_2_steps(CABLE_MAINTENANCE_POS), FALSE);
+            break;
+
+        case rob_fct_move_purge:
+            pos = (CABLE_PURGE_POS_BACK + (position * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
+            lbrob_move_to_pos(0, _micron_2_steps(pos), FALSE);
+            break;
+        case rob_fct_vacuum:
+            lbrob_move_to_pos(0, _micron_2_steps(CABLE_PURGE_POS_FRONT), FALSE);
+            break;
+        case rob_fct_wash:
+            lbrob_move_to_pos(0, _micron_2_steps(CABLE_WASH_POS_BACK), FALSE);
+            break;
+
+        case rob_fct_move:
+            if (!RX_StepperStatus.info.z_in_wash)
+            {
+                if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && rc_move_done())
+                {
+                    _CmdRunning = 0;
+                    RX_StepperStatus.robinfo.moving = FALSE;
+                    _CmdRunning_Lift = CMD_LIFT_WASH_POS;
+                    _NewCmd = msgId;
+                    lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL, _FL_);
+                }
+                else TrPrintfL(TRUE, "Error");
+                return;
+            }
+            
+            switch (_Old_RobFunction)
+            {
+            case rob_fct_wash:
+                lbrob_move_to_pos(0, _micron_2_steps(CABLE_PURGE_POS_FRONT), TRUE);
+                
+                if (_RO_Flush)
+                    Fpga.par->output |= _RO_Flush;
+                else
+                Fpga.par->output |= RO_FLUSH_WIPE;
+                
+                _RO_Flush &= ~RO_FLUSH_WIPE;
+                Fpga.par->output |= RO_FLUSH_PUMP;
+                Fpga.par->output &= ~RO_VACUUM_CLEANER;
+                break;
+                
+            case rob_fct_vacuum:
+                lbrob_move_to_pos(0, _micron_2_steps(CABLE_WASH_POS_BACK), TRUE);
+                _vacuum_on();
+                break;
+                
+            default:
+                break;
+            }
+            break;
+
+        case rob_fct_move_to_pos:
+            if (position == 0 && _RobMovePos.position!=0) 
+            {
+                position = _RobMovePos.position;
+                _RobMovePos.position = 0;
+            }
+            TrPrintfL(TRUE, "lbrob_move_to_pos 2 cmd=0x%08x, pos=%d", _CmdRunning, pos);
+            lbrob_move_to_pos(0, _micron_2_steps(position), FALSE);            
+            break;
+
+        default:
+            Error(ERR_CONT, 0, "Command %s: Rob-Function %d not implemented", _CmdName, _RobMovePos.function);
+        }
+    }
+    else TrPrintfL(TRUE, "CmdRunning");
 }
 
 //--- lbrob_handle_ctrl_msg -----------------------------------
@@ -830,14 +1041,10 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 
     case CMD_ROB_SET_FLUSH_VALVE:
         val = (*(INT32 *)pdata);
-        if (val == 0)
-            _RO_Flush |= RO_FLUSH_WIPE_LEFT;
-        else if (val == 1)
-            _RO_Flush |= RO_FLUSH_WIPE_RIGHT;
-        else if (val == 2)
-            _RO_Flush |= RO_FLUSH_WIPE;
-        else
-            _RO_Flush &= ~RO_FLUSH_WIPE;
+        if (val == 0)           _RO_Flush |= RO_FLUSH_WIPE_LEFT;
+        else if (val == 1)      _RO_Flush |= RO_FLUSH_WIPE_RIGHT;
+        else if (val == 2)      _RO_Flush |= RO_FLUSH_WIPE;
+        else                    _RO_Flush &= ~RO_FLUSH_WIPE;
         break;
 
     default:
@@ -845,215 +1052,6 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
     }
     return REPLY_OK;
-}
-
-//--- _lbrob_slide_sm -----------------------------------
-static int _lbrob_slide_sm(void)
-{
-    switch(_RobMovePos.function)
-    {
-    case rob_fct_move_purge:    _slide_pos_sm(); return TRUE;
-    case rob_fct_move_startup:  _slide_pos_sm(); return TRUE;
-    default: break;
-    }
-    return FALSE;
-}
-
-//--- _slide_pos_start_sm -------------------------------------
-static int _slide_pos_start_sm(ERobotFunctions fct, int pos)
-{    
-    if (_RobMovePos.function==0)
-    {
-        RX_StepperStatus.robinfo.purge_ready = FALSE;
-        switch(fct)
-        {
-        case rob_fct_move_purge:    _RobMovePos.function = fct; 
-                                    _RobMovePos.position = (CABLE_PURGE_POS_BACK + (pos* (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7); 
-                                    TrPrintfL(TRUE, "_slide_pos_start_sm rob_fct_move_purge: head=%d, pos=%d", pos, _RobMovePos.position);
-                                    break;
-        case rob_fct_move_startup:  _RobMovePos.function = fct; 
-                                    _RobMovePos.position = CABLE_CAP_POS; 
-                                    break;
-        default:    return FALSE;
-        }
-        _Step=0;
-        _slide_pos_sm();
-        return TRUE;
-    }
-    return FALSE;
-}
-
-//--- _slide_pos_sm ----------------------------------------------
-static void _slide_pos_sm(void)
-{
-    static int time=0;
-    if (_Step && rx_get_ticks()>time)
-    {
-        time=rx_get_ticks()+1000;
-        TrPrintfL(TRUE, "_slide_pos_sm[%d]", _Step);
-    }
-    switch(_Step)
-    {
-    case 0: TrPrintfL(TRUE, "_slide_pos_sm[%d]", _Step);
-            _CmdRunning = CMD_ROB_MOVE_POS;
-            _Step++;
-            if (!RX_StepperStatus.info.z_in_ref) lb702_do_reference();
-            _slide_pos_sm();
-			break;
-
-    case 1: if (!RX_StepperStatus.robinfo.ref_done)
-                lbrob_reference_slide();
-            _Step++;
-            _slide_pos_sm();
-            break;
-
-    case 2: if (RX_StepperStatus.info.ref_done && RX_StepperStatus.info.z_in_ref && RX_StepperStatus.robinfo.ref_done && motors_move_done(MOTOR_SLIDE_BITS))
-            {
-                TrPrintfL(TRUE, "_slide_pos_sm[%d]", _Step);
-                lbrob_move_to_pos(0, _micron_2_steps(_RobMovePos.position), FALSE);
-                _Step++;
-            }
-            break;
-
-    case 3: if (motors_move_done(MOTOR_SLIDE_BITS)) 
-            {
-                TrPrintfL(TRUE, "_slide_pos_sm[%d] moveDone=%d", _Step, motors_move_done(MOTOR_SLIDE_BITS));
-                Error(LOG, 0, "SlideMove fct=%d done", _RobMovePos.function);
-                if (_RobMovePos.function==rob_fct_move_purge) _CapIsWet=TRUE;
-                RX_StepperStatus.robinfo.purge_ready = TRUE;
-                _CmdRunning = 0;
-                _Step=0;
-                _RobMovePos.function=0;
-            }
-            break;            
-    }
-}
-
-//--- lbrob_cln_move_to ------------------------
-void lbrob_cln_move_to(int pos)
-{
-    _cln_move_to(CMD_ROB_MOVE_POS, rob_fct_move_to_pos, pos);
-}
-
-//--- _cln_move_to ---------------------------------------
-static void _cln_move_to(int msgId, ERobotFunctions fct, int position)
-{
-    int val, pos, head;
-    TrPrintfL(TRUE, "_cln_move_to msgId=0x%08x, fct=%d, _CmdRunning=0x%08x, position=%d, _NewPos=%d", msgId, fct, _CmdRunning, position, _RobMovePos.position);
-    if (!_CmdRunning)
-    {        
-        if (_RobMovePos.position==0) _RobMovePos.position = position;
-
-        if (_slide_pos_start_sm(fct, position)) return;
-
-        if (!RX_StepperStatus.screwerinfo.z_in_down)
-        {
-            Error(ERR_CONT, 0, "_cln_move_to: screwer not down!");
-            return;
-        }
-        else if ((!(RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_screw) && !(_RobMovePos.function == rob_fct_move && RX_StepperStatus.info.z_in_wash)) || !RX_StepperStatus.info.ref_done)
-        {
-            if (!RX_StepperStatus.info.moving)
-            {
-                _CmdRunning_Lift = CMD_LIFT_REFERENCE;
-                lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL, _FL_);
-                _NewCmd = msgId;
-                _RobMovePos.position = position;
-            }
-            else TrPrintfL(TRUE, "Error");
-            return;
-        }
-        else if (!RX_StepperStatus.robinfo.ref_done || (_CapIsWet && _RobMovePos.function != rob_fct_vacuum && _RobMovePos.function != rob_fct_wash && _RobMovePos.function != rob_fct_move && _RobMovePos.function != rob_fct_move_purge))
-        {
-            Error(ERR_CONT, 0, "REFEREMCE SLIDE first msg=0x%08x", msgId);
-            /*
-            _CmdRunning_old = msgId;
-            _RobMovePos.position = position;
-            lbrob_reference_slide();
-            */
-            return;
-        }
-
-        RX_StepperStatus.robinfo.moving = TRUE;
-        _CmdRunning = msgId;
-        switch (_RobMovePos.function)
-        {
-        case rob_fct_purge4ever:
-        case rob_fct_cap:
-            lbrob_move_to_pos(0, _micron_2_steps(CABLE_CAP_POS), FALSE);
-            break;
-            
-        case rob_fct_maintenance:
-            rc_stop();
-            lbrob_move_to_pos(0, _micron_2_steps(CABLE_MAINTENANCE_POS), FALSE);
-            break;
-
-        case rob_fct_move_purge:
-            pos = (CABLE_PURGE_POS_BACK + (position * (CABLE_PURGE_POS_FRONT - CABLE_PURGE_POS_BACK)) / 7);
-            lbrob_move_to_pos(0, _micron_2_steps(pos), FALSE);
-            break;
-        case rob_fct_vacuum:
-            lbrob_move_to_pos(0, _micron_2_steps(CABLE_PURGE_POS_FRONT), FALSE);
-            break;
-        case rob_fct_wash:
-            lbrob_move_to_pos(0, _micron_2_steps(CABLE_WASH_POS_BACK), FALSE);
-            break;
-
-        case rob_fct_move:
-            if (!RX_StepperStatus.info.z_in_wash)
-            {
-                if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && rc_move_done())
-                {
-                    _CmdRunning = 0;
-                    RX_StepperStatus.robinfo.moving = FALSE;
-                    _CmdRunning_Lift = CMD_LIFT_WASH_POS;
-                    _NewCmd = msgId;
-                    lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL, _FL_);
-                }
-                else TrPrintfL(TRUE, "Error");
-                return;
-            }
-            
-            switch (_Old_RobFunction)
-            {
-            case rob_fct_wash:
-                lbrob_move_to_pos(0, _micron_2_steps(CABLE_PURGE_POS_FRONT), TRUE);
-                
-                if (_RO_Flush)
-                    Fpga.par->output |= _RO_Flush;
-                else
-                Fpga.par->output |= RO_FLUSH_WIPE;
-                
-                _RO_Flush &= ~RO_FLUSH_WIPE;
-                Fpga.par->output |= RO_FLUSH_PUMP;
-                Fpga.par->output &= ~RO_VACUUM_CLEANER;
-                break;
-                
-            case rob_fct_vacuum:
-                lbrob_move_to_pos(0, _micron_2_steps(CABLE_WASH_POS_BACK), TRUE);
-                _vacuum_on();
-                break;
-                
-            default:
-                break;
-            }
-            break;
-
-        case rob_fct_move_to_pos:
-            if (position == 0 && _RobMovePos.position!=0) 
-            {
-                position = _RobMovePos.position;
-                _RobMovePos.position = 0;
-            }
-            TrPrintfL(TRUE, "lbrob_move_to_pos 2 cmd=0x%08x, pos=%d", _CmdRunning, pos);
-            lbrob_move_to_pos(0, _micron_2_steps(position), FALSE);            
-            break;
-
-        default:
-            Error(ERR_CONT, 0, "Command %s: Rob-Function %d not implemented", _CmdName, _RobMovePos.function);
-        }
-    }
-    else TrPrintfL(TRUE, "CmdRunning");
 }
 
 //--- _handle_flush_pump -------------------------------------------------------------------------

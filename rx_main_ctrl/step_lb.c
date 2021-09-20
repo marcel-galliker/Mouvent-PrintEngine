@@ -473,8 +473,11 @@ void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function, INT32 position)
     SRobMovePos rob_movepos;
     rob_movepos.function = rob_function;
     rob_movepos.position = position;
-    if (_step_socket[no] == INVALID_SOCKET) return;
-	sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);		
+    if (no==-1)
+    {
+        for (no=0; no<STEPPER_CNT; no++) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);
+    }
+    else sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);		
 }
 
 //--- steplb_rob_to_fct_pos_all ----------------------------------------------
@@ -720,18 +723,12 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         
                                         break;
                                     }
-                
-                                    if (!_Status[no].robinfo.ref_done) 
-                                    {
-                                    //    _steplb_rob_do_reference(no);
-                                        Error(ERR_CONT, 0, "Can not cap: need to reference first!");
-                                        _RobotCtrlMode[no] = 0;
-                                        return;
-                                    }
+                                    else steplb_lift_to_top_pos(no);
+                                    
 									_RobotCtrlMode[no] = ctrl_cap_step1;
                                     break;
 		
-		case ctrl_cap_step1:		if (_Status[no].robinfo.ref_done && !_Status[no].robinfo.moving)
+		case ctrl_cap_step1:		if (_Status[no].info.z_in_ref)
 									{
 										steplb_rob_to_fct_pos(no, rob_fct_cap, 0);
                                         if (_AutoCapMode || RX_Config.printer.type == printer_LB702_UV)   _RobotCtrlMode[no] = ctrl_cap_step3;
@@ -884,6 +881,13 @@ static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int stepperNo)
 //--- _color2Robot ----------------------------------------
 static void _color2Robot(int color, int *pstepper, int *pprintbar)
 {
+    if (color==-1)
+    {
+        *pstepper  = -1;
+        *pprintbar = 0;
+        return;
+    }
+
     switch (RX_Config.printer.type)
     {
     case printer_LB701:
@@ -905,8 +909,7 @@ static void _color2Robot(int color, int *pstepper, int *pprintbar)
         
     default:
         break;
-    }
-                                                                                          
+    }                                                                                          
 }
 
 //--- steplb_printbarUsed -----------------------
@@ -1068,6 +1071,7 @@ int steplb_cln_used(int fluidNo)
 int steplb_stepper_to_fluid(int fluidno)
 {
     int stepperNo, printbarNo;
+
     _color2Robot(fluidno, &stepperNo, &printbarNo);
     
     return stepperNo;

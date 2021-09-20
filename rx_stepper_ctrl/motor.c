@@ -271,26 +271,6 @@ int	motor_move_by_step(int motor, SMovePar *par, INT32 steps)
 		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
 		break;
 
-	case chk_txrob:
-		Fpga.par->cfg[motor].enc_max_diff		= 50;
-		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
-		break;
-
-	case chk_lbrob:
-		Fpga.par->cfg[motor].enc_max_diff		= 200;
-		Fpga.par->cfg[motor].enc_max_diff_stop	= 200;	
-		break;
-
-	case chk_lb_ref1:
-		Fpga.par->cfg[motor].enc_max_diff		= 50;
-		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
-		break;	
-		
-	case chk_lb_ref2:
-		Fpga.par->cfg[motor].enc_max_diff		= 50;
-		Fpga.par->cfg[motor].enc_max_diff_stop	= 50;	
-		break;
-
     case chk_tts:
         Fpga.par->cfg[motor].enc_max_diff = 3;
         Fpga.par->cfg[motor].enc_max_diff_stop = 3;

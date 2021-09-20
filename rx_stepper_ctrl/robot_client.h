@@ -34,6 +34,7 @@ int  rc_find_screw(int spets);
 void rc_stop(void);
 void rc_stop_motors(int motors);
 
+void rc_to_garage(void);
 int rc_in_garage(void);
 void rc_screwer_to_ref(void);
 void rc_turn_ticks_left(int ticks);

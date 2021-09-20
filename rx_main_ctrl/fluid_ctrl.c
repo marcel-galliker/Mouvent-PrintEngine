@@ -1234,10 +1234,18 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 //        ctrlMode == ctrl_prepareToPrint && (rx_def_is_scanning(RX_Config.printer.type) || (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.cln_used)))
 	if (ctrlMode == ctrl_prepareToPrint)
     {
+		Error(LOG, 0, "ctrl_prepareToPrint no=%d",  no);
+		
         if (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.cln_used)
+		{
+			Error(LOG, 0, "stepper[%d].rob_fct_move_startup",  step_stepper_to_fluid(no));
 			steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_move_startup, 0);
+		}
         else
+		{
+			Error(LOG, 0, "stepper[%d].steptx_lift_to_print_pos",  step_stepper_to_fluid(no));
             steptx_lift_to_print_pos();
+		}
     }
 
     if (ctrlMode == ctrl_off || ctrlMode == ctrl_print)

@@ -261,7 +261,17 @@ namespace RX_DigiPrint.Models
             get { return _ClnUsed; }
             set { 
                     SetProperty(ref _ClnUsed, value); 
-                    if (_ClnUsed) RxGlobals.PrintSystem.IsRobotConnected=true;
+                }
+        }
+
+        //--- Property ScrewerUsed ---------------------------------------
+        private bool _ScrewerUsed;
+        public bool ScrewerUsed
+        {
+            get { return _ClnUsed; }
+            set { 
+                    SetProperty(ref _ScrewerUsed, value); 
+                    if (_ScrewerUsed) RxGlobals.PrintSystem.IsRobotConnected=true;
                 }
         }
 
@@ -538,6 +548,7 @@ namespace RX_DigiPrint.Models
             DripPans_OutfeedUP      = (msg.info & 0x40000000) != 0;
             DripPans_OutfeedDOWN    = (msg.info & 0x80000000) != 0;
             ClnUsed               = (msg.cln_used!=0) || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404;
+            ScrewerUsed           = (msg.screwer_used!=0);
 
             TTS_Valve_C1_Waste = (msg.inkinfo & 0x00000001) != 0;
             TTS_Valve_C2_Waste = (msg.inkinfo & 0x00000002) != 0;

@@ -38,6 +38,5 @@ void lbrob_cln_move_to(int pos);
 void lbrob_move_to_pos(int cmd, int pos, int wipe_state);
 
 void lbrob_reset_variables(void);
-void lbrob_to_garage(void);
 void lbrob_stop(void);
 

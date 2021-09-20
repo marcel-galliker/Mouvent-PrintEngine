@@ -1310,7 +1310,8 @@ namespace RX_DigiPrint.Services
 	        SVersion	        swVersion;
 	        SVersion	        fpgaVersion;
 
-            public Int32		cln_used;   // cleaning station
+            public byte		    cln_used;   // cleaning station
+            public byte		    screwer_used;
 
             public UInt32       cmdRunning;
 

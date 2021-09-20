@@ -44,11 +44,7 @@ typedef enum
 	chk_off,		// 00
 	chk_std,		// 01
 	chk_txrob_ref,	// 02
-	chk_txrob,		// 03
-	chk_lbrob,		// 04
-	chk_lb_ref1,	// 05
-	chk_lb_ref2,	// 06
-    chk_tts,		// 07
+    chk_tts,		// 03
 } EEncCheck;
 	
 typedef struct

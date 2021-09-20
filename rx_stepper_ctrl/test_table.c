@@ -111,7 +111,7 @@ void tt_init(void)
 	_ParY_print.stop_mux	= MOTOR_Y_BITS;
 	_ParY_print.enc_bwd		= FALSE;
 	_ParY_print.dis_mux_in	= 0;
-	_ParY_print.encCheck	= chk_lbrob;
+	_ParY_print.encCheck	= chk_std;
 	
 	_ParZ_down.speed		= 5000;
 	_ParZ_down.accel		= 3200;
@@ -126,7 +126,7 @@ void tt_init(void)
 	_ParZ_up.current_acc	= 200.0;
 	_ParZ_up.current_run	= 50.0;
 
-	_ParZ_up.encCheck		= chk_lbrob;
+	_ParZ_up.encCheck		= chk_std;
 }
 
 //--- tt_end ------------------------------

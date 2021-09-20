@@ -1329,6 +1329,7 @@ typedef enum ERobotFunctions
 	rob_fct_maintenance,	// 12: Maintenance Pos
     rob_fct_move_startup,	// 13: Lift in Reference, Slide underneath cluster
 } ERobotFunctions;
+extern char* RobFunctionStr[];
 
 typedef enum ERobotVaccumState
 {
@@ -1617,7 +1618,8 @@ typedef struct SStepperStat
 	SVersion	swVersion;
 	SVersion	fpgaVersion;
 
-	INT32		cln_used;	// cleaning station
+    INT8		cln_used;		// cleaning station
+    INT8		screwer_used;	
 	
 	INT32		cmdRunning;
 
