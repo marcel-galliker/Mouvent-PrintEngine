@@ -70,6 +70,7 @@ static int		_SlideToRef;
 static int		_PrintHeight=0;
 static int		_TimeOut_Move = 0;
 
+static int		_Cmd;
 static int		_Step;
 static int		_lift_ref_running=FALSE;
 static int		_CmdRunningRobi = 0;
@@ -88,9 +89,8 @@ static int  _micron_2_steps(int micron);
 static int  _steps_2_micron(int steps);
 static int  _incs_2_micron(int incs);
 
-static void _lb702_lift_sm(void);
-static void _lift_pos_start_sm(int cmd, int fromRef, int pos);
-static void _lift_pos_sm(void);
+static void _lb702_start_sm(int cmd, int fromRef, int pos);
+static void _lb702_sm(void);
 
 //--- lb702_init --------------------------------------
 void lb702_init(void)
@@ -98,6 +98,7 @@ void lb702_init(void)
 #ifdef DEBUG
 //	RX_StepperStatus.cln_used = (RX_StepperCfg.printerType==printer_LB702_WB);
 	RX_StepperStatus.cln_used = fpga_input(CLN_USED_IN);
+	RX_StepperStatus.screwer_used	= fpga_input(SCEWER_USED_IN);
 #else
 	RX_StepperStatus.cln_used		= fpga_input(CLN_USED_IN);
 	RX_StepperStatus.screwer_used	= fpga_input(SCEWER_USED_IN);
@@ -239,7 +240,7 @@ void lb702_main(int ticks, int menu)
 		if (RX_StepperStatus.cmdRunning==CMD_LIFT_TEST) RX_StepperStatus.cmdRunning=0;
 	}
 	
-	_lb702_lift_sm();
+	_lb702_sm();
 	
     if (memcmp(&oldSatus.info, &RX_StepperStatus.info, sizeof(RX_StepperStatus.info)))
 	{
@@ -278,21 +279,22 @@ static void _lb702_handle_menu(char *str)
 	{
 		switch (str[0])
 		{
-		case 's': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_STOP,		NULL, _FL_); break;
-		case 'R': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE,	NULL, _FL_); break;           
-		case 'r': motors_reset(1<<atoi(&str[1])); break;
-		case 'c': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,NULL, _FL_); break;
-        case 'w': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL, _FL_); break;
-		case 'p': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,	&pos, _FL_); break;
+		case 's': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_STOP,		NULL, _FL_);	break;
+		case 'o': Fpga.par->output ^= (1 << atoi(&str[1]));									break;
+		case 'R': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_REFERENCE,	NULL, _FL_);	break;           
+		case 'r': motors_reset(1<<atoi(&str[1]));											break;
+		case 'c': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CAPPING_POS,NULL, _FL_);	break;
+        case 'w': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL, _FL_);		break;
+		case 'p': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS,	&pos, _FL_);	break;
         case 'e': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_CLUSTER_CHANGE, NULL, _FL_); break;
 		case 'u': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_UP_POS,		NULL, _FL_); break;
-        case 'S': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL, _FL_); break;
-		case 'z': _lb702_motor_z_test(atoi(&str[1]));break;
-        case 'a': RX_StepperStatus.robinfo.auto_cap = !RX_StepperStatus.robinfo.auto_cap;
-		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));break;
-        case 'L': _lift = !_lift; break;
-        case 'C': _rob = !_rob; break;
-        case 'A': _robClient = !_robClient; break;
+        case 'S': lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_SCREW, NULL, _FL_);		break;
+		case 'z': _lb702_motor_z_test(atoi(&str[1]));										break;
+        case 'a': RX_StepperStatus.robinfo.auto_cap = !RX_StepperStatus.robinfo.auto_cap;	break;
+		case 'm': _lb702_motor_test(str[1]-'0', atoi(&str[2]));								break;
+        case 'L': _lift = !_lift;															break;
+        case 'C': _rob = !_rob;																break;
+        case 'A': _robClient = !_robClient;													break;
 		}
 	}			
 }
@@ -493,31 +495,16 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1, char *file, int line
 	}
 }
 
-//--- _lb702_lift_sm --------------------------------------
-static void _lb702_lift_sm(void)
+//--- _lb702_start_sm ------------------------------------
+static void _lb702_start_sm(int cmd, int fromRef, int pos)
 {
-	switch (RX_StepperStatus.cmdRunning)
-	{
-    case CMD_LIFT_PRINT_POS:		_lift_pos_sm(); break;
-    case CMD_LIFT_UP_POS:			_lift_pos_sm(); break;
-    case CMD_LIFT_CLUSTER_CHANGE:	_lift_pos_sm(); break;
-    case CMD_LIFT_SCREW:			_lift_pos_sm(); break;
-    case CMD_LIFT_WASH_POS:			_lift_pos_sm(); break;
-    case CMD_LIFT_CAPPING_POS:		_lift_pos_sm(); break;
-    default: break;
-	}
-}
-
-//--- _lift_pos_start_sm ------------------------------------
-static void _lift_pos_start_sm(int cmd, int fromRef, int pos)
-{
-	TrPrintfL(TRUE, "_lift_pos_start_sm cmd=0x%08x, cmdRunning=0x%08x", cmd, RX_StepperStatus.cmdRunning);
+	TrPrintfL(TRUE, "_lb702_start_sm cmd=0x%08x, cmdRunning=0x%08x", cmd, RX_StepperStatus.cmdRunning);
 	if (RX_StepperStatus.cmdRunning)
 	{
 		if (cmd==RX_StepperStatus.cmdRunning) 
-			TrPrintfL(TRUE, "_lift_pos_start_sm cmd=0x%08x already running", cmd);
+			TrPrintfL(TRUE, "_lb702_start_sm cmd=0x%08x already running", cmd);
         else	
-			Error(ERR_CONT, 0, "_lift_pos_start_sm can't start cmd=0x%08x (cmdRunning=0x%08x)", cmd, RX_StepperStatus.cmdRunning);
+			Error(ERR_CONT, 0, "_lb702_start_sm can't start cmd=0x%08x (cmdRunning=0x%08x)", cmd, RX_StepperStatus.cmdRunning);
 		return;
 	}
 
@@ -547,28 +534,29 @@ static void _lift_pos_start_sm(int cmd, int fromRef, int pos)
 				_PrintPos_New[MOTOR_Z_FRONT] = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - pos);
 				_SlideToRef = FALSE;
 			}
-			_Step=0;
-			RX_StepperStatus.cmdRunning = cmd;
-			_lift_pos_sm();
+			_Step=1;
+			RX_StepperStatus.cmdRunning = _Cmd = cmd;
+			_lb702_sm();
 		}
 	}
 	else ErrorFlag(ERR_ABORT, &_ErrorFlags, 0x00001, 0, "Allow Head Down signal not set!");
 }
 
-//--- _lift_pos_sm ----------------------------------------------------
-static void _lift_pos_sm(void)
+//--- _lb702_sm ----------------------------------------------------
+static void _lb702_sm(void)
 {
 	static int time;
 
 	if (_Step && rx_get_ticks()>time)
 	{
-		TrPrintfL(TRUE, "_lift_pos_sm[%d]", _Step);
+		TrPrintfL(TRUE, "_lb702_sm[%s/%d]", _CmdName, _Step);
 		time=rx_get_ticks()+1000;
-	}	
+	}
 
 	switch(_Step)
 	{
-    case 0:	TrPrintfL(TRUE, "_lift_pos_sm[%d]", _Step);
+    case 0: break;
+    case 1:	TrPrintfL(TRUE, "_lb702_sm[%s/%d]", _CmdName, _Step);
 			_Step++;
 			RX_StepperStatus.info.z_in_ref   = FALSE;
 			RX_StepperStatus.info.z_in_up    = FALSE;
@@ -580,10 +568,11 @@ static void _lift_pos_sm(void)
 					lb702_do_reference();
 			break;
 
-    case 1:	// wait until lift out of danger zone
+    case 2:	// wait until lift out of danger zone
+		//	TrPrintfL(TRUE, "_lb702_sm[%s/%d]: lift.ref_done=%d,  moveDone=%d", _CmdName, _Step, RX_StepperStatus.info.ref_done, motors_move_done(MOTOR_Z_BITS));
 			if (RX_StepperStatus.info.ref_done && motors_move_done(MOTOR_Z_BITS))
 			{
-				TrPrintfL(TRUE, "_lift_pos_sm[%d]: lift.ref_done=%d,  posZ=%d", _Step, RX_StepperStatus.info.ref_done, RX_StepperStatus.posZ);
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: lift.ref_done=%d,  posZ=%d", _CmdName, _Step, RX_StepperStatus.info.ref_done, RX_StepperStatus.posZ);
 				_Step++;
 				if (RX_StepperStatus.cln_used && _SlideToRef && !RX_StepperStatus.info.x_in_ref)
 				{
@@ -594,7 +583,7 @@ static void _lift_pos_sm(void)
 					}
 					else 
 					{
-						Error(ERR_CONT, 0, "_lift_pos_sm[%d]: posZ=%d", _Step, RX_StepperStatus.posZ);
+						Error(ERR_CONT, 0, "_lb702_sm[%s/%d]: posZ=%d", _CmdName, _Step, RX_StepperStatus.posZ);
 						RX_StepperStatus.cmdRunning=0;
 						_Step=0;
 					}
@@ -602,10 +591,11 @@ static void _lift_pos_sm(void)
 			}
 			break;
 
-    case 2:	// wait until slide in reference
+    case 3:	// wait until slide in reference
+		//	TrPrintfL(TRUE, "_lb702_sm[%s/%d]: _SlideToRef=%d, x_in_ref=%d", _CmdName, _Step, _SlideToRef, RX_StepperStatus.info.x_in_ref);
 			if (!RX_StepperStatus.cln_used || !_SlideToRef || RX_StepperStatus.info.x_in_ref)
 			{
-				TrPrintfL(TRUE, "_lift_pos_sm[%d]: ", _Step);
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: ", _CmdName, _Step);
 				RX_StepperStatus.info.moving = TRUE;
 				motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  _PrintPos_New[MOTOR_Z_BACK]);
 				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _PrintPos_New[MOTOR_Z_FRONT]);
@@ -614,12 +604,13 @@ static void _lift_pos_sm(void)
 			}
 			break;
 
-    case 3:	// wait until lift in position
+    case 4:	// wait until lift in position
+		//	TrPrintfL(TRUE, "_lb702_sm[%s/%d]: moveDone=%d", _CmdName, _Step,  motors_move_done(MOTOR_Z_BITS));
 			if (motors_move_done(MOTOR_Z_BITS))
 			{
-				TrPrintfL(TRUE, "_lift_pos_sm[%d]: Command %s DONE", _Step, _CmdName);
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: DONE cmdRunning=0x%08x Cmd=0x%08x", _CmdName, _Step, RX_StepperStatus.cmdRunning, _Cmd);
 				Error(LOG, 0, "%s done", _CmdName);
-				switch(RX_StepperStatus.cmdRunning)
+				switch(_Cmd)
 				{
                 case CMD_LIFT_PRINT_POS:		RX_StepperStatus.info.z_in_print=TRUE; break;
                 case CMD_LIFT_UP_POS:			RX_StepperStatus.info.z_in_up=TRUE;    break;
@@ -667,33 +658,33 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
                                        
     case CMD_LIFT_SCREW:            TrPrintfL(TRUE, "CMD_LIFT_SCREW");
 									strcpy(_CmdName, "CMD_LIFT_SCREW");
-									_lift_pos_start_sm(CMD_LIFT_SCREW, FALSE, DIST_CAP_SCREW);
+									_lb702_start_sm(CMD_LIFT_SCREW, FALSE, DIST_CAP_SCREW);
                                     break;
 
     case CMD_LIFT_PRINT_POS:		TrPrintfL(TRUE, "CMD_LIFT_PRINT_POS");
 									strcpy(_CmdName, "CMD_LIFT_PRINT_POS");
 									_PrintHeight = (*((INT32*)pdata));
-									_lift_pos_start_sm(CMD_LIFT_PRINT_POS, TRUE, _PrintHeight);
+									_lb702_start_sm(CMD_LIFT_PRINT_POS, TRUE, _PrintHeight);
 									break;
 		
 	case CMD_LIFT_UP_POS:			TrPrintfL(TRUE, "CMD_LIFT_UP_POS");
 									strcpy(_CmdName, "CMD_LIFT_UP_POS");
-									_lift_pos_start_sm(CMD_LIFT_UP_POS, TRUE, UP_HEIGHT);										
+									_lb702_start_sm(CMD_LIFT_UP_POS, TRUE, UP_HEIGHT);										
 									break;
 
 	case CMD_LIFT_CAPPING_POS:		TrPrintfL(TRUE, "CMD_LIFT_CAPPING_POS");
 									strcpy(_CmdName, "CMD_LIFT_CAPPING_POS");
-									_lift_pos_start_sm(CMD_LIFT_CAPPING_POS, FALSE, 0);
+									_lb702_start_sm(CMD_LIFT_CAPPING_POS, FALSE, 0);
 									break;
 				
     case CMD_LIFT_WASH_POS:			TrPrintfL(TRUE, "CMD_LIFT_WASH_POS");
                                     strcpy(_CmdName, "CMD_LIFT_WASH_POS");
-									_lift_pos_start_sm(CMD_LIFT_WASH_POS, FALSE, DIST_CAP_WASH);										
+									_lb702_start_sm(CMD_LIFT_WASH_POS, FALSE, DIST_CAP_WASH);										
                                     break;
 
     case CMD_LIFT_CLUSTER_CHANGE:   TrPrintfL(TRUE, "CMD_LIFT_CLUSTER_CHANGE");
 									strcpy(_CmdName, "CMD_LIFT_CLUSTER_CHANGE");
-									_lift_pos_start_sm(CMD_LIFT_CLUSTER_CHANGE, TRUE, CLUSTER_CHANGE_HEIGHT);										
+									_lb702_start_sm(CMD_LIFT_CLUSTER_CHANGE, TRUE, CLUSTER_CHANGE_HEIGHT);										
 									break;
 
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();

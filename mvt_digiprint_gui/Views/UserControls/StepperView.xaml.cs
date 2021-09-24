@@ -103,7 +103,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             StepperStatus stat = sender as StepperStatus;
 
-            _LedRobRef[stat.No].Source = (stat.X_in_ref && RxGlobals.StepperStatus[1].ClnUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) ? _GreenLedImg : null;
+            _LedRobRef[stat.No].Source = (stat.X_in_ref && RxGlobals.StepperStatus[stat.No].ScrewerUsed && RxGlobals.User.UserType == EUserType.usr_mouvent) ? _GreenLedImg : null;
 
             if(e.PropertyName.Equals("CmdRunning") || e.PropertyName.Equals("X_in_ref")) 
             {
@@ -127,6 +127,7 @@ namespace RX_DigiPrint.Views.UserControls
                     Button_Print.IsEnabled      = refDone;
                     Button_Wash.Visibility      = visible;
                     Button_Vacuum.Visibility    = visible;
+                    if (!RxGlobals.PrintSystem.IsRobotConnected) visible=Visibility.Collapsed;
                     Button_RefRobot.Visibility  = visible;
                     Button_Service.Visibility   = visible;
                     Button_Robot_Zeroing.Visibility = visible;
@@ -152,6 +153,7 @@ namespace RX_DigiPrint.Views.UserControls
             }
             Button_Wash.Visibility = visible;
             Button_Vacuum.Visibility = visible;
+            if (!RxGlobals.PrintSystem.IsRobotConnected) visible=Visibility.Collapsed;
             Button_RefRobot.Visibility = visible;
             Button_Service.Visibility = visible;
             Button_Robot_Zeroing.Visibility = visible;

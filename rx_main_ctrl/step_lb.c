@@ -38,6 +38,7 @@ static SStepperStat		    _Status[STEPPER_CNT];
 static SStepperStat         _OldStatus[STEPPER_CNT];
 static int				    _AbortPrinting=FALSE;
 static int                  _WashStarted[STEPPER_CNT];
+static int                  _rboFct_started[STEPPER_CNT];
 static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 static int                  _OldVacuum_Cleaner_State = FALSE;
 static double                _Vacuum_Cleaner_Time = 0;
@@ -280,7 +281,6 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     if (_step_socket[no] && _step_socket[no] != INVALID_SOCKET)
         steplb_rob_control(_RobotCtrlMode[no], no);
     
-
     for (i = 0; i < STEPPER_CNT; i++)
     {
         // Vacuum Cleaner Timer Start -------------------------------------------------------------------------------
@@ -470,26 +470,35 @@ int	 steplb_lift_in_up_pos(int no)
 //--- steplb_rob_to_fct_pos --------------------------
 void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function, INT32 position)
 {
-    SRobMovePos rob_movepos;
-    rob_movepos.function = rob_function;
-    rob_movepos.position = position;
+    SClnMovePar clnMovePar;
+    clnMovePar.function = rob_function;
+    clnMovePar.position = position;
     if (no==-1)
     {
-        for (no=0; no<STEPPER_CNT; no++) sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);
+        for (no=0; no<STEPPER_CNT; no++) 
+        {   
+            sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(clnMovePar), &clnMovePar);
+            _rboFct_started[no] = 0;
+        }
     }
-    else sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);		
+    else 
+    {   
+        sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(clnMovePar), &clnMovePar);		
+        _rboFct_started[no] = 0;
+    }
 }
 
 //--- steplb_rob_to_fct_pos_all ----------------------------------------------
 void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function, INT32 position)
 {
-    SRobMovePos rob_movepos;
-    rob_movepos.function = rob_function;
-    rob_movepos.position = position;
+    SClnMovePar clnMovePar;
+    clnMovePar.function = rob_function;
+    clnMovePar.position = position;
     for (int i = 0; i < STEPPER_CNT; i++)
     {
         if (_step_socket[i] != INVALID_SOCKET)
-		    sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(rob_movepos), &rob_movepos);
+		    sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(clnMovePar), &clnMovePar);
+        _rboFct_started[i] = 0;
     }
 }
 
@@ -506,8 +515,8 @@ int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function)
 	case rob_fct_wipe: 			return _Status[no].robinfo.wipe_ready		&& _Status[no].robinfo.moving == FALSE; break;
 	case rob_fct_vacuum_change: return _Status[no].robinfo.vacuum_in_change	&& _Status[no].robinfo.moving == FALSE; break;
 	case rob_fct_move_purge:	return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break; // && _Status[no].robinfo.rob_in_cap
+    case rob_fct_move_purge_end:return _Status[no].robinfo.purge_ready		&& _Status[no].robinfo.moving == FALSE; break; // && _Status[no].robinfo.rob_in_cap
     case rob_fct_purge4ever:    return _Status[no].robinfo.x_in_purge4ever  && _Status[no].robinfo.moving == FALSE; break;
-    case rob_fct_move_startup:  return _Status[no].info.x_in_cap		    && _Status[no].robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
 }
@@ -526,8 +535,11 @@ int steplb_rob_in_fct_pos_all(ERobotFunctions rob_function)
 //--- steplb_rob_fct_start -------------------------------------
 void steplb_rob_fct_start(int no, ERobotFunctions rob_function)
 {
-	if (_step_socket[no]==INVALID_SOCKET) return;
-	sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
+	if (_rboFct_started[no]!=rob_function)
+    {
+	    sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
+        _rboFct_started[no] = rob_function;
+    }
 }
 
 //--- steplb_rob_fct_done --------------------------------------
@@ -878,40 +890,6 @@ static void _send_ctrlMode(EnFluidCtrlMode ctrlMode, int stepperNo)
     
 }
 
-//--- _color2Robot ----------------------------------------
-static void _color2Robot(int color, int *pstepper, int *pprintbar)
-{
-    if (color==-1)
-    {
-        *pstepper  = -1;
-        *pprintbar = 0;
-        return;
-    }
-
-    switch (RX_Config.printer.type)
-    {
-    case printer_LB701:
-    case printer_LB702_UV:
-        if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
-        {
-            if (color < 4) color += RX_Config.colorCnt;
-            color -= 4;
-        }
-        // no break;
-        
-    case printer_LB702_WB:
-        if (RX_Config.inkSupplyCnt % 2 == 0) *pstepper = color / 2;
-        else                                 *pstepper = (color + 1) / 2;
-
-        if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && color == 0))    *pprintbar = color&1;  
-        else                                                                                   *pprintbar = ((color&1)+1) % 2;
-        break;
-        
-    default:
-        break;
-    }                                                                                          
-}
-
 //--- steplb_printbarUsed -----------------------
 int	steplb_printbarUsed(int stepperNo)
 {
@@ -921,7 +899,7 @@ int	steplb_printbarUsed(int stepperNo)
     {
         if (*RX_Color[color].color.fileName)
         {            
-            _color2Robot(color, &no, &bar);
+            fluid_toRobot(color, &no, &bar);
             if (no==stepperNo) used |= (1<< bar);
         }
     }
@@ -933,7 +911,7 @@ void steplb_adjust_heads(RX_SOCKET socket, SHeadAdjustmentMsg *headAdjustment)
 {
     int stepperno, printbar;
     
-    _color2Robot(headAdjustment->printbarNo, &stepperno, &printbar);
+    fluid_toRobot(headAdjustment->printbarNo, &stepperno, &printbar);
 
     Error(LOG, TRUE, "steplb_adjust_heads: printbar=%d, head=%d, axis=%d, steps=%d", headAdjustment->printbarNo, headAdjustment->headNo, headAdjustment->axis, headAdjustment->steps);
 
@@ -971,7 +949,7 @@ int steplb_get_stitch_position(SHeadAdjustmentMsg *headAdjustment)
 
 	setup_screw_positions(PATH_USER FILENAME_SCREW_POS, pos, READ);
 
-    _color2Robot(headAdjustment->printbarNo, &stepperNo, &printbarNo);
+    fluid_toRobot(headAdjustment->printbarNo, &stepperNo, &printbarNo);
     
 	return pos[stepperNo].printbar[printbarNo].stitch.turns;
 }
@@ -981,7 +959,7 @@ static void _check_fluid_back_pump(void)
 {
 //	int stepperNo, printbarNo;
 
-  //  _color2Robot(color, &stepperNo, &printbarNo);
+  //  fluid_toRobot(color, &stepperNo, &printbarNo);
 
     if (RX_Config.inkSupplyCnt % 2 == 0)
     {
@@ -1026,23 +1004,26 @@ void steplb_set_autocapMode(int state)
 
 void steplb_set_fluid_off(int no)
 {
-    if (_RobotCtrlMode[no/2] != ctrl_off && RX_Config.inkSupplyCnt % 2 == 0 && 
-            ((no %2 == 0 && (fluid_get_ctrlMode(no+1) < ctrl_cap || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6))) || 
-            (no %2 == 1 && (fluid_get_ctrlMode(no-1) < ctrl_cap || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6)))))
+    int stepperNo, printbar;
+    int stop=FALSE;
+    fluid_toRobot(no, &stepperNo, &printbar);
+    
+    stop = (_RobotCtrlMode[stepperNo]>=ctrl_cap    && _RobotCtrlMode[stepperNo]<=ctrl_cap_step4)
+        || (_RobotCtrlMode[stepperNo]>=ctrl_wash   && _RobotCtrlMode[stepperNo]<=ctrl_wash_step3)
+        || (_RobotCtrlMode[stepperNo]>=ctrl_vacuum && _RobotCtrlMode[stepperNo]<=ctrl_vacuum_step3);
+
+    if (stop)
     {
-        _RobotCtrlMode[no / 2] = ctrl_off;
-        _send_ctrlMode(ctrl_off, no/2);
-		steplb_rob_control(ctrl_off, no / 2);
-        steplb_rob_stop(no / 2);       
-    }
-	else if (_RobotCtrlMode[(no+1)/2] != ctrl_off && RX_Config.inkSupplyCnt % 2 == 1 && 
-                 (no == 0 || (no %2 == 0 && (fluid_get_ctrlMode(no-1) < ctrl_cap || fluid_get_ctrlMode(no-1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no-1) >= ctrl_cap && fluid_get_ctrlMode(no-1) <= ctrl_cap_step6))) || 
-            (no %2 == 1 && (fluid_get_ctrlMode(no+1) < ctrl_cap || fluid_get_ctrlMode(no+1) > ctrl_wash_step6 || (fluid_get_ctrlMode(no+1) >= ctrl_cap && fluid_get_ctrlMode(no+1) <= ctrl_cap_step6)))))
-    {
-        _RobotCtrlMode[(no+1) / 2] = ctrl_off;
-        _send_ctrlMode(ctrl_off, (no+1) / 2);
-        steplb_rob_control(ctrl_off, (no + 1) / 2);
-        steplb_rob_stop((no + 1) / 2);
+        _RobotCtrlMode[stepperNo] = ctrl_off;
+        for (int n=0; n<RX_Config.inkSupplyCnt; n++)
+        {
+            int s, p;
+            fluid_toRobot(n, &s, &p);
+            if (s==stepperNo && p!=printbar)
+                _send_ctrlMode(ctrl_off, n);
+        }
+        steplb_rob_control(ctrl_off, stepperNo);
+        steplb_rob_stop(stepperNo);
     }
 }
 
@@ -1055,7 +1036,7 @@ int steplb_cln_used(int fluidNo)
     {
     case printer_LB702_WB:
     case printer_LB702_UV:
-        _color2Robot(fluidNo, &stepperNo, &printbarNo);
+        fluid_toRobot(fluidNo, &stepperNo, &printbarNo);
         if (stepperNo >= STEPPER_CNT) return FALSE;
         return (_Status[stepperNo].cln_used);
         break;
@@ -1072,7 +1053,7 @@ int steplb_stepper_to_fluid(int fluidno)
 {
     int stepperNo, printbarNo;
 
-    _color2Robot(fluidno, &stepperNo, &printbarNo);
+    fluid_toRobot(fluidno, &stepperNo, &printbarNo);
     
     return stepperNo;
 }

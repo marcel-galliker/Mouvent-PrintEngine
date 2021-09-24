@@ -414,8 +414,8 @@ void fluid_tick(void)
         
         if (step_cln_used(i))
 		{
-            int stepperNo = 0;
-            fluid2Robot(i, &stepperNo);
+            int stepperNo, printbar;
+            fluid_toRobot(i, &stepperNo, &printbar);
             state[i].act_pos_y = -1 * RX_StepperStatus.posY[stepperNo];
 		}
     }
@@ -653,10 +653,13 @@ static void _control(int fluidNo)
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
 			switch(pstat->ctrlMode)
 			{
-				case ctrl_shutdown:		_send_ctrlMode(no, ctrl_shutdown_done, TRUE);	break;	
+				case ctrl_shutdown:		if (_lbrob) steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_cap, 0);
+										_send_ctrlMode(no, ctrl_shutdown_done, TRUE);
+										break;	
 				case ctrl_shutdown_done:
 					_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
-					if ((_txrob || RX_StepperStatus.cln_used) && _all_fluids_in_4fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef, ctrl_undef))
+				//	if ((_txrob || RX_StepperStatus.cln_used) && _all_fluids_in_4fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef, ctrl_undef))
+					if (_txrob && _all_fluids_in_4fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef, ctrl_undef))
 						fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 					else					
 						_send_ctrlMode(no, ctrl_off, TRUE);					
@@ -811,13 +814,12 @@ static void _control(int fluidNo)
                                                 int pos = TRUE;
                                                 steptts_handle_gui_msg(INVALID_SOCKET, CMD_TTS_PUMP_PURGE, &pos, sizeof (pos));
                                             }
-											else if (_lbrob && _PurgeCtrlMode != ctrl_purge4ever)
+											else if (_lbrob && _PurgeCtrlMode!=ctrl_purge4ever )
 											{
-											    if (HeadNo == -1)		steplb_rob_fct_start(step_stepper_to_fluid(no), rob_fct_move_purge);
+											    if (HeadNo == -1)		steplb_rob_fct_start(step_stepper_to_fluid(no), rob_fct_move_purge_end);
                                                 if (_Vacuum_Time[no])	steplb_rob_empty_waste(step_stepper_to_fluid(no), _Vacuum_Time[no] / 1000);
   												_Vacuum_Time[no] = 0;
-                                            }
-                    
+                                            }                    
 											break;
 
 				case ctrl_purge_step4:		if (_PurgeCtrlMode==ctrl_purge_hard || _PurgeCtrlMode==ctrl_purge_hard_wipe || _PurgeCtrlMode==ctrl_purge_hard_vacc || _PurgeCtrlMode == ctrl_purge_hard_wash)
@@ -931,7 +933,7 @@ static void _control(int fluidNo)
 				
 				//--- ctrl_print -------------------------------------------------------------------
 //              case ctrl_prepareToPrint:	_send_ctrlMode(no, ctrl_print, TRUE); break;
-				case ctrl_readyToPrint:		if (!_lbrob || steplb_rob_in_fct_pos(step_stepper_to_fluid(no), rob_fct_move_startup)) 
+				case ctrl_readyToPrint:		if (!_lbrob || steplb_rob_in_fct_pos(step_stepper_to_fluid(no), rob_fct_cap)) 
 												_send_ctrlMode(no, ctrl_print, TRUE);
 											break;
 
@@ -1054,8 +1056,7 @@ static void _control_flush(void)
 								{
                                     if (_lbrob)
                                     {
-                                        step_rob_to_wipe_pos(rob_fct_move_purge, RX_Config.headsPerColor - 1);
-                                        
+                                        step_rob_to_wipe_pos(rob_fct_move_purge, RX_Config.headsPerColor - 1);                                        
                                     }
                                     else if (_txrob)
                                         plc_to_purge_pos();
@@ -1238,8 +1239,8 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 		
         if (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.cln_used)
 		{
-			Error(LOG, 0, "stepper[%d].rob_fct_move_startup",  step_stepper_to_fluid(no));
-			steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_move_startup, 0);
+			Error(LOG, 0, "stepper[%d].rob_fct_cap",  step_stepper_to_fluid(no));
+			steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_cap, 0);
 		}
         else
 		{
@@ -1302,7 +1303,8 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	case printer_LB701:		break;
 	case printer_LB702_UV:	
 	case printer_LB702_WB:	if (ctrlMode == ctrl_cap) steplb_rob_start_cap_all();
-                            else if (ctrlMode == ctrl_off && no != -1)
+                        //  else if (ctrlMode == ctrl_off && no != -1)
+                            else if ((ctrlMode==ctrl_shutdown || ctrlMode==ctrl_off) && (no!=-1))
                             {
                                 steplb_set_fluid_off(no);
                             }
@@ -1660,26 +1662,37 @@ int _fluid_get_flush_time(int flush_cycle)
 /*	Change the IS-number to check according to the method _set_IS_Order in
 *	the class PrintSystem in the project mvt_digiprint_gui
 */
-//--- fluid2Robot --------------------------------------------
-void fluid2Robot(int fluidNo, int *stepperNo)
+
+//--- fluid_toRobot ----------------------------------------
+void fluid_toRobot(int fluidNo, int *pstepper, int *pprintbar)
 {
-    int ink_per_Robot = 2;
+    if (fluidNo==-1)
+    {
+        *pstepper  = -1;
+        *pprintbar = 0;
+        return;
+    }
+
     switch (RX_Config.printer.type)
     {
     case printer_LB701:
     case printer_LB702_UV:
-        if (RX_Config.colorCnt >= 5 && RX_Config.colorCnt <= 7)
+        if (RX_Config.inkSupplyCnt >= 5 && RX_Config.inkSupplyCnt <= 7)
         {
-            if (fluidNo < 4) fluidNo += RX_Config.colorCnt;
+            if (fluidNo < 4) fluidNo += RX_Config.inkSupplyCnt;
             fluidNo -= 4;
         }
+        // no break;
+        
+    case printer_LB702_WB:
+        if (RX_Config.inkSupplyCnt % 2 == 0) *pstepper = fluidNo / 2;
+        else                                 *pstepper = (fluidNo + 1) / 2;
+
+        if (RX_Config.inkSupplyCnt % 2 == 0 || (RX_Config.inkSupplyCnt == 7 && fluidNo == 0))  *pprintbar = fluidNo&1;  
+        else                                                                                   *pprintbar = ((fluidNo&1)+1) % 2;
         break;
+        
     default:
         break;
-    }
-
-    if (RX_Config.inkSupplyCnt % ink_per_Robot == 0)
-        *stepperNo = fluidNo / ink_per_Robot;
-    else
-        *stepperNo = (fluidNo + 1) / ink_per_Robot;
+    }                                                                                          
 }

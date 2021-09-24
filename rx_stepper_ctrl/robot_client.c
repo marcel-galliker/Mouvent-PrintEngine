@@ -1177,7 +1177,7 @@ static void _rob_state_machine(void)
                 Error(WARN, 0, "TEST headsPerColor=%d", RX_StepperCfg.headsPerColor);
             }
             TrPrintfL(TRUE, "_rob_state_machine: State=%d", _RobStateMachine_Step);
-            _posy_base = (CABLE_SCREW_POS_BACK + ((_ScrewPar.head+1) * (CABLE_SCREW_POS_FRONT - CABLE_SCREW_POS_BACK)) / 8);
+            _posy_base = (SLIDE_SCREW_POS_BACK + ((_ScrewPar.head+1) * (SLIDE_SCREW_POS_FRONT - SLIDE_SCREW_POS_BACK)) / 8);
             TrPrintfL(TRUE, "_rob_state_machine: State=%d head=%d, axis=%d, _posy_base=%d, posy=%d", _RobStateMachine_Step, _ScrewPar.head, _ScrewPar.axis, _posy_base, _pos.y);            
             memset(&_pos, 0x00, sizeof(_pos));
             if (_ScrewPar.printbar<2)
@@ -1970,6 +1970,8 @@ void rc_menu(int help)
 void rc_handle_menu(char *str)
 {
 	int no;
+	SHeadAdjustment adjust;
+
     if (no=str_start(str, "serialno"))
 		_setSerialNo(atoi(&str[no]));
 	else
@@ -1990,6 +1992,12 @@ void rc_handle_menu(char *str)
 
 		case 'F':   rc_handle_ctrl_msg(INVALID_SOCKET, CMD_FIND_ALL_SCREWS, NULL);	break;
 		case 'Z':	rc_handle_ctrl_msg(INVALID_SOCKET, CMD_RESET_ALL_SCREWS, &no);	break;
+        case 'a':	adjust.printbar = 0;
+					adjust.head     = 0;
+					adjust.axis     = 0;
+					adjust.steps    = 0;
+					rc_handle_ctrl_msg(INVALID_SOCKET, CMD_HEAD_ADJUST, &adjust);
+					break;
 
 		default:	break;
 		}

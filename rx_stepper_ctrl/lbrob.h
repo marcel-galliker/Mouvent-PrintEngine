@@ -15,15 +15,15 @@
 
 #include "rx_sok.h"
 
-#define CABLE_MAINTENANCE_POS   -770000     //  um LB702
-#define CABLE_CAP_POS           -687000     //	um LB702
-#define CABLE_WASH_POS_FRONT    -634000     //	um LB702
-#define CABLE_WASH_POS_BACK     -221000     //	um LB702
-#define CABLE_PURGE_POS_BACK    -311000     //  um LB702
-#define VACUUM_POS              -400000     //  um LB702
-#define CABLE_PURGE_POS_FRONT   -622000     //  um LB702    CABLE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 ->  HEAD_WIDTH = 43000
-#define CABLE_SCREW_POS_FRONT   -503000     //  um LB702    
-#define CABLE_SCREW_POS_BACK    -156208     //  um LB702    CABLE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
+#define SLIDE_MAINTENANCE_POS   -770000     //  um LB702
+#define SLIDE_CAP_POS           -687000     //	um LB702
+#define SLIDE_WASH_POS_FRONT    -634000     //	um LB702
+#define SLIDE_WASH_POS_BACK     -221000     //	um LB702
+#define SLIDE_PURGE_POS_BACK    -311000     //  um LB702
+#define SLIDE_VACUUM_POS        -400000     //  um LB702
+#define SLIDE_PURGE_POS_FRONT   -622000     //  um LB702    SLIDE_PURGE_POS_BACK - (7 * HEAD_WIDTH) - 10000 ->  HEAD_WIDTH = 43000
+#define SLIDE_SCREW_POS_FRONT   -503000     //  um LB702    
+#define SLIDE_SCREW_POS_BACK    -156208     //  um LB702    SLIDE_SCREW_POS_BACK + (8 * HEAD_WIDTH) ->  HEAD_WIDTH = 43349
 
 void lbrob_init(int robotUsed);
 void lbrob_display_status(void);	

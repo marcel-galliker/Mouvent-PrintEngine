@@ -390,6 +390,7 @@ void ink_tick_10ms(void)
 			case ctrl_prepareToPrint:
 				pid_reset(&_InkSupply[isNo].pid_Pump);
 				pid_reset(&_InkSupply[isNo].pid_Setpoint);
+				_set_pump_speed(isNo, 0);
 				_set_air_valve(isNo, PV_OPEN);
 				_TimePrepare[isNo]++;
 				if (_TimePrepare[isNo] >= TIME_PREPARE)

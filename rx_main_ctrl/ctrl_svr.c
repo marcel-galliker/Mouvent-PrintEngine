@@ -601,8 +601,8 @@ void ctrl_tick(void)
 					stat[head].machineMeters	   = (UINT32)RX_PrinterStatus.counterTotal;
                     if (step_cln_used(inkSupply))
                     {
-                        int stepperno = 0;
-                        fluid2Robot(inkSupply, &stepperno);
+                        int stepperno, printbar;
+                        fluid_toRobot(inkSupply, &stepperno, &printbar);
                         stat[head].act_pos_y = -1 * RX_StepperStatus.posY[stepperno];
 					}
 				}

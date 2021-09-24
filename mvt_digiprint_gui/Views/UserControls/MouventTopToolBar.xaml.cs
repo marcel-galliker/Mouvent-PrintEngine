@@ -36,6 +36,7 @@ namespace RX_DigiPrint.Views.UserControls
         private void _SetButtonStates()
         {
             Button_Test.IsChecked = RxGlobals.PrinterStatus.TestMode;
+            Button_Test.IsEnabled = RxGlobals.Plc.IsReadyForProduction && !RxGlobals.PrinterStatus.Cleaning;
             
             //--- size --------------------------------------------------------
        //   Button_JogFwd.IsEnabled = RxGlobals.Plc.IsReadyForProduction && !RxGlobals.Plc.IsRunning;

@@ -268,7 +268,7 @@ namespace RX_DigiPrint.Models
         private bool _ScrewerUsed;
         public bool ScrewerUsed
         {
-            get { return _ClnUsed; }
+            get { return _ScrewerUsed; }
             set { 
                     SetProperty(ref _ScrewerUsed, value); 
                     if (_ScrewerUsed) RxGlobals.PrintSystem.IsRobotConnected=true;

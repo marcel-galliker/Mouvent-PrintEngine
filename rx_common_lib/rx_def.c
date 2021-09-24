@@ -125,20 +125,21 @@ char *PrintStateStr[] =
 //--- RobFunctionStr ----------------
 char* RobFunctionStr[]=
 {   
-	"rob_fct_cap",			//  0: Capping
-	"rob_fct_wash",			//  1: Wash
-	"rob_fct_vacuum",		//  2: Vacuum
-	"rob_fct_wipe",			//  3: Wiping
-	"rob_fct_cap_empty",	//  4: Capping without Flush in Capping station
-	"rob_fct_vacuum_change",//  5: Vaccum change
-	"rob_fct_tilt",			//  6: Tilt for Capping
-	"rob_fct_vacuum_all",	//  7: Vacuum all heads
-    "rob_fct_move_purge",	//  8: Move to Purge position
-    "rob_fct_purge4ever",	//  9: Purge Capping
-    "rob_fct_move",			// 10: Wash heads
-	"rob_fct_move_to_pos",	// 11: Move to absomute position
-	"rob_fct_maintenance",	// 12: Maintenance Pos
-    "rob_fct_move_startup"	// 13: Lift in Reference, Slide underneath cluster
+	"rob_cft_undef",		//  0: undef	
+	"rob_fct_cap",			//  1: Capping
+	"rob_fct_wash",			//  2: Wash
+	"rob_fct_vacuum",		//  3: Vacuum
+	"rob_fct_wipe",			//  4: Wiping
+	"rob_fct_cap_empty",	//  5: Capping without Flush in Capping station
+	"rob_fct_vacuum_change",//  6: Vaccum change
+	"rob_fct_tilt",			//  7: Tilt for Capping
+	"rob_fct_vacuum_all",	//  8: Vacuum all heads
+    "rob_fct_move_purge",	//  9: Move to Purge position
+    "rob_fct_move_purge_end",//10: Move to Purge position
+    "rob_fct_purge4ever",	// 11: Purge Capping
+    "rob_fct_move",			// 12: Wash heads
+	"rob_fct_move_to_pos",	// 13: Move to absomute position
+	"rob_fct_maintenance",	// 14: Maintenance Pos
 };
 
 //--- RX_Color_InkSupplyPerSide -----------------------
