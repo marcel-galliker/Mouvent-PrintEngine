@@ -30,7 +30,9 @@ void rx_def_init();
 #define PATH_ROOT_LX		"/opt/radex/"
 #define PATH_BIN_LX			PATH_ROOT_LX "bin/"
 
+#ifndef PATH_ROOT_WIN
 #define PATH_ROOT_WIN		"D:/Radex/"
+#endif 
 // #define PATH_BIN_WIN		PATH_ROOT_WIN "bin/"
 #define PATH_SOURCE_DATA_DIR	"source-data/"
 #define PATH_RIPPED_DATA_DIR	"ripped-data/"
@@ -40,8 +42,8 @@ void rx_def_init();
 #ifdef WIN32
 	#define PATH_ROOT			PATH_ROOT_WIN
 	#define PATH_TRACE			PATH_ROOT "Trace/"
-	#define PATH_TEMP			"D:/Temp/"
-	#define PATH_HOME			"D:/radex/"
+	#define PATH_TEMP			"C:/Temp/"
+	#define PATH_HOME			PATH_ROOT_WIN
 	#define PATH_SOURCE_DATA	"D:/" PATH_SOURCE_DATA_DIR
 	#define PATH_RIPPED_DATA	"D:/" PATH_RIPPED_DATA_DIR
 	#define PATH_EMBRIP_PRENV	"D:/" PATH_EMBRIP_PRENV_DIR

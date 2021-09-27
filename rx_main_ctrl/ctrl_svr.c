@@ -153,19 +153,13 @@ static int _prepare_config()
 	RX_Spooler.overlap	   = rx_def_is_scanning(RX_Config.printer.type) && RX_Config.printer.overlap;
 	
 	//--- ethernet ports on additional interface board -------------------
-#ifdef linux
-	if (RX_Config.printer.type==printer_cleaf)			 ethPortCnt=4;
-	else if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;
-	else if (arg_hamster)								 ethPortCnt=0;
+	if (RX_Config.printer.type==printer_cleaf) ethPortCnt=4;
 	else 
 	{
-	ethPortCnt=sok_get_ifcnt("^p[0-9]+p[0-9]+$");
-	if (ethPortCnt==0) Error(WARN, 0, "No PxPx Ports"); 
+		ethPortCnt = sok_get_ifcnt();
+		if (ethPortCnt == 0) Error(WARN, 0, "No specific ports for UDP (performance issue detected)"); 
 	}
 
-#else
-	ethPortCnt=0;
-#endif
 	
 	if(ethPortCnt) RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_JUMBO;
 	else           RX_Spooler.dataBlkSize = DATA_BLOCK_SIZE_STD;		

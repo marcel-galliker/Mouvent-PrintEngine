@@ -294,16 +294,7 @@ int rx_startup(const char* name, int debug)
 	int cnt;
 	cnt = rx_process_running_cnt(name, NULL);
 
-	if (debug)
-	{
-		while(1)
-		{
-			cnt = rx_process_running_cnt(name, NULL);
-			if (cnt<2) break;
-			rx_process_kill(name, NULL);
-		}
-	}
-	else
+	if (!debug)
 	{
 		if (cnt>1)
 		{

@@ -296,7 +296,7 @@ EXIT 0</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDLL;%(PreprocessorDefinitions);$(MYDEFINE);</PreprocessorDefinitions>
       <BrowseInformation>true</BrowseInformation>
       <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;..\Externals\Tec-it\Win\TBarCode11\Include;..\Externals\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -378,7 +378,7 @@ EXIT 0</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;..\Externals\Tec-it\Win\TBarCode11\Include;..\Externals\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <PreprocessorDefinitions>_MBCS;_WINDLL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_WINDLL;WIN32;%(PreprocessorDefinitions);$(MYDEFINE);</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

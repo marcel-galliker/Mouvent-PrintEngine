@@ -198,9 +198,79 @@ int	sok_set_ifconfig(const char *ifname, SIfConfig *config)
 }
 
 //--- sok_get_ifcnt ----------------------------
-int	sok_get_ifcnt(const char *grep)
+int	sok_get_ifcnt()
 {
-	return 0;							
+	int count = 0;
+
+	/* Variables used by GetIpAddrTable */
+	PMIB_IPADDRTABLE pIPAddrTable;
+	DWORD dwSize = 0;
+	DWORD dwRetVal = 0;
+
+	/* Variables used to return error message */
+	LPVOID lpMsgBuf;
+
+
+	pIPAddrTable = (MIB_IPADDRTABLE *)malloc(sizeof(MIB_IPADDRTABLE));
+
+	if (pIPAddrTable)
+	{
+		// Make an initial call to GetIpAddrTable to get the
+		// necessary size into the dwSize variable
+		if (GetIpAddrTable(pIPAddrTable, &dwSize, 0) == ERROR_INSUFFICIENT_BUFFER)
+		{
+			free(pIPAddrTable);
+			pIPAddrTable = (MIB_IPADDRTABLE *)malloc(dwSize);
+		}
+		if (pIPAddrTable == NULL)
+		{
+			printf("Memory allocation failed for GetIpAddrTable\n");
+			return 0;
+		}
+	}
+	// Make a second call to GetIpAddrTable to get the
+	// actual data we want
+	if ((dwRetVal = GetIpAddrTable(pIPAddrTable, &dwSize, TRUE)) != NO_ERROR)
+	{
+		printf("GetIpAddrTable failed with error %d\n", dwRetVal);
+		if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dwRetVal, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+						  (LPTSTR)&lpMsgBuf, 0, NULL))
+		{
+			printf("\tError: %s", (LPTSTR)lpMsgBuf);
+			LocalFree(lpMsgBuf);
+		}
+		return 0;
+	}
+
+	IN_ADDR addr;
+	sscanf(RX_CTRL_SUBNET, "%hhu.%hhu.%hhu.", &addr.S_un.S_un_b.s_b1, &addr.S_un.S_un_b.s_b2, &addr.S_un.S_un_b.s_b3);
+	addr.S_un.S_un_b.s_b3++;
+	addr.S_un.S_un_b.s_b4 = 0;
+
+	// then check all ipaddress in range of UDP
+	IN_ADDR IPAddr;
+	printf("\tIP Address[]:     \t%s\n", inet_ntoa(addr));
+
+	for (int i = 0; i < (int)pIPAddrTable->dwNumEntries; i++)
+	{
+		IPAddr.S_un.S_addr = pIPAddrTable->table[i].dwAddr;
+		printf("\tIP Address[%d]:     \t%s\n", i, inet_ntoa(IPAddr));
+
+		if ((pIPAddrTable->table[i].dwAddr & addr.S_un.S_addr) == addr.S_un.S_addr) 
+		{
+			printf("\tUDP port detected\n");
+			count++;
+			addr.S_un.S_un_b.s_b3++;
+		}
+	}
+
+	if (pIPAddrTable)
+	{
+		free(pIPAddrTable);
+		pIPAddrTable = NULL;
+	}
+
+	return count;
 }
 
 //--- sok_get_mac_address ----------------------------------------------------
@@ -434,11 +504,11 @@ int	sok_set_ifconfig(const char *ifname, SIfConfig *pcfg)
 }
 
 //--- sok_get_ifcnt -----------------------------------
-int	sok_get_ifcnt(const char *grep)
+int	sok_get_ifcnt()
 {
 	char cmd[64];
 	FILE *f;
-	sprintf(cmd, "ls -A /sys/class/net | grep -E %s | wc -l", grep);
+	sprintf(cmd, "ls -A /sys/class/net | grep -E ^p[0-9]+p[0-9]+$ | wc -l");
 	f = popen(cmd, "r");
 	char str[32];
 	fgets(str, sizeof(str), f);
