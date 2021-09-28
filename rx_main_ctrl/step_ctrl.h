@@ -23,6 +23,8 @@ void step_error_reset(void);
 
 int	 step_active(int no);
 
+int step_isReady(int no);
+
 int	 step_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 
 int	 step_do_test(SStepperMotorTest *pmsg);

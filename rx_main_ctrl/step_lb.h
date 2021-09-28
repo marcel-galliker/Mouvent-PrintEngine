@@ -19,6 +19,7 @@ void steplb_init(int no, RX_SOCKET psocket);
 int	 steplb_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dataLen);
 
 int  steplb_handle_status(int no, SStepperStat *pStatus);
+int  steplb_isReady(int no);
 int	 steplb_set_ScrewPos(int no, SScrewPositions *ppos);
 int steplb_get_ScrewPos(int stepperNo);
 
@@ -45,7 +46,6 @@ void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function, INT32 position);
 int	 steplb_rob_in_fct_pos(int no, ERobotFunctions rob_function);
 int	 steplb_rob_in_fct_pos_all(ERobotFunctions rob_function);
 
-void steplb_rob_fct_start(int no, ERobotFunctions rob_function);
 int	 steplb_rob_fct_done (int no, ERobotFunctions rob_function);
 
 void steplb_rob_do_reference(void);

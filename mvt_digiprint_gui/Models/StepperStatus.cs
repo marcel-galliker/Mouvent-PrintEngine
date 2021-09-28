@@ -261,6 +261,7 @@ namespace RX_DigiPrint.Models
             get { return _ClnUsed; }
             set { 
                     SetProperty(ref _ClnUsed, value); 
+                    if (_ClnUsed) RxGlobals.PrintSystem.IsClnUsed=true;
                 }
         }
 

@@ -161,15 +161,15 @@
                         <StackPanel Margin="10,2">
 
                             <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"  x:Name="Button_OnOff" Content="OFF"  Margin="5"      Click="OnOff_Clicked"/>
-                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Print"       Click="Print_Clicked" Margin="5"    Padding="10" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}"/>
+                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Print"       Click="Print_Clicked" Margin="5"    Padding="10" Visibility="{Binding Flushed, Converter={StaticResource BoolToInVisible_Converter}}" IsEnabled="{Binding ClnIsReady}"/>
                             <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40"  x:Name="FlushButton"  Content="Flush"  Margin="5"     Click="Flush_Clicked"     Padding="10" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
-                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                      Content="Purge" Margin="5"      Click="Purge_Clicked"     Padding="10"/>
-                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"   Content="Prg+Vac"  Margin="5"     Click="PurgeVacc_Clicked" Padding="10" x:Name="Button_PurgeVacc"/>
-                            <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                     Content="Prg+Wpe"  Margin="5"   Click="PurgeWipe_Clicked" Padding="10" x:Name="Button_PurgeWipe"/>
-                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Prg+Wash" Margin="5" Click="PurgeWash_Clicked" Padding="10" x:Name="Button_PurgeWash"/>
-                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Prg4Ever" Margin="5" Click="Purge4Ever_Clicked" Padding="10" x:Name="Button_Purge4Ever"/>
-                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Recovery" Margin="5" Click="Recovery_Clicked" Padding="10" x:Name="Button_Recovery"/>
+                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40"  x:Name="FlushButton"  Content="Flush"  Margin="5"  Click="Flush_Clicked"     Padding="10" Visibility="{Binding CanFlush, Converter={StaticResource BoolToVisible_Converter}}"/>
+                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                      Content="Purge" Margin="5"      Click="Purge_Clicked"     Padding="10" IsEnabled="{Binding ClnIsReady}"/>
+                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"   Content="Prg+Vac"  Margin="5"                      Click="PurgeVacc_Clicked" Padding="10" IsEnabled="{Binding ClnIsReady}" x:Name="Button_PurgeVacc"/>
+                            <Button  Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                     Content="Prg+Wpe"  Margin="5"   Click="PurgeWipe_Clicked" Padding="10" IsEnabled="{Binding ClnIsReady}" x:Name="Button_PurgeWipe"/>
+                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Prg+Wash" Margin="5" Click="PurgeWash_Clicked"  Padding="10" IsEnabled="{Binding ClnIsReady}" x:Name="Button_PurgeWash"/>
+                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Prg4Ever" Margin="5" Click="Purge4Ever_Clicked" Padding="10" IsEnabled="{Binding ClnIsReady}" x:Name="Button_Purge4Ever"/>
+                            <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40" Content="Recovery" Margin="5" Click="Recovery_Clicked"   Padding="10" IsEnabled="{Binding ClnIsReady}" x:Name="Button_Recovery"/>
                             <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
                             <Button    Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                   Content="Fill"    Margin="5"    Click="Fill_Clicked"      Padding="10" />
                             <Button   Style="{StaticResource Mouvent.CmdButtonStyle}" Height="40"                    Content="Empty"    Margin="5"   Click="Empty_Clicked"     Padding="10" Visibility="{Binding Running, Converter={StaticResource BoolToInVisible_Converter}}"/>

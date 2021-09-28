@@ -535,6 +535,8 @@ typedef struct SMsgHdr
 	UINT32 msgId;
 } SMsgHdr;
 
+const char *MsgIdStr(UINT32 msgId);
+
 typedef struct SReply
 {
 	SMsgHdr		hdr;

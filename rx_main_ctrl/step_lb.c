@@ -38,7 +38,6 @@ static SStepperStat		    _Status[STEPPER_CNT];
 static SStepperStat         _OldStatus[STEPPER_CNT];
 static int				    _AbortPrinting=FALSE;
 static int                  _WashStarted[STEPPER_CNT];
-static int                  _rboFct_started[STEPPER_CNT];
 static UINT32			    _Flushed = 0x00;		// For capping function which is same than flushing (need to purge after cap)
 static int                  _OldVacuum_Cleaner_State = FALSE;
 static double                _Vacuum_Cleaner_Time = 0;
@@ -314,6 +313,13 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
     return REPLY_OK;
 }
 
+//--- steplb_isReady --------------------------------
+int  steplb_isReady(int no)
+{
+    return (_Status[no].cln_used==FALSE || _Status[no].cmdRunning==0); 
+}
+
+
 //--- _set_screw_pos -----------------------------------------
 static int _set_screw_pos(int stepperNo)
 {
@@ -476,16 +482,9 @@ void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function, INT32 position)
     if (no==-1)
     {
         for (no=0; no<STEPPER_CNT; no++) 
-        {   
             sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(clnMovePar), &clnMovePar);
-            _rboFct_started[no] = 0;
-        }
     }
-    else 
-    {   
-        sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(clnMovePar), &clnMovePar);		
-        _rboFct_started[no] = 0;
-    }
+    else sok_send_2(&_step_socket[no], CMD_ROB_MOVE_POS, sizeof(clnMovePar), &clnMovePar);		
 }
 
 //--- steplb_rob_to_fct_pos_all ----------------------------------------------
@@ -498,7 +497,6 @@ void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function, INT32 position)
     {
         if (_step_socket[i] != INVALID_SOCKET)
 		    sok_send_2(&_step_socket[i], CMD_ROB_MOVE_POS, sizeof(clnMovePar), &clnMovePar);
-        _rboFct_started[i] = 0;
     }
 }
 
@@ -530,16 +528,6 @@ int steplb_rob_in_fct_pos_all(ERobotFunctions rob_function)
     case rob_fct_move_purge:	return RX_StepperStatus.robinfo.purge_ready && RX_StepperStatus.robinfo.moving == FALSE; break;
 	default: return FALSE; break;
 	}
-}
-
-//--- steplb_rob_fct_start -------------------------------------
-void steplb_rob_fct_start(int no, ERobotFunctions rob_function)
-{
-	if (_rboFct_started[no]!=rob_function)
-    {
-	    sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, sizeof(rob_function), &rob_function);
-        _rboFct_started[no] = rob_function;
-    }
 }
 
 //--- steplb_rob_fct_done --------------------------------------
@@ -751,7 +739,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 		
 		case ctrl_cap_step2:		if (steplb_rob_in_fct_pos(no, rob_fct_cap) && _risingEdge[no])
 									{
-										steplb_rob_fct_start(no, rob_fct_cap);
+                                        sok_send_2(&_step_socket[no], CMD_ROB_FILL_CAP, 0, NULL);
 										_RobotCtrlMode[no] = ctrl_cap_step3;
                                     }
                                     else if (!steplb_rob_in_fct_pos(no, rob_fct_cap))

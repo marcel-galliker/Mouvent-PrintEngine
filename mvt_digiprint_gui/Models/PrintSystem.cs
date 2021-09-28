@@ -117,6 +117,14 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        //--- Property IsClnUsed ---------------------------------------
+		private bool _IsClnUsed=false;
+		public bool IsClnUsed
+		{
+			get { return _IsClnUsed; }
+			set { SetProperty(ref _IsClnUsed,value); }
+		}
+
 		//--- Property IsRobotConnected ---------------------------------------
 		private bool _IsRobotConnected=false;
 		public bool IsRobotConnected
@@ -521,13 +529,21 @@ namespace RX_DigiPrint.Models
 
 			if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
 			{
-				if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.", MessageBoxImage.Question, true))
+                if (RxGlobals.PrintSystem.IsClnUsed)
 				{
-					TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
-					msg.no = -1;
-					msg.ctrlMode = EFluidCtrlMode.ctrl_prepareToPrint;
+				    if (!MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. \n\nStart Printing?", MessageBoxImage.Question, false))
+                        return false;
+				}
+                else
+				{
+				    if (MvtMessageBox.YesNo("Print System", "Some ink supplies are OFF. Switch them ON.", MessageBoxImage.Question, true))
+				    {
+					    TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+					    msg.no = -1;
+					    msg.ctrlMode = EFluidCtrlMode.ctrl_prepareToPrint;
 
-					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+					    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+				    }
 				}
 			}
 

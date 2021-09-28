@@ -10,6 +10,7 @@
 // ****************************************************************************
 
 #include "rx_def.h"
+#include "tcp_ip.h"
 #include <stdio.h>
 
 //--- rx_def_init -----------------------------------------------------------------
@@ -125,7 +126,7 @@ char *PrintStateStr[] =
 //--- RobFunctionStr ----------------
 char* RobFunctionStr[]=
 {   
-	"rob_cft_undef",		//  0: undef	
+	"rob_fct_undef",		//  0: undef	
 	"rob_fct_cap",			//  1: Capping
 	"rob_fct_wash",			//  2: Wash
 	"rob_fct_vacuum",		//  3: Vacuum
@@ -141,6 +142,36 @@ char* RobFunctionStr[]=
 	"rob_fct_move_to_pos",	// 13: Move to absomute position
 	"rob_fct_maintenance",	// 14: Maintenance Pos
 };
+
+//--- MsgIdStr ----------------------------------
+const char *MsgIdStr(UINT32 msgId)
+{
+	switch(msgId)
+	{
+    case CMD_LIFT_STOP:			    return "CMD_LIFT_STOP";
+    case CMD_LIFT_REFERENCE:	    return "CMD_LIFT_REFERENCE";
+    case CMD_LIFT_UP_POS:			return "CMD_LIFT_UP_POS";			
+    case CMD_LIFT_SCREW:		    return "CMD_LIFT_SCREW";
+    case CMD_LIFT_PRINT_POS:		return "CMD_LIFT_PRINT_POS";
+    case CMD_LIFT_CAPPING_POS:		return "CMD_LIFT_CAPPING_POS";
+    case CMD_LIFT_WASH_POS:		    return "CMD_LIFT_WASH_POS";
+    case CMD_LIFT_CLUSTER_CHANGE:	return "CMD_LIFT_CLUSTER_CHANGE";
+
+    case CMD_ROB_REFERENCE:			return "CMD_ROB_REFERENCE";
+    case CMD_ROB_MOVE_POS:			return "CMD_ROB_MOVE_POS";
+    case CMD_ROB_SERVICE:			return "CMD_ROB_SERVICE";
+    case CMD_ROB_EMPTY_WASTE:		return "CMD_ROB_EMPTY_WASTE";
+    case CMD_ROB_VACUUM:			return "CMD_ROB_VACUUM";
+    case CMD_ROB_FILL_CAP:			return "CMD_ROB_FILL_CAP";
+    case CMD_ROB_SET_FLUSH_VALVE:	return "CMD_ROB_SET_FLUSH_VALVE";
+
+    default: {
+				static char str[32];
+				sprintf(str, "0x%08x", msgId);
+				return str;
+			 }
+	}
+}
 
 //--- RX_Color_InkSupplyPerSide -----------------------
 static char _ColorShortName[INK_SUPPLY_CNT][8];

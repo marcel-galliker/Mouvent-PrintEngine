@@ -63,7 +63,6 @@ static SMovePar	_ParZ_down;
 static SMovePar	_ParZ_calibrate;
 static SMovePar	_ParZ_cap;
 
-static char		_CmdName[32];
 static int		_PrintPos_New[2];
 static int		_PrintPos_Act[2];
 static int		_SlideToRef;
@@ -105,7 +104,6 @@ void lb702_init(void)
 #endif
 
     motors_config(MOTOR_Z_BITS, CURRENT_HOLD, L5918_STEPS_PER_METER, L5918_INC_PER_METER, STEPS);
-	memset(_CmdName, 0, sizeof(_CmdName));
 
 	//--- movment parameters ----------------
 	_ParRef.speed			= 5000;  // Peter defined:  3000; 
@@ -218,7 +216,7 @@ void lb702_main(int ticks, int menu)
 			{
 				if (motors_error(MOTOR_Z_BITS, &motor))
 				{				
-                    Error(ERR_CONT, 0, "LIFT: Command %s - 1000 steps: Motor %s blocked", _CmdName, _MotorName[motor]);
+                    Error(ERR_CONT, 0, "LIFT: Command %s - 1000 steps: Motor %s blocked", MsgIdStr(RX_StepperStatus.cmdRunning), _MotorName[motor]);
 					RX_StepperStatus.info.ref_done = FALSE;
 				}
 				else RX_StepperStatus.info.z_in_ref = TRUE;
@@ -232,7 +230,7 @@ void lb702_main(int ticks, int menu)
 		}
 		else if (motors_error(MOTOR_Z_BITS, &motor))
 		{
-			Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked", _CmdName, _MotorName[motor]);			
+			Error(ERR_CONT, 0, "LIFT: Command %s: Motor %s blocked", MsgIdStr(RX_StepperStatus.cmdRunning), _MotorName[motor]);			
 			RX_StepperStatus.info.ref_done = FALSE;							
             RX_StepperStatus.cmdRunning = FALSE;
 		}
@@ -258,7 +256,7 @@ static void _lb702_display_status(void)
     term_printf("Ref Height back(um): \t %06d  Print Height: \t %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back,  _PrintHeight);
     term_printf("Ref Height front(um): \t %06d  Print Height: \t %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front, _PrintHeight);
     term_printf("Head UP Sensor: BACK= \t %d \t FRONT= \t %d\n",	fpga_input(HEAD_UP_IN_BACK), fpga_input(HEAD_UP_IN_FRONT));
-    term_printf("moving: \t\t %d \t cmd: %08x - %d\n",	RX_StepperStatus.info.moving, RX_StepperStatus.cmdRunning, _Step);
+    term_printf("moving: \t\t %d \t cmd: %s - %d\n",	RX_StepperStatus.info.moving, MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
     term_printf("reference done: \t %d\n",	RX_StepperStatus.info.ref_done);
     term_printf("printhead_en: \t\t %d\n",	RX_StepperStatus.info.printhead_en);
     term_printf("z in reference: \t %d\t",	RX_StepperStatus.info.z_in_ref);
@@ -546,17 +544,19 @@ static void _lb702_start_sm(int cmd, int fromRef, int pos)
 static void _lb702_sm(void)
 {
 	static int time;
+	int trace=FALSE;
 
 	if (_Step && rx_get_ticks()>time)
 	{
-		TrPrintfL(TRUE, "_lb702_sm[%s/%d]", _CmdName, _Step);
+		TrPrintfL(TRUE, "_lb702_sm[%s/%d]", MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
 		time=rx_get_ticks()+1000;
+		trace=TRUE;
 	}
 
 	switch(_Step)
 	{
     case 0: break;
-    case 1:	TrPrintfL(TRUE, "_lb702_sm[%s/%d]", _CmdName, _Step);
+    case 1:	TrPrintfL(TRUE, "_lb702_sm[%s/%d]", MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
 			_Step++;
 			RX_StepperStatus.info.z_in_ref   = FALSE;
 			RX_StepperStatus.info.z_in_up    = FALSE;
@@ -569,10 +569,10 @@ static void _lb702_sm(void)
 			break;
 
     case 2:	// wait until lift out of danger zone
-		//	TrPrintfL(TRUE, "_lb702_sm[%s/%d]: lift.ref_done=%d,  moveDone=%d", _CmdName, _Step, RX_StepperStatus.info.ref_done, motors_move_done(MOTOR_Z_BITS));
+		//	TrPrintfL(TRUE, "_lb702_sm[%s/%d]: lift.ref_done=%d,  moveDone=%d", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, RX_StepperStatus.info.ref_done, motors_move_done(MOTOR_Z_BITS));
 			if (RX_StepperStatus.info.ref_done && motors_move_done(MOTOR_Z_BITS))
 			{
-				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: lift.ref_done=%d,  posZ=%d", _CmdName, _Step, RX_StepperStatus.info.ref_done, RX_StepperStatus.posZ);
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: lift.ref_done=%d,  posZ=%d", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, RX_StepperStatus.info.ref_done, RX_StepperStatus.posZ);
 				_Step++;
 				if (RX_StepperStatus.cln_used && _SlideToRef && !RX_StepperStatus.info.x_in_ref)
 				{
@@ -583,7 +583,7 @@ static void _lb702_sm(void)
 					}
 					else 
 					{
-						Error(ERR_CONT, 0, "_lb702_sm[%s/%d]: posZ=%d", _CmdName, _Step, RX_StepperStatus.posZ);
+						Error(ERR_CONT, 0, "_lb702_sm[%s/%d]: posZ=%d", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, RX_StepperStatus.posZ);
 						RX_StepperStatus.cmdRunning=0;
 						_Step=0;
 					}
@@ -592,10 +592,10 @@ static void _lb702_sm(void)
 			break;
 
     case 3:	// wait until slide in reference
-		//	TrPrintfL(TRUE, "_lb702_sm[%s/%d]: _SlideToRef=%d, x_in_ref=%d", _CmdName, _Step, _SlideToRef, RX_StepperStatus.info.x_in_ref);
+			TrPrintfL(trace, "_lb702_sm[%s/%d]: _SlideToRef=%d, x_in_ref=%d", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, _SlideToRef, RX_StepperStatus.info.x_in_ref);
 			if (!RX_StepperStatus.cln_used || !_SlideToRef || RX_StepperStatus.info.x_in_ref)
 			{
-				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: ", _CmdName, _Step);
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: ", MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
 				RX_StepperStatus.info.moving = TRUE;
 				motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  _PrintPos_New[MOTOR_Z_BACK]);
 				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _PrintPos_New[MOTOR_Z_FRONT]);
@@ -605,11 +605,11 @@ static void _lb702_sm(void)
 			break;
 
     case 4:	// wait until lift in position
-		//	TrPrintfL(TRUE, "_lb702_sm[%s/%d]: moveDone=%d", _CmdName, _Step,  motors_move_done(MOTOR_Z_BITS));
+			TrPrintfL(trace, "_lb702_sm[%s/%d]: moveDone=%d", MsgIdStr(RX_StepperStatus.cmdRunning), _Step,  motors_move_done(MOTOR_Z_BITS));
 			if (motors_move_done(MOTOR_Z_BITS))
 			{
-				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: DONE cmdRunning=0x%08x Cmd=0x%08x", _CmdName, _Step, RX_StepperStatus.cmdRunning, _Cmd);
-				Error(LOG, 0, "%s done", _CmdName);
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: DONE cmdRunning=0x%08x Cmd=0x%08x", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, RX_StepperStatus.cmdRunning, _Cmd);
+				Error(LOG, 0, "%s done", MsgIdStr(RX_StepperStatus.cmdRunning));
 				switch(_Cmd)
 				{
                 case CMD_LIFT_PRINT_POS:		RX_StepperStatus.info.z_in_print=TRUE; break;
@@ -637,16 +637,14 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
 
 	switch(msgId)
 	{
-	case CMD_LIFT_STOP:				strcpy(_CmdName, "CMD_LIFT_STOP");
-									motors_stop(MOTOR_Z_BITS);
+	case CMD_LIFT_STOP:				motors_stop(MOTOR_Z_BITS);
 									RX_StepperStatus.cmdRunning = 0;
                                     RX_StepperStatus.info.ref_done = FALSE;
                                     lbrob_stop();
 									break;	
 
 	case CMD_LIFT_REFERENCE:		TrPrintfL(TRUE, "CMD_LIFT_REFERENCE");
-									strcpy(_CmdName, "CMD_LIFT_REFERENCE");
-                                    if (RX_StepperStatus.cmdRunning)
+									if (RX_StepperStatus.cmdRunning)
                                     {
                                         motors_stop(MOTOR_Z_BITS);
                                         RX_StepperStatus.cmdRunning = 0;
@@ -657,33 +655,27 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
 									break;
                                        
     case CMD_LIFT_SCREW:            TrPrintfL(TRUE, "CMD_LIFT_SCREW");
-									strcpy(_CmdName, "CMD_LIFT_SCREW");
 									_lb702_start_sm(CMD_LIFT_SCREW, FALSE, DIST_CAP_SCREW);
                                     break;
 
     case CMD_LIFT_PRINT_POS:		TrPrintfL(TRUE, "CMD_LIFT_PRINT_POS");
-									strcpy(_CmdName, "CMD_LIFT_PRINT_POS");
 									_PrintHeight = (*((INT32*)pdata));
 									_lb702_start_sm(CMD_LIFT_PRINT_POS, TRUE, _PrintHeight);
 									break;
 		
 	case CMD_LIFT_UP_POS:			TrPrintfL(TRUE, "CMD_LIFT_UP_POS");
-									strcpy(_CmdName, "CMD_LIFT_UP_POS");
 									_lb702_start_sm(CMD_LIFT_UP_POS, TRUE, UP_HEIGHT);										
 									break;
 
 	case CMD_LIFT_CAPPING_POS:		TrPrintfL(TRUE, "CMD_LIFT_CAPPING_POS");
-									strcpy(_CmdName, "CMD_LIFT_CAPPING_POS");
 									_lb702_start_sm(CMD_LIFT_CAPPING_POS, FALSE, 0);
 									break;
 				
     case CMD_LIFT_WASH_POS:			TrPrintfL(TRUE, "CMD_LIFT_WASH_POS");
-                                    strcpy(_CmdName, "CMD_LIFT_WASH_POS");
 									_lb702_start_sm(CMD_LIFT_WASH_POS, FALSE, DIST_CAP_WASH);										
                                     break;
 
     case CMD_LIFT_CLUSTER_CHANGE:   TrPrintfL(TRUE, "CMD_LIFT_CLUSTER_CHANGE");
-									strcpy(_CmdName, "CMD_LIFT_CLUSTER_CHANGE");
 									_lb702_start_sm(CMD_LIFT_CLUSTER_CHANGE, TRUE, CLUSTER_CHANGE_HEIGHT);										
 									break;
 

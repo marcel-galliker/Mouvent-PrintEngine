@@ -170,6 +170,16 @@ int	 step_active(int no)
 	return FALSE;
 }
 
+//--- step_isReady -----------------------------------------------
+int step_isReady(int no)
+{
+	switch(_StepperType)
+	{
+	case STEPPER_LB:	steplb_isReady(no); break;
+    default: return TRUE;
+	}	
+}
+
 //--- _step_handle_msg -------------------------------------------------------
 static int _step_handle_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par)
 {
