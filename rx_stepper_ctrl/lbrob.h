@@ -35,7 +35,7 @@ int  lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata);
 
 void lbrob_reference_slide(void);
 void lbrob_cln_move_to(int pos);
-void lbrob_move_to_pos(int cmd, int pos, ERobotFunctions fct);
+void lbrob_move_to_pos(int cmd, int pos, int cleaningSpeed);
 
 void lbrob_reset_variables(void);
 void lbrob_stop(void);

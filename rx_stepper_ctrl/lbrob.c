@@ -58,7 +58,7 @@
 #define RO_ALL_FLUSH_OUTPUTS    0x02F       // All used outputs -> o0, o1, o2, o3, o5
 #define RO_FLUSH_WIPE_RIGHT     0x001       // o0
 #define RO_FLUSH_WIPE_LEFT      0x002       // o1
-#define RO_FLUSH_WIPE           0x003       // o0 + o1
+#define RO_FLUSH_WIPE_ALL       (RO_FLUSH_WIPE_RIGHT | RO_FLUSH_WIPE_LEFT)
 #define RO_FLUSH_TO_CAP_RIGHT   0x004       // o2
 #define RO_FLUSH_TO_CAP_LEFT    0x008       // o3
 #define RO_FLUSH_TO_CAP         0x00c       // o2 + o3
@@ -132,6 +132,9 @@ static void _pump_main();
 
 static void _fill_start_sm(void);
 static void _fill_sm(void);
+
+static void _wash_start_sm(void);
+static void _wash_sm(void);
 
 static int  _lbrob_start_sm(ERobotFunctions fct, int pos);
 static void _lbrob_sm(void);    // state machine 
@@ -316,7 +319,8 @@ void lbrob_main(int ticks, int menu)
         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
     }
 
-    if (_CmdRunning == CMD_ROB_FILL_CAP) _fill_sm();
+    if (_CmdRunning == CMD_ROB_FILL_CAP)    _fill_sm();
+    else if (_CmdRunning == CMD_ROB_WASH)   _wash_sm();
     else if (_CmdRunning == CMD_ROB_MOVE_POS)
     {
         _lbrob_sm();
@@ -472,6 +476,69 @@ static void _fill_sm(void)
     }
 }
 
+//--- _wash_start_sm ----------------------------
+static void _wash_start_sm(void)
+{
+    _CapIsWet = TRUE;
+    _Step=1;
+    RX_StepperStatus.robinfo.moving = TRUE;
+}
+
+//--- _wash_sm ----------------------------------
+static void _wash_sm(void)
+{
+    int motor;
+    if (motors_move_done(MOTOR_SLIDE_BITS) && motors_error(MOTOR_SLIDE_BITS, &motor))
+    {
+        RX_StepperStatus.robinfo.ref_done = FALSE;
+        Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", MsgIdStr(_CmdRunning), motor + 1);
+        _CmdRunning = 0;
+        _CmdRunning_Lift = 0;
+        Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
+        return;
+    }
+
+    switch(_Step)
+    {
+        case 1:     TrPrintfL(TRUE, "_wash_sm[%d]:", _Step);
+                    if (!RX_StepperStatus.info.z_in_wash)
+                        lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL, _FL_);
+                    _Step++;
+                    break;
+
+        case 2:     if (RX_StepperStatus.info.z_in_wash)
+                    {
+                        TrPrintfL(TRUE, "_wash_sm[%d]:", _Step);
+                        lbrob_move_to_pos(0, _micron_2_steps(SLIDE_WASH_POS_BACK), FALSE);
+                        _Step++;
+                    }
+                    break;
+
+        case 3:     if (motors_move_done(MOTOR_SLIDE_BITS))
+                    {
+                        if (_RO_Flush)  Fpga.par->output |= _RO_Flush;
+                        else            Fpga.par->output |= RO_FLUSH_WIPE_ALL;
+                        _CapIsWet = TRUE;
+                        _RO_Flush &= ~RO_FLUSH_WIPE_ALL;
+                        Fpga.par->output |= RO_FLUSH_PUMP;
+                        Fpga.par->output &= ~RO_VACUUM_CLEANER;
+                        lbrob_move_to_pos(0, _micron_2_steps(SLIDE_PURGE_POS_FRONT), TRUE);                            
+                        _Step++;
+                    }
+                    break;
+
+        case 4:     if (motors_move_done(MOTOR_SLIDE_BITS))
+                    {
+                        _RO_Flush=0;
+                        Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
+                        RX_StepperStatus.robinfo.wash_done = TRUE;
+                        _Step = 0;
+                        _CmdRunning = 0;
+                    }
+                    break;
+    }
+}
+
 //--- _lbrob_start_sm -------------------------------------
 static int _lbrob_start_sm(ERobotFunctions fct, int pos)
 {    
@@ -487,7 +554,7 @@ static int _lbrob_start_sm(ERobotFunctions fct, int pos)
 
         case rob_fct_move_purge_end:_ClnMovePar.function = fct;
                                     _ClnMovePar.position = SLIDE_PURGE_POS_FRONT;
-                                    TrPrintfL(TRUE, "_lbrob_start_sm rob_fct_move_purge_end: head=%d, pos=%d", pos, _ClnMovePar.position);
+                                    TrPrintfL(TRUE, "_lbrob_start_sm rob_fct_move_purge_end: head=%d, pos=%d", pos, TRUE);
                                     break;
 
         case rob_fct_cap:           if (fpga_input(CAPPING_ENDSTOP))
@@ -709,8 +776,7 @@ void lbrob_handle_menu(char *str)
         lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &SClnMovePar);
         break;
     case 'w':
-        SClnMovePar.function = rob_fct_wash;
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &SClnMovePar);
+        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_WASH, &val);
         break;
     case 'q':
         val = atoi(&str[1]);
@@ -807,30 +873,23 @@ void	 lbrob_reference_slide(void)
 }
 
 //--- lbrob_move_to_pos ---------------------------------------------------------------
-void lbrob_move_to_pos(int cmd, int pos, ERobotFunctions fct)
+void lbrob_move_to_pos(int cmd, int pos, int cleaningSpeed)
 {
     if (cmd) _CmdRunning = cmd;
     RX_StepperStatus.robinfo.moving = TRUE;
     int actual_pos = motor_get_step(MOTOR_SLIDE);
 
-    TrPrintfL(TRUE, "lbrob_move_to_pos cmd=0x%08x, pos=%d, fct=%s", _CmdRunning, pos, RobFunctionStr[fct]);
+    TrPrintfL(TRUE, "lbrob_move_to_pos cmd=%s, pos=%d, cleaningSpeed=%d", MsgIdStr(_CmdRunning), pos, cleaningSpeed);
 
-    if (fct==rob_fct_move_purge_end 
-    || (fct==rob_fct_vacuum && (pos > actual_pos))  // move forwards
-    || (fct==rob_fct_wash   && (pos < actual_pos))) // move backwards
+    if (cleaningSpeed)
     {
-        switch(fct)
-        {
-        case rob_fct_vacuum:    break;
-        case rob_fct_wash:      break;
-        default: break;
-        }
         int speed = RX_StepperCfg.wipe_speed? RX_StepperCfg.wipe_speed : 10;
         _ParSlide_drive_purge.speed = _micron_2_steps(speed*1000); // multiplied with 1000 to get from mm/s to um/s
         motors_move_to_step(MOTOR_SLIDE_BITS, &_ParSlide_drive_purge, pos);
     }
     else if (_CapIsWet && (pos > actual_pos)) // move backwards
     {
+        _VacuumStartTimer = rx_get_ticks()+2000;
         motors_move_to_step(MOTOR_SLIDE_BITS, &_ParSlide_drive_slow, pos);
     }      
     else
@@ -851,7 +910,7 @@ void lbrob_cln_move_to(int pos)
 //--- _cln_move_to ---------------------------------------
 static void _cln_move_to(int msgId, int pos, ERobotFunctions fct)
 {
-    TrPrintfL(TRUE, "_cln_move_to msgId=0x%08x, fct=%s, _CmdRunning=0x%08x, position=%d, _NewPos=%d", msgId, RobFunctionStr[fct], _CmdRunning, pos, _ClnMovePar.position);
+    TrPrintfL(TRUE, "_cln_move_to msgId=%s, fct=%s, _CmdRunning=0x%08x, position=%d, _NewPos=%d", MsgIdStr(msgId), RobFunctionStr[fct], _CmdRunning, pos, _ClnMovePar.position);
     if (!_CmdRunning)
     {        
         _CmdRunning = msgId;
@@ -936,9 +995,9 @@ static void _cln_move_to(int msgId, int pos, ERobotFunctions fct)
                 if (_RO_Flush)
                     Fpga.par->output |= _RO_Flush;
                 else
-                Fpga.par->output |= RO_FLUSH_WIPE;
+                Fpga.par->output |= RO_FLUSH_WIPE_ALL;
                 
-                _RO_Flush &= ~RO_FLUSH_WIPE;
+                _RO_Flush &= ~RO_FLUSH_WIPE_ALL;
                 Fpga.par->output |= RO_FLUSH_PUMP;
                 Fpga.par->output &= ~RO_VACUUM_CLEANER;
                 break;
@@ -1051,9 +1110,19 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
     case CMD_ROB_FILL_CAP:
         if (!_CmdRunning)
         {
-            if (!RX_StepperStatus.robinfo.ref_done) return Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=0x%08x", msgId);
+            if (!RX_StepperStatus.robinfo.ref_done) return Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=%s", MsgIdStr(msgId));
             _CmdRunning = msgId;
             _fill_start_sm();
+        }
+        break;
+
+    case CMD_ROB_WASH:
+        if (!_CmdRunning)
+        {
+            RX_StepperStatus.robinfo.wash_done = FALSE;
+//            if (!RX_StepperStatus.robinfo.ref_done) return Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=%s", MsgIdStr(msgId));            
+            _CmdRunning = msgId;
+            _wash_start_sm();
         }
         break;
 
@@ -1061,8 +1130,8 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         val = (*(INT32 *)pdata);
         if (val == 0)           _RO_Flush |= RO_FLUSH_WIPE_LEFT;
         else if (val == 1)      _RO_Flush |= RO_FLUSH_WIPE_RIGHT;
-        else if (val == 2)      _RO_Flush |= RO_FLUSH_WIPE;
-        else                    _RO_Flush &= ~RO_FLUSH_WIPE;
+        else if (val == 2)      _RO_Flush |= RO_FLUSH_WIPE_ALL;
+        else                    _RO_Flush &= ~RO_FLUSH_WIPE_ALL;
         break;
 
     default:
@@ -1075,7 +1144,7 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 //--- _handle_flush_pump -------------------------------------------------------------------------
 static void _handle_flush_pump(void)
 {
-    if (!(Fpga.par->output & RO_FLUSH_WIPE) && !(Fpga.par->output & RO_FLUSH_TO_CAP) && (Fpga.par->output & RO_FLUSH_PUMP))
+    if (!(Fpga.par->output & RO_FLUSH_WIPE_ALL) && !(Fpga.par->output & RO_FLUSH_TO_CAP) && (Fpga.par->output & RO_FLUSH_PUMP))
         Fpga.par->output &= ~RO_FLUSH_PUMP;
 }
 

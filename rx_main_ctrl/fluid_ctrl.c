@@ -769,7 +769,7 @@ static void _control(int fluidNo)
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
                                                 
                                                 if (_lbrob && _PurgeCtrlMode == ctrl_purge4ever)
-                                                    steplb_lift_to_fct_pos(step_stepper_to_fluid(no), rob_fct_cap);
+                                                    steplb_lift_to_capping_pos(step_stepper_to_fluid(no));
 												else if (_lbrob && !steplb_rob_in_fct_pos(step_stepper_to_fluid(no), rob_fct_move_purge) && _PurgeCtrlMode != ctrl_purge_hard_wash)
 												{
                                                     if (_PurgeCtrlMode == ctrl_purge_hard_vacc)
@@ -971,15 +971,15 @@ static void _control(int fluidNo)
 											{
 												if (_lbrob || (RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))
                                                 {
-                                                    steplb_lift_to_fct_pos(step_stepper_to_fluid(no), rob_fct_cap);
+                                                    steplb_lift_to_capping_pos(step_stepper_to_fluid(no));
                                                 }
                                                 _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
                                             }
 
                 case ctrl_recovery_step2:	if ((!_lbrob && !(RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB))	// not LB-machine
 												|| (!_lbrob && RX_Config.printer.type >= printer_LB702_UV && RX_Config.printer.type <= printer_LB702_WB		// LB machine without Robot	
-												&& (steplb_lift_in_fct_pos(step_stepper_to_fluid(no), rob_fct_cap)))
-												|| (_lbrob && steplb_lift_in_fct_pos(step_stepper_to_fluid(no), rob_fct_cap)))								// LB machine with Robot
+												&& (steplb_lift_in_cap_pos(step_stepper_to_fluid(no))))
+												|| (_lbrob && steplb_lift_in_cap_pos(step_stepper_to_fluid(no))))								// LB machine with Robot
 											{   
                                                 setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
 												ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
@@ -1304,17 +1304,14 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	case printer_LB701:		break;
 	case printer_LB702_UV:	
 	case printer_LB702_WB:	if (ctrlMode == ctrl_cap) steplb_rob_start_cap_all();
-                        //  else if (ctrlMode == ctrl_off && no != -1)
                             else if ((ctrlMode==ctrl_shutdown || ctrlMode==ctrl_off) && (no!=-1))
                             {
                                 steplb_set_fluid_off(no);
                             }
                             else 
                             {
-                                if (no == -1) 
-                                    steplb_rob_control_all(ctrlMode);
-                                else 
-                                    steplb_rob_control(ctrlMode, step_stepper_to_fluid(no));
+                                if (no == -1)	steplb_rob_control_all(ctrlMode);
+                                else			steplb_rob_control(ctrlMode, step_stepper_to_fluid(no));
                             }
 							break;
 	default:				break;

@@ -615,6 +615,7 @@ static void _lb702_sm(void)
                 case CMD_LIFT_PRINT_POS:		RX_StepperStatus.info.z_in_print=TRUE; break;
                 case CMD_LIFT_UP_POS:			RX_StepperStatus.info.z_in_up=TRUE;    break;
 				case CMD_LIFT_CAPPING_POS:		RX_StepperStatus.info.z_in_cap=TRUE;   break;
+                case CMD_LIFT_WASH_POS:			RX_StepperStatus.info.z_in_wash=TRUE;   break;			
                 case CMD_LIFT_SCREW:			RX_StepperStatus.info.z_in_screw=TRUE; break;
                 case CMD_LIFT_CLUSTER_CHANGE:	break;
 				}

@@ -38,8 +38,8 @@ int	 steplb_lift_in_up_pos_all(void);
 void steplb_lift_to_up_pos(int no);
 int	 steplb_lift_in_up_pos(int no);
 
-void steplb_lift_to_fct_pos(int no, ERobotFunctions rob_function); 
-int  steplb_lift_in_fct_pos(int no, ERobotFunctions rob_function);
+void steplb_lift_to_capping_pos(int no); 
+int  steplb_lift_in_cap_pos(int no);
 
 void steplb_rob_to_fct_pos(int no, ERobotFunctions rob_function, INT32 position);
 void steplb_rob_to_fct_pos_all(ERobotFunctions rob_function, INT32 position);

@@ -159,9 +159,10 @@ const char *MsgIdStr(UINT32 msgId)
 
     case CMD_ROB_REFERENCE:			return "CMD_ROB_REFERENCE";
     case CMD_ROB_MOVE_POS:			return "CMD_ROB_MOVE_POS";
+    case CMD_ROB_WASH:				return "CMD_ROB_WASH";
+    case CMD_ROB_VACUUM:			return "CMD_ROB_VACUUM";
     case CMD_ROB_SERVICE:			return "CMD_ROB_SERVICE";
     case CMD_ROB_EMPTY_WASTE:		return "CMD_ROB_EMPTY_WASTE";
-    case CMD_ROB_VACUUM:			return "CMD_ROB_VACUUM";
     case CMD_ROB_FILL_CAP:			return "CMD_ROB_FILL_CAP";
     case CMD_ROB_SET_FLUSH_VALVE:	return "CMD_ROB_SET_FLUSH_VALVE";
 
