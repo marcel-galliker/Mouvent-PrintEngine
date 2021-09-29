@@ -710,8 +710,7 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         {
                                             steplb_lift_to_capping_pos(no);
                                             _RobotCtrlMode[no] = ctrl_cap_step4;
-                                        }
-                                        
+                                        }                                        
                                         break;
                                     }
                                     else steplb_lift_to_top_pos(no);
@@ -768,7 +767,8 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                     }										 
 									break;
 		
-        case ctrl_wash:				if (!_Status[no].robinfo.moving)
+        case ctrl_wash:				_RobotCtrlMode[no] = ctrl_wash;
+                                    if (!_Status[no].robinfo.moving)
                                     {
 									    sok_send_2(&_step_socket[no], CMD_ROB_WASH, 0, NULL);
                                         _RobotCtrlMode[no]++;
@@ -786,8 +786,10 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
                                         _RobotCtrlMode[no] = ctrl_off; 
 									break;
                                                                         
-        case ctrl_vacuum:           if (!_Status[no].robinfo.moving)
+        case ctrl_vacuum:           _RobotCtrlMode[no] = ctrl_vacuum;
+                                    if (!_Status[no].robinfo.moving)
 				                    {
+                                        Error(LOG, 0, "ctrl_vacuum");
                                         sok_send_2(&_step_socket[no], CMD_ROB_VACUUM, 0, NULL);
                                         _RobotCtrlMode[no]++;
 									}
@@ -795,12 +797,17 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 
         case ctrl_vacuum_step1:		if (_Status[no].robinfo.vacuum_done)
                                     {
+                                        Error(LOG, 0, "ctrl_vacuum_step1");
                                         _RobotCtrlMode[no]++;
-                                        steplb_lift_to_capping_pos(no);
+                                        steplb_rob_to_fct_pos(no, rob_fct_cap, 0);
                                     }
                                     break;
                                     
-        case ctrl_vacuum_step2:     if (steplb_rob_in_fct_pos(no, rob_fct_cap)) _RobotCtrlMode[no] = ctrl_off;
+        case ctrl_vacuum_step2:     if (steplb_rob_in_fct_pos(no, rob_fct_cap)) 
+                                    {
+                                        Error(LOG, 0, "ctrl_vacuum_step2");
+                                        _RobotCtrlMode[no] = ctrl_off;
+                                    }
 									break;
                                     
 		case ctrl_off:              _RobotCtrlMode[no] = ctrl_off;

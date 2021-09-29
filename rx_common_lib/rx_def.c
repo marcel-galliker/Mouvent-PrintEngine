@@ -148,6 +148,8 @@ const char *MsgIdStr(UINT32 msgId)
 {
 	switch(msgId)
 	{
+    case CMD_ERROR_RESET:			return "CMD_ERROR_RESET";
+
     case CMD_LIFT_STOP:			    return "CMD_LIFT_STOP";
     case CMD_LIFT_REFERENCE:	    return "CMD_LIFT_REFERENCE";
     case CMD_LIFT_UP_POS:			return "CMD_LIFT_UP_POS";			

@@ -76,6 +76,7 @@ void	motors_config(int motors, int currentHold, double stepsPerMeter, double inc
 
 INT32	motor_get_step(int motor);
 INT32	motor_get_end_step(int motor);
+INT32	motor_get_speed(int motor);
 int     motor_move_to_step(int motor, SMovePar *par, INT32 steps);
 int     motors_move_to_step(int motor, SMovePar *par, INT32 steps);
 int		motor_move_by_step(int motor, SMovePar *par, INT32 steps);

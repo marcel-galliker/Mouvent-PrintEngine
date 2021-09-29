@@ -633,7 +633,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
 {		
 	int val0, val1;
 
-	TrPrintfL(TRUE, "lb702_handle_ctrl_msg: msgId=0x%08x [%s:%d]", msgId, file, line);
+	TrPrintfL(TRUE, "lb702_handle_ctrl_msg: msgId=%s [%s:%d]", MsgIdStr(msgId), file, line);
 
 	switch(msgId)
 	{

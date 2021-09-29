@@ -50,6 +50,14 @@ INT32	motor_get_step(int motor)
 	return Fpga.stat->statMot[motor].position*microsteps;
 }
 
+//--- motor_get_speed ---------------------------------
+INT32	motor_get_speed(int motor)
+{
+	INT32 speed = Fpga.stat->statMot[motor].speed;
+	if (Fpga.par->mot_bwd) return -speed;
+	else				   return speed;
+}
+
 //--- motor_get_end_step ------------------------
 INT32	motor_get_end_step(int motor)
 {

@@ -95,7 +95,11 @@ static SMovePar _ParSlide_drive_purge;
 
 static char     *_MotorName[5] = {"BACK", "FRONT", "M2", "M3", "SLIDE"};
 static int      _CmdRunning = 0;
-static int      _Step = 0;
+static int      _SlideStep=0;
+static int      _WashStep=0;
+static int      _FillStep=0;
+static int      _VacuumStep=0;
+
 static int      _NewCmd = 0;
 
 static SClnMovePar _ClnMovePar;
@@ -135,9 +139,11 @@ static void _fill_sm(void);
 
 static void _wash_start_sm(void);
 static void _wash_sm(void);
+static void _vacuum_start_sm(void);
+static void _vacuum_sm(void);
 
-static int  _lbrob_start_sm(ERobotFunctions fct, int pos);
-static void _lbrob_sm(void);    // state machine 
+static int  _slide_start_sm(ERobotFunctions fct, int pos);
+static void _slide_sm(void);    // state machine 
 
 //--- lbrob_init --------------------------------------
 void lbrob_init(int robotUsed)
@@ -248,10 +254,10 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.x_in_purge4ever= FALSE;
     }
 
+    if (motor_get_speed(MOTOR_SLIDE)<0 && _VacuumStartTimer && rx_get_ticks() > _VacuumStartTimer) _vacuum_on();
+
     if (_slide_ref_running)
     {
-        if (_VacuumStartTimer && rx_get_ticks() > _VacuumStartTimer) _vacuum_on();
-
         if (motors_move_done(MOTOR_SLIDE_BITS))
         {
             RX_StepperStatus.robinfo.moving = FALSE;
@@ -319,116 +325,10 @@ void lbrob_main(int ticks, int menu)
         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
     }
 
-    if (_CmdRunning == CMD_ROB_FILL_CAP)    _fill_sm();
-    else if (_CmdRunning == CMD_ROB_WASH)   _wash_sm();
-    else if (_CmdRunning == CMD_ROB_MOVE_POS)
-    {
-        _lbrob_sm();
-        /*
-        switch (_ClnMovePar.function)
-        {
-        case rob_fct_maintenance:
-            _CmdRunning = 0;
-            break;
-
-        case rob_fct_purge4ever:
-            RX_StepperStatus.robinfo.x_in_purge4ever = fpga_input(CAPPING_ENDSTOP);
-            _CapIsWet=TRUE;
-            if (!RX_StepperStatus.robinfo.x_in_purge4ever && _NewCmd != CMD_ROB_MOVE_POS)
-            {
-                Error(ERR_CONT, 0, "LBROB: Command %s: End Sensor Capping NOT HIGH", MsgIdStr(_CmdRunning));
-                RX_StepperStatus.robinfo.ref_done = FALSE;
-            }
-            _CmdRunning = FALSE;
-            break;
-
-        case rob_fct_move_to_pos:
-            _CmdRunning = 0;
-            break;
-
-        case rob_fct_cap:           break;  // handled in _lbrob_sm();
-        case rob_fct_move_purge:    break;
-        case rob_fct_move_purge_end:break;
-
-        case rob_fct_vacuum:
-        case rob_fct_wash:
-            _CapIsWet=TRUE;
-            _Old_RobFunction = _ClnMovePar.function;
-            _ClnMovePar.function = rob_fct_move;
-            _CmdRunning = 0;
-            lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_ClnMovePar);
-            break;
-
-        case rob_fct_move:
-            _CmdRunning = 0;
-            Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
-            switch (_Old_RobFunction)
-            {
-            case rob_fct_wash:
-                Error(LOG, 0, "Wash done");
-                RX_StepperStatus.robinfo.wash_done = TRUE;
-                break;
-            case rob_fct_vacuum:
-                RX_StepperStatus.robinfo.vacuum_done = TRUE;
-                break;
-            default:
-                break;
-            }
-            _Old_RobFunction = _ClnMovePar.function;
-            break;
-
-        default:
-            Error(ERR_CONT, 0, "LBROB_MAIN: Rob-Function %d not implemented", _ClnMovePar.function);
-            _CmdRunning = 0;
-            RX_StepperStatus.robinfo.ref_done = FALSE;
-            break;
-        }
-        if (!_CmdRunning_Lift && !(RX_StepperStatus.info.z_in_wash && _Old_RobFunction == rob_fct_wash) && _ClnMovePar.function != rob_fct_move)
-            _Old_RobFunction = _ClnMovePar.function;
-        */
-    }
-    else
-    {
-        _CmdRunning = FALSE;
-    }
-
-    if (_CmdRunning_Lift || _CmdRunning_Robi)
-    {
-        int loc_new_cmd = 0;
-        ERobotFunctions robfunction = 0;
-        if (!RX_StepperStatus.robinfo.moving && !RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving)
-        {
-            if (_CmdRunning_Robi==CMD_ROBI_MOVE_Z_DOWN && !RX_StepperStatus.screwerinfo.z_in_down)
-            {
-                Error(ERR_CONT, 0, "Screwer blocked in UP position");
-                lbrob_handle_menu("z5000");
-            }
-            loc_new_cmd = _NewCmd;
-            _NewCmd = FALSE;
-            _CmdRunning_Lift = FALSE;
-            _CmdRunning_Robi = FALSE;
-            robfunction = _ClnMovePar.function;
-        }
-        if (loc_new_cmd)
-        {
-            switch (loc_new_cmd)
-            {
-            case CMD_ROB_REFERENCE:
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_REFERENCE, NULL);
-                break;
-            case CMD_ROB_MOVE_POS:
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &_ClnMovePar);
-                break;
-            case CMD_ROB_FILL_CAP:
-                lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &robfunction);
-				break;
-            default:
-                Error(ERR_CONT, 0, "LBROB_MAIN: Command 0x%08x not implemented", loc_new_cmd);
-                break;
-            }
-        }
-        loc_new_cmd = FALSE;
-    }
+    if (_SlideStep)  _slide_sm();
+    if (_WashStep)   _wash_sm();
+    if (_FillStep)   _fill_sm();
+    if (_VacuumStep) _vacuum_sm();
 
     _pump_main();
 
@@ -443,7 +343,7 @@ void lbrob_main(int ticks, int menu)
 static void _fill_start_sm(void)
 {
     _CapIsWet = TRUE;
-    _Step=1;
+    _FillStep=1;
     RX_StepperStatus.robinfo.moving = TRUE;
     Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
     Fpga.par->output |= RO_FLUSH_TO_CAP_LEFT;   // for case is is WB
@@ -456,20 +356,20 @@ static void _fill_sm(void)
 {
     if (_CapFillTime && rx_get_ticks() >= _CapFillTime)
     {
-        TrPrintfL(TRUE, "_fill_sm[%d]:", _Step);
-        switch(_Step)
+        TrPrintfL(TRUE, "_fill_sm[%d]:", _FillStep);
+        switch(_FillStep)
         {
             case 1:     Fpga.par->output &= ~RO_FLUSH_TO_CAP_LEFT;                        
                         Fpga.par->output |= RO_FLUSH_TO_CAP_RIGHT;
                         _CapFillTime += CAP_FILL_TIME;
-                        _Step++;
+                        _FillStep++;
                         break;
 
             case 2:     _CmdRunning = FALSE;
                         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
                         RX_StepperStatus.robinfo.cap_ready = TRUE;
                         _CapFillTime = 0;
-                        _Step = 0;
+                        _FillStep = 0;
                         break;
         }
         _CapFillTime = rx_get_ticks()+CAP_FILL_TIME;
@@ -480,7 +380,7 @@ static void _fill_sm(void)
 static void _wash_start_sm(void)
 {
     _CapIsWet = TRUE;
-    _Step=1;
+    _WashStep=1;
     RX_StepperStatus.robinfo.moving = TRUE;
 }
 
@@ -498,34 +398,20 @@ static void _wash_sm(void)
         return;
     }
 
-    switch(_Step)
-    {
-        case 1:     TrPrintfL(TRUE, "_wash_sm[%d]:", _Step);
-                    if (!RX_StepperStatus.info.z_in_wash)
+    switch(_WashStep)
+    {        
+        case 1:     _slide_start_sm(rob_fct_move_to_pos, SLIDE_WASH_POS_BACK);
+                    _WashStep++;
+                    break;
+
+        case 2:     if (motors_move_done(MOTOR_SLIDE_BITS) && RX_StepperStatus.robinfo.ref_done)
+                    {
                         lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL, _FL_);
-                    _Step++;
-                    break;
-        
-        case 2:
-                    if (RX_StepperStatus.robinfo.ref_done)
-                        _Step++;
-                    else if (motors_move_done(MOTOR_SLIDE_BITS))
-                    {
-                        TrPrintfL(TRUE, "_lbrob_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _Step);
-                        _Step++;
-                        lbrob_reference_slide();
+                        _WashStep++;
                     }
                     break;
 
-        case 3:     if (RX_StepperStatus.info.z_in_wash)
-                    {
-                        TrPrintfL(TRUE, "_wash_sm[%d]:", _Step);
-                        lbrob_move_to_pos(0, _micron_2_steps(SLIDE_WASH_POS_BACK), FALSE);
-                        _Step++;
-                    }
-                    break;
-
-        case 4:     if (motors_move_done(MOTOR_SLIDE_BITS))
+        case 3:     if (motors_move_done(MOTOR_SLIDE_BITS) && RX_StepperStatus.info.z_in_wash)
                     {
                         if (_RO_Flush)  Fpga.par->output |= _RO_Flush;
                         else            Fpga.par->output |= RO_FLUSH_WIPE_ALL;
@@ -534,25 +420,85 @@ static void _wash_sm(void)
                         Fpga.par->output |= RO_FLUSH_PUMP;
                         Fpga.par->output &= ~RO_VACUUM_CLEANER;
                         lbrob_move_to_pos(0, _micron_2_steps(SLIDE_PURGE_POS_FRONT), TRUE);                            
-                        _Step++;
+                        _WashStep++;
                     }
                     break;
 
-        case 5:     if (motors_move_done(MOTOR_SLIDE_BITS))
+        case 4:     if (motors_move_done(MOTOR_SLIDE_BITS))
                     {
                         _RO_Flush=0;
                         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
                         RX_StepperStatus.robinfo.wash_done = TRUE;
-                        _Step = 0;
+                        _WashStep = 0;
                         _CmdRunning = 0;
                     }
                     break;
     }
 }
 
-//--- _lbrob_start_sm -------------------------------------
-static int _lbrob_start_sm(ERobotFunctions fct, int pos)
+//--- _vacuum_start_sm ----------------------------
+static void _vacuum_start_sm(void)
+{
+    _CapIsWet = TRUE;
+    _VacuumStep=1;
+    RX_StepperStatus.robinfo.moving = TRUE;
+}
+
+//--- _vacuum_sm ----------------------------------
+static void _vacuum_sm(void)
+{
+    int motor;
+        
+    if (motors_move_done(MOTOR_SLIDE_BITS) && motors_error(MOTOR_SLIDE_BITS, &motor))
+    {
+        RX_StepperStatus.robinfo.ref_done = FALSE;
+        Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", MsgIdStr(_CmdRunning), motor + 1);
+        _CmdRunning = 0;
+        _CmdRunning_Lift = 0;
+        Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
+        return;
+    }
+
+    switch(_VacuumStep)
+    {        
+        case 1:     _slide_start_sm(rob_fct_move_to_pos, SLIDE_PURGE_POS_FRONT);
+                    _VacuumStep++;
+                    break;
+
+        case 2:     if (motors_move_done(MOTOR_SLIDE_BITS) && abs(RX_StepperStatus.posY[0]-SLIDE_PURGE_POS_FRONT) < 1000)
+                    {
+                        TrPrintfL(TRUE, "_vacuum_sm[%d]: slidePos=%d (%d)", _VacuumStep, RX_StepperStatus.posY[0], SLIDE_PURGE_POS_FRONT);
+                        lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL, _FL_);
+                        _VacuumStep++;
+                    }
+                    break;
+
+        case 3:     if (motors_move_done(MOTOR_SLIDE_BITS) && RX_StepperStatus.info.z_in_wash)
+                    {
+                        TrPrintfL(TRUE, "_vacuum_sm[%d]:", _VacuumStep);
+                        _CapIsWet = TRUE;
+                        _VacuumStartTimer = rx_get_ticks();
+                        lbrob_move_to_pos(0, _micron_2_steps(SLIDE_WASH_POS_BACK), TRUE);
+                        _VacuumStep++;
+                    }
+                    break;
+
+        case 4:     if (motors_move_done(MOTOR_SLIDE_BITS))
+                    {
+                        TrPrintfL(TRUE, "_vacuum_sm[%d]: ", _VacuumStep);
+                        RX_StepperStatus.robinfo.vacuum_done = TRUE;
+                        _VacuumStep = 0;
+                        _CmdRunning = 0;
+                    }
+                    break;
+    }
+}
+
+//--- _slide_start_sm -------------------------------------
+static int _slide_start_sm(ERobotFunctions fct, int pos)
 {    
+    if (_ClnMovePar.function)
+        printf("test\n");
     if (_ClnMovePar.function==0)
     {
         RX_StepperStatus.robinfo.purge_ready = FALSE;
@@ -560,12 +506,12 @@ static int _lbrob_start_sm(ERobotFunctions fct, int pos)
         {
         case rob_fct_move_purge:    _ClnMovePar.function = fct;
                                     _ClnMovePar.position = (SLIDE_PURGE_POS_BACK + (pos* (SLIDE_PURGE_POS_FRONT - SLIDE_PURGE_POS_BACK)) / 7); 
-                                    TrPrintfL(TRUE, "_lbrob_start_sm rob_fct_move_purge: head=%d, pos=%d", pos, _ClnMovePar.position);
+                                    TrPrintfL(TRUE, "_slide_start_sm rob_fct_move_purge: head=%d, pos=%d", pos, _ClnMovePar.position);
                                     break;
 
         case rob_fct_move_purge_end:_ClnMovePar.function = fct;
                                     _ClnMovePar.position = SLIDE_PURGE_POS_FRONT;
-                                    TrPrintfL(TRUE, "_lbrob_start_sm rob_fct_move_purge_end: head=%d, pos=%d", pos, TRUE);
+                                    TrPrintfL(TRUE, "_slide_start_sm rob_fct_move_purge_end: head=%d, pos=%d", pos, TRUE);
                                     break;
 
         case rob_fct_cap:           if (fpga_input(CAPPING_ENDSTOP))
@@ -582,27 +528,36 @@ static int _lbrob_start_sm(ERobotFunctions fct, int pos)
                                     }
                                     break;
 
-        default:                    _Step=0;
+        case rob_fct_maintenance:   rc_stop();
+                                    _ClnMovePar.function = fct; 
+                                    _ClnMovePar.position = SLIDE_MAINTENANCE_POS;
+                                    break;
+
+        case rob_fct_move_to_pos:   _ClnMovePar.function = fct; 
+                                    _ClnMovePar.position = pos;
+                                    break;
+
+        default:                    _SlideStep=0;
                                     return FALSE;
         }
-        _Step=1;
-        _lbrob_sm();
+        _SlideStep=1;
+        _slide_sm();
         return TRUE;
     }
     return FALSE;
 }
 
-//--- _lbrob_sm ----------------------------------------------
-static void _lbrob_sm(void)
+//--- _slide_sm ----------------------------------------------
+static void _slide_sm(void)
 {
     static int time=0;
     int trace=FALSE;
-    if (_Step && rx_get_ticks()>time)
+    if (_SlideStep && rx_get_ticks()>time)
     {
         time=rx_get_ticks()+1000;
         trace=TRUE;
     }
-    switch(_Step)
+    switch(_SlideStep)
     {
     case 0: break;
 
@@ -610,65 +565,65 @@ static void _lbrob_sm(void)
             {
                 rc_move_bottom(_FL_);
             }
-            _Step++;
+            _SlideStep++;
             break;
 
     case 2: if (!RX_StepperStatus.screwer_used || RX_StepperStatus.screwerinfo.z_in_down)
             {
-                TrPrintfL(trace, "_lbrob_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _Step);
+                TrPrintfL(trace, "_slide_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _SlideStep);
                 if (!RX_StepperStatus.info.moving)
                 {
-                    TrPrintfL(TRUE, "_lbrob_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _Step);
-                    _CmdRunning = CMD_ROB_MOVE_POS;
+                    TrPrintfL(TRUE, "_slide_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _SlideStep);
+                  //  _CmdRunning = CMD_ROB_MOVE_POS;
                     if (RX_StepperStatus.info.z_in_ref)
-                        _Step++;
+                        _SlideStep++;
                     else if (!RX_StepperStatus.info.moving) 
                     {
                         lb702_do_reference();
-                        _Step++;
+                        _SlideStep++;
                     }
                 }
             }
 			break;
 
-    case 3: TrPrintfL(trace, "_lbrob_sm[%s/%d]: z_in_ref=%d", RobFunctionStr[_ClnMovePar.function], _Step, RX_StepperStatus.info.z_in_ref);
+    case 3: TrPrintfL(trace, "_slide_sm[%s/%d]: z_in_ref=%d", RobFunctionStr[_ClnMovePar.function], _SlideStep, RX_StepperStatus.info.z_in_ref);
             if (RX_StepperStatus.info.z_in_ref)
             {
-                TrPrintfL(TRUE, "_lbrob_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _Step);
-                _Step++;
+                TrPrintfL(TRUE, "_slide_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _SlideStep);
+                _SlideStep++;
                 if (!RX_StepperStatus.robinfo.ref_done && fpga_input(SLIDE_REF)) 
                     motors_move_by_step(MOTOR_SLIDE_BITS, &_ParSlide_drive, _micron_2_steps(-5000), TRUE);
             }
             break;
 
-    case 4: TrPrintfL(trace, "_lbrob_sm[%s/%d]: ref_done=%d, moveDone=%d", RobFunctionStr[_ClnMovePar.function], _Step, RX_StepperStatus.robinfo.ref_done, motors_move_done(MOTOR_SLIDE_BITS));
+    case 4: TrPrintfL(trace, "_slide_sm[%s/%d]: ref_done=%d, moveDone=%d", RobFunctionStr[_ClnMovePar.function], _SlideStep, RX_StepperStatus.robinfo.ref_done, motors_move_done(MOTOR_SLIDE_BITS));
             if (RX_StepperStatus.robinfo.ref_done)
-                _Step++;
+                _SlideStep++;
             else if (motors_move_done(MOTOR_SLIDE_BITS))
             {
-                TrPrintfL(TRUE, "_lbrob_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _Step);
-                _Step++;
+                TrPrintfL(TRUE, "_slide_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _SlideStep);
+                _SlideStep++;
                 lbrob_reference_slide();
             }
             break;
             
-    case 5: TrPrintfL(trace, "_lbrob_sm[%s/%d]: ref_done=%d, z_in_ref=%d, rob.ref_done=%d, moveDone=%d", RobFunctionStr[_ClnMovePar.function], _Step, RX_StepperStatus.robinfo.ref_done, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.robinfo.ref_done, motors_move_done(MOTOR_SLIDE_BITS));
+    case 5: TrPrintfL(trace, "_slide_sm[%s/%d]: ref_done=%d, z_in_ref=%d, rob.ref_done=%d, moveDone=%d", RobFunctionStr[_ClnMovePar.function], _SlideStep, RX_StepperStatus.robinfo.ref_done, RX_StepperStatus.info.z_in_ref, RX_StepperStatus.robinfo.ref_done, motors_move_done(MOTOR_SLIDE_BITS));
             if (RX_StepperStatus.info.ref_done && RX_StepperStatus.info.z_in_ref && RX_StepperStatus.robinfo.ref_done && motors_move_done(MOTOR_SLIDE_BITS))
             {
-                TrPrintfL(TRUE, "_lbrob_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _Step);
-                lbrob_move_to_pos(_CmdRunning, _micron_2_steps(_ClnMovePar.position), _ClnMovePar.function);
-                _Step++;
+                TrPrintfL(TRUE, "_slide_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _SlideStep);
+                lbrob_move_to_pos(_CmdRunning, _micron_2_steps(_ClnMovePar.position), _ClnMovePar.function==rob_fct_move_purge);
+                _SlideStep++;
             }
             break;
 
     case 6: if (motors_move_done(MOTOR_SLIDE_BITS)) 
             {
-                TrPrintfL(TRUE, "_lbrob_sm[%s/%d] moveDone=%d", RobFunctionStr[_ClnMovePar.function], _Step, motors_move_done(MOTOR_SLIDE_BITS));
+                TrPrintfL(TRUE, "_slide_sm[%s/%d] moveDone=%d", RobFunctionStr[_ClnMovePar.function], _SlideStep, motors_move_done(MOTOR_SLIDE_BITS));
                 Error(LOG, 0, "SlideMove fct=%s done",  RobFunctionStr[_ClnMovePar.function]);
                 switch(_ClnMovePar.function)
                 {
                 case rob_fct_move_purge: _CapIsWet=TRUE;
-                                         RX_StepperStatus.robinfo.purge_ready = TRUE;   
+                                         RX_StepperStatus.robinfo.purge_ready = TRUE;
                                          break;
                 
                 case rob_fct_move_purge_end:
@@ -686,8 +641,8 @@ static void _lbrob_sm(void)
                 default: break;
                 }
                 
-                _CmdRunning = 0;
-                _Step=0;
+                if (_CmdRunning==CMD_ROB_MOVE_POS) _CmdRunning=0;
+                _SlideStep=0;
                 _ClnMovePar.function=0;
             }
             break;            
@@ -712,12 +667,11 @@ void lbrob_display_status(void)
     term_printf("LB Clean ---------------------------------\n");
     if (RX_StepperStatus.cln_used)
     {
-        term_printf("moving: \t\t %d \t cmd: %s - %d\n", RX_StepperStatus.robinfo.moving, MsgIdStr(_CmdRunning), _Step);
-        term_printf("reference done: \t %d\n", RX_StepperStatus.robinfo.ref_done);
-        term_printf("slide in ref: \t\t %d\n", RX_StepperStatus.info.x_in_ref);
-        term_printf("slide in cap: \t\t %d\n", RX_StepperStatus.info.x_in_cap);
- //       term_printf("Cap ready \t\t %d\n", RX_StepperStatus.robinfo.cap_ready);
-        term_printf("Purge ready: \t\t %d\n", RX_StepperStatus.robinfo.purge_ready);
+        term_printf("moving: \t\t %d \tcmd: %s\n", RX_StepperStatus.robinfo.moving, MsgIdStr(_CmdRunning), _SlideStep);
+        term_printf("reference done: \t %d \tSlideStep\t%d\n", RX_StepperStatus.robinfo.ref_done, _SlideStep);
+        term_printf("slide in ref: \t\t %d\tWashStep\t%d\tdone\t%d\n", RX_StepperStatus.info.x_in_ref, _WashStep, RX_StepperStatus.robinfo.wash_done);
+        term_printf("slide in cap: \t\t %d\tVacuumStep\t%d\tdone\t%d\n", RX_StepperStatus.info.x_in_cap, _VacuumStep, RX_StepperStatus.robinfo.vacuum_done);
+        term_printf("Purge ready: \t\t %d\tFillStep\t%d\n", RX_StepperStatus.robinfo.purge_ready, _FillStep);
         term_printf("Slide pos: \t\t %dum\n", RX_StepperStatus.posY[0]);
 //        term_printf("Wipe-Speed: \t\t %d\n", RX_StepperCfg.wipe_speed);
 //        term_printf("Vacuum done: \t\t %d\n", RX_StepperStatus.robinfo.vacuum_done);
@@ -925,117 +879,8 @@ static void _cln_move_to(int msgId, int pos, ERobotFunctions fct)
     if (!_CmdRunning)
     {        
         _CmdRunning = msgId;
-        if (_ClnMovePar.position==0) _ClnMovePar.position = pos;
 
-        if (_lbrob_start_sm(fct, pos)) return;
-
-        if (!RX_StepperStatus.screwerinfo.z_in_down)
-        {
-            Error(ERR_CONT, 0, "_cln_move_to: screwer not down!");
-            return;
-        }
-        else if ((!(RX_StepperStatus.info.z_in_ref || RX_StepperStatus.info.z_in_screw) && !(_ClnMovePar.function == rob_fct_move && RX_StepperStatus.info.z_in_wash)) || !RX_StepperStatus.info.ref_done)
-        {
-            if (!RX_StepperStatus.info.moving)
-            {
-                _CmdRunning_Lift = CMD_LIFT_REFERENCE;
-                lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL, _FL_);
-                _NewCmd = msgId;
-                _ClnMovePar.position = pos;
-            }
-            else TrPrintfL(TRUE, "Error");
-            return;
-        }
-        /*
-        else if (!RX_StepperStatus.robinfo.ref_done || (_CapIsWet && _ClnMovePar.function != rob_fct_vacuum && _ClnMovePar.function != rob_fct_wash && _ClnMovePar.function != rob_fct_move && _ClnMovePar.function != rob_fct_move_purge))
-        {
-            Error(ERR_CONT, 0, "REFEREMCE SLIDE first msg=0x%08x", msgId);
-            _CmdRunning_old = msgId;
-            _ClnMovePar.position = position;
-            lbrob_reference_slide();
-            return;
-        }
-        */
-
-        RX_StepperStatus.robinfo.moving = TRUE;
-        _CmdRunning = msgId;
-        switch (_ClnMovePar.function)
-        {
-        case rob_fct_purge4ever:
-            lbrob_move_to_pos(0, _micron_2_steps(SLIDE_CAP_POS), FALSE);
-            break;
-            
-        case rob_fct_maintenance:
-            rc_stop();
-            lbrob_move_to_pos(0, _micron_2_steps(SLIDE_MAINTENANCE_POS), FALSE);
-            break;
-
-        case rob_fct_move_purge:
-            pos = (SLIDE_PURGE_POS_BACK + (pos * (SLIDE_PURGE_POS_FRONT - SLIDE_PURGE_POS_BACK)) / 7);  // calculate position of head[pos]
-            lbrob_move_to_pos(0, _micron_2_steps(pos), FALSE);
-            break;
-
-        case rob_fct_vacuum:
-            lbrob_move_to_pos(0, _micron_2_steps(SLIDE_PURGE_POS_FRONT), FALSE);
-            break;
-
-        case rob_fct_wash:
-            lbrob_move_to_pos(0, _micron_2_steps(SLIDE_WASH_POS_BACK), FALSE);
-            break;
-
-        case rob_fct_move:
-            if (!RX_StepperStatus.info.z_in_wash)
-            {
-                if (!RX_StepperStatus.info.moving && !RX_StepperStatus.screwerinfo.moving && rc_move_done())
-                {
-                    _CmdRunning = 0;
-                    RX_StepperStatus.robinfo.moving = FALSE;
-                    _CmdRunning_Lift = CMD_LIFT_WASH_POS;
-                    _NewCmd = msgId;
-                    lb702_handle_ctrl_msg(INVALID_SOCKET, _CmdRunning_Lift, NULL, _FL_);
-                }
-                else TrPrintfL(TRUE, "Error");
-                return;
-            }
-            
-            switch (_Old_RobFunction)
-            {
-            case rob_fct_wash:
-                lbrob_move_to_pos(0, _micron_2_steps(SLIDE_PURGE_POS_FRONT), TRUE);
-                
-                if (_RO_Flush)
-                    Fpga.par->output |= _RO_Flush;
-                else
-                Fpga.par->output |= RO_FLUSH_WIPE_ALL;
-                
-                _RO_Flush &= ~RO_FLUSH_WIPE_ALL;
-                Fpga.par->output |= RO_FLUSH_PUMP;
-                Fpga.par->output &= ~RO_VACUUM_CLEANER;
-                break;
-                
-            case rob_fct_vacuum:
-                lbrob_move_to_pos(0, _micron_2_steps(SLIDE_WASH_POS_BACK), TRUE);
-                _vacuum_on();
-                break;
-                
-            default:
-                break;
-            }
-            break;
-
-        case rob_fct_move_to_pos:
-            if (pos == 0 && _ClnMovePar.position!=0) 
-            {
-                pos = _ClnMovePar.position;
-                _ClnMovePar.position = 0;
-            }
-            TrPrintfL(TRUE, "lbrob_move_to_pos 2 cmd=0x%08x, pos=%d", _CmdRunning, pos);
-            lbrob_move_to_pos(0, _micron_2_steps(pos), FALSE);            
-            break;
-
-        default:
-            Error(ERR_CONT, 0, "Command %s: Rob-Function %d not implemented", MsgIdStr(_CmdRunning), _ClnMovePar.function);
-        }
+        if (_slide_start_sm(fct, pos)) return;
     }
     else TrPrintfL(TRUE, "_cln_move_to: CmdRunning");
 }
@@ -1045,6 +890,8 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 {
     int val, pos;
     SClnMovePar robmovepos;
+
+    TrPrintfL(TRUE, "lbrob_handle_ctrl_msg: msgId=%s", MsgIdStr(msgId));
 
     switch (msgId)
     {
@@ -1063,59 +910,33 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
         break;
 
     case CMD_ROB_SERVICE:
-        _CmdRunning = msgId;
-        robmovepos.function = rob_fct_maintenance;
-        lbrob_handle_ctrl_msg(INVALID_SOCKET, CMD_ROB_MOVE_POS, &robmovepos);
+        _cln_move_to(CMD_ROB_MOVE_POS, 0, rob_fct_maintenance);
         break;
 
     case CMD_ROB_EMPTY_WASTE:
-        _CmdRunning = msgId;
         val = (*(INT32 *)pdata);
-        if (val == 0)
+        switch(val)
         {
-            if (Fpga.par->output & RO_INK_VALVE_LEFT)
-                _PumpTimeLeft = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
-            if (Fpga.par->output & RO_INK_VALVE_RIGHT)
-                _PumpTimeRight = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
-        }
-        else if (val == 1 && !RX_StepperStatus.inkinfo.ink_pump_error_left)
-        {
-            Fpga.par->output |= RO_INK_VALVE_LEFT;
-        }
-        else if (val == 2)
-        {
-            if (Fpga.par->output & RO_INK_VALVE_LEFT)
-                _PumpTimeLeft = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
-        }
-        else if (val == 3 && !RX_StepperStatus.inkinfo.ink_pump_error_right)
-        {
-            Fpga.par->output |= RO_INK_VALVE_RIGHT;
-        }
-        else if (val == 4)
-        {
-            if (Fpga.par->output & RO_INK_VALVE_RIGHT)
-                _PumpTimeRight = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
-        }
-        else if (val == 5)
-        {
-            Fpga.par->output |= RO_INK_VALVE_BOTH;
-        }
-        break;
+        case 0: if (Fpga.par->output & RO_INK_VALVE_LEFT)       _PumpTimeLeft  = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
+                if (Fpga.par->output & RO_INK_VALVE_RIGHT)      _PumpTimeRight = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
+                break;
 
-    case CMD_ROB_VACUUM:
-        /*
-        val = (*(INT32 *)pdata);
-        if (val <= 0)
-            val = VACUUM_PUMP_TIME;
-        else
-            val = val * 1000;
-        
-        if (_WastePumpTimer < rx_get_ticks() + val || !_WastePumpTimer || !RX_StepperStatus.info.vacuum_running)
-        {
-            _vacuum_on();
-            _WastePumpTimer = rx_get_ticks() + val;
+        case 1: if (!RX_StepperStatus.inkinfo.ink_pump_error_left)  Fpga.par->output |= RO_INK_VALVE_LEFT;
+                break;
+
+        case 2: if (Fpga.par->output & RO_INK_VALVE_LEFT)           _PumpTimeLeft = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
+                break;
+
+        case 3: if (!RX_StepperStatus.inkinfo.ink_pump_error_right) Fpga.par->output |= RO_INK_VALVE_RIGHT;
+                break;
+
+        case 4: if (Fpga.par->output & RO_INK_VALVE_RIGHT)         _PumpTimeRight = rx_get_ticks() + FOLLOW_UP_TIME_INK_BACK;
+                break;
+
+        case 5: Fpga.par->output |= RO_INK_VALVE_BOTH;
+                break;
+        default: break;
         }
-        */
         break;
 
     case CMD_ROB_FILL_CAP:
@@ -1134,6 +955,15 @@ int lbrob_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata)
 //            if (!RX_StepperStatus.robinfo.ref_done) return Error(ERR_CONT, 0, "LBROB: Robot not refenenced, cmd=%s", MsgIdStr(msgId));            
             _CmdRunning = msgId;
             _wash_start_sm();
+        }
+        break;
+
+    case CMD_ROB_VACUUM:
+        if (!_CmdRunning)
+        {
+            RX_StepperStatus.robinfo.vacuum_done = FALSE;
+            _CmdRunning = msgId;
+            _vacuum_start_sm();
         }
         break;
 

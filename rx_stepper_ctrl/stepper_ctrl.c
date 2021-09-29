@@ -243,7 +243,7 @@ int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)//, int len, struct sockaddr *
 		case printer_LB702_UV:
 		case printer_LB702_WB:			
 		case printer_LH702:				if (RX_StepperStatus.cln_used) lbrob_handle_ctrl_msg(socket, phdr->msgId, &phdr[1]);
-										else							 lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1], _FL_);	
+										else						   lb702_handle_ctrl_msg(socket, phdr->msgId, &phdr[1], _FL_);	
 										break;
 
         case printer_setup_assist:		sa_handle_ctrl_msg(socket, pmsg);	break;
