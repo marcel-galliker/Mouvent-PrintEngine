@@ -94,7 +94,7 @@ namespace RX_DigiPrint.Views
             _UserTypeChanged();
 
             _ShowTab(false, TabLH702, AddLocationHint.After);
-
+            _ShowTab(false, SiemensHMI, AddLocationHint.Last);
         }
 
         
@@ -288,14 +288,16 @@ namespace RX_DigiPrint.Views
                 TabCtrl.SelectedItem=TabPrintQueue;
                 if (type==EPrinterType.printer_LH702)
 				{
-                    _ShowTab(true, TabLH702, AddLocationHint.After);
+                    _ShowTab(true, TabLH702, AddLocationHint.After);                    
                     _ShowTab(false, TabMachine, AddLocationHint.After);
+                    _ShowTab(true, SiemensHMI, AddLocationHint.Last);
                 }
                 else
 				{
                     _ShowTab(true , TabMachine, AddLocationHint.After);
                     _ShowTab(false, TabLH702,   AddLocationHint.After);
-				}
+                    _ShowTab(false, SiemensHMI, AddLocationHint.Last);
+                }
                 TabCtrl.SelectedItem=act;
 
                 _PrinterType = type;

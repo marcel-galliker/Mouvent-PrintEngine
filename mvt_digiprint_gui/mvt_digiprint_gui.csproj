@@ -508,6 +508,10 @@
     <Compile Include="Views\LH702View\LH702_Counters.xaml.cs">
       <DependentUpon>LH702_Counters.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SiemensHMI\Win32ControlHost.cs" />
+    <Compile Include="Views\SiemensHMI\SiemensHMI.xaml.cs">
+      <DependentUpon>SiemensHMI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UserControls\ShutDown.xaml.cs">
       <DependentUpon>ShutDown.xaml</DependentUpon>
     </Compile>
@@ -1043,6 +1047,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\LH702View\LH702_Counters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SiemensHMI\SiemensHMI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

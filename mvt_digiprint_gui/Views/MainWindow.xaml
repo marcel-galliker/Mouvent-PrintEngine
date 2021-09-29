@@ -11,6 +11,7 @@
         xmlns:views_al="clr-namespace:RX_DigiPrint.Views.Alignment"
         xmlns:view_lh702="clr-namespace:RX_DigiPrint.Views.LH702View"
         xmlns:views_psex="clr-namespace:RX_DigiPrint.Views.PrintSystemExtendedView"
+        xmlns:views_plchmi="clr-namespace:RX_DigiPrint.Views.SiemensHMI"
         xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
         xmlns:mvt="clr-namespace:RX_DigiPrint.Helpers"
         mc:Ignorable="d"
@@ -168,6 +169,19 @@
                     <views_su:UsersView x:Name="UsersView"/>
                 </Grid>
             </TabItem>
+
+
+            <TabItem x:Name="SiemensHMI">
+                <TabItem.Header>
+                    <Grid Width="200" Height="50" Background="{Binding SelectedTabName, Converter={StaticResource SelectedTabConverter}, ConverterParameter=TabUsers}">
+                        <TextBlock Style="{StaticResource TabItemStyle}" Text="{mvt:LocalizedBinding PLC}"/>
+                    </Grid>
+                </TabItem.Header>
+                <Grid>
+                    <views_plchmi:SiemensHMIView x:Name="SiemensHMIView"/>
+                </Grid>
+            </TabItem>
+
 
         </dragablz:TabablzControl>
 
