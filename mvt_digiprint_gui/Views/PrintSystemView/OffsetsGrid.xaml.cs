@@ -94,23 +94,23 @@ namespace RX_DigiPrint.Views.PrintSystemView
 
                 case EPrinterType.printer_LB701:
 				case EPrinterType.printer_LB702_UV: 
-                case EPrinterType.printer_LB703_UV:         this.Visibility         = Visibility.Collapsed;
+                case EPrinterType.printer_LB703_UV:         this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
-                                                            DistVerso.Visibility    = Visibility.Collapsed;
+                                                            DistVerso.Visibility    = Visibility.Visible;
                                                             ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 
-                case EPrinterType.printer_LH702:            this.Visibility         = Visibility.Collapsed;
+                case EPrinterType.printer_LH702:            this.Visibility         = Visibility.Visible;
                                                             Encoder.Visibility      = Visibility.Collapsed;
                                                             Angle.Visibility        = Visibility.Collapsed;
                                                             Belt.Visibility         = Visibility.Collapsed;
                                                             Overlap.Visibility      = Visibility.Collapsed; 
                                                             EncoderVerso.Visibility = Visibility.Collapsed;
-                                                            DistVerso.Visibility    = Visibility.Collapsed;
+                                                            DistVerso.Visibility    = Visibility.Visible;
                                                             ManualFlightTimeComp.Visibility = Visibility.Collapsed;
                                                             break;
 

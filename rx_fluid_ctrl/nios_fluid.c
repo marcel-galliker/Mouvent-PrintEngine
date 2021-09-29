@@ -78,6 +78,7 @@ static int				 _LogCnt=0;
 static int				 _NiosAlive;
 static int				 _NiosAliveTime;
 static int				 _HeaterUsed;
+static int				 _MaxTemp;
 
 static SSimuData _SimuData[NIOS_INK_SUPPLY_CNT];
 
@@ -346,6 +347,7 @@ void nios_load(const char *exepath)
 void nois_set_is_cfg(SInkSupplyCfg *pcfg)
 {
     int no=pcfg->no;
+	if (no==0) _MaxTemp=0;
     if (no>=0 && no<SIZEOF(_Cfg->ink_supply))
     {
 		memcpy(&RX_InkSupplyCfg[no], pcfg, sizeof(SInkSupplyCfg));
@@ -356,7 +358,7 @@ void nois_set_is_cfg(SInkSupplyCfg *pcfg)
 		_Cfg->ink_supply[no].heaterTemp	    = pcfg->ink.temp*1000;
 		_Cfg->ink_supply[no].heaterTempMax	= pcfg->ink.tempMax*1000;
         memcpy(_Cfg->ink_supply[no].flushTime, pcfg->ink.flushTime, sizeof(_Cfg->ink_supply[no].flushTime));
-		if (pcfg->ink.tempMax>36) _HeaterUsed = TRUE;
+		if (pcfg->ink.tempMax>_MaxTemp) _MaxTemp=pcfg->ink.tempMax;
 	//	_Cfg->ink_supply[i].condPresOutSet	= pcfg->condPresOutSet[i];
 	//	_Cfg->ink_supply[i].fluid_P			= pcfg->fluid_P[i];
 	}
@@ -482,9 +484,9 @@ void nios_test_stop(void)
 }
 
 //--- nios_test_air_valve --------------------------------------------
-void nios_test_air_valve(int isNo)
+void nios_test_air_valve(int isNo, int value)
 {
-	if (_set_testmode()) _Cfg->ink_supply[isNo].test_airValve = TRUE;
+	if (_set_testmode()) _Cfg->ink_supply[isNo].test_airValve = value;
 }
 
 //--- nios_test_bleed_line --------------------------------------------
@@ -494,9 +496,9 @@ void nios_test_bleed_line(int isNo)
 }
 
 //--- nios_test_bleed_valve --------------------------------------------------
-void nios_test_bleed_valve(int isNo)
+void nios_test_bleed_valve(int isNo, int value)
 {
-	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = TRUE;
+	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = value;
 }
 	
 //--- nios_test_ink_pump ----------------------------------------------
@@ -593,6 +595,7 @@ void _update_status(void)
 		pstat->temp				= _Stat->ink_supply[i].heaterTemp;
 		pstat->pumpSpeedSet		= _Stat->ink_supply[i].inkPumpSpeed_set;		
 		pstat->pumpSpeed		= _Stat->ink_supply[i].inkPumpSpeed_measured;
+        pstat->flush_pump_val	= _Stat->flush_pump_val;
 
 		if (pstat->ctrlMode>ctrl_purge_step1 && pstat->ctrlMode<=ctrl_purge_step6) _Cfg->ink_supply[i].purge_putty_pressure=0;
 
@@ -691,8 +694,8 @@ static void _display_status(void)
 		term_printf("\n");
 		term_printf("inkPump:           ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("%4s(%3d%%)  ", value_str(_Stat->ink_supply[i].inkPumpSpeed_measured), _Stat->ink_supply[i].inkPumpSpeed_set); term_printf("\n");
 				
-		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
-		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("         %d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
+		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
+		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
 		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error); term_printf("\n");
 		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("\n");
@@ -719,7 +722,8 @@ static void _display_status(void)
 		term_printf("Pump - Air ON    "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase2)); term_printf("\n");
 		term_printf("Pump - Bleed ON  "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Stat->ink_supply[i].TestBleedLine_Pump_Phase3)); term_printf("\n");
 		
-    	if (nios_is_heater_connected()) 
+		if (!_HeaterUsed) term_printf(">>> Heater PCB not used\n");
+    	else if (nios_is_heater_connected()) 
 		{
 			term_printf("\n");
 			term_printf("--- HEATER ------------------------------------------------------\n");
@@ -794,8 +798,8 @@ static void _IS_cond_log(int ticks)
 		char name[100];
 		sprintf(name, PATH_TEMP "Regulators_IS1.csv");
 		_plog_file_IS1 = fopen(name, "w");
-		fprintf(_plog_file_IS1, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
-		fprintf(_plog_file_IS1, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I;Degas-Duty(%)\n");
+		fprintf(_plog_file_IS1, "pump_ticks(ms);Meniscus_Average;Cond_Pump_Average(ml/min x 10);PID1_Pin_Setpoint;PID1_Pin_Average;PID1_Output; ");
+		fprintf(_plog_file_IS1, "PID2_Pressure_Cylinder;PID2_Pump_Cylinder;Air valve;Duty_Degasser\n");
 		fflush(_plog_file_IS1);
 		_LogTimer = rx_get_ticks();
 	}
@@ -804,8 +808,8 @@ static void _IS_cond_log(int ticks)
 		char name[100];
 		sprintf(name, PATH_TEMP "Regulators_IS2.csv");
 		_plog_file_IS2 = fopen(name, "w");
-		fprintf(_plog_file_IS2, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
-		fprintf(_plog_file_IS2, "PID2_Setpoint(mbar);PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fprintf(_plog_file_IS2, "pump_ticks(ms);Meniscus_Average;Cond_Pump_Average(ml/min x 10);PID1_Pin_Setpoint;PID1_Pin_Average;PID1_Output; ");
+		fprintf(_plog_file_IS2, "PID2_Pressure_Cylinder;PID2_Pump_Cylinder;Air valve;Duty_Degasser\n");
 		fflush(_plog_file_IS2);
 	}
 	if (_plog_file_IS3 == NULL)
@@ -813,8 +817,8 @@ static void _IS_cond_log(int ticks)
 		char name[100];
 		sprintf(name, PATH_TEMP "Regulators_IS3.csv");
 		_plog_file_IS3 = fopen(name, "w");
-		fprintf(_plog_file_IS3, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
-		fprintf(_plog_file_IS3, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fprintf(_plog_file_IS3, "pump_ticks(ms);Meniscus_Average;Cond_Pump_Average(ml/min x 10);PID1_Pin_Setpoint;PID1_Pin_Average;PID1_Output; ");
+		fprintf(_plog_file_IS3, "PID2_Pressure_Cylinder;PID2_Pump_Cylinder;Air valve;Duty_Degasser\n");
 		fflush(_plog_file_IS3);
 	}
 	if (_plog_file_IS4 == NULL)
@@ -822,8 +826,8 @@ static void _IS_cond_log(int ticks)
 		char name[100];
 		sprintf(name, PATH_TEMP "Regulators_IS4.csv");
 		_plog_file_IS4 = fopen(name, "w");
-		fprintf(_plog_file_IS4, "pump_ticks(ms);PID1_SP-PresINcond (mbar);PID1_FB-PresIN (mbar);PID1_Output-PID2-_P;meniscus cond(mbar);cond pump measured (ml/min x 10);PID1-P;PID1-I; ");
-		fprintf(_plog_file_IS4, "PID2_SP-PID1_Output;PID2_Feedback-ISpres (mbar);PID2_Output-PumpSpeed (%);PID2-P;PID2-I\n");
+		fprintf(_plog_file_IS4, "pump_ticks(ms);Meniscus_Average;Cond_Pump_Average(ml/min x 10);PID1_Pin_Setpoint;PID1_Pin_Average;PID1_Output; ");
+		fprintf(_plog_file_IS4, "PID2_Pressure_Cylinder;PID2_Pump_Cylinder;Air valve;Duty_Degasser\n");
 		fflush(_plog_file_IS4);
 	}
 	if (_plog_file_Temp == NULL)
@@ -850,25 +854,27 @@ static void _IS_cond_log(int ticks)
 			CondSpeed = _Cfg->ink_supply[i].condPumpFeedback;
 			if (CondSpeed > 5000) CondSpeed = 0;
 			Condpressure = _Cfg->ink_supply[i].condPresIn;
+			if (Condpressure > 500) Condpressure = 0;
 			Condpout = _Cfg->ink_supply[i].condPresOut;
 			CondMeniscus = _Cfg->ink_supply[i].condMeniscus;
+			if (CondMeniscus > 500) CondMeniscus = 0;
 			switch (i)
 			{
 			case 0 : 
-				fprintf(_plog_file_IS1, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
-				fprintf(_plog_file_IS1, "%d;%s;%d;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I,  _Stat->duty_degasser); 
+				fprintf(_plog_file_IS1, "%d;%d;%d;%d;%d;%d;", time, CondMeniscus, CondSpeed, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output);
+				fprintf(_plog_file_IS1, "%d;%d;%d;%d\n", ISpressure, ISspeed, _Stat->ink_supply[i].airValve, _Stat->duty_degasser); 
 				break;
 			case 1 : 
-				fprintf(_plog_file_IS2, "%d;%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I, _Stat->ink_supply[i].PIDairvalve_Output);
-				fprintf(_plog_file_IS2, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS2, "%d;%d;%d;%d;%d;%d;", time, CondMeniscus, CondSpeed, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output);
+				fprintf(_plog_file_IS2, "%d;%d;%d;%d\n", ISpressure, ISspeed, _Stat->ink_supply[i].airValve, _Cfg->ink_supply[i].meniscusSet); //_Stat->duty_degasser); 
 				break;
 			case 2 : 
-				fprintf(_plog_file_IS3, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
-				fprintf(_plog_file_IS3, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS3, "%d;%d;%d;%d;%d;%d;", time, CondMeniscus, CondSpeed, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output);
+				fprintf(_plog_file_IS3, "%d;%d;%d;%d\n", ISpressure, ISspeed, _Stat->ink_supply[i].airValve,  _Stat->duty_degasser); 
 				break;
 			case 3 : 
-				fprintf(_plog_file_IS4, "%d;%d;%d;%d;%d;%d;%d;%d;", time, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output, CondMeniscus, CondSpeed, _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I);
-				fprintf(_plog_file_IS4, "%d;%s;%d;%d;%d\n", _Stat->ink_supply[i].PIDsetpoint_Output, value_str(ISpressure), ISspeed, _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); 
+				fprintf(_plog_file_IS4, "%d;%d;%d;%d;%d;%d;", time, CondMeniscus, CondSpeed, _Cfg->ink_supply[i].cylinderPresSet, Condpressure, _Stat->ink_supply[i].PIDsetpoint_Output);
+				fprintf(_plog_file_IS4, "%d;%d;%d;%d\n", ISpressure, ISspeed, _Stat->ink_supply[i].airValve,  _Stat->duty_degasser); 
 				break;
 			} 
 		}

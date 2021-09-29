@@ -174,7 +174,7 @@ int ctrl_replies(void)
 static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 {
 	int reply = REPLY_ERROR;
-
+    
 	_Socket = socket; 
 	
 	//--- handle the message --------------

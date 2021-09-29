@@ -87,6 +87,9 @@
     <ClCompile Include="software\rx_fluid_nios\version.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="software\rx_fluid_nios\pvalve.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="software\rx_fluid_nios\readme.txt">
@@ -161,6 +164,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="software\rx_fluid_nios\version.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="software\rx_fluid_nios\pvalve.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,6 +15,7 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
+#include <string.h>
 #include "temp_ctrl.h"
 #include "IOMux.h"
 #include "average.h"
@@ -36,6 +37,10 @@
 #define TEMP_TOLERANCE			1000
 
 #define VALUE_BUF_SIZE		10
+#define BUF_SIZE			10
+
+#define ADC_CHAN_1 2
+#define ADC_CHAN_2 5
 
 #define ADC_INVL	0x1000
 #define ADC_DATA	0xFFF0
@@ -197,6 +202,18 @@ const dsp_lookup_f_t _temp_table[] =
 //@}
 
 //@{
+
+typedef struct
+{	
+	UINT32			*pTemp;
+	UINT32			err;
+	int				errCnt;
+	int				addr;
+    INT32			buf[BUF_SIZE];
+	int				buf_idx;       
+	int				buf_valid;
+} STempSensor;
+	
 /** private variables *********************************************************/
 static INT32	_ValueBuf1[VALUE_BUF_SIZE]	= {0};
 static INT32	_ValueBuf2[VALUE_BUF_SIZE]	= {0};
@@ -204,6 +221,8 @@ static int		_tank_temp_timeout   = TANK_TEMP_TIMEOUT;
 static int		_head_temp_timeout   = HEAD_TEMP_TIMEOUT;
 static int		_head_target_timeout = RANGE_TIMEOUT;
 static BOOL		_heater_running      = FALSE;
+
+static STempSensor _TempSensor[2];
 //static int		_heater_delay		 = 0;
 
 
@@ -217,8 +236,8 @@ static int  _safety_net  (void);
 SPID_par _HeatPID = 
 {
 	.Setpoint			= 300,
-	.P					= 20,
-	.I					= 30000,
+	.P					= 30,
+	.I					= 15000,
 	.start_integrator 	= 0,
 	.val_min			= 0,   // 91, => 0.22V start of linear pump function 
 	.val_max			= 70, // 0xfff, 	//max value for pump DAC voltage
@@ -230,6 +249,17 @@ SPID_par _HeatPID =
  **/
 void temp_init(void)
 {
+	//--- initialize sensor -----------------------------------
+	memset(_TempSensor, 0, sizeof(_TempSensor));
+	_TempSensor[0].pTemp = &RX_Status.tempHeater;
+	_TempSensor[0].err   = COND_ERR_temp_heater_hw;
+	_TempSensor[0].addr  = ADC_CHAN_1;
+
+	_TempSensor[1].pTemp = &RX_Status.tempIn;
+	_TempSensor[1].err   = COND_ERR_temp_inlet_hw;
+	_TempSensor[1].addr  = ADC_CHAN_2;
+	//------------------------------------------------------
+		
 	// Disable ADC in any case first
 	FM4_ADC0->ADCEN_f.ENBL = 0u;
 
@@ -298,7 +328,10 @@ void temp_ctrl_on(int turn_on)
 {
     if (turn_on != _heater_running)
 	{ 
-        _heater_running = turn_on;
+        if(RX_Status.pcb_rev>='n') 
+			_HeatPID.val_max = 100;
+
+		_heater_running = turn_on;
 		if (!_heater_running) {
 			_heater_ctrl(OFF);
 		}
@@ -335,7 +368,7 @@ static void _heater_ctrl(UINT32 percent)
 	else		
     {            
         // HW Revision >= 'h' has a second thermistor
-		if (RX_Status.tempHeater == INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) 
+		if (RX_Status.pcb_rev<'n' && (RX_Status.tempHeater==INVALID_VALUE || RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP))
 			RX_Status.heater_percent = 0;
 		else
 			RX_Status.heater_percent = percent;
@@ -584,6 +617,18 @@ void temp_tick_10ms (void)
 		}
 		else
 		{
+			// Clusters V3 : faster regulator
+			if(RX_Status.pcb_rev >= 'n')
+			{
+				_HeatPID.P		= 30;
+				_HeatPID.I		= 20000;
+			}
+			// clusters V2
+			else
+			{
+				_HeatPID.P		= 20;
+				_HeatPID.I		= 30000;
+			}
 			pid_calc(RX_Config.tempHead/100, &_HeatPID);
 			_heater_ctrl(_HeatPID.val);
 			// Start integrator only if temperature < setpoint, otherwise the integrator accumulate wrong error
@@ -610,7 +655,7 @@ void temp_tick_10ms (void)
 		RX_Status.info.temp_ready = RX_Config.tempHead > (RX_Config.temp-TEMP_TOLERANCE);
 }
 
-
+						 
 /**
  * \brief Timed IRQ to trigger a temperature measurement
  **/
@@ -628,13 +673,13 @@ void temp_tick_50ms (void)
  **/
 void ADC0_IRQHandler(void)
 {
-    #define ADC_CHAN_1 2
-    #define ADC_CHAN_2 5
-    
-	static int	_ValueIdx1		= 0;
+    static int	_ValueIdx1		= 0;
 	static int	_ValueIdx2		= 0;
 	static int	_ValueIdxValid1	= FALSE;
 	static int	_ValueIdx2Valid = FALSE;
+
+	int i;
+	STempSensor	*s;
 
     INT32 channel = 0;
 	INT32 val;
@@ -681,6 +726,39 @@ void ADC0_IRQHandler(void)
 					// Thermistor position is switched on revision #h
 					if (_ValueIdx2Valid) RX_Status.tempIn = average(_ValueBuf2, VALUE_BUF_SIZE, 0);
 				}
+			}
+
+			for (i=0; i<SIZEOF(_TempSensor); i++)
+			{
+				s=&_TempSensor[i];
+				if (channel == s->addr)
+				{
+					val = _handle_temp_val(FM4_ADC0->SCFDH & ADC_DATA);
+					if (val==INVALID_VALUE) 
+					{
+						if (s->errCnt++ > 10) RX_Status.error |= s->err;
+					}
+					else
+					{
+						s->errCnt=0;
+						s->buf[s->buf_idx++] = val;
+						// calculate average temperature when buffer is full
+						if (s->buf_idx >= BUF_SIZE)
+						{
+							s->buf_idx = 0;
+							s->buf_valid = TRUE;
+						}
+						if (s->buf_valid)
+						{
+							int sum, i;
+							for (i=sum=0; i<BUF_SIZE; i++) sum+=s->buf[i];
+							if (RX_Status.pcb_rev=='n' && s->addr==ADC_CHAN_2)
+								sum =sum*30/20;
+							(*s->pTemp) = sum/BUF_SIZE;
+						}
+					}
+					break;
+				}				
 			}
         }
         

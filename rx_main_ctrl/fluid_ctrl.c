@@ -795,7 +795,7 @@ static void _control(int fluidNo)
 												if (!_Flushed) _PurgeCtrlMode = ctrl_undef;
 											}
 											break;
-
+				
 				
 				//--- ctrl_fill ------------------------------------------------------------------
 				case ctrl_fill:				_send_ctrlMode(no, ctrl_fill_step1, TRUE);		break;

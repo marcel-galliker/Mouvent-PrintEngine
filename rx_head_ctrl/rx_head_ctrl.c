@@ -147,7 +147,6 @@ void handle_menu(char *str)
 		// Only for DEBUGGING purposes
 		// Parameters for tuning the Conditioner's PID controller
 
-		case 'u': if (no<=4) cond_offset_del(no);					break;
 		case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);	break;	
 
 		/*

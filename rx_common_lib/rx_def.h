@@ -1237,7 +1237,8 @@ typedef struct SInkSupplyStat
 	INT32	pumpSpeed;			//	Consumption pump speed measured
 	INT32	canisterLevel;
 	INT32	canisterErr;
-	char	scannerSN[16];
+    INT32	flush_pump_val;
+    char	scannerSN[16];
 	char	barcode[128];
 	EnFluidCtrlMode	ctrlMode;	//	EnFluidCtrlMode
 } SInkSupplyStat;

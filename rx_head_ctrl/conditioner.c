@@ -247,7 +247,6 @@ void cond_error_check(int ticks)
 	{		
 		if (_NiosStat->cond[head].cmdConfirm.reset_errors)  _NiosMem->cfg.cond[head].cmd.reset_errors = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.resetPumpTime) _NiosMem->cfg.cond[head].cmd.resetPumpTime= FALSE;
-		if (_NiosStat->cond[head].cmdConfirm.del_offset)	_NiosMem->cfg.cond[head].cmd.del_offset   = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.set_pid)		_NiosMem->cfg.cond[head].cmd.set_pid	  = FALSE;
 		if (_NiosStat->cond[head].cmdConfirm.save_eeprom)   _NiosMem->cfg.cond[head].cmd.save_eeprom  = FALSE;
 		
@@ -666,14 +665,6 @@ void cond_ctrlMode2(int headNo, EnFluidCtrlMode ctrlMode)
 EnFluidCtrlMode cond_getCtrlMode(int headNo)
 {
 	return _CtrlMode[headNo];		
-}
-
-//--- cond_offset_del --------------------------
-void cond_offset_del(int headNo)
-{
-	int i;
-	if(headNo < MAX_HEADS_BOARD)		  _NiosMem->cfg.cond[headNo].cmd.del_offset = TRUE;
-	else for(i=0; i<MAX_HEADS_BOARD; i++) _NiosMem->cfg.cond[i].cmd.del_offset      = TRUE;
 }
 
 //--- cond_set_config ---------------------------------------

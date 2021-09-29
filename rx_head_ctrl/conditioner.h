@@ -57,7 +57,6 @@ ELogItemType cond_err_level		(void);
 
 void cond_start_log(void);
 void cond_offset_cal(int headNo);
-void cond_offset_del(int headNo);
 void cond_toggle_psensor_cali(int headNo);
 void cond_toggle_psensor_cali_user(int headNo);
     

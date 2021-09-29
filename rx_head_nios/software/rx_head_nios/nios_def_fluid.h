@@ -236,8 +236,8 @@ typedef struct
 	INT32	heaterTemp;
 	INT32	flushTime;
 	
-	UINT32	bleedValve:1;
-	UINT32  airValve:1;
+	UINT32	bleedValve;
+	UINT32  airValve;
 	UINT32  heaterOn:1;
 	UINT32	heaterTempReady:1;
 	

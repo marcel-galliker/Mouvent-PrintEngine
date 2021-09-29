@@ -46,12 +46,14 @@ static int 	_Temp_Inc[NIOS_INK_SUPPLY_CNT];
 static int 	_Temp_Pre[NIOS_INK_SUPPLY_CNT];
 static int 	_Heater_Pre[NIOS_INK_SUPPLY_CNT];
 static int 	_TimeTempFrozen[NIOS_INK_SUPPLY_CNT];
+static int	_HeaterCheckTimeout=0;
 
 static int _PS3V_Sum;
 static int _PS5V_Sum;
 static int _PS24V_Sum;
 static int _PS24VP_Sum;
 static int _PS_inc;
+static int _err_heater_board_cnt;
 
 //--- prototypes ----------------------------------
 static void _set_heater_out(int i, int newState);
@@ -89,8 +91,14 @@ void heater_init(void)
 	pRX_Status->HeaterBoard_Vsupply_5V 		= 5000;
 	pRX_Status->HeaterBoard_Vsupply_24V 	= 24000;
 	pRX_Status->HeaterBoard_Vsupply_24VP 	= 24000;
+	_err_heater_board_cnt = 0;
 }
 
+//--- heater_error_reset ------------
+void heater_error_reset(void)
+{
+	_err_heater_board_cnt = 0;
+}
 //--- heater_tick_10ms ---------------------------------------------------------------
 void heater_tick_10ms(void)
 {
@@ -107,6 +115,12 @@ void heater_tick_10ms(void)
 	if (pRX_Status->info.is_shutdown)
 	{
 		for(i=0 ; i<NIOS_INK_SUPPLY_CNT ; i++) _set_heater_out(i, FALSE);
+		return;
+	}
+
+	if (_HeaterCheckTimeout)
+	{
+		_HeaterCheckTimeout--;
 		return;
 	}
 
@@ -146,11 +160,16 @@ void heater_tick_10ms(void)
 	{
 		if (((~heater_gpio_in)>>(8+i)) & 0x01)
 		{
-			if(pRX_Config->ink_supply[i].heaterTempMax > 39000) pRX_Status->ink_supply[i].error |= err_heater_board;
+			if(pRX_Config->ink_supply[i].heaterTempMax > 39000)
+			{
+				if (_err_heater_board_cnt<10000) _err_heater_board_cnt+=10;	// ms
+				else pRX_Status->ink_supply[i].error |= err_heater_board;
+			}
 			pRX_Status->ink_supply[i].heaterTemp = INVALID_VALUE;
 		}
 		else
 		{
+			_err_heater_board_cnt=0;
 			// Read Thermistor
 			temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC7_DATA -(2*i)) & 0x3ff;
 			temp = IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE, AMC7891_ADC7_DATA -(2*i)) & 0x3ff;
@@ -235,6 +254,7 @@ static void _set_heater_out(int heaterNo, int newState)
 
 //	if (newState!=pRX_Status->ink_supply[heaterNo].heaterOn)
 	{
+		if (!pRX_Status->ink_supply[heaterNo].heaterOn && newState) _HeaterCheckTimeout = 5;
 		pRX_Status->ink_supply[heaterNo].heaterOn = newState;
 		readin=IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE,AMC7891_GPIO_OUT) & 0xfff;
 		readin=IORD_16DIRECT(AVALON_SPI_AMC7891_1_BASE,AMC7891_GPIO_OUT) & 0xfff;

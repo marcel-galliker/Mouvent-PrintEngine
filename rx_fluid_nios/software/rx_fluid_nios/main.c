@@ -21,6 +21,7 @@
 #include "pid.h"
 #include "pio.h"
 #include "pres.h"
+#include "pvalve.h"
 #include "ink_ctrl.h"
 #include "fpga_def_fluid.h"
 #include "version.h"
@@ -69,6 +70,7 @@ void main_error_reset(void)
 	pRX_Status->error = _StaticErrors;
 
 	ink_error_reset();
+	heater_error_reset();
 
 	// re-initialize SPI after error to be able to read temperature
 	init_AMC7891(AVALON_SPI_AMC7891_1_BASE);
@@ -175,9 +177,13 @@ int main()
 	IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_2, 0x0000);	// Pumpe IS3
 	IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_3, 0x0000);	// Pumpe IS4
 
+	// GPIO (Selenoids / Sensor Power) of IS Adapter Board
+	IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, 0x0000);
+
 	// Watchdog
 	IOWR_32DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, WATCHDOG_FREQ, WATCHDOG_PERIOD_10MS);
 
+	pvalve_init();
 	pres_init();
 	ink_init();
 	timer_init();

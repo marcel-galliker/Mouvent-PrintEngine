@@ -83,6 +83,7 @@
     <ClCompile Include="software\rx_fluid_nios\MAX31865.c" />
     <ClCompile Include="software\rx_fluid_nios\pid.c" />
     <ClCompile Include="software\rx_fluid_nios\pres.c" />
+    <ClCompile Include="software\rx_fluid_nios\pvalve.c" />
     <ClCompile Include="software\rx_fluid_nios\rx_ink_common.c" />
     <ClCompile Include="software\rx_fluid_nios\timer.c" />
     <ClCompile Include="software\rx_fluid_nios\trprintf.c" />
@@ -111,6 +112,7 @@
     <ClInclude Include="software\rx_fluid_nios\pid.h" />
     <ClInclude Include="software\rx_fluid_nios\pio.h" />
     <ClInclude Include="software\rx_fluid_nios\pres.h" />
+    <ClInclude Include="software\rx_fluid_nios\pvalve.h" />
     <ClInclude Include="software\rx_fluid_nios\rx_ink_common.h" />
     <ClInclude Include="software\rx_fluid_nios\timer.h" />
     <ClInclude Include="software\rx_fluid_nios\trprintf.h" />

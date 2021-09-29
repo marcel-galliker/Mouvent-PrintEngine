@@ -187,6 +187,7 @@ BYTE i2c_bb_write_page(const UINT32u address, const BYTE *data, BYTE len)
     return 0;
 }
 
+//--- i2c_bb_read_ack ------------------------------------------------
 BOOL i2c_bb_read_ack(void)
 {
     BYTE ack = 0;
@@ -197,6 +198,26 @@ BOOL i2c_bb_read_ack(void)
     ack = i2c_bb_read_byte(NACK);
     
     return ack;
+}
+
+//--- i2c_bb_read_adc -----------------------------------------------
+BOOL i2c_bb_read_adc(char address, BYTE *ret_values, BYTE len)
+{
+	i2c_bb_init();
+	
+    // initialize read sequence
+    i2c_bb_start();
+	i2c_bb_write_byte(address | READ);
+	
+    // read multiple bytes
+    while (--len)
+        *(ret_values++) = i2c_bb_read_byte(ACK);
+
+    // Respond with NACK to end read cycle
+    *ret_values = i2c_bb_read_byte(NACK);
+
+    i2c_bb_stop();	
+	return 0;
 }
 
 /*******************************************************************************

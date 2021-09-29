@@ -14,7 +14,8 @@
 #define EE_ADDR_1c          		0x1c
 #define EE_ADDR_CLUSTER_NO          0x20
 #define EE_ADDR_CLUSTER_TIME        0x24
-#define EE_ADDR_MACHINE_METERS_UNUSED      0x28
+#define __EE_ADDR_MACHINE_METERS	0x28
+#define EE_ADDR_PIN2_FACTORY_OFFSET 0x32
 
 // function prototypes
 int eeprom_write_byte(const UINT32 pagenum, const BYTE byteaddress, const BYTE data);

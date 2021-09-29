@@ -34,6 +34,7 @@ static int	_status=FALSE;
 static int  _cond=TRUE;
 static int  _nios=TRUE;
 static int  _eeprom=FALSE;
+static int  _fpga=FALSE;
 static int  _mvteeprom=FALSE;
 
 static HANDLE	hPuttyThread;
@@ -59,11 +60,14 @@ static void* _putty_thread(void* lpParameter)
 
 	while(_PuttyRunning)
 	{		
-		rx_sleep(500);
+		rx_sleep(1000);
 		term_printf("\033[2J"); // Clear screen
 		term_printf("rx_head_ctrl %s (%s, %s)", version, __DATE__, __TIME__);
-		putty_display_fpga_error();
-		putty_display_fpga_status();
+		if(_fpga)
+		{
+			putty_display_fpga_error();
+			putty_display_fpga_status();
+		}	
 		putty_display_nios_status(_nios, _status);
 
 		if (_eeprom) eeprom_display();
@@ -126,6 +130,8 @@ static void _main_menu(void)
 	else         term_printf("e: show eeprom\n");
 	if (_mvteeprom) term_printf("m: hide mouvent eeprom\n");
 	else            term_printf("m: show mouvent eeprom\n");
+	if (_fpga)		term_printf("z: hide fpga\n");
+	else            term_printf("z: show fpga\n");
 	
 	term_printf("x: exit\n");
 	term_printf(">");
@@ -147,6 +153,7 @@ void putty_handle_menu(char *str)
 		case 'm': _mvteeprom = ! _mvteeprom;	break;
 		case 'n': _nios   = !_nios;		break;
 		case 'c': _cond   = !_cond;		break;
+		case 'z': _fpga   = !_fpga;		break;
 	}
 }
 
@@ -633,6 +640,16 @@ void putty_display_cond_status(int status)
 			}
 			term_printf("\n");
     	}
+		term_printf("Pressure in2:     "); 
+    	{
+			int i, l;
+			for (i=0; i<MAX_HEADS_BOARD; i++)
+			{
+				l   = sprintf(str, "%4s ", value_str1(_NiosMem->stat.cond[no[i]].pressure_in2));
+				term_printf("%15s ", str);
+			}
+			term_printf("\n");
+    	}
 		
 		term_printf("meniscus flowRes: "); PRINTF(MAX_HEADS_BOARD)("     %d.%02d (%d.%02d)", _NiosMem->stat.cond[no[i]].flowResistance/100, _NiosMem->stat.cond[no[i]].flowResistance%100, _NiosMem->cfg.cond[no[i]].flowResistance/100, _NiosMem->cfg.cond[no[i]].flowResistance%100); term_printf("\n");
 		term_printf("meniscus setpoint:"); PRINTF(MAX_HEADS_BOARD)(" %14s ", value_str1(RX_NiosStat.cond[no[i]].meniscus_setpoint)); term_printf("\n");
@@ -675,7 +692,7 @@ void putty_display_cond_status(int status)
 		}
 		
 //		PRINTF(MAX_HEADS_BOARD)("     %3s(%3s)%c ", value_str1(RX_HBStatus->head[i].meniscus), value_str1(_NiosMem->cfg.cond[i].pressure_out), ERR[_NiosMem->stat.cond[i].error.meniscus]); term_printf("\n");
-    	term_printf("Valve:           "); PRINTF(MAX_HEADS_BOARD)("          %5s ", VALVE_NAME[RX_NiosStat.cond[no[i]].info.valve]); term_printf("\n");
+    	term_printf("Valve:           "); PRINTF(MAX_HEADS_BOARD)("        f=%d i=%d ", RX_NiosStat.cond[no[i]].info.valve_flush, RX_NiosStat.cond[no[i]].info.valve_ink); term_printf("\n");
     	term_printf("Printed [ml/min]:"); PRINTF(MAX_HEADS_BOARD)("       %8s ", value_str3(_NiosMem->cfg.cond[no[i]].volume_printed * 60)); term_printf("\n");			
 		term_printf("Pump [ml/min]:   "); PRINTF(MAX_HEADS_BOARD)("    %5s(%4d) ", value_str1(RX_HBStatus->head[no[i]].pumpFeedback), RX_NiosStat.cond[no[i]].pump); term_printf("\n");
 		term_printf("Flow Factor:     "); PRINTF(MAX_HEADS_BOARD)("       %8s ", value_str(RX_HBStatus->head[no[i]].flowFactor)); term_printf("\n");
@@ -719,7 +736,7 @@ void putty_display_cond_status(int status)
 							
 		if (status)	{term_printf("Heater   pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.heater_pg, RX_NiosStat.cond[no[i]].gpio_state.heater_flg); term_printf("\n");}
 		if (status)	{term_printf("24V      pg/flg:   "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].gpio_state.u_24v_pg, RX_NiosStat.cond[no[i]].gpio_state.u_24v_flg); term_printf("\n");}
-		if (status)	{term_printf("Solenoid/Watchdog: "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].info.valve, RX_NiosStat.cond[no[i]].gpio_state.watchdog_reset); term_printf("\n");}
+		if (status)	{term_printf("Solenoid/Watchdog: "); PRINTF(MAX_HEADS_BOARD)("            %d/%d ", RX_NiosStat.cond[no[i]].info.valve_ink, RX_NiosStat.cond[no[i]].gpio_state.watchdog_reset); term_printf("\n");}
 		
 //		if (status)	{term_printf("--- LOW LEVEL ERRORS ---\n"); }
 //		if (status)	{term_printf("baud rate change err:");term_printf("       %04d", RX_NiosStat.baud_rate_change_error); term_printf("\n"); }

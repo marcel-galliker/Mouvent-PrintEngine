@@ -92,10 +92,10 @@ static void main_menu()
 		{
 //		case 's': status = !status;							break;
 		case 'o':	show=FALSE; nios_test_stop(); 						break;
-		case 'a':	show=FALSE; nios_test_air_valve(no);				break;
+		case 'a':	show=FALSE; nios_test_air_valve(no, atoi(&str[2]));	break;
 		case 'B':   show=FALSE; _DisplayBalance = !_DisplayBalance;		break;
 		case 'f':	show=FALSE; nios_test_flush(atoi(&str[1]));			break;
-		case 'b':	show=FALSE; nios_test_bleed_valve(no);				break;
+		case 'b':	show=FALSE; nios_test_bleed_valve(no, atoi(&str[2])); break;
 		case 'i':	show=FALSE; nios_test_ink_pump(no, atoi(&str[2]));	break;
 		case 'v':	show=FALSE; nios_test_vacuum(atoi(&str[1]));		break;
 		case 'p':	show=FALSE; nios_test_air_pressure(atoi(&str[1]));	break;

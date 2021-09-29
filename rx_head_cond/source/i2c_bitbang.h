@@ -15,5 +15,6 @@ BYTE i2c_bb_write_address(const UINT32u address, const BYTE data);
 BYTE i2c_bb_write_page(const UINT32u address, const BYTE *data, BYTE len);
 void i2c_bb_reset(void);
 BOOL i2c_bb_read_ack(void);
+BOOL i2c_bb_read_adc(char address, BYTE *ret_values, BYTE len);
 
 #endif // I2C_BITBANG_H
