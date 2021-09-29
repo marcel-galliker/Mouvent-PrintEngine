@@ -307,7 +307,7 @@ void lbrob_main(int ticks, int menu)
         return;
     }
 
-    if (motors_error(MOTOR_SLIDE_BITS, &motor))
+    if (_CmdRunning && motors_error(MOTOR_SLIDE_BITS, &motor))
     {
         RX_StepperStatus.robinfo.ref_done = FALSE;
         Error(ERR_CONT, 0, "Stepper: Command %s: Motor %s blocked", MsgIdStr(_CmdRunning), _MotorName[motor]);
@@ -505,8 +505,19 @@ static void _wash_sm(void)
                         lb702_handle_ctrl_msg(INVALID_SOCKET, CMD_LIFT_WASH_POS, NULL, _FL_);
                     _Step++;
                     break;
+        
+        case 2:
+                    if (RX_StepperStatus.robinfo.ref_done)
+                        _Step++;
+                    else if (motors_move_done(MOTOR_SLIDE_BITS))
+                    {
+                        TrPrintfL(TRUE, "_lbrob_sm[%s/%d]", RobFunctionStr[_ClnMovePar.function], _Step);
+                        _Step++;
+                        lbrob_reference_slide();
+                    }
+                    break;
 
-        case 2:     if (RX_StepperStatus.info.z_in_wash)
+        case 3:     if (RX_StepperStatus.info.z_in_wash)
                     {
                         TrPrintfL(TRUE, "_wash_sm[%d]:", _Step);
                         lbrob_move_to_pos(0, _micron_2_steps(SLIDE_WASH_POS_BACK), FALSE);
@@ -514,7 +525,7 @@ static void _wash_sm(void)
                     }
                     break;
 
-        case 3:     if (motors_move_done(MOTOR_SLIDE_BITS))
+        case 4:     if (motors_move_done(MOTOR_SLIDE_BITS))
                     {
                         if (_RO_Flush)  Fpga.par->output |= _RO_Flush;
                         else            Fpga.par->output |= RO_FLUSH_WIPE_ALL;
@@ -527,7 +538,7 @@ static void _wash_sm(void)
                     }
                     break;
 
-        case 4:     if (motors_move_done(MOTOR_SLIDE_BITS))
+        case 5:     if (motors_move_done(MOTOR_SLIDE_BITS))
                     {
                         _RO_Flush=0;
                         Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;

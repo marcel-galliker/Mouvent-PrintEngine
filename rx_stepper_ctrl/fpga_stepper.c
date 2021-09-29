@@ -242,7 +242,7 @@ void fpga_display_status(void)
 if (RX_StepperCfg.printerType==printer_TX801) 
 	term_printf("Place:           --LF---   --LB---   --RB---   --RF---   -------\n");
 if (RX_StepperCfg.printerType==printer_LB702_UV || RX_StepperCfg.printerType==printer_LB702_WB || RX_StepperCfg.printerType==printer_LH702 || RX_StepperCfg.printerType==printer_DP803) 
-	term_printf("Place:           -BACK--   -FRONT-   -------   -------   -ROBOT-\n");
+	term_printf("Place:           -BACK--   -FRONT-   -------   -------   -SLIDE-\n");
 	term_printf("Moving:          "); PRINTF(MOTOR_CNT)("   %d      ", ((Fpga.stat->moving & (0x01<<i))!=0));	term_printf("\n"); 
 	term_printf("moveIdx:         "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].moveIdx);				term_printf("\n"); 
 	term_printf("moving_cnt:      "); PRINTF(MOTOR_CNT)("%06d    ", Fpga.stat->statMot[i].moving_cnt);			term_printf("\n"); 

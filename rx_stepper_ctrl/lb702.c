@@ -496,7 +496,7 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1, char *file, int line
 //--- _lb702_start_sm ------------------------------------
 static void _lb702_start_sm(int cmd, int fromRef, int pos)
 {
-	TrPrintfL(TRUE, "_lb702_start_sm cmd=0x%08x, cmdRunning=0x%08x", cmd, RX_StepperStatus.cmdRunning);
+	TrPrintfL(TRUE, "_lb702_start_sm cmd=%s, cmdRunning=%s", MsgIdStr(cmd), MsgIdStr(RX_StepperStatus.cmdRunning));
 	if (RX_StepperStatus.cmdRunning)
 	{
 		if (cmd==RX_StepperStatus.cmdRunning) 
@@ -608,7 +608,7 @@ static void _lb702_sm(void)
 			TrPrintfL(trace, "_lb702_sm[%s/%d]: moveDone=%d", MsgIdStr(RX_StepperStatus.cmdRunning), _Step,  motors_move_done(MOTOR_Z_BITS));
 			if (motors_move_done(MOTOR_Z_BITS))
 			{
-				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: DONE cmdRunning=0x%08x Cmd=0x%08x", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, RX_StepperStatus.cmdRunning, _Cmd);
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: DONE cmdRunning=%s Cmd=%s", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, MsgIdStr(RX_StepperStatus.cmdRunning), MsgIdStr(_Cmd));
 				Error(LOG, 0, "%s done", MsgIdStr(RX_StepperStatus.cmdRunning));
 				switch(_Cmd)
 				{
@@ -627,7 +627,6 @@ static void _lb702_sm(void)
     default: _Step=0;
 	}
 }
-
 
 //--- lb702_handle_ctrl_msg -----------------------------------
 int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file, int line)
