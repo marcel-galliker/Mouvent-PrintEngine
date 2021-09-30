@@ -67,15 +67,13 @@ static int		_PrintPos_New[2];
 static int		_PrintPos_Act[2];
 static int		_SlideToRef;
 static int		_PrintHeight=0;
-static int		_TimeOut_Move = 0;
 
-static int		_Cmd;
+static UINT32	_ErrorFlags=0;
+
 static int		_Step;
 static int		_lift_ref_running=FALSE;
-static int		_CmdRunningRobi = 0;
 static int		_Help=FALSE;
 static int		_Menu=1;
-static UINT32	_ErrorFlags=0;
 static int		_lift = TRUE;
 static int		_rob = TRUE;
 static int		_robClient = TRUE;
@@ -390,15 +388,6 @@ int lb702_menu(void)
 //--- lb702_do_reference ----------------------------------------------------------------
 void lb702_do_reference(void)
 {
-	/*
-    if (RX_StepperStatus.cln_used && !RX_StepperStatus.screwerinfo.z_in_down)
-    {
-		TrPrintfL(TRUE, "lb702_do_reference 1");
-		_CmdRunningRobi = CMD_ROBI_MOVE_Z_DOWN;
-		rc_reference(0);
-    }
-    else 
-	*/
 	if (RX_StepperStatus.info.ref_done)
 	{
 		TrPrintfL(TRUE, "lb702_do_reference 2");
@@ -453,14 +442,13 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1, char *file, int line
         _PrintPos_New[MOTOR_Z_FRONT] = pos1;
         lb702_do_reference();
     }
-    else if (RX_StepperStatus.cln_used && !_CmdRunningRobi && !RX_StepperStatus.screwerinfo.in_garage && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
+    else if (RX_StepperStatus.cln_used && !RX_StepperStatus.screwerinfo.in_garage && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW)
     {
         RX_StepperStatus.cmdRunning = 0;
-        lbrob_to_garage();
+        rc_to_garage();
     }
-	else if (RX_StepperStatus.cln_used && !_CmdRunningRobi && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW) 
+	else if (RX_StepperStatus.cln_used && (!RX_StepperStatus.robinfo.ref_done || !RX_StepperStatus.info.x_in_ref) && RX_StepperStatus.cmdRunning != CMD_LIFT_REFERENCE && RX_StepperStatus.cmdRunning != CMD_LIFT_CAPPING_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_WASH_POS && RX_StepperStatus.cmdRunning != CMD_LIFT_SCREW) 
 	{
-		_CmdRunningRobi = CMD_ROB_REFERENCE;
         RX_StepperStatus.cmdRunning = 0;
 		rc_reference(0);
 	}
@@ -505,7 +493,7 @@ static void _lb702_start_sm(int cmd, int fromRef, int pos)
 			Error(ERR_CONT, 0, "_lb702_start_sm can't start cmd=0x%08x (cmdRunning=0x%08x)", cmd, RX_StepperStatus.cmdRunning);
 		return;
 	}
-
+	RX_StepperStatus.cmdRunning = cmd;
 	if(RX_StepperStatus.info.printhead_en)
 	{
 		if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back < 10000) 
@@ -533,7 +521,6 @@ static void _lb702_start_sm(int cmd, int fromRef, int pos)
 				_SlideToRef = FALSE;
 			}
 			_Step=1;
-			RX_StepperStatus.cmdRunning = _Cmd = cmd;
 			_lb702_sm();
 		}
 	}
@@ -608,16 +595,17 @@ static void _lb702_sm(void)
 			TrPrintfL(trace, "_lb702_sm[%s/%d]: moveDone=%d", MsgIdStr(RX_StepperStatus.cmdRunning), _Step,  motors_move_done(MOTOR_Z_BITS));
 			if (motors_move_done(MOTOR_Z_BITS))
 			{
-				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: DONE cmdRunning=%s Cmd=%s", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, MsgIdStr(RX_StepperStatus.cmdRunning), MsgIdStr(_Cmd));
+				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: DONE cmdRunning=%s", MsgIdStr(RX_StepperStatus.cmdRunning), _Step, MsgIdStr(RX_StepperStatus.cmdRunning));
 				Error(LOG, 0, "%s done", MsgIdStr(RX_StepperStatus.cmdRunning));
-				switch(_Cmd)
+				switch(RX_StepperStatus.cmdRunning)
 				{
                 case CMD_LIFT_PRINT_POS:		RX_StepperStatus.info.z_in_print=TRUE; break;
                 case CMD_LIFT_UP_POS:			RX_StepperStatus.info.z_in_up=TRUE;    break;
 				case CMD_LIFT_CAPPING_POS:		RX_StepperStatus.info.z_in_cap=TRUE;   break;
-                case CMD_LIFT_WASH_POS:			RX_StepperStatus.info.z_in_wash=TRUE;   break;			
+                case CMD_LIFT_WASH_POS:			RX_StepperStatus.info.z_in_wash=TRUE;  break;			
                 case CMD_LIFT_SCREW:			RX_StepperStatus.info.z_in_screw=TRUE; break;
                 case CMD_LIFT_CLUSTER_CHANGE:	break;
+                default:	Error(ERR_CONT, 0, "_lb702_sm[%d] cmd=%s not implemented", _Step, MsgIdStr(RX_StepperStatus.cmdRunning));
 				}
 				_Step=0;
 				RX_StepperStatus.cmdRunning = 0;
@@ -643,8 +631,7 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
                                     lbrob_stop();
 									break;	
 
-	case CMD_LIFT_REFERENCE:		TrPrintfL(TRUE, "CMD_LIFT_REFERENCE");
-									if (RX_StepperStatus.cmdRunning)
+	case CMD_LIFT_REFERENCE:		if (RX_StepperStatus.cmdRunning)
                                     {
                                         motors_stop(MOTOR_Z_BITS);
                                         RX_StepperStatus.cmdRunning = 0;
@@ -654,29 +641,23 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
                                     lb702_do_reference();
 									break;
                                        
-    case CMD_LIFT_SCREW:            TrPrintfL(TRUE, "CMD_LIFT_SCREW");
-									_lb702_start_sm(CMD_LIFT_SCREW, FALSE, DIST_CAP_SCREW);
+    case CMD_LIFT_SCREW:            _lb702_start_sm(CMD_LIFT_SCREW, FALSE, DIST_CAP_SCREW);
                                     break;
 
-    case CMD_LIFT_PRINT_POS:		TrPrintfL(TRUE, "CMD_LIFT_PRINT_POS");
-									_PrintHeight = (*((INT32*)pdata));
+    case CMD_LIFT_PRINT_POS:		_PrintHeight = (*((INT32*)pdata));
 									_lb702_start_sm(CMD_LIFT_PRINT_POS, TRUE, _PrintHeight);
 									break;
 		
-	case CMD_LIFT_UP_POS:			TrPrintfL(TRUE, "CMD_LIFT_UP_POS");
-									_lb702_start_sm(CMD_LIFT_UP_POS, TRUE, UP_HEIGHT);										
+	case CMD_LIFT_UP_POS:			_lb702_start_sm(CMD_LIFT_UP_POS, TRUE, UP_HEIGHT);										
 									break;
 
-	case CMD_LIFT_CAPPING_POS:		TrPrintfL(TRUE, "CMD_LIFT_CAPPING_POS");
-									_lb702_start_sm(CMD_LIFT_CAPPING_POS, FALSE, 0);
+	case CMD_LIFT_CAPPING_POS:		_lb702_start_sm(CMD_LIFT_CAPPING_POS, FALSE, 0);
 									break;
 				
-    case CMD_LIFT_WASH_POS:			TrPrintfL(TRUE, "CMD_LIFT_WASH_POS");
-									_lb702_start_sm(CMD_LIFT_WASH_POS, FALSE, DIST_CAP_WASH);										
+    case CMD_LIFT_WASH_POS:			_lb702_start_sm(CMD_LIFT_WASH_POS, FALSE, DIST_CAP_WASH);										
                                     break;
 
-    case CMD_LIFT_CLUSTER_CHANGE:   TrPrintfL(TRUE, "CMD_LIFT_CLUSTER_CHANGE");
-									_lb702_start_sm(CMD_LIFT_CLUSTER_CHANGE, TRUE, CLUSTER_CHANGE_HEIGHT);										
+    case CMD_LIFT_CLUSTER_CHANGE:   _lb702_start_sm(CMD_LIFT_CLUSTER_CHANGE, TRUE, CLUSTER_CHANGE_HEIGHT);										
 									break;
 
 	case CMD_ERROR_RESET:			fpga_stepper_error_reset();
@@ -684,7 +665,6 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
                                     rc_clear_error();
                                     _ErrorFlags = 0;
 									break;
-	
 	case CMD_LIFT_VENT:	break;
 		
 	case CMD_ROB_STOP:
@@ -695,12 +675,11 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
 	case CMD_ROB_FILL_CAP:
 	case CMD_HEAD_ADJUST:
 	case CMD_FIND_ALL_SCREWS:
-	case CMD_RESET_ALL_SCREWS:
-									if (RX_StepperStatus.cln_used)
-										Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId);
+	case CMD_RESET_ALL_SCREWS:		if (RX_StepperStatus.cln_used)
+										Error(ERR_CONT, 0, "LIFT: Command %s not implemented", MsgIdStr(msgId));
 									break;
 		
-	default:						Error(ERR_CONT, 0, "LIFT: Command 0x%08x not implemented", msgId); break;
+	default:						Error(ERR_CONT, 0, "LIFT: Command %s not implemented", MsgIdStr(msgId)); break;
 	}
 }
 

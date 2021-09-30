@@ -84,8 +84,6 @@
 
 
 // globals
-static int _CmdRunning_Lift = 0;
-static int _CmdRunning_Robi = 0;
 
 // static
 static SMovePar _ParSlide_ref;
@@ -99,8 +97,6 @@ static int      _SlideStep=0;
 static int      _WashStep=0;
 static int      _FillStep=0;
 static int      _VacuumStep=0;
-
-static int      _NewCmd = 0;
 
 static SClnMovePar _ClnMovePar;
 static ERobotFunctions _Old_RobFunction = 0;
@@ -254,7 +250,11 @@ void lbrob_main(int ticks, int menu)
         RX_StepperStatus.robinfo.x_in_purge4ever= FALSE;
     }
 
-    if (motor_get_speed(MOTOR_SLIDE)<0 && _VacuumStartTimer && rx_get_ticks() > _VacuumStartTimer) _vacuum_on();
+    if (_VacuumStartTimer)
+        TrPrintfL(TRUE, "_CapIsWet=%d, speed=%d, _VacuumStartTimer=%d", _CapIsWet, motor_get_speed(MOTOR_SLIDE), _VacuumStartTimer);
+
+    if (motor_get_speed(MOTOR_SLIDE)>0 && _VacuumStartTimer && rx_get_ticks() > _VacuumStartTimer) 
+        _vacuum_on();
 
     if (_slide_ref_running)
     {
@@ -269,8 +269,6 @@ void lbrob_main(int ticks, int menu)
                     RX_StepperStatus.robinfo.ref_done = FALSE;
                     Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", MsgIdStr(_CmdRunning), motor + 1);
                     _CmdRunning = 0;
-                    _CmdRunning_Lift = 0;
-                    _NewCmd = 0;
                     Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
                 }
                 if (RX_StepperStatus.info.x_in_ref)
@@ -317,18 +315,13 @@ void lbrob_main(int ticks, int menu)
     {
         RX_StepperStatus.robinfo.ref_done = FALSE;
         Error(ERR_CONT, 0, "Stepper: Command %s: Motor %s blocked", MsgIdStr(_CmdRunning), _MotorName[motor]);
-        if (_CmdRunning==CMD_HEAD_ADJUST) RX_StepperStatus.adjustDoneCnt++;
-                
-        _CmdRunning = 0;
-        _CmdRunning_Lift = 0;
-        _NewCmd = 0;
-        Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
+        lbrob_stop();
     }
-
+    
     if (_SlideStep)  _slide_sm();
     if (_WashStep)   _wash_sm();
-    if (_FillStep)   _fill_sm();
     if (_VacuumStep) _vacuum_sm();
+    if (_FillStep)   _fill_sm();
 
     _pump_main();
 
@@ -387,17 +380,6 @@ static void _wash_start_sm(void)
 //--- _wash_sm ----------------------------------
 static void _wash_sm(void)
 {
-    int motor;
-    if (motors_move_done(MOTOR_SLIDE_BITS) && motors_error(MOTOR_SLIDE_BITS, &motor))
-    {
-        RX_StepperStatus.robinfo.ref_done = FALSE;
-        Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", MsgIdStr(_CmdRunning), motor + 1);
-        _CmdRunning = 0;
-        _CmdRunning_Lift = 0;
-        Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
-        return;
-    }
-
     switch(_WashStep)
     {        
         case 1:     _slide_start_sm(rob_fct_move_to_pos, SLIDE_WASH_POS_BACK);
@@ -447,18 +429,6 @@ static void _vacuum_start_sm(void)
 //--- _vacuum_sm ----------------------------------
 static void _vacuum_sm(void)
 {
-    int motor;
-        
-    if (motors_move_done(MOTOR_SLIDE_BITS) && motors_error(MOTOR_SLIDE_BITS, &motor))
-    {
-        RX_StepperStatus.robinfo.ref_done = FALSE;
-        Error(ERR_CONT, 0, "Stepper: Command %s: Motor[%d] blocked", MsgIdStr(_CmdRunning), motor + 1);
-        _CmdRunning = 0;
-        _CmdRunning_Lift = 0;
-        Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
-        return;
-    }
-
     switch(_VacuumStep)
     {        
         case 1:     _slide_start_sm(rob_fct_move_to_pos, SLIDE_PURGE_POS_FRONT);
@@ -497,8 +467,6 @@ static void _vacuum_sm(void)
 //--- _slide_start_sm -------------------------------------
 static int _slide_start_sm(ERobotFunctions fct, int pos)
 {    
-    if (_ClnMovePar.function)
-        printf("test\n");
     if (_ClnMovePar.function==0)
     {
         RX_StepperStatus.robinfo.purge_ready = FALSE;
@@ -783,10 +751,15 @@ void lbrob_stop(void)
         RX_StepperStatus.adjustDoneCnt++;
     }
 
-    _CmdRunning_Lift = 0;
-    _CmdRunning = 0;
+    Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
     _RO_Flush = 0;
     RX_StepperStatus.robinfo.ref_done = FALSE;
+
+    _CmdRunning = 0;
+    _SlideStep  = 0;
+    _WashStep   = 0;
+    _VacuumStep = 0;
+
     rc_stop();
 }
 
@@ -794,7 +767,6 @@ void lbrob_stop(void)
 void	 lbrob_reference_slide(void)
 {
     Fpga.par->output &= ~RO_ALL_FLUSH_OUTPUTS;
-    _NewCmd = 0;
     RX_StepperStatus.robinfo.moving = TRUE;
     _slide_ref_running = TRUE;
 
@@ -1135,12 +1107,6 @@ static void _pump_main()
     }
 }
 
-//--- lbrob_reset_variables ----------------------------------------
-void lbrob_reset_variables(void)
-{
-    _NewCmd = FALSE;
-}
-
 //--- _vacuum_on -----------------------------------------------
 static void _vacuum_on()
 {
@@ -1156,14 +1122,15 @@ static void _vacuum_on()
 //--- _lbrob_motor_test ---------------------------------
 static void _lbrob_motor_test(int motorNo, int steps)
 {
+    SMovePar par;
+
     if (motorNo <= 1) return;
 
     int motors = 1 << motorNo;
-    SMovePar par;
 
     memset(&par, 0, sizeof(SMovePar));
 
-    if (motorNo == 4)
+    if (motorNo == MOTOR_SLIDE)
     {
         par.speed = 2000;
         par.accel = 4000;

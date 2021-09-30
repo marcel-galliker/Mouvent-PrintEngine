@@ -37,6 +37,5 @@ void lbrob_reference_slide(void);
 void lbrob_cln_move_to(int pos);
 void lbrob_move_to_pos(int cmd, int pos, int cleaningSpeed);
 
-void lbrob_reset_variables(void);
 void lbrob_stop(void);
 

@@ -1735,7 +1735,7 @@ static void _rob_state_machine(void)
 //--- rc_to_garage --------------------------------
 void rc_to_garage(void)
 {
-    TrPrintfL(TRUE, "lbrob_to_garage: _RobStateMachine_Step=%d, rc_in_garage=%d, screwerinfo.ref_done=%d", _RobStateMachine_Step, rc_in_garage(), RX_StepperStatus.screwerinfo.ref_done);
+    TrPrintfL(TRUE, "rc_to_garage: _RobStateMachine_Step=%d, rc_in_garage=%d, screwerinfo.ref_done=%d", _RobStateMachine_Step, rc_in_garage(), RX_StepperStatus.screwerinfo.ref_done);
     
     if (_RobStateMachine_Step==0)
     {
