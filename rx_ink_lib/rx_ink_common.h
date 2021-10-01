@@ -185,10 +185,10 @@ typedef enum EnFluidCtrlMode
 	ctrl_check_step8,			// 0x018
 	ctrl_check_step9,			// 0x019
 	
-	ctrl_shutdown		= 0x040,// 0x040
-	ctrl_shutdown_step1,		// 0x041	
-	ctrl_shutdown_step2,		// 0x042	
-	ctrl_shutdown_step3,		// 0x043
+	ctrl_shutdown		= 0x040,// 0x040:	send slide to cap position
+	ctrl_shutdown_step1,		// 0x041:	wait until slide in cap
+	ctrl_shutdown_step2,		// 0x042:	start pressure reduction
+	ctrl_shutdown_step3,		// 0x043:	wait until pressure low
 
 	ctrl_flush_night = 0x080,	// 0x080:
     ctrl_flush_weekend,	 //	0x081:
