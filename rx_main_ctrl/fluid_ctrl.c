@@ -654,13 +654,26 @@ static void _control(int fluidNo)
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
 			switch(pstat->ctrlMode)
 			{
-				case ctrl_shutdown:		if (_lbrob) steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_cap, 0);
-										_send_ctrlMode(no, ctrl_shutdown_done, TRUE);
+				case ctrl_shutdown:		if (_lbrob)
+										{
+											steplb_rob_to_fct_pos(step_stepper_to_fluid(no), rob_fct_cap, 0);
+											_send_ctrlMode(no, ctrl_shutdown_step1, TRUE);
+										}
+										else _send_ctrlMode(no, ctrl_shutdown_step2, TRUE);
 										break;	
-				case ctrl_shutdown_done:
+
+                case ctrl_shutdown_step1: if (steplb_rob_in_fct_pos(step_stepper_to_fluid(no), rob_fct_cap))
+											_send_ctrlMode(no, ctrl_shutdown_step2, TRUE);
+										break;
+
+                case ctrl_shutdown_step2:
+										_send_ctrlMode(no, ctrl_shutdown_step3, TRUE);										
+										break;
+
+				case ctrl_shutdown_step3:
 					_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
-				//	if ((_txrob || RX_StepperStatus.cln_used) && _all_fluids_in_4fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef, ctrl_undef))
-					if (_txrob && _all_fluids_in_4fluidCtrlModes(ctrl_off, ctrl_shutdown_done, ctrl_undef, ctrl_undef))
+				//	if ((_txrob || RX_StepperStatus.cln_used) && _all_fluids_in_4fluidCtrlModes(ctrl_off, ctrl_shutdown_step3, ctrl_undef, ctrl_undef))
+					if (_txrob && _all_fluids_in_4fluidCtrlModes(ctrl_off, ctrl_shutdown_step3, ctrl_undef, ctrl_undef))
 						fluid_send_ctrlMode(-1, ctrl_cap, TRUE);
 					else					
 						_send_ctrlMode(no, ctrl_off, TRUE);					
@@ -1358,18 +1371,6 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 				}
 				
 				RX_PrinterStatus.cleaning = (ctrlMode>ctrl_purge_soft) && (ctrlMode<ctrl_fill);
-
-//				if (ctrlMode==ctrl_shutdown && _FluidStatus[i].ctrlMode<=ctrl_off)   continue;
-					
-//				if (ctrlMode==ctrl_cal_start)
-//				{
-//					switch(RX_Config.printer.type)
-//					{
-//					case printer_TX801:	fluid_send_pressure(no, 150); break;
-//					case printer_TX802:	fluid_send_pressure(no, 150); break;
-//					default: break;
-//					}
-//				}
 				
 				cmd.hdr.msgId	= CMD_FLUID_CTRL_MODE;
 				cmd.hdr.msgLen	= sizeof(cmd);

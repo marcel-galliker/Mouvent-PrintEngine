@@ -264,7 +264,12 @@ void pump_tick_10ms(void)
 	
 	switch(RX_Config.mode)
 	{
-		case ctrl_shutdown:	
+		case ctrl_shutdown:
+		case ctrl_shutdown_step1:
+				RX_Status.mode = RX_Config.mode;
+				break;
+		
+		case ctrl_shutdown_step2:
 
 				if(_ShutdownPrint > 0)					
 				{					
@@ -277,7 +282,7 @@ void pump_tick_10ms(void)
 				RX_Status.mode = RX_Config.mode;
 				break;
 		
-		case ctrl_shutdown_done:	
+		case ctrl_shutdown_step3:	
 		
 				// Bring Meniscus to Setpoint (WF) + 15mbars
 				if((_ShutdownPrint > 0)&&(RX_Status.info.valve_ink))	// valve on TO_FLUSH if Error detected, so no shutdown phase

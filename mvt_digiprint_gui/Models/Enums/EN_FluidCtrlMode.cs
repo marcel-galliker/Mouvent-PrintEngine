@@ -16,7 +16,9 @@ namespace RX_DigiPrint.Models.Enums
                 _List = new List<RxEnum<EFluidCtrlMode>>();
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_undef,             "undef"             ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown,          "Shutdown"          ));
-                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown_done,     "SD-Done"           ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown_step1,    "SD /1"             ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown_step2,    "SD /2"             ));
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_shutdown_step3,    "SD /3"             ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_error,             "ERROR"             ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wait,              "Wait"              ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_off,               "OFF"               ));

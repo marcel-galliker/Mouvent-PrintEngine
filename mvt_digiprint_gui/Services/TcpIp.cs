@@ -141,8 +141,8 @@ namespace RX_DigiPrint.Services
     public enum EFluidCtrlMode : int
     {
 	    ctrl_undef,				//  0x000:
-        ctrl_shutdown,          //  0x001:
-        ctrl_shutdown_done,     //  0x002:
+        ctrl_01,                //  0x001:
+        ctrl_02,                //  0x002:
         ctrl_error,             //  0x003:
         ctrl_wait,              //  0x004:
         ctrl_off,               //  0x005:
@@ -161,6 +161,11 @@ namespace RX_DigiPrint.Services
 	    ctrl_check_step7,			// 0x017
 	    ctrl_check_step8,			// 0x018
 	    ctrl_check_step9,			// 0x019
+
+        ctrl_shutdown = 0x40,       //  0x040:
+        ctrl_shutdown_step1,        //  0x041
+        ctrl_shutdown_step2,        //  0x042
+        ctrl_shutdown_step3,        //  0x043:
 
         ctrl_flush_night = 0x080,	//	0x080:
         ctrl_flush_weekend,	        //	0x081:

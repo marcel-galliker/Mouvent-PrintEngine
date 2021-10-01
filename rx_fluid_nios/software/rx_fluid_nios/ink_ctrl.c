@@ -326,6 +326,11 @@ void ink_tick_10ms(void)
 		switch(pRX_Config->ink_supply[isNo].ctrl_mode)
 		{
 			case ctrl_shutdown:
+			case ctrl_shutdown_step1:
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				break;
+
+			case ctrl_shutdown_step2:
 				_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].condPumpFeedback;
 				// if PRINT mode, recalculate integrator with new PI parameters
 				// if CALIBRATION or PURGE mode, don't need to recalculate
@@ -342,7 +347,7 @@ void ink_tick_10ms(void)
 				_ShutdownTimeOut[isNo] = 0;
 				break;
 
-			case ctrl_shutdown_done:
+			case ctrl_shutdown_step3:
 
 				if(_ShutdownPrint[isNo] >= 1)
 				{
