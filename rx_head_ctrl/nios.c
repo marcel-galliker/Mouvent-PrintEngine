@@ -435,7 +435,12 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 				{
 					for (n=0; pos<=p1; n++, pos++)
 					{
-						if (pos+wf_offset>0) voltage[pos+wf_offset] = ((v0 + (v1-v0) * (pos-p0)/(p1-p0)) * valueRef) / voltageRef;					
+						if (pos + wf_offset >= SIZEOF(voltage))
+						{
+							Error(ERR_ABORT, 0, "Periode in Waveform too long");
+							return;
+						}
+						else if (pos+wf_offset>0) voltage[pos+wf_offset] = ((v0 + (v1-v0) * (pos-p0)/(p1-p0)) * valueRef) / voltageRef;					
 					}
 				}	
 				else
