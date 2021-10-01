@@ -60,6 +60,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CmdRunning,value); }
         }
 
+        //--- Property CmdRunning ---------------------------------------
+        private uint _ClnCmdRunning=TcpIp.INVALID_VALUE;
+        public uint ClnCmdRunning
+        {
+            get { return _ClnCmdRunning; }
+            set { SetProperty(ref _ClnCmdRunning,value); }
+        }
+
         //--- Property Mooving ---------------------------------------
         private bool _Moving;
         public bool Moving
@@ -254,8 +262,25 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _X_in_ref, value); }
         }
 
-        //--- Property ClnUsed ---------------------------------------
-        private bool _ClnUsed;
+		//--- Property ClnWashDone ---------------------------------------
+		private bool _ClnWashDone;
+		public bool ClnWashDone
+		{
+			get { return _ClnWashDone; }
+			set { SetProperty(ref _ClnWashDone,value); }
+		}
+
+		//--- Property ClnVacuumDone ---------------------------------------
+		private bool _ClnVacuumDone;
+		public bool ClnVacuumDone
+		{
+			get { return _ClnVacuumDone; }
+			set { SetProperty(ref _ClnVacuumDone,value); }
+		}
+
+
+		//--- Property ClnUsed ---------------------------------------
+		private bool _ClnUsed;
         public bool ClnUsed
         {
             get { return _ClnUsed; }
@@ -515,10 +540,10 @@ namespace RX_DigiPrint.Models
         public void Update(TcpIp.SStepperStat msg)
         {
             Connected = true;
-            RefDone     = (msg.info & 0x00000001)!=0;
+            RefDone      = (msg.info & 0x00000001)!=0;
             RobotRefDone = (msg.robinfo & 0x00000001) != 0;
-            Moving      = (msg.info & 0x00000002)!=0;
-            RobMoving   = (msg.robinfo & 0x00000002) != 0;
+            Moving       = (msg.info & 0x00000002)!=0;
+            RobMoving    = (msg.robinfo & 0x00000002) != 0;
             if (No==0) Console.WriteLine("ScrewerInfo: blockedleft={0}, blockedright={1}, ready={2}, ok={3}", 
                 (msg.screwerinfo&0x00001000)!=0,
                 (msg.screwerinfo&0x00002000)!=0,
@@ -551,6 +576,9 @@ namespace RX_DigiPrint.Models
             ClnUsed               = (msg.cln_used!=0) || RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX404;
             ScrewerUsed           = (msg.screwer_used!=0);
 
+            ClnWashDone         = (msg.robinfo & 0x00020000) !=0;
+            ClnVacuumDone       = (msg.robinfo & 0x00010000) !=0;
+
             TTS_Valve_C1_Waste = (msg.inkinfo & 0x00000001) != 0;
             TTS_Valve_C2_Waste = (msg.inkinfo & 0x00000002) != 0;
             TTS_Valve_C3_Waste = (msg.inkinfo & 0x00000004) != 0;
@@ -571,6 +599,7 @@ namespace RX_DigiPrint.Models
             drip_pans_enabled = Z_in_ref;
             
             CmdRunning = msg.cmdRunning;
+            ClnCmdRunning = msg.clnCmdRunning;
 
             PosX    = msg.posX;
             PosZ    = msg.posZ;

@@ -254,7 +254,7 @@ static void _lb702_display_status(void)
     term_printf("Ref Height back(um): \t %06d  Print Height: \t %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back,  _PrintHeight);
     term_printf("Ref Height front(um): \t %06d  Print Height: \t %06d\n", RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front, _PrintHeight);
     term_printf("Head UP Sensor: BACK= \t %d \t FRONT= \t %d\n",	fpga_input(HEAD_UP_IN_BACK), fpga_input(HEAD_UP_IN_FRONT));
-    term_printf("moving: \t\t %d \t cmd: %s - %d\n",	RX_StepperStatus.info.moving, MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
+    term_printf("moving: \t\t %d \t cmd: %s /%d\n",	RX_StepperStatus.info.moving, MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
     term_printf("reference done: \t %d\n",	RX_StepperStatus.info.ref_done);
     term_printf("printhead_en: \t\t %d\n",	RX_StepperStatus.info.printhead_en);
     term_printf("z in reference: \t %d\t",	RX_StepperStatus.info.z_in_ref);

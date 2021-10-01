@@ -1624,6 +1624,7 @@ typedef struct SStepperStat
     INT8		screwer_used;	
 	
 	INT32		cmdRunning;
+	INT32		clnCmdRunning;
 
 	//--- warnings/errors ----------------
 	ETestTableInfo	info;		// UINT32

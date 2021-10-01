@@ -98,18 +98,18 @@ namespace RX_DigiPrint.Views.PrintQueueView
         //--- Print_Clicked --------------------------------------------------------------------
         private void Print_Clicked(object sender, RoutedEventArgs e)
         {
-            if (!RxGlobals.PrintSystem.ReadyToPrint()) return;
-
-            _Item.ScanLength = _Item.Copies;
-            switch (_Item.TestDotSize)
-            {
-                case 2: _Item.Dots = "M"; break;
-                case 3: _Item.Dots = "L"; break;
-                default: _Item.Dots = "S"; break;
-            }
-            if (DataContext != null)
-                (DataContext as PrintQueueItem).SendMsg(TcpIp.CMD_TEST_START);
-
+            if (RxGlobals.PrintSystem.ReadyToPrint())
+			{
+                _Item.ScanLength = _Item.Copies;
+                switch (_Item.TestDotSize)
+                {
+                    case 2: _Item.Dots = "M"; break;
+                    case 3: _Item.Dots = "L"; break;
+                    default: _Item.Dots = "S"; break;
+                }
+                if (DataContext != null)
+                    (DataContext as PrintQueueItem).SendMsg(TcpIp.CMD_TEST_START);
+			}
             var myWindow = Window.GetWindow(this);
             myWindow.Close();
         }

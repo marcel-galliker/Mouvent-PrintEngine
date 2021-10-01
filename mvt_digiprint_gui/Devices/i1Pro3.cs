@@ -819,7 +819,7 @@ namespace RX_DigiPrint.Devices
                 Result.CieLab.a = ResultCie[1];
                 Result.CieLab.b = ResultCie[2];
             }
-            catch(Exception excep)
+            catch(Exception)
             {
                 return false;
             }

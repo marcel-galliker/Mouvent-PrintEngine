@@ -38,6 +38,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <CheckBox x:Name="Button_Stop" Grid.Row="1" Content="STOP"  Margin="10" Click="CapStop_clicked"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" FontWeight="Bold"/>
+                <Button Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="10" Content="Test" Click="Test_Click"/>
                 <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="10" x:Name="RefSensors">
                     <StackPanel Orientation="Horizontal">
                         <Image  Source="../../Resources/Bitmaps/LED_GREEN.ico" Visibility="{Binding HeadUpInput_0,   Converter={StaticResource BoolToVisible_Converter}}" HorizontalAlignment="Left" x:Name="Test"/>
@@ -54,10 +55,10 @@
                     </StackPanel>
                 </Grid>
 
-                <CheckBox x:Name="Button_Ref"   Grid.Row="2" Content="Ref"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapReference_clicked" />
-                <CheckBox x:Name="Button_Up"    Grid.Row="3" Content="Up"    Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapUp_clicked" />
-                <CheckBox x:Name="Button_Print" Grid.Row="4" Content="Print" Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="CapPrint_clicked" />
-                <CheckBox x:Name="Button_Cap"   Grid.Row="6" Content="Cap"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapCapping_clicked"     HorizontalAlignment="Left" Width="80"/>
+                <CheckBox x:Name="Button_Ref"   Grid.Row="2" Content="Ref"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="LiftReference_clicked" />
+                <CheckBox x:Name="Button_Up"    Grid.Row="3" Content="Up"    Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="LiftUp_clicked" />
+                <CheckBox x:Name="Button_Print" Grid.Row="4" Content="Print" Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10" Click="LiftPrint_clicked" />
+                <CheckBox x:Name="Button_Cap"   Grid.Row="6" Content="Cap"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="ClnCapping_clicked"     HorizontalAlignment="Left" Width="80"/>
                 <CheckBox x:Name="Button_Wash"  Grid.Row="7" Content="Wash"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Wash_clicked"           HorizontalAlignment="Left" Width="80" Visibility="{Binding ClnUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
                 <CheckBox x:Name="Button_Vacuum"  Grid.Row="8" Content="Vacuum"  Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="Vacuum_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding ClnUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
                 <CheckBox x:Name="Button_RefRobot"   Grid.Row="10" Content="Ref Robot"   Style="{DynamicResource Mouvent.CommandChcekboxStyle}" Margin="10,10,0,10" Click="CapRefRobot_clicked"     HorizontalAlignment="Left" Width="80" Visibility="{Binding ScrewerUsed, Converter={StaticResource BoolToVisible_Converter}}"/>
