@@ -86,7 +86,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- Confirm_Clicked --------------------------------------
 		private void Confirm_Clicked(object sender, RoutedEventArgs e)
 		{
-			RxGlobals.SA_StateMachine.ConfirmPosAndFocus();
+			RxGlobals.SA_StateMachine.ConfirmFocus();
 		}
 	}
 

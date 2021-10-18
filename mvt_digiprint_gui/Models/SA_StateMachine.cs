@@ -53,6 +53,8 @@ namespace RX_DigiPrint.Models
 		private readonly double	 _AngleDist		= px2mm(128);
 		private readonly double	 _StitchWebDist = px2mm(2*140);
 		private readonly double	 _DistWebDist   = Math.Round((24.0*25.4)/1200, 3);	// 
+		private readonly double	 _AlignmaneBmp_Height = Math.Round((6400*25.4)/1200, 3);
+		private double			 _WebSkipDist=0;
 		private int				 _DistStepCnt   = 0;
 		private int				 _DistMeasureCnt= 0;
 		private bool			 _Confirmed		= false;
@@ -209,6 +211,7 @@ namespace RX_DigiPrint.Models
 		{
 			int color, n;
 			bool confirm_added=false;
+			bool first=true;
 
 			/*
 			{
@@ -241,6 +244,8 @@ namespace RX_DigiPrint.Models
 			_Actions = new List<SA_Action>();
 			_Actions.Add(new SA_Action(){Name="Print Image"});
 
+			_WebSkipDist = 0;
+
 			//--- measurmentfunctions -----------------------------
 		//	for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
 			for (color=RxGlobals.PrintSystem.ColorCnt-1; color>=0; color--)	// reverse order!
@@ -258,14 +263,18 @@ namespace RX_DigiPrint.Models
 					{
 						colorBrush=Brushes.Transparent;
 					}
-					_Actions.Add(new SA_Action()
+					if (first)
 					{
-						PrintbarNo	= color,
-						ColorBrush  = colorBrush,
-						Function = ECamFunction.CamFindLines_Vertical,
-						Name="Find 3 Vert Lines",
-						ScanPos	= _FindPos,
-					});
+						_Actions.Add(new SA_Action()
+						{
+							PrintbarNo	= color,
+							ColorBrush  = colorBrush,
+							Function = ECamFunction.CamFindLines_Vertical,
+							Name="Find 3 Vert Lines",
+							ScanPos	= _FindPos,
+						});
+					}
+					first=false;
 
 					_Actions.Add(new SA_Action()
 					{
@@ -521,8 +530,8 @@ namespace RX_DigiPrint.Models
 			return _Actions;
 		}
 
-		//--- ConfirmPosAndFocus -------------------------------------
-		public void ConfirmPosAndFocus()
+		//--- ConfirmFocus -------------------------------------
+		public void ConfirmFocus()
 		{
 			if (_Action.Function==ECamFunction.CamConfirmFocus)
 			{
@@ -959,7 +968,8 @@ namespace RX_DigiPrint.Models
 		{
 			if (_Action!=null && _Actions!=null)
 			{
-				if (_Action.State!=ECamFunctionState.waitRob && _Action.State!=ECamFunctionState.runningRob) 
+				if (_Action.State!=ECamFunctionState.waitRob  && _Action.State!=ECamFunctionState.runningRob 
+				&&  _Action.State!=ECamFunctionState.manualCw && _Action.State!=ECamFunctionState.manualCcw) 
 					_Action.State = ECamFunctionState.done;
 				if (_Debug && _Action!=_Actions.Last()) CanContinue = true;
 
@@ -978,6 +988,11 @@ namespace RX_DigiPrint.Models
 					{
 						_StartAction();
 						return;
+					}
+					else
+					{
+						Console.WriteLine("SKIP Image, WebPos={0}", RxGlobals.SetupAssist.WebPos);
+						_WebSkipDist = _AlignmaneBmp_Height-15.0;			
 					}
 					/*
 					else if (_Adjusted)
@@ -1104,10 +1119,15 @@ namespace RX_DigiPrint.Models
 			_MarkFound=false;
 			Console.WriteLine("{0}: Action[{1}]: ScanPos={2}, WebMoveDist={3}", RxGlobals.Timer.Ticks(), _ActionIdx, _Action.ScanPos, _Action.WebMoveDist);
 			Console.WriteLine("{0}: _CamFindLine_Horzizontal_start, MarkFound={1}", RxGlobals.Timer.Ticks(), _MarkFound);			
-		//	RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
-		//	RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
-			_Action.ScanMoveDone = true;
-			_Action.WebMoveDone  = true;
+			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
+			_Action.ScanMoveDone = false;
+			if (_WebSkipDist==0) _Action.WebMoveDone  = true;
+			else 
+			{
+				RxGlobals.SetupAssist.WebMove(_WebSkipDist);
+				_Action.WebMoveDone  = false;
+				_WebSkipDist = 0;
+			}
 			_StartCamFunction();			
 		}
 
@@ -1287,10 +1307,10 @@ namespace RX_DigiPrint.Models
 				if (Math.Abs(steps)<=_Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
 				else 										
 				{
+					_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
 					if (RxGlobals.PrintSystem.IsRobotConnected)
 					{ 
 						_Action.State = ECamFunctionState.waitRob;
-						_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
 						_NextRobotCmd(_Action.StepperNo);
 					}
 					else _Action.State = (steps>0) ? ECamFunctionState.manualCw : ECamFunctionState.manualCcw;
@@ -1320,7 +1340,9 @@ namespace RX_DigiPrint.Models
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
 			_CamFunctions.Off();
-			int steps = (Int32)(_Action.Correction * 6.0 + 0.5);
+
+			int steps=0;
+			if (_Action.Correction!=null) steps=(Int32)(_Action.Correction * 6.0 + 0.5);
 			if (Math.Abs(steps) <= _Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
 			else
 			{
