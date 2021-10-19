@@ -91,6 +91,12 @@ namespace RX_DigiPrint.Services
         ps_setup,       // 09
     };
 
+    public enum EEncoderType : int
+    {
+        enc_Balluff,
+        enc_Renishaw,
+    };
+
     public enum EPrinterType : int
     {
 	    printer_undef,				// 0: not defined
@@ -904,6 +910,7 @@ namespace RX_DigiPrint.Services
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst =64)]
 	        public string       hostName;
             public EPrinterType	type;
+            public EEncoderType encoderType;
             public UInt32		overlap;
             public SOffsetCfg   offset;
             public Int32        externalData;		

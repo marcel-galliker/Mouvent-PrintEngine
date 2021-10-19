@@ -39,6 +39,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_CB612)
                     InkCylinders_RowHeight.Height = GridLength.Auto;
                 else InkCylinders_RowHeight.Height = new GridLength(0);
+
+                if (RxGlobals.PrintSystem.IsLb)
+                    EncoderChoice.Visibility = EncoderType.Visibility =  Visibility.Visible;
+                else
+                    EncoderChoice.Visibility = EncoderType.Visibility = Visibility.Hidden;
 			}
 		}
 	}

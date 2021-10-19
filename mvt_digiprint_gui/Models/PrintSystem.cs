@@ -50,6 +50,13 @@ namespace RX_DigiPrint.Models
             get { return new EN_PrinterTypeList(); }
         }
 
+        //--- EncoderTypeList -------------------------------
+        public EN_EncoderTypeList EncoderTypeList
+        {
+            get { return new EN_EncoderTypeList(); }
+        }
+
+
         //--- SpeedList ---------------------------------------------
         /*
         private List<EN_SpeedList> _SpeedList;
@@ -173,6 +180,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _HostName; }
             set { SetProperty(ref _HostName, value); }
+        }
+
+        //--- Property EncoderType ---------------------------------------
+        private EEncoderType _EncoderType;
+        public EEncoderType EncoderType
+        {
+            get { return _EncoderType; }
+            set { SetProperty(ref _EncoderType, value); }
         }
 
         //--- Property PrinterType ---------------------------------------
@@ -575,6 +590,7 @@ namespace RX_DigiPrint.Models
             HostName = msg.hostName;
 
             PrinterType             = msg.type;
+            EncoderType             = msg.encoderType;
             Overlap                 = msg.overlap>0;
             OffsetVerso             = msg.offset.versoDist;
             ManualFlightTimeComp    = (msg.offset.manualFlightTimeComp/1000.0);
@@ -632,6 +648,7 @@ namespace RX_DigiPrint.Models
             }
 
             msg.type                    = _PrinterType;
+            msg.encoderType             = _EncoderType;
             msg.overlap                 = Convert.ToUInt32(_Overlap);
             msg.offset.versoDist        = OffsetVerso;
             msg.offset.manualFlightTimeComp = Convert.ToInt32(ManualFlightTimeComp*1000);

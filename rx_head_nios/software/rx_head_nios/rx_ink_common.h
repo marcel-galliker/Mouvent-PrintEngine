@@ -159,12 +159,19 @@ typedef enum EPrinterType
 
 } EPrinterType;
 
+typedef enum EEncoderType
+{
+    enc_Balluff,
+    enc_Renishaw,
+}
+EEncoderType;
+
 //--- EnFluidCtrlMode -----------------------------
 typedef enum EnFluidCtrlMode
 {
     ctrl_undef,          // 0x000:
-	ctrl_shutdown,	     //	0x001:
-	ctrl_shutdown_done,	 // 0x002:
+	ctrl_01,			 //	0x001:
+	ctrl_02,			 // 0x002:
 	ctrl_error,			 // 0x003:
     ctrl_wait,			 // 0x004:
     ctrl_off,			 // 0x005:           
@@ -185,6 +192,11 @@ typedef enum EnFluidCtrlMode
 	ctrl_check_step8,			// 0x018
 	ctrl_check_step9,			// 0x019
 	
+	ctrl_shutdown		= 0x040,// 0x040:	send slide to cap position
+	ctrl_shutdown_step1,		// 0x041:	wait until slide in cap
+	ctrl_shutdown_step2,		// 0x042:	start pressure reduction
+	ctrl_shutdown_step3,		// 0x043:	wait until pressure low
+
 	ctrl_flush_night = 0x080,	// 0x080:
     ctrl_flush_weekend,	 //	0x081:
     ctrl_flush_week,	 //	0x082:	

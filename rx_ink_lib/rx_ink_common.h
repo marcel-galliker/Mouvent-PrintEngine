@@ -159,6 +159,13 @@ typedef enum EPrinterType
 
 } EPrinterType;
 
+typedef enum EEncoderType
+{
+    enc_Balluff,
+    enc_Renishaw,
+}
+EEncoderType;
+
 //--- EnFluidCtrlMode -----------------------------
 typedef enum EnFluidCtrlMode
 {
