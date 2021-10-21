@@ -19,7 +19,11 @@ namespace RX_DigiPrint.Models
 		public const bool		_SimuCamera  = false;
 		public bool				_SimuMachine = false;
 
-		private const int		_Adjustment_Tolerance = 3; // in 1/6 screw turns
+#if DEBUG
+		private const double _Adjustment_Tolerance = 1.0; // turns
+#else
+		private const double _Adjustment_Tolerance = 0.5; // turns
+#endif
 
 		private enum ENAssistMode
 		{
@@ -969,7 +973,8 @@ namespace RX_DigiPrint.Models
 			if (_Action!=null && _Actions!=null)
 			{
 				if (_Action.State!=ECamFunctionState.waitRob  && _Action.State!=ECamFunctionState.runningRob 
-				&&  _Action.State!=ECamFunctionState.manualCw && _Action.State!=ECamFunctionState.manualCcw) 
+				&&  _Action.State!=ECamFunctionState.manualCw && _Action.State!=ECamFunctionState.manualCcw
+				&& _Action.State != ECamFunctionState.error) 
 					_Action.State = ECamFunctionState.done;
 				if (_Debug && _Action!=_Actions.Last()) CanContinue = true;
 
@@ -989,10 +994,15 @@ namespace RX_DigiPrint.Models
 						_StartAction();
 						return;
 					}
-					else
+					else if (_AdjustFunction[printBar]== ECamFunction.CamMeasureAngle)
 					{
 						Console.WriteLine("SKIP Image, WebPos={0}", RxGlobals.SetupAssist.WebPos);
 						_WebSkipDist = _AlignmaneBmp_Height-15.0;			
+					}
+					else if (_AdjustFunction[printBar] == ECamFunction.CamMeasureStitch)
+					{
+						Console.WriteLine("SKIP Image, WebPos={0}", RxGlobals.SetupAssist.WebPos);
+						_WebSkipDist = _AlignmaneBmp_Height - 50.0;
 					}
 					/*
 					else if (_Adjusted)
@@ -1303,8 +1313,7 @@ namespace RX_DigiPrint.Models
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Angle Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
 			if (_Action.Correction!=null)
 			{
-				int steps = (Int32)(_Action.Correction * 6.0 + 0.5);
-				if (Math.Abs(steps)<=_Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
+				if (Math.Abs((double)_Action.Correction) <= _Adjustment_Tolerance+0.05) _Action.State = ECamFunctionState.done;
 				else 										
 				{
 					_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
@@ -1313,7 +1322,7 @@ namespace RX_DigiPrint.Models
 						_Action.State = ECamFunctionState.waitRob;
 						_NextRobotCmd(_Action.StepperNo);
 					}
-					else _Action.State = (steps>0) ? ECamFunctionState.manualCw : ECamFunctionState.manualCcw;
+					else _Action.State = (_Action.Correction > 0) ? ECamFunctionState.manualCw : ECamFunctionState.manualCcw;
 				}
 			}
 
@@ -1340,27 +1349,33 @@ namespace RX_DigiPrint.Models
 		{
 		//	RxGlobals.Events.AddItem(new LogItem("Camera: Send Stitch Correction {0} to head{1}", _Action.Correction, _Action.HeadNo));
 			_CamFunctions.Off();
-
-			int steps=0;
-			if (_Action.Correction!=null) steps=(Int32)(_Action.Correction * 6.0 + 0.5);
-			if (Math.Abs(steps) <= _Adjustment_Tolerance) _Action.State = ECamFunctionState.done;
-			else
+			for (int i = 0; i + 1 < _HeadsPerColor; i++)
 			{
-				for (int i = 0; i + 1 < _HeadsPerColor; i++)
+				SA_Action action = _Actions[_StitchIdx + i];
+				if (action.Correction==null)
 				{
-					SA_Action action = _Actions[_StitchIdx + i];
-					if (RxGlobals.PrintSystem.IsRobotConnected)
-					{
-						action.State = ECamFunctionState.waitRob;
-						_AdjustFunction[action.PrintbarNo] = action.Function;
-						_NextRobotCmd(action.StepperNo);
-					}
+					if (action.State == ECamFunctionState.runningCam) action.State = ECamFunctionState.error;
+				}
+				else
+				{
+					if (Math.Abs((double)action.Correction) <= _Adjustment_Tolerance + 0.05) 
+						action.State = ECamFunctionState.done;
 					else
 					{
-						action.State = (steps>0) ? ECamFunctionState.manualCw : ECamFunctionState.manualCcw;
+						_AdjustFunction[action.PrintbarNo] = action.Function;
+						if (RxGlobals.PrintSystem.IsRobotConnected)
+						{
+							action.State = ECamFunctionState.waitRob;
+							_NextRobotCmd(action.StepperNo);
+						}
+						else
+						{
+							action.State = (action.Correction > 0) ? ECamFunctionState.manualCw : ECamFunctionState.manualCcw;
+						}
 					}
 				}
 			}
+
 			ActionDone();
 		}
 
