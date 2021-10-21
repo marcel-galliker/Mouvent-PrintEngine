@@ -6,13 +6,16 @@
       <Directories />
       <PathStyle>MinGWUnixSlash</PathStyle>
     </CustomSourceDirectories>
+    <AutoProgramSPIFFSPartition>true</AutoProgramSPIFFSPartition>
     <BuildHost>
       <HostName>localhost:2222</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </BuildHost>
     <DeploymentHost>
-      <Transport>None</Transport>
+      <HostName>localhost:2022</HostName>
+      <Transport>SSH</Transport>
+      <UserName>mouvent</UserName>
     </DeploymentHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -49,6 +52,7 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
+    <BuildLogMode xsi:nil="true" />
     <ToolchainID>
       <ID>com.sysprogs.toolchain.default-gcc</ID>
       <Version>
@@ -186,6 +190,7 @@
         </FileMasks>
         <TransferNewFilesOnly>true</TransferNewFilesOnly>
         <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
         <Extension>
@@ -214,6 +219,7 @@
         </FileMasks>
         <TransferNewFilesOnly>true</TransferNewFilesOnly>
         <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
         <DeleteDisappearedFiles>false</DeleteDisappearedFiles>
         <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
         <Extension>
@@ -313,6 +319,7 @@
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
       <MaxBreakpointLimit>0</MaxBreakpointLimit>
+      <EnableVerboseMode>true</EnableVerboseMode>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <GDBEnvironment>
@@ -327,13 +334,17 @@
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
       <ProgramArguments />
+      <ArgumentEscapingMode>Auto</ArgumentEscapingMode>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <SuppressArgumentVariablesCheck>false</SuppressArgumentVariablesCheck>
     <X11WindowMode>Local</X11WindowMode>
     <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
     <RunGDBUnderSudo>false</RunGDBUnderSudo>
     <DeploymentMode>Auto</DeploymentMode>
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <StripDebugSymbolsDuringDeployment>false</StripDebugSymbolsDuringDeployment>
     <SuppressTTYCreation>false</SuppressTTYCreation>
+    <IndexDebugSymbols>false</IndexDebugSymbols>
   </Debug>
 </VisualGDBProjectSettings2>

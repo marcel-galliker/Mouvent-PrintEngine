@@ -1000,6 +1000,7 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 	msg.hdr.msgId	= REP_GET_PRINTER_CFG;
 	memcpy(msg.hostName, RX_Hostname, sizeof(msg.hostName));
 	msg.type		= RX_Config.printer.type;
+    msg.encoderType = RX_Config.printer.encoderType;
 	msg.overlap		= RX_Config.printer.overlap;
 	msg.colorCnt	= RX_Config.colorCnt;
 	msg.headsPerColor = RX_Config.headsPerColor;
@@ -1045,6 +1046,7 @@ static void _do_set_printer_cfg(RX_SOCKET socket, SPrinterCfgMsg* pmsg)
 
 	//--- parse inkfile names ----
 	RX_Config.printer.type		  = pmsg->type;
+    RX_Config.printer.encoderType = pmsg->encoderType;
 	RX_Config.printer.overlap	  = pmsg->overlap;
 	RX_Config.colorCnt			   = pmsg->colorCnt;
 	RX_Config.headsPerColor		   = pmsg->headsPerColor;

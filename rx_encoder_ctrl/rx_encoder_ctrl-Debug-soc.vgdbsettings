@@ -6,9 +6,7 @@
       <Directories />
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
-    <BuildHost>
-      <Transport>None</Transport>
-    </BuildHost>
+    <AutoProgramSPIFFSPartition>true</AutoProgramSPIFFSPartition>
     <DeploymentHost>
       <HostName>192.168.200.4</HostName>
       <Transport>SSH</Transport>
@@ -40,10 +38,11 @@
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
     <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
-    <SkipDeploymentTests>false</SkipDeploymentTests>
+    <SkipDeploymentTests>true</SkipDeploymentTests>
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
+    <BuildLogMode xsi:nil="true" />
     <ToolchainID>
       <ID>com.sysprogs.imported.arm-linux-gnueabi2</ID>
       <Version>
@@ -169,13 +168,16 @@
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
       <MaxBreakpointLimit>0</MaxBreakpointLimit>
+      <EnableVerboseMode>false</EnableVerboseMode>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
       <ProgramArguments>-debug +simu_uv +test +cleaf +fhnw +testslide +avg 20000</ProgramArguments>
+      <ArgumentEscapingMode>Auto</ArgumentEscapingMode>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <SuppressArgumentVariablesCheck>false</SuppressArgumentVariablesCheck>
     <DeploymentTargetPath>/tmp/$(TargetFileName)</DeploymentTargetPath>
     <X11WindowMode>Local</X11WindowMode>
     <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
@@ -183,6 +185,8 @@
     <DeploymentMode>Auto</DeploymentMode>
     <LdLibraryPath />
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <StripDebugSymbolsDuringDeployment>false</StripDebugSymbolsDuringDeployment>
     <SuppressTTYCreation>false</SuppressTTYCreation>
+    <IndexDebugSymbols>false</IndexDebugSymbols>
   </Debug>
 </VisualGDBProjectSettings2>

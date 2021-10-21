@@ -6,13 +6,14 @@
       <Directories />
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
+    <AutoProgramSPIFFSPartition>true</AutoProgramSPIFFSPartition>
     <BuildHost>
       <Transport>None</Transport>
     </BuildHost>
     <DeploymentHost>
-      <HostName>192.168.200.101</HostName>
+      <HostName>localhost:2022</HostName>
       <Transport>SSH</Transport>
-      <UserName>root</UserName>
+      <UserName>mouvent</UserName>
     </DeploymentHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -42,6 +43,7 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
+    <BuildLogMode xsi:nil="true" />
     <ToolchainID>
       <ID>com.sysprogs.imported.arm-linux-gnueabi2</ID>
       <Version>
@@ -162,6 +164,7 @@
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
       <MaxBreakpointLimit>0</MaxBreakpointLimit>
+      <EnableVerboseMode>true</EnableVerboseMode>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <GDBExe>F:\Compiler\Linaro-Tools\bin\arm-linux-gnueabi-gdb.exe</GDBExe>
@@ -181,8 +184,10 @@
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
       <ProgramArguments />
+      <ArgumentEscapingMode>Auto</ArgumentEscapingMode>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <SuppressArgumentVariablesCheck>false</SuppressArgumentVariablesCheck>
     <DeploymentTargetPath>/tmp/$(TargetFileName)</DeploymentTargetPath>
     <X11WindowMode>Local</X11WindowMode>
     <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
@@ -190,6 +195,8 @@
     <DeploymentMode>Auto</DeploymentMode>
     <LdLibraryPath />
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <StripDebugSymbolsDuringDeployment>false</StripDebugSymbolsDuringDeployment>
     <SuppressTTYCreation>false</SuppressTTYCreation>
+    <IndexDebugSymbols>false</IndexDebugSymbols>
   </Debug>
 </VisualGDBProjectSettings2>
