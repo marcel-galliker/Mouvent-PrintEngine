@@ -32,6 +32,14 @@ namespace rx_CamLib.Models
 			set { SetProperty(ref _DistToStop,value); }
 		}
 
+		//--- Property Tolerance ---------------------------------------
+		private double _Tolerance;
+		public double Tolerance
+		{
+			get { return _Tolerance; }
+			set { SetProperty(ref _Tolerance, value); }
+		}
+
 		//--- Property StreamCaps ---------------------------------------
 		private StreamCaps _StreamCaps = new StreamCaps();
 		public StreamCaps StreamCaps

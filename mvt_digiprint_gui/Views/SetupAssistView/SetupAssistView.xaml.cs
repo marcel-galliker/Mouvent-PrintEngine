@@ -66,9 +66,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- CamSettings_Clicked ------------------------------------
 		private void CamSettings_Clicked(object sender,RoutedEventArgs e)
 		{
-			if (BTN_CamSettings.IsChecked) CamSettings.Hide();
-			else						   CamSettings.Show(RxGlobals.Camera);
-			BTN_CamSettings.IsChecked = ! BTN_CamSettings.IsChecked;
+			if (BTN_CamSettings.IsChecked) BTN_CamSettings.IsChecked=CamSettings.Hide();
+			else BTN_CamSettings.IsChecked=CamSettings.Show(RxGlobals.Camera);
 		}
 
 		//--- Reference_Clicked -------------------------------------------

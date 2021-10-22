@@ -39,28 +39,28 @@ namespace RX_DigiPrint.Views.SetupAssistView
         //--- _InitCamera ----------------------------
         private void _InitCamera()
 		{
-            CB_Camera.ItemsSource  = _Camera.GetCameraList();
+            CB_Camera.ItemsSource    = _Camera.GetCameraList();
+            CB_Tolerance.ItemsSource = new SA_Tolerance_List();
+
             CB_Camera.SelectedItem = RxGlobals.Settings.SetupAssistCam.Name;
             NB_DistToStops.Text    = Math.Round(RxGlobals.Settings.SetupAssistCam.DistToStop, 3).ToString();
-		}
+            CB_Tolerance.SelectedValue = RxGlobals.Settings.SetupAssistCam.Tolerance;
+        }
 
         //--- Save_Clicked ------------------------------------
         private void Save_Clicked(object sender, RoutedEventArgs e)
         {
-            if (CB_Camera.SelectedItem!=null)
-			{
-                bool save=true;
-                RxGlobals.Settings.SetupAssistCam.Name       = CB_Camera.SelectedItem as string;
-                RxGlobals.Settings.SetupAssistCam.DistToStop = NB_DistToStops.Value;
+            bool save=true;
+            RxGlobals.Settings.SetupAssistCam.Name       = CB_Camera.SelectedItem as string;
+            RxGlobals.Settings.SetupAssistCam.DistToStop = NB_DistToStops.Value;
+            RxGlobals.Settings.SetupAssistCam.Tolerance  = Convert.ToDouble(CB_Tolerance.SelectedValue);
 
-                if (save)
-                {
-                    RxGlobals.Settings.Save(null);
-                    DialogResult = true;
-                    return;
-                }
-
-			}
+            if (save)
+            {
+                RxGlobals.Settings.Save(null);
+                DialogResult = true;
+                return;
+            }
             DialogResult = false;
         }
 

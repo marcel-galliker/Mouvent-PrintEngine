@@ -21,9 +21,20 @@ namespace RX_DigiPrint.Models
 	public class SA_Report
 	{
 		//--- PrintReport ----------------------------------
-		public void PrintReport(List<SA_Action>  actions, DateTime timePrinted)
+		public void PrintReport(List<SA_Action>  actions, DateTime timePrinted, bool force)
 		{
 			if (actions==null) return;
+
+			if (!force)
+			{
+				bool print=false;
+				foreach(SA_Action action in actions)
+				{
+					if (action.State>=ECamFunctionState.error) 
+						print=true;
+				}
+				if (!print) return;
+			}
 
 			PrintDialog pd = new PrintDialog();	
 		//	if(pd.ShowDialog()==true) // use default printer
@@ -56,7 +67,8 @@ namespace RX_DigiPrint.Models
 					Color c = Color.FromRgb(240,240,240);
 					System.Windows.Shapes.Rectangle rect =new Rectangle()
 					{
-						Fill = new SolidColorBrush(c)
+						Fill = new SolidColorBrush(c),
+						HorizontalAlignment = HorizontalAlignment.Stretch,
 					};
 					Grid.SetRow(rect, row);
 					Grid.SetColumn(rect, 0);
@@ -129,13 +141,17 @@ namespace RX_DigiPrint.Models
 						cw=0;
 						ccw=Math.Abs((double)action.Correction);
 					}
+					if (cw<0.1)  cw=0;
+					if (ccw<0.1) ccw=0;
 				
 					if (cw==0 && ccw==0)
 					{
+						/*
 						PackIconMaterial ok = new PackIconMaterial(){Kind = PackIconMaterialKind.Check };
 						Grid.SetRow(ok, row);
 						Grid.SetColumn(ok, col);
 						grid.Children.Add(ok);
+						*/
 						col+=4;
 					}
 					else
@@ -225,7 +241,8 @@ namespace RX_DigiPrint.Models
 			pageGrid.RowDefinitions.Add(new RowDefinition(){ Height=GridLength.Auto});
 			pageGrid.RowDefinitions.Add(new RowDefinition(){ Height=GridLength.Auto});
 
-			TextBlock title=new TextBlock() { };
+			//--- Machine ------------------------------------------------
+			TextBlock title =new TextBlock() { };
 			title.Text="Alignment Measurment of ";
 			pageGrid.Children.Add(title);
 
@@ -235,6 +252,7 @@ namespace RX_DigiPrint.Models
 			Grid.SetColumn(machine, 1);
 			pageGrid.Children.Add(machine);
 
+			//--- timestamp --------------------------------------------------
 			TextBlock time=new TextBlock() { };
 			time.Text="Printed ";
 			Grid.SetRow(time, 1);
@@ -247,6 +265,21 @@ namespace RX_DigiPrint.Models
 			Grid.SetColumn(now,1);
 			pageGrid.Children.Add(now);
 
+			//--- tolerance -------------------------------------------------
+			
+			TextBlock ttol = new TextBlock() { };
+			ttol.Text = "Tolerance";
+			Grid.SetRow(ttol, 2);
+			pageGrid.Children.Add(ttol);
+
+			TextBlock tol = new TextBlock();
+			tol.SetValue(TextBlock.FontWeightProperty, FontWeights.Bold);
+			tol.Text = "±" + RxGlobals.Settings.SetupAssistCam.Tolerance.ToString()+" Rev";
+			Grid.SetRow(tol, 2);
+			Grid.SetColumn(tol, 2);
+			pageGrid.Children.Add(tol);
+
+			//--- results ----------------------------------------------
 			Grid resultsGrid = new Grid();
 			Grid.SetRow(resultsGrid, 2);
 			Grid.SetColumn(resultsGrid,0);

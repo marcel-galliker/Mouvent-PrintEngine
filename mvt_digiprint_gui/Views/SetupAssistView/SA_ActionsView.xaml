@@ -67,7 +67,7 @@
                         </ig:TemplateColumn>
 
                         <!-- Result _____________________________________________________________________________-->
-                        <ig:TemplateColumn HeaderText="Result" Key="Measured" Width="500">
+                        <ig:TemplateColumn HeaderText="Result" Key="Measured" Width="450" x:Name="ResultHdr">
                             <ig:TemplateColumn.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>

@@ -388,6 +388,7 @@
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\Enums\EN_EncoderTypeList.cs" />
+    <Compile Include="Models\Enums\EN_SA_Tolerance.cs" />
     <Compile Include="Models\Enums\EN_TestFluid.cs" />
     <Compile Include="Models\FileNameFilter.cs" />
     <Compile Include="Models\HeadAdjustmentHelp.cs" />

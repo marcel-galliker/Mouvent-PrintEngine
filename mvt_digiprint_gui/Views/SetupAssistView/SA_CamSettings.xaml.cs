@@ -25,17 +25,23 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		}
 
 		//--- Show ------------------------------------------------
-		public void Show(RxCam cam)
+		public bool Show(RxCam cam)
 		{
-			_Camera				 = cam;
-			Settings.ItemsSource = CamGlobals.CamDevice.GetProperties();
-			this.Visibility		 = Visibility.Visible;
+			_Camera	= cam;
+			if (CamGlobals.CamDevice!=null)
+			{
+				Settings.ItemsSource = CamGlobals.CamDevice.GetProperties();
+				this.Visibility = Visibility.Visible;
+				return true;
+			}
+			return false;
 		}
 
 		//--- Hide -------------------------------------------------
-		public void Hide()
+		public bool Hide()
 		{
 			this.Visibility = Visibility.Collapsed;
+			return false;
 		}
 
 		//--- Default_Clicked ---------------------------------------------

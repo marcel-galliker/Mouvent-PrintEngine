@@ -27,7 +27,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
 			{
-				Actions.ItemsSource = RxGlobals.SA_StateMachine.StartAlign();
+				ResultHdr.HeaderText = string.Format("Result (tol=±{0:0.0} Rev)", RxGlobals.Settings.SetupAssistCam.Tolerance);
+				Actions.ItemsSource  = RxGlobals.SA_StateMachine.StartAlign();
 			}
 		}
 
@@ -58,7 +59,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- PrintReport --------------------------------
 		public void PrintReport()
 		{
-			new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted());
+			new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted(), true);
 		}
 
 		//--- Test -----------------------------
@@ -122,7 +123,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			return null;
         }
 	}
-
 	public class AngleStr_Converter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
