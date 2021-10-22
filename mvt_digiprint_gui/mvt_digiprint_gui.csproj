@@ -745,6 +745,9 @@
     <Compile Include="Views\SetupAssistView\SA_CamSettings.xaml.cs">
       <DependentUpon>SA_CamSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SetupAssistView\SA_ValueGrid.xaml.cs">
+      <DependentUpon>SA_ValueGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SetupAssistView\SetupAssistView.xaml.cs">
       <DependentUpon>SetupAssistView.xaml</DependentUpon>
     </Compile>
@@ -1407,6 +1410,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\SetupAssistView\SA_CamSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SetupAssistView\SA_ValueGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

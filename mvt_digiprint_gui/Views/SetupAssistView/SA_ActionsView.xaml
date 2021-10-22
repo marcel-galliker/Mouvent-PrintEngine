@@ -73,7 +73,8 @@
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding Correction, StringFormat={}{0:0.0}}" Margin="5,0" MinWidth="30" />
-                                            <TextBlock Text="{Binding ValueStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/>
+                                         <!--   <TextBlock Text="{Binding ValueStr}" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Bottom" Foreground="Gray"/> -->
+                                            <local:SA_ValueGrid DataContext="{Binding ValueStr}" Width="300"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Visibility="{Binding ConfirmVisibile, Converter={StaticResource BooleanToVisibleConverter}}">
                                             <TextBlock Text="Focus?" VerticalAlignment="Center"/>

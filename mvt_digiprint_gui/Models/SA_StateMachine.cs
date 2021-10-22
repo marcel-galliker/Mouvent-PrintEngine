@@ -202,6 +202,8 @@ namespace RX_DigiPrint.Models
 			}
 		}
 
+//		private Random _Random = new Random();
+
 		//--- _InitActions -----------------------------
 		public List<SA_Action> StartAlign()
 		{
@@ -321,7 +323,27 @@ namespace RX_DigiPrint.Models
 							WebPos		= 12.0,
 							Function	= ECamFunction.CamMeasureAngle,
 							Name		= String.Format(" {0}-{1}",  colorName, n+1),
-						};						
+						};
+						/*
+						if (_SimuMachine && color==3)
+						{
+							Thread t=new Thread(()=>
+								{
+									for (int i = 0; i < 8; i++)
+									{
+										Thread.Sleep(1000);
+										RxBindable.Invoke(()=>{
+											double d = _Random.NextDouble();
+											if (d > 0.9) action.Measured(double.NaN);
+											else action.Measured(5 - 10 * d);
+
+										});
+									}
+								}
+							);
+							t.Start();
+						}
+						*/
 						_Actions.Add(action);
 					}
 					_StitchIdxes[color] = _Actions.Count();

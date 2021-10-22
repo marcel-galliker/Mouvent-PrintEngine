@@ -30,7 +30,10 @@ namespace RX_DigiPrint.Models
 				bool print=false;
 				foreach(SA_Action action in actions)
 				{
-					if (action.State>=ECamFunctionState.error) 
+					if ((action.Function==ECamFunction.CamMeasureAngle 
+					|| action.Function == ECamFunction.CamMeasureStitch
+					|| action.Function == ECamFunction.CamMeasureDist)
+					&& action.State>=ECamFunctionState.error)
 						print=true;
 				}
 				if (!print) return;
