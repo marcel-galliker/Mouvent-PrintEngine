@@ -1,20 +1,19 @@
-﻿using System;
+﻿using MahApps.Metro.IconPacks;
+using rx_CamLib;
+using RX_Common;
+using RX_DigiPrint.Converters;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
-using rx_CamLib;
-using MahApps.Metro.IconPacks;
-using RX_DigiPrint.Converters;
-using System.Globalization;
-using System.ComponentModel;
-using System.Windows.Shapes;
 using System.Windows.Media;
+using System.Windows.Shapes;
+
+//	To select printer by name: Use forms library to print! // System.Windows.Controls.PrintDialog does not allow this?
+//	https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.printdialog?view=windowsdesktop-5.0
 
 namespace RX_DigiPrint.Models
 {
@@ -42,16 +41,21 @@ namespace RX_DigiPrint.Models
 			PrintDialog pd = new PrintDialog();	
 		//	if(pd.ShowDialog()==true) // use default printer
 			{
-				try
+				RxBindable.Invoke(()=>
 				{
-					FixedDocument doc = new FixedDocument();
-					doc.DocumentPaginator.PageSize = new Size(pd.PrintableAreaHeight, pd.PrintableAreaWidth);
-					doc.Pages.Add(_composePage(doc.DocumentPaginator.PageSize, actions, timePrinted));
-					pd.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
-					pd.PrintDocument(doc.DocumentPaginator, "Adjustment");
-				}
-				catch(Exception)
-				{ }
+					try
+					{
+						FixedDocument doc = new FixedDocument();
+						doc.DocumentPaginator.PageSize = new Size(pd.PrintableAreaHeight, pd.PrintableAreaWidth);
+						doc.Pages.Add(_composePage(doc.DocumentPaginator.PageSize, actions, timePrinted));
+						pd.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
+						pd.PrintDocument(doc.DocumentPaginator, "Adjustment");
+					}
+					catch(Exception ex)
+					{
+						Console.WriteLine("Exception {0}", ex.Message);
+					}
+				});
 			}
 		}
 
@@ -127,69 +131,51 @@ namespace RX_DigiPrint.Models
 					action.Correction = row;
 					if ((row&1)!=0) action.Correction = -action.Correction;
 				}
-				if (action.Correction==null)
-				{
-				}
-				else
+
+				if (action.Correction!=null && Math.Abs((double)action.Correction) > 0.1)
 				{
 					//--- 4: Result turn CW --------------------
-					double cw, ccw;
-					if (action.Correction<0)
+					double cw=0, ccw=0;
+					if (action.Correction < 0)
 					{
-						cw = Math.Abs((double)action.Correction-2);
+						cw = Math.Abs((double)action.Correction - 2);
 						ccw = 2;
 					}
 					else
 					{
-						cw=0;
-						ccw=Math.Abs((double)action.Correction);
+						ccw = Math.Abs((double)action.Correction);
 					}
-					if (cw<0.1)  cw=0;
-					if (ccw<0.1) ccw=0;
-				
-					if (cw==0 && ccw==0)
+
+					if (cw!=0)
 					{
-						/*
-						PackIconMaterial ok = new PackIconMaterial(){Kind = PackIconMaterialKind.Check };
-						Grid.SetRow(ok, row);
-						Grid.SetColumn(ok, col);
-						grid.Children.Add(ok);
-						*/
-						col+=4;
+						PackIconMaterial turncw = new PackIconMaterial(){ Kind=PackIconMaterialKind.AxisZRotateClockwise, Margin=new Thickness(5,2,2,2)};
+						Grid.SetRow(turncw, row);
+						Grid.SetColumn(turncw, col++);
+						grid.Children.Add(turncw);
+
+						TextBlock txtcw=new TextBlock();
+						txtcw.Text = String.Format("{0:0.0}", cw);
+						Grid.SetRow(txtcw, row);
+						Grid.SetColumn(txtcw, col++);
+						grid.Children.Add(txtcw);
 					}
-					else
+					else col+=2;
+
+					//--- 5: Result turn CCW --------------------
+					if (ccw!=0)
 					{
-						if (cw!=0)
-						{
-							PackIconMaterial turncw = new PackIconMaterial(){ Kind=PackIconMaterialKind.AxisZRotateClockwise, Margin=new Thickness(5,2,2,2)};
-							Grid.SetRow(turncw, row);
-							Grid.SetColumn(turncw, col++);
-							grid.Children.Add(turncw);
+						PackIconMaterial turnccw = new PackIconMaterial(){ Kind=PackIconMaterialKind.AxisZRotateCounterclockwise, Margin=new Thickness(5,2,2,2)};
+						Grid.SetRow(turnccw, row);
+						Grid.SetColumn(turnccw, col++);
+						grid.Children.Add(turnccw);
 
-							TextBlock txtcw=new TextBlock();
-							txtcw.Text = String.Format("{0:0.0}", cw);
-							Grid.SetRow(txtcw, row);
-							Grid.SetColumn(txtcw, col++);
-							grid.Children.Add(txtcw);
-						}
-						else col+=2;
-
-						//--- 5: Result turn CCW --------------------
-						if (ccw!=0)
-						{
-							PackIconMaterial turnccw = new PackIconMaterial(){ Kind=PackIconMaterialKind.AxisZRotateCounterclockwise, Margin=new Thickness(5,2,2,2)};
-							Grid.SetRow(turnccw, row);
-							Grid.SetColumn(turnccw, col++);
-							grid.Children.Add(turnccw);
-
-							TextBlock txtccw=new TextBlock();
-							txtccw.Text = String.Format("{0:0.0}", ccw);
-							Grid.SetRow(txtccw, row);
-							Grid.SetColumn(txtccw, col++);
-							grid.Children.Add(txtccw);
-						}
-						else col+=2;
+						TextBlock txtccw=new TextBlock();
+						txtccw.Text = String.Format("{0:0.0}", ccw);
+						Grid.SetRow(txtccw, row);
+						Grid.SetColumn(txtccw, col++);
+						grid.Children.Add(txtccw);
 					}
+					else col+=2;
 				}
 			}
 		}
@@ -277,7 +263,8 @@ namespace RX_DigiPrint.Models
 
 			TextBlock tol = new TextBlock();
 			tol.SetValue(TextBlock.FontWeightProperty, FontWeights.Bold);
-			tol.Text = "±" + RxGlobals.Settings.SetupAssistCam.Tolerance.ToString()+" Rev";
+			tol.Text = "A=±" + RxGlobals.Settings.SetupAssistCam.ToleranceAngle.ToString()+" Rev "
+					 + "S=±" + RxGlobals.Settings.SetupAssistCam.ToleranceStitch.ToString() + " Rev";
 			Grid.SetRow(tol, 2);
 			Grid.SetColumn(tol, 2);
 			pageGrid.Children.Add(tol);

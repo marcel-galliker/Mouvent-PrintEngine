@@ -60,8 +60,19 @@
                 <common:MvtNumBox  Grid.Row="4" Grid.Column="2" Margin="10,5" Width="70" HorizontalAlignment="Left" x:Name="NB_DistToStops"/>
                 <TextBlock Grid.Row="4" Grid.Column="2" Text="m" Margin="85,5,0,5" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Tolerance" VerticalAlignment="Center" />
-                <rx:RxComboBox x:Name="CB_Tolerance"
+                <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal">
+                    <iconPacks:PackIconMaterial 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
+                                            Foreground="Black"
+                                            Margin="5"
+                                            Width="20" 
+                                            Height="20" 
+                                            Kind="AngleAcute"/>
+
+                    <TextBlock  Text="Tolerance" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <rx:RxComboBox x:Name="CB_ToleranceAngle"
                     Grid.Row="5" Grid.Column="1"
                     Width="70"
                     HorizontalAlignment="Left"
@@ -69,6 +80,26 @@
                     Margin="10,5"
                     />
                 <TextBlock Grid.Row="5" Grid.Column="2" Text="Rev" Margin="85,5,0,5" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                <StackPanel Grid.Row="6" Grid.Column="0" Orientation="Horizontal">
+                    <iconPacks:PackIconMaterial 
+                                            Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
+                                            Foreground="Black"
+                                            Margin="5"
+                                            Width="20" 
+                                            Height="20" 
+                                            Kind="ArrowCollapseHorizontal"/>
+
+                    <TextBlock  Text="Tolerance" VerticalAlignment="Center" />
+                </StackPanel>
+                <rx:RxComboBox x:Name="CB_ToleranceStitch"
+                    Grid.Row="6" Grid.Column="1"
+                    Width="70"
+                    HorizontalAlignment="Left"
+                    HorizontalContentAlignment="Left"
+                    Margin="10,5"
+                    />
+                <TextBlock Grid.Row="6" Grid.Column="2" Text="Rev" Margin="85,5,0,5" VerticalAlignment="Center" HorizontalAlignment="Left"/>
             </Grid>
         </GroupBox>
 

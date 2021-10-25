@@ -27,7 +27,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
 			{
-				ResultHdr.HeaderText = string.Format("Result (tol=±{0:0.0} Rev)", RxGlobals.Settings.SetupAssistCam.Tolerance);
+				ResultHdr.HeaderText = string.Format("Result (tol A=±{0:0.0} Rev, S=±{1:0.0} Rev)", RxGlobals.Settings.SetupAssistCam.ToleranceAngle, RxGlobals.Settings.SetupAssistCam.ToleranceStitch);
 				Actions.ItemsSource  = RxGlobals.SA_StateMachine.StartAlign();
 			}
 		}

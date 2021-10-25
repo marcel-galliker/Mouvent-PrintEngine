@@ -37,11 +37,12 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			if (str!=null)
 			{
 				String[] list = str.Split(' ');
+			// !first item is always ""
 				int i;
-				int cnt=Math.Min(list.Count(), _Grid.Children.Count);
+				int cnt=Math.Min(list.Count()-1, _Grid.Children.Count);
 				for (i = 0; i < cnt; i++)
 				{
-					(_Grid.Children[i] as TextBlock).Text = list[i];
+					(_Grid.Children[i] as TextBlock).Text = list[i+1];
 				}
 				while (i<_Grid.Children.Count) 
 				{

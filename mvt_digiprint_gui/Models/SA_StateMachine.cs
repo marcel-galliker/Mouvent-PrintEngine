@@ -913,16 +913,16 @@ namespace RX_DigiPrint.Models
 				RxGlobals.RxInterface.SendCommand(TcpIp.CMD_STOP_PRINTING);
 			}
 			
-			if (!RxGlobals.PrintSystem.IsRobotConnected)
-			{
-				new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted(), false);
-			}
-
 			RxGlobals.SetupAssist.ScanReference();
 			for(int n=0; n<_RobotUsed.Length; n++)
 			{
 				if (_RobotUsed[n]) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_ROBI_MOVE_TO_GARAGE);
 				_RobotUsed[n] = false;
+			}
+
+			if (!RxGlobals.PrintSystem.IsRobotConnected)
+			{
+				new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted(), false);
 			}
 
 			return false;
@@ -1331,7 +1331,7 @@ namespace RX_DigiPrint.Models
 			}
 			else
 			{
-				if (Math.Abs((double)_Action.Correction) <= RxGlobals.Settings.SetupAssistCam.Tolerance + 0.05) _Action.State = ECamFunctionState.done;
+				if (Math.Abs((double)_Action.Correction) <= RxGlobals.Settings.SetupAssistCam.ToleranceAngle + 0.05) _Action.State = ECamFunctionState.done;
 				else
 				{
 					_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
@@ -1377,7 +1377,7 @@ namespace RX_DigiPrint.Models
 				}
 				else
 				{
-					if (Math.Abs((double)action.Correction) <= RxGlobals.Settings.SetupAssistCam.Tolerance + 0.05) 
+					if (Math.Abs((double)action.Correction) <= RxGlobals.Settings.SetupAssistCam.ToleranceStitch + 0.05) 
 						action.State = ECamFunctionState.done;
 					else
 					{
