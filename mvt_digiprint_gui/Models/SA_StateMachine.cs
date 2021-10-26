@@ -400,7 +400,7 @@ namespace RX_DigiPrint.Models
 			_Adjusted	= false;
 
 			_Actions = new List<SA_Action>();
-			if (_SimuMachine==false)
+		//	if (_SimuMachine==false)
 			{
 				_Actions.Add(new SA_Action(){Name="Print Image"});
 
@@ -943,7 +943,7 @@ namespace RX_DigiPrint.Models
 				_Action = null;
 				return;
 			}
-			if (_Debug) CanContinue = false;
+		//	if (_Debug) CanContinue = false;
 			_Action			=_Actions[_ActionIdx];
 			if (_Action.State==ECamFunctionState.undef)
 				_Action.State = (_Action.Function<ECamFunction.CamFindLines_Vertical)? ECamFunctionState.printing : ECamFunctionState.runningCam;			

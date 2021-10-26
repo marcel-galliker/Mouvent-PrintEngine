@@ -747,7 +747,7 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 							if (ret==REPLY_OK) strcpy(_FileTimePath, filepath);
 
 							#ifdef DEBUG
-							//	bmp_write(PATH_TEMP "TEST.bmp" , buffer[0], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
+							//	bmp_write(PATH_RIPPED_DATA "trace/TEST.bmp" , buffer[0], bmpInfo.bitsPerPixel, bmpInfo.srcWidthPx, bmpInfo.lengthPx, bmpInfo.lineLen, FALSE);
 							#endif
 
 							bmpInfo.buffer[color] = &buffer[color];
@@ -763,7 +763,7 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 						bmpInfo.resol.y=1200;					
 						char fname[20];
 						sprintf(fname, "TEST-%d", id->scan);
-						tif_write(PATH_TEMP, fname, &bmpInfo, NULL);						
+						tif_write(PATH_RIPPED_DATA "trace/", fname, &bmpInfo, NULL);						
 					}
 					#endif
 				}
@@ -1318,7 +1318,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				if (!head) break;
 				head--;
 				pInfo = &pItem->splitInfo[head];
-				rx_mem_use(*pBmpInfo->buffer[color]);
+		//		rx_mem_use(*pBmpInfo->buffer[color]);
 			
 				pItem->headsUsed++;
 				pInfo->pListItem		= pItem;
@@ -1327,8 +1327,15 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->same				= same;
 				pInfo->same				= FALSE;
 				pInfo->data				= pBmpInfo->buffer[color];
-			
-				if ((id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY || (id->id==PQ_TEST_SA_REGISTER && RX_Color[color].color.colorCode!=0)) && pInfo->data)
+
+                if (pInfo->data 
+					&& (  id->id == PQ_TEST_JETS 
+					   || id->id == PQ_TEST_JET_NUMBERS 
+					   || id->id == PQ_TEST_DENSITY 
+					   || id->id == PQ_TEST_SA_DENSITY 
+					   || (id->id== PQ_TEST_SA_REGISTER && RX_Color[color].color.colorCode!=0)
+					   )
+				)
 				{
 					if (n==0 && (id->copy|id->scan)==1)
 					{
@@ -1342,7 +1349,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 						}
 					}
 					pInfo->data	= &_TestBuf[color][n];
-				}
+                }
 			
 				pInfo->used			= TRUE;
 				pInfo->board		= head/RX_Spooler.headsPerBoard;
@@ -1373,14 +1380,14 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				}
 
 				if (rx_def_is_lb(RX_Spooler.printerType) 
-				&& (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY || id->id==PQ_TEST_FULL_ALIGNMENT)  
+				&& (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY || id->id==PQ_TEST_FULL_ALIGNMENT || id->id==PQ_TEST_SA_DENSITY)  
 				&& (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=color))
 				{
 					empty=TRUE;
 				}
 
 				if (rx_def_is_lb(RX_Spooler.printerType) 
-				&& (id->id==PQ_TEST_SA_ALIGNMENT || id->id==PQ_TEST_SA_DENSITY)  
+				&& (id->id==PQ_TEST_SA_ALIGNMENT || id->id==PQ_TEST_SA_DENSITY) 
 				&& (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=RX_Spooler.colorCnt-1-color))
 				{
 					// printing in different order, black first
@@ -1413,17 +1420,18 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				}
 
 				//--- rip the test data -----------------------------------------
-				if (pInfo->data && (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY)) 
+				if (pInfo->data && (id->id==PQ_TEST_JETS || id->id==PQ_TEST_JET_NUMBERS || id->id==PQ_TEST_DENSITY || id->id==PQ_TEST_SA_DENSITY)) 
 				{
 					RX_Bitmap bmp;
-					bmp.bppx		= pInfo->bitsPerPixel;
+                    int y = (id->id==PQ_TEST_SA_DENSITY)? 2000:0;
+                    bmp.bppx		= pInfo->bitsPerPixel;
 					bmp.width		= pInfo->widthPx;
 					bmp.height		= pInfo->srcLineCnt;					
 					bmp.lineLen		= pInfo->srcLineLen;
 					bmp.sizeUsed	= 0;
 					bmp.sizeAlloc	= 0;
 					bmp.buffer		= *pInfo->data;
-					rip_test_data(&bmp, id->id, RX_TestData[head]);
+					rip_test_data(&bmp, id->id, y, RX_TestData[head]);
 				}
 				else if (pInfo->data && (id->id==PQ_TEST_SA_REGISTER) && RX_Color[color].color.colorCode!=0)
 				{
@@ -1518,7 +1526,7 @@ static int _data_split_prod(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					pInfo->clearBlockUsed = clearBlockUsed;
 					pInfo->same			  = same;
 					pInfo->data			  = pBmpInfo->buffer[color];
-					pInfo->pListItem	  = pItem;
+                    pInfo->pListItem	  = pItem;
 					pInfo->used			  = TRUE;
 					pInfo->board		  = head/RX_Spooler.headsPerBoard;
 					pInfo->head			  = head%RX_Spooler.headsPerBoard;
@@ -2081,7 +2089,7 @@ static void _data_fill_blk_scan(SBmpSplitInfo *psplit, int blkNo, BYTE *dst, int
 	BYTE    t0=*test0;
 	BYTE	t1=*test1;
 
-	if (test)
+    if (test)
 	{
 		*test0 = 0x33;
 		*test1 = 0x66;
@@ -2252,7 +2260,7 @@ static void _data_fill_blk_test(SBmpSplitInfo *psplit, int blkNo, BYTE *dst)
 	BYTE**	ptr     = psplit->data;
 	BYTE	*src    = *ptr;
 	
-	if (mirror)
+    if (mirror)
 	{
 		line	 = psplit->srcLineCnt-line-1;
 		endLine  = -1;

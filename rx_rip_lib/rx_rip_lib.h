@@ -152,7 +152,7 @@ EXPORT int  rip_get_print_env	(const char *path, char *printEnv);
 
 EXPORT int  rip_bmp_copy		(int *srcBmp, int srcWidth, int srcHeight, int srcStride, int srcBppx, int dist, int cnt, int *dstBmp, int dstStride);
 
-EXPORT int  rip_test_data		(RX_Bitmap *pBmp, int testImage, char *text);
+EXPORT int  rip_test_data		(RX_Bitmap *pBmp, int testImage, int y, char *text);
 
 #ifdef __cplusplus
 }

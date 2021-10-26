@@ -541,7 +541,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			*/
 		}
 		else ret=REPLY_OK;
-		rx_mem_unuse(pInfo->data);
+		if (!rx_printMode_is_test(pInfo->printMode)) rx_mem_unuse(pInfo->data);
 
 		if (ret==REPLY_OK)
 		{
@@ -641,17 +641,7 @@ static void _scr_fill_blk(SBmpSplitInfo *psplit, int dstLineLen, BYTE *dst)
 			s=src;
 			width=srcWidthBt;
 		}
-		/*
-		if (mirror)	
-		{
-			src	-= psplit->srcLineLen;
-			line--;
-		}
-		else
-		*/
-		{
-			src	+= psplit->srcLineLen;
-			line++;
-		}
+		src	+= psplit->srcLineLen;
+		line++;
 	}
 }

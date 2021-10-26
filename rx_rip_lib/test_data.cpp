@@ -33,10 +33,10 @@
 #define X			130
 
  //--- rip_test_data ----------------------------------------------------------
-int  rip_test_data	(RX_Bitmap *pBmp, int testImage, char *text)
+int rip_test_data(RX_Bitmap *pBmp, int testImage, int y, char *text)
 {
 	FT_Face font;
-	int y, n, len;
+	int n, len;
 	char *line;
 	UINT16 wstr[100];
 
@@ -44,7 +44,6 @@ int  rip_test_data	(RX_Bitmap *pBmp, int testImage, char *text)
 	ft_enum_fonts((char*)PATH_BIN_SPOOLER);
 
 	font = ft_load_font((char*)FONT_NAME);
-	y=0;
 	n=0;
 	line=text;
 	len=0;
@@ -63,15 +62,16 @@ int  rip_test_data	(RX_Bitmap *pBmp, int testImage, char *text)
 			#else
 				char_to_wchar((const char*)line, (wchar_t*)wstr, len);
 			#endif
-			if (testImage==PQ_TEST_DENSITY && n>6)
+            if ((testImage == PQ_TEST_DENSITY && n > 6) 
+			||  (testImage == PQ_TEST_SA_DENSITY && n > 4) )
 			{
 				ft_text_out(pBmp, X, y, font, FONT_SIZE_SMALL, 0, wstr, len, 1);	// changed interface if wstr from wchar_t to UINT16
 				y += LINE_DIST_SMALL;
 			}
 			else 
 			{
-			ft_text_out(pBmp, X, y, font, FONT_SIZE, 0, wstr, len, 1);	// changed interface if wstr from wchar_t to UINT16
-			y += LINE_DIST;
+				ft_text_out(pBmp, X, y, font, FONT_SIZE, 0, wstr, len, 1);	// changed interface if wstr from wchar_t to UINT16
+				y += LINE_DIST;
 			}
 			line += len;
 			len=0;

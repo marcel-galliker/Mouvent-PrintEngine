@@ -312,18 +312,30 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3(pstat->printed_ml	));
 			len += sprintf(&str[len], "s# %d-%02d\n", pinfo->serialNo/100, pinfo->serialNo%100);
-			len += sprintf(&str[len], "volt %d / straight %d / uniform %d\n", pinfo->voltage, pinfo->straightness, pinfo->uniformity);
-			len += sprintf(&str[len], "bad");
-			for (bad=0; bad<SIZEOF(pinfo->badJets) && pinfo->badJets[bad]; bad++)
-			{
-				len += sprintf(&str[len], "  %d", pinfo->badJets[bad]); 
-			}
-			len += sprintf(&str[len], "\n");
-			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
-			len += sprintf(&str[len], "Angle=%s ", value_str_screw(pstat->eeprom_mvt.robot.angle));
-			len += sprintf(&str[len], "Stitch=%s", value_str_screw(pstat->eeprom_mvt.robot.stitch));
-			len += sprintf(&str[len], "\n");
-			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
+            if (RX_TestImage.testImage != PQ_TEST_SA_DENSITY)
+            {
+                len += sprintf(
+                    &str[len], "volt %d / straight %d / uniform %d\n",
+                    pinfo->voltage, pinfo->straightness, pinfo->uniformity);
+                len += sprintf(&str[len], "bad");
+                for (bad = 0;
+                     bad < SIZEOF(pinfo->badJets) && pinfo->badJets[bad]; bad++)
+                {
+                    len += sprintf(&str[len], "  %d", pinfo->badJets[bad]);
+                }
+                len += sprintf(&str[len], "\n");
+                len +=
+                    sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n",
+                            RX_TestImage.dots, pstat->meniscus / 10,
+                            abs(pstat->meniscus) % 10, pstat->pumpFeedback / 10,
+                            pstat->pumpFeedback % 10);
+                len += sprintf(&str[len], "Angle=%s ",
+                               value_str_screw(pstat->eeprom_mvt.robot.angle));
+                len += sprintf(&str[len], "Stitch=%s",
+                               value_str_screw(pstat->eeprom_mvt.robot.stitch));
+                len += sprintf(&str[len], "\n");
+            }
+            if (RX_TestImage.testImage == PQ_TEST_DENSITY || RX_TestImage.testImage == PQ_TEST_SA_DENSITY) 
 			{
 				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_density.voltage);
 				for (int i=0; i<MAX_DENSITY_VALUES; i++)
