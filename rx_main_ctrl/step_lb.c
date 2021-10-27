@@ -693,7 +693,6 @@ void steplb_rob_control(EnFluidCtrlMode ctrlMode, int no)
 {		
     static int _risingEdge[STEPPER_CNT] = {0};
     static int _time[STEPPER_CNT] = {0};
-    ERobotFunctions function;
 
     if (ctrlMode != ctrl_vacuum && ctrlMode != ctrl_vacuum_step1) _time[no] = 0;
     

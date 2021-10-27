@@ -350,7 +350,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin32.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;libmlpiwin32.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
@@ -499,7 +499,7 @@ Exit 0</Command>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin32.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;libmlpiwin32.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers />
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
@@ -541,7 +541,7 @@ copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11.dll "$(ProjectDir)..\bin\
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib_x64.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib_x64.lib;rx_tif_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>

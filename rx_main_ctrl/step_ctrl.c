@@ -177,7 +177,8 @@ int step_isReady(int no)
 	{
 	case STEPPER_LB:	steplb_isReady(no); break;
     default: return TRUE;
-	}	
+	}
+	return TRUE;
 }
 
 //--- _step_handle_msg -------------------------------------------------------
