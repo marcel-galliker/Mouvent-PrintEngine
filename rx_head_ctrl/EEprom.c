@@ -126,11 +126,11 @@ void eeprom_init_data(int headNo, BYTE *eeprom, SHeadEEpromInfo *pInfo)
 								l+=sprintf(&code[l], "%02X ", buf[i]);
 								if (l>128)
 								{
-									TrPrintfL(TRUE, "EEPROM: %s", code);
+									TrPrintfL(TRUE, "EEPROM[%d]: %s", headNo, code);
 									l=0;
 								}
 							}
-							TrPrintfL(TRUE, "EEPROM: %s", code);
+							TrPrintfL(TRUE, "EEPROM[%d]: %s", headNo, code);
 						}
 
 						if (cmp) 
