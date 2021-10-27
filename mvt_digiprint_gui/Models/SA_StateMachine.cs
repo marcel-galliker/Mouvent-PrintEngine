@@ -625,7 +625,16 @@ namespace RX_DigiPrint.Models
 								_CallbackData = CallBackData;
 								RxGlobals.SetupAssist.WebMove(-CallBackData.DPosY/1000);
 							}
-							else RxGlobals.SetupAssist.WebMove(1);
+							else 
+							{
+								if (RxGlobals.SetupAssist.WebPos<3000)
+									RxGlobals.SetupAssist.WebMove(1);
+								else 
+								{
+									Console.WriteLine("{0}: Mark NOT Found", RxGlobals.Timer.Ticks());
+									Abort();
+								}
+							}
 							handled=true;
 						}
 						break;
@@ -1593,7 +1602,7 @@ namespace RX_DigiPrint.Models
 
 					case ECamFunction.CamFindLines_Vertical:				
 						_CamFunctions.FindLines_Vertical();
-						RxGlobals.SetupAssist.WebMove(1000.0);
+						RxGlobals.SetupAssist.WebMove(200.0);
 						break;
 
 					case ECamFunction.CamFindLine_Horzizontal:

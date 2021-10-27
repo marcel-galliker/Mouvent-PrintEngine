@@ -737,22 +737,25 @@ namespace RX_DigiPrint.Devices
         /// <returns>true if successful</returns>
         public bool WhiteCalibrate()
         {
-            try
-            {
-                if (Handle==IntPtr.Zero) Connect();
-                PrepareMeasure();
-                HandleResult(I1PRO3_Calibrate(Handle));
-                IsWhiteCalibrated = true;
-                SetLed(I1Pro3.LedActionEnum.IndicatorLedSucceeded);
+            while (true)
+			{
+                try
+                {
+                    if (Handle == IntPtr.Zero) Connect();
+                    PrepareMeasure();
+                    HandleResult(I1PRO3_Calibrate(Handle));
+                    IsWhiteCalibrated = true;
+                    SetLed(I1Pro3.LedActionEnum.IndicatorLedSucceeded);
+                    return true;
+                }
+                catch (Exception excep)
+                {
+                    SetLed(I1Pro3.LedActionEnum.IndicatorLedFailed);
+                    IsWhiteCalibrated = false;
+                    DialogResult res=MessageBox.Show("Error: " + excep.Message, "Calibrate Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    if (res== DialogResult.Cancel) return false;
+                }
             }
-            catch (Exception excep)
-            {
-                SetLed(I1Pro3.LedActionEnum.IndicatorLedFailed);
-                IsWhiteCalibrated = false;
-                MessageBox.Show("Error: " + excep.Message, "Calibrate Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
         }
 
         //--- Connect -------------------------------------
