@@ -1393,6 +1393,14 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				{
 					empty=TRUE;
 				}
+
+				if (rx_def_is_lb(RX_Spooler.printerType) 
+				&& id->id==PQ_TEST_SA_REGISTER
+				&& RX_Color[color].color.colorCode!=0
+				&& (RX_Spooler.colorCnt==0 || ((id->copy-1)%RX_Spooler.colorCnt)!=RX_Spooler.colorCnt-2-color))
+				{
+					empty=TRUE;
+				}
 					
 				if (rx_def_is_lb(RX_Spooler.printerType) 
 				&& (id->id==PQ_TEST_ENCODER)  
@@ -1430,21 +1438,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 					bmp.buffer		= *pInfo->data;
 					rip_test_data(&bmp, id->id, y, RX_TestData[head]);
 				}
-				else if (pInfo->data && (id->id==PQ_TEST_SA_REGISTER) && RX_Color[color].color.colorCode!=0)
-				{
-					RX_Bitmap bmp;
-					bmp.bppx		= pInfo->bitsPerPixel;
-					bmp.width		= pInfo->widthPx;
-					bmp.height		= pInfo->srcLineCnt;					
-					bmp.lineLen		= pInfo->srcLineLen;
-					bmp.sizeUsed	= 0;
-					bmp.sizeAlloc	= 0;
-					bmp.buffer		= *pInfo->data;
-					for (int m=0; m<RX_Spooler.headsPerColor; m++)
-					{
-						if (m!=color) bmp_clear(&bmp, 180+256*m, 0, 200, bmp.height);
-					}
-				}
+
 				if (pInfo->bitsPerPixel==8)
 				{
 					scr_start(pInfo);

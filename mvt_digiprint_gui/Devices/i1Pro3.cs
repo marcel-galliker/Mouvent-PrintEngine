@@ -737,6 +737,7 @@ namespace RX_DigiPrint.Devices
         /// <returns>true if successful</returns>
         public bool WhiteCalibrate()
         {
+            Console.WriteLine("Test");
             while (true)
 			{
                 try

@@ -1190,6 +1190,10 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 		{
             RX_TestImage.scans=RX_Config.colorCnt;
 		}
+		else if (RX_TestImage.testImage==PQ_TEST_SA_REGISTER)
+		{
+            RX_TestImage.scans=RX_Config.colorCnt-1;
+		}
     }
 	if (RX_TestImage.scans<1) RX_TestImage.scans=1;
 //	RX_TestImage.scanMode = PQ_SCAN_STD;
