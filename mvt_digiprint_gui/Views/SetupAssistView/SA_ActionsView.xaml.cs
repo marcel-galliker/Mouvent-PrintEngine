@@ -1,4 +1,5 @@
-﻿using rx_CamLib;
+﻿using MahApps.Metro.IconPacks;
+using rx_CamLib;
 using RX_Common;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
@@ -110,14 +111,10 @@ namespace RX_DigiPrint.Views.SetupAssistView
 	{
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			switch((ECamFunction)value)
-			{
-				case ECamFunction.CamMeasureAngle:	return Visibility.Visible;
-				case ECamFunction.CamMeasureStitch:	return Visibility.Visible;
-				case ECamFunction.CamMeasureDist:	return Visibility.Visible;
-				default: return Visibility.Collapsed;
-			}
+			if ((PackIconMaterialKind)value == PackIconMaterialKind.None) return Visibility.Collapsed;
+			return Visibility.Visible;
 		}
+
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
 			return null;

@@ -58,7 +58,7 @@
                                             Width="15" 
                                             Height="15" 
                                             Kind="{Binding IconKind}"
-                                            Visibility="{Binding Function, Converter={StaticResource FunctionImageVisible_Converter}}"/>
+                                            Visibility="{Binding IconKind, Converter={StaticResource FunctionImageVisible_Converter}}"/>
 
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
                                     </StackPanel>

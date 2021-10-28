@@ -34,6 +34,8 @@ namespace rx_CamLib
 		CamMeasureAngle,
 		CamMeasureStitch,
 		CamMeasureDist,
+		CamMeasureRegAngle,
+		CamMeasureRegStitch,
 		I1Calibrate,
 		I1Measure,
 	};

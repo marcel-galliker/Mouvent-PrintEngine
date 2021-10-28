@@ -109,9 +109,11 @@ namespace RX_DigiPrint.Models
 					SetProperty(ref _Function,value);
 					switch(value)
 					{ 
-					case ECamFunction.CamMeasureAngle:	IconKind=PackIconMaterialKind.AngleAcute; break;
-					case ECamFunction.CamMeasureStitch: IconKind=PackIconMaterialKind.ArrowCollapseHorizontal; break;
-					case ECamFunction.CamMeasureDist:	IconKind=PackIconMaterialKind.ArrowExpandDown; break;
+					case ECamFunction.CamMeasureAngle:		IconKind=PackIconMaterialKind.AngleAcute; break;
+					case ECamFunction.CamMeasureStitch:		IconKind=PackIconMaterialKind.ArrowCollapseHorizontal; break;
+					case ECamFunction.CamMeasureDist:		IconKind=PackIconMaterialKind.ArrowExpandDown; break;
+					case ECamFunction.CamMeasureRegStitch:	IconKind = PackIconMaterialKind.ArrowCollapseHorizontal; break;
+					case ECamFunction.CamMeasureRegAngle:	IconKind = PackIconMaterialKind.AngleAcute; break;
 					default: break;
 					}
 				}
