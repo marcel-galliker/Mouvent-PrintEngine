@@ -113,7 +113,7 @@ static void _do_10ms_timer(void)
 static void _do_250ms_timer(void)
 {
 	volatile UINT16 dummy;
-	int i, Heaters_Average;
+	int i, Heaters_Average, Heaters_In_Print;
 
 	/* First read does start AD conversion, result is only available at second read.
 	 * That's why the code seems one off!
@@ -133,17 +133,25 @@ static void _do_250ms_timer(void)
 
 	// Average of all heater
 	Heaters_Average = 0;
+	Heaters_In_Print = 0;
 	for (i = 0; i < 4; i++)
-		Heaters_Average += pRX_Status->cond[i].heater_percent;
-	Heaters_Average /= 4;
+	{	   	
+		if ( pRX_Status->cond[i].mode == ctrl_print)
+		{
+			Heaters_Average += pRX_Status->cond[i].heater_percent;
+			Heaters_In_Print++;
+		}
+	}
+		
+	Heaters_Average /= Heaters_In_Print;
 	
 	// Head 1 sensor defected : take head 2, or 3 or 4
-	if (pRX_Config->cond[0].tempHead > 100000)		// > 100°C means problem
+	if (pRX_Config->cond[0].tempHead == INVALID_VALUE)		// > 100°C means problem
 	{
 		i = -1;
-		if (pRX_Config->cond[1].tempHead < 100000) i = 1;
-		else if (pRX_Config->cond[2].tempHead < 100000) i = 2;
-		else if (pRX_Config->cond[3].tempHead < 100000) i = 3;
+		if (pRX_Config->cond[1].tempHead != INVALID_VALUE) i = 1;
+		else if (pRX_Config->cond[2].tempHead != INVALID_VALUE) i = 2;
+		else if (pRX_Config->cond[3].tempHead != INVALID_VALUE) i = 3;
 		
 		if (i > -1)
 		{
@@ -154,12 +162,12 @@ static void _do_250ms_timer(void)
 	}
 
 	// Head 2 sensor defected : take head 2, or 1 or 4
-	if (pRX_Config->cond[1].tempHead > 100000)		// > 100°C means problem
+	if (pRX_Config->cond[1].tempHead == INVALID_VALUE)		// > 100°C means problem
 	{
 		i = -1;
-		if (pRX_Config->cond[2].tempHead < 100000) i = 2;
-		else if (pRX_Config->cond[0].tempHead < 100000) i = 0;
-		else if (pRX_Config->cond[3].tempHead < 100000) i = 3;
+		if (pRX_Config->cond[2].tempHead != INVALID_VALUE) i = 2;
+		else if (pRX_Config->cond[0].tempHead != INVALID_VALUE) i = 0;
+		else if (pRX_Config->cond[3].tempHead != INVALID_VALUE) i = 3;
 		
 		if (i > -1)
 		{
@@ -170,12 +178,12 @@ static void _do_250ms_timer(void)
 	}
 
 	// Head 3 sensor defected : take head 4, or 2 or 1
-	if (pRX_Config->cond[2].tempHead > 100000)		// > 100°C means problem
+	if (pRX_Config->cond[2].tempHead == INVALID_VALUE)		// > 100°C means problem
 	{
 		i = -1;
-		if (pRX_Config->cond[3].tempHead < 100000) i = 3;
-		else if (pRX_Config->cond[1].tempHead < 100000) i = 1;
-		else if (pRX_Config->cond[0].tempHead < 100000) i = 0;
+		if (pRX_Config->cond[3].tempHead != INVALID_VALUE) i = 3;
+		else if (pRX_Config->cond[1].tempHead != INVALID_VALUE) i = 1;
+		else if (pRX_Config->cond[0].tempHead != INVALID_VALUE) i = 0;
 		
 		if (i > -1)
 		{
@@ -186,12 +194,12 @@ static void _do_250ms_timer(void)
 	}
 
 	// Head 4 sensor defected : take head 3, or 2 or 1
-	if (pRX_Config->cond[2].tempHead > 100000)		// > 100°C means problem
+	if (pRX_Config->cond[3].tempHead == INVALID_VALUE)		// > 100°C means problem
 	{
 		i = -1;
-		if (pRX_Config->cond[2].tempHead < 100000) i = 2;
-		else if (pRX_Config->cond[1].tempHead < 100000) i = 1;
-		else if (pRX_Config->cond[0].tempHead < 100000) i = 0;
+		if (pRX_Config->cond[2].tempHead != INVALID_VALUE) i = 2;
+		else if (pRX_Config->cond[1].tempHead != INVALID_VALUE) i = 1;
+		else if (pRX_Config->cond[0].tempHead != INVALID_VALUE) i = 0;
 		
 		if (i > -1)
 		{
