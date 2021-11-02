@@ -140,6 +140,10 @@ namespace RX_DigiPrint.Models
             RxGlobals.RxInterface.SendMsgBuf(cmd, str.ToString());
 
             if (cmd==TcpIp.CMD_PLC_SET_VAR) RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_VAR, _parstr("CMD_SET_PARAMETER", 1));
+
+            // Force the configuration to be reloaded (issue with XML_ENC_OFFSET that is in fact saved in the configuration as offset.incPerMeter)
+            // to ensure the GUI configuration is up to date (if we changed another configuration parameter to avoid overwrite of the offset.incPerMeter)
+            RxGlobals.RxInterface.SendCommand(TcpIp.CMD_GET_PRINTER_CFG);
         }
 
     }
