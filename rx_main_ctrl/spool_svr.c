@@ -313,7 +313,7 @@ int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 					msg.hdr.msgId  = CMD_SET_DISABLED_JETS;
 					msg.hdr.msgLen = sizeof(msg);
 					msg.head  = head;
-					memcpy(msg.disabledJets, RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].eeprom_mvt.disabledJets, sizeof(msg.disabledJets));
+					memcpy(msg.disabledJets, RX_Config.headDisabledJets[head] , sizeof(msg.disabledJets));
 					cnt=spool_send_msg(&msg);
 				}
 				{
@@ -321,7 +321,7 @@ int	spool_set_config(RX_SOCKET socket, UINT32 resetCnt)
 					msg.hdr.msgId  = CMD_SET_DENSITY_VAL;
 					msg.hdr.msgLen = sizeof(msg);
 					msg.head  = head;
-					memcpy(msg.value, RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].eeprom_mvt.densityValue, sizeof(msg.value));
+					memcpy(msg.value, RX_Config.densityValue[head / MAX_HEADS_BOARD][head % MAX_HEADS_BOARD], sizeof(msg.value));
 					if (FALSE)
 					{
 						char str[128];

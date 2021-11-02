@@ -334,7 +334,7 @@ static void _send_head_info(void)
 				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);
 				for (int i=0; i<MAX_DENSITY_VALUES; i++)
 				{
-					len += sprintf(&str[len], "%d  ", pstat->eeprom_mvt.densityValue[i]);			
+					len += sprintf(&str[len], "%d  ", RX_Config.densityValue[headNo / MAX_HEADS_BOARD][headNo % MAX_HEADS_BOARD][i]);			
 				}
 			len += sprintf(&str[len], "\n");
 			}

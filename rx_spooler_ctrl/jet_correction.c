@@ -16,13 +16,14 @@
 #include "rx_def.h"
 #include "rx_error.h"
 #include "jet_correction.h"
+#include "rx_trace.h"
+
 
 
 //-----------------------------------------------------------------------
 INT16 RX_DisabledJets[MAX_COLORS*MAX_HEADS_COLOR][MAX_DISABLED_JETS];
 static int _Active;
 static int _Changed;
-static int _MaxDropSize=3;
 static int _First;
 
 //--- prototypes --------------------------------------------------------
@@ -32,7 +33,7 @@ static int  _get_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y);
 static void _set_pixel1(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
 static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
 
-static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine);
+static int _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, int maxdropsize);
 
 static int  (*_GetPixel)(UCHAR *pBuffer, int bytesPerLine, int x, int y);
 static void (*_SetPixel)(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
@@ -65,7 +66,11 @@ void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 		for (n=0; n<MAX_DISABLED_JETS; n++)
 		{
 			if (RX_DisabledJets[pmsg->head][n]!=old[n]) _Changed = TRUE;
-			if (pmsg->disabledJets[n]>=0)				_Active  = TRUE;
+			if (pmsg->disabledJets[n]>=0)
+			{
+				_Active = TRUE;
+				TrPrintfL(TRUE, "Head %d: Disable jet %d", pmsg->head, pmsg->disabledJets[n]);
+			}
 		}
 	}
 	_First = TRUE;
@@ -120,7 +125,7 @@ int jc_changed(void)
 	return _Changed;
 }
 
-void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, int lengthPx, int lineLen)
+void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, int lengthPx, int lineLen, int maxdropsize)
 {
 	int pixelPerByte;
 
@@ -144,13 +149,24 @@ void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, in
 			int jet = disabledJets[n];
 			if (jet < 0) break;
 			jet += (pInfo->startBt - pInfo->fillBt) * pixelPerByte + pInfo->jetPx0;
-			if (jet >= 0) _disable_jet(*pInfo->data, pInfo->bitsPerPixel, lengthPx, lineLen, jet, fromLine);
+			if (jet >= 0)
+			{
+				TrPrintfL(TRUE, "correct %d drops on jet %d", _disable_jet(*pInfo->data, pInfo->bitsPerPixel, lengthPx, lineLen, jet, fromLine, maxdropsize), jet);
+			}
 		}
 	}
 }
 
+int getmaxdropsize(const char *dots)
+{
+	int maxdropsize = 1;
+	if (strchr(dots, 'M')) maxdropsize = 2;
+	if (strchr(dots, 'L')) maxdropsize = 3;
+	return maxdropsize;
+}
+
 //--- _jet_correction --------------------------------------------------
-int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
+int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, const char* dots)
 {
 	int color, head;
 	SBmpSplitInfo	*pInfo; 
@@ -168,7 +184,7 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine)
 			if (RX_Spooler.headNo[color][head])
 			{
 				pInfo = &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
-				jc_head_correct(pInfo, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen);
+				jc_head_correct(pInfo, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen, getmaxdropsize(dots));
 			}
 		}
 	}
@@ -210,9 +226,10 @@ static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 }
 
 //--- _disable_jet -----------------------------------------------------
-static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine)
+static int _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, int maxdropsize)
 {
-    int jetMax=bytesPerLine*8/bitsPerPixel;
+	int jetMax = bytesPerLine * 8 / bitsPerPixel;
+	int ncorrect = 0;
 	if (jet>0 && jet<jetMax)
 	{
 		//--- special for "Jet Numbers" Image
@@ -250,7 +267,7 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 			int side=0;		// side: to change left/right
             int org[2];		// original dot size 
             int comp[2];	// compensated dot size
-			int limit = 200 * _MaxDropSize; // take into account the jc ratio in percent
+			int limit = 200 * maxdropsize; // take into account the jc ratio in percent
 
 			for (y=fromLine; y<length; y++)
 			{
@@ -264,12 +281,13 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 				{
 					org[0] = comp[0] = _GetPixel(pBuffer, bytesPerLine, jet-1, y);
 					org[1] = comp[1] = _GetPixel(pBuffer, bytesPerLine, jet+1, y);
-					max = 2*_MaxDropSize-org[0]-org[1];
-					while (droplets > 0 && max)
+					max = 2 * maxdropsize - org[0] - org[1];
+					while (droplets > 0 && max > 0)
 					{
-						if (comp[side] < _MaxDropSize)
+						if (comp[side] < maxdropsize)
 						{
 							comp[side]++;
+							ncorrect++;
 							droplets -= 100; // ratio in percent
 							max--;
 						}
@@ -281,5 +299,5 @@ static void _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytes
 			}            
         }
 	}
-//	Error(LOG, 0, "_disable_jet %d", jet);
+	return ncorrect;
 }

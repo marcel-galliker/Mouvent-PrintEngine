@@ -374,18 +374,8 @@ namespace RX_DigiPrint.Models
             bool used=false;
             HeadNo  = no;
 
-            if (_DensityValuesCRC == null || _DensityValuesCRC != item.eeprom_mvt.densityValueCRC)
-            {
-                for (int i = 0; i < DensityValue.Length; i++) DensityValue[i] = item.eeprom_mvt.densityValue[i];
-                _DensityValuesCRC = item.eeprom_mvt.densityValueCRC;
-            }
-            
-            if (_DisabledJetsCRC == null || _DisabledJetsCRC != item.eeprom_mvt.disabledJetsCRC)
-            {
-                for (int i = 0; i < DisabledJets.Length; i++) DisabledJets[i] = item.eeprom_mvt.disabledJets[i];
-                _DisabledJetsCRC = item.eeprom_mvt.disabledJetsCRC;
-            }
-            
+            for (int i = 0; i < DensityValue.Length; i++) DensityValue[i] = item.eeprom_mvt.densityValue[i];
+            for (int i = 0; i < DisabledJets.Length; i++) DisabledJets[i] = item.eeprom_mvt.disabledJets[i];
             Voltage = item.eeprom_mvt.voltage;
 
             try

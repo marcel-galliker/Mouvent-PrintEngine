@@ -114,57 +114,6 @@ static int _do_head_stat(RX_SOCKET socket, int headNo, SHeadBoardStat	*pstat)
 			fluid_send_ctrlMode(-1, ctrl_off, TRUE);
 		}			
 		
-		BOOL save_setup = FALSE;
-		for (int condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
-		{
-			SHeadEEpromMvt *mvt = &RX_HBStatus[headNo].head[condNo].eeprom_mvt;
-
-			if (!memempty(mvt, sizeof(SHeadEEpromMvt))) // ensure the eeprom had already been read
-			{
-				// check the eeprom content, if not valid, take the element from configuration file
-				// and send new value to heads
-				if (mvt->densityValueCRC != rx_crc8(mvt->densityValue, sizeof(mvt->densityValue)) 
-				|| mvt->voltageCRC != rx_crc8(&mvt->voltage, sizeof(mvt->voltage)))
-				{
-					Error(LOG, 0, "EEPROM MVT density not valid for head [%d.%d], read info from configuration file", headNo, condNo);
-					memcpy(mvt->densityValue, RX_Config.densityValue[headNo][condNo], sizeof(mvt->densityValue));
-					mvt->voltage = RX_Config.voltage[headNo][condNo];
-					SDensityValuesMsg msg;
-					msg.hdr.msgId = CMD_SET_DENSITY_VAL;
-					msg.hdr.msgLen = sizeof(msg);
-					msg.head = headNo * MAX_HEADS_BOARD + condNo;
-					msg.voltage = RX_Config.voltage[headNo][condNo];
-					memcpy(msg.value, RX_Config.densityValue[headNo][condNo], sizeof(msg.value));
-					ctrl_set_density_values(&msg);
-				}
-				else if (mvt->voltage != RX_Config.voltage[headNo][condNo] || memcmp(RX_Config.densityValue[headNo][condNo], mvt->densityValue, sizeof(mvt->densityValue)))
-				{
-					Error(LOG, 0, "Save setup for density [%d.%d]", headNo, condNo);
-					memcpy(RX_Config.densityValue[headNo][condNo], mvt->densityValue, sizeof(mvt->densityValue));
-					RX_Config.voltage[headNo][condNo] = mvt->voltage;
-					save_setup = TRUE;
-				}
-			
-				if (mvt->disabledJetsCRC != rx_crc8(mvt->disabledJets, sizeof(mvt->disabledJets)))
-				{
-					Error(LOG, 0, "EEPROM MVT disabled jets not valid for head [%d.%d], read info from configuration file", headNo, condNo);
-					memcpy(mvt->disabledJets, RX_Config.headDisabledJets[headNo * MAX_HEADS_BOARD + condNo], sizeof(mvt->disabledJets));
-					SDisabledJetsMsg msg;
-					msg.hdr.msgId = CMD_SET_DISABLED_JETS;
-					msg.hdr.msgLen = sizeof(msg);
-					msg.head = headNo * MAX_HEADS_BOARD + condNo;
-					memcpy(msg.disabledJets, RX_Config.headDisabledJets[headNo * MAX_HEADS_BOARD + condNo], sizeof(msg.disabledJets));
-					ctrl_set_disalbled_jets(&msg);
-				}
-				else if (memcmp(mvt->disabledJets, RX_Config.headDisabledJets[headNo * MAX_HEADS_BOARD + condNo], sizeof(mvt->disabledJets)))
-				{
-					Error(LOG, 0, "Save setup for disabled jets [%d.%d]", headNo, condNo);
-					memcpy(RX_Config.headDisabledJets[headNo * MAX_HEADS_BOARD + condNo], mvt->disabledJets, sizeof(mvt->disabledJets));
-					save_setup = TRUE;
-				}
-			}
-		}
-		if (save_setup) setup_save_config();
 
 		for (i=0; i<SIZEOF(pstat->head); i++)
 		{

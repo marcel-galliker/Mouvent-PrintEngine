@@ -23,5 +23,6 @@ void jc_set_disabled_jets(SDisabledJetsMsg *pmsg);
 
 int  jc_active(void);
 int	 jc_changed(void);
-int	 jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine);
-void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, int lengthPx, int lineLen);
+int	 jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, const char *dots);
+int getmaxdropsize(const char *dot);
+void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, int lengthPx, int lineLen, int maxdropsize);

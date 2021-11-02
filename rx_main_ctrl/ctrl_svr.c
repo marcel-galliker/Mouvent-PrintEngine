@@ -618,17 +618,11 @@ static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
 				memcpy(msg.dots, dots, sizeof(msg.dots));
 				
 				no = headNo*HEAD_CNT+n;
-				if (screenOnPrinter && RX_HBStatus[headNo].head[n].eeprom_mvt.voltage)	msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom_mvt.voltage;
+				if (screenOnPrinter && RX_Config.voltage[headNo][n])
+					msg.fpVoltage = RX_Config.voltage[headNo][n];
 				else if (RX_Config.headFpVoltage[no]) msg.fpVoltage = RX_Config.headFpVoltage[no];
 				else msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
 				
-				/*
-                Error(LOG, 0, "Head %s: FirepulseVoltage=%d%% (mvt=%d, fuji=%d)",
-					RX_Config.headBoard[headNo].head[n].name,
-					msg.fpVoltage,
-					RX_HBStatus[headNo].head[n].eeprom_mvt.voltage, 
-					RX_HBStatus[headNo].head[n].eeprom.voltage);
-				*/
 
 				if(_HeadCtrl[headNo].cfg->reverseHeadOrder) no = RX_Config.colorCnt*RX_Config.headsPerColor-1-no;
 				memcpy(&msg.ink, &RX_Config.inkSupply[inksupply].ink, sizeof(msg.ink));
@@ -849,13 +843,22 @@ void ctrl_send_head_cfg(void)
 //--- ctrl_set_density_values ------------------------------------------
 void ctrl_set_density_values(SDensityValuesMsg *pmsg)
 {
-	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
+	//sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
+
+	int headNo = pmsg->head / MAX_HEADS_BOARD;
+	int condNo = pmsg->head % MAX_HEADS_BOARD;
+	memcpy(RX_Config.densityValue[headNo][condNo], pmsg->value, sizeof(pmsg->value));
+	RX_Config.voltage[headNo][condNo] = pmsg->voltage; 
+	setup_save_config();
 }
 
 //--- ctrl_set_disalbled_jets ------------------------------------------
 void ctrl_set_disalbled_jets(SDisabledJetsMsg *pmsg)
 {
-	sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
+	//sok_send(&_HeadCtrl[pmsg->head/MAX_HEADS_BOARD].socket, pmsg);
+
+	memcpy(RX_Config.headDisabledJets[pmsg->head], pmsg->disabledJets, sizeof(pmsg->disabledJets));
+	setup_save_config();
 }
 
 //--- ctrl_abort_printing ------------------------------------------------------
@@ -1015,12 +1018,23 @@ void ctrl_reply_stat(RX_SOCKET socket)
 	int i;
 	for (i=0; i<HEAD_BOARD_CNT; i++)
 	{
-		RX_HBStatus[i].boardNo=i;
-		RX_HBStatus[i].info.connected = (_HeadCtrl[i].socket!=INVALID_SOCKET);
-	//	RX_HBStatus[i].info.flushed   = (_HeadsFlushed & (0x01LL<<i)) != 0;
+		SHeadBoardStat status;
+		memcpy(&status, &RX_HBStatus[i], sizeof(status));
+		status.boardNo = i;
+		status.info.connected = (_HeadCtrl[i].socket!=INVALID_SOCKET);
+
+		// ignore part of the stat regarding density and jet compensation as there are now stored in configuration
+		// because EPROM is not reliable
+		for (int condNo = 0; condNo < MAX_HEADS_BOARD; condNo++)
+		{
+			SHeadEEpromMvt *mvt = &status.head[condNo].eeprom_mvt;
+			memcpy(mvt->densityValue, RX_Config.densityValue[i][condNo], sizeof(mvt->densityValue));
+			mvt->voltage = RX_Config.voltage[i][condNo];
+			memcpy(mvt->disabledJets, RX_Config.headDisabledJets[i * MAX_HEADS_BOARD + condNo], sizeof(mvt->disabledJets));
+		}
 
 		if (_HeadCtrl[i].running) 
-			gui_send_msg_2(socket, REP_HEAD_STAT, sizeof(SHeadBoardStat), &RX_HBStatus[i]);
+			gui_send_msg_2(socket, REP_HEAD_STAT, sizeof(SHeadBoardStat), &status);
 	}
 }
 

@@ -873,8 +873,8 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 		
 		if (loaded || rx_printMode_is_test(printMode))
 		{
-			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224);
-			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0);
+			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224, dots);
+			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0, dots);
 		}
 		#ifdef DEBUG
 		if (FALSE)
