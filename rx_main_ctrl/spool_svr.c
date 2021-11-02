@@ -484,21 +484,6 @@ int spool_send_test_data(int headNo, char *str)
 	return spool_send_msg(&msg);
 }
 
-//--- spool_load_file ---------------------------------------------------------------------
-int spool_load_file(SPageId *pid, char *path)
-{
-	SLoadFileCmd msg;
-	int cnt;
-
-	msg.hdr.msgLen		= sizeof(msg);
-	msg.hdr.msgId		= CMD_LOAD_FILE;
-	memcpy(&msg.id, pid, sizeof(msg.id));
-	strncpy(msg.filepath, path, sizeof(msg.filepath));
-	cnt=spool_send_msg(&msg);
-
-	return REPLY_OK;
-}
-
 //--- spool_print_file ---------------------------------------------------------------
 int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT32 lengthPx, SPrintQueueItem *pitem, int clearBlockUsed)
 {

@@ -45,13 +45,6 @@ static RX_SOCKET		_RxCtrlSocket=INVALID_SOCKET;
 
 
 //--- load file ---------------------------------
-static void				*_load_file_thread(void *par);
-#define LOAD_FILE_BUF_SIZE	8
-static SLoadFileCmd	_LoadFileBuf[LOAD_FILE_BUF_SIZE];
-static int			_LoadFileInIdx;
-static int			_LoadFileOutIdx;
-HANDLE				_LoadFile_Sem;
-
 static void				*_print_file_thread(void *par);
 static HANDLE			_PrintFile_Sem;
 static RX_SOCKET		_PrintFile_Socket;
@@ -89,7 +82,6 @@ static int _do_spool_cfg	(RX_SOCKET socket, SSpoolerCfg	  *cfg);
 static int _do_color_cfg	(RX_SOCKET socket, SColorSplitCfg *cfg);
 static int _do_disabled_jets(RX_SOCKET socket, SDisabledJetsMsg  *jets);
 static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg);
-static int _do_load_file	(RX_SOCKET socket, SLoadFileCmd  *msg);
 
 static int _do_print_file	(RX_SOCKET socket, SPrintFileCmd  *msg);
 static void _do_start_sending(UINT32 resetCnt);
@@ -115,8 +107,6 @@ int ctrl_start(const char *ipAddrMain)
 	_LastWakeup = 0;
 	_LastGap = 0;
 	_SMP_Flags=0;
-	_LoadFileInIdx  = 0;
-	_LoadFileOutIdx = 0;
 
 	rx_mem_init(512*1024*1024);
 	if (!_PrintFile_Sem) _PrintFile_Sem = rx_sem_create();
@@ -124,7 +114,6 @@ int ctrl_start(const char *ipAddrMain)
 	if (!_sem_send) _sem_send = rx_sem_create();
 
 	rx_thread_start(_main_ctrl_thread, (void*)ipAddrMain, 0, "_main_ctrl_thread");
-	rx_thread_start(_load_file_thread,  NULL,             0, "_load_file_thread");
 	rx_thread_start(_print_file_thread, NULL,             0, "_print_file_thread");
 	rx_thread_start(_send_thread, NULL, 0, "_send_thread");
 	hc_start();
@@ -259,7 +248,6 @@ static int _handle_main_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct s
 	case CMD_COLOR_CFG:				_do_color_cfg		(socket, (SColorSplitCfg*)	pdata);	break;
 	case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*) pmsg);	break;
 	case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);	break;
-    case CMD_LOAD_FILE:				_do_load_file		(socket, (SLoadFileCmd*)	pmsg);	break;
 	case CMD_PRINT_FILE:			_MsgGot0++;
 									_PrintFile_Socket = socket;
 									memcpy(&_PrintFile_Msg, pmsg, sizeof(_PrintFile_Msg));
@@ -379,32 +367,6 @@ static int _do_density_values(RX_SOCKET socket, SDensityValuesMsg *pmsg)
 {
 	scr_set_values(pmsg->head, 0, 1000, pmsg->value);
 	return REPLY_OK;
-}
-
-//--- _do_load_file ---------------------------------------------------
-static int _do_load_file(RX_SOCKET socket, SLoadFileCmd  *pdata)
-{
-	int idx=(_LoadFileInIdx+1) % LOAD_FILE_BUF_SIZE;
-	if (idx==_LoadFileOutIdx) return Error(ERR_ABORT, 0, "Loadfile buffer overflow");
-	memcpy(&_LoadFileBuf[_LoadFileInIdx], pdata, sizeof(_LoadFileBuf[_LoadFileInIdx]));
-	_LoadFileInIdx=idx;
-	rx_sem_post(_LoadFile_Sem);
-	return REPLY_OK;
-}
-
-//---  _load_file_thread ------------------------------------------------------------
-static void *_load_file_thread(void *par)
-{
-	_LoadFile_Sem=rx_sem_create();
-	while (_ThreadRunning)
-	{
-		if (rx_sem_wait(_LoadFile_Sem, 1000)==REPLY_OK)
-		{
-			data_load_file(_LoadFileBuf[_LoadFileOutIdx].filepath, &_LoadFileBuf[_LoadFileOutIdx].id);
-			_LoadFileOutIdx = (_LoadFileOutIdx+1) % LOAD_FILE_BUF_SIZE;
-		}				
-	}
-	return NULL;
 }
 
 //--- _do_print_file ----------------------------------------------------------------------

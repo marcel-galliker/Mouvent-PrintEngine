@@ -491,7 +491,6 @@ static int _print_next(void)
 	static int _first;
 	static int _ScansNext;
 	static int _CopiesStart;
-	SPrintQueueItem *_NextItem=NULL;
 	TrPrintfL(TRUE, "_print_next printState=%d, spooler_ready=%d, pq_ready=%d", RX_PrinterStatus.printState, spool_is_ready(), pq_is_ready());
 	while ((RX_PrinterStatus.printState==ps_printing || RX_PrinterStatus.printState==ps_goto_pause || RX_PrinterStatus.printState==ps_pause || (_Scanning&&RX_PrinterStatus.printState==ps_stopping)) && spool_is_ready() && pq_is_ready())
 	{	
@@ -576,7 +575,6 @@ static int _print_next(void)
 			{
 				pq_trace_item(item);
 
-				_NextItem = NULL;
 				memcpy(&_Item, item, sizeof(_Item));
 				_first		  = TRUE;
 				_Item.scansStop = 0;
@@ -700,7 +698,6 @@ static int _print_next(void)
 					}
 				}
 
-				if (RX_Config.printer.type==printer_LH702) spool_load_file(&_Item.id, _FilePathLocal);
 				if (RX_Config.printer.type==printer_DP803) Error(LOG, 0, "Start Printing: >>%s<<, copiesTotal=%d, speed=%d m/min", _Item.filepath, _Item.copiesTotal, _Item.speed);
 			}
 		}
@@ -890,17 +887,6 @@ static int _print_next(void)
 						_Item.pageMargin = new_margin;
 					}
 					
-					if (RX_Config.printer.type==printer_LH702 && _NextItem==NULL)
-					{
-						_NextItem = pq_get_next_item();
-						if (_NextItem) 
-						{
-							char path[MAX_PATH];
-							_local_path(_NextItem->filepath, path);
-							if (_NextItem->id.page<_NextItem->start.page) _NextItem->id.page=_NextItem->start.page;
-							spool_load_file(&_NextItem->id, path);
-						}
-					}
 				}
 				return REPLY_OK;
 			}		
