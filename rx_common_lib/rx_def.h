@@ -572,7 +572,7 @@ typedef struct SPrinterStatus
 		#define CTR_LH702_K			0
 		#define CTR_LH702_COLOR		1
 		#define CTR_LH702_COLOR_W	2
-
+    
 }  SPrinterStatus;
 
 //--- SSpoolerCfg ----------------------------------

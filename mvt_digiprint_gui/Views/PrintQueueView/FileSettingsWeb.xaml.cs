@@ -34,8 +34,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
             RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
             LengthBox.ShowRolls = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf);
 
-            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LH702) SpeedHeight.Height = new GridLength(0);
-            else SpeedHeight.Height = GridLength.Auto;
+            SpeedHeight.Height = GridLength.Auto;
         }
 
         void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -62,13 +61,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
                 // Limit length selection to "Copies" for VDP jobs
                 LengthUnit.Visibility = item.Variable ? Visibility.Collapsed : Visibility.Visible;
-
-                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702)
-                {
-                    SpeedLabel.Visibility = Visibility.Collapsed;
-                    CB_Speed.Visibility = Visibility.Collapsed;
-                    SpeedUnit.Visibility = Visibility.Collapsed;
-                }
 
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.getInk(), item.SrcHeight);
                 if (!item.Variable && item.SrcPages > 1)

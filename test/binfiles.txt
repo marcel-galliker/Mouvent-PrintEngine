@@ -99,6 +99,9 @@ bin\main\head_presout.xml
 bin\main\libIQCoreRemote.so
 bin\main\libmlpi.so.1
 bin\main\libxl.so
+bin\main\libmbedcrypto.so.1
+bin\main\libmbedx509.so.0
+bin\main\libopen62541.so.1
 bin\main\rx_dhcp_server
 bin\main\rx_main_ctrl
 bin\rexroth
@@ -139,5 +142,6 @@ bin\win\rx_rip_lib.dll
 bin\win\rx_spooler_ctrl.exe
 bin\win\TBarCode11_x64.dll
 bin\win\cudart64_102.dll
+bin\win\libcrypto-1_1-x64.dll
 bin\win10
 bin\win10\Win10-Startup.exe

@@ -3,6 +3,7 @@
     All board to simulate should be register do a Network instance before run
 """
 import logging
+logger = logging.getLogger(__name__)
 import asyncio
 import xml.etree.ElementTree as ET
 import message_mgr
@@ -39,18 +40,18 @@ class UPDBoot:
     def __init__(self, boards):
         self.boards = boards
     def connection_made(self, transport):
-        logging.info('Connection from UDP to boot')
+        logger.info('Connection from UDP to boot')
         self.transport = transport
         all_transports.append(transport)
 
     def connection_lost(self, exc):
-        logging.error('Connection lost to boot')
+        logger.error('Connection lost to boot')
 
     def datagram_received(self, data, addr):
         "receive the broadcast message for rx_boot"
         msg = Message(header="i")
         msg.unpack(data)
-        logging.debug(f'Received message {msg.msgtype} of {len(data)} bytes on boot from addr {addr}')
+        logger.debug(f'Received message {msg.msgtype} of {len(data)} bytes on boot from addr {addr}')
         if msg.msgtype == "CMD_BOOT_INFO_REQ" or msg.msgtype == "CMD_BOOT_PING":
             # both messages respond the same struct
             reptype = msg.msgtype.replace("CMD", "REP").replace("_REQ","")
@@ -75,9 +76,9 @@ class UPDBoot:
             board = [h for h in self.boards if mac_addr(h["MacAddr"]) ==  msg.macAddr][0]
             # setup the good ip address
             board["ipaddress"] = msg.ipAddr.split("\0", 1)[0] 
-            logging.info(f"CMD_BOOT_ADDR_SET: board {board['DevTypeStr']} {board['DevNo']} change ip: {board['ipaddress']}")
+            logger.info(f"CMD_BOOT_ADDR_SET: board {board['DevTypeStr']} {board['DevNo']} change ip: {board['ipaddress']}")
         else:
-            logging.error(f"Boot message unknown x{msg.msgtype:08x}")
+            logger.error(f"Boot message unknown x{msg.msgtype:08x}")
 
 class FactoryTCPProtocol:
     "TCP protocol factory to save board number"
@@ -89,13 +90,13 @@ class FactoryTCPProtocol:
 
 class AbstractTCPProtocol:
     "manage messages"
-    def __init__(self, board ):
+    def __init__(self, board):
         self.board = board
         self.transport = None
 
     def connection_made(self, transport):
         peername = transport.get_extra_info('peername')
-        logging.info(f'Connection from {peername} to board {self.board.no}')
+        logger.info(f'Connection from {peername} to board {self.board.type}:{self.board.no}')
         if self.transport:
             raise Exception("already connected")
         self.transport = transport
@@ -103,28 +104,30 @@ class AbstractTCPProtocol:
 
 
     def connection_lost(self, exc):
-        logging.error(f'Connection lost to board {self.board.no}')
+        logger.error(f'Connection lost to board {self.board.type}:{self.board.no}')
 
     def data_received(self, data):
         "manage data and call the mgt_XXX of the corresponding message"
         while len(data):
             msg = Message()        
             data = msg.unpack(data)
-            logging.debug(f"Receive message {msg.msgtype}")
+            logger.debug(f"Receive message {msg.msgtype}")
             if isinstance(msg.msgtype, str):
                 message_manager = "mgt_"+msg.msgtype
                 if hasattr(self, message_manager):
                     getattr(self, message_manager)(msg)
                 else:
-                    logging.debug(f'Ignore msg {msg.msgtype} ({msg.lenght} bytes) on TCP for board {self.board.no}')
+                    logger.debug(f'Ignore msg {msg.msgtype} ({msg.lenght} bytes) on TCP for board {self.board.type}:{self.board.no}')
             else:
-                logging.error(f'Unknown msg x{msg.msgtype:06x} ({msg.lenght} bytes) on TCP for board {self.board.no}')
+                logger.error(f'Unknown msg x{msg.msgtype:06x} ({msg.lenght} bytes) on TCP for board {self.board.type}:{self.board.no}')
 
 class AbstractBoard(dict):
     "Base class for board (use to read network.cfg, should inherit from dict)"
     def __init__(self, d):
         super().__init__(d)
         self.no = int(d["DevNo"])
+        self.type = d["DevTypeStr"]
+        self.transport = None
         self.config = {} # rest api config of the board
 
 
@@ -151,7 +154,7 @@ class Network:
         # wait for board to "boot" to ensure we get the good ip
         while self.simulate and not all([board["ipaddress"] for board in boards]):
             await asyncio.sleep(1)
-        logging.info("all boards booted...")
+        logger.info("all boards booted...")
 
     def register(self, dev, protocol):
         "register a module for a device, module should have TCPProtocol, Board, startup and process"
@@ -196,7 +199,7 @@ class Network:
                 all_transports.append(await loop.create_server(
                         FactoryTCPProtocol(board,self.protocols[dev].TCPProtocol),
                         tcp_ip, tcp_port[dev]))
-                logging.info(f"start {tcp_ip}:{tcp_port[dev]} for board {dev} {no}")
+                logger.info(f"start {tcp_ip}:{tcp_port[dev]} for board {dev} {board.no}")
 
                 await self.protocols[dev].startup(loop, board)
 

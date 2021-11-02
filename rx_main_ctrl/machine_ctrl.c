@@ -22,7 +22,7 @@
 #include "step_cleaf.h"
 #include "fluid_ctrl.h"
 #include "machine_ctrl.h"
-
+#include "opcua.h"
 
 #define CAPPING_TIMEOUT	(20*60*1000)	// ms 
 static int		_CappingTimer=0;
@@ -32,6 +32,7 @@ typedef enum
 	mi_none,
 	mi_plc,
 	mi_tt,
+	mi_siemens,
 } EMachineInterface;
 
 static EMachineInterface _MInterface = mi_none;
@@ -52,7 +53,7 @@ static void set_interface(void)
 	case printer_LB702_UV:			_MInterface=mi_plc;		break;
 	case printer_LB703_UV:			_MInterface=mi_plc;		break;
 	case printer_LB702_WB:			_MInterface=mi_plc;		break;
-	case printer_LH702:				_MInterface=mi_plc;		break;
+	case printer_LH702:				_MInterface=mi_siemens;		break;
 	case printer_DP803:				_MInterface=mi_plc;		break;
 	default:						_MInterface=mi_none;
 	}
@@ -119,14 +120,13 @@ int		machine_set_printpar(SPrintQueueItem *pItem)
 	set_interface();
 
 	ctrl_send_firepulses(pItem->dots, (pItem->srcBitsPerPixel>=8));
-
-	if (RX_Config.printer.type==printer_LH702) lh702_set_printpar(pItem);
 		
 	switch(_MInterface) 
 	{
-	case mi_none:	return enc_start_printing (pItem, FALSE);
 	case mi_tt:		return tt_set_printpar(pItem);
 	case mi_plc:	return plc_set_printpar(pItem);
+	case mi_siemens:return lh702_set_printpar(pItem);
+	default:		return enc_start_printing(pItem, FALSE);
 	}
 	return REPLY_OK;
 }
@@ -136,9 +136,8 @@ int		machine_set_scans(int scans)
 {
 	switch(_MInterface) 
 	{
-	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_set_scans(scans);
-	case mi_plc:	return REPLY_OK;
+	default:	return REPLY_OK;
 	}
 	return REPLY_OK;
 }
@@ -149,9 +148,9 @@ UINT32	machine_get_scanner_pos(void)
 {
 	switch(_MInterface) 
 	{
-	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_get_scanner_pos();
 	case mi_plc:	return plc_get_scanner_pos();
+	default:		return REPLY_OK;
 	}
 	return REPLY_OK;
 }
@@ -164,11 +163,11 @@ int		machine_start_printing(void)
 
 	switch(_MInterface) 
 	{
-	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_start_printing();
 	case mi_plc:	return plc_start_printing();
+	default:
+		return REPLY_OK;
 	}
-	return REPLY_OK;
 }
 
 //--- machine_pause_printing ----------------------
@@ -180,6 +179,8 @@ int		machine_pause_printing(int fromGui)
 	case mi_none:	return REPLY_OK;
 	case mi_tt:		return tt_pause_printing();
 	case mi_plc:	return plc_pause_printing(fromGui);
+	case mi_siemens:
+		return lh702_pause_printing();
 	}
 	return REPLY_OK;
 }
@@ -193,6 +194,8 @@ int		machine_stop_printing(void)
 	case mi_none:	return enc_stop_printing();
 	case mi_tt:		return tt_stop_printing();
 	case mi_plc:	return plc_stop_printing();
+	case mi_siemens:
+		return lh702_stop_printing();
 	}
 	return REPLY_OK;
 }
@@ -208,6 +211,9 @@ int		machine_abort_printing(void)
 	case mi_plc:	// if (!rx_def_is_scanning(RX_Config.printer.type)) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 					step_abort_printing();
 					return plc_abort_printing();
+	case mi_siemens:
+		step_abort_printing();
+		return lh702_stop_printing();
 	}
 	return REPLY_OK;
 }

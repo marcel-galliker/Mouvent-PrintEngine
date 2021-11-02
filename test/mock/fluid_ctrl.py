@@ -4,6 +4,7 @@
 """
 import asyncio
 import logging
+logger = logging.getLogger(__name__)
 
 import network
 import message_mgr
@@ -34,11 +35,11 @@ class TCPProtocol(network.AbstractTCPProtocol):
         self.board.reset()
 
     def mgt_CMD_FLUID_IS_CFG(self, msg):
-        logging.info("CMD_FLUID_IS_CFG")
+        logger.info("CMD_FLUID_IS_CFG")
         # nois_set_is_cfg((SInkSupplyCfg",
         
     def mgt_CMD_FLUID_CFG(self, msg):
-        logging.info("CMD_FLUID_CFG")
+        logger.info("CMD_FLUID_CFG")
                                                 
     def mgt_CMD_FLUID_STAT(self, msg):
         msg = Message("REP_FLUID_STAT")
@@ -52,7 +53,7 @@ class TCPProtocol(network.AbstractTCPProtocol):
 
         
     def mgt_CMD_FLUID_CTRL_MODE(self, msg):
-        logging.info(f"CMD_FLUID_CTRL_MODE {msg.ctrlMode}")
+        logger.info(f"CMD_FLUID_CTRL_MODE {msg.ctrlMode}")
         ctrl_conv = {
             message_mgr.enums.get("ctrl_shutdown"): message_mgr.enums["ctrl_off"],
             message_mgr.enums.get("ctrl_prepareToPrint"): message_mgr.enums["ctrl_readyToPrint"],
@@ -61,27 +62,27 @@ class TCPProtocol(network.AbstractTCPProtocol):
         #_do_fluid_ctrlMode(socket, (SFluidCtrlCmd*)msg);
         
     def mgt_CMD_FLUID_DEGASSER(self, msg):
-        logging.info("CMD_FLUID_DEGASSER")
+        logger.info("CMD_FLUID_DEGASSER")
         #nios_set_degasser((int",
 
     def mgt_CMD_SET_PURGE_PAR(self, msg):
-        logging.info("CMD_SET_PURGE_PAR")
+        logger.info("CMD_SET_PURGE_PAR")
         #_do_set_purge_par(socket, (SPurgePar",
 
     def mgt_CMD_SCALES_SET_CFG(self, msg):
-        logging.info("CMD_SCALES_SET_CFG")
+        logger.info("CMD_SCALES_SET_CFG")
         #_do_scales_set_cfg(socket, (SScalesCfgMsg*)msg);
 
     def mgt_CMD_SCALES_GET_CFG(self, msg):
-        logging.info("CMD_SCALES_GET_CFG")
+        logger.info("CMD_SCALES_GET_CFG")
         #_do_scales_get_cfg(socket);
 
     def mgt_CMD_SCALES_TARA(self, msg):
-        logging.info("CMD_SCALES_TARA")
+        logger.info("CMD_SCALES_TARA")
         #_do_scales_tara(socket, (INT32",
 
     def mgt_CMD_SCALES_CALIBRATE(self, msg):
-        logging.info("CMD_SCALES_CALIBRATE")
+        logger.info("CMD_SCALES_CALIBRATE")
         # _do_scales_calib(socket, (SValue",
 
     def mgt_CMD_SCALES_STAT(self, msg):
@@ -132,8 +133,7 @@ if __name__ == "__main__":
 
     if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % args.log)
-    logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
-                        level=numeric_level)
+    logging.basicConfig(level=numeric_level)
 
     simulation = network.Network()
     simulation.register("Fluid", sys.modules[__name__])

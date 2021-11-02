@@ -719,7 +719,6 @@ static int _plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dat
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
 		case CMD_PLC_SAVE_MATERIAL:	_plc_save_material (socket, FILENAME_MATERIAL, CMD_PLC_ITM_MATERIAL, (char*)data);
-									lh702_save_material((char*)data);
 									// _plc_update_material_list(FILENAME_MATERIAL, FILENAME_MATERIAL_LIST);
 									break;
 		case CMD_PLC_DEL_MATERIAL:	_plc_del_material  (socket, FILENAME_MATERIAL, cmd, (char*)data);		break;
@@ -877,11 +876,24 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 		else
 		{
 			strcpy(var, str);
-			if (lc_get_value_by_name(name, value)==0) len += sprintf(&answer[len], "=%s", value);
-			else
+			// special case of OPCUA -> (temporary) hack to call opcua server :(  
+			int ret = 0;
+			if (RX_Config.printer.type == printer_LH702)
 			{
-				if (_SimuPLC)	len += sprintf(&answer[len], "=SIMU");
-				else			len += sprintf(&answer[len], "=ERROR");
+				ret = opcua_get_plc_value(name, &answer[len]);
+				len += ret;
+			}
+			if (ret == 0)
+			{
+				if (lc_get_value_by_name(name, value) == 0)
+					len += sprintf(&answer[len], "=%s", value);
+				else
+				{
+					if (_SimuPLC && RX_Config.printer.type != printer_LH702)
+						len += sprintf(&answer[len], "=SIMU");
+					else
+						len += sprintf(&answer[len], "=ERROR");
+				}
 			}
 	//		TrPrintfL(!strcmp(name, "Application.GUI_00_001_Main.PAR_FLEXO_CONFIGURATION"), "_plc_get_var socket=%d >>%s=%s<<", socket, name, value);
 		}
@@ -915,11 +927,9 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			*val++=0;
 			strcpy(var, str);
 			for(char *ch=val; *ch; ch++) if (*ch==',') *ch='.';
-			if (!_plc_set_cpu_cmd(name, val))
+			if (RX_Config.printer.type != printer_LH702 && !_plc_set_cpu_cmd(name, val))
 			{
 				ret = lc_set_value_by_name(name, val);
-			//	Error(LOG, 0, "SET %s=%s", name, val);
-			//	TrPrintfL(TRUE, 0, "SET %s=%s", name, val);
 				if (ret)  ErrorFlag(ERR_CONT, &_ErrorFlags, 1, 0, "Writing >>%s=%s<<: Error %s", name, val, mlpi_get_errmsg());
 			}
 						
@@ -930,6 +940,9 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 				RX_Config.stepper.material_thickness = (INT32)(0.5+1000*strtod(val, NULL));
 			if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
 			if (!strcmp(name, "XML_JC_RATIO")) RX_Config.jc_ratio = atoi(val);
+
+			if (RX_Config.printer.type == printer_LH702) // OPCUA server
+				opcua_set_plc_value(name, val);
 
 		}
 		str = end;
@@ -1164,11 +1177,6 @@ void plc_load_material(char *material)
 			}
 		}
 
-		//--- save in config --------------------------
-		if (load)
-		{
-			setup_save_config();
-		}
 	}				
 }
 
@@ -1697,7 +1705,10 @@ static void _plc_state_ctrl()
 		if (ticks-_time>450)
 		{			
 			_time=ticks;
-			lc_get_value_by_name_UINT32(UnitID ".STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
+			if (RX_Config.printer.type == printer_LH702)
+				RX_PrinterStatus.actSpeed = opcua_get_speed();
+			else
+				lc_get_value_by_name_UINT32(UnitID ".STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);
 		}
 	}
 	gui_send_printer_status(&RX_PrinterStatus);

@@ -140,7 +140,7 @@ int pc_start_printing(void)
         spool_start_printing();
 		step_set_config();
 		if (!RX_StepperStatus.info.z_in_print 
-		&& (rx_def_is_tx(RX_Config.printer.type) || (RX_Config.printer.type==printer_LH702 && plc_in_simu())))
+		&& rx_def_is_tx(RX_Config.printer.type))
 		{
 			step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);				
 		}

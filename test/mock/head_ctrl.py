@@ -4,6 +4,7 @@
 """
 import asyncio, functools
 import logging
+logger = logging.getLogger(__name__)
 import struct
 import os
 import sys
@@ -67,22 +68,22 @@ class UDPProtocol:
         self.count = 0
 
     def connection_made(self, transport):
-        logging.info(f'Connection from UDP to board {self.board.no}')
+        logger.info(f'Connection from UDP to board {self.board.no}')
         self.transport = transport
         network.all_transports.append(transport)
 
     def connection_lost(self, exc):
-        logging.error(f'UDP Connection lost to board {self.board.no}')
+        logger.error(f'UDP Connection lost to board {self.board.no}')
 
     def datagram_received(self, data, addr):
         "receive UDP blocks"
         msg = struct.unpack("=I%ds" % (len(data) - 4), data)
-        logging.debug(f"Received udp message {msg[0]} of size {len(data)}")
+        logger.debug(f"Received udp message {msg[0]} of size {len(data)}")
         if msg[0] != 0xffffffff:
             self.board.add_block(msg[0], msg[1])
             self.count += 1
             if self.count % 1000 == 0:
-                logging.info(f"UDP {len(self.board.blocks)} blocks/{self.count} on board {self.board.no}")
+                logger.info(f"UDP {len(self.board.blocks)} blocks/{self.count} on board {self.board.no}")
 
 
 class TCPProtocol(network.AbstractTCPProtocol):
@@ -103,18 +104,18 @@ class TCPProtocol(network.AbstractTCPProtocol):
         # send back the ResetCnt
         msg.msgtype = "REP_HEAD_BOARD_CFG"
         self.transport.write(msg.pack())
-        logging.info(f"Reset counter {msg.resetCnt} for board {self.board.no}")
+        logger.info(f"Reset counter {msg.resetCnt} for board {self.board.no}")
 
     def mgt_CMD_SET_DENSITY_VAL(self, msg):
-        logging.info(f"set density on board {self.board.no} head {msg.head % 4}")
+        logger.info(f"set density on board {self.board.no} head {msg.head % 4}")
         self.board.config["density"][msg.head % 4] = msg.value
         self.board.config["voltage"][msg.head % 4] = msg.voltage
-        logging.info(f"{msg.voltage}V {msg.value}")
+        logger.info(f"{msg.voltage}V {msg.value}")
 
     def mgt_CMD_SET_DISABLED_JETS(self, msg):
-        logging.info(f"set disabled jets on board {self.board.no} head {msg.head % 4}")
+        logger.info(f"set disabled jets on board {self.board.no} head {msg.head % 4}")
         self.board.config["disabled_jets"][msg.head % 4] = msg.disabledJets
-        logging.info(f"{msg.disabledJets}")
+        logger.info(f"{msg.disabledJets}")
 
     def mgt_CMD_HEAD_STAT(self, msg):
         msg = Message("REP_HEAD_STAT")
@@ -143,16 +144,16 @@ class TCPProtocol(network.AbstractTCPProtocol):
         else:
             msg.used = (msg.blkCnt+31)//32 * (0xffffffff, )
         msg.blkCnt = len(msg.used) * 32
-        logging.debug(f"{self.board.used.count} blocks used {msg.blkNo} for {msg.blkCnt} blocks on board {self.board.no} head {msg.headNo}")
+        logger.debug(f"{self.board.used.count} blocks used {msg.blkNo} for {msg.blkCnt} blocks on board {self.board.no} head {msg.headNo}")
         self.transport.write(msg.pack())
 
     def mgt_CMD_FPGA_IMAGE(self, msg):
-        logging.info(f"FPGA image on board {self.board.no} head {msg.head} Blk0 {msg.blkNo} BlkCnt {msg.blkCnt} (id:{msg.id} copy:{msg.copy} page:{msg.page} scan:{msg.scan})")
+        logger.info(f"FPGA image on board {self.board.no} head {msg.head} Blk0 {msg.blkNo} BlkCnt {msg.blkCnt} (id:{msg.id} copy:{msg.copy} page:{msg.page} scan:{msg.scan})")
         self.transport.write(Message("REP_FPGA_IMAGE").pack())
         self.board.image(msg)
 
     def mgt_CMD_PRINT_ABORT(self, msg):
-        logging.info(f"Abort print board {self.board.no}")
+        logger.info(f"Abort print board {self.board.no}")
         self.board.abort = True
 
 class UsedFlags(list):
@@ -198,7 +199,7 @@ def save_image(board, fpga_images):
     blk_No0 = board.blkNo0
     for fpga in fpga_images:
         filename = f"printed/fake id{fpga.id} c{fpga.copy} p{fpga.page} s{fpga.scan} b{no} h{fpga.head}.bmp"
-        logging.info(f"Creating '{filename}' ({fpga.widthPx}x{fpga.lengthPx})...")
+        logger.info(f"Creating '{filename}' ({fpga.widthPx}x{fpga.lengthPx})...")
         try:
             img = bytearray()
             end = blk_end[fpga.head]
@@ -225,12 +226,12 @@ def save_image(board, fpga_images):
             if fpga.jetPx0 or width != fpga.widthPx: # remove alignement to retreive printed image
                 start = 0
                 if fpga.jetPx0:
-                    logging.info(f"'{filename}' has jetPx0={fpga.jetPx0}")
+                    logger.info(f"'{filename}' has jetPx0={fpga.jetPx0}")
                     start = fpga.jetPx0
                 bmp = bmp.crop((start, 0, fpga.widthPx , fpga.lengthPx))
             bmp.save(filename)
         except Exception as e:
-            logging.error(f"{e.__class__.__name__}: {e} while saving '{filename}'")
+            logger.error(f"{e.__class__.__name__}: {e} while saving '{filename}'")
 
 
 class Board(network.AbstractBoard):
@@ -267,11 +268,11 @@ class Board(network.AbstractBoard):
         msg.msgtype = "EVT_PRINT_DONE"
         self.main_ctrl.write(msg.pack())
         del self.fpga_images[(msg.id, msg.page, msg.copy, msg.scan)]
-        logging.warning(f"Done on board {self.no} for id{msg.id} s{msg.scan} c{msg.copy}")
+        logger.warning(f"Done on board {self.no} for id{msg.id} s{msg.scan} c{msg.copy}")
 
     def reset(self):
         "reset the board by clearing everythings"
-        logging.warning(f"reset board {self.no}")
+        logger.warning(f"reset board {self.no}")
         self.abort = False
         self.blockOutIdx = 4 * [2**32-1]
         self.blocks = {}
@@ -329,8 +330,7 @@ if __name__ == "__main__":
 
     if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % args.log)
-    logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
-                        level=numeric_level)
+    logging.basicConfig(level=numeric_level)
 
     rec_blocks = args.nobmp
     try:

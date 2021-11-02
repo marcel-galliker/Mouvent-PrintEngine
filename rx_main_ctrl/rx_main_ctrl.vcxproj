@@ -48,6 +48,7 @@
     <ClInclude Include="cleaf_orders.h" />
     <ClInclude Include="ctr.h" />
     <ClInclude Include="iQ500.h" />
+    <ClInclude Include="opcua.h" />
     <ClInclude Include="pe_main.h" />
     <ClInclude Include="prod_log.h" />
     <ClInclude Include="lh702_ctrl.h" />
@@ -85,7 +86,6 @@
     <ClInclude Include="step_std.h" />
     <ClInclude Include="step_test.h" />
     <ClInclude Include="step_tx.h" />
-    <ClInclude Include="lh702_tcp_ip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rx_ink_lib\rx_ink_common.c" />
@@ -93,6 +93,7 @@
     <ClCompile Include="cleaf_orders.c" />
     <ClCompile Include="ctr.c" />
     <ClCompile Include="iQ500.c" />
+    <ClCompile Include="opcua.c" />
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
     <ClCompile Include="lh702_ctrl.c" />
@@ -303,7 +304,7 @@
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)rx_main_ctrl-Release-lx.vgdbsettings</NMakeOutput>
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;.\rx_rexroth_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;..\Externals\libtiff;..\Externals\mlpi\include;..\Externals\matrix\linux\include;..\Externals\libxl\include_c;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXML;.\rx_rexroth_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_pecore_lib;..\Externals\libtiff;..\Externals\mlpi\include;..\Externals\matrix\linux\include;..\Externals\libxl\include_c;..\Externals\iQ500;..\Externals\open62541\ubuntu\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release_lx;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -367,18 +368,20 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>$(DefineConstants);WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c;..\Externals\open62541\window\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib;open62541.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib;..\Externals\open62541\window\lib;..\Externals\OpenSSL\win\lib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11.dll $(OutDir) 2&gt;nul 1&gt;nul  Exit 0</Command>
+      <Command>copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11.dll $(OutDir) 2&gt;nul 1&gt;nul 
+copy ..\Externals\OpenSSL\win\lib\libcrypto-1_1-x64.dll $(OutDir) 2&gt;nul 1&gt;nul 
+</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
@@ -411,13 +414,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;MLPI_SERVER_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;rx_rexroth_lib;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c;..\Externals\open62541\window\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_rexroth_lib.lib;Shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib;open62541.lib;libcrypto.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -531,7 +534,7 @@ rem copy ..\Externals\matrix\win\lib\matrix32.dll d:\radex\bin\main\win
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);$(MYDEFINE);</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c;..\Externals\open62541\window\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -539,8 +542,8 @@ rem copy ..\Externals\matrix\win\lib\matrix32.dll d:\radex\bin\main\win
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib;open62541.lib;libcrypto.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);..\Externals\mlpi\lib;..\Externals\matrix\win\lib;..\Externals\open62541\window\lib;..\Externals\OpenSSL\win\lib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
@@ -552,7 +555,10 @@ rem copy ..\Externals\matrix\win\lib\matrix32.dll d:\radex\bin\main\win
       <Command>mkdir "$(ProjectDir)..\bin\win"
 copy "$(OutDir)$(TargetName)$(TargetExt)" "$(ProjectDir)..\bin\win\"
 copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll $(OutDir)
-copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll "$(ProjectDir)..\bin\win"</Command>
+copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll "$(ProjectDir)..\bin\win"
+copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll $(OutDir)
+copy ..\Externals\OpenSSL\win\lib\libcrypto-1_1-x64.dll $(OutDir)
+copy ..\Externals\OpenSSL\win\lib\libcrypto-1_1-x64.dll "$(ProjectDir)..\bin\win"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
@@ -560,6 +566,14 @@ copy ..\Externals\Tec-it\win\TBarCode11\Bin\TBarCode11_x64.dll "$(ProjectDir)..\
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-soc|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\rx_ink_lib;..\rx_common_lib;..\Externals\TinyXml;..\rx_rip_lib;..\Externals\libtiff;..\rx_tif_lib;rx_rexroth_lib;..\rx_pecore_lib;..\Externals\matrix\win\h;..\Externals\mlpi\include;..\Externals\libxl\include_c;..\Externals\open62541\window\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Ws2_32.lib;rx_common_lib.lib;TinyXML.lib;rx_rip_lib.lib;rx_tif_lib.lib;rx_pecore_lib.lib;libmlpiwin64.lib;wininet.lib;Dbghelp.lib;open62541.lib;libcrypto.lib</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

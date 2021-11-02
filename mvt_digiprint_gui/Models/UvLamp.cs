@@ -28,9 +28,9 @@ namespace RX_DigiPrint.Models
             {
                 switch (RxGlobals.PrintSystem.PrinterType)
                 {
-                    case Services.EPrinterType.printer_LB701:      Visible = Visibility.Visible; break;
-                    case Services.EPrinterType.printer_LB702_UV:   Visible = Visibility.Visible; break;
-                    case Services.EPrinterType.printer_LH702:      Visible = Visibility.Collapsed; break;
+                    case Services.EPrinterType.printer_LB701:
+                    case Services.EPrinterType.printer_LB702_UV:
+                    case Services.EPrinterType.printer_LH702:
 					case Services.EPrinterType.printer_LB703_UV:   Visible = Visibility.Visible; break;
                     default: Visible = Visibility.Collapsed; break;
                 }

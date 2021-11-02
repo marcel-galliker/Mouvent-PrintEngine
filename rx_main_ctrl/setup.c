@@ -19,8 +19,8 @@
 #include "network.h"
 
 // --- Communication with master default settings (hybrid machines)
-#define MASTER_IP_ADDR_SERVER "172.17.5.192"
-#define MASTER_IP_PORT_SERVER 2000
+#define MASTER_IP_ADDR_SERVER "172.17.6.10"
+#define MASTER_IP_PORT_SERVER 55105
 #define EM2_1_IP_ADDRESS "172.17.6.118"
 #define EM2_1_IP_SUBMASK "255.240.0.0"
 

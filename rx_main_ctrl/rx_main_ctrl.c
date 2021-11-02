@@ -120,7 +120,6 @@ static void _menu(void)
 	#endif
 		default:	break;
 		}
-		lh702_menu(str);
 	}
 }
 
@@ -205,6 +204,7 @@ int main(int argc, char* argv[])
 	}
 	//--- main procedure ---------------------------
 	setup_read_config();
+	plc_load_material(RX_Config.material);
 	
 	ctrl_update_hostname();
 	

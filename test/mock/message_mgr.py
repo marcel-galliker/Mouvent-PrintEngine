@@ -5,6 +5,8 @@ import struct
 import re
 import os
 import logging
+logger = logging.getLogger(__name__)
+
 
 # defines and structs that could be find reading .h
 defines = {}
@@ -29,7 +31,7 @@ def read_header(header_dir, header):
                 try:
                     defines[define.group(1)] = eval(value, defines)
                 except Exception as e:
-                    logging.debug(f"line {n}:{e}")
+                    logger.debug(f"line {n}:{e}")
         
         if in_struct:
             ends = re.match(r"}\s*(\w+);", line)
@@ -84,17 +86,21 @@ def cstruct(s):
             # remove message header
             if typed == "SMsgHdr" or (typed == "UINT32" and field.group(2)=="id"):
                 continue
-            if typed.startswith("E"): # Enum = int
-                typed = "INT32"
-            elif typed.startswith("S"): # the field is a struct 
+            if typed in structs: # the field is a struct 
                 # parse the struct
                 newstruct=cstruct(typed)
+                # if the result is only one line, renamed it according to original field name
+                if newstruct.count("\n") == 1:
+                    newstruct = re.sub(r"(\w+) \w+([\d+])?;\n",r"\1 "+ field.group(2) + r"\2;\n",newstruct)
                 # and flaten it if possible (not an array)
                 if arr:
                     msgtypes[typed] = newstruct
                 else:
                     r += newstruct
                     continue
+            elif typed.startswith("E"): # Enum = int
+                typed = "INT32"
+
             if arr: # array should be evaluated (define)
                 if arr.startswith("["):
                     arr = "[%d]" % eval(arr[1:-1], defines)
@@ -274,7 +280,7 @@ class Message:
                 else: # it is a ignored message
                     val = ()
             except struct.error as e:
-                logging.error("%s for msg %s (%d bytes)" % (e, self.msgtype, self.lenght))
+                logger.error("%s for msg %s (%d bytes)" % (e, self.msgtype, self.lenght))
             else:
                 # and retreive in the value the different members
                 names2dict(names, val, self.__dict__)

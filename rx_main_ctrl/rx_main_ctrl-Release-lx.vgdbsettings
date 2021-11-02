@@ -6,6 +6,7 @@
       <Directories />
       <PathStyle>MinGWUnixSlash</PathStyle>
     </CustomSourceDirectories>
+    <AutoProgramSPIFFSPartition>true</AutoProgramSPIFFSPartition>
     <BuildHost>
       <HostName>localhost:2222</HostName>
       <Transport>SSH</Transport>
@@ -46,6 +47,7 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
+    <BuildLogMode xsi:nil="true" />
     <ToolchainID>
       <ID>com.sysprogs.toolchain.default-gcc</ID>
       <Version>
@@ -224,6 +226,28 @@
         <DestinationFilePath>$(TargetDir)/libIQCoreRemote.so</DestinationFilePath>
         <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
+      <CustomActionBase xsi:type="SourceTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>BuildMachine</HostName>
+          <Transport>BuiltinShortcut</Transport>
+        </RemoteHost>
+        <LocalDirectory>$(ProjectDir)/../Externals/open62541</LocalDirectory>
+        <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/open62541</RemoteDirectory>
+        <FileMasks>
+          <string>*</string>
+        </FileMasks>
+        <TransferNewFilesOnly>true</TransferNewFilesOnly>
+        <IncludeSubdirectories>true</IncludeSubdirectories>
+        <SelectedDirectories />
+        <DeleteDisappearedFiles>true</DeleteDisappearedFiles>
+        <ApplyGlobalExclusionList>true</ApplyGlobalExclusionList>
+        <Extension>
+          <Direction>Outgoing</Direction>
+          <SkipMountPoints>false</SkipMountPoints>
+          <OverwriteTrigger>Stat</OverwriteTrigger>
+        </Extension>
+      </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>
       <CustomActionBase xsi:type="FileTransferAction">
@@ -262,6 +286,24 @@
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <SourceFilePath>$(ProjectDir)\..\Externals\iQ500\libIQCoreRemote.so</SourceFilePath>
         <DestinationFilePath>$(ProjectDir)\..\bin\main\libIQCoreRemote.so</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceFilePath>$(ProjectDir)\..\Externals\open62541\ubuntu\lib\libmbedcrypto.so.1</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\main\libmbedcrypto.so.1</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceFilePath>$(ProjectDir)\..\Externals\open62541\ubuntu\lib\libmbedx509.so.0</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\main\libmbedx509.so.0</DestinationFilePath>
+        <OverwriteTrigger>Always</OverwriteTrigger>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <SourceFilePath>$(ProjectDir)\..\Externals\open62541\ubuntu\lib\libopen62541.so</SourceFilePath>
+        <DestinationFilePath>$(ProjectDir)\..\bin\main\libopen62541.so.1</DestinationFilePath>
         <OverwriteTrigger>Always</OverwriteTrigger>
       </CustomActionBase>
     </PostBuildActions>
@@ -325,6 +367,7 @@
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
       <MaxBreakpointLimit>0</MaxBreakpointLimit>
+      <EnableVerboseMode>true</EnableVerboseMode>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <GDBEnvironment>
@@ -339,13 +382,17 @@
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
       <ProgramArguments />
+      <ArgumentEscapingMode>Auto</ArgumentEscapingMode>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <SuppressArgumentVariablesCheck>false</SuppressArgumentVariablesCheck>
     <X11WindowMode>Local</X11WindowMode>
     <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
     <RunGDBUnderSudo>false</RunGDBUnderSudo>
     <DeploymentMode>Auto</DeploymentMode>
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <StripDebugSymbolsDuringDeployment>false</StripDebugSymbolsDuringDeployment>
     <SuppressTTYCreation>false</SuppressTTYCreation>
+    <IndexDebugSymbols>false</IndexDebugSymbols>
   </Debug>
 </VisualGDBProjectSettings2>
