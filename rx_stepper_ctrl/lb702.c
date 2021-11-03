@@ -176,12 +176,13 @@ void lb702_main(int ticks, int menu)
 
 	if (RX_StepperStatus.info.moving || !RX_StepperStatus.info.ref_done || _lift_ref_running)
 	{
-		RX_StepperStatus.info.z_in_ref   = FALSE;
-		RX_StepperStatus.info.z_in_up    = FALSE;
-		RX_StepperStatus.info.z_in_print = FALSE;
-		RX_StepperStatus.info.z_in_cap   = FALSE;			
-        RX_StepperStatus.info.z_in_screw = FALSE;
-	}
+		RX_StepperStatus.info.z_in_ref		= FALSE;
+		RX_StepperStatus.info.z_in_up		= FALSE;
+		RX_StepperStatus.info.z_in_print	= FALSE;
+		RX_StepperStatus.info.z_in_cap		= FALSE;			
+        RX_StepperStatus.info.z_in_screw	= FALSE;
+        RX_StepperStatus.info.z_in_exchange = FALSE;
+    }
 	if ((RX_StepperStatus.cmdRunning || _lift_ref_running) && motors_move_done(MOTOR_Z_BITS))
 	{
         if (_lift_ref_running)
@@ -545,12 +546,13 @@ static void _lb702_sm(void)
     case 0: break;
     case 1:	TrPrintfL(TRUE, "_lb702_sm[%s/%d]", MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
 			_Step++;
-			RX_StepperStatus.info.z_in_ref   = FALSE;
-			RX_StepperStatus.info.z_in_up    = FALSE;
-			RX_StepperStatus.info.z_in_print = FALSE;
-			RX_StepperStatus.info.z_in_cap   = FALSE;
-			RX_StepperStatus.info.z_in_screw = FALSE;
-			if (!RX_StepperStatus.info.ref_done 
+			RX_StepperStatus.info.z_in_ref		= FALSE;
+			RX_StepperStatus.info.z_in_up		= FALSE;
+			RX_StepperStatus.info.z_in_print	= FALSE;
+			RX_StepperStatus.info.z_in_cap		= FALSE;
+			RX_StepperStatus.info.z_in_screw	= FALSE;
+            RX_StepperStatus.info.z_in_exchange = FALSE;
+            if (!RX_StepperStatus.info.ref_done 
 			|| (_SlideToRef && !RX_StepperStatus.info.x_in_ref)) 
 					lb702_do_reference();
 			break;
@@ -599,12 +601,12 @@ static void _lb702_sm(void)
 				Error(LOG, 0, "%s done", MsgIdStr(RX_StepperStatus.cmdRunning));
 				switch(RX_StepperStatus.cmdRunning)
 				{
-                case CMD_LIFT_PRINT_POS:		RX_StepperStatus.info.z_in_print=TRUE; break;
-                case CMD_LIFT_UP_POS:			RX_StepperStatus.info.z_in_up=TRUE;    break;
-				case CMD_LIFT_CAPPING_POS:		RX_StepperStatus.info.z_in_cap=TRUE;   break;
-                case CMD_LIFT_WASH_POS:			RX_StepperStatus.info.z_in_wash=TRUE;  break;			
-                case CMD_LIFT_SCREW:			RX_StepperStatus.info.z_in_screw=TRUE; break;
-                case CMD_LIFT_CLUSTER_CHANGE:	break;
+                case CMD_LIFT_PRINT_POS:		RX_StepperStatus.info.z_in_print	= TRUE; break;
+                case CMD_LIFT_UP_POS:			RX_StepperStatus.info.z_in_up		= TRUE; break;
+				case CMD_LIFT_CAPPING_POS:		RX_StepperStatus.info.z_in_cap		= TRUE; break;
+                case CMD_LIFT_WASH_POS:			RX_StepperStatus.info.z_in_wash		= TRUE; break;			
+                case CMD_LIFT_SCREW:			RX_StepperStatus.info.z_in_screw	= TRUE; break;
+                case CMD_LIFT_CLUSTER_CHANGE:	RX_StepperStatus.info.z_in_exchange	= TRUE; break;
                 default:	Error(ERR_CONT, 0, "_lb702_sm[%d] cmd=%s not implemented", _Step, MsgIdStr(RX_StepperStatus.cmdRunning));
 				}
 				_Step=0;
