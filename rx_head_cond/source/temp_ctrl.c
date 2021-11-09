@@ -254,10 +254,15 @@ void temp_init(void)
 	_TempSensor[0].pTemp = &RX_Status.tempHeater;
 	_TempSensor[0].err   = COND_ERR_temp_heater_hw;
 	_TempSensor[0].addr  = ADC_CHAN_1;
+	SetPinFunc_AN02();    // Set ADC analog input pin
 
 	_TempSensor[1].pTemp = &RX_Status.tempIn;
 	_TempSensor[1].err   = COND_ERR_temp_inlet_hw;
 	_TempSensor[1].addr  = ADC_CHAN_2;
+	if(RX_Status.pcb_rev>='h' || RX_Status.pcb_rev>='n')
+	{
+		SetPinFunc_AN05();    // Set ADC analog input pin
+	}
 	//------------------------------------------------------
 		
 	// Disable ADC in any case first
@@ -752,8 +757,8 @@ void ADC0_IRQHandler(void)
 						{
 							int sum, i;
 							for (i=sum=0; i<BUF_SIZE; i++) sum+=s->buf[i];
-							if (RX_Status.pcb_rev=='n' && s->addr==ADC_CHAN_2)
-								sum =sum*30/20;
+						//	if (RX_Status.pcb_rev=='n' && s->addr==ADC_CHAN_2)
+						//		sum =sum*30/20;
 							(*s->pTemp) = sum/BUF_SIZE;
 						}
 					}
