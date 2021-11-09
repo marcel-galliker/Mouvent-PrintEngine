@@ -788,7 +788,7 @@ static void _pump_pid(int Meniscus_Error_Enable)
 		// Conditions to use P normal : Pinlet > 0  AND -1.5 < and Meniscus-setpoint < 1.5 for 1 second
 		if(_Start_PID == START_PID_P_REDUCED)
 		{
-			if((RX_Status.pressure_in > 0)&&(RX_Status.meniscus + _PumpPID.Setpoint > -15)&&(RX_Status.meniscus + _PumpPID.Setpoint < 15))
+			if((RX_Status.pressure_in > -100)&&(RX_Status.meniscus + _PumpPID.Setpoint > -15)&&(RX_Status.meniscus + _PumpPID.Setpoint < 15))
 			{
 				_TimePIDstable++;
 				if(_TimePIDstable > 100)
