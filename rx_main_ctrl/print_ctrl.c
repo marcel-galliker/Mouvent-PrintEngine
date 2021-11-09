@@ -331,7 +331,7 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "Temp=%d.%d°C / Waveform=%s\n", pstat->tempHead / 1000, (pstat->tempHead% 1000) / 100, RX_Config.inkSupply[color].ink.name);
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{
-				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", pstat->eeprom_mvt.voltage);
+				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", RX_Config.voltage[headNo / MAX_HEADS_BOARD][headNo % MAX_HEADS_BOARD]);
 				for (int i=0; i<MAX_DENSITY_VALUES; i++)
 				{
 					len += sprintf(&str[len], "%d  ", RX_Config.densityValue[headNo / MAX_HEADS_BOARD][headNo % MAX_HEADS_BOARD][i]);			
