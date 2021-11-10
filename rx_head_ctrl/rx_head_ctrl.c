@@ -31,6 +31,7 @@
 #include "mem_test.h"
 #include "putty.h"
 #include "nios_def_head.h"
+#include "rx_head_ctrl.h"
 
 #include <pthread.h>
 #include <sys/time.h>
@@ -63,10 +64,12 @@ SNiosStat				RX_NiosStat;
 
 
 static int		_AppRunning;
+static int		_WaveFormLoaded = FALSE;
 
 //--- prototypes ---------------------------------------------------------
 static void _mem_test(void);
 static void	_check_rx_boot(void);
+static void _tickle_puls(void);
 
 
 //--- _do_waveform ----------------------------------------------
@@ -82,6 +85,7 @@ static void _do_waveform(const char *fname)
 	if (setup_ink(path, &inkdef, READ)==REPLY_OK)
 	{
 		for (i=0; i<4; i++) nios_setInk(i, &inkdef, "SML", 100);
+		_WaveFormLoaded = TRUE;
 	}
 	else Error(WARN, 0, "ERROR WaveForm >>%s<< not found or incorrect", path);
 }
@@ -229,8 +233,29 @@ static void _main_loop(void)
 				_AppRunning=FALSE;										
 			}
 		}
+		_tickle_puls();
 		if (!msg) rx_sleep(10);
 		time6= rx_get_ticks();
+	}
+}
+
+static void _tickle_puls(void)
+{
+#define TIME_MIN_IN_MS 60000
+	static int time_ms = 0;
+	for (int i = 0; i < SIZEOF(RX_FpgaStat.enc_speed); i++)
+	{
+		if (RX_FpgaStat.enc_speed[i].current >= 400 || RX_HBStatus[0].head[i].ctrlMode != ctrl_print)
+		{
+			time_ms = 0;
+			return;
+		}
+	}
+	if (!time_ms) time_ms = rx_get_ticks() + TIME_MIN_IN_MS;
+	if (rx_get_ticks() > time_ms)
+	{
+		do_jetting(400, 0);
+		time_ms = 0;
 	}
 }
 
@@ -352,4 +377,20 @@ int main(int argc, char** argv)
 	rx_end();
 	TrPrintfL(1, "rx_head_ctrl ended");
 	return 0;
+}
+
+//--- do_jetting -------------------------------------
+void do_jetting(int freq, int greyLevel)
+{
+	if (freq && !_WaveFormLoaded)
+	{
+		_do_waveform("test.wfd");
+		Error(WARN, 0, "Cluster in Jetting Mode");
+		int arg = arg_offline;
+		arg_offline = TRUE;
+		fpga_set_config(INVALID_SOCKET);
+		arg_offline = arg;
+		nios_fixed_grey_levels(greyLevel, 3);
+	}
+	fpga_enc_config(freq);
 }

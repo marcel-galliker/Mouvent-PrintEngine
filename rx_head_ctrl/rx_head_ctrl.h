@@ -36,3 +36,4 @@ extern INT32			RX_UdpSpeed[2];
 
 extern SNiosStat		RX_NiosStat;
 extern SFluidStateLight	RX_FluidStat[MAX_HEADS_BOARD];
+void do_jetting(int freq, int greyLevel);
