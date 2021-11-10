@@ -42,7 +42,7 @@ void pid_calc(INT32 actVal, SPID_par* pPID)
 	//--- I-Value ----------------
 	if ((pPID->I)&&(pPID->start_integrator))
 	{
-		if (pPID->val < pPID->val_max) pPID->diff_I += (diff*10); // dt = 10 mS	 
+		if ((pPID->val < pPID->val_max)&&(pPID->val > pPID->val_min)) pPID->diff_I += (diff*10); // dt = 10 mS	 
 	}
 	
 	// pid function
