@@ -499,6 +499,7 @@ typedef struct SPrinterCfg
 {
 	EPrinterType	type;
 	EEncoderType	encoderType;
+	BOOL 			hybrid;
 
 	UINT16	inkSupplyCnt;
 

@@ -31,6 +31,11 @@
         <Border BorderBrush="WhiteSmoke" BorderThickness="1">
         <StackPanel x:Name="Settings" Margin="0">
 
+                <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="5,0,5,0" x:Name="Endless_Settings" Visibility="Collapsed">
+                    <TextBlock Margin="0,5,10,5" Grid.Row="1"  Text="{mvt:LocalizedBinding Endless}" />
+                    <CheckBox Margin="20,5,10,5" Grid.Row="1" Grid.Column="1" IsChecked="{Binding Endless}" Click="Endless_Click"></CheckBox>
+                </StackPanel>
+
                 <Grid Margin="5, 0, 5, 0" x:Name="Length_Settings">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="140" />

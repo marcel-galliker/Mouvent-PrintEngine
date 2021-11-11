@@ -150,13 +150,13 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
 
 	if (setup_chapter(file, "Configuration", -1, action)!=REPLY_OK) 
 	{
-		if (action == READ) // if could not read configuration, set default values in config to avoid setting null values ar first write
+		if (action == READ) // if could not read configuration, set default values in config to avoid setting null values at first write
 		{
 			strcpy(pcfg->master_ip_address, MASTER_IP_ADDR_SERVER);
 			pcfg->master_ip_port = MASTER_IP_PORT_SERVER;
 			strcpy(pcfg->em2_1_address, EM2_1_IP_ADDRESS);
 			strcpy(pcfg->em2_1_mask, EM2_1_IP_SUBMASK);
-			pcfg->lh702_protocol_version = 2;
+			pcfg->lh702_protocol_version = 10; // OPCUA protocol version (TODO remove when only OPCUA)
 			pcfg->print_queue_buffer = 64;
 			pcfg->mark_reader_ignore_size = 80;
 			pcfg->mark_reader_window_size = 25;
@@ -181,6 +181,7 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
 	{
 		setup_int32(file, "type", action, (int*)&pcfg->printer.type, printer_undef);
 		setup_int32(file, "encoderType", action, (int*)&pcfg->printer.encoderType, enc_Balluff);
+		setup_int32(file, "hybrid", action, &pcfg->printer.hybrid, 0);
 
 		setup_uint32(file, "overlap", action, &pcfg->printer.overlap, TRUE);
         if (!rx_def_is_tx(pcfg->printer.type) && pcfg->printer.type!=printer_test_table)	pcfg->printer.overlap = TRUE;

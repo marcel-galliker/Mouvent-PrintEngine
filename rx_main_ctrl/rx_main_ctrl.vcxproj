@@ -53,6 +53,7 @@
     <ClInclude Include="prod_log.h" />
     <ClInclude Include="lh702_ctrl.h" />
     <ClInclude Include="rx_main_ctrl.h" />
+    <ClInclude Include="siemens_ctrl.h" />
     <ClInclude Include="step_dp.h" />
     <ClInclude Include="step_lb.h" />
     <ClInclude Include="args.h" />
@@ -97,6 +98,7 @@
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
     <ClCompile Include="lh702_ctrl.c" />
+    <ClCompile Include="siemens_ctrl.c" />
     <ClCompile Include="step_dp.c" />
     <ClCompile Include="step_lb.c" />
     <ClCompile Include="args.c" />

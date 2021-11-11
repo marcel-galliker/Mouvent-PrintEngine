@@ -828,6 +828,7 @@ namespace RX_DigiPrint.Services
 	        public string       hostName;
             public EPrinterType	type;
             public EEncoderType encoderType;
+            public Int32 		hybrid;
             public UInt32		overlap;
             public SOffsetCfg   offset;
             public Int32        externalData;		

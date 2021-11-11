@@ -12,6 +12,7 @@ namespace RX_DigiPrint.Converters
             PrintQueueItem item = value as PrintQueueItem;
             if (item!=null)
             {
+                if (RxGlobals.PrintSystem.isHybrid && item.ScanLength == PrintQueueItem.EndLessCopies) return RX_DigiPrint.Resources.Language.Resources.Endless;
                 if (item.SrcPages>1)                       return string.Format("{0} pg", (item.LastPage-item.FirstPage+1)*item.Copies); 
                 if (item.LengthUnit==EPQLengthUnit.copies) return string.Format("{0} cp", item.ScanLength);
                 if (item.LengthUnit==EPQLengthUnit.mm)

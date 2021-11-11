@@ -459,7 +459,9 @@ static void _plc_send_par(SPlcPar *pPlcPar)
 
 //--- plc_set_printpar -----------------------------------------------
 int  plc_set_printpar(SPrintQueueItem *pItem)
-{		
+{
+	if (RX_Config.printer.type == printer_LH702) lh702_set_printpar(pItem); // store for LH702
+
 	SPlcPar par;
 	
 	TrPrintfL(TRUE, "plc_set_printpar");
@@ -719,6 +721,7 @@ static int _plc_handle_gui_msg(RX_SOCKET socket, UINT32 cmd, void *data, int dat
 		//--- material database --------------------------------------------------------
 		case CMD_PLC_REQ_MATERIAL:	_plc_req_material  (socket, FILENAME_MATERIAL, cmd); break;
 		case CMD_PLC_SAVE_MATERIAL:	_plc_save_material (socket, FILENAME_MATERIAL, CMD_PLC_ITM_MATERIAL, (char*)data);
+									lh702_save_material((char *)data);
 									// _plc_update_material_list(FILENAME_MATERIAL, FILENAME_MATERIAL_LIST);
 									break;
 		case CMD_PLC_DEL_MATERIAL:	_plc_del_material  (socket, FILENAME_MATERIAL, cmd, (char*)data);		break;
@@ -878,7 +881,7 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 			strcpy(var, str);
 			// special case of OPCUA -> (temporary) hack to call opcua server :(  
 			int ret = 0;
-			if (RX_Config.printer.type == printer_LH702)
+			if (RX_Config.lh702_protocol_version >= 10)
 			{
 				ret = opcua_get_plc_value(name, &answer[len]);
 				len += ret;
@@ -941,7 +944,7 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			if (!strcmp(var, "XML_ENC_OFFSET"))			RX_Config.printer.offset.incPerMeter[0] = atoi(val);
 			if (!strcmp(name, "XML_JC_RATIO")) RX_Config.jc_ratio = atoi(val);
 
-			if (RX_Config.printer.type == printer_LH702) // OPCUA server
+			if (RX_Config.lh702_protocol_version >= 10) // OPCUA TODO change this test when full OPCUA
 				opcua_set_plc_value(name, val);
 
 		}
@@ -1705,7 +1708,7 @@ static void _plc_state_ctrl()
 		if (ticks-_time>450)
 		{			
 			_time=ticks;
-			if (RX_Config.printer.type == printer_LH702)
+			if (RX_Config.lh702_protocol_version >= 10) // OPCUA TODO review this test
 				RX_PrinterStatus.actSpeed = opcua_get_speed();
 			else
 				lc_get_value_by_name_UINT32(UnitID ".STA_PRINTING_SPEED", &RX_PrinterStatus.actSpeed);

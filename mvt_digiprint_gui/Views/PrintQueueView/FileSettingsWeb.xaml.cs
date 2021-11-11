@@ -34,7 +34,6 @@ namespace RX_DigiPrint.Views.PrintQueueView
             RxGlobals.Settings.PropertyChanged += Settings_PropertyChanged;
             LengthBox.ShowRolls = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_cleaf);
 
-            SpeedHeight.Height = GridLength.Auto;
         }
 
         void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -62,6 +61,14 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 // Limit length selection to "Copies" for VDP jobs
                 LengthUnit.Visibility = item.Variable ? Visibility.Collapsed : Visibility.Visible;
 
+
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702 && RxGlobals.PrintSystem.isHybrid)
+                {
+                    SpeedLabel.Visibility = Visibility.Collapsed;
+                    CB_Speed.Visibility = Visibility.Collapsed;
+                    SpeedUnit.Visibility = Visibility.Collapsed;
+                }
+
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(item.LargestDot, item.getInk(), item.SrcHeight);
                 if (!item.Variable && item.SrcPages > 1)
                 {
@@ -76,6 +83,17 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     item._hasPageSettings = false;
                 }
                 Settings.Visibility = Visibility.Visible;
+
+                // Hybrid case => endless mode on not variable
+                if (RxGlobals.PrintSystem.isHybrid && !item.Variable)
+                {
+                    Endless_Settings.Visibility = Visibility.Visible;
+                    Endless_Click(null, null);
+                }
+                else
+                {
+                    Endless_Settings.Visibility = Visibility.Collapsed;
+                }
             }
             else
             {
@@ -89,6 +107,21 @@ namespace RX_DigiPrint.Views.PrintQueueView
         {
             PrintQueueItem item = DataContext as PrintQueueItem;
             item.PageMargin = (RxGlobals.PrintSystem.HeadsPerColor * Constants.HeadWidth - item.PageWidth) / 2;
+        }
+
+        private void Endless_Click(object sender, RoutedEventArgs e)
+        {
+            PrintQueueItem item = DataContext as PrintQueueItem;
+            if (item.Endless)
+            {
+                Length_Settings.Visibility = Visibility.Collapsed;
+                Start_Settings.Visibility = Visibility.Collapsed;
+            } else
+            {
+                Length_Settings.Visibility = Visibility.Visible;
+                Start_Settings.Visibility = Visibility.Visible;
+            }
+
         }
     }
 }

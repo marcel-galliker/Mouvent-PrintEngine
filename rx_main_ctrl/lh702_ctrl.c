@@ -5,7 +5,7 @@
 // ****************************************************************************
 //
 //	Copyright 2013 by Radex AG, Switzerland. All rights reserved.
-//	Written by Marcel Galliker
+//	Written by Marcel Galliker 
 //
 // ****************************************************************************
 
@@ -34,203 +34,108 @@
 #include "label.h"
 #include "spool_svr.h"
 #include "machine_ctrl.h"
-#include "enc_ctrl.h"
-#include "step_ctrl.h"
-
+#include "lh702_tcp_ip.h"
 #include "lh702_ctrl.h"
-
-#include "opcua.h"
+#include "siemens_ctrl.h"
 
 //--- Defines -----------------------------------------------------------------
 
-//#define PREFIX_PLC "DPU_DB.PLC_1.DPU_DB."
-#define PREFIX_PLC "S71500ET200MP station_1.PLC_1.DPU_DB."
-
-// DPU_to_PLC :Struct
-// life monitor (increment by 1 every 3 seconds)
-#define inLifeMonitor PREFIX_PLC "DPU_to_PLC.inLifeMonitor"
-// Cluster life hours
-#define inHoursCluster PREFIX_PLC "DPU_to_PLC.inHoursCluster"
-// ink level for each color tank
-#define inInkLevels PREFIX_PLC "DPU_to_PLC.inInkLevels"
-// ack send to confirm the request boReqPrepareToPrint
-#define boReqPrepareToPrintAck PREFIX_PLC "DPU_to_PLC.boReqPrepareToPrintAck"
-// indicate to PLC the Digital Printer is ready to print
-#define boIsReadyToPrint PREFIX_PLC "DPU_to_PLC.boIsReadyToPrint"
-// ack send to confirm the request boPrintOn
-#define boReqPrintOnAck PREFIX_PLC "DPU_to_PLC.boReqPrintOnAck"
-// indicate to PLC the Digital Printer is siemens_printing
-#define boIsPrinting PREFIX_PLC "DPU_to_PLC.boIsPrinting"
-// request to PLC to start the machine
-#define boReqStart PREFIX_PLC "DPU_to_PLC.boReqStart"
-// request to PLC to stop the machine
-#define boReqStop PREFIX_PLC "DPU_to_PLC.boReqStop"
-// request to PLC to siemens_pause siemens_printing (pullback)
-#define boReqPause PREFIX_PLC "DPU_to_PLC.boReqPause"
-// Length of a page
-#define inFormatLength PREFIX_PLC "DPU_to_PLC.inFormatLength"
-// cmd for the UV Lamp
-#define boReqPowerOnUvLamps PREFIX_PLC "DPU_to_PLC.boReqPowerOnUvLamps"
-// set point for speed (m/min)
-#define reMachineSpeedSetpoint PREFIX_PLC "DPU_to_PLC.reMachineSpeedSetpoint"
-
-
-// PLC_to_DPU : Struct
-// offset to correct the lateral register
-#define inLateralRegister PREFIX_PLC "PLC_to_DPU.inLateralRegister"
-// request to DPU to prepare cluster to print
-#define boReqPrepareToPrint PREFIX_PLC "PLC_to_DPU.boReqPrepareToPrint"
-// request to DPU to print
-#define boReqPrintOn PREFIX_PLC "PLC_to_DPU.boReqPrintOn"
-// ack send to confirm the request boReqStart
-#define boReqStartAck PREFIX_PLC "PLC_to_DPU.boReqStartAck"
-// indicate the machine is started
-#define boMachineIsRunning PREFIX_PLC "PLC_to_DPU.boMachineIsRunning"
-// ack send to confirm the request boReqStop
-#define boReqStopAck PREFIX_PLC "PLC_to_DPU.boReqStopAck"
-// indicate the machine is siemens_stopped
-#define boMachineIsStopped PREFIX_PLC "PLC_to_DPU.boMachineIsStopped"
-// indicate the print is paused
-#define boReqPauseAck PREFIX_PLC "PLC_to_DPU.boReqPauseAck"
-// indicate the sequence of pullback is running
-#define boSequencePauseIsRunning PREFIX_PLC "PLC_to_DPU.boSequencePauseIsRunning"
-// status of the UV Lamp
-#define inUvLampStatus PREFIX_PLC "PLC_to_DPU.inUvLampStatus"
-// time of the UV Lamp
-#define inUvLampCoolingCountdown PREFIX_PLC "PLC_to_DPU.inUvLampCoolingCountdown"
-// Actual speed (m/min)
-#define reMachineActualSpeed PREFIX_PLC "PLC_to_DPU.reMachineActualSpeed"
-
-
-typedef struct
-{
-	INT64 counter[3];
-	UINT64 macAddr;
-	time_t time;
-} _sctr;
 //--- Externals ---------------------------------------------------------------
 extern SInkSupplyStat FluidStatus[INK_SUPPLY_CNT];
 
+typedef struct SStringCmd
+{
+	SMsgHdr		hdr;
+	char		str[256];
+} SStringCmd;
+
 //--- Statics -----------------------------------------------------------------
-static int _lh702ThreadRunning=FALSE;
+static RX_SOCKET _Socket=INVALID_SOCKET;
+int _lh702ThreadRunning=FALSE;
+static SLH702_State _Status;
+static SLH702_State2 _Status2;
+static SLH702_State3 _Status3;
+
+static SLH702_Materials _Materials;
 static SPrintQueueItem	*_pItem;
 static int		_Manipulated=FALSE;
-
-static INT16 _inLifeMonitor = 0;
-
+static int		_lastQuery; // ticks of the last query received from LH702 PLC to timeout
 
 //--- Prototypes --------------------------------------------------------------
-static void *_lh702_thread(void *lpParameter);
+static void _set_network_config(void);
 
+static void *_lh702_thread(void *lpParameter);
+static int   _lh702_closed(RX_SOCKET socket, const char *peerName);
+
+static int  _lh702_handle_msg		(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
 static void _handle_dist			(int value);
 static void _handle_lateral			(int value);
 static void _handle_thickness		(int value);
 static void _handle_headheight		(int value);
 static void _handle_encoffset		(int value);
+static void _lh702_send_status		(void);
+static void _lh702_send_materials	(void);
 static void _plc_set_var			(const char *format, ...);
 static void _ctr_calc_check(time_t time, UCHAR *check);
 
-
-static int _error;
-
-typedef enum
+typedef struct
 {
-	uv_off,			 // 00
-	uv_warmup,		 // 01
-	uv_ready,		 // 02
-	uv_shuttingdownn // 03
-} EUvLampStatus;
-
-int opcua_get_plc_value(char *name, char* answer)
-{
-	int len = 0;
-	short uvstatus;
-	static short _timer = 0;
-	if (strstr(name, "STA_UV_POWER_ON"))
-	{
-		if (opcua_get_int(inUvLampStatus, &uvstatus) == 0)
-		{
-			if (uvstatus != uv_off)
-				len = sprintf(answer, "=TRUE");
-			else
-				len = sprintf(answer, "=FALSE");
-		}
-	}
-	else if (strstr(name, "STA_UV_LAMPS_READY"))
-	{
-		if (opcua_get_int(inUvLampStatus, &uvstatus) == 0)
-		{
-			if (uvstatus == uv_ready)
-				len = sprintf(answer, "=TRUE");
-			else
-				len = sprintf(answer, "=FALSE");
-		}
-	}
-	else if (strstr(name, "STA_UV_LAMP_1_TIMER"))
-	{
-
-		if (opcua_get_int(inUvLampStatus, &uvstatus) == 0)
-		{
-			int uvtimer;
-			switch (uvstatus)
-			{
-			case uv_off:
-			case uv_ready:
-				uvtimer = 0;
-				_timer = 0;
-				break;
-			case uv_warmup:
-				// simulate a timer for warmup not managed py Siemend PLC
-				if (_timer == 0) _timer = 30; // 500ms timer in the UI
-				uvtimer = _timer / 2;
-				_timer = max(_timer - 1, 2);
-				break;
-			case uv_shuttingdownn:
-				opcua_get_int(inUvLampCoolingCountdown, &uvtimer);
-				uvtimer = -uvtimer;
-				_timer = 0;
-				break;
-			}
-			len = sprintf(answer, "=%hd", uvtimer);
-		}
-	}
-	
-	return len;
-}
-
-int opcua_get_speed()
-{
-	float speed;
-	opcua_get_float(reMachineActualSpeed, &speed);
-
-    return (int)(speed + 0.5);
-}
-
-void opcua_set_plc_value(char *name, char *val)
-{
-	if (strstr(name, "CMD_UV_LAMPS_ON") && !strcmp(val, "1"))
-	{
-		if (opcua_set_bool(boReqPowerOnUvLamps, TRUE) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
-	}
-	else if (strstr(name, "CMD_UV_LAMPS_OFF") && !strcmp(val, "1"))
-	{
-		if (opcua_set_bool(boReqPowerOnUvLamps, FALSE) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
-	}
-}
+	INT64 counter[3];
+	UINT64	macAddr;
+	time_t time;
+} _sctr;
 
 //--- lh702_init -------------------------------------------------
 void lh702_init(void)
 {
 	if (RX_Config.printer.type != printer_LH702) return; // No init/thread if it's not an LH702
-	
+	void* (*fth)(void *lpParameter);
+
+	if (RX_Config.lh702_protocol_version < 10)
+	{
+		memset(&_Status, 0, sizeof(_Status));
+		_Status.hdr.msgLen = sizeof(_Status);
+		_Status.hdr.msgId = EVT_STATE;
+
+		memset(&_Status2, 0, sizeof(_Status2));
+		_Status2.hdr.msgLen = sizeof(_Status2);
+		_Status2.hdr.msgId = EVT_STATE2;
+		_Status2.protocol_version_number = 2;
+
+		memset(&_Status3, 0, sizeof(_Status3));
+		_Status3.hdr.msgLen = sizeof(_Status3);
+		_Status3.hdr.msgId = EVT_STATE3;
+		_Status3.nb_cluster_per_color = RX_Config.headsPerColor / MAX_HEADS_BOARD;
+		_Status3.protocol_version_number = 3;
+
+		memset(&_Materials, 0, sizeof(_Materials));
+	    _Materials.hdr.msgLen = sizeof(_Materials);
+	    _Materials.hdr.msgId = REP_LIST_MATERIALS;	
+		
+	    lh702_load_material(RX_Config.material);
+		fth = _lh702_thread;
+	} else fth = siemens_thread;
+
+	_Socket=INVALID_SOCKET;
 	if(!_lh702ThreadRunning)
 	{
 		_lh702ThreadRunning = TRUE;
-		rx_thread_start(_lh702_thread, NULL, 0, "_lh702_thread");
+		rx_thread_start(fth, NULL, 0, "_lh702_thread");
 	}
 }
 
-
+//--- _set_network_config ----------------------------------
+static void _set_network_config(void)
+{
+	SIfConfig cfg;
+	if (sok_get_ifconfig("em2:1", &cfg)==REPLY_ERROR)
+	{
+        *((UINT32 *)&cfg.addr) = sok_addr_32(RX_Config.em2_1_address);
+		cfg.dhcp = FALSE;
+        *((UINT32 *)&cfg.mask) = sok_addr_32(RX_Config.em2_1_mask);
+		sok_set_ifconfig("em2:1", &cfg);
+	}
+}
 
 //--- siemensc_end -------------------------------------
 void lh702_end(void)
@@ -241,255 +146,322 @@ void lh702_end(void)
 //--- lh702_error_reset -----------------------
 void lh702_error_reset(void)
 {
-	_error = FALSE;
-
+//	sok_send_2(&_Socket, CMD_ERROR_RESET, 0, NULL);
 }
 
+//--- lh702_save_material ----------------------------------------------
+void lh702_save_material	(char *varList)
+{
+	HANDLE attribute =NULL;
+	char *str=varList;
+	char *end;
+	char *val;
+	char var[128];
+		
+	//--- find material ---
+	if ((end=strchr(str, '\n')))
+	{
+		end++;
+	}
+	str = end;
+
+	while ((end=strchr(str, '\n')))
+	{
+		*end=0;
+		val= strchr(str, '=');
+		*val=0;
+		strcpy(var, str);
+		*val++='=';
+		printf(">>%s<< = >>%s<<\n",  var, val);
+		if (!strcmp(var, "XML_MATERIAL"))			strncpy(_Status.material, val, sizeof(_Status.material)-1);
+		if (!strcmp(var, "XML_HEAD_HEIGHT"))		_Status.head_height = (INT32)(atof(val)*1000);
+		if (!strcmp(var, "XML_MATERIAL_THICKNESS"))	_Status.thickness   = (INT32)(atof(val)*1000);
+		if (!strcmp(var, "XML_ENC_OFFSET"))			_Status.encoder_adj = atoi(val);
+		if (!strcmp(var, "XML_JC_RATIO")) RX_Config.jc_ratio = atoi(val);
+
+		*end++='\n';
+		str = end;
+	}
+}
 
 //--- lh702_set_printpar -----------------------------------------------------
-int lh702_set_printpar(SPrintQueueItem *pitem)
+void lh702_set_printpar(SPrintQueueItem *pitem)
 {
 	_pItem = pitem;
-	// force the set point by changing the value
-	opcua_set_float(reMachineSpeedSetpoint, (float)0);
-	opcua_set_float(reMachineSpeedSetpoint, (float)pitem->speed);
-	return REPLY_OK;
+	if (pitem==NULL)
+	{
+		_Status.id				= 0;
+		_Status.dist			= 0;
+		_Status.lateral			= 0;
+		_Status.copies_printed	= 0;
+	}
+	else
+	{
+		_Status.id				= pitem->id.id;
+		_Status.dist			= pitem->printGoDist;
+		_Status2.print_go_mode  = pitem->printGoMode;
+		_Status3.print_go_mode = pitem->printGoMode;
+		_Status.lateral			= pitem->pageMargin;
+		_Status.printState		= PS_STARTING;
+	}
 }
 
-
-typedef enum
+//--- lh702_request_stop ------------------------------------------------------
+void lh702_stop_printing()
 {
-	siemens_stopped,
-	siemens_waitforpause,
-	siemens_waitforstop,
-	siemens_pause,
-	siemens_waittension,
-	siemens_waitready,
-	siemens_readytoprint,
-	siemens_printing,
-	siemens_requirestop,
-	siemens_requirepause,
-} ESiemensState;
-
-static ESiemensState _state = siemens_stopped;
+	if (RX_Config.lh702_protocol_version >= 10) siemens_stop_printing();
+	else
+	{
+		_Status2.stop_printing_request = TRUE;
+		_Status3.stop_printing_request = TRUE;
+	}
+}
 
 //--- _lh702_thread ------------------------------------------------------------
 static void *_lh702_thread(void *lpParameter)
 {
-	unsigned char status;
-	short last_lateral = 0;
-	BOOL first = TRUE;
-	BOOL restart = FALSE;
-	int count = 0;
-
+	int errNo;
+	int first=TRUE;
+	
 	while (_lh702ThreadRunning)
-	{
-		int retval = 0;
-		if (opcua_connect(RX_Config.master_ip_address, RX_Config.master_ip_port, PATH_BIN "server_cert.der", PATH_BIN "server_key.der"))
+	{		
+		if (first)
 		{
-			if (_error == FALSE) Error(ERR_CONT, 0, "Failed to connect OPCUA server");
-			_error = TRUE;
+			_set_network_config();
+			first=FALSE;					
+		}
+		if (_Socket==INVALID_SOCKET)
+		{
+			errNo=sok_open_client_2(&_Socket, RX_Config.master_ip_address, RX_Config.master_ip_port, SOCK_STREAM, _lh702_handle_msg, _lh702_closed);
+			if (errNo)
+			{
+				char str[256];
+				Error(ERR_CONT, 0, "Socket Error >>%s<<", err_system_error(errNo, str,  sizeof(str)));
+			}
+			else
+			{
+				TrPrintfL(TRUE, "Connected");
+				ErrorEx(dev_plc, -1, LOG, 0, "Connected");
+				_lastQuery = rx_get_ticks();
+			}
 		}
 		else
 		{
-			if (_error || _inLifeMonitor == 0)
+			// as the socket is a client, we should time out on our side
+			if (rx_get_ticks() - _lastQuery > 10000) // 10 seconds
 			{
-				Error(LOG, 0, "Connected to OPCUA server");
-				_inLifeMonitor = 1;
+				Error(ERR_CONT, 0, "Time out on communication with PLC");
+				sok_close(&_Socket);
 			}
-			_error = FALSE;
-			if (++count % 6 == 0) // every 3 seconds
-			{
-				// set live monitor
-				_inLifeMonitor++;
-				retval = opcua_set_int(inLifeMonitor, _inLifeMonitor);
-				if (!RX_StepperStatus.info.z_in_print) opcua_set_bool(boIsReadyToPrint, 0);
-
-				// transfer status for ink and clusters
-				static int order[7] = {4, 5, 6, 0, 1, 2, 3};
-				short cluster_hours[21];
-				short ink_level[7] = {0};
-				for (int i = 0; i < 7; i++)
-				{
-					int nbcluster = RX_Config.headsPerColor / HEAD_CNT;
-					for (int j = 0; j < nbcluster; j++)
-					{
-						int index = i * nbcluster + j;
-						int colorIndex = order[i] * nbcluster + j;
-						if (RX_HBStatus[colorIndex].info.connected)
-						{
-							cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
-						}
-					}
-					ink_level[i] = FluidStatus[i].canisterLevel;
-				}
-				opcua_set_int_array(inHoursCluster, cluster_hours, 21);
-				opcua_set_int_array(inInkLevels, ink_level, 7);
-			}
-
-			switch (_state)
-			{
-			case siemens_stopped:
-				restart = FALSE;
-				if (RX_PrinterStatus.printState == ps_printing)
-				{
-					TrPrintfL(TRUE, "OPCUA: Start siemens_printing");
-					if ((retval = opcua_set_bool(boReqStart, 1)) == 0) _state = siemens_waittension;
-					opcua_set_bool(boReqStop, 0);
-					opcua_set_bool(boReqPause, 0);
-					first = TRUE;
-				}
-				break;
-			case siemens_waittension:
-				if ((retval = opcua_get_bool(boReqPrepareToPrint, &status)) == 0)
-				{
-					if (status == 1)
-					{
-						_state = siemens_waitready;
-						retval = opcua_set_bool(boReqStart, 0);
-						step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);
-						TrPrintfL(TRUE, "OPCUA: Tension ready");
-					}
-				}
-				break;
-			case siemens_waitready:
-				TrPrintfL(TRUE, "OPCUA: wait printer ready enc_ready %d printpos %d data ready %d", enc_ready() , RX_StepperStatus.info.z_in_print, RX_PrinterStatus.dataReady);
-				if (RX_PrinterStatus.dataReady && ((enc_ready() && RX_StepperStatus.info.z_in_print) || arg_simuEncoder))
-				{
-					if ((retval = opcua_set_bool(boIsReadyToPrint, 1)) == 0)
-					{
-						_state = siemens_readytoprint;
-						TrPrintfL(TRUE, "OPCUA: Printer ready");
-					}
-				}
-				break;
-			case siemens_readytoprint:
-				if ((retval = opcua_get_bool(boReqPrintOn, &status)) == 0)
-				{
-					if (status)
-					{
-						_state = siemens_printing;
-						if (!restart) enc_start_printing(_pItem, FALSE);
-						else enc_restart_pg();
-
-						restart = FALSE;
-
-						int pageHeight = _pItem->pageHeight / 1000;
-						int printGoDist = _pItem->printGoDist / 1000;
-						if (_pItem->printGoMode == PG_MODE_LENGTH) pageHeight = printGoDist;
-						if (_pItem->printGoMode == PG_MODE_GAP) pageHeight = pageHeight + printGoDist;
-
-						retval = opcua_set_int(inFormatLength, pageHeight);
-						retval |= opcua_set_bool(boIsPrinting, 1) || opcua_set_bool(boReqStart, 0);
-						TrPrintfL(TRUE, "OPCUA: Printing");
-					}
-				}
-				break;
-			case siemens_printing:
-			{
-				short lateral = 0;
-				retval = opcua_get_int(inLateralRegister, &lateral);
-				if (first)
-				{
-					first = FALSE;
-					last_lateral = lateral;
-				}
-				else if (lateral != last_lateral)
-				{
-					_handle_lateral(lateral - last_lateral);
-					last_lateral = lateral;
-				}
-			}
-				break;
-			case siemens_waitforpause:
-				if ((retval = opcua_get_bool(boMachineIsStopped, &status)) == 0)
-				{
-					if (status)
-					{
-						_state = siemens_pause;
-						RX_PrinterStatus.printState = ps_pause;
-						retval = opcua_set_bool(boReqPause, 0);
-						TrPrintfL(TRUE, "OPCUA: Pause");
-					}
-				}
-				if (RX_PrinterStatus.printState == ps_pause)
-				{
-					retval = opcua_set_bool(boIsPrinting, 0);
-				}
-				break;
-			case siemens_waitforstop:
-				if ((retval = opcua_get_bool(boMachineIsStopped, &status)) == 0)
-				{
-					if (status)
-					{
-						_state = siemens_stopped;
-						RX_PrinterStatus.printState = ps_ready_power;
-						retval = opcua_set_bool(boIsPrinting, 0);
-						retval |= opcua_set_bool(boIsReadyToPrint, 0);
-						retval |= opcua_set_bool(boReqStop, 0);
-						if (RX_StepperStatus.info.z_in_print) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
-						TrPrintfL(TRUE, "OPCUA: Stop");
-					}
-				}
-				break;
-			case siemens_pause:
-				if (RX_PrinterStatus.printState == ps_printing)
-				{
-					TrPrintfL(TRUE, "OPCUA: Restart printing");
-					restart = TRUE;
-					if ((retval = opcua_set_bool(boReqStart, 1)) == 0) _state = siemens_readytoprint;
-				}
-				break;
-
-			// TODO recompile open62541 multithread and move these cases in dedicated fonctions
-			case siemens_requirestop:
-				opcua_set_bool(boReqStart, 0);
-				if ((retval = opcua_set_bool(boReqStop, 1)) == 0)
-				{
-					retval |= opcua_set_bool(boIsPrinting, 0);
-					retval |= opcua_set_bool(boIsReadyToPrint, 0);
-					_state = siemens_waitforstop;
-					RX_PrinterStatus.printState = ps_stopping;
-					TrPrintfL(TRUE, "OPCUA: Require Stop");
-				}
-
-				break;
-			case siemens_requirepause:
-				retval = opcua_set_bool(boReqPause, 1); //|| opcua_set_bool(boIsPrinting, 0);				
-				_state = siemens_waitforpause;
-				TrPrintfL(TRUE, "OPCUA: Require Pause");
-				opcua_set_bool(boReqStart, 0);
-				break;
-			}
-			if (retval != 0)
-			{
-				Error(ERR_ABORT, 0, "Could not contact OPCUA");
-				_state = siemens_stopped;
-			}
-
 		}
-		rx_sleep(500);
+		rx_sleep(1000);
 	}
-	Error(ERR_ABORT, 0, "Stopping OPCUA communication...");
+	
 	return NULL;
 }
 
-int lh702_pause_printing()
+//--- _lh702_closed --------------------------------------------
+static int _lh702_closed(RX_SOCKET socket, const char *peerName)
 {
-	// TODO recompile open62541 multithread and move siemens_requirepause
-	Error(WARN, 0, "PAUSED by Operator");
-	if (_state == siemens_printing)
-		_state = siemens_requirepause;
-	else
-		lh702_stop_printing();
+	sok_close(&_Socket);
+	Error(LOG, 0, "LH702 TCP/IP connection closed");
 	return REPLY_OK;
 }
-
-int lh702_stop_printing()
+//--- _lh702_send_status ---------------------------------------------
+static void _lh702_send_status(void)
 {
-	enc_stop_printing();
-	// TODO recompile open62541 multithread and move siemens_requirestop
-	_state = siemens_requirestop;
+	if (_Socket!=INVALID_SOCKET)
+	{
+		// Protocol version 1
+		switch(RX_PrinterStatus.printState)
+		{
+		case ps_printing:
+			if (RX_StepperStatus.info.z_in_print)
+				_Status.printState = PS_PRINTING;
+			else
+				_Status.printState = PS_STARTING;
+			break;
+		case ps_stopping:	_Status.printState = PS_PRINTING; break;
+		default:			_Status.printState = PS_OFF;
+		}
+		strncpy(_Status.material, RX_Config.material, sizeof(_Status.material));
+		_Status.head_height    = RX_Config.stepper.print_height;
+		_Status.thickness	   = RX_Config.stepper.material_thickness;
+		_Status.encoder_adj	   = RX_Config.printer.offset.incPerMeter[0];
+		_Status.copies_printed = RX_PrinterStatus.printedCnt;
+		_Status.meters_k	   = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_K]/1000;
+		_Status.meters_color   = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_COLOR]/1000;
+		_Status.meters_color_w = (INT32)RX_PrinterStatus.counterLH702[CTR_LH702_COLOR_W]/1000;
+		sok_send(&_Socket, &_Status);
+
+		static int order[LH702_NB_COLORS] = {4, 5, 6, 0, 1, 2, 3};
+		
+		// Protocol version 2
+		if (RX_Config.lh702_protocol_version == 2)
+		{			
+			for (int i=0; i<LH702_NB_COLORS; i++)
+			{
+				for (int j=0; j<LH702_NB_CLUSTER_PER_COLORS_STATE2; j++)
+				{
+					int index = i * LH702_NB_CLUSTER_PER_COLORS_STATE2 + j;
+					int colorIndex = order[i] * LH702_NB_CLUSTER_PER_COLORS_STATE2 + j;
+					//_Status2.cluster_hours[index] = RX_HBStatus[index].clusterTime / 3600;
+					_Status2.cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
+				}
+				_Status2.ink_level[i] = FluidStatus[i].canisterLevel;
+			}
+			sok_send(&_Socket, &_Status2);
+		}
+
+		if (RX_Config.lh702_protocol_version >= 3)
+		{
+			for (int i = 0; i < LH702_NB_COLORS; i++)
+			{
+				for (int j = 0; j < LH702_NB_CLUSTER_PER_COLORS_STATE3; j++)
+				{
+					int index = i * LH702_NB_CLUSTER_PER_COLORS_STATE3 + j;
+					int colorIndex = order[i] * LH702_NB_CLUSTER_PER_COLORS_STATE3 + j;
+					_Status3.cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
+				}
+				_Status3.ink_level[i] = FluidStatus[i].canisterLevel;
+			}
+			sok_send(&_Socket, &_Status3);			
+		}
+
+		//TrPrintfL(TRUE, "SendToLH702: version=%d, printState=%d, id=%d, copies=%d", RX_Config.lh702_protocol_version, _Status.printState, _Status.id, _Status.copies_printed);
+	}
+}
+
+	//--- lh702_menu ----------------------------------------------
+void lh702_menu(char *str)
+{
+	if (RX_Config.printer.type==printer_LH702)
+	{
+		SLH702_Value val;
+		val.hdr.msgLen = sizeof(val);
+		val.value = atoi(&str[1]);
+		switch(str[0])
+		{
+		case '?':	term_printf("--- LH702: commands when not printing -------------\n");					
+					term_printf("m<name>:    load material\n");
+					term_printf("x:			 list materials\n");
+					term_printf("t<microns>: set Thickness\n");
+					term_printf("h<microns>: set Head Height above material\n");
+					term_printf("e<val>:	    set encoder adjustment value\n");
+				
+					term_printf("--- LH702: commands while printing ----------------\n");
+					term_printf("d<microns>: Add to PrintGo Distace\n");
+					term_printf("l<microns>: Add to Page Margin\n");
+					term_flush();
+					break;	
+
+		case 'd':	val.hdr.msgId  = CMD_ADD_DIST;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);
+					break;
+
+		case 'l':	val.hdr.msgId  = CMD_ADD_LATERAL;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);
+					break;
+
+		case 'x':	
+		{			
+					char materials[64][64];
+					int n = plc_list_materials(materials);
+					for (int i = 0; i < n; i++) term_printf("%s\n", materials[i]);
+					term_flush();
+					break;
+		}
+
+		case 'm':
+					lh702_load_material(&str[1]);	   
+					break;
+
+		case 't':	// _handle_thickness(atoi(&str[1]));  
+					val.hdr.msgId  = PAR_THICKNESS;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);					
+					break;
+
+		case 'h':	// _handle_headheight(atoi(&str[1])); 
+					val.hdr.msgId  = PAR_HEAD_HEIGHT;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);					
+					break;
+
+		case 'e':	// _handle_encoffset(atoi(&str[1]));
+					val.hdr.msgId  = PAR_ENCODER_ADJ;
+					_lh702_handle_msg(INVALID_SOCKET, &val, sizeof(val), NULL, NULL);					
+					break;
+		default:	break;
+		}						
+	}
+}
+
+//--- _lh702_handle_msg ------------------------------------------------------------------
+static int _lh702_handle_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
+{
+	SMsgHdr		 *phdr = (SMsgHdr*)pmsg;
+	SLH702_Value *val  = (SLH702_Value*)pmsg;
+	SLH702_Str   *str  = (SLH702_Str*)pmsg;
+	_lastQuery = rx_get_ticks();
+	if (len)
+	{
+		net_register_by_device(dev_plc, -1);
+
+		//Error(LOG, 0, "received msg (len=%d, id=0x%08x)", phdr->msgLen, phdr->msgId);
+		switch(phdr->msgId)
+		{
+		case CMD_START_PRINTING:  	Error(LOG, 0, "DM5 -> CMD_START_PRINTING");	
+									pc_start_printing();
+									break;
+			
+		case CMD_STOP_PRINTING:		Error(LOG, 0, "DM5 -> CMD_STOP_PRINTING");	
+									pc_abort_printing();
+									break;
+			
+		case CMD_CHANGE_JOB:		Error(LOG, 0, "DM5 -> CMD_CHANGE_JOB");		
+									pc_change_job();
+									break;
+		
+        case CMD_GET_STATE:			//Error(LOG, 0, "DM5 -> CMD_GET_STATE");		
+									_lh702_send_status();
+									break;
+
+		case CMD_ACK_STOP_REQUEST:  Error(LOG, 0, "DM5 -> CMD_ACK_STOP_REQUEST");
+									machine_error_reset();
+									_Status2.stop_printing_request = FALSE;
+									_Status3.stop_printing_request = FALSE;
+									break;
+
+		case CMD_LIST_MATERIALS:	Error(LOG, 0, "DM5 -> CMD_LIST_MATERIALS");
+									_lh702_send_materials();
+									break;
+
+		case PAR_MATERIAL:			Error(LOG, 0, "DM5 -> PAR_MATERIAL=>>%s<<", str->str);
+									lh702_load_material(str->str);
+									break;
+			
+		case PAR_THICKNESS:			Error(LOG, 0, "DM5 -> PAR_THICKNESS=%d", val->value);
+									_handle_thickness(val->value);
+									break;
+		
+		case PAR_HEAD_HEIGHT:		Error(LOG, 0, "DM5 -> PAR_HEAD_HEIGHT=%d", val->value);
+									_handle_headheight(val->value);
+									break;
+			
+		case PAR_ENCODER_ADJ:		Error(LOG, 0, "DM5 -> PAR_ENCODER_ADJ=%d", val->value);
+									_handle_encoffset(val->value);
+									break;
+			
+		case CMD_ADD_DIST:			Error(LOG, 0, "DM5 -> CMD_ADD_DIST=%d", val->value);
+									_handle_dist(val->value);
+									break;
+			
+		case CMD_ADD_LATERAL:		Error(LOG, 0, "DM5 -> CMD_ADD_LATERAL=%d", val->value);
+									_handle_lateral(val->value);
+									break;
+			
+		default: Error(WARN, 0, "Siemens:Got unknown MessageId=0x%08x", phdr->msgId);
+		}		
+	}
 	return REPLY_OK;
 }
 
@@ -527,6 +499,53 @@ static void _handle_lateral	(int value)
 		Error(LOG, 0, "CMD_ADD_LATERAL %d + %d = %d", old, value, evt.item.pageMargin);
 		handle_gui_msg(INVALID_SOCKET, &evt, evt.hdr.msgLen, NULL, 0);
 	}
+}
+
+//--- _lh702_send_materials ---------------------------
+void _lh702_send_materials(void)
+{
+	_Materials.length = plc_list_materials(_Materials.materials);
+	sok_send(&_Socket, &_Materials);
+}
+
+//--- lh702_load_material ---------------------------
+void lh702_load_material(char *material)
+{
+	if (RX_Config.printer.type==printer_LH702) plc_load_material(material);
+}
+
+//--- _plc_set_var ------------------------------------
+static void _plc_set_var(const char *format, ...)
+{
+	SStringCmd cmd;
+	int len;
+	va_list args;
+	va_start (args, format);
+	len=sprintf(cmd.str, UnitID "\n");
+	len+=vsprintf(&cmd.str[len], format, args);
+	len=sprintf(&cmd.str[len],"\n");	
+	va_end (args);
+	cmd.hdr.msgId  = CMD_PLC_SET_VAR;
+	cmd.hdr.msgLen = (int)(sizeof(cmd.hdr)+strlen(cmd.str)+1);
+	plc_handle_gui_msg(INVALID_SOCKET, &cmd, cmd.hdr.msgLen);
+}
+
+//--- _handle_thickness --------------------------
+static void _handle_thickness(int value)
+{
+	_plc_set_var("XML_MATERIAL_THICKNESS=%f", value/1000.0);
+}
+
+//--- _handle_headheight --------------------------
+static void _handle_headheight(int value)
+{
+	_plc_set_var("XML_HEAD_HEIGHT=%f", value/1000.0);
+}
+
+//--- _handle_encoffset --------------------------
+static void _handle_encoffset(int value)
+{
+	_plc_set_var("XML_ENC_OFFSET=%d", value);
 }
 
 //--- lh702_ctr_init ------------------------------
@@ -616,8 +635,10 @@ void lh702_ctr_save(int reset, char *machineName)
 			setup_str	(file, "check", WRITE, check, sizeof(check), "");
 		}
 
+	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, FALSE);
 		setup_save(file, PATH_USER FILENAME_COUNTERS_LH702);
 		setup_destroy(file);
+	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
 		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS_LH702, time);
 	}
 }

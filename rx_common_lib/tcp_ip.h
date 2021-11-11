@@ -624,6 +624,7 @@ typedef struct
 	char			hostName[64];
 	EPrinterType	type;
 	EEncoderType	encoderType;
+	BOOL hybrid;
 	UINT32			overlap;
 	SOffsetCfg		offset;
 	INT32			externalData;

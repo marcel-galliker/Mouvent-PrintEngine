@@ -622,11 +622,11 @@ static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
 					msg.fpVoltage = RX_Config.voltage[headNo][n];
 				else if (RX_Config.headFpVoltage[no]) msg.fpVoltage = RX_Config.headFpVoltage[no];
 				else msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
-				
 
 				if(_HeadCtrl[headNo].cfg->reverseHeadOrder) no = RX_Config.colorCnt*RX_Config.headsPerColor-1-no;
 				memcpy(&msg.ink, &RX_Config.inkSupply[inksupply].ink, sizeof(msg.ink));
-				TrPrintfL(TRUE, "Board[%d].head[%d].ink = >>%s<<", headNo, n, RX_Config.inkSupply[inksupply].ink.description);
+
+				TrPrintfL(TRUE, "Board[%d].head[%d].ink = >>%s<< voltage=%d dots=%s", headNo, n, RX_Config.inkSupply[inksupply].ink.description, msg.fpVoltage, msg.dots);
 				sok_check_addr_32(&_HeadCtrl[headNo].socket, _HeadCtrl[headNo].cfg->ctrlAddr, __FILE__, __LINE__);
 				sok_send(&_HeadCtrl[headNo].socket, &msg);
 			}

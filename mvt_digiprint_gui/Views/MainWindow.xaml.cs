@@ -290,7 +290,7 @@ namespace RX_DigiPrint.Views
 				{
                     _ShowTab(true, TabLH702, AddLocationHint.After);                    
                     _ShowTab(false, TabMachine, AddLocationHint.After);
-                    _ShowTab(true, SiemensHMI, AddLocationHint.Last);
+                    _ShowTab(!RxGlobals.PrintSystem.isHybrid, SiemensHMI, AddLocationHint.Last);
                 }
                 else
 				{
