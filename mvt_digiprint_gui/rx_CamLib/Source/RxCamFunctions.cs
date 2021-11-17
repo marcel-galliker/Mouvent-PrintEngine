@@ -164,6 +164,7 @@ namespace rx_CamLib
 		//--- MeasureAngle --------------------------------
 		public RxCam.ENCamResult MeasureAngle(bool first)
 		{
+			Console.WriteLine("RxCamFubctions.MeasureAngle (first={0})", first);
 			if (SimuCallback!=null)
 			{	
 				new Task(() =>
@@ -187,7 +188,7 @@ namespace rx_CamLib
 				else       
 				{ 
 					Thread.Sleep(100);
-					result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 5, 17);
+					result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 5, 17); // 5, 10, 15
 				}
 				if (result!=ENCamResult.OK)
 					Console.WriteLine("CamResult={0}", result.ToString());
@@ -217,7 +218,9 @@ namespace rx_CamLib
 				_Camera.NumExtraErodes=3;
 				_Camera.SetLineAspectLimit(5);
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-				_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 5, 10, 15);
+				Thread.Sleep(100);
+			//	_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 5, 10, 15);
+				_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 5, 17);
 			});
 			return RxCam.ENCamResult.OK;
 		}

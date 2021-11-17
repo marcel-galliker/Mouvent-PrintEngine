@@ -100,43 +100,11 @@ namespace RX_DigiPrint.Models
 
 				//--- details ------------------------------------------------------------
 				{
-					/*
-					if (action.MeasureCnt == 0)
-					{
-						action.Measured(0, Double.NaN);
-						action.Measured(0, 0.0);
-						action.Measured(0, -0.1);
-						action.Measured(0, 0.7);
-						action.Measured(0, -1.2);
-						action.Measured(0, -0.6);
-						action.Measured(0, -5.4);
-						action.Measured(0, -0.2);
-
-						action.Measured(1, Double.NaN);
-						action.Measured(1, 1.0);
-						action.Measured(1, -1.1);
-						action.Measured(1, 1.7);
-						action.Measured(1, -1.2);
-						action.Measured(1, -1.6);
-						action.Measured(1, -5.4);
-						action.Measured(1, -1.2);
-
-						action.Measured(2, Double.NaN);
-						action.Measured(2, 2.0);
-						action.Measured(2, -2.1);
-						action.Measured(2, 2.7);
-						action.Measured(2, -1.2);
-						action.Measured(2, -2.6);
-						action.Measured(2, -5.4);
-						action.Measured(2, -2.2);
-					}
-					*/
-
 					Grid detailsGrid = new Grid(){ Margin=new Thickness(0,20, 0, 0)};
-					for (int pass=0; pass<action._ValueStrList.Count; pass++)
+					for (int pass=0; pass<action._ValueList.Count; pass++)
 					{
 						SA_ValueGrid values = new SA_ValueGrid(){Margin=new Thickness(0,0,2,0)};
-						values.DataContext = action._ValueStrList[pass];
+						values.DataContext = action._ValueList[pass];
 						values.FontSize = 8;
 						values.Foreground = Brushes.DarkGray;
 						values.HorizontalAlignment = HorizontalAlignment.Stretch;

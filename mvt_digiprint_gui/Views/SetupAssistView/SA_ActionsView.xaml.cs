@@ -60,7 +60,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- PrintReport --------------------------------
 		public void PrintReport()
 		{
-			new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted(), true);
+			//	new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted(), true);
+			new SA_Report().PrintReport(Actions.ItemsSource as List<SA_Action>, RxGlobals.SA_StateMachine.TimePrinted(), true);
 		}
 
 		//--- FileOpen --------------------------------
@@ -70,16 +71,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			if (actions != null)
 			{
 				Actions.ItemsSource = actions;
-			}
-		}
-
-		//--- Test -----------------------------
-		public void Test()
-		{
-			List<SA_Action> actions=RxGlobals.SA_StateMachine.Test();
-			if (Actions.ItemsSource==null)
-			{
-				Actions.ItemsSource=actions;
 			}
 		}
 

@@ -15,14 +15,15 @@ namespace RX_DigiPrint.Models
 		public double Value { get; set; }
 		public bool Used { get; set; }
 	}
+
 	public class SA_Action: RxBindable
 	{
 		public static readonly int  MeasurementPasses=3;
 
-		public List<string> _ValueStrList = new List<string>();
+		public List<List<SA_Value>> _ValueList = new List<List<SA_Value>>();
 
 		//--- Property Values ---------------------------------------
-		private List<SA_Value> _Values = new List<SA_Value>();
+		private List<SA_Value> _Values;
 		public List<SA_Value> Values
 		{
 			get { return _Values; }
@@ -130,9 +131,9 @@ namespace RX_DigiPrint.Models
 					SetProperty(ref _Function,value);
 					switch(value)
 					{ 
-					case ECamFunction.CamMeasureAngle:		IconKind=PackIconMaterialKind.AngleAcute; break;
-					case ECamFunction.CamMeasureStitch:		IconKind=PackIconMaterialKind.ArrowCollapseHorizontal; break;
-					case ECamFunction.CamMeasureDist:		IconKind=PackIconMaterialKind.ArrowExpandDown; break;
+					case ECamFunction.CamMeasureAngle:		IconKind = PackIconMaterialKind.AngleAcute; break;
+					case ECamFunction.CamMeasureStitch:		IconKind = PackIconMaterialKind.ArrowCollapseHorizontal; break;
+					case ECamFunction.CamMeasureDist:		IconKind = PackIconMaterialKind.ArrowExpandDown; break;
 					case ECamFunction.CamMeasureRegStitch:	IconKind = PackIconMaterialKind.ArrowCollapseHorizontal; break;
 					case ECamFunction.CamMeasureRegAngle:	IconKind = PackIconMaterialKind.AngleAcute; break;
 					default: break;
@@ -194,29 +195,35 @@ namespace RX_DigiPrint.Models
 		/// <summary>
 		/// Writing the header line of the csv file
 		/// </summary>
-		/// <param name="sw">Stream Writer</param>
-		public static void WriteCsvHeader(StreamWriter sw)
+		/// <param name="csv">Stream Writer</param>
+		public static void WriteCsvHeader(StreamWriter csv)
 		{
-			sw.Write("Color"); sw.Write(CSV_SEPARATOR);
-			sw.Write("Head"); sw.Write(CSV_SEPARATOR);
-			sw.Write("Function"); sw.Write(CSV_SEPARATOR);
-			sw.Write("Pass"); sw.Write(CSV_SEPARATOR);
+			csv.Write("Color"); csv.Write(CSV_SEPARATOR);
+			csv.Write("Head"); csv.Write(CSV_SEPARATOR);
+			csv.Write("Function"); csv.Write(CSV_SEPARATOR);
+			csv.Write("Pass"); csv.Write(CSV_SEPARATOR);
 			for (int i=0; i<8; i++)
-				sw.Write("Res"+(i+1).ToString()+ CSV_SEPARATOR);
-			sw.WriteLine();
+				csv.Write("Res"+(i+1).ToString()+ CSV_SEPARATOR);
+			csv.WriteLine();
 		}
 
 		//--- WriteCsv ---------------------------------------------------------
-		public void WriteCsv(StreamWriter sw)
+		public void WriteCsv(StreamWriter csv)
 		{
-			for(int pass=0; pass<_ValueStrList.Count; pass++)
+			for(int pass=0; pass<_ValueList.Count; pass++)
 			{
-				sw.Write(ColorBrush.ToString()); sw.Write(CSV_SEPARATOR);
-				sw.Write(Name); sw.Write(CSV_SEPARATOR);
-				sw.Write(Function.ToString()); sw.Write(CSV_SEPARATOR);
-				sw.Write(pass+1); sw.Write(CSV_SEPARATOR);
-				sw.Write(_ValueStrList[pass].Replace(' ', CSV_SEPARATOR));
-				sw.WriteLine();
+				csv.Write(ColorBrush.ToString()); csv.Write(CSV_SEPARATOR);
+				csv.Write(Name); csv.Write(CSV_SEPARATOR);
+				csv.Write(Function.ToString()); csv.Write(CSV_SEPARATOR);
+				csv.Write(pass+1); csv.Write(CSV_SEPARATOR);
+				for(int i=0; i< _ValueList[pass].Count; i++)
+				{
+					if (double.IsNaN(_ValueList[pass][i].Value)) csv.Write("---");
+					else                                         csv.Write(string.Format("{0:0.0}", _ValueList[pass][i].Value));
+					csv.Write(CSV_SEPARATOR);
+				}
+//				csv.Write(_ValueList[pass].ToString().Replace(' ', CSV_SEPARATOR));
+				csv.WriteLine();
 			}
 		}
 
@@ -240,27 +247,27 @@ namespace RX_DigiPrint.Models
 				{
 					filePath = openFileDialog.FileName;
 
-					var fileStream = openFileDialog.OpenFile();
-
 					try 
 					{
-						using (StreamReader reader = new StreamReader(fileStream))
+						var fileStream = openFileDialog.OpenFile();
+						using (StreamReader csv = new StreamReader(fileStream))
 						{
 							while (true)
 							{
-								String line = reader.ReadLine();
+								String line = csv.ReadLine();
 								if (line == null) break;
 								String[] field = line.Split(CSV_SEPARATOR);
-								if (field[2].Equals(ECamFunction.CamMeasureAngle.ToString()))
-								{
+								ECamFunction function = ECamFunction.CamNoFunction;
+								if (field[2].Equals(ECamFunction.CamMeasureAngle.ToString())) function= ECamFunction.CamMeasureAngle;
+								else if (field[2].Equals(ECamFunction.CamMeasureStitch.ToString())) function = ECamFunction.CamMeasureStitch;
+								
+								if (function!= ECamFunction.CamNoFunction)
+								{ 
 									int pass= Rx.StrToInt32(field[3]);
 									if (pass==1) 
 									{ 
 										action=new SA_Action();
-										action.Function= ECamFunction.CamMeasureAngle;
-										
-
-										Color color = Colors.Black;// ColorTranslator.FromHtml(field[0]);
+										action.Function= function;
 										action.ColorBrush = Rx.BrushFromStr(field[0]);
 										action.Name = field[1];
 										if (actions==null) actions=new List<SA_Action>();
@@ -281,40 +288,35 @@ namespace RX_DigiPrint.Models
 			return actions;
 		}
 
-
 		//--- Property MeasureCnt ---------------------------------------
 		public int MeasureCnt
 		{
-			get { return _Values.Count(); }
+			get { 
+					if (_Values==null) return 0;
+					return _Values.Count(); 
+				}
 		}
 
 		//--- Measured ---
 		public void Measured(int pass, double value)
 		{
-			while (_ValueStrList.Count <= pass)
+			while (_ValueList.Count <= pass)
 			{
-				_ValueStrList.Add("");
-				_Values.Clear();
+				_ValueList.Add(new List<SA_Value>());
 			}
+		
+			List<SA_Value> values = _ValueList[pass];
 
-			_Values.Add(new SA_Value(){Value=value });
+			values.Add(new SA_Value(){Value=value });
 
-			if (value.Equals(double.NaN))
-			{
-				_ValueStrList[pass] += " ---";
-			}
-			else
-			{
-				_ValueStrList[pass] += string.Format(" {0:0.0}", value);
-			}
-			if (_Values.Count()>3)
+			if (values.Count()>3)
 			{
 				int cnt=0;
 				string str1="", str2="";
 				double avg=0;
 				double min=1000;
 				double max=-1000;
-				foreach(SA_Value val in _Values) 
+				foreach(SA_Value val in values) 
 				{ 
 					double a=val.Value;
 					if (!a.Equals(double.NaN))
@@ -331,7 +333,7 @@ namespace RX_DigiPrint.Models
 				avg = (avg-min-max)/cnt;
 				
 				double diff=0;
-				foreach(SA_Value val in _Values)
+				foreach(SA_Value val in values)
 				{
 					double a = val.Value;
 					if (!a.Equals(double.NaN) && a>=min && a<=max) diff+=(a-avg)*(a-avg);
@@ -344,8 +346,7 @@ namespace RX_DigiPrint.Models
 				double avg2=0;
 				cnt=0;
 				int i=0;
-				bool[] used= new bool[_Values.Count];
-				foreach(SA_Value val in _Values)
+				foreach(SA_Value val in values)
 				{
 					double a = val.Value;
 					if (!a.Equals(double.NaN) && a>=min && a<=max) { cnt++; avg2+=a; str2 += string.Format("{0:0.0}  ", a); val.Used =true;}
@@ -359,6 +360,10 @@ namespace RX_DigiPrint.Models
 			//	Console.WriteLine("ANGLE CORRECTION: ok  {0}", str2);
 			//	Console.WriteLine("ANGLE CORRECTION: Corr={0:0.000} avg={1:0.000}, diff={2:0.000}, avg2={3:0.000}, cnt={4}", Correction, avg, diff, avg2, cnt);
 			}
+
+			//--- force a refresh ---
+			Values = null;
+			Values = values;
 		}
 
 		//--- Property Correction ---------------------------------------

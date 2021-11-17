@@ -46,23 +46,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		//--- UserControl_DataContextChanged ------------------------------------------------------------
 		private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			String str = e.NewValue as string;
-			if (str!=null)
-			{
-				String[] list = str.Split(' ');
-			// !first item is always ""
-				int i;
-				int cnt=Math.Min(list.Count()-1, _Grid.Children.Count);
-				for (i = 0; i < cnt; i++)
-				{
-					(_Grid.Children[i] as TextBlock).Text = list[i+1];
-				}
-				while (i<_Grid.Children.Count) 
-				{
-					(_Grid.Children[i++] as TextBlock).Text="";
-				}
-			}
-
 			List<SA_Value> values = e.NewValue as List<SA_Value>;
 			if (values!=null)
 			{
@@ -74,7 +57,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 					if (i< values.Count)
 					{
 						if (double.IsNaN(values[i].Value)) txt.Text = "---";
-						else txt.Text = values[i].Value.ToString();
+						else txt.Text = string.Format("{0:0.0}",  values[i].Value);
 						txt.FontWeight = values[i].Used ? FontWeights.Bold : FontWeights.Normal;
 					}
 					else txt.Text = "";
