@@ -36,6 +36,7 @@ namespace rx_CamLib
 		CamMeasureDist,
 		CamMeasureRegAngle,
 		CamMeasureRegStitch,
+		CamMoveScan,
 		I1Calibrate,
 		I1Measure,
 	};
@@ -169,7 +170,7 @@ namespace rx_CamLib
 				{
 					CallBackDataStruct CallbackData = new CallBackDataStruct();
 					CallbackData.Value_1 = (float)1.2;
-						Thread.Sleep(100);
+					Thread.Sleep(100);
 					SimuCallback.Invoke(RxCam.ENCamCallBackInfo.AngleCorr, CallbackData);
 				}).Start();
 				return RxCam.ENCamResult.OK;
@@ -183,7 +184,11 @@ namespace rx_CamLib
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
 				ENCamResult result;
 				if (first) result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 1,  0,  0);
-				else       result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 5, 10, 15);
+				else       
+				{ 
+					Thread.Sleep(100);
+					result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 5, 17);
+				}
 				if (result!=ENCamResult.OK)
 					Console.WriteLine("CamResult={0}", result.ToString());
 			});

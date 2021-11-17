@@ -54,6 +54,10 @@
                 <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="Printer"></iconPacks:PackIconMaterial>
             </common:MvtButton>
 
+            <common:MvtButton HorizontalAlignment="Left" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" Click="FileOpen_Clicked" IsChecked="{Binding CanContinue}" Margin="15, 5, 15, 5" >
+                <iconPacks:PackIconMaterial HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="20" Height="20" Kind="FileDocumentOutline"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+
         </StackPanel>
 
         <Grid Grid.Row="2">

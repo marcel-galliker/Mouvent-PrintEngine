@@ -3,14 +3,31 @@ using rx_CamLib;
 using RX_Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
+	public class SA_Value
+	{
+		public double Value { get; set; }
+		public bool Used { get; set; }
+	}
 	public class SA_Action: RxBindable
 	{
-		private List<double> _Values=new List<double>();
+		public static readonly int  MeasurementPasses=3;
+
+		public List<string> _ValueStrList = new List<string>();
+
+		//--- Property Values ---------------------------------------
+		private List<SA_Value> _Values = new List<SA_Value>();
+		public List<SA_Value> Values
+		{
+			get { return _Values; }
+			set { SetProperty(ref _Values, value); }
+		}
 
 		//--- Property Name ---------------------------------------
 		private string _Name;
@@ -73,7 +90,11 @@ namespace RX_DigiPrint.Models
 		public double ScanPos
 		{
 			get { return _ScanPos; }
-			set { SetProperty(ref _ScanPos, value); }
+			set {
+					if (_ScanPos!=0 && _ScanPos!=value && Function == ECamFunction.CamMeasureAngle)
+						Console.WriteLine("ScanPos changed");
+					SetProperty(ref _ScanPos, value);
+				}
 		}
 
 		//--- Property ScanMoveDone ---------------------------------------
@@ -135,28 +156,157 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _State,value); }
 		}
 
-		//--- Property MyProperty ---------------------------------------
+		private static readonly char CSV_SEPARATOR=';';
+
+		//--- ReadCsv ----------------------------------------------
+		public void ReadCsv(string filepath)
+		{
+			try
+			{
+				using (StreamReader sr = new StreamReader(filepath))
+				{
+					String fct = Function.ToString();
+					while (true)
+					{
+						String line = sr.ReadLine();
+						if (line==null) break;
+						String[] field=line.Split(CSV_SEPARATOR);
+						if (field[1].Equals(Name)
+						&& field[2].Equals(Function.ToString()))
+						{
+							int pass = Rx.StrToInt32(field[3]);
+							for (int n=4; n<field.Length; n++)
+							{
+								if (field[n].Contains("---")) Measured(pass, double.NaN);
+								else
+									Measured(pass, Rx.StrToDouble(field[n]));
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+			}
+		}
+
+		/// <summary>
+		/// Writing the header line of the csv file
+		/// </summary>
+		/// <param name="sw">Stream Writer</param>
+		public static void WriteCsvHeader(StreamWriter sw)
+		{
+			sw.Write("Color"); sw.Write(CSV_SEPARATOR);
+			sw.Write("Head"); sw.Write(CSV_SEPARATOR);
+			sw.Write("Function"); sw.Write(CSV_SEPARATOR);
+			sw.Write("Pass"); sw.Write(CSV_SEPARATOR);
+			for (int i=0; i<8; i++)
+				sw.Write("Res"+(i+1).ToString()+ CSV_SEPARATOR);
+			sw.WriteLine();
+		}
+
+		//--- WriteCsv ---------------------------------------------------------
+		public void WriteCsv(StreamWriter sw)
+		{
+			for(int pass=0; pass<_ValueStrList.Count; pass++)
+			{
+				sw.Write(ColorBrush.ToString()); sw.Write(CSV_SEPARATOR);
+				sw.Write(Name); sw.Write(CSV_SEPARATOR);
+				sw.Write(Function.ToString()); sw.Write(CSV_SEPARATOR);
+				sw.Write(pass+1); sw.Write(CSV_SEPARATOR);
+				sw.Write(_ValueStrList[pass].Replace(' ', CSV_SEPARATOR));
+				sw.WriteLine();
+			}
+		}
+
+		//--- FileOpen ---------------------------------------
+		public static List<SA_Action> FileOpen()
+		{
+			List<SA_Action> actions = null;
+
+			var fileContent = string.Empty;
+			var filePath = string.Empty;
+
+			using (OpenFileDialog openFileDialog = new OpenFileDialog())
+			{
+				openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+				openFileDialog.Filter = "csv files (*.csv)|*.csv";
+				openFileDialog.FilterIndex = 1;
+				openFileDialog.RestoreDirectory = true;
+				SA_Action action=null;
+
+				if (openFileDialog.ShowDialog() == DialogResult.OK)
+				{
+					filePath = openFileDialog.FileName;
+
+					var fileStream = openFileDialog.OpenFile();
+
+					try 
+					{
+						using (StreamReader reader = new StreamReader(fileStream))
+						{
+							while (true)
+							{
+								String line = reader.ReadLine();
+								if (line == null) break;
+								String[] field = line.Split(CSV_SEPARATOR);
+								if (field[2].Equals(ECamFunction.CamMeasureAngle.ToString()))
+								{
+									int pass= Rx.StrToInt32(field[3]);
+									if (pass==1) 
+									{ 
+										action=new SA_Action();
+										action.Function= ECamFunction.CamMeasureAngle;
+										
+
+										Color color = Colors.Black;// ColorTranslator.FromHtml(field[0]);
+										action.ColorBrush = Rx.BrushFromStr(field[0]);
+										action.Name = field[1];
+										if (actions==null) actions=new List<SA_Action>();
+										actions.Add(action);
+									}
+									for(int i=4; i<field.Length; i++)
+										action.Measured(pass, Rx.StrToDouble(field[i]));
+								}
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Exception {0}", ex.Message);
+					}
+				}
+			}
+			return actions;
+		}
+
+
+		//--- Property MeasureCnt ---------------------------------------
 		public int MeasureCnt
 		{
 			get { return _Values.Count(); }
 		}
 
-		//--- Property BaseIdx ---------------------------------------
-		private int _BaseIdx=-1;
-		public int BaseIdx
-		{
-			get { return _BaseIdx; }
-			set { SetProperty(ref _BaseIdx,value); }
-		}
-
 		//--- Measured ---
-		public void Measured(double value)
+		public void Measured(int pass, double value)
 		{
-			_Values.Add(value);
-			if (value.Equals(double.NaN)) 
-				ValueStr += string.Format(" ---");
-			else                   
-				ValueStr += string.Format(" {0:0.0}", value);
+			while (_ValueStrList.Count <= pass)
+			{
+				_ValueStrList.Add("");
+				_Values.Clear();
+			}
+
+			_Values.Add(new SA_Value(){Value=value });
+
+			if (value.Equals(double.NaN))
+			{
+				_ValueStrList[pass] += " ---";
+			}
+			else
+			{
+				_ValueStrList[pass] += string.Format(" {0:0.0}", value);
+			}
 			if (_Values.Count()>3)
 			{
 				int cnt=0;
@@ -164,8 +314,9 @@ namespace RX_DigiPrint.Models
 				double avg=0;
 				double min=1000;
 				double max=-1000;
-				foreach(double a in _Values) 
+				foreach(SA_Value val in _Values) 
 				{ 
+					double a=val.Value;
 					if (!a.Equals(double.NaN))
 					{
 						if (a<min) min=a;
@@ -180,8 +331,9 @@ namespace RX_DigiPrint.Models
 				avg = (avg-min-max)/cnt;
 				
 				double diff=0;
-				foreach(double a in _Values)
+				foreach(SA_Value val in _Values)
 				{
+					double a = val.Value;
 					if (!a.Equals(double.NaN) && a>=min && a<=max) diff+=(a-avg)*(a-avg);
 				}
 				diff /= cnt;
@@ -191,25 +343,22 @@ namespace RX_DigiPrint.Models
 				max=avg+diff;
 				double avg2=0;
 				cnt=0;
-				foreach(double a in _Values)
+				int i=0;
+				bool[] used= new bool[_Values.Count];
+				foreach(SA_Value val in _Values)
 				{
-					if (!a.Equals(double.NaN) && a>=min && a<=max) { cnt++; avg2+=a; str2 += string.Format("{0:0.0}  ", a);}
+					double a = val.Value;
+					if (!a.Equals(double.NaN) && a>=min && a<=max) { cnt++; avg2+=a; str2 += string.Format("{0:0.0}  ", a); val.Used =true;}
+					i++;
 				}
 				if (cnt<3) return;
 
 				Correction = avg2/cnt;
+
 			//	Console.WriteLine("ANGLE CORRECTION: all {0}", str1);
 			//	Console.WriteLine("ANGLE CORRECTION: ok  {0}", str2);
 			//	Console.WriteLine("ANGLE CORRECTION: Corr={0:0.000} avg={1:0.000}, diff={2:0.000}, avg2={3:0.000}, cnt={4}", Correction, avg, diff, avg2, cnt);
 			}
-		}
-
-		//--- Property ValueStr ---------------------------------------
-		private string _ValueStr="";
-		public string ValueStr
-		{
-			get { return _ValueStr; }
-			set { SetProperty(ref _ValueStr,value); }
 		}
 
 		//--- Property Correction ---------------------------------------

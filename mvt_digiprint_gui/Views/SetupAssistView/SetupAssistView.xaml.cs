@@ -127,6 +127,12 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			SetupActions.PrintReport();
 		}
 
+		//--- FileOpen_Clicked ----------------------------------------------
+		private void FileOpen_Clicked(object sender, RoutedEventArgs e)
+		{
+			SetupActions.FileOpen();
+		}
+
 		//--- Move_Clicked -------------------------------------------
 		private void Move_Clicked(object sender,RoutedEventArgs e)
 		{

@@ -194,7 +194,6 @@ namespace RX_DigiPrint.Models
 			else
 			{
 				_checkWebMoveDone();
-
 				TcpIp.SetupAssist_MoveCmd cmd = new TcpIp.SetupAssist_MoveCmd();
 				double old=WebPos;
 				WebPos	   += (double)dist;

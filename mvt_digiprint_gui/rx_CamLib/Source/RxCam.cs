@@ -1304,6 +1304,7 @@ namespace rx_CamLib
         {
             int hResult;
 
+            if(halignFilter==null) return ENCamResult.Error;
             halignFilter.SetFrameTiming(false);
             //halignFilter.SetDebug(false);
             halignFilter.SetHostPointer(IntPtr.Zero);

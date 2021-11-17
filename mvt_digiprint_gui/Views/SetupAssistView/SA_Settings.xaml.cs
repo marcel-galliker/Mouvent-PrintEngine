@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Printing;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,10 +41,25 @@ namespace RX_DigiPrint.Views.SetupAssistView
         private void _InitCamera()
 		{
             CB_Camera.ItemsSource    = _Camera.GetCameraList();
+
+            PrintDialog pd = new PrintDialog();
+            PrintQueueCollection printQueues = pd.PrintQueue.HostingPrintServer.GetPrintQueues();
+            System.Printing.PrintQueue pq = pd.PrintQueue;
+            CB_Printer.ItemsSource   = printQueues;
+
             CB_ToleranceAngle.ItemsSource = new SA_Tolerance_List();
             CB_ToleranceStitch.ItemsSource = new SA_Tolerance_List();
 
             CB_Camera.SelectedItem = RxGlobals.Settings.SetupAssistCam.Name;
+            foreach (var item in printQueues)
+			{
+                if (item.FullName.Equals(RxGlobals.Settings.SetupAssistCam.ReportPrinterName))
+				{
+                    CB_Printer.SelectedItem = item;
+                    break;
+                }
+            }
+
             NB_DistToStops.Text    = Math.Round(RxGlobals.Settings.SetupAssistCam.DistToStop, 3).ToString();
             CB_ToleranceAngle.SelectedValue = RxGlobals.Settings.SetupAssistCam.ToleranceAngle;
             CB_ToleranceStitch.SelectedValue = RxGlobals.Settings.SetupAssistCam.ToleranceStitch;
@@ -54,6 +70,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
         {
             bool save=true;
             RxGlobals.Settings.SetupAssistCam.Name       = CB_Camera.SelectedItem as string;
+            RxGlobals.Settings.SetupAssistCam.ReportPrinterName = (CB_Printer.SelectedItem as System.Printing.PrintQueue).FullName;
             RxGlobals.Settings.SetupAssistCam.DistToStop = NB_DistToStops.Value;
             RxGlobals.Settings.SetupAssistCam.ToleranceAngle  = Convert.ToDouble(CB_ToleranceAngle.SelectedValue);
             RxGlobals.Settings.SetupAssistCam.ToleranceStitch = Convert.ToDouble(CB_ToleranceStitch.SelectedValue);

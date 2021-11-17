@@ -24,6 +24,14 @@ namespace rx_CamLib.Models
 			set { SetProperty(ref _Name,value); }
 		}
 
+		//--- Property ReportPrinterName ---------------------------------------
+		private string _ReportPrinterName;
+		public string ReportPrinterName
+		{
+			get { return _ReportPrinterName; }
+			set { SetProperty(ref _ReportPrinterName, value); }
+		}
+
 		//--- Property DistToStop ---------------------------------------
 		private double _DistToStop;
 		public double DistToStop

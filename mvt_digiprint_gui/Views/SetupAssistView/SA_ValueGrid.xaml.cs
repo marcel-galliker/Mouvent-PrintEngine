@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RX_DigiPrint.Models;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,6 +32,17 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			}
 		}
 
+		//--- FontSize -----------------------------------
+		new public int FontSize 
+		{
+			set {
+					foreach(var ctrl in _Grid.Children)
+					{
+						if (ctrl is TextBlock) (ctrl as TextBlock).FontSize = value;
+					}
+				} 
+		}
+
 		//--- UserControl_DataContextChanged ------------------------------------------------------------
 		private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
@@ -47,6 +60,24 @@ namespace RX_DigiPrint.Views.SetupAssistView
 				while (i<_Grid.Children.Count) 
 				{
 					(_Grid.Children[i++] as TextBlock).Text="";
+				}
+			}
+
+			List<SA_Value> values = e.NewValue as List<SA_Value>;
+			if (values!=null)
+			{
+				int i;
+				int cnt = Math.Min(values.Count() - 1, _Grid.Children.Count);
+				for (i=0; i< _Grid.Children.Count; i++)
+				{
+					TextBlock txt = _Grid.Children[i] as TextBlock;
+					if (i< values.Count)
+					{
+						if (double.IsNaN(values[i].Value)) txt.Text = "---";
+						else txt.Text = values[i].Value.ToString();
+						txt.FontWeight = values[i].Used ? FontWeights.Bold : FontWeights.Normal;
+					}
+					else txt.Text = "";
 				}
 			}
 		}

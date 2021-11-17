@@ -2,9 +2,12 @@
 using rx_CamLib;
 using RX_Common;
 using RX_DigiPrint.Converters;
+using RX_DigiPrint.Views.SetupAssistView;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -19,10 +22,27 @@ namespace RX_DigiPrint.Models
 {
 	public class SA_Report
 	{
+		public void SaveMeasurments(List<SA_Action> actions, DateTime timePrinted)
+		{
+			string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)+"\\alignment-"+ 
+				timePrinted.ToString().Replace(':', '-').Replace('.', '-')+".csv";
+			if (!File.Exists(filepath))
+			{
+				using (StreamWriter sw = new StreamWriter(filepath))
+				{
+					SA_Action.WriteCsvHeader(sw);
+					foreach (SA_Action a in actions) 
+						a.WriteCsv(sw);
+				}
+			}
+		}
+
 		//--- PrintReport ----------------------------------
 		public void PrintReport(List<SA_Action>  actions, DateTime timePrinted, bool force)
 		{
 			if (actions==null) return;
+
+			SaveMeasurments(actions, timePrinted);
 
 			if (!force)
 			{
@@ -38,25 +58,23 @@ namespace RX_DigiPrint.Models
 				if (!print) return;
 			}
 
-			PrintDialog pd = new PrintDialog();	
-		//	if(pd.ShowDialog()==true) // use default printer
+			PrintDialog pd = new PrintDialog();
+			pd.PrintQueue = new System.Printing.PrintQueue(pd.PrintQueue.HostingPrintServer, RxGlobals.Settings.SetupAssistCam.ReportPrinterName);
+			RxBindable.Invoke(()=>
 			{
-				RxBindable.Invoke(()=>
+				try
 				{
-					try
-					{
-						FixedDocument doc = new FixedDocument();
-						doc.DocumentPaginator.PageSize = new Size(pd.PrintableAreaHeight, pd.PrintableAreaWidth);
-						doc.Pages.Add(_composePage(doc.DocumentPaginator.PageSize, actions, timePrinted));
-						pd.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
-						pd.PrintDocument(doc.DocumentPaginator, "Adjustment");
-					}
-					catch(Exception ex)
-					{
-						Console.WriteLine("Exception {0}", ex.Message);
-					}
-				});
-			}
+					FixedDocument doc = new FixedDocument();
+					doc.DocumentPaginator.PageSize = new Size(pd.PrintableAreaHeight, pd.PrintableAreaWidth);
+					doc.Pages.Add(_composePage(doc.DocumentPaginator.PageSize, actions, timePrinted));
+					pd.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
+					pd.PrintDocument(doc.DocumentPaginator, "Adjustment");
+				}
+				catch(Exception ex)
+				{
+					Console.WriteLine("Exception {0}", ex.Message);
+				}
+			});
 		}
 
 		//--- _composeAction -----------------------------------
@@ -67,20 +85,69 @@ namespace RX_DigiPrint.Models
 				int row = grid.RowDefinitions.Count;
 				int col=0;
 				grid.RowDefinitions.Add(new RowDefinition(){ Height=GridLength.Auto});
-				
 				//--- background --------
 				if ((row&1)==0)
 				{
-					Color c = Color.FromRgb(240,240,240);
-					System.Windows.Shapes.Rectangle rect =new Rectangle()
-					{
-						Fill = new SolidColorBrush(c),
-						HorizontalAlignment = HorizontalAlignment.Stretch,
-					};
+					Rectangle rect = new Rectangle();
+					rect.Fill = Brushes.LightGray;
+					rect.VerticalAlignment=VerticalAlignment.Stretch;
+					rect.HorizontalAlignment=HorizontalAlignment.Stretch;
 					Grid.SetRow(rect, row);
 					Grid.SetColumn(rect, 0);
-					Grid.SetColumnSpan(rect, 10);
+					Grid.SetColumnSpan(rect, 20);
 					grid.Children.Add(rect);
+				}
+
+				//--- details ------------------------------------------------------------
+				{
+					/*
+					if (action.MeasureCnt == 0)
+					{
+						action.Measured(0, Double.NaN);
+						action.Measured(0, 0.0);
+						action.Measured(0, -0.1);
+						action.Measured(0, 0.7);
+						action.Measured(0, -1.2);
+						action.Measured(0, -0.6);
+						action.Measured(0, -5.4);
+						action.Measured(0, -0.2);
+
+						action.Measured(1, Double.NaN);
+						action.Measured(1, 1.0);
+						action.Measured(1, -1.1);
+						action.Measured(1, 1.7);
+						action.Measured(1, -1.2);
+						action.Measured(1, -1.6);
+						action.Measured(1, -5.4);
+						action.Measured(1, -1.2);
+
+						action.Measured(2, Double.NaN);
+						action.Measured(2, 2.0);
+						action.Measured(2, -2.1);
+						action.Measured(2, 2.7);
+						action.Measured(2, -1.2);
+						action.Measured(2, -2.6);
+						action.Measured(2, -5.4);
+						action.Measured(2, -2.2);
+					}
+					*/
+
+					Grid detailsGrid = new Grid(){ Margin=new Thickness(0,20, 0, 0)};
+					for (int pass=0; pass<action._ValueStrList.Count; pass++)
+					{
+						SA_ValueGrid values = new SA_ValueGrid(){Margin=new Thickness(0,0,2,0)};
+						values.DataContext = action._ValueStrList[pass];
+						values.FontSize = 8;
+						values.Foreground = Brushes.DarkGray;
+						values.HorizontalAlignment = HorizontalAlignment.Stretch;
+						detailsGrid.RowDefinitions.Add(new RowDefinition() { Height=GridLength.Auto});
+						Grid.SetRow(values, pass);
+						detailsGrid.Children.Add(values);
+					}
+					Grid.SetRow(detailsGrid, row);
+					Grid.SetColumn(detailsGrid, 4);
+					Grid.SetColumnSpan(detailsGrid, 10);
+					grid.Children.Add(detailsGrid);
 				}
 
 				//--- 0: state -----------
@@ -103,7 +170,7 @@ namespace RX_DigiPrint.Models
 						Width=15, 
 						Height=15,  
 						Stroke=Brushes.Transparent,
-						Margin=new Thickness(5,5,5,5)
+						Margin=new Thickness(5,10,5,10)
 					};
 				color.Fill = action.ColorBrush;
 				Grid.SetRow(color, row);
@@ -196,6 +263,7 @@ namespace RX_DigiPrint.Models
 			actionsGrid.ColumnDefinitions.Add(new ColumnDefinition(){ Width=GridLength.Auto});
 			actionsGrid.ColumnDefinitions.Add(new ColumnDefinition(){ Width=GridLength.Auto});
 			actionsGrid.ColumnDefinitions.Add(new ColumnDefinition(){ Width=GridLength.Auto});
+			actionsGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star)});
 
 			List<SA_Action> list = new List<SA_Action>();
 

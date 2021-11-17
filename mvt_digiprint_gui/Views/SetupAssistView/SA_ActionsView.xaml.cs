@@ -63,6 +63,16 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			new SA_Report().PrintReport(RxGlobals.SA_StateMachine.GetActions(), RxGlobals.SA_StateMachine.TimePrinted(), true);
 		}
 
+		//--- FileOpen --------------------------------
+		public void FileOpen()
+		{
+			List<SA_Action> actions = SA_Action.FileOpen();
+			if (actions != null)
+			{
+				Actions.ItemsSource = actions;
+			}
+		}
+
 		//--- Test -----------------------------
 		public void Test()
 		{
