@@ -68,7 +68,8 @@
 #define boReqPowerOnUvLamps PREFIX_PLC "DPU_to_PLC.boReqPowerOnUvLamps"
 // set point for speed (m/min)
 #define reMachineSpeedSetpoint PREFIX_PLC "DPU_to_PLC.reMachineSpeedSetpoint"
-
+// Web width in mm
+#define inWebWidth PREFIX_PLC "DPU_to_PLC.inWebWidth" 
 
 // PLC_to_DPU : Struct
 // offset to correct the lateral register
@@ -169,7 +170,7 @@ int opcua_get_plc_value(char *name, char* answer)
 				uvtimer = _timer / 2;
 				_timer = max(_timer - 1, 2);
 				break;
-			case uv_shuttingdownn:
+			default: // cooldown or forced cooldown
 				opcua_get_int(inUvLampCoolingCountdown, &uvtimer);
 				uvtimer = -uvtimer;
 				_timer = 0;
@@ -198,6 +199,10 @@ void opcua_set_plc_value(char *name, char *val)
 	else if (strstr(name, "CMD_UV_LAMPS_OFF") && !strcmp(val, "1"))
 	{
 		if (opcua_set_bool(boReqPowerOnUvLamps, FALSE) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
+	}
+	else if (strstr(name, "PAR_WEB_WIDTH"))
+	{
+		if (opcua_set_int(inWebWidth, atoi(val)) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
 	}
 }
 
@@ -279,9 +284,10 @@ void *siemens_thread(void *lpParameter)
 					{
 						int index = i * nbcluster + j;
 						int colorIndex = order[i] * nbcluster + j;
+						cluster_hours[index] = 0;
 						if (RX_HBStatus[colorIndex].info.connected)
 						{
-							cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
+							for (int h=0; h<HEAD_CNT; h++) cluster_hours[index] = max(cluster_hours[index], RX_HBStatus[colorIndex].head[h].printingSeconds / 3600);
 						}
 					}
 					ink_level[i] = FluidStatus[i].canisterLevel;

@@ -930,10 +930,10 @@ static void _plc_set_var(RX_SOCKET socket, char *varList)
 			*val++=0;
 			strcpy(var, str);
 			for(char *ch=val; *ch; ch++) if (*ch==',') *ch='.';
-			if (RX_Config.printer.type != printer_LH702 && !_plc_set_cpu_cmd(name, val))
+			if (!_plc_set_cpu_cmd(name, val))
 			{
 				ret = lc_set_value_by_name(name, val);
-				if (ret)  ErrorFlag(ERR_CONT, &_ErrorFlags, 1, 0, "Writing >>%s=%s<<: Error %s", name, val, mlpi_get_errmsg());
+				if (ret) ErrorFlag(ERR_CONT, &_ErrorFlags, 1, 0, "Writing >>%s=%s<<: Error %s", name, val, mlpi_get_errmsg());
 			}
 						
 			//--- XML_STEPPER_PRINT_HEIGHT special -----------------------------------------------
