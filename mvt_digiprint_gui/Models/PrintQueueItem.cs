@@ -595,7 +595,11 @@ namespace RX_DigiPrint.Models
             get { return RxGlobals.PrintSystem.isHybrid &&  ScanLength == EndLessCopies; }
             set
             {
-                if (value) ScanLength = EndLessCopies; 
+                if (value)
+                {
+                    ScanLength = EndLessCopies;
+                    LengthUnit = EPQLengthUnit.copies;
+                }
                 else ScanLength = 1;
             }
 
