@@ -35,69 +35,6 @@
 #include "siemens_ctrl.h"
 
 #include "opcua.h"
-
-//--- Defines -----------------------------------------------------------------
-
-//#define PREFIX_PLC "DPU_DB.PLC_1.DPU_DB."
-#define PREFIX_PLC "S71500ET200MP station_1.PLC_1.DPU_DB."
-
-// DPU_to_PLC :Struct
-// life monitor (increment by 1 every 3 seconds)
-#define inLifeMonitor PREFIX_PLC "DPU_to_PLC.inLifeMonitor"
-// Cluster life hours
-#define inHoursCluster PREFIX_PLC "DPU_to_PLC.inHoursCluster"
-// ink level for each color tank
-#define inInkLevels PREFIX_PLC "DPU_to_PLC.inInkLevels"
-// ack send to confirm the request boReqPrepareToPrint
-#define boReqPrepareToPrintAck PREFIX_PLC "DPU_to_PLC.boReqPrepareToPrintAck"
-// indicate to PLC the Digital Printer is ready to print
-#define boIsReadyToPrint PREFIX_PLC "DPU_to_PLC.boIsReadyToPrint"
-// ack send to confirm the request boPrintOn
-#define boReqPrintOnAck PREFIX_PLC "DPU_to_PLC.boReqPrintOnAck"
-// indicate to PLC the Digital Printer is siemens_printing
-#define boIsPrinting PREFIX_PLC "DPU_to_PLC.boIsPrinting"
-// request to PLC to start the machine
-#define boReqStart PREFIX_PLC "DPU_to_PLC.boReqStart"
-// request to PLC to stop the machine
-#define boReqStop PREFIX_PLC "DPU_to_PLC.boReqStop"
-// request to PLC to siemens_pause siemens_printing (pullback)
-#define boReqPause PREFIX_PLC "DPU_to_PLC.boReqPause"
-// Length of a page
-#define inFormatLength PREFIX_PLC "DPU_to_PLC.inFormatLength"
-// cmd for the UV Lamp
-#define boReqPowerOnUvLamps PREFIX_PLC "DPU_to_PLC.boReqPowerOnUvLamps"
-// set point for speed (m/min)
-#define reMachineSpeedSetpoint PREFIX_PLC "DPU_to_PLC.reMachineSpeedSetpoint"
-// Web width in mm
-#define inWebWidth PREFIX_PLC "DPU_to_PLC.inWebWidth" 
-
-// PLC_to_DPU : Struct
-// offset to correct the lateral register
-#define inLateralRegister PREFIX_PLC "PLC_to_DPU.inLateralRegister"
-// request to DPU to prepare cluster to print
-#define boReqPrepareToPrint PREFIX_PLC "PLC_to_DPU.boReqPrepareToPrint"
-// request to DPU to print
-#define boReqPrintOn PREFIX_PLC "PLC_to_DPU.boReqPrintOn"
-// ack send to confirm the request boReqStart
-#define boReqStartAck PREFIX_PLC "PLC_to_DPU.boReqStartAck"
-// indicate the machine is started
-#define boMachineIsRunning PREFIX_PLC "PLC_to_DPU.boMachineIsRunning"
-// ack send to confirm the request boReqStop
-#define boReqStopAck PREFIX_PLC "PLC_to_DPU.boReqStopAck"
-// indicate the machine is siemens_stopped
-#define boMachineIsStopped PREFIX_PLC "PLC_to_DPU.boMachineIsStopped"
-// indicate the print is paused
-#define boReqPauseAck PREFIX_PLC "PLC_to_DPU.boReqPauseAck"
-// indicate the sequence of pullback is running
-#define boSequencePauseIsRunning PREFIX_PLC "PLC_to_DPU.boSequencePauseIsRunning"
-// status of the UV Lamp
-#define inUvLampStatus PREFIX_PLC "PLC_to_DPU.inUvLampStatus"
-// time of the UV Lamp
-#define inUvLampCoolingCountdown PREFIX_PLC "PLC_to_DPU.inUvLampCoolingCountdown"
-// Actual speed (m/min)
-#define reMachineActualSpeed PREFIX_PLC "PLC_to_DPU.reMachineActualSpeed"
-
-
 //--- Externals ---------------------------------------------------------------
 extern SInkSupplyStat FluidStatus[INK_SUPPLY_CNT];
 extern int _lh702ThreadRunning;
@@ -126,14 +63,27 @@ typedef enum
 	uv_shuttingdownn // 03
 } EUvLampStatus;
 
+
+// Get the OPCUA name of the variable including the full prefix
+#define SET 0
+#define GET 1
+char plcstruct[2][11] = {"DPU_to_PLC", "PLC_to_DPU"}; // prefix for GET and SET
+static char *get_name(int dpu2plc, const char* var, char* buffer)
+{
+	sprintf(buffer, "%s.DPU_DB.%s.%s", RX_Config.opcua_prefix, plcstruct[dpu2plc], var);
+	return buffer;
+}
+
+
 int opcua_get_plc_value(char *name, char* answer)
 {
 	int len = 0;
 	short uvstatus;
 	static short _timer = 0;
+	char buffer[256]; // for opcua variable name
 	if (strstr(name, "STA_UV_POWER_ON"))
 	{
-		if (opcua_get_int(inUvLampStatus, &uvstatus) == 0)
+		if (opcua_get_int(get_name(GET, "inUvLampStatus", buffer), &uvstatus) == 0)
 		{
 			if (uvstatus != uv_off)
 				len = sprintf(answer, "=TRUE");
@@ -143,7 +93,7 @@ int opcua_get_plc_value(char *name, char* answer)
 	}
 	else if (strstr(name, "STA_UV_LAMPS_READY"))
 	{
-		if (opcua_get_int(inUvLampStatus, &uvstatus) == 0)
+		if (opcua_get_int(get_name(GET, "inUvLampStatus", buffer), &uvstatus) == 0)
 		{
 			if (uvstatus == uv_ready)
 				len = sprintf(answer, "=TRUE");
@@ -154,7 +104,7 @@ int opcua_get_plc_value(char *name, char* answer)
 	else if (strstr(name, "STA_UV_LAMP_1_TIMER"))
 	{
 
-		if (opcua_get_int(inUvLampStatus, &uvstatus) == 0)
+		if (opcua_get_int(get_name(GET, "inUvLampStatus", buffer), &uvstatus) == 0)
 		{
 			short uvtimer = 0;
 			switch (uvstatus)
@@ -171,7 +121,7 @@ int opcua_get_plc_value(char *name, char* answer)
 				_timer = max(_timer - 1, 2);
 				break;
 			default: // cooldown or forced cooldown
-				opcua_get_int(inUvLampCoolingCountdown, &uvtimer);
+				opcua_get_int(get_name(GET, "inUvLampCoolingCountdown", buffer), &uvtimer);
 				uvtimer = -uvtimer;
 				_timer = 0;
 				break;
@@ -186,23 +136,25 @@ int opcua_get_plc_value(char *name, char* answer)
 int opcua_get_speed()
 {
 	float speed;
-	if (opcua_get_float(reMachineActualSpeed, &speed)) return 0;
+	char buffer[256];
+	if (opcua_get_float(get_name(GET, "reMachineActualSpeed", buffer), &speed)) return 0;
 	return (int)(speed + 0.5);
 }
 
 void opcua_set_plc_value(char *name, char *val)
 {
+	char buffer[256];
 	if (strstr(name, "CMD_UV_LAMPS_ON") && !strcmp(val, "1"))
 	{
-		if (opcua_set_bool(boReqPowerOnUvLamps, TRUE) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
+		if (opcua_set_bool(get_name(SET, "boReqPowerOnUvLamps", buffer), TRUE) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
 	}
 	else if (strstr(name, "CMD_UV_LAMPS_OFF") && !strcmp(val, "1"))
 	{
-		if (opcua_set_bool(boReqPowerOnUvLamps, FALSE) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
+		if (opcua_set_bool(get_name(SET, "boReqPowerOnUvLamps", buffer), FALSE) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
 	}
 	else if (strstr(name, "PAR_WEB_WIDTH"))
 	{
-		if (opcua_set_int(inWebWidth, atoi(val)) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
+		if (opcua_set_int(get_name(SET, "inWebWidth", buffer), atoi(val)) != 0) Error(ERR_ABORT, 0, "Could not contact OPCUA");
 	}
 }
 
@@ -217,10 +169,11 @@ void siemens_error_reset(void)
 //--- lh702_set_printpar -----------------------------------------------------
 int siemens_set_printpar(SPrintQueueItem *pitem)
 {
+	char buffer[256];
 	_pItem = pitem;
 	// force the set point by changing the value
-	opcua_set_float(reMachineSpeedSetpoint, (float)0);
-	opcua_set_float(reMachineSpeedSetpoint, (float)pitem->speed);
+	opcua_set_float(get_name(SET, "reMachineSpeedSetpoint", buffer), (float)0);
+	opcua_set_float(get_name(SET, "reMachineSpeedSetpoint", buffer), (float)pitem->speed);
 	return REPLY_OK;
 }
 
@@ -249,6 +202,7 @@ void *siemens_thread(void *lpParameter)
 	BOOL first = TRUE;
 	BOOL restart = FALSE;
 	int count = 0;
+	char buffer[256];
 
 	while (_lh702ThreadRunning)
 	{
@@ -270,8 +224,8 @@ void *siemens_thread(void *lpParameter)
 			{
 				// set live monitor
 				_inLifeMonitor++;
-				retval = opcua_set_int(inLifeMonitor, _inLifeMonitor);
-				if (!RX_StepperStatus.info.z_in_print) opcua_set_bool(boIsReadyToPrint, 0);
+				retval = opcua_set_int(get_name(SET, "inLifeMonitor", buffer), _inLifeMonitor);
+				if (!RX_StepperStatus.info.z_in_print) opcua_set_bool(get_name(SET, "boIsReadyToPrint", buffer), 0);
 
 				// transfer status for ink and clusters
 				static int order[7] = {4, 5, 6, 0, 1, 2, 3};
@@ -292,8 +246,8 @@ void *siemens_thread(void *lpParameter)
 					}
 					ink_level[i] = FluidStatus[i].canisterLevel;
 				}
-				opcua_set_int_array(inHoursCluster, cluster_hours, 21);
-				opcua_set_int_array(inInkLevels, ink_level, 7);
+				opcua_set_int_array(get_name(SET, "inHoursCluster", buffer), cluster_hours, 21);
+				opcua_set_int_array(get_name(SET, "inInkLevels", buffer), ink_level, 7);
 			}
 
 			switch (_state)
@@ -303,19 +257,19 @@ void *siemens_thread(void *lpParameter)
 				if (RX_PrinterStatus.printState == ps_printing)
 				{
 					TrPrintfL(TRUE, "OPCUA: Start siemens_printing");
-					if ((retval = opcua_set_bool(boReqStart, 1)) == 0) _state = siemens_waittension;
-					opcua_set_bool(boReqStop, 0);
-					opcua_set_bool(boReqPause, 0);
+					if ((retval = opcua_set_bool(get_name(SET, "boReqStart", buffer), 1)) == 0) _state = siemens_waittension;
+					opcua_set_bool(get_name(SET, "boReqStop", buffer), 0);
+					opcua_set_bool(get_name(SET, "boReqPause", buffer), 0);
 					first = TRUE;
 				}
 				break;
 			case siemens_waittension:
-				if ((retval = opcua_get_bool(boReqPrepareToPrint, &status)) == 0)
+				if ((retval = opcua_get_bool(get_name(GET, "boReqPrepareToPrint", buffer), &status)) == 0)
 				{
 					if (status == 1)
 					{
 						_state = siemens_waitready;
-						retval = opcua_set_bool(boReqStart, 0);
+						retval = opcua_set_bool(get_name(SET, "boReqStart", buffer), 0);
 						step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_PRINT_POS, NULL, 0);
 						TrPrintfL(TRUE, "OPCUA: Tension ready");
 					}
@@ -325,7 +279,7 @@ void *siemens_thread(void *lpParameter)
 				TrPrintfL(TRUE, "OPCUA: wait printer ready enc_ready %d printpos %d data ready %d", enc_ready() , RX_StepperStatus.info.z_in_print, RX_PrinterStatus.dataReady);
 				if (RX_PrinterStatus.dataReady && ((enc_ready() && RX_StepperStatus.info.z_in_print) || arg_simuEncoder))
 				{
-					if ((retval = opcua_set_bool(boIsReadyToPrint, 1)) == 0)
+					if ((retval = opcua_set_bool(get_name(SET, "boIsReadyToPrint", buffer), 1)) == 0)
 					{
 						_state = siemens_readytoprint;
 						TrPrintfL(TRUE, "OPCUA: Printer ready");
@@ -333,7 +287,7 @@ void *siemens_thread(void *lpParameter)
 				}
 				break;
 			case siemens_readytoprint:
-				if ((retval = opcua_get_bool(boReqPrintOn, &status)) == 0)
+				if ((retval = opcua_get_bool(get_name(GET, "boReqPrintOn", buffer), &status)) == 0)
 				{
 					if (status)
 					{
@@ -348,8 +302,8 @@ void *siemens_thread(void *lpParameter)
 						if (_pItem->printGoMode == PG_MODE_LENGTH) pageHeight = printGoDist;
 						if (_pItem->printGoMode == PG_MODE_GAP) pageHeight = pageHeight + printGoDist;
 
-						retval = opcua_set_int(inFormatLength, pageHeight);
-						retval |= opcua_set_bool(boIsPrinting, 1) || opcua_set_bool(boReqStart, 0);
+						retval = opcua_set_int(get_name(SET, "inFormatLength", buffer), pageHeight);
+						retval |= opcua_set_bool(get_name(SET, "boIsPrinting", buffer), 1) || opcua_set_bool(get_name(SET, "boReqStart", buffer), 0);
 						TrPrintfL(TRUE, "OPCUA: Printing");
 					}
 				}
@@ -357,7 +311,7 @@ void *siemens_thread(void *lpParameter)
 			case siemens_printing:
 			{
 				short lateral = 0;
-				retval = opcua_get_int(inLateralRegister, &lateral);
+				retval = opcua_get_int(get_name(GET, "inLateralRegister", buffer), &lateral);
 				if (first)
 				{
 					first = FALSE;
@@ -371,31 +325,31 @@ void *siemens_thread(void *lpParameter)
 			}
 				break;
 			case siemens_waitforpause:
-				if ((retval = opcua_get_bool(boMachineIsStopped, &status)) == 0)
+				if ((retval = opcua_get_bool(get_name(GET, "boMachineIsStopped", buffer), &status)) == 0)
 				{
 					if (status)
 					{
 						_state = siemens_pause;
 						RX_PrinterStatus.printState = ps_pause;
-						retval = opcua_set_bool(boReqPause, 0);
+						retval = opcua_set_bool(get_name(SET, "boReqPause", buffer), 0);
 						TrPrintfL(TRUE, "OPCUA: Pause");
 					}
 				}
 				if (RX_PrinterStatus.printState == ps_pause)
 				{
-					retval = opcua_set_bool(boIsPrinting, 0);
+					retval = opcua_set_bool(get_name(SET, "boIsPrinting", buffer), 0);
 				}
 				break;
 			case siemens_waitforstop:
-				if ((retval = opcua_get_bool(boMachineIsStopped, &status)) == 0)
+				if ((retval = opcua_get_bool(get_name(GET, "boMachineIsStopped", buffer), &status)) == 0)
 				{
 					if (status)
 					{
 						_state = siemens_stopped;
 						RX_PrinterStatus.printState = ps_ready_power;
-						retval = opcua_set_bool(boIsPrinting, 0);
-						retval |= opcua_set_bool(boIsReadyToPrint, 0);
-						retval |= opcua_set_bool(boReqStop, 0);
+						retval = opcua_set_bool(get_name(SET, "boIsPrinting", buffer), 0);
+						retval |= opcua_set_bool(get_name(SET, "boIsReadyToPrint", buffer), 0);
+						retval |= opcua_set_bool(get_name(SET, "boReqStop", buffer), 0);
 						if (RX_StepperStatus.info.z_in_print) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 						TrPrintfL(TRUE, "OPCUA: Stop");
 					}
@@ -406,17 +360,17 @@ void *siemens_thread(void *lpParameter)
 				{
 					TrPrintfL(TRUE, "OPCUA: Restart printing");
 					restart = TRUE;
-					if ((retval = opcua_set_bool(boReqStart, 1)) == 0) _state = siemens_readytoprint;
+					if ((retval = opcua_set_bool(get_name(SET, "boReqStart", buffer), 1)) == 0) _state = siemens_readytoprint;
 				}
 				break;
 
 			// TODO recompile open62541 multithread and move these cases in dedicated fonctions
 			case siemens_requirestop:
-				opcua_set_bool(boReqStart, 0);
-				if ((retval = opcua_set_bool(boReqStop, 1)) == 0)
+				opcua_set_bool(get_name(SET, "boReqStart", buffer), 0);
+				if ((retval = opcua_set_bool(get_name(SET, "boReqStop", buffer), 1)) == 0)
 				{
-					retval |= opcua_set_bool(boIsPrinting, 0);
-					retval |= opcua_set_bool(boIsReadyToPrint, 0);
+					retval |= opcua_set_bool(get_name(SET, "boIsPrinting", buffer), 0);
+					retval |= opcua_set_bool(get_name(SET, "boIsReadyToPrint", buffer), 0);
 					_state = siemens_waitforstop;
 					RX_PrinterStatus.printState = ps_stopping;
 					TrPrintfL(TRUE, "OPCUA: Require Stop");
@@ -424,10 +378,10 @@ void *siemens_thread(void *lpParameter)
 
 				break;
 			case siemens_requirepause:
-				retval = opcua_set_bool(boReqPause, 1); //|| opcua_set_bool(boIsPrinting, 0);				
+				retval = opcua_set_bool(get_name(SET, "boReqPause", buffer), 1); //|| opcua_set_bool(get_name(SET, "boIsPrinting", buffer), 0);				
 				_state = siemens_waitforpause;
 				TrPrintfL(TRUE, "OPCUA: Require Pause");
-				opcua_set_bool(boReqStart, 0);
+				opcua_set_bool(get_name(SET, "boReqStart", buffer), 0);
 				break;
 			}
 			if (retval != 0)

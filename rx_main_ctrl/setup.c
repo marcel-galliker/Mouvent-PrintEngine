@@ -23,6 +23,7 @@
 #define MASTER_IP_PORT_SERVER 55105
 #define EM2_1_IP_ADDRESS "172.17.6.118"
 #define EM2_1_IP_SUBMASK "255.240.0.0"
+#define PREFIX_PLC "S71500ET200MP station_1.PLC_1"
 
 //--- prototypes --------------------------------------------------------------
 
@@ -156,6 +157,7 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
 			pcfg->master_ip_port = MASTER_IP_PORT_SERVER;
 			strcpy(pcfg->em2_1_address, EM2_1_IP_ADDRESS);
 			strcpy(pcfg->em2_1_mask, EM2_1_IP_SUBMASK);
+			strcpy(pcfg->opcua_prefix, PREFIX_PLC);
 			pcfg->lh702_protocol_version = 10; // OPCUA protocol version (TODO remove when only OPCUA)
 			pcfg->print_queue_buffer = 64;
 			pcfg->mark_reader_ignore_size = 80;
@@ -171,6 +173,7 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
     setup_uint32(file, "master_port", action, &pcfg->master_ip_port, MASTER_IP_PORT_SERVER);
     setup_str   (file, "em2_1_ip", action, pcfg->em2_1_address, sizeof(pcfg->em2_1_address), EM2_1_IP_ADDRESS);
     setup_str   (file, "em2_1_mask", action, pcfg->em2_1_mask, sizeof(pcfg->em2_1_mask), EM2_1_IP_SUBMASK);
+	setup_str   (file, "opcua_prefix", action, pcfg->opcua_prefix, sizeof(pcfg->em2_1_mask), PREFIX_PLC);
 	setup_uint32(file, "lh702_protocol_ver", action, &pcfg->lh702_protocol_version, 10);
 	setup_uint32(file, "print_queue_buffer", action, &pcfg->print_queue_buffer, 64);
 	setup_uint32(file, "mark_reader_ignore_size", action, &pcfg->mark_reader_ignore_size, 80);
