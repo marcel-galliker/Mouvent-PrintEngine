@@ -9,6 +9,7 @@
              xmlns:common="clr-namespace:RX_Common;assembly=rx_common_lib_cs"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    
     <UserControl.Resources>
         <local:StateBusy_Converter              x:Key="StateBusy_Converter"/>
         <local:FunctionImageVisible_Converter   x:Key="FunctionImageVisible_Converter"/>
@@ -24,19 +25,23 @@
                     Style="{DynamicResource XamGrid-WideScroll-Style}"
                     >
                     <ig:XamGrid.Columns>
+                        
                         <!-- STATE _____________________________________________________________________________-->
                         <ig:TemplateColumn HeaderText=" " Key="State" Width="40">
                             <ig:TemplateColumn.ItemTemplate>
                                 <DataTemplate>
                                     <common:MvtButton Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton}" 
                                         IsBusy="{Binding State, Converter={StaticResource StateBusy_Converter}}">
-                                        <iconPacks:PackIconMaterial 
+                                        <Grid>
+                                            <iconPacks:PackIconMaterial 
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"
                                             Foreground="Black"
                                             Margin="5"
                                             Width="20" 
                                             Height="20" 
                                             Kind="{Binding State, Converter={StaticResource SA_StateImage_Converter}}"/>
+                                            <TextBlock Text="{Binding PassStr}" FontSize="{StaticResource FontSizeXS}" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                                        </Grid>
                                     </common:MvtButton>
                                 </DataTemplate>
                             </ig:TemplateColumn.ItemTemplate>

@@ -37,6 +37,7 @@ namespace rx_CamLib
 		CamMeasureRegAngle,
 		CamMeasureRegStitch,
 		CamMoveScan,
+		CamMoveWeb,
 		I1Calibrate,
 		I1Measure,
 	};
@@ -88,7 +89,7 @@ namespace rx_CamLib
 		//--- FindLines_Vertical -------------------------
 		public void FindLines_Vertical()
 		{
-			RxBindable.Invoke(()=>
+			RxBindable.Invoke(() =>
 			{
 				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 				//set very small LineAspectLimit for StartLines
@@ -176,24 +177,22 @@ namespace rx_CamLib
 				}).Start();
 				return RxCam.ENCamResult.OK;
 			}
-			RxBindable.Invoke(()=>
+			//			RxBindable.Invoke(()=>
+			object result = RxBindable.InvokeFct(() =>
 			{
+				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Off);
+				Thread.Sleep(100);
 				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 				_Camera.SetLinesHorizontal(false);
-				_Camera.NumExtraErodes=3;
+				_Camera.NumExtraErodes = 3;
 				_Camera.SetLineAspectLimit(5);
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-				ENCamResult result;
-				if (first) result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 1,  0,  0);
-				else       
-				{ 
-					Thread.Sleep(100);
-					result=_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 5, 17); // 5, 10, 15
-				}
-				if (result!=ENCamResult.OK)
-					Console.WriteLine("CamResult={0}", result.ToString());
+				ENCamResult res = RxCam.ENCamResult.Error;
+				if (first) res = _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 1, 0, 0);
+				else res = _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Angle, 10, 5, 17); // 5, 10, 15
+				return res;
 			});
-			return RxCam.ENCamResult.OK;
+			return (ENCamResult)result;
 		}
 
 		//--- MeasureStitch --------------------------------
@@ -211,18 +210,19 @@ namespace rx_CamLib
 				return RxCam.ENCamResult.OK;
 			}
 
-			RxBindable.Invoke(()=>
+			object result = RxBindable.InvokeFct(() =>
 			{
+				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Off);
+				Thread.Sleep(100);
 				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 				_Camera.SetLinesHorizontal(false);
 				_Camera.NumExtraErodes=3;
 				_Camera.SetLineAspectLimit(5);
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-				Thread.Sleep(100);
-			//	_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 5, 10, 15);
-				_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 5, 17);
+				//	_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 5, 10, 15);
+				return _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Stitch, 10, 5, 17);
 			});
-			return RxCam.ENCamResult.OK;
+			return (ENCamResult)result;
 		}
 
 		//--- MeasureDist --------------------------------
@@ -240,17 +240,19 @@ namespace rx_CamLib
 				return RxCam.ENCamResult.OK;
 			}
 
-			RxBindable.Invoke(()=>
+			object result = RxBindable.InvokeFct(() =>
 			{
+				_Camera.SetMeasureMode(RxCam.ENMeasureMode.MeasureMode_Off);
+				Thread.Sleep(100);
 				_Camera.SetBinarizationMode(RxCam.ENBinarizeMode.BinarizeMode_Auto);
 				_Camera.SetLinesHorizontal(true);
 				_Camera.NumExtraErodes=3;
 				_Camera.RegisterMidOuterRatio=(float)1.5;
 				_Camera.SetLineAspectLimit(5);
 				_Camera.SetDisplayMode(RxCam.ENDisplayMode.Display_Correction);
-				_Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Register, 5, 10, 15);
+				return _Camera.DoMeasures(RxCam.ENMeasureMode.MeasureMode_Register, 5, 10, 15);
 			});
-			return RxCam.ENCamResult.OK;
+			return (ENCamResult) result;
 		}
 	}
 }

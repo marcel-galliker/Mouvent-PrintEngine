@@ -186,6 +186,12 @@ namespace RX_DigiPrint.Models
 			WebPos = 0;
 		}
 
+		//--- WebMoveInit ------------------------
+		public void WebMoveInit()
+		{
+			_WebMoveStartCnt = _WebMoveCnt;
+		}
+
 		//--- WebMove ----------------------------------
 		private int _WebMoveStartCnt=-1;
 		public void WebMove(double dist)
@@ -199,12 +205,11 @@ namespace RX_DigiPrint.Models
 				WebPos	   += (double)dist;
 				cmd.pos	= (Int32)(1000*dist);
 				EnPlcState state = (EnPlcState)Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_MACHINE_STATE"));
-				if (_WebMoveStartCnt<0) _WebMoveStartCnt=_WebMoveCnt;
 				string msg=string.Format("WEB MOVE start={0} done={1} PlcState={2} dist={3} oldpos={4} WebPos={5}", _WebMoveStartCnt, _WebMoveCnt, state.ToString(), cmd.pos, old, WebPos);
 				if (_WebMoveCnt!=_WebMoveStartCnt)
 					Console.WriteLine("WEB MOVE Error: _WebMoveCnt={0}, _WebMoveStartCnt={1}", _WebMoveCnt, _WebMoveStartCnt);
 				_WebMoveStartCnt++;
-				WebMoving=true;
+				WebMoving =true;
 				Console.WriteLine("{0}: {1}", RxGlobals.Timer.Ticks(), msg);
 			//	RxGlobals.Events.AddItem(new LogItem(msg));
 				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SA_WEB_MOVE, ref cmd);
@@ -227,7 +232,8 @@ namespace RX_DigiPrint.Models
 			RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n" + "STA_RELATIVE_MOVE_CNT" + "\n" + "STA_MACHINE_STATE" + "\n");
 			int old=_WebMoveCnt;
 			_WebMoveCnt=Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_RELATIVE_MOVE_CNT"));
-						
+			if (_WebMoveCnt != old)
+				Console.WriteLine("WEB MOVE cnt changed from {0} to {1}", old, _WebMoveCnt);
 			if (_OnWebMoveDone!=null)
 			{
 				if (_WebMoveCnt!=old)

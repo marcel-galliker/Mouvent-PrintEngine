@@ -48,6 +48,28 @@ namespace RX_Common
             }
         }
 
+        public static object InvokeFct(Func<object> function)
+        {
+            if (function == null) return null;
+            if (RxBindable._Dispatcher != null)
+            {
+                try
+                {
+                    return RxBindable._Dispatcher.Invoke<object>(function);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            else
+            {
+                try { return function(); }
+                catch { };
+            }
+            return null;
+        }
+
         //--- InvokeDelayed -------------------------
         public static void InvokeDelayed(int ms, Action action)
         {

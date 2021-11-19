@@ -19,6 +19,7 @@ namespace RX_DigiPrint.Models
 	public class SA_Action: RxBindable
 	{
 		public static readonly int  MeasurementPasses=3;
+//		public static readonly int MeasurementPasses = 1;
 
 		public List<List<SA_Value>> _ValueList = new List<List<SA_Value>>();
 
@@ -192,6 +193,7 @@ namespace RX_DigiPrint.Models
 			}
 		}
 
+		//--- WriteCsvHeader --------------------------------
 		/// <summary>
 		/// Writing the header line of the csv file
 		/// </summary>
@@ -210,19 +212,23 @@ namespace RX_DigiPrint.Models
 		//--- WriteCsv ---------------------------------------------------------
 		public void WriteCsv(StreamWriter csv)
 		{
-			for(int pass=0; pass<_ValueList.Count; pass++)
+			int cnt= _ValueList.Count;
+			if (cnt==0) cnt=1;
+			for (int pass=0; pass<cnt; pass++)
 			{
 				csv.Write(ColorBrush.ToString()); csv.Write(CSV_SEPARATOR);
 				csv.Write(Name); csv.Write(CSV_SEPARATOR);
 				csv.Write(Function.ToString()); csv.Write(CSV_SEPARATOR);
 				csv.Write(pass+1); csv.Write(CSV_SEPARATOR);
-				for(int i=0; i< _ValueList[pass].Count; i++)
+				if (pass < _ValueList.Count)
 				{
-					if (double.IsNaN(_ValueList[pass][i].Value)) csv.Write("---");
-					else                                         csv.Write(string.Format("{0:0.0}", _ValueList[pass][i].Value));
-					csv.Write(CSV_SEPARATOR);
+					for(int i=0; i< _ValueList[pass].Count; i++)
+					{
+						if (double.IsNaN(_ValueList[pass][i].Value)) csv.Write("---");
+						else                                         csv.Write(string.Format("{0:0.0}", _ValueList[pass][i].Value));
+						csv.Write(CSV_SEPARATOR);
+					}
 				}
-//				csv.Write(_ValueList[pass].ToString().Replace(' ', CSV_SEPARATOR));
 				csv.WriteLine();
 			}
 		}
@@ -263,8 +269,8 @@ namespace RX_DigiPrint.Models
 								
 								if (function!= ECamFunction.CamNoFunction)
 								{ 
-									int pass= Rx.StrToInt32(field[3]);
-									if (pass==1) 
+									int pass= Rx.StrToInt32(field[3])-1;
+									if (pass==0) 
 									{ 
 										action=new SA_Action();
 										action.Function= function;
@@ -296,6 +302,15 @@ namespace RX_DigiPrint.Models
 					return _Values.Count(); 
 				}
 		}
+
+		//--- Property PassStr ---------------------------------------
+		private string _PassStr;
+		public string PassStr
+		{
+			get { return _PassStr; }
+			set { SetProperty(ref _PassStr, value); }
+		}
+
 
 		//--- Measured ---
 		public void Measured(int pass, double value)
@@ -362,6 +377,8 @@ namespace RX_DigiPrint.Models
 			}
 
 			//--- force a refresh ---
+			if (Function==ECamFunction.CamMeasureAngle || Function==ECamFunction.CamMeasureStitch)
+				PassStr = (pass+1).ToString();
 			Values = null;
 			Values = values;
 		}

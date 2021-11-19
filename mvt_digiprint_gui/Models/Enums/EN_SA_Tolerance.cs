@@ -23,7 +23,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<double>(1.25,  "1.25"));
                 _List.Add(new RxEnum<double>(1.50,  "1.50"));
                 _List.Add(new RxEnum<double>(2.00,  "2.00"));
-                _List.Add(new RxEnum<double>(10.00, "OFF"));
+                _List.Add(new RxEnum<double>(100.00, "OFF"));
             }
         }
 

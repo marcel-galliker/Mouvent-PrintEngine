@@ -24,6 +24,8 @@ namespace RX_DigiPrint.Models
 	{
 		public void SaveMeasurments(List<SA_Action> actions, DateTime timePrinted)
 		{
+			if (timePrinted.Equals(new DateTime(0)))
+					timePrinted=DateTime.Now;
 			string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)+"\\alignment-"+ 
 				timePrinted.ToString().Replace(':', '-').Replace('.', '-')+".csv";
 			if (!File.Exists(filepath))

@@ -30,6 +30,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			{
 				ResultHdr.HeaderText = string.Format("Result (tol A=±{0:0.0} Rev, S=±{1:0.0} Rev)", RxGlobals.Settings.SetupAssistCam.ToleranceAngle, RxGlobals.Settings.SetupAssistCam.ToleranceStitch);
 				Actions.ItemsSource  = RxGlobals.SA_StateMachine.StartAlign();
+				_ActionsChanged();
 			}
 		}
 
@@ -39,6 +40,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
 			{
 				Actions.ItemsSource = RxGlobals.SA_StateMachine.StartDensity();
+				_ActionsChanged();
 			}
 		}
 
@@ -48,6 +50,24 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
 			{
 				Actions.ItemsSource = RxGlobals.SA_StateMachine.StartRegister();
+				_ActionsChanged();
+			}
+		}
+
+		//--- _ActionsChanged -----------------------------------------------------------
+		private void _ActionsChanged()
+		{
+			List< SA_Action> actions = Actions.ItemsSource as List<SA_Action>;
+			if (actions==null) return;
+
+			// hide some actions
+			for (int i=0; i<actions.Count; i++)
+			{
+				if (actions[i].Function == ECamFunction.CamMoveScan
+				|| actions[i].Function == ECamFunction.CamMoveWeb)
+				{
+					Actions.Rows[i].Height = new Infragistics.Controls.Grids.RowHeight(0);
+				}
 			}
 		}
 
@@ -121,22 +141,4 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			return null;
         }
 	}
-	public class AngleStr_Converter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-			List<float> list = parameter as List<float>;
-            if (list!=null)
-            {
-				return list.Count.ToString();
-            }
-            return null;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }
