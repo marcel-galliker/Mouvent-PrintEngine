@@ -232,13 +232,11 @@ namespace RX_DigiPrint.Models
 			RxGlobals.Plc.RequestVar("Application.GUI_00_001_Main" + "\n" + "STA_RELATIVE_MOVE_CNT" + "\n" + "STA_MACHINE_STATE" + "\n");
 			int old=_WebMoveCnt;
 			_WebMoveCnt=Rx.StrToInt32(RxGlobals.Plc.GetVar("Application.GUI_00_001_Main", "STA_RELATIVE_MOVE_CNT"));
-			if (_WebMoveCnt != old)
-				Console.WriteLine("WEB MOVE cnt changed from {0} to {1}", old, _WebMoveCnt);
 			if (_OnWebMoveDone!=null)
 			{
 				if (_WebMoveCnt!=old)
 				{
-					Console.WriteLine("{0}: WEB MOVE DONE {1} (new={2})", RxGlobals.Timer.Ticks(), old, _WebMoveCnt);
+					Console.WriteLine("{0}: WEB MOVE DONE {1} (next={2})", RxGlobals.Timer.Ticks(), old, _WebMoveCnt);
 					WebMoving=false;
 					_OnWebMoveDone();
 				}

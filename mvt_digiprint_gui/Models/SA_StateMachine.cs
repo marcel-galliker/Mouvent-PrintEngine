@@ -278,7 +278,7 @@ namespace RX_DigiPrint.Models
 						colorBrush=Brushes.Transparent;
 					}
 
-				//	if (first)
+					if (first)
 					{
 						_Actions.Add(new SA_Action()
 						{
@@ -404,7 +404,7 @@ namespace RX_DigiPrint.Models
 							StepperNo = color / 2,
 							WebMoveDist = 0,
 							WebPos = 130,
-							ScanMoveDone = true,
+							ScanPos = _FindPos,
 							Function = ECamFunction.CamMoveWeb,
 							Name = "Move Web",
 						};
@@ -1359,6 +1359,7 @@ namespace RX_DigiPrint.Models
 		{
 			_Action.WebMoveDist = _Action.WebPos - RxGlobals.SetupAssist.WebPos;
 			Console.WriteLine("CamMoveWeb WebPos ={0}, to {1} dist {2} done={3}", RxGlobals.SetupAssist.WebPos, _Action.WebPos, _Action.WebMoveDist, _Action.WebMoveDone);
+			RxGlobals.SetupAssist.ScanMoveTo(_Action.ScanPos);
 			RxGlobals.SetupAssist.WebMove(_Action.WebMoveDist);
 		}
 
@@ -1542,7 +1543,7 @@ namespace RX_DigiPrint.Models
 						Console.WriteLine("_CamMeasureAngle_done: Set Stitch Action[{0}].ScanPos={1}, DPosX={2}", stitchIdx + _Action.HeadNo, _Actions[stitchIdx + _Action.HeadNo].ScanPos, _CallbackData.DPosX);
 					}
 					int distIdx = _DistIdxes[_Action.PrintbarNo];
-					if (distIdx!=0 && distIdx + _Action.HeadNo<_Actions.Count())
+					if (distIdx!=0 && distIdx + _Action.HeadNo<_Actions.Count() && _Actions[distIdx + _Action.HeadNo].Function==ECamFunction.CamMeasureDist)
 					{
 						_Actions[distIdx + _Action.HeadNo].ScanPos = RxGlobals.SetupAssist.ScanPos+_AngleDist+0.2;//+_CallbackData.DPosX/1000;
 						Console.WriteLine("_CamMeasureAngle_done: Set Dist Action[{0}].ScanPos={1}, DPosX={2}", distIdx + _Action.HeadNo, _Actions[distIdx + _Action.HeadNo].ScanPos, _CallbackData.DPosX);

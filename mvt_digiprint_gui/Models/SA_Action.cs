@@ -18,8 +18,8 @@ namespace RX_DigiPrint.Models
 
 	public class SA_Action: RxBindable
 	{
-		public static readonly int  MeasurementPasses=3;
-//		public static readonly int MeasurementPasses = 1;
+//		public static readonly int  MeasurementPasses=3;
+		public static readonly int MeasurementPasses = 1;
 
 		public List<List<SA_Value>> _ValueList = new List<List<SA_Value>>();
 

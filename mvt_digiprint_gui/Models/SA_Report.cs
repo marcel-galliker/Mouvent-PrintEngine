@@ -24,18 +24,25 @@ namespace RX_DigiPrint.Models
 	{
 		public void SaveMeasurments(List<SA_Action> actions, DateTime timePrinted)
 		{
-			if (timePrinted.Equals(new DateTime(0)))
-					timePrinted=DateTime.Now;
-			string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)+"\\alignment-"+ 
-				timePrinted.ToString().Replace(':', '-').Replace('.', '-')+".csv";
-			if (!File.Exists(filepath))
+			try
 			{
-				using (StreamWriter sw = new StreamWriter(filepath))
+				if (timePrinted.Equals(new DateTime(0)))
+						timePrinted=DateTime.Now;
+				string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)+"\\alignment-"+ 
+					timePrinted.ToString().Replace(':', '-').Replace('.', '-')+".csv";
+				if (!File.Exists(filepath))
 				{
-					SA_Action.WriteCsvHeader(sw);
-					foreach (SA_Action a in actions) 
-						a.WriteCsv(sw);
+					using (StreamWriter sw = new StreamWriter(filepath))
+					{
+						SA_Action.WriteCsvHeader(sw);
+						foreach (SA_Action a in actions) 
+							a.WriteCsv(sw);
+					}
 				}
+			}
+			catch(Exception ex)
+			{
+				Console.WriteLine("Exception: "+ex.Message);
 			}
 		}
 
