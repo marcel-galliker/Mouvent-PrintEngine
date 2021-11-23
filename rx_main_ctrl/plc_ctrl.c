@@ -30,6 +30,7 @@
 #include "ctrl_svr.h"
 #include "print_ctrl.h"
 #include "chiller.h"
+#include "siemens_ctrl.h"
 #include "lh702_ctrl.h"
 #include "step_tx.h"
 #include "plc_ctrl.h"

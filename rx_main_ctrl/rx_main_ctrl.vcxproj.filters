@@ -162,6 +162,9 @@
     <ClInclude Include="siemens_ctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="opcua.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">
@@ -290,10 +293,10 @@
     <ClCompile Include="iQ500.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="opcua.c">
+    <ClCompile Include="siemens_ctrl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="siemens_ctrl.c">
+    <ClCompile Include="opcua.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

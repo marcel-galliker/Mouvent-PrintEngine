@@ -16,6 +16,7 @@
 #include "enc_ctrl.h"
 #include "plc_ctrl.h"
 #include "siemens_ctrl.h"
+#include "lh702_ctrl.h"
 #include "chiller.h"
 #include "step_ctrl.h"
 #include "ctrl_svr.h"
