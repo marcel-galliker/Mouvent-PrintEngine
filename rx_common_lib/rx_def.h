@@ -139,6 +139,10 @@ void rx_def_init();
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
+#define ALL_FLUIDS			-1
+#define ALL_HEADS			-1
+#define ALL_STEPPERS		-1
+
 //--- simple value ----------------------------------------------	
 typedef struct SValue
 {

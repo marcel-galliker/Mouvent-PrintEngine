@@ -389,6 +389,8 @@
       <ExamineRegistersInRawFormat>true</ExamineRegistersInRawFormat>
       <DisableSignals>false</DisableSignals>
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
+      <AsyncModeSupportsBreakpoints>true</AsyncModeSupportsBreakpoints>
+      <TemporaryBreakConsolidationTimeout>0</TemporaryBreakConsolidationTimeout>
       <EnableNonStopMode>false</EnableNonStopMode>
       <MaxBreakpointLimit>0</MaxBreakpointLimit>
       <EnableVerboseMode>true</EnableVerboseMode>

@@ -571,8 +571,8 @@ void _update_status(void)
 		if (!_HeaterUsed) pstat->err &= ~err_heater_board;
 
 		pstat->info.connected		= TRUE;
-		pstat->info.bleedValve		= _Stat->ink_supply[i].bleedValve;
-		pstat->info.cusionValve		= _Stat->ink_supply[i].airValve;
+		pstat->info.bleedValve		= _Stat->ink_supply[i].bleedValve ? TRUE : FALSE;
+		pstat->info.cusionValve		= _Stat->ink_supply[i].airValve ? TRUE : FALSE;
 		pstat->info.condTempReady	= condTempReady;
 		pstat->info.heaterTempReady = _Stat->ink_supply[i].heaterTempReady;
 		if (_Cfg->cmd.lung_enabled) pstat->presLung = _Stat->degass_pressure;
