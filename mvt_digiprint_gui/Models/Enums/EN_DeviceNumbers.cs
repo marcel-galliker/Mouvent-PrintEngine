@@ -117,7 +117,8 @@ namespace RX_DigiPrint.Models.Enums
                                                 }
                                                 for (color=0; color<cnt && color<4; color++)
                                                     _List.Add(new RxEnum<int>(color+1, string.Format("{0}", color+1)));
-                                                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB)
+                                                if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_LB702_WB 
+                                                || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LB702_UV)
                                                     _List.Add(new RxEnum<int>(99+1, string.Format("SA")));
                                                 break;
 
