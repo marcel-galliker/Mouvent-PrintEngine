@@ -67,6 +67,7 @@ static int		_PrintPos_New[2];
 static int		_PrintPos_Act[2];
 static int		_SlideToRef;
 static int		_PrintHeight=0;
+static int		_PrintHeightAct = 0;
 
 static UINT32	_ErrorFlags=0;
 
@@ -470,9 +471,9 @@ static void _lb702_move_to_pos(int cmd, int pos0, int pos1, char *file, int line
 			RX_StepperStatus.info.moving = TRUE;
 			_PrintPos_New[MOTOR_Z_BACK]  = pos0;
 			_PrintPos_New[MOTOR_Z_FRONT] = pos1;
-			motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0);
-			motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1);
-			motors_start(MOTOR_Z_BITS, TRUE);	
+			if (motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  pos0) &&
+				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, pos1))
+					motors_start(MOTOR_Z_BITS, TRUE);	
 		} 
 		else 
 		{
@@ -504,23 +505,29 @@ static void _lb702_start_sm(int cmd, int fromRef, int pos)
 		else if (abs(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back) > MAX_ALIGN)
 			Error(ERR_ABORT, 0, "Reference Height front/back too differents (> 10mm)");
         #ifndef DEBUG
-		else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height > 15000)
+		else if (RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height > 15000 && RX_StepperStatus.cln_used)
 			Error(ERR_ABORT, 0, "Capping Height must be < 15mm");
         #endif
 		else
 		{
-			if (fromRef)
+			if (fromRef && RX_StepperStatus.cln_used)
 			{
 				_PrintPos_New[MOTOR_Z_BACK]  = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back  - pos);
 				_PrintPos_New[MOTOR_Z_FRONT] = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - pos);
 				_SlideToRef = TRUE;
 			}
-			else
+            else if (RX_StepperStatus.cln_used)
 			{
 				_PrintPos_New[MOTOR_Z_BACK]  = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - pos);
 				_PrintPos_New[MOTOR_Z_FRONT] = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].cap_height - pos);
 				_SlideToRef = FALSE;
 			}
+            else
+            {
+                _PrintPos_New[MOTOR_Z_BACK]  = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_back - pos);
+				_PrintPos_New[MOTOR_Z_FRONT] = -1*_micron_2_steps(RX_StepperCfg.robot[RX_StepperCfg.boardNo].ref_height_front - pos);
+				_SlideToRef = FALSE;
+            }
 			_Step=1;
 			_lb702_sm();
 		}
@@ -586,9 +593,12 @@ static void _lb702_sm(void)
 			{
 				TrPrintfL(TRUE, "_lb702_sm[%s/%d]: ", MsgIdStr(RX_StepperStatus.cmdRunning), _Step);
 				RX_StepperStatus.info.moving = TRUE;
-				motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  _PrintPos_New[MOTOR_Z_BACK]);
-				motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _PrintPos_New[MOTOR_Z_FRONT]);
-				motors_start(MOTOR_Z_BITS, TRUE);
+				if (motor_move_to_step(MOTOR_Z_BACK, &_ParZ_down,  _PrintPos_New[MOTOR_Z_BACK]) &&
+					motor_move_to_step(MOTOR_Z_FRONT, &_ParZ_down, _PrintPos_New[MOTOR_Z_FRONT]))
+                    {
+						motors_start(MOTOR_Z_BITS, TRUE);
+                        _PrintHeightAct = _PrintHeight;
+                    }
 				_Step++;
 			}
 			break;
@@ -647,7 +657,8 @@ int  lb702_handle_ctrl_msg(RX_SOCKET socket, int msgId, void *pdata, char *file,
                                     break;
 
     case CMD_LIFT_PRINT_POS:		_PrintHeight = (*((INT32*)pdata));
-									_lb702_start_sm(CMD_LIFT_PRINT_POS, TRUE, _PrintHeight);
+									if (!RX_StepperStatus.info.z_in_print || _PrintHeight != _PrintHeightAct)
+										_lb702_start_sm(CMD_LIFT_PRINT_POS, TRUE, _PrintHeight);
 									break;
 		
 	case CMD_LIFT_UP_POS:			_lb702_start_sm(CMD_LIFT_UP_POS, TRUE, UP_HEIGHT);										
