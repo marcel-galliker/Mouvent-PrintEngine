@@ -47,9 +47,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
             System.Printing.PrintQueue pq = pd.PrintQueue;
             CB_Printer.ItemsSource   = printQueues;
 
-            CB_ToleranceAngle.ItemsSource = new SA_Tolerance_List();
-            CB_ToleranceStitch.ItemsSource = new SA_Tolerance_List();
-
             CB_Camera.SelectedItem = RxGlobals.Settings.SetupAssistCam.Name;
             foreach (var item in printQueues)
 			{
@@ -61,8 +58,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
             }
 
             NB_DistToStops.Text    = Math.Round(RxGlobals.Settings.SetupAssistCam.DistToStop, 3).ToString();
-            CB_ToleranceAngle.SelectedValue = RxGlobals.Settings.SetupAssistCam.ToleranceAngle;
-            CB_ToleranceStitch.SelectedValue = RxGlobals.Settings.SetupAssistCam.ToleranceStitch;
         }
 
         //--- Save_Clicked ------------------------------------
@@ -72,8 +67,6 @@ namespace RX_DigiPrint.Views.SetupAssistView
             RxGlobals.Settings.SetupAssistCam.Name       = CB_Camera.SelectedItem as string;
             RxGlobals.Settings.SetupAssistCam.ReportPrinterName = (CB_Printer.SelectedItem as System.Printing.PrintQueue).FullName;
             RxGlobals.Settings.SetupAssistCam.DistToStop = NB_DistToStops.Value;
-            RxGlobals.Settings.SetupAssistCam.ToleranceAngle  = Convert.ToDouble(CB_ToleranceAngle.SelectedValue);
-            RxGlobals.Settings.SetupAssistCam.ToleranceStitch = Convert.ToDouble(CB_ToleranceStitch.SelectedValue);
 
             if (save)
             {

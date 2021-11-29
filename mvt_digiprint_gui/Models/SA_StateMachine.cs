@@ -262,28 +262,21 @@ namespace RX_DigiPrint.Models
 
 			//--- measurmentfunctions -----------------------------
 		//	for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
-			for (color=RxGlobals.PrintSystem.ColorCnt-1; color>=0; color--)	// reverse order!
+			for (int i=RxGlobals.PrintSystem.ColorCnt-1; i>=0; i--)	// reverse order!
 			{
+				color = RxGlobals.PrintSystem.Color_Order[i];
 				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
-				_AdjustFunction[color]= ECamFunction.CamNoFunction;
+				_AdjustFunction[color]= ECamFunction.CamPrint;
 				if (ink!=null)
 				{
-					Brush colorBrush;
-					try
-					{
-						colorBrush = new SolidColorBrush(ink.Color);
-					}
-					catch(Exception)
-					{
-						colorBrush=Brushes.Transparent;
-					}
-
 					if (first)
 					{
 						_Actions.Add(new SA_Action()
 						{
 							PrintbarNo	= color,
-							ColorBrush  = colorBrush,
+							ColorBrush  = ink.ColorBrush,
+							StrokeBrush = ink.StrokeBrush,
+							guiCtrl = ink.guiCtrl,
 							WebMoveDist = first? 200 : 20,
 							WebMoveDone = true,
 							Function = ECamFunction.CamFindLines_Vertical,
@@ -295,7 +288,9 @@ namespace RX_DigiPrint.Models
 					_Actions.Add(new SA_Action()
 					{
 						PrintbarNo	= color,
-						ColorBrush  = colorBrush,
+						ColorBrush  = ink.ColorBrush,
+						StrokeBrush = ink.StrokeBrush,
+						guiCtrl = ink.guiCtrl,
 						Function = ECamFunction.CamFindLine_Horzizontal,
 						Name="Find Horiz Line",
 						WebMoveDist = 0,
@@ -305,7 +300,9 @@ namespace RX_DigiPrint.Models
 					_Actions.Add(new SA_Action()
 					{
 						PrintbarNo	= color,
-						ColorBrush  = colorBrush,
+						ColorBrush  = ink.ColorBrush,
+						StrokeBrush = ink.StrokeBrush,
+						guiCtrl = ink.guiCtrl,
 						Function = ECamFunction.CamFindFirstAngle,
 						Name="Find First Angle",
 						WebMoveDist = 0,
@@ -328,52 +325,68 @@ namespace RX_DigiPrint.Models
 					_HeadsPerColor = RxGlobals.PrintSystem.HeadsPerColor;
 					string colorName = new ColorCode_Str().Convert(ink.ColorCode, null, color*RxGlobals.PrintSystem.InkCylindersPerColor, null).ToString();
 					_AngleIdxes[color] = _Actions.Count();
-					for (n=0; n<_HeadsPerColor; n++)
+					if (RxGlobals.SA_AlignSettings.MeasureAngle[i])
 					{
-						SA_Action action=new SA_Action()
+						for (n=0; n<_HeadsPerColor; n++)
 						{
-							PrintbarNo	= color,
-							ColorBrush  = colorBrush,
-							StepperNo   = color/2,
-							HeadNo		= n,
-							WebMoveDist = n==0? 12.0 : 0,
-							WebPos		= 12.0,
-							Function	= ECamFunction.CamMeasureAngle,
-							Name		= String.Format("{0}-{1}", colorName, n+1),
-						};
-						_Actions.Add(action);
-						if (_SimuMachine) action.ReadCsv("D:\\Temp\\alignment.csv");
-					}
-				//	if (first)
-					{
-						SA_Action action = new SA_Action()
+							SA_Action action=new SA_Action()
+							{
+								PrintbarNo	= color,
+								ColorBrush  = ink.ColorBrush,
+								guiCtrl = ink.guiCtrl,
+								StrokeBrush = ink.StrokeBrush,
+								StepperNo   = color/2,
+								HeadNo		= n,
+								WebMoveDist = n==0? 12.0 : 0,
+								WebPos		= 12.0,
+								Function	= ECamFunction.CamMeasureAngle,
+								Name		= String.Format("{0}-{1}", colorName, n+1),
+							};
+							_Actions.Add(action);
+							if (_SimuMachine) action.ReadCsv("D:\\Temp\\alignment.csv");
+						}
+						_Actions.Add(new SA_Action()
 						{
 							PrintbarNo = color,
-							ColorBrush = colorBrush,
+							ColorBrush = ink.ColorBrush,
+							StrokeBrush = ink.StrokeBrush,
+							guiCtrl = ink.guiCtrl,
 							StepperNo = color / 2,
 							WebMoveDist = 0,
 							WebPos = 0,
 							Function = ECamFunction.CamMoveScan,
 							Name = "Repeat",
-						};
-						_Actions.Add(action);
+						});
+
+						_Actions.Add(new SA_Action()
+						{
+							PrintbarNo = color,
+							Function = ECamFunction.CamDummy,
+							Name = "Dummy",
+						});
+
 					}
 
 					_StitchIdxes[color] = _Actions.Count();
-					for (n=0; n<_HeadsPerColor-1; n++)
+					if (RxGlobals.SA_AlignSettings.MeasureStitch[i])
 					{
-						SA_Action action=new SA_Action()
+						for (n=0; n<_HeadsPerColor-1; n++)
 						{
-							PrintbarNo	= color,
-							ColorBrush  = colorBrush,
-							StepperNo   = color/2,
-							HeadNo		= n,
-							Function	= ECamFunction.CamMeasureStitch,
-							Name		= String.Format("{0}-{1}..{2}",  colorName, n+1, n+2),
-							WebMoveDist	= n==0? 10.0 : 0,
-							WebPos		= 22.0,
-						};						
-						_Actions.Add(action);
+							SA_Action action=new SA_Action()
+							{
+								PrintbarNo	= color,
+								ColorBrush  = ink.ColorBrush,
+								StrokeBrush = ink.StrokeBrush,
+								guiCtrl		= ink.guiCtrl,
+								StepperNo   = color/2,
+								HeadNo		= n,
+								Function	= ECamFunction.CamMeasureStitch,
+								Name		= String.Format("{0}-{1}..{2}",  colorName, n+1, n+2),
+								WebMoveDist	= n==0? 10.0 : 0,
+								WebPos		= 22.0,
+							};						
+							_Actions.Add(action);
+						}
 					}
 
 					_DistIdxes[color] = _Actions.Count();
@@ -381,35 +394,43 @@ namespace RX_DigiPrint.Models
 					{ 
 						for (n=0; n<_HeadsPerColor-1; n++)
 						{
-							SA_Action action=new SA_Action()
+							_Actions.Add(new SA_Action()
 							{
 								PrintbarNo	= color,
-								ColorBrush  = colorBrush,
+								ColorBrush  = ink.ColorBrush,
+								StrokeBrush = ink.StrokeBrush,
+								guiCtrl = ink.guiCtrl,
 								StepperNo   = color/2,
 								HeadNo		= n,
 								Function	= ECamFunction.CamMeasureDist,
 								Name		= String.Format(" {0}-{1}..{2}",  colorName, n+1, n+2),
 								WebMoveDist	= n==0? 7.5 : 0,
 								WebPos		= 82.840,
-							};				
-							_Actions.Add(action);
+							});				
 						}
 					}
 
+					_Actions.Add(new SA_Action()
 					{
-						SA_Action action = new SA_Action()
-						{
-							PrintbarNo = color,
-							ColorBrush = colorBrush,
-							StepperNo = color / 2,
-							WebMoveDist = 0,
-							WebPos = 130,
-							ScanPos = _FindPos,
-							Function = ECamFunction.CamMoveWeb,
-							Name = "Move Web",
-						};
-						_Actions.Add(action);
-					}
+						PrintbarNo = color,
+						ColorBrush = ink.ColorBrush,
+						StrokeBrush = ink.StrokeBrush,
+						guiCtrl = ink.guiCtrl,
+						StepperNo = color / 2,
+						WebMoveDist = 0,
+						WebPos = 130,
+						ScanPos = _FindPos,
+						Function = ECamFunction.CamMoveWeb,
+						Name = "Move Web",
+					});
+
+					_Actions.Add(new SA_Action()
+					{
+						PrintbarNo = color,
+						Function = ECamFunction.CamDummy,
+						Name = "Dummy",
+					});
+
 					first = false;
 				}
 			}
@@ -494,9 +515,9 @@ namespace RX_DigiPrint.Models
 			}
 
 			//--- measurmentfunctions -----------------------------
-		//	for (color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
-			for (color=RxGlobals.PrintSystem.ColorCnt-1; color>=0; color--)	// reverse order!
+			for (int i=RxGlobals.PrintSystem.ColorCnt-1; i>=0; i--)	// reverse order!
 			{
+				color = RxGlobals.PrintSystem.Color_Order[i];
 				InkType ink = RxGlobals.InkSupply.List[color*RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
 				if (ink!=null)
 				{
@@ -540,8 +561,9 @@ namespace RX_DigiPrint.Models
 			
 			if (_SimuMachine==false)
 			{
-				for (color = RxGlobals.PrintSystem.ColorCnt - 2; color >= 0; color--)   // reverse order!
+				for (int i = RxGlobals.PrintSystem.ColorCnt - 2; i >= 0; i--)   // reverse order!
 				{
+					color = RxGlobals.PrintSystem.Color_Order[i];
 					InkType ink = RxGlobals.InkSupply.List[color * RxGlobals.PrintSystem.InkCylindersPerColor].InkType;
 					if (ink != null)
 					{
@@ -597,11 +619,11 @@ namespace RX_DigiPrint.Models
 							});
 						}
 						_StitchIdxes[color] = _Actions.Count();
-						for (int i=0; i<_CamMeasureRegStitch_Cnt; i++)
+						for (n=0; n<_CamMeasureRegStitch_Cnt; n++)
 						{
 							SA_Action action = new SA_Action()
 							{
-								WebMoveDist = (i==0)? px2mm(320):0,
+								WebMoveDist = (n==0)? px2mm(320):0,
 								ColorBrush = colorBrush,
 								PrintbarNo = color,
 								StepperNo = color / 2,
@@ -846,7 +868,7 @@ namespace RX_DigiPrint.Models
 							else
 							{
 								_HeadNo=0;
-								if (++_MeasurementPass<SA_Action.MeasurementPasses)
+								if (++_MeasurementPass<RxGlobals.SA_AlignSettings.Passes)
 								{
 									_ActionIdx = stitchIdx + _HeadNo;
 									_Action = _Actions[_ActionIdx];
@@ -1112,7 +1134,7 @@ namespace RX_DigiPrint.Models
 			_SA_Running = true;
 			switch(_Action.Function)
 			{
-				case ECamFunction.CamNoFunction:			_TestPrint_start();					break;
+				case ECamFunction.CamPrint:					_TestPrint_start();					break;
 				case ECamFunction.CamFindLines_Vertical:	_CamFindLines_Vertical_start();		break;
 				case ECamFunction.CamFindLine_Horzizontal:	_CamFindLine_Horzizontal_start();	break;
 				case ECamFunction.CamFindFirstAngle:		_CamFindFirstAngle_start();			break;
@@ -1175,7 +1197,7 @@ namespace RX_DigiPrint.Models
 					}
 
 					/*
-					if (_AdjustFunction[printBar]==ECamFunction.CamNoFunction) || _Actions[_ActionIdx].PrintbarNo!=printBar)
+					if (_AdjustFunction[printBar]==ECamFunction.CamPrint) || _Actions[_ActionIdx].PrintbarNo!=printBar)
 					{
 						_StartAction();
 						return;
@@ -1518,7 +1540,7 @@ namespace RX_DigiPrint.Models
 			}
 			else
 			{
-				if (Math.Abs((double)_Action.Correction) <= RxGlobals.Settings.SetupAssistCam.ToleranceAngle + 0.05) _Action.State = ECamFunctionState.done;
+				if (Math.Abs((double)_Action.Correction) <= RxGlobals.SA_AlignSettings.ToleranceAngle + 0.05) _Action.State = ECamFunctionState.done;
 				else
 				{
 					_AdjustFunction[_Action.PrintbarNo] = _Action.Function;
@@ -1571,7 +1593,7 @@ namespace RX_DigiPrint.Models
 				}
 				else
 				{
-					if (Math.Abs((double)action.Correction) <= RxGlobals.Settings.SetupAssistCam.ToleranceStitch + 0.05) 
+					if (Math.Abs((double)action.Correction) <= RxGlobals.SA_AlignSettings.ToleranceStitch + 0.05) 
 						action.State = ECamFunctionState.done;
 					else
 					{
@@ -1648,9 +1670,9 @@ namespace RX_DigiPrint.Models
 					break;
 
 			case ECamFunction.CamMoveScan: // _ScanMoveDone
-					if (++_MeasurementPass>=SA_Action.MeasurementPasses) 
+					if (++_MeasurementPass>= RxGlobals.SA_AlignSettings.Passes) 
 					{
-						if (_AdjustFunction[_Action.PrintbarNo] != ECamFunction.CamNoFunction)
+						if (_AdjustFunction[_Action.PrintbarNo] != ECamFunction.CamPrint)
 							_SkipFct = true;
 						_MeasurementPass = 0;
 					}
@@ -1710,7 +1732,7 @@ namespace RX_DigiPrint.Models
 				_Action.WebMoveDone=true;
 				switch (_Action.Function)
 				{
-					case ECamFunction.CamNoFunction:	ActionDone();
+					case ECamFunction.CamPrint:	ActionDone();
 														_TimePrimted = DateTime.Now;
 														break;
 
@@ -1787,7 +1809,7 @@ namespace RX_DigiPrint.Models
 
 				switch(_Action.Function)
 				{
-					case ECamFunction.CamNoFunction:
+					case ECamFunction.CamPrint:
 						break;
 
 					case ECamFunction.CamFindLines_Vertical:				

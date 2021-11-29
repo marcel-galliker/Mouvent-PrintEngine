@@ -50,7 +50,6 @@ namespace RX_DigiPrint.Models
 		public void PrintReport(List<SA_Action>  actions, DateTime timePrinted, bool force)
 		{
 			if (actions==null) return;
-
 			SaveMeasurments(actions, timePrinted);
 
 			if (!force)
@@ -140,19 +139,10 @@ namespace RX_DigiPrint.Models
 				col++;
 
 				//--- 1: Color ---------------------
-				Ellipse color = new Ellipse()
-					{
-						HorizontalAlignment=HorizontalAlignment.Center, 
-						VerticalAlignment=VerticalAlignment.Center, 
-						Width=15, 
-						Height=15,  
-						Stroke=Brushes.Transparent,
-						Margin=new Thickness(5,10,5,10)
-					};
-				color.Fill = action.ColorBrush;
-				Grid.SetRow(color, row);
-				Grid.SetColumn(color, col++);
-				grid.Children.Add(color);
+				UIElement ctrl = action.guiCtrl;
+				Grid.SetRow(ctrl, row);
+				Grid.SetColumn(ctrl, col++);
+				grid.Children.Add(ctrl);
 				col++;
 
 				//--- 2: Function --------------
@@ -267,56 +257,61 @@ namespace RX_DigiPrint.Models
 			page.Height = pageSize.Height;
 
 			Grid pageGrid = new Grid(){ Margin=new Thickness(50,30,0,0)};
+			pageGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+			pageGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
 
-			pageGrid.ColumnDefinitions.Add(new ColumnDefinition(){Width=GridLength.Auto});
-			pageGrid.ColumnDefinitions.Add(new ColumnDefinition(){Width=GridLength.Auto});
+			Grid titleGrid = new Grid();
+			titleGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+			titleGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
 
-			pageGrid.RowDefinitions.Add(new RowDefinition(){ Height=GridLength.Auto});
-			pageGrid.RowDefinitions.Add(new RowDefinition(){ Height=GridLength.Auto});
-			pageGrid.RowDefinitions.Add(new RowDefinition(){ Height=GridLength.Auto});
+			titleGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+			titleGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+			titleGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
 
 			//--- Machine ------------------------------------------------
 			TextBlock title =new TextBlock() { };
 			title.Text="Alignment Measurment of ";
-			pageGrid.Children.Add(title);
+			titleGrid.Children.Add(title);
 
 			TextBlock machine=new TextBlock() { };
 			machine.SetValue(TextBlock.FontWeightProperty, FontWeights.Bold);
 			machine.Text=RxGlobals.PrintSystem.HostName;
 			Grid.SetColumn(machine, 1);
-			pageGrid.Children.Add(machine);
+			titleGrid.Children.Add(machine);
 
 			//--- timestamp --------------------------------------------------
 			TextBlock time=new TextBlock() { };
 			time.Text="Printed ";
 			Grid.SetRow(time, 1);
-			pageGrid.Children.Add(time);
+			titleGrid.Children.Add(time);
 
 			TextBlock now=new TextBlock();
 			now.SetValue(TextBlock.FontWeightProperty, FontWeights.Bold);
 			now.Text=timePrinted.ToString();
 			Grid.SetRow(now, 1);
 			Grid.SetColumn(now,1);
-			pageGrid.Children.Add(now);
+			titleGrid.Children.Add(now);
 
 			//--- tolerance -------------------------------------------------
 			
 			TextBlock ttol = new TextBlock() { };
 			ttol.Text = "Tolerance";
 			Grid.SetRow(ttol, 2);
-			pageGrid.Children.Add(ttol);
+			titleGrid.Children.Add(ttol);
 
 			TextBlock tol = new TextBlock();
 			tol.SetValue(TextBlock.FontWeightProperty, FontWeights.Bold);
-			tol.Text = "A=±" + RxGlobals.Settings.SetupAssistCam.ToleranceAngle.ToString()+" Rev "
-					 + "S=±" + RxGlobals.Settings.SetupAssistCam.ToleranceStitch.ToString() + " Rev";
+			tol.Text = "A=±" + RxGlobals.SA_AlignSettings.ToleranceAngle.ToString()+" Rev "
+					 + "S=±" + RxGlobals.SA_AlignSettings.ToleranceStitch.ToString() + " Rev";
 			Grid.SetRow(tol, 2);
 			Grid.SetColumn(tol, 2);
-			pageGrid.Children.Add(tol);
+			titleGrid.Children.Add(tol);
+
+			pageGrid.Children.Add(titleGrid);
 
 			//--- results ----------------------------------------------
 			Grid resultsGrid = new Grid();
-			Grid.SetRow(resultsGrid, 2);
+			Grid.SetRow(resultsGrid, 1);
 			Grid.SetColumn(resultsGrid,0);
 			Grid.SetColumnSpan(resultsGrid,3);
 

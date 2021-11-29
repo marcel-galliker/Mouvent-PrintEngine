@@ -26,7 +26,8 @@ namespace rx_CamLib
 
 	public enum ECamFunction
 	{
-		CamNoFunction,
+		CamDummy,
+		CamPrint,
 		CamConfirmFocus,	
 		CamFindLines_Vertical,		// vertical lines (WEB)	
 		CamFindLine_Horzizontal,	// horizontal line (WEB)

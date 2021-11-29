@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
 
@@ -18,9 +19,6 @@ namespace RX_DigiPrint.Models
 
 	public class SA_Action: RxBindable
 	{
-//		public static readonly int  MeasurementPasses=3;
-		public static readonly int MeasurementPasses = 1;
-
 		public List<List<SA_Value>> _ValueList = new List<List<SA_Value>>();
 
 		//--- Property Values ---------------------------------------
@@ -45,6 +43,14 @@ namespace RX_DigiPrint.Models
 		{
 			get { return _ColorBrush; }
 			set { SetProperty(ref _ColorBrush,value); }
+		}
+
+		//--- Property StrokeBrush ---------------------------------------
+		private Brush _StrokeBrush = Brushes.Transparent;
+		public Brush StrokeBrush
+		{
+			get { return _StrokeBrush; }
+			set { SetProperty(ref _StrokeBrush, value); }
 		}
 
 		//--- Property StepperNo ---------------------------------------
@@ -124,7 +130,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- Property Function ---------------------------------------
-		private ECamFunction _Function=ECamFunction.CamNoFunction;
+		private ECamFunction _Function=ECamFunction.CamPrint;
 		public ECamFunction Function
 		{
 			get { return _Function; }
@@ -148,6 +154,14 @@ namespace RX_DigiPrint.Models
 		{
 			get { return _IconKind; }
 			set { SetProperty(ref _IconKind,value); }
+		}
+
+		//--- Property guiCtrl ---------------------------------------
+		private UIElement _guiCtrl;
+		public UIElement guiCtrl
+		{
+			get { return _guiCtrl; }
+			set { SetProperty(ref _guiCtrl, value); }
 		}
 
 		//--- Property State ---------------------------------------
@@ -263,11 +277,11 @@ namespace RX_DigiPrint.Models
 								String line = csv.ReadLine();
 								if (line == null) break;
 								String[] field = line.Split(CSV_SEPARATOR);
-								ECamFunction function = ECamFunction.CamNoFunction;
+								ECamFunction function = ECamFunction.CamPrint;
 								if (field[2].Equals(ECamFunction.CamMeasureAngle.ToString())) function= ECamFunction.CamMeasureAngle;
 								else if (field[2].Equals(ECamFunction.CamMeasureStitch.ToString())) function = ECamFunction.CamMeasureStitch;
 								
-								if (function!= ECamFunction.CamNoFunction)
+								if (function!= ECamFunction.CamPrint)
 								{ 
 									int pass= Rx.StrToInt32(field[3])-1;
 									if (pass==0) 

@@ -54,7 +54,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" 
                                              Width ="15" Height ="15" Fill ="{Binding ColorBrush}"
-                                             Stroke="Transparent" Margin="0,0,5,0"/>
+                                             Stroke="{Binding StrokeBrush}" Margin="0,0,5,0"/>
 
                                         <iconPacks:PackIconMaterial 
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}"

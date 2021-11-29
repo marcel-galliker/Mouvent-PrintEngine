@@ -395,6 +395,7 @@
     <Compile Include="Models\HeadAdjustmentHelp.cs" />
     <Compile Include="Models\JetCompensation.cs" />
     <Compile Include="Models\JetCompensationDensityViewModel.cs" />
+    <Compile Include="Models\SA_AlignSettings.cs" />
     <Compile Include="Models\SA_Report.cs" />
     <Compile Include="Models\SA_StateMachine.cs" />
     <Compile Include="Models\SA_Action.cs" />
@@ -736,6 +737,9 @@
     </Compile>
     <Compile Include="Views\SetupAssistView\SA_ActionsView.xaml.cs">
       <DependentUpon>SA_ActionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SetupAssistView\SA_AlignSettingsWnd.xaml.cs">
+      <DependentUpon>SA_AlignSettingsWnd.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SetupAssistView\SA_CamCapture.xaml.cs">
       <DependentUpon>SA_CamCapture.xaml</DependentUpon>
@@ -1401,6 +1405,10 @@
     <Page Include="Views\SetupAssistView\SA_ActionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SetupAssistView\SA_AlignSettingsWnd.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\SetupAssistView\SA_CamCapture.xaml">
       <SubType>Designer</SubType>

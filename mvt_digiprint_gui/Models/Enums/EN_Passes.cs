@@ -1,15 +1,11 @@
 ﻿using RX_Common;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RX_DigiPrint.Models.Enums
 {
 
-    public class EN_PassesList : IEnumerable
+	public class EN_PassesList : IEnumerable
     {
         private static List<RxEnum<int>> _List;
 

@@ -102,7 +102,10 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			BTN_CamSettings.IsChecked = false;
 			CamSettings.Hide();
-			SetupActions.StartAlign();
+			SA_AlignSettingsWnd wnd = new SA_AlignSettingsWnd();
+			var res= wnd.ShowDialog();
+			if (res!=null && (bool)res )
+				SetupActions.StartAlign();
 		}
 
 		//--- StartDensity_Clicked -------------------------------------------

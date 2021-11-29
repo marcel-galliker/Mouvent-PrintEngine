@@ -40,22 +40,6 @@ namespace rx_CamLib.Models
 			set { SetProperty(ref _DistToStop,value); }
 		}
 
-		//--- Property ToleranceAngle ---------------------------------------
-		private double _ToleranceAngle;
-		public double ToleranceAngle
-		{
-			get { return _ToleranceAngle; }
-			set { SetProperty(ref _ToleranceAngle, value); }
-		}
-
-		//--- Property ToleranceStitch ---------------------------------------
-		private double _ToleranceStitch;
-		public double ToleranceStitch
-		{
-			get { return _ToleranceStitch; }
-			set { SetProperty(ref _ToleranceStitch, value); }
-		}
-
 		//--- Property StreamCaps ---------------------------------------
 		private StreamCaps _StreamCaps = new StreamCaps();
 		public StreamCaps StreamCaps

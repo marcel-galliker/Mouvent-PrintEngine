@@ -67,6 +67,7 @@ namespace RX_DigiPrint.Models
         public static RxCam                 Camera          = new RxCam();
         public static SA_Base               SetupAssist     = new SA_Base();
         public static SA_StateMachine       SA_StateMachine = new SA_StateMachine();
+        public static SA_AlignSettings      SA_AlignSettings= new SA_AlignSettings();
         public static I1Pro3                I1Pro3          = new I1Pro3();
     }
 }

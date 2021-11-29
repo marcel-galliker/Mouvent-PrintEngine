@@ -28,7 +28,7 @@ namespace RX_DigiPrint.Views.SetupAssistView
 		{
 			if (!RxGlobals.SA_StateMachine.Running && RxGlobals.PrintSystem.ReadyToPrint())
 			{
-				ResultHdr.HeaderText = string.Format("Result (tol A=±{0:0.0} Rev, S=±{1:0.0} Rev)", RxGlobals.Settings.SetupAssistCam.ToleranceAngle, RxGlobals.Settings.SetupAssistCam.ToleranceStitch);
+				ResultHdr.HeaderText = string.Format("Result (tol A=±{0:0.0} Rev, S=±{1:0.0} Rev)", RxGlobals.SA_AlignSettings.ToleranceAngle, RxGlobals.SA_AlignSettings.ToleranceStitch);
 				Actions.ItemsSource  = RxGlobals.SA_StateMachine.StartAlign();
 				_ActionsChanged();
 			}
@@ -64,7 +64,8 @@ namespace RX_DigiPrint.Views.SetupAssistView
 			for (int i=0; i<actions.Count; i++)
 			{
 				if (actions[i].Function == ECamFunction.CamMoveScan
-				|| actions[i].Function == ECamFunction.CamMoveWeb)
+				|| actions[i].Function == ECamFunction.CamMoveWeb
+				|| actions[i].Function == ECamFunction.CamDummy)
 				{
 					Actions.Rows[i].Height = new Infragistics.Controls.Grids.RowHeight(0);
 				}

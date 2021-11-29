@@ -1,7 +1,9 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Services;
 using System;
+using System.Windows;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace RX_DigiPrint.Models
 {
@@ -64,9 +66,27 @@ namespace RX_DigiPrint.Models
             get { return _Description; }
             set { SetProperty(ref _Description, value); }
         }
-        
-        //--- Property Color ---------------------------------------
-        private Color _Color;
+
+        //--- guiCtrl -----------------------------
+        public UIElement guiCtrl
+		{
+			get {
+                Ellipse ctrl = new Ellipse()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Width = 15,
+                    Height = 15,
+                    Fill = ColorBrush,
+                    Stroke = StrokeBrush,
+                    Margin = new Thickness(5, 10, 5, 10)
+                };
+                return ctrl;
+            }
+        }
+
+		//--- Property Color ---------------------------------------
+		private Color _Color;
         public Color Color
         {
             get { return _Color; }
@@ -74,11 +94,19 @@ namespace RX_DigiPrint.Models
             { 
                 if (SetProperty(ref _Color, value))
                 {
-                    if (_Color.B>100 && _Color.G<100 || _Color.R + _Color.G + _Color.B < 200) ColorFG = Colors.White;
-                    else ColorFG = Colors.Black;
+                    if (_Color.B > 100 && _Color.G < 100 || _Color.R + _Color.G + _Color.B < 200) 
+                    {
+                        ColorFG = Colors.White;
+                        StrokeBrush = Brushes.Transparent;
+                    }
+                    else 
+                    { 
+                        ColorFG = Colors.Black;
+                        StrokeBrush = Brushes.DarkGray;
+                    }
                 } 
             }
-        }        
+        }
 
         //--- ColorFG ---------------------------------------------------
         Color _ColorFG;
@@ -86,6 +114,20 @@ namespace RX_DigiPrint.Models
         {
             get { return _ColorFG;}
             set { _ColorFG = value;}
+        }
+
+        //--- Property ColorBrush ---------------------------------------
+        public Brush ColorBrush
+        {
+            get { return new SolidColorBrush(_Color); }
+        }
+
+        //--- Property StrokeBrush ---------------------------------------
+        private Brush _StrokeBrush;
+        public Brush StrokeBrush
+        {
+            get { return _StrokeBrush; }
+            set { SetProperty(ref _StrokeBrush, value); }
         }
 
         //--- Property CanFlush ---------------------------------------

@@ -40,7 +40,7 @@ namespace RX_Common
         }
 
         //--- Save -------------------------------
-        public void Save(string path)
+        public virtual void Save(string path)
         {
           //  string path =  Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)+"\\"+_AppName;
             if (path==null) path = _MyPath;
@@ -51,7 +51,7 @@ namespace RX_Common
             XmlTextWriter xml = new XmlTextWriter(path+"\\user.config", null);
             
             xml.WriteStartDocument();
-            xml.WriteStartElement("Settings");
+            xml.WriteStartElement(this.GetType().Name);
 
             _SaveObject(ref xml, this);
 
@@ -76,6 +76,14 @@ namespace RX_Common
                         xml.WriteEndElement();
                         Console.WriteLine("/{0}>", prop.Name);
 					}
+                    else if (val.GetType().Name.Equals("Boolean[]"))
+					{
+                        Boolean[] list=val as Boolean[];
+                        xml.WriteStartAttribute(prop.Name);
+                        for (int n=0; n<list.Length; n++)
+                            xml.WriteValue(list[n].ToString()+';');
+                        xml.WriteEndAttribute();
+                    }
                     else
 					{
                         xml.WriteStartAttribute(prop.Name);    
@@ -100,7 +108,7 @@ namespace RX_Common
             {
                 while (xml.Read())
                 {
-                //  Console.WriteLine("{0}: {1}=>>{2}<<", xml.NodeType.ToString(), xml.Name, xml.Value);
+                    Console.WriteLine("{0}: {1}=>>{2}<<", xml.NodeType.ToString(), xml.Name, xml.Value);
                     if (xml.NodeType==XmlNodeType.Element && xml.Name.Equals(this.GetType().Name))
                     { 
                         _LoadObject(ref xml, this);
@@ -130,6 +138,14 @@ namespace RX_Common
 						{
                             prop.SetValue(obj, _LoadPoint(attr));
 						}
+                        else if (prop.PropertyType.Name.Equals("Boolean[]"))
+                        {
+                            string[] list = attr.Split(';');
+                            bool[] values = new bool[list.Length-1];
+                            for (int i=0; i<list.Length-1; i++)
+                                values[i] = Convert.ToBoolean(list[i]);
+                            prop.SetValue(obj, values);
+                        }
                         else prop.SetValue(obj, TypeDescriptor.GetConverter(prop.PropertyType).ConvertFromString(attr));
                     }
                     catch(Exception e)
