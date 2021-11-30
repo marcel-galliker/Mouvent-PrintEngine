@@ -1438,7 +1438,7 @@ typedef struct ETestTableInfo
 	UINT32 z_in_jet			: 1;	//	0x00004000
     UINT32 vacuum_running	: 1;	//	0x00008000
 	UINT32 z_in_down		: 1;	//	0x00010000
-	UINT32 info_17			: 1;	//	0x00020000
+	UINT32 z_in_exchange	: 1;	//	0x00020000
 	UINT32 headUpInput_0	: 1;	//	0x00040000
 	UINT32 headUpInput_1	: 1;	//	0x00080000
 	UINT32 headUpInput_2	: 1;	//	0x00100000

@@ -224,6 +224,7 @@ int steplb_handle_status(int no, SStepperStat *pStatus)
             info.z_in_print &= _Status[i].info.z_in_print;
             info.z_in_cap &= _Status[i].info.z_in_cap;
             info.z_in_screw |= _Status[i].info.z_in_screw;
+            info.z_in_exchange |= _Status[i].info.z_in_exchange;
             info.x_in_cap &= _Status[i].info.x_in_cap || !_Status[i].cln_used;
             info.x_in_ref &= _Status[i].info.x_in_ref ;
             cln_used |= _Status[i].cln_used;

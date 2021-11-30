@@ -37,7 +37,7 @@
 #define STEPS_REV_LIFT		(200*STEPS)	// steps per motor revolution * 16 times oversampling
 #define DIST_REV_LIFT		1000		// moving distance per revolution [um]
 
-#define SCAN_SPEED			10000
+#define SCAN_SPEED			5000
 
 //Inputs
 #define SCAN_REF			0

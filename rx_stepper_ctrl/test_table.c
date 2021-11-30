@@ -636,9 +636,9 @@ static void _scan_start(void)
 	if (_ScanPar.scanMode==PQ_SCAN_RTL) slide_scan_right();
 	else							    slide_scan_left();
 	Fpga.par->output |= TT_VACUUM_OUT;	
-	motor_move_to_step	(MOTOR_Y_LEFT,  &_ParY_print, POSY_PRINT);
-	motor_move_to_step	(MOTOR_Y_RIGHT, &_ParY_print, POSY_PRINT+_ScanPar.offsetAngle);
-	motors_start(MOTOR_Y_BITS, TRUE);
+	if (motor_move_to_step	(MOTOR_Y_LEFT,  &_ParY_print, POSY_PRINT) &&
+		motor_move_to_step	(MOTOR_Y_RIGHT, &_ParY_print, POSY_PRINT+_ScanPar.offsetAngle))
+			motors_start(MOTOR_Y_BITS, TRUE);
 }
 
 //--- _scan_state_machine -------------------------
