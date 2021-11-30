@@ -22,6 +22,8 @@ namespace RX_DigiPrint.Models
 {
 	public class SA_Report
 	{
+		private readonly int _ColorPerPage =4;
+
 		public void SaveMeasurments(List<SA_Action> actions, DateTime timePrinted)
 		{
 			try
@@ -35,8 +37,14 @@ namespace RX_DigiPrint.Models
 					using (StreamWriter sw = new StreamWriter(filepath))
 					{
 						SA_Action.WriteCsvHeader(sw);
-						foreach (SA_Action a in actions) 
-							a.WriteCsv(sw);
+						foreach (SA_Action a in actions)
+						{
+							if (a.Function==ECamFunction.CamMeasureAngle 								
+							|| a.Function == ECamFunction.CamMeasureStitch)
+							{
+								a.WriteCsv(sw);
+							}
+						}
 					}
 				}
 			}
@@ -74,7 +82,12 @@ namespace RX_DigiPrint.Models
 				{
 					FixedDocument doc = new FixedDocument();
 					doc.DocumentPaginator.PageSize = new Size(pd.PrintableAreaHeight, pd.PrintableAreaWidth);
-					doc.Pages.Add(_composePage(doc.DocumentPaginator.PageSize, actions, timePrinted));
+					for (int from=0; from<RxGlobals.PrintSystem.ColorCnt; from+= _ColorPerPage)
+					{
+						int to = from+ _ColorPerPage;
+						if (to> RxGlobals.PrintSystem.ColorCnt) to= RxGlobals.PrintSystem.ColorCnt;
+						doc.Pages.Add(_composePage(doc.DocumentPaginator.PageSize, actions, timePrinted, from, to));
+					}
 					pd.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
 					pd.PrintDocument(doc.DocumentPaginator, "Adjustment");
 				}
@@ -250,7 +263,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- _composePage ---------------------------------------
-		private PageContent _composePage(Size pageSize, List<SA_Action>  actions, DateTime timePrinted)
+		private PageContent _composePage(Size pageSize, List<SA_Action>  actions, DateTime timePrinted, int from, int to)
 		{
 			FixedPage page = new FixedPage() { Margin=new Thickness()};
 			page.Width  = pageSize.Width;
@@ -270,7 +283,7 @@ namespace RX_DigiPrint.Models
 
 			//--- Machine ------------------------------------------------
 			TextBlock title =new TextBlock() { };
-			title.Text="Alignment Measurment of ";
+			title.Text="Alignment Measurment of  ";
 			titleGrid.Children.Add(title);
 
 			TextBlock machine=new TextBlock() { };
@@ -314,12 +327,11 @@ namespace RX_DigiPrint.Models
 			Grid.SetRow(resultsGrid, 1);
 			Grid.SetColumn(resultsGrid,0);
 			Grid.SetColumnSpan(resultsGrid,3);
-
-			for (int color=0; color<RxGlobals.PrintSystem.ColorCnt; color++)
+			for (int color=from; color<to; color++)
 			{
 				resultsGrid.ColumnDefinitions.Add(new ColumnDefinition(){ Width=new GridLength(250)});
 				Grid actionsGrid = _composeColor(actions, color);
-				Grid.SetColumn(actionsGrid, color);
+				Grid.SetColumn(actionsGrid, resultsGrid.ColumnDefinitions.Count-1);
 				resultsGrid.Children.Add(actionsGrid);
 			}
 			pageGrid.Children.Add(resultsGrid);

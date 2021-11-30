@@ -270,6 +270,7 @@ namespace RX_DigiPrint.Models
 					try 
 					{
 						var fileStream = openFileDialog.OpenFile();
+						InkType ink =  new InkType();
 						using (StreamReader csv = new StreamReader(fileStream))
 						{
 							while (true)
@@ -288,7 +289,9 @@ namespace RX_DigiPrint.Models
 									{ 
 										action=new SA_Action();
 										action.Function= function;
-										action.ColorBrush = Rx.BrushFromStr(field[0]);
+										ink.Color = Rx.ColorFromStr(field[0]);
+										action.ColorBrush  = ink.ColorBrush;
+										action.StrokeBrush = ink.StrokeBrush;
 										action.Name = field[1];
 										if (actions==null) actions=new List<SA_Action>();
 										actions.Add(action);
@@ -311,29 +314,25 @@ namespace RX_DigiPrint.Models
 		//--- Property MeasureCnt ---------------------------------------
 		public int MeasureCnt
 		{
-			get { 
-					if (_Values==null) return 0;
-					return _Values.Count(); 
-				}
+			get { return (_Values==null)? 0 : _Values.Count(); }
 		}
 
 		//--- Property PassStr ---------------------------------------
 		private string _PassStr;
 		public string PassStr
 		{
-			get { return _PassStr; }
+			get { return (RxGlobals.SA_AlignSettings.Passes>1) ? _PassStr : null; }
 			set { SetProperty(ref _PassStr, value); }
 		}
 
-
-		//--- Measured ---
+		//--- Measured ---------------------------------------------------------
 		public void Measured(int pass, double value)
 		{
 			while (_ValueList.Count <= pass)
 			{
 				_ValueList.Add(new List<SA_Value>());
 			}
-		
+
 			List<SA_Value> values = _ValueList[pass];
 
 			values.Add(new SA_Value(){Value=value });

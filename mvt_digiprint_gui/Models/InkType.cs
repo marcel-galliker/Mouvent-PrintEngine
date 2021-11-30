@@ -95,15 +95,9 @@ namespace RX_DigiPrint.Models
                 if (SetProperty(ref _Color, value))
                 {
                     if (_Color.B > 100 && _Color.G < 100 || _Color.R + _Color.G + _Color.B < 200) 
-                    {
                         ColorFG = Colors.White;
-                        StrokeBrush = Brushes.Transparent;
-                    }
                     else 
-                    { 
                         ColorFG = Colors.Black;
-                        StrokeBrush = Brushes.DarkGray;
-                    }
                 } 
             }
         }
@@ -123,11 +117,14 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property StrokeBrush ---------------------------------------
-        private Brush _StrokeBrush;
         public Brush StrokeBrush
         {
-            get { return _StrokeBrush; }
-            set { SetProperty(ref _StrokeBrush, value); }
+            get {
+                    if (_Color.B > 100 && _Color.G < 100 || _Color.R + _Color.G + _Color.B < 200)
+                        return Brushes.Transparent;
+                    else
+                        return Brushes.DarkGray;
+                }
         }
 
         //--- Property CanFlush ---------------------------------------

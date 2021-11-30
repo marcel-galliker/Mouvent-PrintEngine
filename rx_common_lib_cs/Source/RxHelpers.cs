@@ -180,19 +180,28 @@ namespace RX_Common
 
 
         /// <summary>
+        /// Returns a color defeined by string "#aarrggbb"
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static Color ColorFromStr(string str)
+        {
+            int argb = Int32.Parse(str.Replace("#", ""), System.Globalization.NumberStyles.HexNumber);
+            byte a = (byte)(argb >> 24);
+            byte r = (byte)(argb >> 16);
+            byte g = (byte)(argb >> 8);
+            byte b = (byte)(argb >> 0);
+            return Color.FromArgb(a, r, g, b);
+        }
+
+        /// <summary>
         /// Returns a solid color brush defeined by string "#aarrggbb
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
         public static Brush BrushFromStr(string str)
 		{
-            int argb = Int32.Parse(str.Replace("#", ""), System.Globalization.NumberStyles.HexNumber);
-            byte a= (byte)(argb >> 24);
-            byte r= (byte)(argb >> 16);
-            byte g= (byte)(argb >> 8);
-            byte b= (byte)(argb >> 0);
-            Color color = Color.FromArgb(a, r, g, b);
-            return new SolidColorBrush(color);
+            return new SolidColorBrush(ColorFromStr(str));
 		}
 
         [DllImport("user32.dll")]
