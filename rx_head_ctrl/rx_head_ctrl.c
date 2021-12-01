@@ -151,7 +151,7 @@ void handle_menu(char *str)
 		// Only for DEBUGGING purposes
 		// Parameters for tuning the Conditioner's PID controller
 
-		case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);	break;	
+		//case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);	break;	
 
 		/*
 		case 'z': if (no<=4) cond_ctrlMode2(no, ctrl_offset_cal);			break; // 4 for all connected heads
@@ -382,7 +382,7 @@ int main(int argc, char** argv)
 //--- do_jetting -------------------------------------
 void do_jetting(int freq, int greyLevel)
 {
-	if (freq && !_WaveFormLoaded)
+	if (freq)
 	{
 		_do_waveform("test.wfd");
 		Error(WARN, 0, "Cluster in Jetting Mode");
