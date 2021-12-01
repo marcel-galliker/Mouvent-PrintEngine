@@ -1023,7 +1023,8 @@ static void _do_get_printer_cfg(RX_SOCKET socket)
 	memcpy(msg.hostName, RX_Hostname, sizeof(msg.hostName));
 	msg.type		= RX_Config.printer.type;
 	msg.encoderType	= RX_Config.printer.encoderType;
-	msg.overlap		= RX_Config.printer.overlap;
+	msg.hybrid = RX_Config.printer.hybrid;
+	msg.overlap = RX_Config.printer.overlap;
 	msg.colorCnt	= RX_Config.colorCnt;
 	msg.headsPerColor = RX_Config.headsPerColor;
     msg.inkSupplyCnt  = RX_Config.inkSupplyCnt;

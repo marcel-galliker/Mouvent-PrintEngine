@@ -2721,4 +2721,7 @@ No Splices in the machine?</value>
   <data name="NoFlush" xml:space="preserve">
     <value>No Flush</value>
   </data>
+  <data name="Endless" xml:space="preserve">
+    <value>Endless</value>
+  </data>
 </root>

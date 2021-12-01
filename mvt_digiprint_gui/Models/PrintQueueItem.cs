@@ -587,6 +587,24 @@ namespace RX_DigiPrint.Models
             }
         }
 
+
+        public const int EndLessCopies = 999999999;
+
+        public bool Endless
+        {
+            get { return RxGlobals.PrintSystem.isHybrid &&  ScanLength == EndLessCopies; }
+            set
+            {
+                if (value)
+                {
+                    ScanLength = EndLessCopies;
+                    LengthUnit = EPQLengthUnit.copies;
+                }
+                else ScanLength = 1;
+            }
+
+        }
+
         //--- Property LengthUnit ---------------------------------------
         private EPQLengthUnit _LengthUnit=EPQLengthUnit.copies;
         public EPQLengthUnit LengthUnit
@@ -744,7 +762,7 @@ namespace RX_DigiPrint.Models
             get { return _RipState; }
             set { SetProperty(ref _RipState, value); }
         }
-        
+
         #endregion
 
         private Int32 _GetField(Tiff tif, TiffTag tag)

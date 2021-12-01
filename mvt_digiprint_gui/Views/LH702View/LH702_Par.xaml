@@ -46,7 +46,7 @@
                     <TextBox Grid.Column="1" x:Name="MaterialName" Text="{mvt:LocalizedBinding Name}" Visibility="Collapsed"/>
                 </Grid>
                 <rx_uc:PlcParCtrl ID="XML_MATERIAL"  Label="" x:Name="XML_MATERIAL" Visibility="Collapsed" Width="auto"/>
-
+                <rx_uc:PlcParCtrl ID="PAR_WEB_WIDTH" Label="{mvt:LocalizedBinding WebWidth}"    Unit="mm" UnitWidth="50" Format="n"/>
                 <rx_uc:PlcParCtrl ID="XML_HEAD_HEIGHT"        Label="{mvt:LocalizedBinding PrintHeight}" Unit="mm" UnitWidth="50" Format="1"/>
                 <rx_uc:PlcParCtrl ID="XML_MATERIAL_THICKNESS" Label="{mvt:LocalizedBinding Thickness}"    Unit="mm" UnitWidth="50" Format="f"/>
                 <rx_uc:PlcParCtrl ID="XML_ENC_OFFSET"         Label="{mvt:LocalizedBinding EncoderAdj}"  Unit="inc" UnitWidth="50" Format="n"/>

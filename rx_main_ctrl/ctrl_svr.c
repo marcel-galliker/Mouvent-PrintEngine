@@ -622,11 +622,11 @@ static void _send_ink_def(int headNo, char *dots, int screenOnPrinter)
 					msg.fpVoltage = RX_Config.voltage[headNo][n];
 				else if (RX_Config.headFpVoltage[no]) msg.fpVoltage = RX_Config.headFpVoltage[no];
 				else msg.fpVoltage = RX_HBStatus[headNo].head[n].eeprom.voltage;
-				
 
 				if(_HeadCtrl[headNo].cfg->reverseHeadOrder) no = RX_Config.colorCnt*RX_Config.headsPerColor-1-no;
 				memcpy(&msg.ink, &RX_Config.inkSupply[inksupply].ink, sizeof(msg.ink));
-				TrPrintfL(TRUE, "Board[%d].head[%d].ink = >>%s<<", headNo, n, RX_Config.inkSupply[inksupply].ink.description);
+
+				TrPrintfL(TRUE, "Board[%d].head[%d].ink = >>%s<< voltage=%d dots=%s", headNo, n, RX_Config.inkSupply[inksupply].ink.description, msg.fpVoltage, msg.dots);
 				sok_check_addr_32(&_HeadCtrl[headNo].socket, _HeadCtrl[headNo].cfg->ctrlAddr, __FILE__, __LINE__);
 				sok_send(&_HeadCtrl[headNo].socket, &msg);
 			}
@@ -752,8 +752,14 @@ int ctrl_send_purge_par(int fluidNo, int time)
 			par.no = head%HEAD_CNT;
 			sok_send_2(&_HeadCtrl[head/HEAD_CNT].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
 	//		Error(LOG, 0, "head[%d.%d]: purge_par(no=%d, delay=%d, time=%d)", head/HEAD_CNT, head%HEAD_CNT, par.no, par.delay, par.time);
-			if (par.time+par.delay>timeTotal) timeTotal = par.time+par.delay;
-			par.delay+=delay;
+			if (_SingleHead != ALL_HEADS)
+				timeTotal = par.time;
+			else
+			{
+				if (par.time + par.delay > timeTotal) timeTotal = par.time + par.delay;
+				par.delay += delay;
+			}
+			
 		}
 	}
 	return timeTotal;

@@ -1708,6 +1708,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Endless.
+        /// </summary>
+        public static string Endless {
+            get {
+                return ResourceManager.GetString("Endless", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to English.
         /// </summary>
         public static string English {

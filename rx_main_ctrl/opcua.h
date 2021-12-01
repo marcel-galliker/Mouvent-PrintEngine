@@ -1,52 +1,22 @@
 #pragma once
 
-/**
- * @brief Connect to a opcua server
- * @param address url of server
- * @param port port number of server
- * @param cert path to certificate file
- * @param key path to key file
- * @param user user name
- * @param password password of connection
- * @return 0 if success
- */
-int opcua_connect(char *address, int port, char *cert, char *key);
+#ifndef HANDLE
+#    define HANDLE void*
+#endif
 
-/**
- * @brief get a boolean value of a node
- * @param _node_name name of the node (path separated with ".")
- * @param value returned value of the node
- * @return 0 if success
- */
-int opcua_get_bool(char *_node_name, unsigned char *value);
-
-/**
- * @brief set a boolean value of a node
- * @param _node_name name of the node (path separated with ".")
- * @param value value for the node
- * @return 0 if success
- */
-int opcua_set_bool(char *_node_name, unsigned char value);
-
-/**
- * @brief get a int16 value of a node
- * @param _node_name name of the node (path separated with ".")
- * @param value returned value of the node
- * @return 0 if success
- */
-int opcua_set_int(char *_node_name, short value);
-
-int opcua_set_float(char *_node_name, float value);
-
-int opcua_get_int(char *_node_name, short *value);
-
-int opcua_get_float(char *_node_name, float *value);
-
-	/**
- * @brief get a int16 array of a node
- * @param _node_name name of the node (path separated with ".")
- * @param value array to set
- * @size size of the array
- * @return 0 if success
- */
-int opcua_set_int_array(char *_node_name, short *value, int size);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    int opcua_connect(HANDLE* client, const char* address, int port, short ns, const char* prefix, const char* cert, char* key);
+    void opcua_close(HANDLE *client);
+    int opcua_get_bool(HANDLE client, const char* _node_name, unsigned char* value);
+    int opcua_set_bool(HANDLE client, const char* _node_name, unsigned char value);
+    int opcua_get_float(HANDLE client, const char* _node_name, float* value);
+    int opcua_set_float(HANDLE client, const char* _node_name, float value);
+    int opcua_get_int(HANDLE client, char* _node_name, short* value);
+    int opcua_set_int(HANDLE client, const char* _node_name, short value);
+    int opcua_set_int_array(HANDLE client, char* _node_name, short* value, int size);
+#ifdef __cplusplus
+}
+#endif

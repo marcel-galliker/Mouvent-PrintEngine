@@ -23,6 +23,7 @@
       <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)</RemoteDirectory>
       <FileMasks>
         <string>*.cpp</string>
+        <string>*.hpp</string>
         <string>*.h</string>
         <string>*.c</string>
         <string>*.mak</string>

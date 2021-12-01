@@ -974,14 +974,12 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 						switch (errHandlingMode)
 						{
 							case err_handling_mode_pause: pc_pause_printing(FALSE); break;
-							case err_handling_mode_stop:
-								pc_stop_printing(FALSE);
-								lh702_stop_printing();
-								break;
+							case err_handling_mode_stop: pc_stop_printing(FALSE); break;
 							default: break;
 						}
 					}
 				}
+				if (errHandlingMode == err_handling_mode_stop) lh702_stop_printing();
 			}
 			else if (FluidStatus[i].canisterLevel <= canisterLow || FluidStatus[i].canisterLevel <= canisterLow + canisterHysteresis && _ScalesErr[i] == LOG_TYPE_WARN)
 			{

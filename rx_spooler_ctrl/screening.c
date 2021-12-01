@@ -205,15 +205,15 @@ void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUE
 	board	= headNo/RX_Spooler.headsPerBoard;
 	head	= headNo%RX_Spooler.headsPerBoard;
 
-//	if (TRUE || values[0]) 
-	if (FALSE)
+
+	char s[256];
+	int len = 0;
+	for (i = 0; i < MAX_DENSITY_VALUES; i++)
 	{
-		char str[128];
-		int len = sprintf(str, "scr_set_values[%d.%d]: ", board, head);
-		for (int i=0; i<MAX_DENSITY_VALUES; i++) len += sprintf(&str[len], "%d ", values[i]);
-		Error(LOG, 0, str);
-		TrPrintfL(TRUE, str);
+		len += sprintf(s+len, "%d ", values[i]);
 	}
+	TrPrintfL(TRUE, "Head[%d.%d] density: %s", board, head, s);
+
 
 	ok=TRUE;
 	for (i=0; i<MAX_DENSITY_VALUES; i++)

@@ -23,6 +23,7 @@
 #define MASTER_IP_PORT_SERVER 55105
 #define EM2_1_IP_ADDRESS "172.17.6.118"
 #define EM2_1_IP_SUBMASK "255.240.0.0"
+#define PREFIX_PLC "S71500ET200MP station_1.PLC_1"
 
 //--- prototypes --------------------------------------------------------------
 
@@ -150,13 +151,14 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
 
 	if (setup_chapter(file, "Configuration", -1, action)!=REPLY_OK) 
 	{
-		if (action == READ) // if could not read configuration, set default values in config to avoid setting null values ar first write
+		if (action == READ) // if could not read configuration, set default values in config to avoid setting null values at first write
 		{
 			strcpy(pcfg->master_ip_address, MASTER_IP_ADDR_SERVER);
 			pcfg->master_ip_port = MASTER_IP_PORT_SERVER;
 			strcpy(pcfg->em2_1_address, EM2_1_IP_ADDRESS);
 			strcpy(pcfg->em2_1_mask, EM2_1_IP_SUBMASK);
-			pcfg->lh702_protocol_version = 2;
+			strcpy(pcfg->opcua_prefix, PREFIX_PLC);
+			pcfg->lh702_protocol_version = 10; // OPCUA protocol version (TODO remove when only OPCUA)
 			pcfg->print_queue_buffer = 64;
 			pcfg->mark_reader_ignore_size = 80;
 			pcfg->mark_reader_window_size = 25;
@@ -171,7 +173,8 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
     setup_uint32(file, "master_port", action, &pcfg->master_ip_port, MASTER_IP_PORT_SERVER);
     setup_str   (file, "em2_1_ip", action, pcfg->em2_1_address, sizeof(pcfg->em2_1_address), EM2_1_IP_ADDRESS);
     setup_str   (file, "em2_1_mask", action, pcfg->em2_1_mask, sizeof(pcfg->em2_1_mask), EM2_1_IP_SUBMASK);
-	setup_uint32(file, "lh702_protocol_ver", action, &pcfg->lh702_protocol_version, 2);
+	setup_str   (file, "opcua_prefix", action, pcfg->opcua_prefix, sizeof(pcfg->em2_1_mask), PREFIX_PLC);
+	setup_uint32(file, "lh702_protocol_ver", action, &pcfg->lh702_protocol_version, 10);
 	setup_uint32(file, "print_queue_buffer", action, &pcfg->print_queue_buffer, 64);
 	setup_uint32(file, "mark_reader_ignore_size", action, &pcfg->mark_reader_ignore_size, 80);
 	setup_uint32(file, "mark_reader_window_size", action, &pcfg->mark_reader_window_size, 25);
@@ -181,6 +184,7 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
 	{
 		setup_int32(file, "type", action, (int*)&pcfg->printer.type, printer_undef);
 		setup_int32(file, "encoderType", action, (int*)&pcfg->printer.encoderType, enc_Balluff);
+		setup_int32(file, "hybrid", action, &pcfg->printer.hybrid, 0);
 
 		setup_uint32(file, "overlap", action, &pcfg->printer.overlap, TRUE);
         if (!rx_def_is_tx(pcfg->printer.type) && pcfg->printer.type!=printer_test_table)	pcfg->printer.overlap = TRUE;

@@ -30,8 +30,10 @@ namespace RX_DigiPrint.Models
                 {
                     case Services.EPrinterType.printer_LB701:
                     case Services.EPrinterType.printer_LB702_UV:
-                    case Services.EPrinterType.printer_LH702:
 					case Services.EPrinterType.printer_LB703_UV:   Visible = Visibility.Visible; break;
+                    case Services.EPrinterType.printer_LH702:
+                        if (!RxGlobals.PrintSystem.isHybrid) Visible = Visibility.Visible; else Visible = Visibility.Collapsed;
+                        break;
                     default: Visible = Visibility.Collapsed; break;
                 }
             }

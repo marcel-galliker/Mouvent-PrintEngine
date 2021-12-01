@@ -196,6 +196,8 @@ namespace RX_DigiPrint.Models
             }
         }
 
+        public bool isHybrid { set; get; }
+
         //--- Property ExternalData ---------------------------------------
         private bool _ExternalData;
         public bool ExternalData
@@ -522,7 +524,8 @@ namespace RX_DigiPrint.Models
 
             HostName = msg.hostName;
 
-            PrinterType             = msg.type;
+            isHybrid = msg.hybrid != 0; // important to set it BEFORE the Printer Type (as the event that changes tab is _PrinterTypeChanged)
+            PrinterType = msg.type;
             EncoderType             = msg.encoderType;
             Overlap                 = msg.overlap>0;
             OffsetVerso             = msg.offset.versoDist;

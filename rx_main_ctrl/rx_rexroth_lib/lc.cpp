@@ -171,7 +171,7 @@ int lc_get_value_by_name (char *name, char *value)
 	{
 		if (!strcmp(name, _Symbols[i].name))
 		{
-			if (strstr(name, "XML_")) 
+			if (strstr(name, "XML_") || RX_Config.printer.type == printer_LH702) 
 			{
 				strcpy(value, _Symbols[i].value);
 				return REPLY_OK;				
@@ -265,13 +265,13 @@ int lc_set_value_by_name (const char *name, char *value)
 			if (!strcmp(_Symbols[i].name, name))
 			{
 				strcpy(_Symbols[i].value, value);
-				if (strstr(name, "XML_")) 
+				if (strstr(name, "XML_") || RX_Config.printer.type == printer_LH702) 
 					return REPLY_OK;
 				break;
 			}				
 		}	
 	}
-	if (strstr(name, "XML_"))
+	if (strstr(name, "XML_") || RX_Config.printer.type == printer_LH702)
 	{
 		if (_SymbolCnt<SIZEOF(_Symbols))
 		{			

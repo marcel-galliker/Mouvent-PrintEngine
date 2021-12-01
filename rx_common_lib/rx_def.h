@@ -139,6 +139,10 @@ void rx_def_init();
 
 #define WAKEUP_BAR_LEN		128	// dots to wakeup lazy jets
 
+#define ALL_FLUIDS			-1
+#define ALL_HEADS			-1
+#define ALL_STEPPERS		-1
+
 //--- simple value ----------------------------------------------	
 typedef struct SValue
 {
@@ -499,6 +503,7 @@ typedef struct SPrinterCfg
 {
 	EPrinterType	type;
 	EEncoderType	encoderType;
+	BOOL 			hybrid;
 
 	UINT16	inkSupplyCnt;
 
@@ -1645,6 +1650,7 @@ typedef struct SRxConfig
 	} scales;
     char			master_ip_address[64];
     UINT32			master_ip_port;
+	char			opcua_prefix[64];
 	char			em2_1_address[64];
     char			em2_1_mask[64];
 	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];

@@ -15,6 +15,7 @@
 #include "tcp_ip.h"
 #include "enc_ctrl.h"
 #include "plc_ctrl.h"
+#include "siemens_ctrl.h"
 #include "lh702_ctrl.h"
 #include "chiller.h"
 #include "step_ctrl.h"
@@ -53,7 +54,12 @@ static void set_interface(void)
 	case printer_LB702_UV:			_MInterface=mi_plc;		break;
 	case printer_LB703_UV:			_MInterface=mi_plc;		break;
 	case printer_LB702_WB:			_MInterface=mi_plc;		break;
-	case printer_LH702:				_MInterface=mi_siemens;		break;
+	case printer_LH702:
+		if (RX_Config.lh702_protocol_version >= 10) // OPCUA TODO remove this test when full OPCUA
+			_MInterface = mi_siemens;
+		else
+			_MInterface = mi_plc; // old PLC in SIMU for DM5
+    break;
 	case printer_DP803:				_MInterface=mi_plc;		break;
 	default:						_MInterface=mi_none;
 	}
@@ -106,7 +112,7 @@ void	machine_error_reset(void)
 {
 	chiller_error_reset();
 	plc_error_reset();
-	lh702_error_reset();
+	siemens_error_reset();
 	fluid_error_reset();
 	ctrl_head_error_reset();
 	step_error_reset();
@@ -125,7 +131,8 @@ int		machine_set_printpar(SPrintQueueItem *pItem)
 	{
 	case mi_tt:		return tt_set_printpar(pItem);
 	case mi_plc:	return plc_set_printpar(pItem);
-	case mi_siemens:return lh702_set_printpar(pItem);
+	case mi_siemens:
+		return siemens_set_printpar(pItem);
 	default:		return enc_start_printing(pItem, FALSE);
 	}
 	return REPLY_OK;
@@ -180,7 +187,7 @@ int		machine_pause_printing(int fromGui)
 	case mi_tt:		return tt_pause_printing();
 	case mi_plc:	return plc_pause_printing(fromGui);
 	case mi_siemens:
-		return lh702_pause_printing();
+		return siemens_pause_printing();
 	}
 	return REPLY_OK;
 }
@@ -195,7 +202,7 @@ int		machine_stop_printing(void)
 	case mi_tt:		return tt_stop_printing();
 	case mi_plc:	return plc_stop_printing();
 	case mi_siemens:
-		return lh702_stop_printing();
+		return siemens_stop_printing();
 	}
 	return REPLY_OK;
 }
@@ -213,7 +220,7 @@ int		machine_abort_printing(void)
 					return plc_abort_printing();
 	case mi_siemens:
 		step_abort_printing();
-		return lh702_stop_printing();
+		return siemens_stop_printing();
 	}
 	return REPLY_OK;
 }
