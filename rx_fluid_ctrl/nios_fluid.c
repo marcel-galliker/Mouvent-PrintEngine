@@ -183,7 +183,7 @@ static void _nios_check_errors(void)
 	int isNo;
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
 	{
-		if (_Stat->ink_supply[isNo].ctrl_state == ctrl_print && _Stat->ink_supply[isNo].IS_Pressure_Actual == INVALID_VALUE && _Stat->ink_supply[isNo].error & err_ink_tank_pressure)			 
+		if (_Stat->ink_supply[isNo].ctrl_state == ctrl_print && _Stat->ink_supply[isNo].IS_Pressure_Actual == INVALID_VALUE)			 
 			ErrorFlag(ERR_ABORT, (UINT32*)&_Error[isNo], err_ink_tank_pressure, 0, "InkSupply[%d-%s] Ink Tank pressure sensor not working", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
 			ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_overpressure, 0, "InkSupply[%d-%s] Ink Tank overpressure", isNo+1, RX_ColorNameShort(isNo));
