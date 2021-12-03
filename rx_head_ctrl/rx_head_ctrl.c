@@ -243,9 +243,13 @@ static void _tickle_puls(void)
 {
 #define TIME_MIN_IN_MS 60000
 	static int time_ms = 0;
+	int no[MAX_HEADS_BOARD];
+
+	for (int i = 0; i < MAX_HEADS_BOARD; i++) no[i] = RX_HBConfig.reverseHeadOrder ? MAX_HEADS_BOARD - 1 - i : i;
+	
 	for (int i = 0; i < SIZEOF(RX_FpgaStat.enc_speed); i++)
 	{
-		if (RX_FpgaStat.enc_speed[i].current >= 400 || RX_HBStatus[0].head[i].ctrlMode != ctrl_print)
+		if (RX_FpgaStat.enc_speed[i].current >= 400 || RX_HBStatus[0].head[i].ctrlMode != ctrl_print || (RX_HBStatus[0].head[no[i]].imgInCnt - RX_HBStatus[0].head[no[i]].printDoneCnt != 0))
 		{
 			time_ms = 0;
 			return;
