@@ -306,7 +306,7 @@ void ink_tick_10ms(void)
 				// if CALIBRATION or PURGE mode, don't need to recalculate
 				if(_ShutdownPrint[isNo] == 1)
 				{
-					_InkSupply[isNo].pid_Setpoint.diff_I *= PID_SETPOINT_P_CHECK_REDUCED;
+					//_InkSupply[isNo].pid_Setpoint.diff_I *= PID_SETPOINT_P_CHECK_REDUCED;
 					_ShutdownPrint[isNo] = 3;
 				}
 
@@ -406,7 +406,8 @@ void ink_tick_10ms(void)
 				else _FilterCloggedTime[isNo] = 0;
 				// ----- END NEW  -------
 
-				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
+				//_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
+				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_INK_RECIRCULATION);
 
 				break;
 
