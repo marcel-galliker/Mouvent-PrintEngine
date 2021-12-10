@@ -109,6 +109,12 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- PrintSystem_PropertyChanged ----------------------------------
         void PrintSystem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (_InkSupply == null)
+            {
+                _InkSupply = DataContext as InkSupply;
+                CmdButton.IsEnabled = RxGlobals.Chiller.Running && _InkSupply != null && _InkSupply.InkType != null;
+            }
+
             if  (e.PropertyName.Equals("ColorCnt") || e.PropertyName.Equals("HeadsPerColor") 
                 || e.PropertyName.Equals("InkCylindersPerColor"))
             {
