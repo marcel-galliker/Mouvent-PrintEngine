@@ -206,7 +206,7 @@ void ink_init(void)
 		_InkSupply[isNo].pid_Setpoint.P 				= 200;
 		_InkSupply[isNo].pid_Setpoint.I 				= 1500;
 		_InkSupply[isNo].pid_Setpoint.Start_Integrator	= 1;
-		_InkSupply[isNo].pid_Setpoint.val_max   		= 1000;	// Max IS pressure 1200 mbar
+		_InkSupply[isNo].pid_Setpoint.val_max   		= 2000;	// Max IS pressure 2000 mbar
 		_InkSupply[isNo].pid_Setpoint.val_min			= 0;	// Min not 0, just a little more
 		
 		_InkSupply[isNo].pid_Calibration.val_max    	= 400;	// Max cond inlet pressure 30 mbars
