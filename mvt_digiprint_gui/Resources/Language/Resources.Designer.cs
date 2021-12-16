@@ -5139,6 +5139,96 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recovery /1.
+        /// </summary>
+        public static string Recovery1 {
+            get {
+                return ResourceManager.GetString("Recovery1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /2.
+        /// </summary>
+        public static string Recovery2 {
+            get {
+                return ResourceManager.GetString("Recovery2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /3.
+        /// </summary>
+        public static string Recovery3 {
+            get {
+                return ResourceManager.GetString("Recovery3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /4.
+        /// </summary>
+        public static string Recovery4 {
+            get {
+                return ResourceManager.GetString("Recovery4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /5.
+        /// </summary>
+        public static string Recovery5 {
+            get {
+                return ResourceManager.GetString("Recovery5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /6.
+        /// </summary>
+        public static string Recovery6 {
+            get {
+                return ResourceManager.GetString("Recovery6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /7.
+        /// </summary>
+        public static string Recovery7 {
+            get {
+                return ResourceManager.GetString("Recovery7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /8.
+        /// </summary>
+        public static string Recovery8 {
+            get {
+                return ResourceManager.GetString("Recovery8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery /9.
+        /// </summary>
+        public static string Recovery9 {
+            get {
+                return ResourceManager.GetString("Recovery9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery.
+        /// </summary>
+        public static string RecoveryStart {
+            get {
+                return ResourceManager.GetString("RecoveryStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Recto.
         /// </summary>
         public static string Recto {

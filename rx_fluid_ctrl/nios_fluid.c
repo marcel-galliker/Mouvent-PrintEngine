@@ -183,7 +183,7 @@ static void _nios_check_errors(void)
 	int isNo;
 	for (isNo=0; isNo<SIZEOF(_Stat->ink_supply); isNo++)
 	{
-		if (_Stat->ink_supply[isNo].ctrl_state == ctrl_print && _Stat->ink_supply[isNo].IS_Pressure_Actual == INVALID_VALUE)			 
+		if ((_Stat->ink_supply[isNo].ctrl_state == ctrl_print || (_Stat->ink_supply[isNo].ctrl_state >= ctrl_recovery_start && _Stat->ink_supply[isNo].ctrl_state <= ctrl_recovery_step4)) && _Stat->ink_supply[isNo].IS_Pressure_Actual == INVALID_VALUE)			 
 			ErrorFlag(ERR_ABORT, (UINT32*)&_Error[isNo], err_ink_tank_pressure, 0, "InkSupply[%d-%s] Ink Tank pressure sensor not working", isNo+1, RX_ColorNameShort(isNo));
 		if (_Stat->ink_supply[isNo].error&err_overpressure)		 
 			ErrorFlag(ERR_CONT, (UINT32*)&_Error[isNo], err_overpressure, 0, "InkSupply[%d-%s] Ink Tank overpressure", isNo+1, RX_ColorNameShort(isNo));
@@ -343,9 +343,12 @@ void nios_load(const char *exepath)
 #endif
 }
 
-//--- nois_set_is_cfg --------------------------
-void nois_set_is_cfg(SInkSupplyCfg *pcfg)
+//--- nios_set_is_cfg --------------------------
+void nios_set_is_cfg(SInkSupplyCfg *pcfg)
 {
+#define RECOVERY_TEMP 40
+#define RECOVERY_MENISCUS 10
+	
     int no=pcfg->no;
 	if (no==0) _MaxTemp=0;
     if (no>=0 && no<SIZEOF(_Cfg->ink_supply))
@@ -354,8 +357,18 @@ void nois_set_is_cfg(SInkSupplyCfg *pcfg)
 		RX_ColorNameInit(no, FALSE, RX_InkSupplyCfg[no].ink.fileName, RX_InkSupplyCfg[no].ink.colorCode);
 		_Cfg->ink_supply[no].present         = (pcfg->ink.fileName[0]!=0);
 		if (pcfg->cylinderPresSet<=INK_PRESSURE_MAX) _Cfg->ink_supply[no].cylinderPresSet = pcfg->cylinderPresSet;
-		_Cfg->ink_supply[no].meniscusSet	= pcfg->meniscusSet;
-		_Cfg->ink_supply[no].heaterTemp	    = pcfg->ink.temp*1000;
+		
+		if (_Cfg->ink_supply[no].ctrl_mode >= ctrl_recovery_start && _Cfg->ink_supply[no].ctrl_mode <= ctrl_recovery_step7)
+		{
+			_Cfg->ink_supply[no].meniscusSet = RECOVERY_MENISCUS;
+			_Cfg->ink_supply[no].heaterTemp = RECOVERY_TEMP * 1000;
+		}
+		else
+		{
+			_Cfg->ink_supply[no].meniscusSet = pcfg->meniscusSet;
+			_Cfg->ink_supply[no].heaterTemp = pcfg->ink.temp * 1000;
+		}
+		
 		_Cfg->ink_supply[no].heaterTempMax	= pcfg->ink.tempMax*1000;
         memcpy(_Cfg->ink_supply[no].flushTime, pcfg->ink.flushTime, sizeof(_Cfg->ink_supply[no].flushTime));
 		if (pcfg->ink.tempMax>_MaxTemp) _MaxTemp=pcfg->ink.tempMax;

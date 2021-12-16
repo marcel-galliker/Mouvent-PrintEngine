@@ -65,6 +65,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
             // Button_Calibrate.Visibility = visibility;
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
             CB_RectoVerso.IsEnabled =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);
+
+            _set_recovery_visible();
         }
 
         //--- InkSupply_PropertyChanged ----------------------------------
@@ -104,6 +106,15 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 RxGlobals.InkSupply.List[_ActiveItem].IsChecked = !RxGlobals.PrintSystem.AllInkSupplies;
                 if (RxGlobals.PrintSystem.AllInkSupplies) _ActiveItem=0;
             }
+        }
+
+        //--- _set_recovery_visible ---------------
+        private void _set_recovery_visible()
+        {
+            bool visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide);
+
+            visible &= (RxGlobals.User.UserType >= EUserType.usr_service);
+            Button_Recovery.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         }
 
         //--- PrintSystem_PropertyChanged ----------------------------------
@@ -152,6 +163,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeVacc.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
             Button_PurgeWipe.Visibility = (RxGlobals.PrintSystem.IsTx) ? Visibility.Visible : Visibility.Collapsed;
 
+            _set_recovery_visible();
         }
 
         //--- OnInkSupplyPropertyChanged -------------------------
@@ -290,6 +302,15 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.ShortPurgeAndWipe, RX_DigiPrint.Resources.Language.Resources.PurgeAndWipeAllPrintheads,  MessageBoxImage.Question, true))
             {
                 _command("Purge+Wipe",   EFluidCtrlMode.ctrl_purge_hard_wipe, true);
+            }
+        }
+
+        private void Recovery_Clicked(object sender, RoutedEventArgs e)
+        {
+            RX_Common.MvtMessageBox.EPurgeResult result = MvtMessageBox.Purge(RX_DigiPrint.Resources.Language.Resources.RecoveryStart, true, RX_DigiPrint.Resources.Language.Resources.RecoveryStart + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes || result == MvtMessageBox.EPurgeResult.PurgeResultAll)
+            {
+                _command("Recovery", EFluidCtrlMode.ctrl_recovery_start, (result == MvtMessageBox.EPurgeResult.PurgeResultAll));
             }
         }
 

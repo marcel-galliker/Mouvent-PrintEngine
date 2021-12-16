@@ -53,6 +53,17 @@ namespace RX_DigiPrint.Models.Enums
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_purge_step5, RX_DigiPrint.Resources.Language.Resources.Purge5));
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_purge_step6, RX_DigiPrint.Resources.Language.Resources.Purge6));
 
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_start, RX_DigiPrint.Resources.Language.Resources.RecoveryStart));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step1, RX_DigiPrint.Resources.Language.Resources.Recovery1));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step2, RX_DigiPrint.Resources.Language.Resources.Recovery2));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step3, RX_DigiPrint.Resources.Language.Resources.Recovery3));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step4, RX_DigiPrint.Resources.Language.Resources.Recovery4));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step5, RX_DigiPrint.Resources.Language.Resources.Recovery5));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step6, RX_DigiPrint.Resources.Language.Resources.Recovery6));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step7, RX_DigiPrint.Resources.Language.Resources.Recovery7));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step8, RX_DigiPrint.Resources.Language.Resources.Recovery8));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step9, RX_DigiPrint.Resources.Language.Resources.Recovery9));
+
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wipe, RX_DigiPrint.Resources.Language.Resources.Wipe));
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wipe_step1, RX_DigiPrint.Resources.Language.Resources.Wipe1));
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_wipe_step2, RX_DigiPrint.Resources.Language.Resources.Wipe2));
@@ -116,6 +127,17 @@ namespace RX_DigiPrint.Models.Enums
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cal_step3, RX_DigiPrint.Resources.Language.Resources.Calib3));
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cal_step4, RX_DigiPrint.Resources.Language.Resources.Calib4));
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_cal_done, RX_DigiPrint.Resources.Language.Resources.CalibDone));
+
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_start, RX_DigiPrint.Resources.Language.Resources.RecoveryStart));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step1, RX_DigiPrint.Resources.Language.Resources.Recovery1));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step2, RX_DigiPrint.Resources.Language.Resources.Recovery2));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step3, RX_DigiPrint.Resources.Language.Resources.Recovery3));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step4, RX_DigiPrint.Resources.Language.Resources.Recovery4));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step5, RX_DigiPrint.Resources.Language.Resources.Recovery5));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step6, RX_DigiPrint.Resources.Language.Resources.Recovery6));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step7, RX_DigiPrint.Resources.Language.Resources.Recovery7));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step8, RX_DigiPrint.Resources.Language.Resources.Recovery8));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step9, RX_DigiPrint.Resources.Language.Resources.Recovery9));
 
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test_watchdog, RX_DigiPrint.Resources.Language.Resources.TestWDG));
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test, RX_DigiPrint.Resources.Language.Resources.Test));

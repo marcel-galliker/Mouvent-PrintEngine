@@ -140,8 +140,10 @@ int	ctrl_printing(void)
 static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
 {
 	SMsgHdr *phdr = (SMsgHdr*)pmsg;
-	static int time[MSG_BUF_SIZE];	
-	
+	static int time[MSG_BUF_SIZE];
+	void *pdata = &phdr[1];
+	int *freq;
+
 	// these functions mustn't use any FPGA Register !!!!
 	switch (phdr->msgId)
 	{
@@ -150,6 +152,12 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 						_SpoolerSocket = socket;
 																			break;
 	case CMD_HEAD_STAT: _do_head_stat (socket, (SFluidStateLight*) &phdr[1]); break;
+
+	case CMD_SET_RECOVERY_FREQ:
+		freq = (int *)pdata;
+		set_recovery_freq(*freq);
+		break;
+		
 	default:		{
 						// ALL messages that use FPGA Registers
 						int idx = (_MsgBufIn + 1) % MSG_BUF_SIZE;
@@ -393,6 +401,11 @@ static int _rep_head_stat(RX_SOCKET socket)
 //--- _do_print_abort ---------------------------------------------------
 static int _do_print_abort(RX_SOCKET socket)
 {
+	for (int headNo = 0; headNo < SIZEOF(RX_HBStatus[0].head); headNo++)
+	{
+		if (RX_HBStatus[0].head[headNo].ctrlMode >= ctrl_recovery_start && RX_HBStatus[0].head[headNo].ctrlMode <= ctrl_recovery_step9) return REPLY_OK;
+	}
+	
 	_Printing=FALSE;
 	fpga_abort();
 	return REPLY_OK;	

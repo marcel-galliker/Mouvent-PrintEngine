@@ -186,7 +186,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	{
 	case CMD_ERROR_RESET:		nios_error_reset();											break;
 
-    case CMD_FLUID_IS_CFG:		nois_set_is_cfg		((SInkSupplyCfg*)pdata);				break;
+    case CMD_FLUID_IS_CFG:		nios_set_is_cfg		((SInkSupplyCfg*)pdata);				break;
 
 	case CMD_FLUID_CFG:			nios_set_cfg		((SFluidBoardCfg*)pdata);									
 								fpga_cfg			();

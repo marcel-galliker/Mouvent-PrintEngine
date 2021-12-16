@@ -372,8 +372,8 @@ static void _sample_wf(int head, SInkDefinition *pink, char *dots, int fpVoltage
 		valueRef   = FP_VALUE_36;			
 	}
 	*/
-	
-	if (_NiosMem->cfg.cond[head].mode==ctrl_print) 
+
+	if (_NiosMem->cfg.cond[head].mode == ctrl_print || (_NiosMem->cfg.cond[head].mode >= ctrl_recovery_start && _NiosMem->cfg.cond[head].mode <= ctrl_recovery_step4)) 
 	{
 		if (fpVoltage) 	valueRef = (valueRef*fpVoltage)/100;
 		else			valueRef = valueRef;

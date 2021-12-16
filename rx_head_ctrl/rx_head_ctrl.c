@@ -252,6 +252,12 @@ static void _tickle_puls(void)
 		if (RX_FpgaStat.enc_speed[i].current >= 400 || RX_HBStatus[0].head[i].ctrlMode != ctrl_print || (RX_HBStatus[0].head[no[i]].imgInCnt - RX_HBStatus[0].head[no[i]].printDoneCnt != 0))
 		{
 			time_ms = 0;
+			// If all Heads off set fpga enc config to 0
+			for (int j = 0; j < MAX_HEADS_BOARD; j++)
+			{
+				if (RX_HBStatus[0].head[j].ctrlMode > ctrl_off) return;
+			}
+			fpga_enc_config(0);
 			return;
 		}
 	}
