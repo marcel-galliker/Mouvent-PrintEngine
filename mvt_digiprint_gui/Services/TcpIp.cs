@@ -256,6 +256,7 @@ namespace RX_DigiPrint.Services
         ctrl_recovery_step7,            // 0x507:
         ctrl_recovery_step8,            // 0x508:
         ctrl_recovery_step9,            // 0x509:
+        ctrl_recovery_step10,           // 0x50a:
 
         ctrl_test_watchdog = 0x10000,
 	    ctrl_test,				// 0x10001

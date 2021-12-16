@@ -633,6 +633,7 @@ void pump_tick_10ms(void)
 		case ctrl_recovery_step2:
 		case ctrl_recovery_step3:
 		case ctrl_recovery_step4:
+		case ctrl_recovery_step5:
 						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(TRUE);
 						_set_valve(VALVE_INK);
@@ -644,7 +645,7 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode; 		
             break;
 				
-		case ctrl_recovery_step5:
+		case ctrl_recovery_step6:
 						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
@@ -654,8 +655,8 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode;
 						break;
 		
-		case ctrl_recovery_step6:
 		case ctrl_recovery_step7:
+		case ctrl_recovery_step8:
 						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(FALSE);
 						turn_off_pump();
@@ -666,7 +667,7 @@ void pump_tick_10ms(void)
             RX_Status.mode = RX_Config.mode;
 						break;
 		
-		case ctrl_recovery_step8:
+		case ctrl_recovery_step9:
 						RX_Config.cmd.disable_meniscus_check = TRUE;
 						_presure_in_max();
 						if (_PurgeTime>RX_Config.purgeTime || _PurgeDelay < RX_Config.purgeDelay)
@@ -686,9 +687,9 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode;
 						break;
 						
-		case ctrl_recovery_step9:
+		case ctrl_recovery_step10:
 						RX_Config.cmd.disable_meniscus_check = FALSE;
-        		RX_Status.mode = RX_Config.mode;
+        				RX_Status.mode = RX_Config.mode;
 						break;
         				
        	default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)

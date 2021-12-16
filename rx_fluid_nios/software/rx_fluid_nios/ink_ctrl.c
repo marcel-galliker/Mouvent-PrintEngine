@@ -1331,6 +1331,7 @@ void ink_tick_10ms(void)
 			case ctrl_recovery_step2:
 			case ctrl_recovery_step3:
 			case ctrl_recovery_step4:
+			case ctrl_recovery_step5:
 
 				// ----- NEW : Ramp start-up pressure  -------
 				if(pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode)
@@ -1361,7 +1362,7 @@ void ink_tick_10ms(void)
 				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
 				break;
 
-			case ctrl_recovery_step5:
+			case ctrl_recovery_step6:
 				if (is_Sensor_25(isNo))
 					_Recovery_Pressure = RECOVERY_PRESSURE;
 				else
@@ -1370,19 +1371,19 @@ void ink_tick_10ms(void)
 				_Recovery_Pressure = 0;
 				break;
 
-			case ctrl_recovery_step6:
+			case ctrl_recovery_step7:
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
-			case ctrl_recovery_step7:
+			case ctrl_recovery_step8:
 				_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 				_InkSupply[isNo].purgeTime = 0;
 				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual >= (60 * _InkSupply[isNo].purgePressure / 100))
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
-			case ctrl_recovery_step8:
+			case ctrl_recovery_step9:
 				if (_InkSupply[isNo].purgeTime < pRX_Config->ink_supply[isNo].purgeTime) {
 					_pump_ctrl(isNo, _InkSupply[isNo].purgePressure, PUMP_CTRL_MODE_DEFAULT);
 					_set_bleed_valve(isNo, PV_CLOSED);
@@ -1397,7 +1398,7 @@ void ink_tick_10ms(void)
 				}
 				break;
 
-			case ctrl_recovery_step9:
+			case ctrl_recovery_step10:
 				_set_air_valve(isNo, PV_OPEN);
 				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= RECOVERY_PRESSURE_END)
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;

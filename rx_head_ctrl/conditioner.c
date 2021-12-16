@@ -409,7 +409,7 @@ static void _update_counters(void)
 				
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
-		if (_NiosStat->cond[condNo].mode == ctrl_print || (_NiosStat->cond[condNo].mode >= ctrl_recovery_start && _NiosStat->cond[condNo].mode <= ctrl_recovery_step4)) printing = TRUE;
+		if (_NiosStat->cond[condNo].mode == ctrl_print || (_NiosStat->cond[condNo].mode >= ctrl_recovery_start && _NiosStat->cond[condNo].mode <= ctrl_recovery_step5)) printing = TRUE;
 		if (_NiosStat->cond[condNo].clusterTime   > RX_HBStatus->clusterTime)   RX_HBStatus->clusterTime   = _NiosStat->cond[condNo].clusterTime;
 	}
 	if (printing) RX_HBStatus->clusterTime++;
@@ -636,7 +636,7 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 
 	_CtrlMode[headNo] = ctrlMode;
 	
-	if (_CtrlMode[headNo] == ctrl_recovery_step3 || _CtrlMode[headNo] == ctrl_recovery_step4)		do_jetting(_Recovery_Freq, 2);
+	if (_CtrlMode[headNo] >= ctrl_recovery_step3 && _CtrlMode[headNo] <= ctrl_recovery_step5)		do_jetting(_Recovery_Freq, 2);
     else if (_CtrlMode[headNo] == ctrl_recovery_step5 || _CtrlMode[headNo] == ctrl_off)				fpga_enc_config(0);
 }
 

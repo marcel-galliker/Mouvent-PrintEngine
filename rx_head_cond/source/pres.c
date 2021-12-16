@@ -276,6 +276,6 @@ void pres_tick_10ms(void)
 		else if (RX_Status.pump_measured) RX_Status.flowFactor = 100*diff/(RX_Status.pump_measured*60/100);
 		else RX_Status.flowFactor = 1000;
     }
-	if (RX_Status.mode == ctrl_print || (RX_Status.mode >= ctrl_recovery_start && RX_Status.mode <= ctrl_recovery_step4)) RX_Status.info.flowFactor_ok = (RX_Status.flowFactor < 200);
+	if (RX_Status.mode == ctrl_print || (RX_Status.mode >= ctrl_recovery_start && RX_Status.mode <= ctrl_recovery_step5)) RX_Status.info.flowFactor_ok = (RX_Status.flowFactor < 200);
 	else RX_Status.info.flowFactor_ok = TRUE;
 }

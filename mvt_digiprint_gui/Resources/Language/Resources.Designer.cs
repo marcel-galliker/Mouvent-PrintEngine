@@ -5148,6 +5148,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recovery /10.
+        /// </summary>
+        public static string Recovery10 {
+            get {
+                return ResourceManager.GetString("Recovery10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Recovery /2.
         /// </summary>
         public static string Recovery2 {

@@ -403,7 +403,7 @@ static int _do_print_abort(RX_SOCKET socket)
 {
 	for (int headNo = 0; headNo < SIZEOF(RX_HBStatus[0].head); headNo++)
 	{
-		if (RX_HBStatus[0].head[headNo].ctrlMode >= ctrl_recovery_start && RX_HBStatus[0].head[headNo].ctrlMode <= ctrl_recovery_step9) return REPLY_OK;
+		if (RX_HBStatus[0].head[headNo].ctrlMode >= ctrl_recovery_start && RX_HBStatus[0].head[headNo].ctrlMode <= ctrl_recovery_step10) return REPLY_OK;
 	}
 	
 	_Printing=FALSE;

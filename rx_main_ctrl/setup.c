@@ -395,6 +395,12 @@ int setup_recovery(const char* filepath, SRecoveryFct* data, EN_setup_Action  ac
 			setup_int32(file, "Sec", action, &data->purge_time_s, 0);
 			setup_chapter(file, "..", -1, action);
 		}
+
+		if (setup_chapter(file, "Repetion", -1, action) == REPLY_OK)
+		{
+			setup_int32(file, "Rep", action, &data->repetion, 0);
+			setup_chapter(file, "..", -1, action);
+		}
 	}
 
 	if (action == WRITE) setup_save(file, filepath);

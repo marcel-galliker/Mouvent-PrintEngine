@@ -2010,6 +2010,9 @@ No Splices in the machine?</value>
   <data name="Recovery9" xml:space="preserve">
     <value>Recovery /9</value>
   </data>
+  <data name="Recovery10" xml:space="preserve">
+    <value>Recovery /10</value>
+  </data>
   <data name="RedOrangeR" xml:space="preserve">
     <value>Red/Orange (R)</value>
   </data>

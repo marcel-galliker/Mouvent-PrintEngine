@@ -1125,9 +1125,10 @@ typedef struct SHeadStateLight
 
 typedef struct SRecoveryFct
 {
-	INT32 freq_hz[2];
-	INT32 printing_time_min[2];
+	INT32 freq_hz[3];
+	INT32 printing_time_min[3];
 	INT32 purge_time_s;
+	INT32 repetion;
 } SRecoveryFct;
 			
 typedef struct SFluidStateLight

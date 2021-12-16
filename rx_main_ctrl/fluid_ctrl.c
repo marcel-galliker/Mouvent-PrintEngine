@@ -643,6 +643,7 @@ static void _control(int fluidNo)
 	static int	_txrob;
     static UINT32 _flushedNeeded = 0x00;
 	static int _RecoveryTime[INK_SUPPLY_CNT] = { 0 };
+	static int _RecoveryNumber[INK_SUPPLY_CNT] = { 0 };
 
     int i;
     for (i = 0; i < RX_Config.inkSupplyCnt; i++)
@@ -827,6 +828,7 @@ static void _control(int fluidNo)
                                             break;
 
 				case ctrl_recovery_start:	machine_set_capping_timer(FALSE);
+											_RecoveryNumber[no] = 0;
                                             _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
                 case ctrl_recovery_step1:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 
@@ -848,19 +850,33 @@ static void _control(int fluidNo)
 				case ctrl_recovery_step4:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[1] * 60 * 1000;
 											if (rx_get_ticks() >= _RecoveryTime[no])
 											{
+												ctrl_set_recovery_freq(_RecoveryData.freq_hz[2]);
+												_RecoveryTime[no] = 0;
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											}
+											break;
+											
+				case ctrl_recovery_step5:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[2] * 60 * 1000;
+											if (rx_get_ticks() >= _RecoveryTime[no])
+											{
 												_RecoveryTime[no] = 0;
 												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 											}
 											break;
 
-				case ctrl_recovery_step5:	_send_purge_par(no, _RecoveryData.purge_time_s*1000); 
+				case ctrl_recovery_step6:	_send_purge_par(no, _RecoveryData.purge_time_s*1000); 
 											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 											break;
 
-				case ctrl_recovery_step6:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 				case ctrl_recovery_step7:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 				case ctrl_recovery_step8:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
-				case ctrl_recovery_step9:	_send_ctrlMode(no, ctrl_off, TRUE); break;
+				case ctrl_recovery_step9:	_RecoveryNumber[no]++;
+											if (_RecoveryNumber[no] >= _RecoveryData.repetion)
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+											else
+												_send_ctrlMode(no, ctrl_recovery_step1, TRUE);
+											break;
+				case ctrl_recovery_step10:	_send_ctrlMode(no, ctrl_off, TRUE); break;
 				
 				//--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
