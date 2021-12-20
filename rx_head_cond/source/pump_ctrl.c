@@ -271,6 +271,7 @@ void pump_tick_10ms(void)
 					else _TimeMeniscusStability = 0;
 					// Timeout
 					if(_ShutdownPrint > 4500) RX_Status.mode = RX_Config.mode;
+					if (RX_Status.mode == ctrl_error) _ShutdownPrint = 0;
 				}
 				else RX_Status.mode = RX_Config.mode;
 				break;
@@ -634,6 +635,9 @@ void pump_tick_10ms(void)
 		case ctrl_recovery_step3:
 		case ctrl_recovery_step4:
 		case ctrl_recovery_step5:
+						if (RX_Config.mode != RX_Status.mode)
+							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink | COND_ERR_p_in_too_high);
+						
 						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(TRUE);
 						_set_valve(VALVE_INK);
@@ -689,7 +693,10 @@ void pump_tick_10ms(void)
 						
 		case ctrl_recovery_step10:
 						RX_Config.cmd.disable_meniscus_check = FALSE;
-        				RX_Status.mode = RX_Config.mode;
+						if (RX_Config.mode != RX_Status.mode)
+							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink | COND_ERR_p_in_too_high);
+						
+        		RX_Status.mode = RX_Config.mode;
 						break;
         				
        	default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)

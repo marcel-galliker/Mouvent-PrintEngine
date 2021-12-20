@@ -1340,6 +1340,12 @@ void ink_tick_10ms(void)
 						_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet / 5;	// start with low setpoint
 					else _PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet;
 					_StartModePRINT[isNo] = 0;
+
+					if (pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_recovery_step1)
+					{
+						pid_reset(&_InkSupply[isNo].pid_Pump);
+						pid_reset(&_InkSupply[isNo].pid_Setpoint);
+					}
 				}
 				else _StartModePRINT[isNo]++;
 
@@ -1359,7 +1365,7 @@ void ink_tick_10ms(void)
 						pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 				}
 				else _FilterCloggedTime[isNo] = 0;
-				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
+				_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_INK_RECIRCULATION);
 				break;
 
 			case ctrl_recovery_step6:
