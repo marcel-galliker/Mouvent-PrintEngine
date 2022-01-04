@@ -870,13 +870,14 @@ static void _control(int fluidNo)
 
 				case ctrl_recovery_step7:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 				case ctrl_recovery_step8:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
-				case ctrl_recovery_step9:	_RecoveryNumber[no]++;
+				case ctrl_recovery_step9:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											
+				case ctrl_recovery_step10:	_RecoveryNumber[no]++;
 											if (_RecoveryNumber[no] >= _RecoveryData.repetion)
-												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+												_send_ctrlMode(no, ctrl_off, TRUE);
 											else
 												_send_ctrlMode(no, ctrl_recovery_step1, TRUE);
 											break;
-				case ctrl_recovery_step10:	_send_ctrlMode(no, ctrl_off, TRUE); break;
 				
 				//--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
