@@ -201,7 +201,8 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_SCALES_GET_CFG:	 _do_scales_get_cfg(socket);								break;
 	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)pdata);					break;	
 	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)pdata);					break;	
-	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;	
+	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;
+	case CMD_FLUID_FLUSH:		 nios_test_flush(*(int*)pdata);								break;
 	default:		
 					{
 						char peer[64];

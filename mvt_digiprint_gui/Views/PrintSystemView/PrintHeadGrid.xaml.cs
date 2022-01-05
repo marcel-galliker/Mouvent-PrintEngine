@@ -26,6 +26,20 @@ namespace RX_DigiPrint.Views.PrintSystemView
             ServiceGrid.Visibility = visibility;
         }
 
+        //--- PrintSystem_PropertyChanged --------------------------------------
+        private void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Visibility visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible : Visibility.Collapsed;
+            Visibility collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible;
+            Cooler_Pres.Visibility = visible;
+            Cooler_Pres_Text.Visibility = visible;
+            Cooler_Temp.Visibility = visible;
+            Cooler_Temp_Text.Visibility = visible;
+            ClusterNo.Visibility = visible;
+            Temp_Head.Visibility = collapsed;
+            Temp_Head_Txt.Visibility = collapsed;
+        }
+
         //--- _assign_inksupply --------------------------------------------------------
         private void _assign_inksupply(int cnt)
         {

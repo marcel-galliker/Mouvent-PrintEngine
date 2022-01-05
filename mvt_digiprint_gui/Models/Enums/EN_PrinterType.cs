@@ -16,6 +16,7 @@ namespace RX_DigiPrint.Models.Enums
             _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_slide, RX_DigiPrint.Resources.Language.Resources.RadexTestSlide));
             _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_slide_only, RX_DigiPrint.Resources.Language.Resources.RadexTestSlideOnly));
             _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_table, RX_DigiPrint.Resources.Language.Resources.Swiss4JetTestTable));
+            _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_table_seon, RX_DigiPrint.Resources.Language.Resources.ProductionTestTable));
             _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB701, RX_DigiPrint.Resources.Language.Resources.MouventLB701));
             _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_UV, RX_DigiPrint.Resources.Language.Resources.MouventLB702UV));
             _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_WB, RX_DigiPrint.Resources.Language.Resources.MouventLB702WB));

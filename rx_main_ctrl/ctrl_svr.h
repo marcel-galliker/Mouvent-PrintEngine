@@ -50,5 +50,5 @@ void ctrl_reply_stat(RX_SOCKET socket);
 void ctrl_tick(void);
 
 void ctrl_head_alive(int headNo);
-
+void ctrl_reset_cond(void);
 

@@ -69,11 +69,13 @@
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}" Content="{mvt:LocalizedBinding Print}"  Height="40"         Click="Print_Clicked"       Padding="10" x:Name="Button_Print"/>
                         
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
-
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Print Cluster" Click="PrintCluster_Clicked"  Padding="10" x:Name="Button_PrintCluster"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Purge Cluster" Click="PurgeCluster_Clicked"  Padding="10" x:Name="Button_PurgeCluster"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeMicro}"   Click="PurgeMicro_Clicked"  Padding="10" x:Name="Button_PurgeMicro"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeSoft}"    Click="PurgeSoft_Clicked"   Padding="10" x:Name="Button_PurgeSoft"/>
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding Purge}"         Click="Purge_Clicked"       Padding="10" x:Name="Button_Purge" />
                         <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="{mvt:LocalizedBinding PurgeHard}"    Click="PurgeHard_Clicked"   Padding="10" x:Name="Button_PurgeHard"/>
+                        <Button Style="{StaticResource Mouvent.CmdButtonStyle}"  Height="40" Content="Toggle Meniscus" Click="ToggleMeniscus_Clicked" Padding="10" x:Name="Button_ToggleMeniscus"/>
                    <!-- <Button Content="Flush"         Click="Flush_Clicked"/>     - -->
 
                         <Rectangle Fill="{StaticResource Mouvent.MainColorBrush}" HorizontalAlignment="Stretch" Height="1" Margin="-16, 8"/>
@@ -84,9 +86,9 @@
             </Grid>
         </rx:RxPopup>
 
-        <Rectangle  Margin="2,0,2,0" Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}"/>
+        <Rectangle  Margin="2,0,2,0" Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding TempReady, Converter={StaticResource BoolToInVisible_Converter}}" Name="Temp_Head_Warn"/>
 
-        <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Name="Temp_Head">
             <TextBlock Text="{Binding TempHead,  Converter={StaticResource HeadVal_ConverterTemp}}"/>
             <TextBlock Text=" (" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding TempSetpoint, Converter={StaticResource HeadVal_ConverterTemp}}" VerticalAlignment="Center"/>
@@ -99,6 +101,9 @@
 
         <Grid  Margin="2,0,2,0" Grid.Row="6" x:Name="ServiceGrid" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
             <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -124,7 +129,8 @@
                 <TextBlock Text="{Binding PresOut_diff, Converter={StaticResource HeadVal_Converter10}}" VerticalAlignment="Center"/>
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
-           
+
+            <Rectangle  Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding Meniscus_Disabled, Converter={StaticResource BoolToVisible_Converter}}"/>
             <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
@@ -149,6 +155,9 @@
                 <TextBlock Text="{Binding ImgBuf}"/>
                 <TextBlock  Margin="0,0,2,0" Text=")"/>
             </StackPanel>
+            <TextBlock  Grid.Row="8" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Cooler_Pressure}" Name="Cooler_Pres"/>
+            <TextBlock  Grid.Row="9" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding Cooler_Temp, Converter={StaticResource HeadVal_ConverterTemp}}" Name="Cooler_Temp"/>
+            <TextBlock  Grid.Row="10" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding ClusterNo}" Name="ClusterNo"/>
         </Grid>
 
         <!-- NO Connection _______________________________________________________________________-->

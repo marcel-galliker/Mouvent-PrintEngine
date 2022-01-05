@@ -77,6 +77,15 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     _Item.PageMargin = 0;
                 }
             }
+            else if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
+            {
+                CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(1, RxGlobals.InkSupply.List, 2000);
+                if (init)
+                {
+                    _Item.Speed = EN_SpeedList.DefaultValue;
+                    _Item.PageMargin = 0;
+                }
+            }
             else
             {
                 CB_Speed.ItemsSource = RxGlobals.PrintSystem.SpeedList(1, RxGlobals.InkSupply.List, 2000);

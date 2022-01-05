@@ -267,6 +267,9 @@
   <data name="CLGainFact" xml:space="preserve">
     <value>C.L. Gain Fact</value>
   </data>
+  <data name="ClusterNo" xml:space="preserve">
+    <value>Cluster No</value>
+  </data>
   <data name="Cluster1" xml:space="preserve">
     <value>Clúster 1</value>
   </data>
@@ -314,6 +317,12 @@
   </data>
   <data name="ControlMode" xml:space="preserve">
     <value>Modo de control</value>
+  </data>
+  <data name="Cooler_Pres" xml:space="preserve">
+    <value>Cooler Pressure</value>
+  </data>
+  <data name="Cooler_Temp" xml:space="preserve">
+    <value>Cooler Temperature</value>
   </data>
   <data name="Copies" xml:space="preserve">
     <value>Copias</value>
@@ -2198,6 +2207,9 @@ No ¿Hay empalmes en la máquina?</value>
   </data>
   <data name="Paper" xml:space="preserve">
     <value>Papel</value>
+  </data>
+  <data name="ProductionTestTable" xml:space="preserve">
+    <value>Production Test Table</value>
   </data>
   <data name="RadexTestSlide" xml:space="preserve">
     <value>Radex prueba de deslizamiento</value>

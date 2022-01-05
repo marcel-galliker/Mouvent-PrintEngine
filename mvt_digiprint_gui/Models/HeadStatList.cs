@@ -13,6 +13,10 @@ namespace RX_DigiPrint.Models
     {
         static private ObservableCollection<HeadStat> _MyList = new ObservableCollection<HeadStat>();
         static Boolean[] _BoardConnected = new Boolean[128];
+        static UInt32[] _ClusterNo = new UInt32[4];
+        static Int32[] _Cooler_Pressure = new Int32[4];
+        static UInt32[] _Cooler_Temp = new UInt32[4];
+        static Boolean[] _MeniscusDisabled = new Boolean[128];
 
         //--- constructor -----------------------------
         public HeadStatList()
@@ -40,6 +44,7 @@ namespace RX_DigiPrint.Models
                 SetItemCount(no+1);
                 _MyList[no].SetItem(no, item, tempFpga, flow);
                 _MyList[no].Connected = _BoardConnected[no/4];
+                _MyList[no].Meniscus_Disabled = _MeniscusDisabled[no / 4];
             }
             );
         }
@@ -54,6 +59,66 @@ namespace RX_DigiPrint.Models
                 foreach(HeadStat item in _MyList)
                 {
                     if ((item.HeadNo/4) == boardNo) item.Connected = connected;
+                }
+            }
+            );
+        }
+
+        //--- ClusterNo -----------------------------------------------------------------
+        public void ClusterNo(int boardNo, UInt32 clusterNo)
+        {
+            if (boardNo < _ClusterNo.Length) _ClusterNo[boardNo] = clusterNo;
+            if (_MyList == null) return;
+            RxBindable.Invoke(() =>
+            {
+                foreach (HeadStat item in _MyList)
+                {
+                    if ((item.HeadNo / 4) == boardNo) item.ClusterNo = clusterNo;
+                }
+            }
+            );
+        }
+
+        //--- Cooler_Pressure --------------------------------------------------
+        public void Cooler_Pressure(int boardNo, Int32 cooler_pressure)
+        {
+            if (boardNo < _Cooler_Pressure.Length) _Cooler_Pressure[boardNo] = cooler_pressure;
+            if (_MyList == null) return;
+            RxBindable.Invoke(() =>
+            {
+                foreach (HeadStat item in _MyList)
+                {
+                    if ((item.HeadNo / 4) == boardNo) item.Cooler_Pressure = cooler_pressure;
+                }
+            }
+            );
+        }
+
+        //--- Cooler_Temp --------------------------------------------------------------
+        public void Cooler_Temp(int boardNo, UInt32 cooler_temp)
+        {
+            if (boardNo < _Cooler_Temp.Length) _Cooler_Temp[boardNo] = cooler_temp;
+            if (_MyList == null) return;
+            RxBindable.Invoke(() =>
+            {
+                foreach (HeadStat item in _MyList)
+                {
+                    if ((item.HeadNo / 4) == boardNo) item.Cooler_Temp = cooler_temp;
+                }
+            }
+            );
+        }
+
+        //--- Meniscus_disabled ------------------------------------------
+        public void Meniscus_disabled(int boardNo, Boolean meniscus_disabled)
+        {
+            if (boardNo < _MeniscusDisabled.Length) _MeniscusDisabled[boardNo] = meniscus_disabled;
+            if (_MyList == null) return;
+            RxBindable.Invoke(() =>
+            {
+                foreach (HeadStat item in _MyList)
+                {
+                    if ((item.HeadNo / 4) == boardNo) item.Meniscus_Disabled = meniscus_disabled;
                 }
             }
             );

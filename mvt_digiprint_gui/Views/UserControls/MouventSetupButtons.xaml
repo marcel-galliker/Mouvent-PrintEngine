@@ -61,6 +61,11 @@
                 <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                                             Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="30" Height="30" Kind="ShowerHead"></iconPacks:PackIconMaterial>
             </common:MvtButton>
+
+            <common:MvtButton Click="CusterNo_Clicked" x:Name="Button_ClusterNo" Margin="15,0,0,0" Style="{StaticResource Mouvent.RoundIconButtonStyle.DarkBackgroundButton.SizeL}" ToolTip="{mvt:LocalizedBinding SetClusterNo}">
+                <iconPacks:PackIconMaterial Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightIcon}" Width="30" Height="30" Kind="FormatListNumbered"></iconPacks:PackIconMaterial>
+            </common:MvtButton>
+            
             <TextBlock Margin="5,0,0,0" x:Name="Wash_Time" VerticalAlignment="Center" Text="10s" HorizontalAlignment="Center" FontSize="13" Foreground="White"/>
 
         </StackPanel>

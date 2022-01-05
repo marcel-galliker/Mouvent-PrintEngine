@@ -38,7 +38,7 @@ namespace RX_DigiPrint.Views.UserControls
 
                 // Add more ink levels when needed
                 int additionalInkLevels = 0;
-                if (RxGlobals.PrintSystem.IsTx) additionalInkLevels = 1;    // Flush
+                if (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) additionalInkLevels = 1;    // Flush
                 if (RxGlobals.PrintSystem.IsLb) additionalInkLevels = 2;    // Flush + waste
                 if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702) additionalInkLevels = 0;  // Neither flush or waste
                 for (int i=0; i<additionalInkLevels; i++)
@@ -67,7 +67,14 @@ namespace RX_DigiPrint.Views.UserControls
                         MainGrid.Children.Add(ctrl);
                     }
                 }
-                
+
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
+                {
+                    InkLevel waste = new InkLevel() { DataContext = RxGlobals.InkSupply.List[TcpIp.InkSupplyCnt + 1] };
+                    Grid.SetColumn(waste, TcpIp.InkSupplyCnt + 1);
+                    MainGrid.Children.Add(waste);
+                }
+
                 _PrinterType = RxGlobals.PrintSystem.PrinterType;
             }
         }
