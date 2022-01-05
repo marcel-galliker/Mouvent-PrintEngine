@@ -75,16 +75,14 @@
 #define boReqPrepareToPrint PREFIX_PLC "PLC_to_DPU.boReqPrepareToPrint"
 // request to DPU to print
 #define boReqPrintOn PREFIX_PLC "PLC_to_DPU.boReqPrintOn"
-// ack send to confirm the request boReqStart
-#define boReqStartAck PREFIX_PLC "PLC_to_DPU.boReqStartAck"
 // indicate the machine is started
 #define boMachineIsRunning PREFIX_PLC "PLC_to_DPU.boMachineIsRunning"
 // ack send to confirm the request boReqStop
-#define boReqStopAck PREFIX_PLC "PLC_to_DPU.boReqStopAck"
+#define boReqStopExt PREFIX_PLC "PLC_to_DPU.boReqStopExt"
 // indicate the machine is siemens_stopped
 #define boMachineIsStopped PREFIX_PLC "PLC_to_DPU.boMachineIsStopped"
 // indicate the print is paused
-#define boReqPauseAck PREFIX_PLC "PLC_to_DPU.boReqPauseAck"
+#define boReqPauseExt PREFIX_PLC "PLC_to_DPU.boReqPauseExt"
 // indicate the sequence of pullback is running
 #define boSequencePauseIsRunning PREFIX_PLC "PLC_to_DPU.boSequencePauseIsRunning"
 // status of the UV Lamp
@@ -366,6 +364,23 @@ void *siemens_thread(void *lpParameter)
 					_handle_lateral(lateral - last_lateral);
 					last_lateral = lateral;
 				}
+
+				// Pause request from ABG
+				opcua_get_bool(_client, boReqPauseExt, &status);
+				if (status)
+				{
+					Error(ERR_CONT, 0, "PAUSE requested by ABG");
+					RX_PrinterStatus.printState=ps_pause; // suppress pause message
+					pc_pause_printing(FALSE);
+				}
+
+				// Stop request from PLC machine
+				opcua_get_bool(_client, boReqStopExt, &status);
+				if (status)
+				{
+					Error(LOG, 0, "ABORT Printing requested by Machine (Errors)");
+					pc_abort_printing();
+				}
 			}
 				break;
 			case siemens_waitforpause:
@@ -408,7 +423,6 @@ void *siemens_thread(void *lpParameter)
 				}
 				break;
 
-			// TODO recompile open62541 multithread and move these cases in dedicated fonctions
 			case siemens_requirestop:
 				opcua_set_bool(_client, boReqStart, 0);
 				if ((retval = opcua_set_bool(_client, boReqStop, 1)) == 0)
@@ -444,7 +458,7 @@ void *siemens_thread(void *lpParameter)
 
 int siemens_pause_printing()
 {
-	Error(WARN, 0, "PAUSED by Operator");
+	Error(WARN, 0, "PAUSED requested");
 	if (_state == siemens_printing)
 		_state = siemens_requirepause;
 	else
