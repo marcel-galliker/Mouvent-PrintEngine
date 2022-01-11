@@ -68,6 +68,8 @@ namespace RX_DigiPrint.Views.UserControls
                 CMD_WEBIN.Visibility = Visibility.Collapsed;
                 CMD_JOG_BWD.Visibility = Visibility.Visible;
                 CMD_JOG_FWD.Visibility = Visibility.Visible;
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
+                    Button_ClusterNo.Visibility = Visibility.Visible;
             }
             else 
             {

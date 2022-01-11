@@ -127,7 +127,7 @@ void ctr_tick(void)
 			_counterAct = RX_PrinterStatus.counterAct;
 			_counterTotal = RX_PrinterStatus.counterTotal;
 		}
-		if (_Manipulated)
+		if (_Manipulated && !rx_def_is_tts(RX_Config.printer.type))
 		{
 			Error(ERR_CONT, 0, "Counters corrupted, please contact Mouvent support");
 		}

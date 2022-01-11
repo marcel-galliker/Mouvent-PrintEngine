@@ -1700,6 +1700,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\TestTableSeon\Slide.png" />
+    <Resource Include="Resources\Bitmaps\TestTableSeon\TestTableSeon.jpg" />
     <Resource Include="Resources\Bitmaps\PG_Mark_Verso_INV.ico" />
     <Resource Include="Resources\Bitmaps\PG_Mark_Verso.ico" />
     <EmbeddedResource Include="Resources\Language\Resources.de-DE.resx">

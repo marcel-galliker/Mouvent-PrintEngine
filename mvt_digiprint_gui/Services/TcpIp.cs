@@ -502,7 +502,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_TT_MOVE_CAP	        = 0x01000509;
         public const UInt32 CMD_TT_MOVE_PURGE	    = 0x0100050a;
         public const UInt32 CMD_TT_MOVE_ADJUST	    = 0x0100050b;
-
+        public const UInt32 CMD_TT_ABORT            = 0x0100050c;
         public const UInt32 CMD_TT_SCAN_TRAY        = 0x0100050d;
         public const UInt32 CMD_TT_SCAN_WASTE       = 0x0100050e;
 
@@ -512,6 +512,9 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_TTS_JOG_BWD         = 0x01000514;
         public const UInt32 CMD_TTS_JOG_STOP        = 0x01000515;
         public const UInt32 CMD_FLUID_TTS           = 0x01000516;
+
+
+        public const UInt32 CMD_TT_END              = 0x010005ff;
 
         //--- Capping Commands ---------------------------------------------------
         public const UInt32 CMD_LIFT_STOP			= 0x01000601;
@@ -1247,6 +1250,7 @@ namespace RX_DigiPrint.Services
 
             public UInt32		info;
             public UInt32		robinfo;
+            public UInt32       inkinfo;
 	        public UInt32		warn;
 	        public UInt32		err;
 

@@ -934,7 +934,7 @@ void ink_tick_10ms(void)
 								_CheckSequence[isNo].Ctrl_Check_State = 0;
 							}
 							// IS pressure > 900 mbars
-							else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+							else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 1900)
 							{
 								pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 								_CheckSequence[isNo].Ctrl_Check_State = 0;

@@ -130,7 +130,7 @@ typedef enum EPrinterType
 	printer_test_table,			// 1:
 	printer_test_slide,			// 2:
 	printer_test_slide_only,	// 3:
-	printer_test_table_seon,	// 4:
+	printer_test_table_seon,	// 4:	// Production Testtable, which is only in Seon needed.
 
 	//--- web printers ------------------------------
 	printer_LB701=1000,			// 1000: 

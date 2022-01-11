@@ -73,6 +73,7 @@ static void set_interface(void)
 int		machine_init(void)
 {
 	plc_init();
+	drive_init();
 	lh702_init();
 	set_interface();
 	return REPLY_OK;
@@ -121,6 +122,8 @@ void	machine_error_reset(void)
 	ctrl_head_error_reset();
 	step_error_reset();
 	enc_error_reset();
+	tts_error_reset();
+	drive_error_reset();
 }
 
 //--- machine_set_printpar -----------------------

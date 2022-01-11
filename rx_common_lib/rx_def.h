@@ -652,7 +652,7 @@ typedef struct SHeadInfo
 {
 	UINT32 connected : 1;
 	UINT32 flushed   : 1;
-	UINT32 info_2 : 1;
+	UINT32 meniscus : 1;
 	UINT32 info_3 : 1;
 	UINT32 info_4 : 1;
 	UINT32 info_5 : 1;

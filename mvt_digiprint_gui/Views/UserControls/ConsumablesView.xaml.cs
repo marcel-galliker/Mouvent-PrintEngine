@@ -30,16 +30,17 @@ namespace RX_DigiPrint.Views.UserControls
 
         //--- _BindValues ------------------------------
         private EPrinterType _PrinterType;
+		private int _ColorCnt;
         private void _BindValues()
         {
-            if (RxGlobals.PrintSystem.PrinterType!=_PrinterType)
+            if (RxGlobals.PrintSystem.PrinterType!=_PrinterType || _ColorCnt!=RxGlobals.PrintSystem.ColorCnt)
             {
                 MainGrid.Children.Clear();
 
                 // Add more ink levels when needed
                 int additionalInkLevels = 0;
-                if (RxGlobals.PrintSystem.IsTx || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) additionalInkLevels = 1;    // Flush
-                if (RxGlobals.PrintSystem.IsLb) additionalInkLevels = 2;    // Flush + waste
+                if (RxGlobals.PrintSystem.IsTx) additionalInkLevels = 1;    // Flush
+                if (RxGlobals.PrintSystem.IsLb || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) additionalInkLevels = 2;    // Flush + waste
                 if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_LH702) additionalInkLevels = 0;  // Neither flush or waste
                 for (int i=0; i<additionalInkLevels; i++)
                 {
@@ -76,6 +77,7 @@ namespace RX_DigiPrint.Views.UserControls
                 }
 
                 _PrinterType = RxGlobals.PrintSystem.PrinterType;
+				_ColorCnt = RxGlobals.PrintSystem.ColorCnt;
             }
         }
 
