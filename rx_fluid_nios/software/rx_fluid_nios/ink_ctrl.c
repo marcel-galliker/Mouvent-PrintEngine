@@ -397,7 +397,7 @@ void ink_tick_10ms(void)
 
 				// --- Detect filter clogged -------
 				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual!=INVALID_VALUE
-				&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+				&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 1900)
 				{
 					_FilterCloggedTime[isNo]++;
 					if(_FilterCloggedTime[isNo] > 6000)		// 1 minute over 900 mbars
@@ -933,7 +933,7 @@ void ink_tick_10ms(void)
 								pRX_Status->ink_supply[isNo].error |= err_check4_timeout;
 								_CheckSequence[isNo].Ctrl_Check_State = 0;
 							}
-							// IS pressure > 900 mbars
+							// IS pressure > 1900 mbars
 							else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 1900)
 							{
 								pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
