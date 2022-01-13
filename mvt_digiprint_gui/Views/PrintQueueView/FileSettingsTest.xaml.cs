@@ -95,7 +95,10 @@ namespace RX_DigiPrint.Views.PrintQueueView
                     _Item.PageMargin = 200;
                 }
             }
-            MessageCheckBox.IsChecked = true;
+            if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
+                MessageCheckBox.IsChecked = false;
+            else
+                MessageCheckBox.IsChecked = true;
         }
 
         //--- Print_Clicked --------------------------------------------------------------------
