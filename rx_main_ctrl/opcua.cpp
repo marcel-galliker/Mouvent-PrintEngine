@@ -74,6 +74,7 @@ OpcuaClient::OpcuaClient(const string &_url, const string &_port,
 }
 
 OpcuaClient::~OpcuaClient() {
+  unique_lock<mutex> lock(mutex_);
   UA_Client_disconnect(client_);
   UA_Client_delete(client_);
 }
@@ -180,17 +181,24 @@ int OpcuaClient::set(const string &_node_name, int16_t value) {
   return set(_node_name, &value, UA_DATATYPEKIND_INT16);
 }
 
-int OpcuaClient::set(const string &_node_name, const vector<int16_t> &_value) {
+int OpcuaClient::set(const string &_node_name, const vector<uint16_t> &_value) {
   UA_StatusCode retval;
   UA_Variant *myVariant = UA_Variant_new();
   if (myVariant == NULL)
     return UA_STATUSCODE_BADOUTOFMEMORY;
-  UA_Variant_setArrayCopy(myVariant, _value.data(), _value.size(),
-                          &UA_TYPES[UA_TYPES_INT16]);
-  UA_NodeId id = nodeId(_node_name);
-  unique_lock<mutex> lock(mutex_);
-  retval = UA_Client_writeValueAttribute(client_, id, myVariant);
-  UA_NodeId_clear(&id);
+  // first read the value from the server, to be sure to have the good type
+  // else we get a UA_STATUSCODE_BADTYPEMISMATCH 
+  retval = get(_node_name, myVariant);
+  if (retval == 0)
+  {
+      // then overwrite the array with the _value and write it to the server
+      UA_Variant_setArrayCopy(myVariant, _value.data(), _value.size(),
+                              &UA_TYPES[UA_TYPES_UINT16]);
+      UA_NodeId id = nodeId(_node_name);
+      unique_lock<mutex> lock(mutex_);
+      retval = UA_Client_writeValueAttribute(client_, id, myVariant);
+      UA_NodeId_clear(&id);
+  }
   UA_Variant_delete(myVariant);
   return retval;
 }
@@ -252,9 +260,9 @@ int opcua_set_int(HANDLE client, const char *_node_name, short value) {
   return ((Mvt::OpcuaClient *)client)->set(_node_name, value);
 }
 
-int opcua_set_int_array(HANDLE client, char *_node_name, short *value,
+int opcua_set_uint_array(HANDLE client, char *_node_name, unsigned short *value,
                         int size) {
-  vector<int16_t> arr(value, value + size);
+  vector<uint16_t> arr(value, value + size);
 
   return ((Mvt::OpcuaClient *)client)->set(_node_name, arr);
 }
