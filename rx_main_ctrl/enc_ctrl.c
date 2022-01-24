@@ -652,7 +652,7 @@ int  enc_stop_pg(char *reason)
 {
 	if (!_Scanning)
 	{
-	//	Error(LOG, 0, "enc_stop_pg(%s)", reason);
+		TrPrintfL(TRUE, "enc_stop_pg(%s)", reason);
 		_StopPG = TRUE;
 		sok_send_2(&_Encoder[0].socket, CMD_ENCODER_PG_STOP, 0, NULL);			
 	}
@@ -697,8 +697,7 @@ int  enc_abort_printing(void)
 int	 enc_enable_printing(int enable)
 {
 	static int _enable=FALSE;
-//	if (enable!=_enable) 
-//	Error(LOG, 0, "enc_enable_printing(%d)", enable);
+	if (enable!=_enable) TrPrintfL(1, "enc_enable_printing(%d)", enable);
 	_enable = enable;
 
 	int no;
