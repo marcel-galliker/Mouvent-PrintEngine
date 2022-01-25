@@ -73,6 +73,7 @@ static void _do_scales_get_cfg	(RX_SOCKET socket);
 static void _do_scales_tara		(RX_SOCKET socket, INT32  *pmsg);
 static void _do_scales_calib	(RX_SOCKET socket, SValue *pmsg);
 static void _do_scales_stat		(RX_SOCKET socket);
+static void _do_set_flush_pump	(RX_SOCKET socket, INT32 val);
 
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
@@ -201,7 +202,8 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_SCALES_GET_CFG:	 _do_scales_get_cfg(socket);								break;
 	case CMD_SCALES_TARA:		 _do_scales_tara(socket, (INT32*)pdata);					break;	
 	case CMD_SCALES_CALIBRATE:	 _do_scales_calib(socket, (SValue*)pdata);					break;	
-	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;	
+	case CMD_SCALES_STAT:		 _do_scales_stat(socket);									break;
+	case CMD_SET_FLUSH_PUMP_VAL: _do_set_flush_pump(socket, *((INT32*)pdata));				break;
 	default:		
 					{
 						char peer[64];
@@ -321,3 +323,8 @@ RX_SOCKET ctrl_socket(void)
 	return _Socket;			
 }
 
+//--- _do_set_flush_pump ----------------------------------------------
+static void _do_set_flush_pump(RX_SOCKET socket, INT32 val)
+{
+	nios_set_flush_pump(val);
+}

@@ -395,6 +395,7 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 	_Cfg->cmd.lung_enabled		= pcfg->lung_enabled;
 	_Cfg->printerType			= pcfg->printerType;
 	_Cfg->headsPerColor			= pcfg->headsPerColor;
+	_Cfg->boardNo				= pcfg->boardNo;
 	nios_error_reset();
 }
 
@@ -907,4 +908,10 @@ void nios_set_purge_pressure(int isNo, int pressure)
 	if (isNo > SIZEOF(_Cfg->ink_supply)) return;
 	
 	_Cfg->ink_supply[isNo].purge_putty_pressure = pressure;
+}
+
+//--- nios_set_flush_pump -------------------------------------
+void nios_set_flush_pump(int val)
+{
+	_Cfg->flush_pump_val = val;
 }

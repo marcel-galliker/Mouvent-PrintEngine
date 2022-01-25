@@ -296,6 +296,11 @@ void ink_tick_10ms(void)
 		pRX_Status->duty_degasser = _DutyDegasserCalcul;
 	}
 
+	if (pRX_Config->flush_pump_val <= 0)
+		_set_flush_pump(NIOS_INK_SUPPLY_CNT + 1, FALSE);
+	else
+		_set_flush_pump(NIOS_INK_SUPPLY_CNT + 1, TRUE);
+
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
 		switch(pRX_Config->ink_supply[isNo].ctrl_mode)
@@ -1757,8 +1762,15 @@ static void _set_flush_pump(int isNo, int state)
 					if (pRX_Config->ink_supply[i].condPresIn>pres) pres=pRX_Config->ink_supply[i].condPresIn;
 				}
 			};
-			if (pRX_Status->flush_pres_head<400) pRX_Status->flush_pump_val=100;
-			if (pRX_Status->flush_pres_head>450) pRX_Status->flush_pump_val=0;
+
+			if (pRX_Config->flush_pump_val > pRX_Status->flush_pump_val)
+				pRX_Status->flush_pump_val = pRX_Config->flush_pump_val;
+
+			if (pRX_Config->boardNo == 0)
+			{
+				if (pRX_Status->flush_pres_head<400) pRX_Status->flush_pump_val=100;
+				if (pRX_Status->flush_pres_head>450) pRX_Status->flush_pump_val=0;
+			}
 		}
 	}
 	pRX_Status->flush_pump 	= pRX_Status->flush_pump_val>0;
