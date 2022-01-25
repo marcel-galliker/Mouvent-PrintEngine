@@ -486,7 +486,7 @@ void setup_int64(HANDLE hsetup, const char *name, EN_setup_Action action, INT64 
 	SSetupFile *setup=(SSetupFile*)hsetup;
 	if (action == WRITE)
 	{
-		v=abs(*val);
+		v=llabs(*val);
 		l = sizeof(str);
 		str[--l]=0;
 		while (v)
