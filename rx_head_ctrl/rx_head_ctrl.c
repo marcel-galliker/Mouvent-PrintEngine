@@ -394,10 +394,6 @@ void do_jetting(int freq, int greyLevel)
 	{
 		_do_waveform("test.wfd");
 		Error(WARN, 0, "Cluster in Jetting Mode");
-		int arg = arg_offline;
-		arg_offline = TRUE;
-		fpga_set_config(INVALID_SOCKET);
-		arg_offline = arg;
 		nios_fixed_grey_levels(greyLevel, 3);
 	}
 	fpga_enc_config(freq);
