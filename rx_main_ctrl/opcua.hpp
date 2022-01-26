@@ -68,7 +68,7 @@ public:
   int get(const string &_node_name, float &_val);
 
   //! @copydoc set(const string&, bool)
-  int set(const string &_node_name, const vector<int16_t> &_val);
+  int set(const string &_node_name, const vector<uint16_t> &_val);
 
 private:
   UA_Client *client_; ///< connection to the opcua server

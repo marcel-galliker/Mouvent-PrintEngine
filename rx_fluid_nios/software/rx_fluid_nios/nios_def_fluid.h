@@ -112,6 +112,8 @@ typedef struct SNiosFluidCfg
 	UINT32			headsPerColor;
 
 	INT32			test_lungPressure;	// [mbar]
+	INT32			flush_pump_val;
+	INT32			boardNo;
 
 	EPrinterType	printerType;
 	

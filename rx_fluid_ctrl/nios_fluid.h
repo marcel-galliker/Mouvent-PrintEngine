@@ -48,3 +48,4 @@ void nios_test_air_pressure	(int pressure);
 void nios_test_flush		(int power);
 
 int  nios_is_heater_connected(void);
+void nios_set_flush_pump(int val);

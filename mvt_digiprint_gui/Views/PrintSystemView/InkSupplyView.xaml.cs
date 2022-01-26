@@ -271,9 +271,24 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void Print_Clicked      (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_print,          false);}
         private void Fill_Clicked       (object sender, RoutedEventArgs e) {_command(null,      EFluidCtrlMode.ctrl_fill,           false);}
         private void Empty_Clicked      (object sender, RoutedEventArgs e) {_command("Empty",   EFluidCtrlMode.ctrl_empty,          false);}
-        private void Flush_Clicked_0    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_night,    false);}
-        private void Flush_Clicked_1    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_weekend,  false);}
-        private void Flush_Clicked_2    (object sender, RoutedEventArgs e) {_command("Flush",   EFluidCtrlMode.ctrl_flush_week,     false);}
+        private void Flush_Clicked_0    (object sender, RoutedEventArgs e) 
+		{
+		    RX_Common.MvtMessageBox.EPurgeResult result =
+                MvtMessageBox.Purge("Flush for Night", false, "Disconnect all flush pipes on the others colors. Ready for flush " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes) _command("Flush",   EFluidCtrlMode.ctrl_flush_night,    false);
+		}
+		private void Flush_Clicked_1    (object sender, RoutedEventArgs e) 
+		{
+			RX_Common.MvtMessageBox.EPurgeResult result =
+                MvtMessageBox.Purge("Flush for Week-end", false, "Disconnect all flush pipes on the others colors. Ready for flush " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes) _command("Flush",   EFluidCtrlMode.ctrl_flush_weekend,    false);
+		}
+		private void Flush_Clicked_2    (object sender, RoutedEventArgs e) 
+		{
+			RX_Common.MvtMessageBox.EPurgeResult result =
+                MvtMessageBox.Purge("Flush for Week", false, "Disconnect all flush pipes on the others colors. Ready for flush " + _InkSupply.InkType.Name + " ?");
+            if (result == MvtMessageBox.EPurgeResult.PurgeResultYes) _command("Flush",   EFluidCtrlMode.ctrl_flush_week,    false);
+		}
 
         private void Purge_Clicked(object sender, RoutedEventArgs e)
         {
