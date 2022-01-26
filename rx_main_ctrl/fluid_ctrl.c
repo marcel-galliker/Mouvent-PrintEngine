@@ -77,7 +77,8 @@ static void _control_flush();
 static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
 static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
-static int _fluid_get_flush_time(int flush_cycle);
+static int	_fluid_get_flush_time(int flush_cycle);
+static void _flush_pump_check(void);
 
 //--- statics -----------------------------------------------------------------
 
@@ -203,6 +204,8 @@ static void *_fluid_thread(void *lpParameter)
 				}
 			}
 		}
+
+		_flush_pump_check();
 		rx_sleep(1000);
 	}
 	return NULL;
@@ -346,6 +349,7 @@ void fluid_set_config(void)
 	{
 		if (_FluidThreadPar[i].socket!=INVALID_SOCKET)
 		{
+			cfg.boardNo = i;
 			cfg.printerType = RX_Config.printer.type;
 			cfg.lung_enabled = (i==0);
 			for (n=0; n<INK_PER_BOARD; n++) 
@@ -529,9 +533,9 @@ static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat)
 		FluidStatus[fluidNo*INK_PER_BOARD+i].info.cond_flowFactor_ok = flowFactor_ok;
 	}
 		
-	if      ((_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
+	//if      ((_FluidCtrlMode>=ctrl_flush_night && _FluidCtrlMode<=ctrl_flush_done) || _FluidCtrlMode == ctrl_cap_step3) _control_flush();
 //	else if (_RobotCtrlMode>=ctrl_wipe        && _RobotCtrlMode<ctrl_fill       && fluidNo==0) _control_robot();
-	else _control(fluidNo);
+	/*else*/ _control(fluidNo);
 
 	//--- update overall state --------------------------
 	SPrinterStatus stat;
@@ -799,14 +803,6 @@ static void _control(int fluidNo)
 													_PurgeCtrlMode = ctrl_undef;
 												}
 											}
- 											else if (RX_PrinterStatus.printState==ps_pause)
-                                            {
-												if (_PurgeCtrlMode!=ctrl_undef && _all_fluids_in_3fluidCtrlModes(ctrl_purge_step4, ctrl_off, ctrl_print))
-												{
-	                                                _send_ctrlMode(-1, ctrl_print, TRUE);
-													_PurgeCtrlMode = ctrl_undef;
-                                                }											
-                                            }
 											else 
 											{
 												_send_ctrlMode(no, ctrl_off, TRUE);
@@ -847,6 +843,32 @@ static void _control(int fluidNo)
 				case ctrl_cal_step2:		_send_ctrlMode(no, ctrl_cal_step3,	 TRUE);		break;
 				case ctrl_cal_step3:		_send_ctrlMode(no, ctrl_print, TRUE);    
 											break;
+
+											case ctrl_flush_night:		
+				case ctrl_flush_weekend:		
+				case ctrl_flush_week:		step_lift_to_top_pos();
+											_send_ctrlMode(no, ctrl_flush_step1, TRUE);
+											break;
+                                
+				case ctrl_flush_step1:		if (step_lift_in_up_pos())
+											{
+												plc_to_purge_pos();
+												_send_ctrlMode(no, ctrl_flush_step2, TRUE);
+											}
+											break;
+		
+				case ctrl_flush_step2:		if (plc_in_purge_pos())
+											{
+												_send_ctrlMode(no, ctrl_flush_step3, TRUE);
+											}
+											break;
+				case ctrl_flush_step3:		_send_ctrlMode(no, ctrl_flush_step4, TRUE); break;
+		
+				case ctrl_flush_step4:		_send_ctrlMode(no, ctrl_flush_done, TRUE); break;
+		
+				case ctrl_flush_done:		ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
+											_send_ctrlMode(no, ctrl_off, TRUE); break;
+											break; // send to all
 				
 				//--- ctrl_print -------------------------------------------------------------------
 				case ctrl_print:			_PurgeAll=FALSE;
@@ -1154,17 +1176,17 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	{
 		if (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET)
 		{
-			if (ctrlMode>=ctrl_flush_night && ctrlMode<=ctrl_flush_week )
+			if (ctrlMode>=ctrl_flush_night && ctrlMode<=ctrl_flush_week && i == no)
 			{
 				cmd.hdr.msgId	= CMD_FLUID_CTRL_MODE;
 				cmd.hdr.msgLen	= sizeof(cmd);
 				cmd.no			= i%INK_PER_BOARD;
 				cmd.ctrlMode	= ctrlMode;
-				if (!rx_def_is_scanning(RX_Config.printer.type))
+				/*if (!rx_def_is_scanning(RX_Config.printer.type))
 				{
 					if (i==no) cmd.ctrlMode = ctrlMode;
 					else	   cmd.ctrlMode = ctrl_off;
-				}
+				}*/
 				_Flushed |= (0x1<<i);
 				sok_send(&_FluidThreadPar[i/INK_PER_BOARD].socket, &cmd);
 				ctrl_send_all_heads_fluidCtrlMode(i, ctrlMode);	
@@ -1505,4 +1527,21 @@ void fluid2Robot(int fluidNo, int *stepperNo)
             *stepperNo = fluidNo / ink_per_Robot;
         else
             *stepperNo = (fluidNo + 1) / ink_per_Robot;
+}
+
+//--- _flush_pump_check -----------------------------------------------
+static void _flush_pump_check(void)
+{
+	static int flush_pump_val = 0;
+	int flush_pump_val_old = flush_pump_val;
+	flush_pump_val = 0;
+	for (int i = INK_PER_BOARD; i < INK_SUPPLY_CNT; i++)
+	{
+		if (FluidStatus[i].flush_pump_val > flush_pump_val && *RX_Config.inkSupply[i].ink.fileName)
+			flush_pump_val = FluidStatus[i].flush_pump_val;
+	}
+	if (flush_pump_val != flush_pump_val_old)
+	{
+		sok_send_2(&_FluidThreadPar[0].socket, CMD_SET_FLUSH_PUMP_VAL, sizeof(flush_pump_val), &flush_pump_val);
+	}
 }

@@ -1108,6 +1108,7 @@ typedef struct SFluidBoardCfg
 	EPrinterType	printerType;
 	UINT32			lung_enabled;
 	UINT32			headsPerColor;
+	INT32			boardNo;
 } SFluidBoardCfg;
 	
 typedef struct SHeadStateLight

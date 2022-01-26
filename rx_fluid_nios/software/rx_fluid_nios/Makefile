@@ -158,6 +158,7 @@ C_SRCS += trprintf.c
 C_SRCS += comm.c
 C_SRCS += fifo.c
 C_SRCS += pvalve.c
+C_SRCS += rx_ink_common.c
 CXX_SRCS :=
 ASM_SRCS :=
 
