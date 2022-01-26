@@ -728,7 +728,7 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 }
 
 //--- ctrl_send_purge_par ----------------------------------------------
-int ctrl_send_purge_par(int fluidNo, int time)
+int ctrl_send_purge_par(int fluidNo, int time, int delay_time_ms)
 {
 #define HEAD_WIDTH	43000
 	int head;
@@ -738,7 +738,7 @@ int ctrl_send_purge_par(int fluidNo, int time)
 	SHeadCfg *pcfg;
 	
 	if (RX_Config.stepper.wipe_speed) delay =  HEAD_WIDTH / RX_Config.stepper.wipe_speed;
-	else delay=5000;
+	else delay=delay_time_ms;
 	if (time==0) delay=0;
 
 	timeTotal = 0;

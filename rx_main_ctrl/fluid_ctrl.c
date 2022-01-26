@@ -40,6 +40,8 @@
 #define 	TIME_PURGE					3000	// [ms]
 #define 	TIME_HARD_PURGE				10000	// [ms]
 
+#define		TIME_PURGE_DELAY			5000	// [ms]
+
 //--- statics ----------------------------------------
 
 static int				_FluidThreadRunning=FALSE;
@@ -62,7 +64,7 @@ static void* _fluid_thread(void *par);
 static int _handle_fluid_ctrl_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *ppar);
 static int _connection_closed		(RX_SOCKET socket, const char *peerName);
 static void _send_ctrlMode			(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
-static void _send_purge_par			(int fluidNo, int time);
+static void _send_purge_par			(int fluidNo, int time, int delay_time_ms);
 
 static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat);
 static void _do_scales_stat(int fluidNo, SScalesStatMsg   *pstat);
@@ -702,11 +704,11 @@ static void _control(int fluidNo)
 											if (pstat->purge_putty_ON) time=0;
 											switch(pstat->ctrlMode)
 											{
-											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE); _txrob=FALSE; break;
-											case ctrl_purge:			_send_purge_par(no, TIME_PURGE);	  _txrob=FALSE; break;
-											case ctrl_purge_hard_wipe:	_send_purge_par(no, time); break;
-											case ctrl_purge_hard_vacc:	_send_purge_par(no, time); break;
-											case ctrl_purge_hard:		_send_purge_par(no, time); _txrob=FALSE; break;
+											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE, TIME_PURGE_DELAY); _txrob=FALSE; break;
+											case ctrl_purge:			_send_purge_par(no, TIME_PURGE, TIME_PURGE_DELAY);	  _txrob=FALSE; break;
+											case ctrl_purge_hard_wipe:	_send_purge_par(no, time, TIME_PURGE_DELAY); break;
+											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, TIME_PURGE_DELAY); break;
+											case ctrl_purge_hard:		_send_purge_par(no, time, TIME_PURGE_DELAY); _txrob=FALSE; break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
@@ -864,7 +866,7 @@ static void _control(int fluidNo)
 											}
 											break;
 
-				case ctrl_recovery_step6:	_send_purge_par(no, _RecoveryData.purge_time_s*1000); 
+				case ctrl_recovery_step6:	_send_purge_par(no, _RecoveryData.purge_time_s*1000, _RecoveryData.purge_time_s*1000); 
 											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 											break;
 
@@ -1241,13 +1243,11 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 }
 
 //--- _send_purge_par -------------------------------------------------
-static void _send_purge_par(int fluidNo, int time)
+static void _send_purge_par(int fluidNo, int time, int delay_time_ms)
 {
     SPurgePar par;
 	par.no    =  fluidNo%INK_PER_BOARD;
-    if (RX_StepperStatus.robot_used) par.delay = 3000;
-	else                             par.delay = 0;
-	par.time  = ctrl_send_purge_par(fluidNo, time);
+	par.time  = ctrl_send_purge_par(fluidNo, time, delay_time_ms);
 	sok_send_2(&_FluidThreadPar[fluidNo/INK_PER_BOARD].socket, CMD_SET_PURGE_PAR, sizeof(par), &par);
     _InitDone |= 0x01 << fluidNo;
 }
