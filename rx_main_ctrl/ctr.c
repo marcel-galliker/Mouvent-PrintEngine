@@ -71,7 +71,8 @@ void ctr_init(void)
 	
 	_calc_check(rx_file_get_mtime(PATH_USER FILENAME_COUNTERS), check2);
 	
-	_Manipulated = (strcmp(check1, check2))!=0;
+#ifndef WIN32
+	_Manipulated = (strcmp(check1, check2)) != 0;
 	if (_Manipulated)
 	{
 		ctr_calc_reset_key(RX_Hostname, check2);
@@ -81,8 +82,9 @@ void ctr_init(void)
 			Error(WARN, 0, "Total counter reset to %d.%d m", _counterTotal / 1000, _counterTotal % 1000);
 		}
 	}
-	if (_Manipulated && !rx_def_is_test(RX_Config.printer.type)) 
+	if (_Manipulated && !rx_def_is_test(RX_Config.printer.type))
 		Error(ERR_CONT, 0, "Counters corrupted, please contact Mouvent support");
+#endif // !WIN32
 
 	lh702_ctr_init();
 
