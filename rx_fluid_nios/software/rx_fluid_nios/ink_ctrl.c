@@ -66,6 +66,11 @@
 #define		TIME_BLEED_LINE_TIMEOUT40	4000
 #define		TIME_BLEED_LINE_TIMEOUT90	9000
 
+// State of PID regulation
+#define		PID_STATE_OFF			1
+#define		PID_STATE_PINLET		2
+#define		PID_STATE_PUMP			3
+
 // -- END NEW
 
 //--- statics -----------------------------------------------
@@ -309,10 +314,10 @@ void ink_tick_10ms(void)
 				_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].condPumpFeedback;
 				// if PRINT mode, recalculate integrator with new PI parameters
 				// if CALIBRATION or PURGE mode, don't need to recalculate
-				if(_ShutdownPrint[isNo] == 1)
+				if(_ShutdownPrint[isNo] == PID_STATE_PINLET)
 				{
 					_InkSupply[isNo].pid_Setpoint.diff_I *= PID_SETPOINT_P_CHECK_REDUCED;
-					_ShutdownPrint[isNo] = 3;
+					_ShutdownPrint[isNo] = PID_STATE_PUMP;
 				}
 
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
@@ -322,7 +327,7 @@ void ink_tick_10ms(void)
 
 			case ctrl_shutdown_done:
 
-				if(_ShutdownPrint[isNo] >= 1)
+				if(_ShutdownPrint[isNo] == PID_STATE_PUMP)
 				{
 					if(_PressureSetpoint[isNo] > 30) _PressureSetpoint[isNo]--;
 					else _PressureSetpoint[isNo] = 30;
@@ -349,7 +354,7 @@ void ink_tick_10ms(void)
 				else if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual < -10) _set_air_valve(isNo, PV_CLOSED);
 				_set_bleed_valve(isNo, PV_CLOSED);
 
-				_ShutdownPrint[isNo] = 0;
+				_ShutdownPrint[isNo] = PID_STATE_OFF;
 
 				{
 					int i, on=FALSE;
@@ -377,7 +382,12 @@ void ink_tick_10ms(void)
 				_set_flush_pump(isNo, FALSE);
 				_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
 				_PumpOFFTime = 0;
-				_ShutdownPrint[isNo] = 1;
+
+				// If Shutdown phase ON before
+				if(_ShutdownPrint[isNo] == PID_STATE_PUMP)
+					_InkSupply[isNo].pid_Setpoint.diff_I /= PID_SETPOINT_P_CHECK_REDUCED;
+
+				_ShutdownPrint[isNo] = PID_STATE_PINLET;				
 
 				// ----- NEW : Ramp start-up pressure  -------
 				if(pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode)
@@ -972,14 +982,14 @@ void ink_tick_10ms(void)
 				if(pRX_Status->ink_supply[isNo].error == 0)
 				{
 					_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_INK_RECIRCULATION);
-					_ShutdownPrint[isNo] = 2;
+					_ShutdownPrint[isNo] = PID_STATE_PUMP;
 				}
 				else
 				{
 					_set_air_valve(isNo, PV_OPEN);
 					_set_bleed_valve(isNo, PV_CLOSED);
 					_set_pump_speed(isNo, 0);
-					_ShutdownPrint[isNo] = 0;
+					_ShutdownPrint[isNo] = PID_STATE_OFF;
 				}
 
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
