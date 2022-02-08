@@ -253,7 +253,7 @@ BOOL CWin10StartupDlg::OnEraseBkgnd(CDC* pDC)
 	CRect rect;
 	GetClientRect(&rect);
 	
-	COLORREF bgcolor=RGB(0xff, 0xff, 0xff);
+	COLORREF bgcolor=RGB(0xeb, 0xeb, 0xeb);
 	SetBackgroundColor(bgcolor);
 	
 	//--- set dialog background ---------------------------------
