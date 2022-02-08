@@ -73,8 +73,6 @@ static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
 static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
 static int	_fluid_get_flush_time(int flush_cycle);
-static void _flush_pump_check(void);
-
 //--- statics -----------------------------------------------------------------
 
 typedef struct
@@ -103,6 +101,8 @@ static INT32			_HeadPumpSpeed[INK_SUPPLY_CNT][2];	// min/max
 static INT32			_CanisterLevel[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER];
 static INT64			_CanisterLevelSum[INK_SUPPLY_CNT + 2];
 
+static int				_flush_pump_need_ON[INK_SUPPLY_CNT][INK_PER_BOARD] = {0};
+static int				_flush_pump_ON = FALSE;
 
 
 //--- fluid_init ----------------------------------------------------------------
@@ -200,7 +200,6 @@ static void *_fluid_thread(void *lpParameter)
 			}
 		}
 
-		_flush_pump_check();
 		rx_sleep(1000);
 	}
 	return NULL;
@@ -827,9 +826,11 @@ static void _control(int fluidNo)
 												_send_ctrlMode(no, ctrl_flush_step3, TRUE);
 											}
 											break;
-				case ctrl_flush_step3:		_send_ctrlMode(no, ctrl_flush_step4, TRUE); break;
+				case ctrl_flush_step3:		_flush_pump_need_ON[fluidNo][no] = 100;
+											_send_ctrlMode(no, ctrl_flush_step4, TRUE); break;
 		
-				case ctrl_flush_step4:		_send_ctrlMode(no, ctrl_flush_done, TRUE); break;
+				case ctrl_flush_step4:		_flush_pump_need_ON[fluidNo][no] = 0;
+											_send_ctrlMode(no, ctrl_flush_done, TRUE); break;
 		
 				case ctrl_flush_done:		ErrorEx(dev_fluid, -1, LOG, 0, "Flush complete");
 											_send_ctrlMode(no, ctrl_off, TRUE); break;
@@ -841,12 +842,29 @@ static void _control(int fluidNo)
 				
 				//--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
+											_flush_pump_need_ON[fluidNo][no] = 0;
 											//step_rob_stop();
 											//step_lift_stop();
 					break;				
 			}
 		}
 	}
+
+	// Start flush pump in Ink Supply 1 if at least 1 color need it 
+	int _StartPump = 0;
+	int j;
+	for (i=0; i<FLUID_BOARD_CNT; i++)
+	{
+		for (j=0; j<INK_PER_BOARD; j++) 
+		{ 
+			if (_flush_pump_need_ON[i][j] > 0) _StartPump = 100;
+		}
+	}
+    if (_flush_pump_ON != _StartPump) 
+	{ 
+		sok_send_2(&_FluidThreadPar[0].socket, CMD_SET_FLUSH_PUMP_VAL, sizeof(_StartPump), &_StartPump);
+	}
+	_flush_pump_ON = _StartPump;
 }
 
 //--- _control_flush -------------------------------------------------
@@ -1442,21 +1460,4 @@ void fluid2Robot(int fluidNo, int *stepperNo)
             *stepperNo = fluidNo / ink_per_Robot;
         else
             *stepperNo = (fluidNo + 1) / ink_per_Robot;
-}
-
-//--- _flush_pump_check -----------------------------------------------
-static void _flush_pump_check(void)
-{
-	static int flush_pump_val = 0;
-	int flush_pump_val_old = flush_pump_val;
-	flush_pump_val = 0;
-	for (int i = INK_PER_BOARD; i < INK_SUPPLY_CNT; i++)
-	{
-		if (FluidStatus[i].flush_pump_val > flush_pump_val && *RX_Config.inkSupply[i].ink.fileName)
-			flush_pump_val = FluidStatus[i].flush_pump_val;
-	}
-	if (flush_pump_val != flush_pump_val_old)
-	{
-		sok_send_2(&_FluidThreadPar[0].socket, CMD_SET_FLUSH_PUMP_VAL, sizeof(flush_pump_val), &flush_pump_val);
-	}
 }

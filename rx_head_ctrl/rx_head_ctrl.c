@@ -233,7 +233,7 @@ static void _main_loop(void)
 				_AppRunning=FALSE;										
 			}
 		}
-		_tickle_puls();
+		if (RX_HBConfig.printerType == printer_LB702_WB) _tickle_puls();
 		if (!msg) rx_sleep(10);
 		time6= rx_get_ticks();
 	}
