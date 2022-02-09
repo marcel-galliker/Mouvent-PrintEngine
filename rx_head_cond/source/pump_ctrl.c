@@ -256,7 +256,7 @@ void pump_tick_10ms(void)
 						else _PumpPID.Setpoint = _SetpointShutdown;
 						_NbPresShutdown = 0;
 					}
-					_pump_pid(FALSE);	// disable meniscus error
+					_pump_pid(TRUE);	
 					if(abs(RX_Status.meniscus) < 20)
 					{
 						_TimeMeniscusStability++;
