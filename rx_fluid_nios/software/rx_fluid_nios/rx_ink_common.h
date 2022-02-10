@@ -267,6 +267,18 @@ typedef enum EnFluidCtrlMode
 	ctrl_cal_step4,			// 0x404:
 	ctrl_cal_done,			// 0x405:
 
+	ctrl_recovery_start = 0x500,	// 0x500
+	ctrl_recovery_step1,			// 0x501
+	ctrl_recovery_step2,			// 0x502
+	ctrl_recovery_step3,			// 0x503
+	ctrl_recovery_step4,			// 0x504
+	ctrl_recovery_step5,			// 0x505
+	ctrl_recovery_step6,			// 0x506
+	ctrl_recovery_step7,			// 0x507
+	ctrl_recovery_step8,			// 0x508
+	ctrl_recovery_step9,			// 0x509
+	ctrl_recovery_step10,			// 0x50a
+
 	ctrl_test_watchdog = 0x10000,
 	ctrl_test,			  // 0x10001
 	ctrl_offset_cal,	  // 0x10002

@@ -145,6 +145,7 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 	SValue *data;
 	int freq = 11000;
 	int greylevel = 2;
+	int *freq_rec;
 
 	// these functions mustn't use any FPGA Register !!!!
 	switch (phdr->msgId)
@@ -168,6 +169,11 @@ static int _save_ctrl_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr
 
 	case CMD_JETTING_HEAD:
 		do_jetting(freq, greylevel);
+		break;
+		
+	case CMD_SET_RECOVERY_FREQ:
+		freq_rec = (int *)pdata;
+		set_recovery_freq(*freq_rec);
 		break;
 		
 	default:		{
@@ -414,6 +420,11 @@ static int _rep_head_stat(RX_SOCKET socket)
 //--- _do_print_abort ---------------------------------------------------
 static int _do_print_abort(RX_SOCKET socket)
 {
+	for (int headNo = 0; headNo < SIZEOF(RX_HBStatus[0].head); headNo++)
+	{
+		if (RX_HBStatus[0].head[headNo].ctrlMode >= ctrl_recovery_start && RX_HBStatus[0].head[headNo].ctrlMode <= ctrl_recovery_step10) return REPLY_OK;
+	}
+	
 	_Printing=FALSE;
 	fpga_abort();
 	return REPLY_OK;	

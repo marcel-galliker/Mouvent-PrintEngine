@@ -266,6 +266,12 @@ int  pres_valid(int i)
 	return _Sensor[i].buf_valid;
 }
 
+//--- is_Sensor_25 -------------------------------------
+int is_Sensor_25(int isNo)
+{
+	return _Sensor[isNo].addr == ADDR_SENSOR_2_5_BAR;
+}
+
 //--- pres_tick_10ms ------------------
 void pres_tick_10ms(void)
 {

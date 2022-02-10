@@ -1044,6 +1044,17 @@ void ctrl_reply_stat(RX_SOCKET socket)
 	}
 }
 
+//--- ctrl_set_recovery_freq -----------------------------------------
+void ctrl_set_recovery_freq(int freq_hz)
+{
+	for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
+	{
+		if (_HeadCtrl[i].socket != INVALID_SOCKET)
+			sok_send_2(&_HeadCtrl[i].socket, CMD_SET_RECOVERY_FREQ, sizeof(freq_hz), &freq_hz);
+	}
+
+}
+
 //--- ctrl_set_cluster_no ----------------------------------------------
 void ctrl_set_cluster_no(SValue* pdata)
 {
