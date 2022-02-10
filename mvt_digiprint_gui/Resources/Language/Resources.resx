@@ -1980,6 +1980,39 @@ No Splices in the machine?</value>
   <data name="PurgeWipe" xml:space="preserve">
     <value>Purge+Wipe</value>
   </data>
+  <data name="RecoveryStart" xml:space="preserve">
+    <value>Recovery</value>
+  </data>
+  <data name="Recovery1" xml:space="preserve">
+    <value>Recovery /1</value>
+  </data>
+  <data name="Recovery2" xml:space="preserve">
+    <value>Recovery /2</value>
+  </data>
+  <data name="Recovery3" xml:space="preserve">
+    <value>Recovery /3</value>
+  </data>
+  <data name="Recovery4" xml:space="preserve">
+    <value>Recovery /4</value>
+  </data>
+  <data name="Recovery5" xml:space="preserve">
+    <value>Recovery /5</value>
+  </data>
+  <data name="Recovery6" xml:space="preserve">
+    <value>Recovery /6</value>
+  </data>
+  <data name="Recovery7" xml:space="preserve">
+    <value>Recovery /7</value>
+  </data>
+  <data name="Recovery8" xml:space="preserve">
+    <value>Recovery /8</value>
+  </data>
+  <data name="Recovery9" xml:space="preserve">
+    <value>Recovery /9</value>
+  </data>
+  <data name="Recovery10" xml:space="preserve">
+    <value>Recovery /10</value>
+  </data>
   <data name="RedOrangeR" xml:space="preserve">
     <value>Red/Orange (R)</value>
   </data>

@@ -28,6 +28,7 @@
 void pres_init(void);
 void pres_tick_10ms(void);
 int  pres_valid(int isNo);
+int is_Sensor_25(int isNo);
 
 
 #endif /* __pres_h__ */

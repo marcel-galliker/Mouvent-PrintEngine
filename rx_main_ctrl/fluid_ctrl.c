@@ -53,6 +53,7 @@ static int				_Scanning;
 static int				_ScalesFluidNo=-1;
 static UINT32			_InitDone = 0x00;
 static int				_MeasurementNumber = 0;
+static SRecoveryFct		_RecoveryData = { 0 };
 
 
 //--- prototypes -----------------------
@@ -142,6 +143,13 @@ int	fluid_init(void)
 		_FluidThreadRunning = TRUE;
 		rx_thread_start(_fluid_thread, NULL, 0, "_fluid_thread");	
 	}
+
+	memset(&_RecoveryData, 0, sizeof(_RecoveryData));
+	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
+
+	// To adjust the file to the size of _RecoveryData
+	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, WRITE);
+
 	return REPLY_OK;
 }
 
@@ -637,6 +645,8 @@ static void _control(int fluidNo)
 {
 	static int	_txrob;
     static UINT32 _flushedNeeded = 0x00;
+	static int _RecoveryTime[INK_SUPPLY_CNT] = { 0 };
+	static int _RecoveryNumber[INK_SUPPLY_CNT] = { 0 };
 
     int i;
     for (i = 0; i < RX_Config.inkSupplyCnt; i++)
@@ -839,6 +849,57 @@ static void _control(int fluidNo)
 				//--- ctrl_print -------------------------------------------------------------------
 				case ctrl_print:			_PurgeAll=FALSE;
                                             break;
+
+				case ctrl_recovery_start:	machine_set_capping_timer(FALSE);
+											_RecoveryNumber[no] = 0;
+                                            _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+                case ctrl_recovery_step1:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+
+                case ctrl_recovery_step2:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
+											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
+											_RecoveryTime[no] = 0;
+											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+                                            break;
+
+                case ctrl_recovery_step3:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
+											if (rx_get_ticks() >= _RecoveryTime[no])
+											{
+                                                ctrl_set_recovery_freq(_RecoveryData.freq_hz[1]);
+												_RecoveryTime[no] = 0;
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											}
+											break;
+
+				case ctrl_recovery_step4:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[1] * 60 * 1000;
+											if (rx_get_ticks() >= _RecoveryTime[no])
+											{
+												ctrl_set_recovery_freq(_RecoveryData.freq_hz[2]);
+												_RecoveryTime[no] = 0;
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											}
+											break;
+											
+				case ctrl_recovery_step5:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[2] * 60 * 1000;
+											if (rx_get_ticks() >= _RecoveryTime[no])
+											{
+												_RecoveryTime[no] = 0;
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											}
+											break;
+
+				case ctrl_recovery_step6:	_send_purge_par(no, _RecoveryData.purge_time_s*1000); 
+											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											break;
+
+				case ctrl_recovery_step7:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+				case ctrl_recovery_step8:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+				case ctrl_recovery_step9:	_RecoveryNumber[no]++;
+											if (_RecoveryNumber[no] >= _RecoveryData.repetion)
+												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+											else
+												_send_ctrlMode(no, ctrl_recovery_step1, TRUE);
+											break;
+				case ctrl_recovery_step10:	_send_ctrlMode(no, ctrl_off, TRUE); break;
 				
 				//--- ctrl_off ---------------------------------------------------------------------
 				case ctrl_off:				_PurgeAll=FALSE;
