@@ -207,10 +207,7 @@ void ink_init(void)
 
 	for (isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++)
 	{
-		if (is_Sensor_25(isNo))
-			_MaxPressure[isNo] = 2000;
-		else
-			_MaxPressure[isNo] = 1000;
+
 		pid_reset(&_InkSupply[isNo].pid_Pump);
 		pid_reset(&_InkSupply[isNo].pid_Setpoint);
 
@@ -320,10 +317,13 @@ void ink_tick_10ms(void)
 
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
-		if (pRX_Config->ink_supply[isNo].ctrl_mode >= ctrl_recovery_start && pRX_Config->ink_supply[isNo].ctrl_mode <= ctrl_recovery_step10 && is_Sensor_25(isNo))
-			_InkSupply[isNo].pid_Setpoint.val_max 			= 2000;	// Max IS pressure 2000 mbar
+		if ((pRX_Config->printerType == printer_test_slide || pRX_Config->printerType == printer_test_table_seon) &&
+				is_Sensor_25(isNo))
+			_MaxPressure[isNo] 			= 2000;	// Max IS pressure 2000 mbar
 		else
-			_InkSupply[isNo].pid_Setpoint.val_max 			= 1000;	// Max IS pressure 1200 mbar
+			_MaxPressure[isNo] 			= 1000;	// Max IS pressure 1200 mbar
+
+		_InkSupply[isNo].pid_Setpoint.val_max   		= _MaxPressure[isNo];
 
 		switch(pRX_Config->ink_supply[isNo].ctrl_mode)
 		{
