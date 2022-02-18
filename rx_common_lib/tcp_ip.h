@@ -740,6 +740,7 @@ typedef struct SPrintFileCmd
 	UINT8		wakeup;
 	char		filename[256];
 	char		dots[4];
+	INT32		copies;
 } SPrintFileCmd;
 
 typedef struct SPrintFileRep
