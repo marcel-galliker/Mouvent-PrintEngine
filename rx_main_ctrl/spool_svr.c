@@ -513,6 +513,8 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	memcpy(&msg.id, pid, sizeof(msg.id));
 	memcpy(&_Id[RX_PrinterStatus.sentCnt%MAX_PAGES], pid, sizeof(msg.id));
 
+	msg.copies = pitem->copies;
+
 	if (rx_def_is_lb(RX_Config.printer.type) && RX_Config.printer.type!=printer_DP803 && !RX_PrinterStatus.testMode)
 	{
 		int i;
