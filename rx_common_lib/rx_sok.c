@@ -29,6 +29,7 @@
 	#include <sys/socket.h>
 	#include <sys/time.h>
 	#include <sys/types.h>
+	#include <sys/utsname.h>
 	#include <net/if.h>
 	#include <netinet/in.h>
 	#include <netinet/in_systm.h>
@@ -56,6 +57,11 @@
 //--- module globals ----------------------------------------------------------------
 
 #define FIFO_SIZE	256
+
+#ifdef linux
+#define ETH_CONFIG_PATH "/etc/netplan/02-eth-config-em1.yaml"
+#define ETH_TMP_PATH "/tmp/02-eth-config-em1.yaml"
+#endif
 
 typedef struct SCilentThreadPar
 {
@@ -342,6 +348,24 @@ int sok_set_ip_address_str (const char *deviceName, const char *addr)
 #endif // WIN32
 
 #ifdef linux
+static int isNetplanSupported()
+{
+	char line[1024];
+	FILE *fp = popen("/usr/bin/lsb_release -a", "r");
+	if (fp != NULL)
+	{
+		while (fgets(line, sizeof(line - 1), fp) != NULL)
+		{
+			if (strstr(line, "Release:") >= 0)
+			{
+				return (strstr(line, "18.04") >= 0);
+			}
+		}
+		pclose(fp);
+	}
+	return FALSE;
+}
+
 //--- sok_get_mac_address --------------------------------------------------------
 void sok_get_mac_address(const char *deviceName, UINT64 *macAddr)
 {
@@ -367,26 +391,67 @@ void sok_get_mac_address(const char *deviceName, UINT64 *macAddr)
 
 #ifdef linux
 
-//--- sok_get_ifconfig ------------------------------------------------
-int sok_get_ifconfig(const char *ifname, SIfConfig *pcfg)
+//--- sok_get_netplan_config ------------------------------------------------
+static int sok_get_netplan_config(const char *ifname, SIfConfig *pcfg)
+{
+	int nbMaskBits;
+	int mask = 0;
+	char *pos;
+	char str[256];
+	FILE *file = fopen(ETH_CONFIG_PATH, "rt");
+	if (file != NULL)
+	{
+		int state = 0;
+		while (fgets(str, sizeof(str), file))
+		{
+			if (str_start(str, "#")) continue;
+			switch (state)
+			{
+			case 0: // Wait for em1
+				if (strstr(str, "em1:") > 0) state = 1;
+				break;
+			case 1: // DHCP or static address ?
+				if (strstr(str, "dhcp4: true") > 0) {
+					pcfg->dhcp = TRUE;
+					return REPLY_OK;
+				}
+				if (strstr(str, "addresses:") > 0) state = 2;
+				break;
+			case 2: // Extract address and mask
+				pcfg->dhcp = FALSE;
+				pos = strstr(str, "-");
+				if (pos == NULL)
+					pos = str;
+				else
+					pos = pos + 1;
+
+				sscanf(pos, "%d.%d.%d.%d/%d", (int *)&pcfg->addr[0], (int *)&pcfg->addr[1], (int *)&pcfg->addr[2], (int *)&pcfg->addr[3], &nbMaskBits);
+				mask = ~(0xffffffff >> nbMaskBits);
+				pcfg->mask[0] = (mask >> 24);
+				pcfg->mask[1] = (mask >> 16);
+				pcfg->mask[2] = (mask >> 8);
+				pcfg->mask[3] = mask;
+				return REPLY_OK;
+			default:
+				return REPLY_ERROR;
+			}
+		}		
+	}
+	else {
+		// If em1 yaml file is not present, then we are in DHCP mode
+		pcfg->dhcp = TRUE;
+	}
+	return REPLY_ERROR;
+}
+
+//--- sok_get_network_config ------------------------------------------------
+static int sok_get_network_config(const char *ifname, SIfConfig *pcfg)
 {
 	FILE *file;
 	char str[256];
 	int pos;
 	int ret = REPLY_ERROR;
 
-	memset(pcfg, 0, sizeof(*pcfg));
-	file = fopen("/etc/hostname", "rt");
-	if (file!=NULL)
-	{
-		fgets(pcfg->hostname, sizeof(pcfg->hostname), file);
-		char *ch;
-		for (ch=pcfg->hostname; *ch>=' '; ch++)
-		{
-		}
-		*ch=0;
-		fclose(file);
-	}
 	file = fopen("/etc/network/interfaces", "rt");
 	if (file!=NULL)
 	{
@@ -410,6 +475,30 @@ int sok_get_ifconfig(const char *ifname, SIfConfig *pcfg)
 	return ret;
 }
 
+//--- sok_get_ifconfig ------------------------------------------------
+int sok_get_ifconfig(const char *ifname, SIfConfig *pcfg)
+{
+	memset(pcfg, 0, sizeof(*pcfg));
+	FILE* file = fopen("/etc/hostname", "rt");
+	if (file != NULL)
+	{
+		fgets(pcfg->hostname, sizeof(pcfg->hostname), file);
+		char *ch;
+		for (ch = pcfg->hostname; *ch >= ' '; ch++)
+		{
+		}
+		*ch = 0;
+		fclose(file);
+	}
+
+	if (isNetplanSupported())
+	{
+		return sok_get_netplan_config(ifname, pcfg);
+	}	
+
+	return sok_get_network_config(ifname, pcfg);
+}
+
 //--- _write_config -------------------------------------------
 static void _write_config(FILE *out, const char *ifname, SIfConfig *pcfg)
 {
@@ -429,79 +518,132 @@ static void _write_config(FILE *out, const char *ifname, SIfConfig *pcfg)
 	fprintf(out, "\n");								
 }
 
-//--- sok_set_ifconfig ---------------------------------------
-int	sok_set_ifconfig(const char *ifname, SIfConfig *pcfg)
+//--- sok_set_netplan_config ---------------------------------------
+static int sok_set_netplan_config(const char *ifname, SIfConfig *pcfg)
+{	
+	FILE* out = fopen(ETH_TMP_PATH, "wt");	
+	if (out != NULL)
+	{
+		fprintf(out, "network:\n  ethernets:\n    em1:\n");
+		if (pcfg->dhcp)
+		{
+			fprintf(out, "      dhcp4: true\n");
+		}
+		else 
+		{			
+			int nbMaskBits;
+			int mask = 0;
+			for (int i = 0; i<4; i++)
+			{
+				mask = mask << 8;
+				mask = mask | pcfg->mask[i];
+			}
+			for (nbMaskBits = 0; nbMaskBits < 32; nbMaskBits++)
+			{
+				if (mask & (1 << nbMaskBits)) break;
+			}
+			nbMaskBits = 32 - nbMaskBits;
+			fprintf(out, "      addresses:\n       - %d.%d.%d.%d/%d\n", pcfg->addr[0], pcfg->addr[1], pcfg->addr[2], pcfg->addr[3], nbMaskBits);
+		}
+		fclose(out);
+		chmod(ETH_CONFIG_PATH, 0666);
+		system("mv " ETH_TMP_PATH " " ETH_CONFIG_PATH);
+		system("netplan generate");
+		system("netplan apply");
+
+		return REPLY_OK;
+	}
+	return REPLY_ERROR;	
+}
+
+//--- sok_set_network_config ---------------------------------------
+static int sok_set_network_config(const char *ifname, SIfConfig *pcfg)
+{
+	FILE *file, *out;
+	int i;
+	int found=0;
+	char str[256];
+		
+	file = fopen("/etc/network/interfaces", "rt");
+	out =  fopen("/tmp/interfaces", "wt");
+	if (file!=NULL)
+	{
+		while(fgets(str, sizeof(str), file))
+		{
+			if (found!=1 && str_start(str, "#")) 
+			{
+				fwrite(str, 1, strlen(str), out);
+				continue;
+			}
+			if (found==0 && strstr(str, ifname)) 
+			{
+				found = 1;
+				_write_config(out, ifname, pcfg);
+			}
+			if (found==1) // found, skip
+			{
+				if(strlen(str)<5) found=2; 
+			}
+			else fwrite(str, 1, strlen(str), out);
+		}
+		if (!found) _write_config(out, ifname, pcfg);
+
+		fclose(file);
+		fclose(out);
+		chmod("/etc/network/interfaces", 0666);
+		system("mv /tmp/interfaces /etc/network/interfaces");
+
+		if (pcfg->dhcp)
+		{
+			sprintf(str, "ifconfig %s down", ifname); system(str);
+			sprintf(str, "dhclient %s", ifname); system(str);
+		}
+		else
+		{
+			sprintf(str, "ifconfig %s down", ifname); system(str);
+			sprintf(str, "dhclient -r %s", ifname); system(str);
+			sprintf(str, "ifconfig %s %d.%d.%d.%d", ifname, pcfg->addr[0],  pcfg->addr[1],  pcfg->addr[2], pcfg->addr[3]); system(str);					
+			sprintf(str, "ifconfig %s netmask %d.%d.%d.%d", ifname, pcfg->mask[0],  pcfg->mask[1],  pcfg->mask[2], pcfg->mask[3]); system(str);					
+			sprintf(str, "ifconfig %s up", ifname); system(str);
+		}
+	}
+	return REPLY_OK;
+}
+
+//--- sok_get_ifconfig ------------------------------------------------
+int sok_set_ifconfig(const char *ifname, SIfConfig *pcfg)
 {
 	SIfConfig act;
-	
 	sok_get_ifconfig(ifname, &act);
-	
+
+	// Change of host name ?
 	if (strcmp(pcfg->hostname, act.hostname))
 	{
-		FILE *file;		
+		FILE *file;
 		chmod("/etc/hostname", 0666);
 		file = fopen("/etc/hostname", "wt");
-		if (file!=NULL)
+		if (file != NULL)
 		{
 			fprintf(file, "%s\n", pcfg->hostname);
 			fclose(file);
 		}
 		Error(LOG, 0, "Write Hostname=>>%s<<", pcfg->hostname);
 	}
-	
-	if (pcfg->dhcp!=act.dhcp || memcmp(pcfg->addr, act.addr, sizeof(pcfg->addr)) || memcmp(pcfg->mask, act.mask, sizeof(pcfg->mask)))
+
+	// Any change IP config ?
+	if (pcfg->dhcp != act.dhcp || memcmp(pcfg->addr, act.addr, sizeof(pcfg->addr)) || memcmp(pcfg->mask, act.mask, sizeof(pcfg->mask)))
 	{
-		FILE *file, *out;
-		int i;
-		int found=0;
-		char str[256];
-		
-		file = fopen("/etc/network/interfaces", "rt");
-		out =  fopen("/tmp/interfaces", "wt");
-		if (file!=NULL)
+		if (isNetplanSupported())
 		{
-			while(fgets(str, sizeof(str), file))
-			{
-				if (found!=1 && str_start(str, "#")) 
-				{
-					fwrite(str, 1, strlen(str), out);
-					continue;
-				}
-				if (found==0 && strstr(str, ifname)) 
-				{
-					found = 1;
-					_write_config(out, ifname, pcfg);
-				}
-				if (found==1) // found, skip
-				{
-					if(strlen(str)<5) found=2; 
-				}
-				else fwrite(str, 1, strlen(str), out);
-			}
-			if (!found) _write_config(out, ifname, pcfg);
-
-			fclose(file);
-			fclose(out);
-			chmod("/etc/network/int5erfaces", 0666);
-			system("mv /tmp/interfaces /etc/network/interfaces");
-
-			if (pcfg->dhcp)
-			{
-				sprintf(str, "ifconfig %s down", ifname); system(str);
-				sprintf(str, "dhclient %s", ifname); system(str);
-			}
-			else
-			{
-				sprintf(str, "ifconfig %s down", ifname); system(str);
-				sprintf(str, "dhclient -r %s", ifname); system(str);
-				sprintf(str, "ifconfig %s %d.%d.%d.%d", ifname, pcfg->addr[0],  pcfg->addr[1],  pcfg->addr[2], pcfg->addr[3]); system(str);					
-				sprintf(str, "ifconfig %s netmask %d.%d.%d.%d", ifname, pcfg->mask[0],  pcfg->mask[1],  pcfg->mask[2], pcfg->mask[3]); system(str);					
-				sprintf(str, "ifconfig %s up", ifname); system(str);
-			}
+			return sok_set_netplan_config(ifname, pcfg);
 		}
+
+		return sok_set_network_config(ifname, pcfg);
 	}
+
 	return REPLY_OK;
 }
+
 
 //--- sok_get_ifcnt -----------------------------------
 int	sok_get_ifcnt()
