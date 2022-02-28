@@ -180,7 +180,7 @@ namespace RX_DigiPrint.Views.Settings
         //---  save -----------------------------------------
         private void Save()
         {
-            // _Settings.Host_DHCP = (bool)HOST_DHCP.IsChecked;
+            _Settings.Host_DHCP = (bool)HOST_DHCP.IsChecked;
             _Settings.SetNetworkSettings();
             RxGlobals.PrinterProperties = _Settings.RxClone();
             RxGlobals.PrinterProperties.Save();
