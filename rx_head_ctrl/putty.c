@@ -40,6 +40,8 @@ static int  _mvteeprom=FALSE;
 static HANDLE	hPuttyThread;
 static int		_PuttyRunning;
 
+static int		_Help = FALSE;
+
 //--- prototypes ----------------------------------------------------------
 static void* _putty_thread(void* lpParameter);
 static void _main_menu(void);
@@ -93,47 +95,53 @@ static void _main_menu(void)
 //		term_printf("r<filename>: load rbf\n");
 //		term_printf("t: Test, send UDP DataBlock\n");
 //		term_printf("T: Test, send 1000 UDP DataBlocks\n");
-	term_printf("d<n>: Drop size fixed (n=0..3)\n");
-	term_printf("p<filename>: print bmp file (default=angle.bmp)\n");
-	//term_printf("P<filename>: print tif file (default=maserati_K.tif)\n");
-	term_printf("g: print GO\n");
-//	term_printf("u: Display block used flags\n");
-	term_printf("l: start pressure log of head[0]\n");	
-	term_printf("R: trace registers\n");
-	term_printf("t: TCP/IP Stress Test\n");
-	term_printf("E: Reset pending errors\n");
-	term_printf("h<xxx>: Frequency in Hz\n");
-	term_printf("d<x>:   Drop size fixed 0..3\n");
-	if (_status)
+	if (_Help)
 	{
-		term_printf("o: cond. OFF mode\n");
-		term_printf("r: cond. Print mode\n");		
-//		term_printf("n: cond. Watchdog Test\n");
-		term_printf("q: start log\n");
-		term_printf("i: heater [C] (<=50)\n");	
+		term_printf("d<n>: Drop size fixed (n=0..3)\n");
+		term_printf("p<filename>: print bmp file (default=angle.bmp)\n");
+		//term_printf("P<filename>: print tif file (default=maserati_K.tif)\n");
+		term_printf("g: print GO\n");
+//		term_printf("u: Display block used flags\n");
+		term_printf("l: start pressure log of head[0]\n");	
+		term_printf("R: trace registers\n");
+		term_printf("t: TCP/IP Stress Test\n");
+		term_printf("E: Reset pending errors\n");
+		term_printf("h<xxx>: Frequency in Hz\n");
+		term_printf("d<x>:   Drop size fixed 0..3\n");
+		if (_status)
+		{
+			term_printf("o: cond. OFF mode\n");
+			term_printf("r: cond. Print mode\n");		
+//			term_printf("n: cond. Watchdog Test\n");
+			term_printf("q: start log\n");
+			term_printf("i: heater [C] (<=50)\n");	
 
-		term_printf("z<x>:   Calibrate pressure sensor\n");
-    	term_printf("u<x>:   Delete user calibrated offset\n");
+			term_printf("z<x>:   Calibrate pressure sensor\n");
+			term_printf("u<x>:   Delete user calibrated offset\n");
+		}
+		if (_mvteeprom)
+		{
+			term_printf("ra<h><angle>:   set rob_angle[<h>]=<angle>\n");
+			term_printf("rd<h><dist>:    set rob_dist [<h>]=<dist>\n");
+		}
+		if (_status) term_printf("s: hide status       ");
+		else         term_printf("s: show status       ");
+		if (_cond)   term_printf("c: hide conditioner  ");
+		else         term_printf("c: show conditioner  ");
+		if (_nios)   term_printf("n: hide nios         ");
+		else         term_printf("n: show nios         ");
+		if (_eeprom) term_printf("e: hide eeprom\n");
+		else         term_printf("e: show eeprom\n");
+		if (_mvteeprom) term_printf("m: hide mouvent eeprom\n");
+		else            term_printf("m: show mouvent eeprom\n");
+		if (_fpga)		term_printf("z: hide fpga\n");
+		else            term_printf("z: show fpga\n");
+		
+		term_printf("x: exit\n");
 	}
-	if (_mvteeprom)
-	{
-		term_printf("ra<h><angle>:   set rob_angle[<h>]=<angle>\n");
-    	term_printf("rd<h><dist>:    set rob_dist [<h>]=<dist>\n");
-	}
-	if (_status) term_printf("s: hide status       ");
-	else         term_printf("s: show status       ");
-	if (_cond)   term_printf("c: hide conditioner  ");
-	else         term_printf("c: show conditioner  ");
-	if (_nios)   term_printf("n: hide nios         ");
-	else         term_printf("n: show nios         ");
-	if (_eeprom) term_printf("e: hide eeprom\n");
-	else         term_printf("e: show eeprom\n");
-	if (_mvteeprom) term_printf("m: hide mouvent eeprom\n");
-	else            term_printf("m: show mouvent eeprom\n");
-	if (_fpga)		term_printf("z: hide fpga\n");
-	else            term_printf("z: show fpga\n");
+	else
+		term_printf("?: help\n");
 	
-	term_printf("x: exit\n");
 	term_printf(">");
 	term_flush();
 	
@@ -154,7 +162,14 @@ void putty_handle_menu(char *str)
 		case 'n': _nios   = !_nios;		break;
 		case 'c': _cond   = !_cond;		break;
 		case 'z': _fpga   = !_fpga;		break;
+		case '?': _Help = TRUE;			break;
 	}
+}
+
+//--- unload_help_menu ------------------------------------
+void unload_help_menu(void)
+{
+	_Help = FALSE;
 }
 
 //--- putty_input ---------------------------------------
