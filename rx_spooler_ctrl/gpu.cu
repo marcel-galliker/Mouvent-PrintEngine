@@ -169,7 +169,7 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 	UINT32 limitML = (256 - limitL);
 	UINT32 limitSM = ((limitL ? limitL : 256) - limitM);
 
-	UINT32 src;	// need 32 bits for compensating disabled jets
+	UINT32 src;
 	UINT16  ta;
 
 	sectorWidth+=x;
@@ -179,7 +179,7 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 	{
 		while (x<sectorWidth)
 		{
-			src = *pSrc++ * densityFactor[x];
+			src = *pSrc * densityFactor[x];
 			ta  = taLine[(offset+x)%TA_WIDTH];
 			dst <<= 2;
 			if (src > ta)
@@ -192,6 +192,7 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 					dst |= 0x01;
 			}
 
+			++pSrc;
 			if (!(++x & 3)) *pDst++=dst;
 		}
 	}
@@ -220,7 +221,7 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 	{
 		while (x<sectorWidth)
 		{
-			src = *pSrc++ * densityFactor[x];
+			src = *pSrc * densityFactor[x];
 			ta  = taLine[(offset+x)%TA_WIDTH];
 			dst <<= 2;
 			if (src > ta)
@@ -233,6 +234,7 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 					dst |= 0x01;
 			}
 
+			++pSrc;
 			if (!(++x & 3)) *pDst++=dst;
 		}
 	}
@@ -266,7 +268,7 @@ __global__ void _screen_fms_16bits_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UI
 	{
 		while (x < sectorWidth)
 		{
-			src = *pSrc++ * densityFactor[x];
+			src = *pSrc * densityFactor[x];
 			ta = taLine[(offset + x) % TA_WIDTH];
 			dst <<= 2;
 			if (src > 256 * ta)
@@ -279,6 +281,7 @@ __global__ void _screen_fms_16bits_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UI
 					dst |= 0x01;
 			}
 
+			++pSrc;
 			if (!(++x & 3)) *pDst++ = dst;
 		}
 	}
@@ -311,7 +314,7 @@ static void _screen_fms_16bits(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UIN
 	{
 		while (x < sectorWidth)
 		{
-			src = *pSrc++ * densityFactor[x];
+			src = *pSrc * densityFactor[x];
 			ta = taLine[(offset + x) % TA_WIDTH];
 			dst <<= 2;
 			if (src > (UINT32) 256 * ta)
@@ -324,6 +327,7 @@ static void _screen_fms_16bits(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UIN
 					dst |= 0x01;
 			}
 
+			++pSrc;
 			if (!(++x & 3)) *pDst++ = dst;
 		}
 	}
@@ -354,7 +358,7 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 		while (x<sectorWidth)
 		{
 			src = *pSrc * densityFactor[x];
-			if (x&1) pSrc++;
+
 			ta  = taLine[(offset+x)%TA_WIDTH];
 			dst <<= 2;
 			if (src > ta)
@@ -367,6 +371,7 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 					dst |= 0x01;
 			}
 
+			if (x&1) pSrc++;
 			if (!(++x & 3)) *pDst++=dst;
 		}
 	}
@@ -396,7 +401,7 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 		while (x<sectorWidth)
 		{
 			src = *pSrc * densityFactor[x];
-			if (x&1) pSrc++;
+
 			ta  = taLine[(offset+x)%TA_WIDTH];
 			dst <<= 2;
 			if (src > ta)
@@ -409,6 +414,7 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 					dst |= 0x01;
 			}
 
+			if (x&1) pSrc++;
 			if (!(++x & 3)) *pDst++=dst;
 		}
 	}
