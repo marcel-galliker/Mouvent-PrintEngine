@@ -608,6 +608,8 @@ void temp_tick_10ms (void)
 	int tempHeaterOK = 1;
 	if((RX_Status.tempHeater > TEMP_MAX_HIGH_PUMP) && (RX_Status.pump_measured * 60 / 1000 > 10)) tempHeaterOK = 0;
 	if((RX_Status.tempHeater > TEMP_MAX_LOW_PUMP) && (RX_Status.pump_measured * 60 / 1000 <= 10)) tempHeaterOK = 0;
+	// if almost no ink circulation, disable the heater
+	if(RX_Status.pump_measured * 60 / 1000 <= 4) tempHeaterOK = 0;
 	
 	if (_heater_running 
         && (RX_Status.tempIn < TempMAX)

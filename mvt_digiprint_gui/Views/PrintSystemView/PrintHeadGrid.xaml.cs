@@ -22,8 +22,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- User_PropertyChanged --------------------------------------
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
-            ServiceGrid.Visibility = visibility;
+            ServiceGrid.Visibility = Visibility.Visible;
         }
 
         //--- _assign_inksupply --------------------------------------------------------
