@@ -279,7 +279,7 @@ namespace RX_DigiPrint.Models
         //--- AnyFlushed -------------------------------------------
         public static bool AnyFlushed()
 		{
-            foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
+			foreach(InkSupply inkSupply in RxGlobals.InkSupply.List)
 			{
                 if (inkSupply.InkType!=null && inkSupply.Connected && inkSupply.Flushed)
 				{

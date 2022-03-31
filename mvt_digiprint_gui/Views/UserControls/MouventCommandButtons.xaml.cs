@@ -156,8 +156,6 @@ namespace RX_DigiPrint.Views.UserControls
                 return;
             }
 
-            if (InkSupply.AnyFlushed()) return;
-
             if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
                 if (!MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.PrintSystem, RX_DigiPrint.Resources.Language.Resources.SomeInkSuppliesAreOff, MessageBoxImage.Question, false))
