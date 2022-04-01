@@ -57,8 +57,7 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
-            ServiceGrid.Visibility = visibility;
+            ServiceGrid.Visibility = Visibility.Visible;
         }
 
         private void Chiller_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

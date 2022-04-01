@@ -49,15 +49,8 @@ namespace RX_DigiPrint.Views.PrintSystemExtendedView
 
         public void SetUser()
         {
-            if (RxGlobals.User.UserType >= Services.EUserType.usr_service)
-            {
-                ServiceGrid.Visibility = System.Windows.Visibility.Visible;
-            }
-            else
-            {
-                ServiceGrid.Visibility = System.Windows.Visibility.Hidden;
-            }
-
+            ServiceGrid.Visibility = Visibility.Visible;
+            
             Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_service) ? Visibility.Visible : Visibility.Collapsed;
             Line_Calibrate.Visibility = visibility;
             // Button_Calibrate.Visibility = visibility;

@@ -103,9 +103,7 @@ namespace RX_DigiPrint.Views.PrintQueueView
 
         //--- Print_Clicked --------------------------------------------------------------------
         private void Print_Clicked(object sender, RoutedEventArgs e)
-        {
-            if (InkSupply.AnyFlushed()) return;
-
+        {	             
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_cleaf && !(RxGlobals.StepperStatus[0].DripPans_InfeedDOWN && RxGlobals.StepperStatus[0].DripPans_OutfeedDOWN))
             {
                 MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.PrintSystem, RX_DigiPrint.Resources.Language.Resources.DripPansBelowTheClusters, MessageBoxImage.Question, true);

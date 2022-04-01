@@ -195,6 +195,12 @@ __global__ void _screen_fms_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *d
 			++pSrc;
 			if (!(++x & 3)) *pDst++=dst;
 		}
+		// check if the last byte is not complete
+		if (x & 3) // not 4 pixels
+		{
+			while (x++ & 3) dst <<= 2; // complete to 4 pixels
+			*pDst = dst;			   // and save the byte
+		}
 	}
 }
 
@@ -236,6 +242,12 @@ static void _screen_fms(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16 *de
 
 			++pSrc;
 			if (!(++x & 3)) *pDst++=dst;
+		}
+		// check if the last byte is not complete
+		if (x & 3) // not 4 pixels
+		{
+			while (x++ & 3) dst <<= 2; // complete to 4 pixels
+			*pDst = dst;			   // and save the byte
 		}
 	}
 }
@@ -284,6 +296,12 @@ __global__ void _screen_fms_16bits_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UI
 			++pSrc;
 			if (!(++x & 3)) *pDst++ = dst;
 		}
+		// check if the last byte is not complete
+		if (x & 3) // not 4 pixels
+		{
+			while (x++ & 3) dst <<= 2; // complete to 4 pixels
+			*pDst = dst;			   // and save the byte
+		}
 	}
 }
 
@@ -330,6 +348,12 @@ static void _screen_fms_16bits(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UIN
 			++pSrc;
 			if (!(++x & 3)) *pDst++ = dst;
 		}
+		// check if the last byte is not complete
+		if (x & 3) // not 4 pixels
+		{
+			while (x++ & 3) dst <<= 2; // complete to 4 pixels
+			*pDst = dst;			   // and save the byte
+		}
 	}
 }
 
@@ -374,6 +398,12 @@ __global__ void _screen_fms_600_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 			if (x&1) pSrc++;
 			if (!(++x & 3)) *pDst++=dst;
 		}
+		// check if the last byte is not complete
+		if (x & 3) // not 4 pixels
+		{
+			while (x++ & 3) dst <<= 2; // complete to 4 pixels
+			*pDst = dst;			   // and save the byte
+		}
 	}
 }
 
@@ -416,6 +446,12 @@ static void _screen_fms_600(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 
 			if (x&1) pSrc++;
 			if (!(++x & 3)) *pDst++=dst;
+		}
+		// check if the last byte is not complete
+		if (x & 3) // not 4 pixels
+		{
+			while (x++ & 3) dst <<= 2; // complete to 4 pixels
+			*pDst = dst;			  // and save the byte
 		}
 	}
 }
@@ -463,6 +499,7 @@ __global__ void _screen_fms_300_kernel(UINT8 *in, UINT8 *out, UINT16 *pta, UINT1
 				pSrc++;
 			}
 		}
+		// no check the last byte is complete as 300dpi (so also a multiple of 4 at 1200dpi)
 	}
 }
 
@@ -508,6 +545,7 @@ static void _screen_fms_300(UINT32 y, UINT8 *in, UINT8 *out, UINT16 *pta, UINT16
 				pSrc++;
 			}
 		}
+		// no check the last byte is complete as 300dpi (so also a multiple of 4 at 1200dpi)
 	}
 }
 
