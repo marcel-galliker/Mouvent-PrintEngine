@@ -62,8 +62,6 @@ static int		_Manipulated=FALSE;
 static int		_lastQuery; // ticks of the last query received from LH702 PLC to timeout
 
 //--- Prototypes --------------------------------------------------------------
-static void _set_network_config(void);
-
 static void *_lh702_thread(void *lpParameter);
 static int   _lh702_closed(RX_SOCKET socket, const char *peerName);
 
@@ -121,19 +119,6 @@ void lh702_init(void)
 	{
 		_lh702ThreadRunning = TRUE;
 		rx_thread_start(fth, NULL, 0, "_lh702_thread");
-	}
-}
-
-//--- _set_network_config ----------------------------------
-static void _set_network_config(void)
-{
-	SIfConfig cfg;
-	if (sok_get_ifconfig("em2:1", &cfg)==REPLY_ERROR)
-	{
-        *((UINT32 *)&cfg.addr) = sok_addr_32(RX_Config.em2_1_address);
-		cfg.dhcp = FALSE;
-        *((UINT32 *)&cfg.mask) = sok_addr_32(RX_Config.em2_1_mask);
-		sok_set_ifconfig("em2:1", &cfg);
 	}
 }
 
@@ -227,7 +212,6 @@ static void *_lh702_thread(void *lpParameter)
 	{		
 		if (first)
 		{
-			_set_network_config();
 			first=FALSE;					
 		}
 		if (_Socket==INVALID_SOCKET)

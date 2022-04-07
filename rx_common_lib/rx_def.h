@@ -1661,8 +1661,6 @@ typedef struct SRxConfig
     char			master_ip_address[64];
     UINT32			master_ip_port;
 	char			opcua_prefix[64];
-	char			em2_1_address[64];
-    char			em2_1_mask[64];
 	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
 	INT16			jc_ratio;
 	INT16			densityValue[HEAD_BOARD_CNT][HEAD_CNT][MAX_DENSITY_VALUES];
