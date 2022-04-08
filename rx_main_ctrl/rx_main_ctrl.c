@@ -115,9 +115,6 @@ static void _menu(void)
 		case 'i':	dl_identify(atoi(&str[1]));	break;
 		case 't':	dl_trigger (atoi(&str[1]));	break;
         case 'g':	gui_test();break;
-	#ifdef DEBUG
-		case 'r':	ctr_print_reset_key(&str[1]); break;
-	#endif
 		default:	break;
 		}
 	}

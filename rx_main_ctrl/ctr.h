@@ -16,8 +16,6 @@
 void ctr_init(void);
 void ctr_tick(void);
 void ctr_reset(void);
-void ctr_calc_reset_key(char *machineName, UCHAR *key);
-void ctr_print_reset_key(char *machineName);
 void ctr_add(int mm, UINT32 colors);
 // void ctr_save(void);
 void ctr_reset_jobLen(void);
