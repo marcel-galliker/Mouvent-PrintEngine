@@ -275,6 +275,14 @@ namespace RX_DigiPrint.Models
                }
             }
         }
+
+		//--- Property Flushed ---------------------------------------
+        private bool _FlushAvailable = true;
+        public bool FlushAvailable
+        {
+            get { return _FlushAvailable; } 
+           set { SetProperty(ref _FlushAvailable, value); }
+        }
         
         //--- AnyFlushed -------------------------------------------
         public static bool AnyFlushed()
@@ -404,6 +412,7 @@ namespace RX_DigiPrint.Models
             BleedValve      = ((msg.info & 0x00000002)==0)? "--":"ON";
             AirCusionValve  = ((msg.info & 0x00000004)==0)? "--":"ON";
             Flushed         = (msg.info & 0x00000008)!=0;
+			FlushAvailable  = (msg.info & 0x00000080)!=0;
             CondTempReady   = ((msg.info & 0x00000010)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             TempReady       = ((msg.info & 0x00000020)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
             FlowFactorOk    = ((msg.info & 0x00000040)!=0) || (CtrlMode!=EFluidCtrlMode.ctrl_print);
