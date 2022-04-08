@@ -90,7 +90,10 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- User_PropertyChanged --------------------------------------
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            ServiceGrid.Visibility = Visibility.Visible;
+            Visibility visibility  =  (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed; 
+            ServiceGrid.Visibility = visibility;
+			Visibility visibilityPlus  =  (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Collapsed : Visibility.Visible; 
+            ServiceGridPlus.Visibility = visibilityPlus;
         }
 
         //--- PrintSystem_PropertyChanged ---------------------------------------------------------
