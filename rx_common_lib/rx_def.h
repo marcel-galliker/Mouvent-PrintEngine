@@ -1159,7 +1159,7 @@ typedef struct SInkSupplyInfo
 			UINT32 condTempReady : 1;	// 0x00000010
 			UINT32 heaterTempReady : 1;	// 0x00000020
 			UINT32 cond_flowFactor_ok : 1;// 0x00000040
-			UINT32 info_7 : 1;			// 0x00000080
+			UINT32 canFlush : 1;		// 0x00000080
 			UINT32 info_8 : 1;			// 0x00000100
 			UINT32 info_9 : 1;			// 0x00000200
 			UINT32 info10 : 1;			// 0x00000400
@@ -1711,8 +1711,6 @@ typedef struct SRxConfig
     char			master_ip_address[64];
     UINT32			master_ip_port;
 	char			opcua_prefix[64];
-	char			em2_1_address[64];
-    char			em2_1_mask[64];
 	INT16			headDisabledJets[MAX_HEAD_DIST][MAX_DISABLED_JETS];
 	INT16			jc_ratio;
 	INT16			densityValue[HEAD_BOARD_CNT][HEAD_CNT][MAX_DENSITY_VALUES];

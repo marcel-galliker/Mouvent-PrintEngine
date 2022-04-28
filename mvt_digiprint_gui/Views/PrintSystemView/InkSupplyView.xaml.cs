@@ -60,7 +60,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         private void User_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             Visibility visibility  = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed; 
-            ServiceGrid.Visibility = Visibility.Visible;
+            ServiceGrid.Visibility = visibility;
             Line_Calibrate.Visibility = visibility;
             // Button_Calibrate.Visibility = visibility;
             InkType.IsEnabled       =  (RxGlobals.User.UserType >= EUserType.usr_maintenance);

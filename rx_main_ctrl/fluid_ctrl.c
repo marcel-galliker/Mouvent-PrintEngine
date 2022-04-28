@@ -1090,6 +1090,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		{
 			FluidStatus[i].info.connected = (_FluidThreadPar[i/INK_PER_BOARD].socket!=INVALID_SOCKET);
 			FluidStatus[i].info.flushed   = ((_Flushed & (0x01<<i))!=0);
+			FluidStatus[i].info.canFlush  = (RX_Config.inkSupply[i].ink.flushTime[0]!=0);
 		}
 
 		FluidStatus[i].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, i, _MeasurementNumber, _ScalesStatus[_FluidToScales[i]]);
