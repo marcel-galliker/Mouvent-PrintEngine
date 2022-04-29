@@ -170,7 +170,7 @@ REM ----------------------------------------------------------------------------
 	REM Important to clean to ensure the Linux folder is empty
 	set TARGETS=/t:Clean,Build
 	set FLAGS=/m:1 /property:Configuration=Release-lx /property:Platform=Win32
-	call :BUILD_PROJECT rx_dhcp_server, sln
+ 	call :BUILD_PROJECT rx_dhcp_server, sln
 	call :BUILD_PROJECT rx_spooler_ctrl, sln
 	call :BUILD_PROJECT rx_boot, sln
 	call :BUILD_PROJECT rx_main_ctrl, sln

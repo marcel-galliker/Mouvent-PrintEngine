@@ -24,6 +24,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             Visibility visibility = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Visible : Visibility.Collapsed;
             ServiceGrid.Visibility = visibility;
+			Visibility visibilityPlus = (RxGlobals.User.UserType >= EUserType.usr_maintenance) ? Visibility.Collapsed : Visibility.Visible;
+            ServiceGridPlus.Visibility = visibilityPlus;
         }
 
         //--- _assign_inksupply --------------------------------------------------------

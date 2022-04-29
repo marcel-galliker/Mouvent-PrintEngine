@@ -37,11 +37,29 @@
 
         <TextBlock Grid.Row="5" Grid.Column="0" Text="{mvt:LocalizedBinding PrintingTime}"/>
 
-        <Grid Grid.Row="6" Grid.ColumnSpan="2" x:Name="ServiceGrid" >
+		<Grid Grid.Row="6" Grid.ColumnSpan="2" x:Name="ServiceGridPlus" >
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="250"/>
+				<ColumnDefinition Width="50"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="auto"/>
+				<RowDefinition Height="auto"/>
+				<RowDefinition Height="auto"/>
+			</Grid.RowDefinitions>
+			<TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding PumpSpeed}"/>
+			<TextBlock Grid.Row="0" Grid.Column="1" Text="ml/min"/>
+
+			<TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding FlowFactor}"/>
+			<TextBlock Grid.Row="1" Grid.Column="1" Text="&lt;200"/>
+
+		</Grid>
+
+		<Grid Grid.Row="6" Grid.ColumnSpan="2" x:Name="ServiceGrid" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250"/>
                 <ColumnDefinition Width="50"/>
-            </Grid.ColumnDefinitions>
+			</Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -51,7 +69,6 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding FirepulseVoltage}"/>

@@ -58,12 +58,9 @@ static SLH702_State3 _Status3;
 
 static SLH702_Materials _Materials;
 static SPrintQueueItem	*_pItem;
-static int		_Manipulated=FALSE;
-static int		_lastQuery; // ticks of the last query received from LH702 PLC to timeout
+static int _lastQuery; // ticks of the last query received from LH702 PLC to timeout
 
 //--- Prototypes --------------------------------------------------------------
-static void _set_network_config(void);
-
 static void *_lh702_thread(void *lpParameter);
 static int   _lh702_closed(RX_SOCKET socket, const char *peerName);
 
@@ -76,7 +73,6 @@ static void _handle_encoffset		(int value);
 static void _lh702_send_status		(void);
 static void _lh702_send_materials	(void);
 static void _plc_set_var			(const char *format, ...);
-static void _ctr_calc_check(time_t time, UCHAR *check);
 
 typedef struct
 {
@@ -121,19 +117,6 @@ void lh702_init(void)
 	{
 		_lh702ThreadRunning = TRUE;
 		rx_thread_start(fth, NULL, 0, "_lh702_thread");
-	}
-}
-
-//--- _set_network_config ----------------------------------
-static void _set_network_config(void)
-{
-	SIfConfig cfg;
-	if (sok_get_ifconfig("em2:1", &cfg)==REPLY_ERROR)
-	{
-        *((UINT32 *)&cfg.addr) = sok_addr_32(RX_Config.em2_1_address);
-		cfg.dhcp = FALSE;
-        *((UINT32 *)&cfg.mask) = sok_addr_32(RX_Config.em2_1_mask);
-		sok_set_ifconfig("em2:1", &cfg);
 	}
 }
 
@@ -227,7 +210,6 @@ static void *_lh702_thread(void *lpParameter)
 	{		
 		if (first)
 		{
-			_set_network_config();
 			first=FALSE;					
 		}
 		if (_Socket==INVALID_SOCKET)
@@ -267,6 +249,7 @@ static int _lh702_closed(RX_SOCKET socket, const char *peerName)
 	Error(LOG, 0, "LH702 TCP/IP connection closed");
 	return REPLY_OK;
 }
+
 //--- _lh702_send_status ---------------------------------------------
 static void _lh702_send_status(void)
 {
@@ -553,8 +536,6 @@ void lh702_ctr_init(void)
 {	
 	if (rx_file_exists(PATH_USER FILENAME_COUNTERS_LH702))
 	{
-		UCHAR	check1[64];
-		UCHAR	check2[64];
 		//--- read file ------------	
 		HANDLE file = setup_create();
 		setup_load(file, PATH_USER FILENAME_COUNTERS_LH702);
@@ -564,25 +545,9 @@ void lh702_ctr_init(void)
 			setup_int64 (file, "black",   READ, &RX_PrinterStatus.counterLH702[CTR_LH702_K], 0);
 			setup_int64 (file, "color",	  READ, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR], 0);
 			setup_int64 (file, "color_w", READ, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR_W], 0);
-			setup_str   (file, "check",  READ, check1, sizeof(check1), "");
 		}
 		setup_destroy(file);
-	
-		_ctr_calc_check(rx_file_get_mtime(PATH_USER FILENAME_COUNTERS_LH702), check2);
-	
-		_Manipulated = (strcmp(check1, check2))!=0;
-		if (_Manipulated)
-		{
-			ctr_calc_reset_key(RX_Hostname, check2);
-			if (!strcmp(check1, check2))
-			{
-				_Manipulated = FALSE;
-				RX_PrinterStatus.counterTotal=0;
-			}
-		}
-		if (_Manipulated && !rx_def_is_test(RX_Config.printer.type)) 
-			Error(ERR_CONT, 0, "Counters manipulated");
-	
+		
 		lh702_ctr_save(FALSE, NULL);	
 	}
 }
@@ -593,7 +558,6 @@ void lh702_ctr_save(int reset, char *machineName)
 	if (RX_Config.printer.type==printer_LH702)
 	{
 		char   name[64];
-		UCHAR  check[64];
 		time_t time=rx_file_get_mtime(PATH_USER FILENAME_COUNTERS_LH702);
 
 		HANDLE file = setup_create();
@@ -609,49 +573,13 @@ void lh702_ctr_save(int reset, char *machineName)
 			setup_int64 (file, "black",   WRITE, &RX_PrinterStatus.counterLH702[CTR_LH702_K], 0);
 			setup_int64 (file, "color",	  WRITE, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR], 0);
 			setup_int64 (file, "color_w", WRITE, &RX_PrinterStatus.counterLH702[CTR_LH702_COLOR_W], 0);
-
-			if (reset)
-			{
-				time = rx_get_system_sec();
-				ctr_calc_reset_key(name, check);
-			}
-			else if (_Manipulated) 
-			{
-				if (rx_def_is_test(RX_Config.printer.type)) 
-				{
-					strcpy(check, "TEST");
-				}
-				else 
-				{
-					Error(ERR_CONT, 0, "Counters manipulated");
-					strcpy(check, "Manipulated");
-				}
-			}
-			else
-			{
-				time = rx_get_system_sec();
-				_ctr_calc_check(time, check);
-			}
-			setup_str	(file, "check", WRITE, check, sizeof(check), "");
 		}
 
-	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, FALSE);
 		setup_save(file, PATH_USER FILENAME_COUNTERS_LH702);
 		setup_destroy(file);
-	//	rx_file_set_readonly(PATH_USER FILENAME_COUNTERS, TRUE);
+
 		rx_file_set_mtime(PATH_USER FILENAME_COUNTERS_LH702, time);
 	}
-}
-
-//--- _ctr_calc_check ---------------------------------
-static void _ctr_calc_check(time_t time, UCHAR *check)
-{
-	_sctr ctr;
-	memset(&ctr, 0, sizeof(ctr));
-	sok_get_mac_address("em2", &ctr.macAddr);
-	ctr.time  = time;
-	for (int i=0; i<3; i++) ctr.counter[i] = RX_PrinterStatus.counterLH702[i];
-	rx_hash_mem_str((UCHAR*)&ctr, sizeof(ctr), check);
 }
 
 //--- lh702_ctr_add -----------------------------------------

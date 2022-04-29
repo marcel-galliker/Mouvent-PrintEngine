@@ -97,7 +97,25 @@
 
         <TextBlock  Grid.Row="5" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding PrintingTime}" />
 
-        <Grid  Margin="2,0,2,0" Grid.Row="6" x:Name="ServiceGrid" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
+		<Grid  Margin="2,0,2,0" Grid.Row="6" x:Name="ServiceGridPlus" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="auto"/>
+				<RowDefinition Height="auto"/>
+				<RowDefinition Height="auto"/>
+			</Grid.RowDefinitions>
+			<StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+				<TextBlock Text="{Binding PumpFeedback, Converter={StaticResource HeadVal_Converter10}}" />
+				<TextBlock Text=" ("/>
+				<TextBlock Text="{Binding PumpSpeed, Converter={StaticResource HeadVal_Converter}}" />
+				<TextBlock  Margin="0,0,2,0" Text="%)"/>
+			</StackPanel>
+
+			<Rectangle  Grid.Row="1" Margin="2,0,2,0"  Fill="{StaticResource RX.Warn}" Visibility="{Binding FlowFactorWarning, Converter={StaticResource BoolToVisible_Converter}}"/>
+			<TextBlock  Grid.Row="1" Margin="0,0,2,0"  HorizontalAlignment="Right"  Text="{Binding FlowFactor, Converter={StaticResource HeadVal_Converter}}" />
+
+		</Grid>
+
+		<Grid  Margin="2,0,2,0" Grid.Row="6" x:Name="ServiceGrid" IsVisibleChanged="ServiceGrid_IsVisibleChanged">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>

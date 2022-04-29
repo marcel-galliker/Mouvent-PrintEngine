@@ -326,9 +326,10 @@ static void _send_head_info(void)
 			{
 				len += sprintf(&str[len], "  %d", pinfo->badJets[bad]); 
 			}
+			char degree_sign = 176;			// take degree sign out of ISO 8859-1 table, as it otherwise doesn't seem to work.
 			len += sprintf(&str[len], "\n");
 			len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n", RX_TestImage.dots, pstat->meniscus/10, abs(pstat->meniscus)%10, pstat->pumpFeedback/10, pstat->pumpFeedback%10);
-			len += sprintf(&str[len], "Temp=%d.%d°C / Waveform=%s\n", pstat->tempHead / 1000, (pstat->tempHead% 1000) / 100, RX_Config.inkSupply[color].ink.name);
+			len += sprintf(&str[len], "Temp=%d.%d%cC / Waveform=%s\n", pstat->tempHead / 1000, (pstat->tempHead% 1000) / 100, degree_sign, RX_Config.inkSupply[color].ink.name);
 			if (RX_TestImage.testImage==PQ_TEST_DENSITY) 
 			{
 				len += sprintf(&str[len], "Density Correction: volt=%d%%\n", RX_Config.voltage[headNo / MAX_HEADS_BOARD][headNo % MAX_HEADS_BOARD]);

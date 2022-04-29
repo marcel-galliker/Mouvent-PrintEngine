@@ -98,6 +98,7 @@ void handle_menu(char *str)
 	int i;
 	int no;
 	
+	if (str[0] != NULL) unload_help_menu();
 	if      (no=str_start(str, "cluster"))		cond_set_clusterNo(atoi(&str[no]));
 	else if (no=str_start(str, "resetinkctr"))	
 	{
@@ -233,7 +234,7 @@ static void _main_loop(void)
 				_AppRunning=FALSE;										
 			}
 		}
-		_tickle_puls();
+		if (RX_HBConfig.printerType == printer_LB702_WB) _tickle_puls();
 		if (!msg) rx_sleep(10);
 		time6= rx_get_ticks();
 	}

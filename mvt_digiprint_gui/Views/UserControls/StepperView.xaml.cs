@@ -130,7 +130,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             bool isPrinting = RxGlobals.PrinterStatus.PrintState == EPrintState.ps_printing ||
                               RxGlobals.PrinterStatus.PrintState == EPrintState.ps_stopping ||
-                              RxGlobals.PrinterStatus.PrintState == EPrintState.ps_pause ||
+                              //RxGlobals.PrinterStatus.PrintState == EPrintState.ps_pause ||
                               RxGlobals.PrinterStatus.PrintState == EPrintState.ps_goto_pause;
             StepperGrid.IsEnabled = !isPrinting;
         }

@@ -15,7 +15,8 @@
 void putty_init(void);
 
 char *putty_input(char *str, int size);
-void putty_handle_menu(char *str);	
+void putty_handle_menu(char *str);
+void unload_help_menu(void);
 
 void putty_display_fpga_status(void);
 void putty_display_fpga_error(void);
