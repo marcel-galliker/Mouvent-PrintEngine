@@ -28,7 +28,7 @@
 //--- defines --------------------------------------------
 #define 	MAX_PRES_DEVIATION			20	// % deviation allowed before Bleed solenoid kicks in
 #define		MAX_PRINT_PRESSURE_FLUID	300
-#define		MAX_PRESSURE_FLUID			2000
+#define		MAX_PRESSURE_FLUID			2500
 
 #define 	PRESSURE_SOFT_PURGE			80
 #define 	PRESSURE_PURGE				160
@@ -315,7 +315,7 @@ void ink_tick_10ms(void)
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
 		if (pRX_Config->ink_supply[isNo].ctrl_mode >= ctrl_recovery_start && pRX_Config->ink_supply[isNo].ctrl_mode <= ctrl_recovery_step10 && is_Sensor_25(isNo))
-			_InkSupply[isNo].pid_Setpoint.val_max 			= 2000;	// Max IS pressure 2000 mbar
+			_InkSupply[isNo].pid_Setpoint.val_max 			= 2500;	// Max IS pressure 2000 mbar
 		else
 			_InkSupply[isNo].pid_Setpoint.val_max 			= 1000;	// Max IS pressure 1200 mbar
 
@@ -1729,8 +1729,6 @@ static void _trace_pump_ctrl(int pressure)
 static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 {
 	#define PUMP_THRESHOLD	5
-	#define MAX_PRESSURE	1100
-
 
 	int set_valve = (pRX_Status->ink_supply[isNo].ctrl_state!=ctrl_test)
 			    && !(pRX_Status->ink_supply[isNo].ctrl_state>=ctrl_fill && pRX_Status->ink_supply[isNo].ctrl_state<ctrl_fill+10);
@@ -1814,7 +1812,7 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 
 		if(print_mode != PUMP_CTRL_MODE_NO_AIR_VALVE)
 		{
-			if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > MAX_PRESSURE)	// for safety
+			if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > _InkSupply[isNo].pid_Setpoint.val_max)	// for safety
 			{
 				_set_air_valve(isNo, PV_OPEN);
 			}

@@ -855,7 +855,8 @@ static void _control(int fluidNo)
 				case ctrl_recovery_start:	machine_set_capping_timer(FALSE);
 											_RecoveryNumber[no] = 0;
                                             _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
-                case ctrl_recovery_step1:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+                case ctrl_recovery_step1:	Error(LOG, 0, "Fluid %d: Recovery Function Nr. %d", no, _RecoveryNumber[no] + 1);
+											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 
                 case ctrl_recovery_step2:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
 											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);

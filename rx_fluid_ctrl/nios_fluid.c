@@ -478,6 +478,15 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 	_Cfg->ink_supply[isNo].condMeniscusDiff			  = pstat->condMeniscusDiff;
 	_Cfg->ink_supply[isNo].canisterEmpty			  = pstat->canisterEmpty;
 	_Cfg->ink_supply[isNo].alive++;
+
+	static int _cfg_ctrlMode_old[NIOS_INK_SUPPLY_CNT] = {0};
+	static int _state_ctrlMode_old[NIOS_INK_SUPPLY_CNT] = {0};
+	if ((RX_FluidBoardStatus.stat[isNo].ctrlMode >= ctrl_recovery_start && RX_FluidBoardStatus.stat[isNo].ctrlMode <= ctrl_recovery_step10) && (RX_FluidBoardStatus.stat[isNo].ctrlMode != _state_ctrlMode_old[isNo] || _Cfg->ink_supply[isNo].ctrl_mode != _cfg_ctrlMode_old[isNo]))
+	{
+		Error(LOG, 0, "Fluid[%d].ctrlMode: Soll: %s, Ist: %s", isNo, FluidCtrlModeStr(_Cfg->ink_supply[isNo].ctrl_mode), FluidCtrlModeStr(_Stat->ink_supply[isNo].ctrl_state));
+		_state_ctrlMode_old[isNo] = RX_FluidBoardStatus.stat[isNo].ctrlMode;
+		_cfg_ctrlMode_old[isNo] = _Cfg->ink_supply[isNo].ctrl_mode;
+	}
 }
 
 //--- nios_test_stop -------------------------------------------------

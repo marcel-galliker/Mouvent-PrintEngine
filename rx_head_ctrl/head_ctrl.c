@@ -386,6 +386,18 @@ static int _do_head_stat(RX_SOCKET socket, SFluidStateLight *pmsg)
     	_NiosMem->cfg.cond[head].fluidErr            = RX_FluidStat[head].fluidErr;
 	}
 	*/
+	int head;
+	static int _cfg_ctrlMode_old[MAX_HEADS_BOARD] = {0};
+	static int _state_ctrlMode_old[MAX_HEADS_BOARD] = {0};
+	for (head = 0; head < MAX_HEADS_BOARD; head++)
+	{
+		if ((RX_HBStatus[0].head[head].ctrlMode >= ctrl_recovery_start && RX_HBStatus[0].head[head].ctrlMode <= ctrl_recovery_step10) && (_NiosMem->cfg.cond[head].mode != _cfg_ctrlMode_old[head] || RX_HBStatus[0].head[head].ctrlMode != _state_ctrlMode_old[head]))
+		{
+			Error(LOG, 0, "Head[%d].ctrlMode: Soll: %s, Ist: %s", head, FluidCtrlModeStr(_NiosMem->cfg.cond[head].mode), FluidCtrlModeStr(RX_HBStatus[0].head[head].ctrlMode));
+			_cfg_ctrlMode_old[head] = _NiosMem->cfg.cond[head].mode;
+			_state_ctrlMode_old[head] = RX_HBStatus[0].head[head].ctrlMode;
+		}
+	}
 	_rep_head_stat(socket);
 	return REPLY_OK;
 }
