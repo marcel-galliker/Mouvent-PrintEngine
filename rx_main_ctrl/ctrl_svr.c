@@ -1054,3 +1054,40 @@ void ctrl_set_recovery_freq(int freq_hz)
 	}
 
 }
+
+//--- ctrl_set_cluster_no ----------------------------------------------
+void ctrl_set_cluster_no(SValue* pdata)
+{
+	if (!rx_def_is_tts(RX_Config.printer.type)) return;
+
+	if (*RX_Config.inkSupply[0].ink.fileName)
+	{
+		if (_HeadCtrl[pdata->no - 1].socket != INVALID_SOCKET)
+			sok_send_2(&_HeadCtrl[pdata->no - 1].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
+	}
+	else if (*RX_Config.inkSupply[1].ink.fileName)
+	{
+		if (_HeadCtrl[pdata->no - 1 + RX_Config.headsPerColor / HEAD_CNT].socket != INVALID_SOCKET)
+			sok_send_2(&_HeadCtrl[pdata->no - 1 + RX_Config.headsPerColor / HEAD_CNT].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
+	}
+}
+
+//--- ctrl_reset_cond ------------------------------
+void ctrl_reset_cond(void)
+{
+	for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
+	{
+		if (_HeadCtrl[i].socket != INVALID_SOCKET)
+			sok_send_2(&_HeadCtrl[i].socket, CMD_RESET_COND, 0, NULL);
+	}
+}
+
+//--- ctrl_set_jetting -----------------------------------------
+void ctrl_set_jetting(void)
+{
+	for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
+	{
+		if (_HeadCtrl[i].socket != INVALID_SOCKET)
+			sok_send_2(&_HeadCtrl[i].socket, CMD_JETTING_HEAD, 0, NULL);
+	}
+}

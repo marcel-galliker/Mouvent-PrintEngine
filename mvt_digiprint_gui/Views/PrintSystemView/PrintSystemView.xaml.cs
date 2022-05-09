@@ -34,6 +34,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             PrintSystemGrid.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer && _PrintSystem.ExpandSettingsPanel) ? Visibility.Visible : Visibility.Collapsed;
             StepperGrid.Visibility = (RxGlobals.User.UserType >= EUserType.usr_engineer && _PrintSystem.ExpandSettingsPanel) ? Visibility.Visible : Visibility.Collapsed;
+
+            Visibility visibility = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon && RxGlobals.User.UserType >= EUserType.usr_engineer) ? Visibility.Visible : Visibility.Collapsed;
+            FluidSettings.Visibility = visibility;
+            FlushCommands.Visibility = visibility;
+            ConditionerReset.Visibility = visibility;
         }
 
         //--- _PrintSystem_PropertyChanged -----------------------------------------------

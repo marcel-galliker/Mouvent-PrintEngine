@@ -495,6 +495,7 @@ typedef struct SOffsetCfg
 int rx_def_is_scanning(EPrinterType printerType);
 int rx_def_is_tx(EPrinterType printerType);
 int rx_def_is_lb(EPrinterType printerType);
+int rx_def_is_tts(EPrinterType printerType);
 int rx_def_is_test(EPrinterType printerType);
 int rx_def_use_pq(EPrinterType printerType);
 
@@ -652,7 +653,7 @@ typedef struct SHeadInfo
 {
 	UINT32 connected : 1;
 	UINT32 flushed   : 1;
-	UINT32 info_2 : 1;
+	UINT32 meniscus : 1;
 	UINT32 info_3 : 1;
 	UINT32 info_4 : 1;
 	UINT32 info_5 : 1;
@@ -909,6 +910,7 @@ typedef struct SHeadBoardStat
 	UINT32		clusterTime;
 	INT32		tempFpga;
 	UINT32		flow;
+	UINT32		cooler_temp;
 	
 	//--- warnings/errors ----------------
 	SHeadInfo		info;
@@ -1275,7 +1277,18 @@ typedef struct SChillerStat
 	INT32	pressure;
 	INT32	resistivity;
 	UINT32	status;
-} SChillerStat; 
+} SChillerStat;
+
+typedef struct SDriveStat
+{
+	INT32	enabled;
+	INT32	speed;
+	INT32	targetposition;
+	INT32	acceleration;
+	INT32	decelerlation;
+	INT32	jerk;
+	INT32	actualpoint;
+} SDriveStat;
 	
 typedef struct SRobotOffsets
 {
@@ -1393,7 +1406,7 @@ typedef struct ETestTableInfo
 	UINT32 x_in_ref			: 1;	//	0x00000200
 	UINT32 printing			: 1;	//	0x00000400
 	UINT32 curing			: 1;	//	0x00000800
-	UINT32 info_12			: 1;	//	0x00001000
+	UINT32 z_in_jet			: 1;	//	0x00001000
 	UINT32 info_13			: 1;	//	0x00002000
 	UINT32 info_14			: 1;	//	0x00004000
 	UINT32 info_15			: 1;	//	0x00008000
@@ -1414,6 +1427,42 @@ typedef struct ETestTableInfo
 	UINT32 DripPans_OutfeedUP			: 1;	//	0x40000000
 	UINT32 DripPans_OutfeedDOWN			: 1;	//	0x80000000
 } ETestTableInfo;
+
+typedef struct EInkPumpInfo
+{
+	UINT32 waste_valve_0 : 1;		 //	0x00000001
+	UINT32 waste_valve_1 : 1;        //	0x00000002
+	UINT32 waste_valve_2 : 1;        //	0x00000004
+	UINT32 waste_valve_3 : 1;		 //	0x00000008
+	UINT32 ipa_valve_0 : 1;			 //	0x00000010
+	UINT32 ipa_valve_1 : 1;			 //	0x00000020
+	UINT32 ipa_valve_2 : 1;          //	0x00000040
+	UINT32 ipa_valve_3 : 1;          //	0x00000080
+	UINT32 xl_valve_0 : 1;           //	0x00000100
+	UINT32 xl_valve_1 : 1;           //	0x00000200
+	UINT32 xl_valve_2 : 1;           //	0x00000400
+	UINT32 xl_valve_3 : 1;           //	0x00000800
+	UINT32 flush_valve_0 : 1;        //	0x00001000
+	UINT32 flush_valve_1 : 1;        //	0x00002000
+	UINT32 flush_valve_2 : 1;        //	0x00004000
+	UINT32 flush_valve_3 : 1;        //	0x00008000
+	UINT32 info_16 : 1;              //	0x00010000
+	UINT32 info_17 : 1;              //	0x00020000
+	UINT32 info_18 : 1;				 //	0x00040000
+	UINT32 info_19 : 1;				 //	0x00080000
+	UINT32 info_20 : 1;				 //	0x00100000
+	UINT32 info_21 : 1;				 //	0x00200000
+	UINT32 info_22 : 1;              //	0x00400000
+	UINT32 info_23 : 1;              //	0x00800000
+	UINT32 info_24 : 1;				 //	0x01000000
+	UINT32 info_25 : 1;              //	0x02000000
+	UINT32 info_26 : 1;				 // 0x04000000
+	UINT32 info_27 : 1;              // 0x08000000
+	UINT32 info_28 : 1;				 // 0x10000000
+	UINT32 info_29 : 1;				 //	0x20000000
+	UINT32 info_30 : 1;				 //	0x40000000
+	UINT32 info_31 : 1;				 //	0x80000000
+} EInkPumpInfo;
 	
 typedef struct ERobotInfo
 {
@@ -1525,6 +1574,7 @@ typedef struct SStepperStat
 	//--- warnings/errors ----------------
 	ETestTableInfo	info;		// UINT32
 	ERobotInfo		robinfo;	// UINT32
+	EInkPumpInfo	inkinfo;	// UINT32
 
 	UINT32		warn;
 	

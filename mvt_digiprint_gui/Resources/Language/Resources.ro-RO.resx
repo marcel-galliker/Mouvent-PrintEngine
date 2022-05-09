@@ -285,6 +285,12 @@
   <data name="ControlMode" xml:space="preserve">
     <value>Mod Control</value>
   </data>
+  <data name="Cooler_Pres" xml:space="preserve">
+    <value>Cooler Pressure</value>
+  </data>
+  <data name="Cooler_Temp" xml:space="preserve">
+    <value>Cooler Temperature</value>
+  </data>
   <data name="Copies" xml:space="preserve">
     <value>Copiere</value>
   </data>

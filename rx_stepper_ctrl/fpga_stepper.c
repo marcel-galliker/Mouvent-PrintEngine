@@ -38,8 +38,6 @@
 
 //--- defines -----------------------------------------------------------------
 
-#define OUT_GUI_START	0x0001
-
 #define VAL_TO_MV(x) ((x*5000)/0x0fff)
 #define VAL_TO_MV_AI(x) ((x*10000)/0x0fff)
 #define VAL_TO_TEMP(x)	 ((int)(25+(x*2-820)/2.654))
@@ -56,7 +54,6 @@ static int		_MemId=0;
 static int		_Init=FALSE;
 static HANDLE	_FpgaThread=NULL;
 static int		_PWM_Speed[6];
-static int		_GuiTimer=0;
 static int		_ErrorCheckTime=0;
 	
 #define WATCHDOG_CNT	0x7fffffff
@@ -122,8 +119,6 @@ void fpga_init()
 
 	memset(_PWM_Speed, 0, sizeof(_PWM_Speed));
 	
-	_GuiTimer = rx_get_ticks()+1000;
-	Fpga.par->output |= OUT_GUI_START;
 	_Init = TRUE;
 }
 
@@ -338,12 +333,6 @@ void  fpga_main(int ticks, int menu)
 			_lastCnt[i]   = cnt;
 		}
 		_lastTicks = ticks;
-	}
-	
-	if (_GuiTimer && ticks>_GuiTimer) 
-	{
-		_GuiTimer = 0;
-		Fpga.par->output  &= ~OUT_GUI_START;
 	}
 	
 	if (menu)

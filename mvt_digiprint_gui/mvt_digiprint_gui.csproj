@@ -374,6 +374,7 @@
     <Compile Include="Helpers\RxXamGrid.cs" />
     <Compile Include="Helpers\UnitConversion.cs" />
     <Compile Include="Models\ClusterAlignment.cs" />
+    <Compile Include="Models\ClusterNo.cs" />
     <Compile Include="Models\ClusterStat.cs" />
     <Compile Include="Models\ClusterStatList.cs" />
     <Compile Include="Models\Density.cs" />
@@ -508,9 +509,30 @@
     <Compile Include="Views\LH702View\LH702_Counters.xaml.cs">
       <DependentUpon>LH702_Counters.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSystemView\Conditioner_Reset.xaml.cs">
+      <DependentUpon>Conditioner_Reset.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\FluidSettings.xaml.cs">
+      <DependentUpon>FluidSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintSystemView\FlushCommands.xaml.cs">
+      <DependentUpon>FlushCommands.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SiemensHMI\Win32ControlHost.cs" />
     <Compile Include="Views\SiemensHMI\SiemensHMI.xaml.cs">
       <DependentUpon>SiemensHMI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableSeonView\TestTableSeonCommands.xaml.cs">
+      <DependentUpon>TestTableSeonCommands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml.cs">
+      <DependentUpon>TestTableSeonStepperSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TestTableSeonView\TestTableSeonView.xaml.cs">
+      <DependentUpon>TestTableSeonView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UserControls\SetClusterNo.xaml.cs">
+      <DependentUpon>SetClusterNo.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserControls\ShutDown.xaml.cs">
       <DependentUpon>ShutDown.xaml</DependentUpon>
@@ -1050,7 +1072,35 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\PrintSystemView\Conditioner_Reset.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\FluidSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\FlushCommands.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SiemensHMI\SiemensHMI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonCommands.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonStepperSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TestTableSeonView\TestTableSeonView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UserControls\SetClusterNo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1650,23 +1700,39 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Bitmaps\TestTableSeon\Slide.png" />
+    <Resource Include="Resources\Bitmaps\TestTableSeon\TestTableSeon.jpg" />
     <Resource Include="Resources\Bitmaps\PG_Mark_Verso_INV.ico" />
     <Resource Include="Resources\Bitmaps\PG_Mark_Verso.ico" />
-    <EmbeddedResource Include="Resources\Language\Resources.de-DE.resx" />
-    <EmbeddedResource Include="Resources\Language\Resources.es-ES.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.de-DE.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Language\Resources.es-ES.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Language\Resources.fr-FR.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Language\Resources.it-IT.resx" />
-    <EmbeddedResource Include="Resources\Language\Resources.nl-NL.resx" />
-    <EmbeddedResource Include="Resources\Language\Resources.pl-PL.resx" />
-    <EmbeddedResource Include="Resources\Language\Resources.pt-PT.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.it-IT.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Language\Resources.nl-NL.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Language\Resources.pl-PL.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Language\Resources.pt-PT.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Language\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Language\Resources.ro-RO.resx" />
+    <EmbeddedResource Include="Resources\Language\Resources.ro-RO.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Resource Include="Resources\Bitmaps\PG_Mark_INV.ico" />
     <Resource Include="Resources\Bitmaps\density.png" />
     <Resource Include="Resources\Bitmaps\Tex\TX801.png" />

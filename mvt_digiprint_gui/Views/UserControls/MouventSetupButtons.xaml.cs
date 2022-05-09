@@ -32,14 +32,17 @@ namespace RX_DigiPrint.Views.UserControls
             CMD_JOG_BWD.DataContext = RxGlobals.Plc;
             CMD_JOG_FWD.DataContext = RxGlobals.Plc;
             Visibility v = Visibility.Collapsed;
+            Visibility a = Visibility.Collapsed;
             switch (RxGlobals.PrintSystem.PrinterType)
             {
                 case EPrinterType.printer_TX801: v = Visibility.Visible; break;
                 case EPrinterType.printer_TX802: v = Visibility.Visible; break;
                 case EPrinterType.printer_TX404: v = Visibility.Visible; break;
+                case EPrinterType.printer_test_table_seon: a = Visibility.Visible; break;
             }
             Button_Wash.Visibility = v;
             Button_Glue.Visibility = v;
+            Button_ClusterNo.Visibility = a;
             RxGlobals.Timer.TimerFct += _Timer;
         }
 
@@ -60,11 +63,13 @@ namespace RX_DigiPrint.Views.UserControls
         private void _Timer(int no)
         {
             CMD_WEBIN.IsChecked = RxGlobals.Plc.ToWebIn;
-            if (RxGlobals.Plc.WebInActive)
+            if (RxGlobals.Plc.WebInActive || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
             {
                 CMD_WEBIN.Visibility = Visibility.Collapsed;
                 CMD_JOG_BWD.Visibility = Visibility.Visible;
                 CMD_JOG_FWD.Visibility = Visibility.Visible;
+                if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon)
+                    Button_ClusterNo.Visibility = Visibility.Visible;
             }
             else 
             {
@@ -116,6 +121,13 @@ namespace RX_DigiPrint.Views.UserControls
                 RxGlobals.RxInterface.SendMsgBuf(TcpIp.CMD_PLC_SET_CMD, "CMD_SETUP/CMD_GLUE");
         }
 
+        //--- CusterNo_Clicked -------------------------------------------------
+        private void CusterNo_Clicked(object sender, RoutedEventArgs e)
+        {
+            SetClusterNo view = new SetClusterNo();
+            view.ShowDialog();
+        }
+
         //--- Jog_PreviewMouseDown -------------------------------
         private void Jog_PreviewMouseDown(object sender, MouseButtonEventArgs e) 
         {
@@ -125,7 +137,9 @@ namespace RX_DigiPrint.Views.UserControls
                 RxGlobals.Events.AddItem(new LogItem("Mouse down {0}", button.Name)); 
                 Debug.WriteLine("PreviewMouseDown", button.Name);
                 button.IsChecked = true;
-                RxGlobals.Plc.SetVar(button.Name, 1);
+                if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_test_table_seon) RxGlobals.Plc.SetVar(button.Name, 1);
+                else if (button.Name.Equals("CMD_JOG_FWD")) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TTS_JOG_FWD);
+                else if (button.Name.Equals("CMD_JOG_BWD")) RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TTS_JOG_BWD);
             }
             e.Handled = true;
         }
@@ -138,7 +152,8 @@ namespace RX_DigiPrint.Views.UserControls
             {
                 Debug.WriteLine("PreviewMouseUp", button.Name);
                 button.IsChecked = false;
-                RxGlobals.Plc.SetVar(button.Name, 0);
+                if (RxGlobals.PrintSystem.PrinterType != EPrinterType.printer_test_table_seon) RxGlobals.Plc.SetVar(button.Name, 0);
+                else RxGlobals.RxInterface.SendCommand(TcpIp.CMD_TTS_JOG_STOP);
             }
             e.Handled = true;
         } 

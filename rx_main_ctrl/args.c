@@ -20,6 +20,7 @@
 //--- external variables -------------------
 int arg_debug			= FALSE;
 int arg_simuPLC			= FALSE;
+int arg_simuDrive		= FALSE;
 int arg_simuEncoder		= FALSE;
 int arg_simuHeads		= FALSE;
 int arg_simuChiller		= FALSE;
@@ -37,6 +38,7 @@ void args_init(int argc, char** argv)
 		else if	(!stricmp(argv[i], "-simuencoder"))	arg_simuEncoder=TRUE;
 		else if	(!stricmp(argv[i], "-simuheads"))	arg_simuHeads=TRUE;
 		else if	(!stricmp(argv[i], "-simuchiller"))	arg_simuChiller=TRUE;
+		else if (!stricmp(argv[i], "-simudrive"))	arg_simuDrive = TRUE;
 		else if	(!stricmp(argv[i], "-hamster"))		arg_hamster=arg_simuPLC=TRUE;
 		else if	(!stricmp(argv[i], "-localsubnet"))	strcpy(RX_CTRL_SUBNET, "127.168.200.");
 		else printf("argument >>%s<< not known\n", argv[i]);	

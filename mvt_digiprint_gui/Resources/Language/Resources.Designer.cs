@@ -907,6 +907,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cluster No.
+        /// </summary>
+        public static string ClusterNo {
+            get {
+                return ResourceManager.GetString("ClusterNo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Coating dryer.
         /// </summary>
         public static string CoatingDryer {
@@ -1119,6 +1128,24 @@ namespace RX_DigiPrint.Resources.Language {
         public static string ControlMode {
             get {
                 return ResourceManager.GetString("ControlMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cooler Pressure.
+        /// </summary>
+        public static string Cooler_Pres {
+            get {
+                return ResourceManager.GetString("Cooler_Pres", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cooler Temperature.
+        /// </summary>
+        public static string Cooler_Temp {
+            get {
+                return ResourceManager.GetString("Cooler_Temp", resourceCulture);
             }
         }
         
@@ -4847,6 +4874,15 @@ namespace RX_DigiPrint.Resources.Language {
         public static string Production {
             get {
                 return ResourceManager.GetString("Production", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Production Test Table.
+        /// </summary>
+        public static string ProductionTestTable {
+            get {
+                return ResourceManager.GetString("ProductionTestTable", resourceCulture);
             }
         }
         

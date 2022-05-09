@@ -138,6 +138,7 @@ static int 	_FlushISPressureStable[NIOS_INK_SUPPLY_CNT] = {0};
 static int  _TimeEmpty[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_EmptyDetecTEndState[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_EmptyPressureStored[NIOS_INK_SUPPLY_CNT] = {0};
+static int  _MaxPressure[NIOS_INK_SUPPLY_CNT] = {1000};
 
 // --- NEW  ---
 static int 	_StartModePRINT[NIOS_INK_SUPPLY_CNT] = {0};
@@ -203,8 +204,10 @@ void ink_init(void)
 
 	memset(_InkSupply, 0, sizeof(_InkSupply));
 
+
 	for (isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++)
 	{
+
 		pid_reset(&_InkSupply[isNo].pid_Pump);
 		pid_reset(&_InkSupply[isNo].pid_Setpoint);
 
@@ -217,7 +220,7 @@ void ink_init(void)
 		_InkSupply[isNo].pid_Setpoint.P 				= 200;
 		_InkSupply[isNo].pid_Setpoint.I 				= 1500;
 		_InkSupply[isNo].pid_Setpoint.Start_Integrator	= 1;
-		_InkSupply[isNo].pid_Setpoint.val_max 			= 1000;	// Max IS pressure 1200 mbar
+		_InkSupply[isNo].pid_Setpoint.val_max   		= _MaxPressure[isNo];	// Max IS pressure 1000 or 2000 mbar
 		_InkSupply[isNo].pid_Setpoint.val_min			= 0;	// Min not 0, just a little more
 		
 		_InkSupply[isNo].pid_Calibration.val_max    	= 400;	// Max cond inlet pressure 30 mbars
@@ -314,10 +317,13 @@ void ink_tick_10ms(void)
 
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
-		if (pRX_Config->ink_supply[isNo].ctrl_mode >= ctrl_recovery_start && pRX_Config->ink_supply[isNo].ctrl_mode <= ctrl_recovery_step10 && is_Sensor_25(isNo))
-			_InkSupply[isNo].pid_Setpoint.val_max 			= 2000;	// Max IS pressure 2000 mbar
+		if ((pRX_Config->printerType == printer_test_slide || pRX_Config->printerType == printer_test_table_seon) &&
+				is_Sensor_25(isNo))
+			_MaxPressure[isNo] 			= 2000;	// Max IS pressure 2000 mbar
 		else
-			_InkSupply[isNo].pid_Setpoint.val_max 			= 1000;	// Max IS pressure 1200 mbar
+			_MaxPressure[isNo] 			= 1000;	// Max IS pressure 1200 mbar
+
+		_InkSupply[isNo].pid_Setpoint.val_max   		= _MaxPressure[isNo];
 
 		switch(pRX_Config->ink_supply[isNo].ctrl_mode)
 		{
@@ -422,11 +428,11 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 
 				// --- Detect filter clogged -------
-				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual != INVALID_VALUE
-					&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+				if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual!=INVALID_VALUE
+					&& pRX_Status->ink_supply[isNo].IS_Pressure_Actual > (_MaxPressure[isNo] - 100))
 				{
 					_FilterCloggedTime[isNo]++;
-					if(_FilterCloggedTime[isNo] > 6000)		// 1 minute over 900 mbars
+					if(_FilterCloggedTime[isNo] > 6000)		// 1 minute over 900 or 1900 mbars
 						pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 				}
 				else _FilterCloggedTime[isNo] = 0;
@@ -959,8 +965,8 @@ void ink_tick_10ms(void)
 								pRX_Status->ink_supply[isNo].error |= err_check4_timeout;
 								_CheckSequence[isNo].Ctrl_Check_State = 0;
 							}
-							// IS pressure > 900 mbars
-							else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900)
+							// IS pressure > 1900 mbars
+							else if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > (_MaxPressure[isNo] - 100))
 							{
 								pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 								_CheckSequence[isNo].Ctrl_Check_State = 0;
@@ -1372,9 +1378,9 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 
 				// --- Detect filter clogged -------
-				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual != INVALID_VALUE && pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 900) {
+				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual != INVALID_VALUE && pRX_Status->ink_supply[isNo].IS_Pressure_Actual > (_MaxPressure[isNo] - 100)) {
 					_FilterCloggedTime[isNo]++;
-					if (_FilterCloggedTime[isNo] > 6000)// 1 minute over 900 mbars
+					if (_FilterCloggedTime[isNo] > 6000)// 1 minute over 900 or 1900 mbars
 						pRX_Status->ink_supply[isNo].error |= err_filter_clogged;
 				}
 				else _FilterCloggedTime[isNo] = 0;

@@ -339,6 +339,38 @@ namespace RX_DigiPrint.Models
 		    get { return _FluidCtrlModeList;}
 	    }
 
+        //--- Property ClusterNo ----------------------------------------------------
+        private UInt32 _ClusterNo;
+        public UInt32 ClusterNo
+        {
+            get { return _ClusterNo; }
+            set { SetProperty(ref _ClusterNo, value); }
+        }
+
+        //--- Property Cooler_Pressure ----------------------------------------
+        private Int32 _Cooler_Pressure = 0;
+        public Int32 Cooler_Pressure
+        {
+            get { return _Cooler_Pressure; }
+            set { SetProperty(ref _Cooler_Pressure, value); }
+        }
+
+        //--- Property Cooler_Temp ---------------------------------
+        private UInt32 _Cooler_Temp = 0;
+        public UInt32 Cooler_Temp
+        {
+            get { return _Cooler_Temp; }
+            set { SetProperty(ref _Cooler_Temp, value); }
+        }
+
+        //--- Property Meniscus_Disabled ---------------------------------------
+        private Boolean _Meniscus_Disabled = false;
+        public Boolean Meniscus_Disabled
+        {
+            get { return _Meniscus_Disabled; }
+            set { SetProperty(ref _Meniscus_Disabled, value); }
+        }
+
         //--- DensityValue ---------------------------------------------------
         private Byte? _DensityValuesCRC;
         public Int16[] DensityValue = new Int16[TcpIp.MAX_DENSITY_VALUES];
@@ -413,6 +445,8 @@ namespace RX_DigiPrint.Models
             ImgBuf      = item.imgBuf;
             PrintGoCnt  = item.printGoCnt;
             PrintDoneCnt= item.printDoneCnt;
+
+            ClusterNo = item.eeprom_mvt.clusterNo;
 
             // Conditioner
             TempHead    = item.tempHead;

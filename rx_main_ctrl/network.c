@@ -403,7 +403,7 @@ int net_device_to_ipaddr(EDevice dev, int no, char *ipAddr, int size)
 	case dev_plc:	sprintf(ipAddr, "%s%d", RX_CTRL_SUBNET, RX_CTRL_PLC); 
 					break;
 
-	case dev_stepper:	if (rx_def_is_lb(RX_Config.printer.type))
+	case dev_stepper:	if (rx_def_is_lb(RX_Config.printer.type) || rx_def_is_tts(RX_Config.printer.type))
 						{
 							if (no<0 || no>3)
 							{

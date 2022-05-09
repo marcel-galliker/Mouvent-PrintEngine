@@ -267,6 +267,9 @@
   <data name="CLGainFact" xml:space="preserve">
     <value>C.L. Gain Fact</value>
   </data>
+  <data name="ClusterNo" xml:space="preserve">
+    <value>Cluster No</value>
+  </data>
   <data name="Cluster1" xml:space="preserve">
     <value>Cluster 1</value>
   </data>
@@ -306,6 +309,9 @@
   <data name="Configuration" xml:space="preserve">
     <value>Konfiguration</value>
   </data>
+  <data name="ConfirmDelete" xml:space="preserve">
+    <value>Löschen {0}?</value>
+  </data>
   <data name="Connected" xml:space="preserve">
     <value>Verbunden</value>
   </data>
@@ -314,6 +320,12 @@
   </data>
   <data name="ControlMode" xml:space="preserve">
     <value>Bedienmodus</value>
+  </data>
+  <data name="Cooler_Pres" xml:space="preserve">
+    <value>Cooler Pressure</value>
+  </data>
+  <data name="Cooler_Temp" xml:space="preserve">
+    <value>Cooler Temperature</value>
   </data>
   <data name="Copies" xml:space="preserve">
     <value>Kopien</value>
@@ -368,9 +380,6 @@
   </data>
   <data name="DeleteTheItems" xml:space="preserve">
     <value>Artikel löschen</value>
-  </data>
-  <data name="ConfirmDelete" xml:space="preserve">
-    <value>Löschen {0}?</value>
   </data>
   <data name="Density" xml:space="preserve">
     <value>Dichte</value>
@@ -2198,6 +2207,9 @@ Keine Klebestellen im Gerät?</value>
   </data>
   <data name="Paper" xml:space="preserve">
     <value>Papier</value>
+  </data>
+  <data name="ProductionTestTable" xml:space="preserve">
+    <value>Production Test Table</value>
   </data>
   <data name="RadexTestSlide" xml:space="preserve">
     <value>Radex Objektträger</value>

@@ -47,6 +47,7 @@
     <ClInclude Include="chiller.h" />
     <ClInclude Include="cleaf_orders.h" />
     <ClInclude Include="ctr.h" />
+    <ClInclude Include="drive_ctrl.h" />
     <ClInclude Include="iQ500.h" />
     <ClInclude Include="opcua.h" />
     <ClInclude Include="opcua.hpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="step_ctrl.h" />
     <ClInclude Include="step_std.h" />
     <ClInclude Include="step_test.h" />
+    <ClInclude Include="step_tts.h" />
     <ClInclude Include="step_tx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +96,7 @@
     <ClCompile Include="chiller.c" />
     <ClCompile Include="cleaf_orders.c" />
     <ClCompile Include="ctr.c" />
+    <ClCompile Include="drive_ctrl.c" />
     <ClCompile Include="iQ500.c" />
     <ClCompile Include="pe_main.c" />
     <ClCompile Include="prod_log.c" />
@@ -132,6 +135,7 @@
     <ClCompile Include="step_ctrl.c" />
     <ClCompile Include="step_std.c" />
     <ClCompile Include="step_test.c" />
+    <ClCompile Include="step_tts.c" />
     <ClCompile Include="step_tx.c" />
     <ClCompile Include="version.c" />
   </ItemGroup>
