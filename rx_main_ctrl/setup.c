@@ -181,7 +181,7 @@ int _setup_config(const char *filepath, SRxConfig *pcfg, EN_setup_Action  action
 		setup_int32(file, "hybrid", action, &pcfg->printer.hybrid, 0);
 
 		setup_uint32(file, "overlap", action, &pcfg->printer.overlap, TRUE);
-        if (!rx_def_is_tx(pcfg->printer.type) && pcfg->printer.type!=printer_test_table)	pcfg->printer.overlap = TRUE;
+        if (!rx_def_is_tx(pcfg->printer.type) && pcfg->printer.type!=printer_test_table && !rx_def_is_tts(pcfg->printer.type))	pcfg->printer.overlap = TRUE;
 		setup_uint32(file, "externalData", action, &pcfg->externalData, FALSE);
 
 		setup_uint32(file, "CanisterEmptyHandlingMode", action, &pcfg->canister_empty_handling_mode, err_handling_mode_default);

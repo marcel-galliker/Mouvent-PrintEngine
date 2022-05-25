@@ -113,6 +113,7 @@ namespace RX_DigiPrint.Models.Enums
                                                     case EPrinterType.printer_TX801:        cnt=2; break;
                                                     case EPrinterType.printer_TX802:        cnt=2; break;
                                                     case EPrinterType.printer_TX404:        cnt=2; break;
+                                                    case EPrinterType.printer_test_table_seon:  cnt=3; break;
                                                     default: cnt=1; break;
                                                 }
                                                 for (color=0; color<cnt && color<4; color++)

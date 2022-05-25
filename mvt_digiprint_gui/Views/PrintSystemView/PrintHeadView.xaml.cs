@@ -120,6 +120,15 @@ namespace RX_DigiPrint.Views.PrintSystemView
             Button_PurgeMicro.Visibility = collapsed;
 //          Button_Wipe.Visibility  = (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_TX801 || RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_TX802) ? Visibility.Visible : Visibility.Collapsed;
             Grid.RowDefinitions[1].Height = new GridLength(25/RxGlobals.Screen.Scale);
+
+            //--- printer_test_table_seon -----------------------------------------------------------
+            visible = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Visible : Visibility.Collapsed;
+            collapsed = (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon) ? Visibility.Collapsed : Visibility.Visible;
+            Button_ToggleMeniscus.Visibility = visible;
+            Cooler_Pres.Visibility = visible;
+            Cooler_Temp.Visibility = visible;
+            ClusterNo.Visibility = visible;
+            Temp_Head.Visibility = Temp_Head_Warn.Visibility = collapsed;
         }
 
         //--- InkSupply_PropertyChanged ----------------------------------
@@ -147,6 +156,11 @@ namespace RX_DigiPrint.Views.PrintSystemView
             if (RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_slide_only || RxGlobals.User.UserType==EUserType.usr_engineer)
                 Button_Print.Visibility  = Button_Off.Visibility = Visibility.Visible;
             else Button_Print.Visibility = Button_Off.Visibility = Visibility.Collapsed;
+
+            Visibility visible = RxGlobals.PrintSystem.PrinterType == EPrinterType.printer_test_table_seon ? Visibility.Visible : Visibility.Collapsed;
+
+            Button_PrintCluster.Visibility = visible;
+            Button_PurgeCluster.Visibility = visible;
 
             CmdPopup.Open(CmdButton);
         }
@@ -191,5 +205,36 @@ namespace RX_DigiPrint.Views.PrintSystemView
  //       private void Drain_Clicked      (object sender, RoutedEventArgs e) {_command(EFluidCtrlMode.ctrl_drain);        }
         private void Flush_Clicked      (object sender, RoutedEventArgs e) {_command("Flush", EFluidCtrlMode.ctrl_flush_night);   }
         private void Wipe_Clicked       (object sender, RoutedEventArgs e) {_command(null, EFluidCtrlMode.ctrl_wipe);             }
+        private void ToggleMeniscus_Clicked(object sender, RoutedEventArgs e) { _command(null, EFluidCtrlMode.ctrl_toggle_meniscus); }
+        private void PrintCluster_Clicked(object sender, RoutedEventArgs e)
+        {
+            HeadStat stat = DataContext as HeadStat;
+            if (stat != null)
+            {
+                int cluster = stat.HeadNo / 4;
+                TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+
+                for (int i = 0; i < 4; i++)
+                {
+                    msg.no = cluster * 4 + i;
+                    msg.ctrlMode = EFluidCtrlMode.ctrl_print;
+                    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_FLUID_CTRL_MODE, ref msg);
+                }
+                CmdPopup.IsOpen = false;
+            }
+        }
+        private void PurgeCluster_Clicked(object sender, RoutedEventArgs e)
+        {
+            HeadStat stat = DataContext as HeadStat;
+            if (stat != null)
+            {
+                TcpIp.SValue msg = new TcpIp.SValue();
+                msg.no = stat.HeadNo;
+
+                RxGlobals.RxInterface.SendMsg(TcpIp.CMD_PURGE_CLUSTER, ref msg);
+
+                CmdPopup.IsOpen = false;
+            }
+        }
     }
 }

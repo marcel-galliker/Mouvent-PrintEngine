@@ -29,6 +29,8 @@
 #include "datalogic.h"
 #include "plc_ctrl.h"
 #include "print_ctrl.h"
+#include "drive_ctrl.h"
+#include "step_tts.h"
 #include "machine_ctrl.h"
 #include "fluid_ctrl.h"
 #include "lh702_ctrl.h"
@@ -56,6 +58,9 @@ static int				_ScalesFluidNo=-1;
 static UINT32			_InitDone = 0x00;
 static int				_MeasurementNumber = 0;
 static SRecoveryFct		_RecoveryData = { 0 };
+static int				_PurgeCluster = FALSE;
+static int				_PurgeClusterNo = -1;
+static int				_PurgeHeadNo = -1;
 
 
 //--- prototypes -----------------------
@@ -321,6 +326,13 @@ void fluid_set_config(void)
 							    _FluidToScales[INK_SUPPLY_CNT]   = SCALE(1,1);// 4;	// flush		
 							}
 						break;
+
+	case printer_test_table_seon:
+							_FluidToScales[0] = 0;
+                            _FluidToScales[1] = 1;
+                            _FluidToScales[INK_SUPPLY_CNT] = 2;
+                            _FluidToScales[INK_SUPPLY_CNT+1] = 3;
+                            break;
                         
 	default:			for (i=0; i<SIZEOF(_FluidToScales); i++) _FluidToScales[i]=i;	
 						break; 
@@ -696,7 +708,7 @@ static void _control(int fluidNo)
 				case ctrl_purge_hard_vacc:	
 				case ctrl_purge_soft:
 				case ctrl_purge_hard:		if (lbrob) steplb_rob_to_wipe_pos(no / 2, rob_fct_purge_all);  //steplb_rob_to_wipe_pos(no / 2, HeadNo + rob_fct_purge_head0);
-											else if (RX_Config.printer.type != printer_LH702)
+											else if (RX_Config.printer.type != printer_LH702 && !(rx_def_is_tts(RX_Config.printer.type) && RX_StepperStatus.info.z_in_print))
                                             {
                                                 if (!step_lift_in_top_pos()) step_lift_to_top_pos();
                                             }
@@ -732,7 +744,7 @@ static void _control(int fluidNo)
 											break;
 											
 				case ctrl_purge_step1:		if ((!lbrob && (step_lift_in_top_pos() || (RX_Config.printer.type == printer_LH702))) || 
-                                                (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)))  // steplb_lift_in_up_pos_individually(no / 2))
+                                                (lbrob && steplb_rob_in_wipe_pos(no / 2, rob_fct_purge_all)) || (rx_def_is_tts(RX_Config.printer.type) && RX_StepperStatus.info.z_in_print))  // steplb_lift_in_up_pos_individually(no / 2))
 											{
 												if (_txrob && _PurgeFluidNo < 0 && !steptx_rob_wash_done()) break;
 												/*
@@ -754,6 +766,7 @@ static void _control(int fluidNo)
 				case ctrl_purge_step2:		if (plc_in_purge_pos())
 											{
 												_send_ctrlMode(no, ctrl_purge_step3, TRUE);
+												if (rx_def_is_tts(RX_Config.printer.type))	steptts_to_print_pos();
 												if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_wipe)
 													step_rob_to_wipe_pos(rob_fct_wipe);
 												else if (_txrob && _PurgeCtrlMode == ctrl_purge_hard_vacc)
@@ -765,7 +778,12 @@ static void _control(int fluidNo)
 											}
 											break;
 
-				case ctrl_purge_step3:		_send_ctrlMode(no, ctrl_purge_step4, TRUE);
+				case ctrl_purge_step3:		if (!rx_def_is_tts(RX_Config.printer.type) || RX_StepperStatus.info.z_in_print) _send_ctrlMode(no, ctrl_purge_step4, TRUE);
+											else
+											{
+												int pos = TRUE;
+												steptts_handle_gui_msg(INVALID_SOCKET, CMD_TTS_PUMP_PURGE, &pos, sizeof (pos));
+											}
 											// if (lbrob) steplb_rob_wipe_start(no/2, HeadNo + rob_fct_purge_head0);
 											break;
 
@@ -800,6 +818,23 @@ static void _control(int fluidNo)
 											{
 												_send_ctrlMode(no, ctrl_off, TRUE);
 												if (!_Flushed) _PurgeCtrlMode = ctrl_undef;
+												if (rx_def_is_tts(RX_Config.printer.type))
+												{
+													int pos = FALSE;
+													steptts_handle_gui_msg(INVALID_SOCKET, CMD_TTS_PUMP_PURGE, &pos, sizeof (pos));
+													if (_PurgeCluster == TRUE && _PurgeClusterNo != -1 && _PurgeHeadNo >= _PurgeClusterNo * 4 && _PurgeHeadNo < (_PurgeClusterNo + 1) * 4)
+													{
+														Error(LOG, 0, "PurgeClusterNo: %d, Head: %d", _PurgeClusterNo, _PurgeHeadNo);
+														if (_PurgeHeadNo % 4 == 3)
+														{
+															_PurgeClusterNo = -1;
+															_PurgeCluster = FALSE;
+															_PurgeHeadNo = -1;
+														}
+														else
+															ctrl_send_head_fluidCtrlMode(++_PurgeHeadNo, ctrl_purge_hard, TRUE, TRUE);
+													}
+												}
 											}
 											break;
 				
@@ -1112,7 +1147,7 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 	
 	// waste
 	
-	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf)
+	if (RX_Config.printer.type == printer_LB702_WB || RX_Config.printer.type == printer_cleaf || rx_def_is_tts(RX_Config.printer.type))
 	{
 		FluidStatus[INK_SUPPLY_CNT + 1].canisterLevel = moving_average_canisterLevel(_CanisterLevel, _CanisterLevelSum, INK_SUPPLY_CNT + 1, _MeasurementNumber, _ScalesStatus[_FluidToScales[INK_SUPPLY_CNT + 1]]);
 		
@@ -1471,6 +1506,56 @@ INT32 fluid_get_error(int no)
         return FluidStatus[no].err;
     }
     return INVALID_VALUE;
+}
+
+//--- do_fluid_flush_pump ------------------------------------------------
+void do_fluid_flush_pump(RX_SOCKET socket, SValue *pmsg)
+{
+    int i;
+    int power; // %
+    SValue value = *pmsg;
+
+    for (i = 0; i < FLUID_BOARD_CNT; i++)
+    {
+        if (_FluidThreadPar[i].socket != INVALID_SOCKET)
+        {
+			if (FluidStatus[i].flush_pump_val || RX_StepperStatus.inkinfo.flush_valve_0 || RX_StepperStatus.inkinfo.flush_valve_1 || RX_StepperStatus.inkinfo.flush_valve_2 || RX_StepperStatus.inkinfo.flush_valve_3)
+            {
+                power = 0;
+                value.value = 0;
+				steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
+            }
+            else
+            {
+                power = 75;
+                steptts_handle_gui_msg(INVALID_SOCKET, CMD_FLUID_FLUSH, &value, sizeof(value));
+            }
+            sok_send_2(&_FluidThreadPar[i].socket, CMD_FLUID_FLUSH, sizeof(power), &power);
+        }
+    }
+}
+
+//--- fluid_purgeCluster ----------------------------------------------
+int fluid_purgeCluster(int clusterNo, int state)
+{
+	if (state == TRUE && !_PurgeCluster)
+	{
+		_PurgeCluster = TRUE;
+		_PurgeClusterNo = clusterNo;
+		_PurgeHeadNo = _PurgeClusterNo * 4;
+	}
+	else if (state)
+	{
+		Error(LOG, 0, "This command is only possible, after Cluster %d has finished the purge.", _PurgeClusterNo);
+		return REPLY_ERROR;
+	}
+	else if (clusterNo == _PurgeClusterNo)
+	{
+		_PurgeCluster = FALSE;
+		_PurgeClusterNo = -1;
+		_PurgeHeadNo = -1;
+	}
+	return REPLY_OK;
 }
 
 //--- _Fluid_get_flush_time ----------------------------------------------

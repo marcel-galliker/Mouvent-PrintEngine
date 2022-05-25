@@ -167,14 +167,14 @@ namespace RX_DigiPrint.Views.UserControls
 
         private void UserType_Click(object sender, RoutedEventArgs e)
         {
-            MvtUserLevelManager ulm = new MvtUserLevelManager(SettingsDlg.GetVersion(), RxGlobals.PrinterProperties.Host_Name);
-            UserLogin ulw = new UserLogin(ulm);
-            ulw.Owner = Window.GetWindow(this);
-            if((bool)ulw.ShowDialog())
-            {
-                /* New user type corresponds to the result of the authentication */
-                RxGlobals.User.UserType = (EUserType)ulm.GetLevel();
-            }
+           MvtUserLevelManager ulm = new MvtUserLevelManager(SettingsDlg.GetVersion(), RxGlobals.PrinterProperties.Host_Name);
+           UserLogin ulw = new UserLogin(ulm);
+           ulw.Owner = Window.GetWindow(this);
+           if ((bool)ulw.ShowDialog())
+           {
+               /* New user type corresponds to the result of the authentication */
+               RxGlobals.User.UserType = (EUserType)ulm.GetLevel();
+           }
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)

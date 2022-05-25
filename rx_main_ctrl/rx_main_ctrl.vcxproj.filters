@@ -165,6 +165,12 @@
     <ClInclude Include="opcua.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="drive_ctrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="step_tts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boot_svr.c">
@@ -297,6 +303,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="opcua.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="drive_ctrl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="step_tts.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

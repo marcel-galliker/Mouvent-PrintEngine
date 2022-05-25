@@ -22,6 +22,8 @@
 #include "ctrl_svr.h"
 #include "step_cleaf.h"
 #include "fluid_ctrl.h"
+#include "step_tts.h"
+#include "drive_ctrl.h"
 #include "machine_ctrl.h"
 #include "opcua.h"
 
@@ -33,6 +35,7 @@ typedef enum
 	mi_none,
 	mi_plc,
 	mi_tt,
+	mi_tts,
 	mi_siemens,
 } EMachineInterface;
 
@@ -46,6 +49,7 @@ static void set_interface(void)
 	case printer_test_slide:		_MInterface=mi_none;	break;
 	case printer_test_slide_only:	_MInterface=mi_none;	break;
 	case printer_test_table:		_MInterface=mi_tt;		break;
+	case printer_test_table_seon:	_MInterface=mi_tts;		break;
 	case printer_cleaf:				_MInterface=mi_plc;		break;
 	case printer_TX801:				_MInterface=mi_plc;		break;
 	case printer_TX802:				_MInterface=mi_plc;		break;
@@ -69,6 +73,7 @@ static void set_interface(void)
 int		machine_init(void)
 {
 	plc_init();
+	drive_init();
 	lh702_init();
 	set_interface();
 	return REPLY_OK;
@@ -117,6 +122,8 @@ void	machine_error_reset(void)
 	ctrl_head_error_reset();
 	step_error_reset();
 	enc_error_reset();
+	tts_error_reset();
+	drive_error_reset();
 }
 
 //--- machine_set_printpar -----------------------
@@ -130,6 +137,7 @@ int		machine_set_printpar(SPrintQueueItem *pItem)
 	switch(_MInterface) 
 	{
 	case mi_tt:		return tt_set_printpar(pItem);
+	case mi_tts:	return drive_set_printbar(pItem);
 	case mi_plc:	return plc_set_printpar(pItem);
 	case mi_siemens:
 		return siemens_set_printpar(pItem);
@@ -156,6 +164,7 @@ UINT32	machine_get_scanner_pos(void)
 	switch(_MInterface) 
 	{
 	case mi_tt:		return tt_get_scanner_pos();
+	case mi_tts:	return drive_get_scanner_pos();
 	case mi_plc:	return plc_get_scanner_pos();
 	default:		return REPLY_OK;
 	}
@@ -200,6 +209,7 @@ int		machine_stop_printing(void)
 	{
 	case mi_none:	return enc_stop_printing();
 	case mi_tt:		return tt_stop_printing();
+	case mi_tts:    return enc_stop_printing();
 	case mi_plc:	return plc_stop_printing();
 	case mi_siemens:
 		return siemens_stop_printing();
@@ -215,6 +225,8 @@ int		machine_abort_printing(void)
 	{
 	case mi_none:	return enc_abort_printing();
 	case mi_tt:		return tt_abort_printing();
+	case mi_tts:    step_tts_abort_printing();
+					return enc_abort_printing();
 	case mi_plc:	// if (!rx_def_is_scanning(RX_Config.printer.type)) step_handle_gui_msg(INVALID_SOCKET, CMD_LIFT_UP_POS, NULL, 0);
 					step_abort_printing();
 					return plc_abort_printing();

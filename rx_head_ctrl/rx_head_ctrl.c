@@ -66,6 +66,10 @@ SNiosStat				RX_NiosStat;
 static int		_AppRunning;
 static int		_WaveFormLoaded = FALSE;
 
+static int		_Warned_FlowResistance[MAX_HEADS_BOARD] = {FALSE};
+static int		_Warned_PresOut[MAX_HEADS_BOARD] = {FALSE};
+static int		_Warned_CoolerTemp = FALSE;
+
 //--- prototypes ---------------------------------------------------------
 static void _mem_test(void);
 static void	_check_rx_boot(void);
@@ -397,11 +401,45 @@ void do_jetting(int freq, int greyLevel)
 	{
 		_do_waveform("test.wfd");
 		Error(WARN, 0, "Cluster in Jetting Mode");
-		int arg = arg_offline;
-		arg_offline = TRUE;
-		fpga_set_config(INVALID_SOCKET);
-		arg_offline = arg;
 		nios_fixed_grey_levels(greyLevel, 3);
 	}
 	fpga_enc_config(freq);
+}
+
+//--- _jetting_check ------------------------------------
+static void _jetting_check(void)
+{
+
+	int no[MAX_HEADS_BOARD];
+
+	for (int i = 0; i < MAX_HEADS_BOARD; i++) no[i] = RX_HBConfig.reverseHeadOrder ? MAX_HEADS_BOARD - 1 - i : i;
+
+
+	for (int i = 0; i < MAX_HEADS_BOARD; i++)
+	{
+		if (_NiosMem->stat.cond[no[i]].flowResistance > 2000 && !_Warned_FlowResistance[no[i]])
+		{
+			Error(WARN, 0, "Flow Resistance of Head %d too high (%d.%02d ml/min)", _NiosMem->stat.cond[no[i]].flowResistance / 100, _NiosMem->stat.cond[no[i]].flowResistance % 100);
+			_Warned_FlowResistance[no[i]] = TRUE;
+		}
+
+		if ((RX_HBStatus->head[no[i]].presOut > -380 || RX_HBStatus->head[no[i]].presOut < -420) && _Warned_PresOut[no[i]])
+		{
+			Error(WARN, 0, "Pressure Out of Head %d too low (%4s mbar)", value_str1(RX_HBStatus->head[no[i]].presOut));
+			_Warned_PresOut[no[i]] = TRUE;
+		}
+
+		if (RX_NiosStat.cooler_temp > 60000 && !_Warned_CoolerTemp)
+		{
+			Error(WARN, 0, "Cooler Temperature too high (%s C)", value_str_temp(RX_NiosStat.cooler_temp));
+			_Warned_CoolerTemp = TRUE;
+		}
+	}
+}
+
+void jetting_warning_reset(void)
+{
+	memset(&_Warned_FlowResistance, 0, sizeof(_Warned_FlowResistance));
+	memset(&_Warned_PresOut, 0, sizeof(_Warned_PresOut));
+	_Warned_CoolerTemp = FALSE;
 }

@@ -217,7 +217,9 @@ int	 enc_set_config(int restart)
 								_Encoder[0].webOffset_mm=150; break;
 //	case printer_test_table:	if (RX_Config.inkSupplyCnt<=4) _Encoder[0].webOffset_mm=200;	// CLEAF
 //								else						   _Encoder[0].webOffset_mm=110;	// Bobst
-//								break; 
+//								break;
+	case printer_test_table_seon:
+								_Encoder[0].webOffset_mm = 220; break;
 	case printer_test_table:	_Encoder[0].webOffset_mm=110; break;
 	case printer_LB701:		 	
 	case printer_LB703_UV:	 	
@@ -325,6 +327,13 @@ static void _enc_config(int no, SPrintQueueItem *pitem, int restart)
 									if (TRUE) msg.correction=CORR_LINEAR;
 									else Error(WARN, 0, "Encoder compensation OFF");
 								}
+								break;
+
+	case printer_test_table_seon:
+								msg.orientation = FALSE;
+								msg.scanning = TRUE;
+								msg.incPerMeter = 1000000;
+								msg.pos_actual = machine_get_scanner_pos();
 								break;
 		
 	case printer_LB701:			msg.orientation = FALSE;	msg.scanning=FALSE; msg.incPerMeter=1000000; msg.pos_actual = 0; 

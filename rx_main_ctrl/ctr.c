@@ -32,16 +32,16 @@ typedef struct
 } _sctr;
 
 //--- static variables -------------------
-static int   _Time;
+static int		_Time;
 static INT64 _counterAct, _counterTotal;
-static int   _jobLen;
+static int		_jobLen;
 
 //--- prototypes ---------------------------------------
 static void _ctr_save(int reset, char *machineName);
 
 //--- ctr_init --------------------------------------
 void ctr_init(void)
-{
+{	
 	//--- init ---
 	RX_PrinterStatus.counterAct = 0;
 	RX_PrinterStatus.counterTotal = 0;
@@ -59,7 +59,7 @@ void ctr_init(void)
 		_counterTotal = RX_PrinterStatus.counterTotal;
 	}
 	setup_destroy(file);
-		
+	
 	lh702_ctr_init();
 
 	_ctr_save(FALSE, NULL);	

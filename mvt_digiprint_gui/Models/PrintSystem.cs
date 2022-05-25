@@ -92,6 +92,7 @@ namespace RX_DigiPrint.Models
                 case EPrinterType.printer_TX801:			return true;
 	            case EPrinterType.printer_TX802:			return true;
                 case EPrinterType.printer_TX404:            return true;
+                case EPrinterType.printer_test_table_seon:  return true;
 	            default: return false;
 	            }
             }
