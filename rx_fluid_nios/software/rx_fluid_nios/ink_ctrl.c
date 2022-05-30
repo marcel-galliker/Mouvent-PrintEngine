@@ -68,7 +68,7 @@
 
 #define 	RECOVERY_PRESSURE			2500	// mbar
 #define		RECOVERY_PRESSURE_OLD		1100	// mbar
-#define		RECOVERY_PRESSURE_END		50		// mbar
+#define		RECOVERY_PRESSURE_END		200		// mbar
 
 // State of PID regulation
 #define		PID_STATE_OFF			1
@@ -295,6 +295,7 @@ void ink_tick_10ms(void)
 			&& 	pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_off
 			&& (pRX_Config->ink_supply[isNo].ctrl_mode < ctrl_empty ||  pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_empty+10)
 			&& (pRX_Config->ink_supply[isNo].ctrl_mode < ctrl_flush_night ||  pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_flush_done)
+			&& (pRX_Config->ink_supply[isNo].ctrl_mode < ctrl_recovery_start || pRX_Config->ink_supply[isNo].ctrl_mode > ctrl_recovery_step10)
 			)
 			{
 				_set_pump_speed(isNo, 0);
@@ -1358,7 +1359,7 @@ void ink_tick_10ms(void)
 			case ctrl_recovery_step5:
 
 				// ----- NEW : Ramp start-up pressure  -------
-				if(pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode)
+				if(pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode && pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_recovery_step1)
 				{
 					if(pRX_Config->ink_supply[isNo].cylinderPresSet > 10)
 						_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet / 5;	// start with low setpoint
@@ -1423,13 +1424,13 @@ void ink_tick_10ms(void)
 				{
 					_InkSupply[isNo].purgePressure = 0;
 					_set_pump_speed(isNo, 0);
-					_set_air_valve(isNo, PV_OPEN);
+					//_set_air_valve(isNo, PV_OPEN);
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				}
 				break;
 
 			case ctrl_recovery_step10:
-				_set_air_valve(isNo, PV_OPEN);
+				//_set_air_valve(isNo, PV_OPEN);
 				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= RECOVERY_PRESSURE_END)
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
@@ -1798,7 +1799,7 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 		pRX_Status->ink_supply[isNo].PIDsetpoint_Output = _InkSupply[isNo].pid_Pump.Setpoint;
 		pid_calc(pRX_Status->ink_supply[isNo].IS_Pressure_Actual, &_InkSupply[isNo].pid_Pump);
 
-		if      (_InkSupply[isNo].pid_Pump.val <=0)
+		if (_InkSupply[isNo].pid_Pump.val <=0)
 		{
 			_set_pump_speed(isNo, 0);
 			// reset integrator if pump at 0 because the air valve manage the pressure decreasing
@@ -1814,7 +1815,8 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 		//  Controller 3 (Air valve) :  Pressure_IS_actual > Pressure_IS_setpoint --> Air valve open 100%
 		//---------------------------------------------------------------------------------------------------
 
-		if(print_mode != PUMP_CTRL_MODE_NO_AIR_VALVE)
+		if(print_mode != PUMP_CTRL_MODE_NO_AIR_VALVE &&
+				!(pRX_Config->ink_supply[isNo].ctrl_mode >= ctrl_recovery_start && pRX_Config->ink_supply[isNo].ctrl_mode <= ctrl_recovery_step10))
 		{
 			if(pRX_Status->ink_supply[isNo].IS_Pressure_Actual > _InkSupply[isNo].pid_Setpoint.val_max)	// for safety
 			{

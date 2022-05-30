@@ -695,7 +695,7 @@ void pump_tick_10ms(void)
 						RX_Config.cmd.disable_meniscus_check = FALSE;
 						if (RX_Config.mode != RX_Status.mode)
 							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink | COND_ERR_p_in_too_high);
-						
+						_set_valve(VALVE_INK);
         		RX_Status.mode = RX_Config.mode;
 						break;
         				
