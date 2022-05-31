@@ -722,11 +722,11 @@ static void _control(int fluidNo)
 											if (pstat->purge_putty_ON) time=0;
 											switch(pstat->ctrlMode)
 											{
-											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE, TIME_PURGE_DELAY); _txrob=FALSE; break;
-											case ctrl_purge:			_send_purge_par(no, TIME_PURGE, TIME_PURGE_DELAY);	  _txrob=FALSE; break;
-											case ctrl_purge_hard_wipe:	_send_purge_par(no, time, TIME_PURGE_DELAY); break;
-											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, TIME_PURGE_DELAY); break;
-											case ctrl_purge_hard:		_send_purge_par(no, time, TIME_PURGE_DELAY); _txrob=FALSE; break;
+											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE, TIME_SOFT_PURGE); _txrob=FALSE; break;
+											case ctrl_purge:			_send_purge_par(no, TIME_PURGE, TIME_PURGE);	  _txrob=FALSE; break;
+											case ctrl_purge_hard_wipe:	_send_purge_par(no, time, time); break;
+											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, time); break;
+											case ctrl_purge_hard:		_send_purge_par(no, time, time); _txrob=FALSE; break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
