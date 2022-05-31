@@ -442,6 +442,9 @@ void fluid_tick(void)
 			state[i].condPumpFeedback = _HeadState[i].condPumpFeedback / _HeadStateCnt[i].condPumpFeedback;
 		else 
 			state[i].condPumpFeedback = INVALID_VALUE;
+
+		state[i].condPumpFeedback_min = _HeadState[i].condPumpFeedback_min;
+		state[i].condPumpFeedback_max = _HeadState[i].condPumpFeedback_max;
 		
 		if (!chiller_is_running() &&  FluidStatus[i].ctrlMode>ctrl_off)
 			_send_ctrlMode(i, ctrl_off, TRUE);
@@ -1426,13 +1429,24 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 			_HeadStateCnt[no].condPumpSpeed++;
 		//	TrPrintfL(TRUE, "Head[%d].punpSpeed=%d, cnt=%d", no, pstat->pumpSpeed, _HeadStateCnt[no].condPumpSpeed);
 		}
+		
 		if (valid(pstat->pumpFeedback))
 		{
 			//if ((int)pstat->pumpFeedback < _HeadPumpSpeed[no][0] || !_HeadPumpSpeed[no][0]) _HeadPumpSpeed[no][0] = pstat->pumpFeedback;
 			//if ((int)pstat->pumpFeedback > _HeadPumpSpeed[no][1])							 _HeadPumpSpeed[no][1] = pstat->pumpFeedback;
 
 			_HeadState[no].condPumpFeedback += pstat->pumpFeedback;
-			_HeadStateCnt[no].condPumpFeedback++; 
+			_HeadStateCnt[no].condPumpFeedback++;
+
+			if (!_HeadStateCnt[no].condPumpFeedback_min || pstat->pumpFeedback <= _HeadState[no].condPumpFeedback_min)
+				_HeadState[no].condPumpFeedback_min = pstat->pumpFeedback;
+
+			_HeadStateCnt[no].condPumpFeedback_min++;
+
+			if (!_HeadStateCnt[no].condPumpFeedback_max || pstat->pumpFeedback >= _HeadState[no].condPumpFeedback_max)
+				_HeadState[no].condPumpFeedback_max = pstat->pumpFeedback;
+
+			_HeadStateCnt[no].condPumpFeedback_max++;
 		}
 	}
 }

@@ -1117,6 +1117,8 @@ typedef struct SHeadStateLight
 	INT32			temp;
 	INT32			condPumpSpeed;			
 	INT32			condPumpFeedback;
+	INT32			condPumpFeedback_min;
+	INT32			condPumpFeedback_max;
 	INT32			condPresIn;
 	INT32			condPresOut;
 	INT32			condMeniscus;

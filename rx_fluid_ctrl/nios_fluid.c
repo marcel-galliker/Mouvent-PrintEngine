@@ -472,6 +472,8 @@ void nios_set_head_state(int isNo, SHeadStateLight *pstat)
 	_Cfg->ink_supply[isNo].headTemp                   = pstat->temp;
 	_Cfg->ink_supply[isNo].condPumpSpeed			  = pstat->condPumpSpeed;
 	_Cfg->ink_supply[isNo].condPumpFeedback			  = pstat->condPumpFeedback;
+	_Cfg->ink_supply[isNo].condPumpFeedback_min		  = pstat->condPumpFeedback_min;
+	_Cfg->ink_supply[isNo].condPumpFeedback_max		  = pstat->condPumpFeedback_max;
 	_Cfg->ink_supply[isNo].condPresIn				  = pstat->condPresIn;
 	_Cfg->ink_supply[isNo].condPresOut				  = pstat->condPresOut;	
 	_Cfg->ink_supply[isNo].condMeniscus				  = pstat->condMeniscus;
@@ -735,7 +737,9 @@ static void _display_status(void)
 		term_printf("Check state (Time):"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d(%5d)", _Stat->ink_supply[i].Check_State, _Stat->ink_supply[i].Check_Time_State); term_printf("\n");	
 		
 		term_printf("Cond. Pump Speed   "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str(_Cfg->ink_supply[i].condPumpSpeed)); term_printf("\n");	
-		term_printf("Cond. Pump Feedback"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback)); term_printf("\n");	
+		term_printf("Cond. Pump Feedback"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback)); term_printf("\n");
+		term_printf("Cond. Pump Feedback Min"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback_min)); term_printf("\n");
+		term_printf("Cond. Pump Feedback Max"); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPumpFeedback_max)); term_printf("\n");
 		term_printf("Head Temp:         "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str_temp(_Cfg->ink_supply[i].headTemp)); term_printf("\n");	
 //		term_printf("PID1-Setpoint  Kp  Ti: "); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d %d ", _Stat->ink_supply[i].fluid_PIDsetpoint_P, _Stat->ink_supply[i].fluid_PIDsetpoint_I); term_printf("\n");	
 //		term_printf("PID2-Pump  Kp  Ti:	"); for (i = 0; i < NIOS_INK_SUPPLY_CNT; i++) term_printf("  %d %d ", _Stat->ink_supply[i].fluid_PIDpump_P, _Stat->ink_supply[i].fluid_PIDpump_I); term_printf("\n");	

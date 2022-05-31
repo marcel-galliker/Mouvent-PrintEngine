@@ -1776,7 +1776,9 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 			else _InkSupply[isNo].pid_Setpoint.P = PID_SETPOINT_P_PRINT_8_HEADS / PID_SETPOINT_P_CHECK_REDUCED;
 
 			_InkSupply[isNo].pid_Setpoint.Setpoint = pressure_target;
-			pid_calc(pRX_Config->ink_supply[isNo].condPumpFeedback, &_InkSupply[isNo].pid_Setpoint);
+
+			pid_calc(pRX_Config->ink_supply[isNo].condPumpFeedback_min, &_InkSupply[isNo].pid_Setpoint);
+
 			pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	= _InkSupply[isNo].pid_Setpoint.val;
 
 			// reset pid if output at 0, no reason to accumulate negative value (never want pressure negative)
