@@ -63,6 +63,7 @@ typedef struct
 	INT32	present;
 	EnFluidCtrlMode	ctrl_mode;
 	INT32   cylinderPresSet;
+	INT32	condPumpSpeedSet;
 	INT32	meniscusSet;
 //	INT32	condPresOutSet;
 	INT32	flushTime[3];
@@ -227,6 +228,7 @@ typedef struct
 	UINT32	inkPumpSpeed_set;
 	UINT32	inkPumpSpeed_measured;
 	INT32   cylinderPresSet;
+	INT32	condPumpSpeedSet;
 	
 	INT32   IS_Pressure_Actual;
 	INT32   IS_Pressure_Setpoint;

@@ -81,6 +81,7 @@ static void _fluid_send_flush_time(int no, INT32 time);
 static int  _all_fluids_in_fluidCtrlMode(EnFluidCtrlMode ctrlMode);
 static int  _all_fluids_in_3fluidCtrlModes(EnFluidCtrlMode ctrlMode1, EnFluidCtrlMode ctrlMode2, EnFluidCtrlMode ctrlMode3);
 static int	_fluid_get_flush_time(int flush_cycle);
+static void _fluid_send_condPumpSpeed(int no, int condpumpSpeed);
 //--- statics -----------------------------------------------------------------
 
 typedef struct
@@ -898,6 +899,7 @@ static void _control(int fluidNo)
 
                 case ctrl_recovery_step2:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
 											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
+											_fluid_send_condPumpSpeed(no, _RecoveryData.pump_speed_setpoint * 10);
 											_RecoveryTime[no] = 0;
 											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
                                             break;
@@ -1336,6 +1338,13 @@ static void _send_purge_par(int fluidNo, int time, int delay_time_ms)
 void fluid_send_pressure(int no, INT32 pressure)
 {
 	RX_Config.inkSupply[no].cylinderPresSet = pressure;
+	fluid_set_config();
+}
+
+//--- _fluid_send_condPumpSpeed -------------------------------------
+static void _fluid_send_condPumpSpeed(int no, int condpumpSpeed)
+{
+	RX_Config.inkSupply[no].condPumpSpeedSet = condpumpSpeed;
 	fluid_set_config();
 }
 

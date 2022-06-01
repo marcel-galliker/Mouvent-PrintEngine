@@ -232,6 +232,7 @@ void ink_init(void)
 		_LastPumpTicks[isNo]		   = _get_pump_ticks(isNo);
 		_PumpSpeed1000[isNo]		   = 0;
 		pRX_Status->ink_supply[isNo].cylinderPresSet = INVALID_VALUE; // 150;
+		pRX_Status->ink_supply[isNo].condPumpSpeedSet = INVALID_VALUE;
 	}
 //	_PurgeNo	   = -1;
 }
@@ -264,6 +265,7 @@ void ink_tick_10ms(void)
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
 		pRX_Status->ink_supply[isNo].cylinderPresSet = pRX_Config->ink_supply[isNo].cylinderPresSet;
+		pRX_Status->ink_supply[isNo].condPumpSpeedSet = pRX_Config->ink_supply[isNo].condPumpSpeedSet;
 
 		pRX_Status->ink_supply[isNo].fluid_PIDpump_P 		= _InkSupply[isNo].pid_Pump.P;
 		pRX_Status->ink_supply[isNo].fluid_PIDpump_I 		= _InkSupply[isNo].pid_Pump.I;
@@ -1359,11 +1361,11 @@ void ink_tick_10ms(void)
 			case ctrl_recovery_step5:
 
 				// ----- NEW : Ramp start-up pressure  -------
-				if(pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode && pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_recovery_step1)
+				if(pRX_Status->ink_supply[isNo].ctrl_state != pRX_Config->ink_supply[isNo].ctrl_mode)
 				{
-					if(pRX_Config->ink_supply[isNo].cylinderPresSet > 10)
-						_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet / 5;	// start with low setpoint
-					else _PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].cylinderPresSet;
+					if(pRX_Config->ink_supply[isNo].condPumpSpeedSet > 10)
+						_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].condPumpSpeedSet / 5;	// start with low setpoint
+					else _PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].condPumpSpeedSet;
 					_StartModePRINT[isNo] = 0;
 
 					if (pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_recovery_step1)
@@ -1374,9 +1376,9 @@ void ink_tick_10ms(void)
 				}
 				else _StartModePRINT[isNo]++;
 
-				if ((_PressureSetpoint[isNo] != pRX_Status->ink_supply[isNo].cylinderPresSet) && (_StartModePRINT[isNo] > 500)) {
+				if ((_PressureSetpoint[isNo] != pRX_Status->ink_supply[isNo].condPumpSpeedSet) && (_StartModePRINT[isNo] > 500)) {
 					if (_StartModePRINT[isNo] > 504) {
-						if (_PressureSetpoint[isNo] < pRX_Status->ink_supply[isNo].cylinderPresSet) _PressureSetpoint[isNo]++;
+						if (_PressureSetpoint[isNo] < pRX_Status->ink_supply[isNo].condPumpSpeedSet) _PressureSetpoint[isNo]++;
 						else _PressureSetpoint[isNo]--;
 						_StartModePRINT[isNo] = 500;
 					}

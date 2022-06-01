@@ -1099,6 +1099,7 @@ typedef struct SInkSupplyCfg
 	char			inkFileName[64];
 	SInkDefinition	ink;
 	INT32			cylinderPresSet;
+	INT32			condPumpSpeedSet;
 	INT32			meniscusSet;
 	ERectoVerso		rectoVerso;
 	char			scannerSN[16];
@@ -1134,6 +1135,7 @@ typedef struct SRecoveryFct
 	INT32 printing_time_min[3];
 	INT32 purge_time_s;
 	INT32 repetion;
+	INT32 pump_speed_setpoint;
 } SRecoveryFct;
 			
 typedef struct SFluidStateLight

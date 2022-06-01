@@ -356,6 +356,8 @@ void nios_set_is_cfg(SInkSupplyCfg *pcfg)
 		memcpy(&RX_InkSupplyCfg[no], pcfg, sizeof(SInkSupplyCfg));
 		RX_ColorNameInit(no, FALSE, RX_InkSupplyCfg[no].ink.fileName, RX_InkSupplyCfg[no].ink.colorCode);
 		_Cfg->ink_supply[no].present         = (pcfg->ink.fileName[0]!=0);
+		_Cfg->ink_supply[no].condPumpSpeedSet = pcfg->condPumpSpeedSet;
+		
 		if (pcfg->cylinderPresSet<=INK_PRESSURE_MAX) _Cfg->ink_supply[no].cylinderPresSet = pcfg->cylinderPresSet;
 		
 		if (_Cfg->ink_supply[no].ctrl_mode >= ctrl_recovery_start && _Cfg->ink_supply[no].ctrl_mode <= ctrl_recovery_step7)
