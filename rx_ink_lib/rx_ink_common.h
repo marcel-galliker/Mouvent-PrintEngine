@@ -135,6 +135,7 @@ typedef enum EPrinterType
     printer_test_slide_only, // 3:
     printer_test_table_seon, // 4:
     printer_test_slide_HB,   // 5:
+    printer_test_CTC,		 // 6: CTC=Conditioner Test Center
 
     //--- web printers ------------------------------
     printer_LB701 = 1000, // 1000:

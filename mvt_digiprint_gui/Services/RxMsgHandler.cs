@@ -28,8 +28,8 @@ namespace RX_DigiPrint.Services
 
             try
             {
-             //   Console.WriteLine("handle_message id={0:X}, len={1}", hdr.msgId, hdr.msgLen);
-             //   RxGlobals.Events.AddItem(new LogItem(string.Format("handle_message id={0:X}, len={1}", hdr.msgId, hdr.msgLen)));
+                // Console.WriteLine("{0}: handle_message id=0x{1:X}", RxGlobals.Timer.Ticks(), hdr.msgId);
+                //   RxGlobals.Events.AddItem(new LogItem(string.Format("handle_message id={0:X}, len={1}", hdr.msgId, hdr.msgLen)));
                 switch (hdr.msgId)
                 {
                     case TcpIp.REP_EVT_CONFIRM:     RxGlobals.Events.Reset();   break;
@@ -98,6 +98,7 @@ namespace RX_DigiPrint.Services
                         RxGlobals.Events.AddItem(new LogItem("Received unknown MessageId=0x{0:X}", hdr.msgId)); 
                         break;
                 }
+            //    Console.WriteLine("{0}: handle_message id=0x{1:X} DONE", RxGlobals.Timer.Ticks(), hdr.msgId);
             }
             catch (Exception e)
             {

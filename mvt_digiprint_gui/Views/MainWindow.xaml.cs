@@ -271,6 +271,11 @@ namespace RX_DigiPrint.Views
                         TabMachine.Content = new TestTableSeonView.TestTableSeonView();
                         break;
 
+                    case EPrinterType.printer_test_CTC:
+                        MachineName.Text = "Conditioner Test Center";
+                        TabMachine.Content = new ConditionerTextCenterView.CTC_View();
+                        break;
+
                     case EPrinterType.printer_Dropwatcher:
                         break;
 

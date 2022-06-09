@@ -299,6 +299,7 @@
     <Compile Include="Converters\BooleanConverters.cs" />
     <Compile Include="Converters\CamLib\CamCapsMediatype_Converter.cs" />
     <Compile Include="Converters\CamLib\CamCapsResolution_Converter.cs" />
+    <Compile Include="Converters\CTC_StateImage_Converter.cs" />
     <Compile Include="Converters\IconConverter.cs" />
     <Compile Include="Converters\IconPacks_ModernKind.cs" />
     <Compile Include="Converters\JetCompensationConverters.cs" />
@@ -386,6 +387,8 @@
     <Compile Include="Models\ClusterNo.cs" />
     <Compile Include="Models\ClusterStat.cs" />
     <Compile Include="Models\ClusterStatList.cs" />
+    <Compile Include="Models\CTC_Operation.cs" />
+    <Compile Include="Models\CTC_Test.cs" />
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\Enums\EN_EncoderTypeList.cs" />
@@ -518,6 +521,15 @@
     <Compile Include="Services\RxFlz.cs" />
     <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml.cs">
       <DependentUpon>SoftwareValueCorrectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConditionerTextCenterView\CTC_Commands.xaml.cs">
+      <DependentUpon>CTC_Commands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConditionerTextCenterView\CTC_TestView.xaml.cs">
+      <DependentUpon>CTC_TestView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConditionerTextCenterView\CTC_View.xaml.cs">
+      <DependentUpon>CTC_View.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml.cs">
       <DependentUpon>PrintSystemExtendedView.xaml</DependentUpon>
@@ -1077,6 +1089,18 @@
     <Page Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ConditionerTextCenterView\CTC_Commands.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ConditionerTextCenterView\CTC_TestView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ConditionerTextCenterView\CTC_View.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PrintSystemExtended\PrintSystemExtendedView.xaml">
       <SubType>Designer</SubType>

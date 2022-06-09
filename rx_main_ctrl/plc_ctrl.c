@@ -901,7 +901,8 @@ static void _plc_get_var(RX_SOCKET socket, char *varList)
 		{
 			strcpy(var, str);
 			if (lc_get_value_by_name(name, value)==0) len += sprintf(&answer[len], "=%s", value);
-            else if (RX_Config.printer.type == printer_test_table_seon)
+            else if (RX_Config.printer.type == printer_test_table_seon ||
+                     RX_Config.printer.type == printer_test_CTC)
             {
                 
             }

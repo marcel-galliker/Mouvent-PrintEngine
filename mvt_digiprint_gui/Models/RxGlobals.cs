@@ -7,6 +7,8 @@ using RX_DigiPrint.Views.LB702WBView;
 using RX_DigiPrint.Views.LH702View;
 using RX_DigiPrint.Views.PrintQueueView;
 using RX_DigiPrint.Views.UserControls;
+using RX_DigiPrint.Views.ConditionerTextCenterView;
+
 using System.Windows;
 
 namespace RX_DigiPrint.Models
@@ -69,5 +71,7 @@ namespace RX_DigiPrint.Models
         public static SA_StateMachine       SA_StateMachine = new SA_StateMachine();
         public static SA_AlignSettings      SA_AlignSettings= new SA_AlignSettings();
         public static I1Pro3                I1Pro3          = new I1Pro3();
+        public static CTC_TestView          CTC_TestView;
+        public static CTC_Operation         CTC_Operation   = new CTC_Operation();
     }
 }

@@ -20,6 +20,7 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_slide_HB,      "radex Test Slide HB"));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_table,         "Swiss4Jet Test Table"));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_table_seon,    "Production Test Table"));
+                _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_test_CTC,           "Conditioner Test Center"));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB701,              "Mouvent LB701"   ));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_UV,           "Mouvent LB702-UV"   ));
                 _List.Add(new RxEnum<EPrinterType>(EPrinterType.printer_LB702_WB,           "Mouvent LB702-WB"   ));
