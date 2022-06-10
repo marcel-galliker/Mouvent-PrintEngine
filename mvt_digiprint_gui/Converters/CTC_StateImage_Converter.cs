@@ -19,7 +19,7 @@ namespace RX_DigiPrint.Converters
 				case EN_State.undef:	return null;
 				case EN_State.running:	return "ProgressCheck";
 				case EN_State.ok:		return "Check";
-				case EN_State.failed:	return "AlertCircleOutline";
+				case EN_State.failed:	return "CloseThick"; //return "AlertCircleOutline";
 				default:				return null;
 			}
 		}

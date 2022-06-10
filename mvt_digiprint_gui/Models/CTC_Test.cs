@@ -10,7 +10,7 @@ namespace RX_DigiPrint.Models
 {
 	public class CTC_Test: RxBindable
 	{
-		public const int HEADS=12;
+		public const int HEADS=48;
 		public static CTC_Test Overall = new CTC_Test() { Name = "OVERALL" };
 
 		//--- EN_State -----------------------
@@ -64,6 +64,12 @@ namespace RX_DigiPrint.Models
 				if (Overall.State[head]==EN_State.undef) Overall.State[head]=state;
 				else if (state==EN_State.failed)		 Overall.State[head]=EN_State.failed;
 			}
+		}
+
+		//--- ResetState -------------------------------
+		public void ResetState()
+		{
+			for (int head = 0; head < HEADS; head++) State[head]=EN_State.undef;
 		}
 
 		//--- SimuRunning ----------------------------------------

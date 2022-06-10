@@ -1,4 +1,6 @@
-﻿using RX_DigiPrint.Models;
+﻿using MahApps.Metro.IconPacks;
+using RX_Common;
+using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,15 +23,100 @@ namespace RX_DigiPrint.Views.ConditionerTextCenterView
 	/// </summary>
 	public partial class CTC_Commands : UserControl
 	{
+		List<MvtButton> Button = new List<MvtButton>();
+		private MvtButton actButton;
+
+		//--- constructor ----------------------------------------------
 		public CTC_Commands()
 		{
 			InitializeComponent();
+			foreach(var item in CommandGrid.Children)
+			{
+				MvtButton button = item as MvtButton;
+				if (button!=null)
+				{
+					Button.Add(button);
+				}
+			}
+		}
+
+		//--- started ---------------------------------------
+		private void _started(MvtButton button)
+		{
+			actButton = button;
+			actButton.IsBusy = true;
+			PackIconMaterial icon = actButton.Content as PackIconMaterial;
+			icon.Kind = PackIconMaterialKind.Pause;
+			for (int i = 0; i < Button.Count; i++)
+			{
+				if (Button[i]!=actButton && Button[i]!=BTN_Reset) Button[i].IsEnabled=false;
+			}
+		}
+
+		//--- OnDone ---------------------------------------
+		private void OnDone()
+		{
+			actButton.IsChecked = true;
+			for(int i=0; i<Button.Count; i++)
+			{
+				Button[i].IsBusy	= false;
+				Button[i].IsEnabled = true;
+				PackIconMaterial icon = Button[i].Content as PackIconMaterial;
+				icon.Kind = PackIconMaterialKind.Play;
+			}
 		}
 
 		//--- ElectronicsTest_Clicked ----------------------------------------------
 		private void ElectronicsTest_Clicked(object sender, RoutedEventArgs e)
 		{
-			RxGlobals.CTC_Operation.ElectronicsTest();
+			_started(sender as MvtButton);
+			RxGlobals.CTC_Operation.ElectronicsTest(OnDone);
+		}
+
+		//--- LeakTest_Clicked ----------------------------------------------
+		private void LeakTest_Clicked(object sender, RoutedEventArgs e)
+		{
+			_started(sender as MvtButton);
+			RxGlobals.CTC_Operation.LeakTest(OnDone);
+		}
+
+		//--- ValveTest_Clicked ----------------------------------------------
+		private void ValveTest_Clicked(object sender, RoutedEventArgs e)
+		{
+			_started(sender as MvtButton);
+			RxGlobals.CTC_Operation.ValveTest(OnDone);
+		}
+
+		//--- LongRun_Clicked ----------------------------------------------
+		private void LongRun_Clicked(object sender, RoutedEventArgs e)
+		{
+			_started(sender as MvtButton);
+			RxGlobals.CTC_Operation.LongRun(OnDone);
+		}
+
+		//--- Empty_Clicked ----------------------------------------------
+		private void Empty_Clicked(object sender, RoutedEventArgs e)
+		{
+			_started(sender as MvtButton);
+			RxGlobals.CTC_Operation.Empty(OnDone);
+		}
+
+		//--- Off_Clicked ----------------------------------------------
+		private void Off_Clicked(object sender, RoutedEventArgs e)
+		{
+			_started(sender as MvtButton);
+			RxGlobals.CTC_Operation.Off(OnDone);
+		}
+
+		//--- Reset_Clicked ----------------------------------------------
+		private void Reset_Clicked(object sender, RoutedEventArgs e)
+		{
+			RxGlobals.CTC_Operation.Reset();
+			OnDone();
+			for (int i = 0; i < Button.Count; i++)
+			{
+				Button[i].IsChecked = false;
+			}
 		}
 	}
 }

@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <GroupBox Style="{StaticResource MvtGroupBox}" Header="Commands">
-        <Grid>
+        <Grid x:Name="CommandGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
@@ -31,32 +31,38 @@
             </common:MvtButton>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Leak Test" VerticalAlignment="Center"/>
-            <common:MvtButton Grid.Row="1" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <common:MvtButton Grid.Row="1" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              Click="LeakTest_Clicked">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Valve Test" VerticalAlignment="Center"/>
-            <common:MvtButton Grid.Row="2" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <common:MvtButton Grid.Row="2" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              Click="ValveTest_Clicked">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Long Run" VerticalAlignment="Center"/>
-            <common:MvtButton Grid.Row="3" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <common:MvtButton Grid.Row="3" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              Click="LongRun_Clicked">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Empty" VerticalAlignment="Center"/>
-            <common:MvtButton Grid.Row="4" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <common:MvtButton Grid.Row="4" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              Click="Empty_Clicked">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Text="Off" VerticalAlignment="Center"/>
-            <common:MvtButton Grid.Row="5" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <common:MvtButton Grid.Row="5" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              Click="Off_Clicked">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Text="Reset" VerticalAlignment="Center"/>
-            <common:MvtButton Grid.Row="6" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}">
+            <common:MvtButton Grid.Row="6" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              Click="Reset_Clicked" x:Name="BTN_Reset">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
