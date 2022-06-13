@@ -61,6 +61,9 @@ static void _menicus_minmax(void);
 static void _presure_in_max(void);
 static void _error_cnt(int err, int *errcnt, int errflag, int timeout);
 
+static void _ctc_operation(void);
+static void _ctc_leak_test(void);
+
 static int	_watchdog;
 static int	_timer;
 static int  _rampup_time;
@@ -712,6 +715,11 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode; 
 						break;		  
 						
+		case ctrl_ctc_operation:
+						_ctc_operation();
+						RX_Status.mode = RX_Config.mode; 
+						break;
+		
         //--- PURGE --------------------------------------------
 		case ctrl_purge_soft:
 		case ctrl_purge:
@@ -974,6 +982,25 @@ void pump_tick_10ms(void)
 	}
 }
 
+
+//--- _ctc_operation ----------------------------------
+static void _ctc_operation(void)
+{
+	switch(RX_Config.ctc_command)
+	{
+	case 1:	_ctc_leak_test(); break;
+	}
+}
+
+//--- _ctc_leak_test --------------
+static void _ctc_leak_test(void)
+{
+	switch(RX_Config.ctc_step)
+	{
+	case 1:	break;
+	case 2:	break;
+	}
+}
 //--- _set_valve --------------------------------------
 static void _set_valve(int state)
 {

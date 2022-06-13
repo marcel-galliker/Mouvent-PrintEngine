@@ -271,6 +271,7 @@ static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 	return REPLY_OK;
 }
 
+//--- _do_ctc_operation ---------------------------------------------------
 static int _do_ctc_operation(RX_SOCKET socket, SCTC_OperationMsg *pmsg)
 {
 	nios_set_ctc_operation(pmsg->headNo, pmsg->cmd, pmsg->step, pmsg->par);

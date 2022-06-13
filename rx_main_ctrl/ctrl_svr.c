@@ -1308,3 +1308,10 @@ void ctrl_set_rob_pos(int headNo, INT32 angle, INT32 stitch)
 	msg.stitch	= stitch;
 	sok_send_2(&_HeadCtrl[headNo/HEAD_CNT].socket, CMD_SET_ROB_POS, sizeof(msg), &msg);
 }
+
+//--- ctrl_send_ctc_msg --------------------------------------
+void ctrl_send_ctc_msg(SCTC_OperationMsg *pmsg)
+{
+	sok_send(&_HeadCtrl[pmsg->headNo/HEAD_CNT].socket, pmsg);
+	ctrl_send_head_fluidCtrlMode(pmsg->headNo, ctrl_ctc_operation, FALSE, FALSE);
+}

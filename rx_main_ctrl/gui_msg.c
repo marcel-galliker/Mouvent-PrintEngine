@@ -954,6 +954,7 @@ static void _do_ctc_operation(RX_SOCKET socket, SCTC_OperationMsg *pmsg)
 	{
 		fluid_send_ctc_msg(pmsg->headNo/RX_Config.headsPerColor, pmsg);
 	}
+	ctrl_send_ctc_msg(pmsg);
 }
 
 //--- _do_fluidCtrlMode ---

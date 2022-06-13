@@ -37,6 +37,9 @@ int _cond_load(const char *exepath);
 
 void cond_ctrlMode		(int headNo, EnFluidCtrlMode ctrlMode);
 void cond_ctrlMode2		(int headNo, EnFluidCtrlMode ctrlMode);
+
+void cond_ctc_operation(int headNo, int cmd, int step, int par);
+
 EnFluidCtrlMode cond_getCtrlMode(int headNo);
 void cond_heater_test	(int temp);
 void cond_toggle_meniscus_check(void);

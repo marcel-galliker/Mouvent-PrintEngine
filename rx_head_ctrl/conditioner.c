@@ -728,6 +728,15 @@ void cond_ctrlMode2(int headNo, EnFluidCtrlMode ctrlMode)
 	else for(i=0; i<MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrlMode);
 }
 
+//--- cond_ctc_operation --------------------------------------------
+void cond_ctc_operation(int headNo, int cmd, int step, int par)
+{
+	_NiosMem->cfg.cond[headNo].ctc_command = cmd;
+	_NiosMem->cfg.cond[headNo].ctc_step	   = step;
+	_NiosMem->cfg.cond[headNo].ctc_par	   = par;
+	cond_ctrlMode(headNo, ctrl_ctc_operation);
+}
+
 //--- cond_getCtrlMode --------------------------------------------
 EnFluidCtrlMode cond_getCtrlMode(int headNo)
 {
