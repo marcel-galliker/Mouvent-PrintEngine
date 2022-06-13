@@ -100,6 +100,11 @@ typedef struct
 	
 	//--- test bleed line -----
 	int		test_bleed_line;
+
+	//--- ctc_operation ------------
+	INT32 ctc_command;
+	INT32 ctc_step;
+	INT32 ctc_par;
 	
 } SIsAdapterCfg;
 

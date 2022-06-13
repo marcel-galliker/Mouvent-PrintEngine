@@ -138,6 +138,8 @@ namespace RX_DigiPrint.Models.Enums
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test,          "Test"          ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal,      "Cal Offset"  ));
                 _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal_done, "Cal Done"    ));
+
+                _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_ctc_operation, "CTC Operation" ));
             }
         }
 

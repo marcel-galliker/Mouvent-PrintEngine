@@ -144,6 +144,8 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 
 	case ctrl_test_watchdog:		return "WATCHDOG";	//0x10000,
 	case ctrl_test:					return "TEST";		//0x10001,
+
+	case ctrl_ctc_operation:		return "CTC";
     	
 //	case ctrl_heater_error:	return "HEAT ERR";  //0x12346,
 		

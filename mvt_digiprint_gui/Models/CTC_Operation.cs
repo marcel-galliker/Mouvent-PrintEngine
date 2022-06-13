@@ -1,4 +1,5 @@
 ﻿using RX_Common;
+using RX_DigiPrint.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +13,7 @@ namespace RX_DigiPrint.Models
 	public class CTC_Operation : RxBindable
 	{
 
-		private const bool _Simulation = true;
+		private const bool _Simulation = false;
 		private Thread Process;
 
 		//--- Constructor -----------------------------------------------------------------
@@ -36,54 +37,50 @@ namespace RX_DigiPrint.Models
 		{
 			Process = new Thread(()=>
 			{
-				CTC_Test result;
-
 				RxBindable.Invoke(()=>_Tests.Add(new CTC_Test(){Name="Electronics" }));
 
 				//--------------------------------------------------
-				result = new CTC_Test() { Step = "Connected" };
-				result.SimuRunning();
-				RxBindable.Invoke(() => _Tests.Add(result));
+				CTC_Test connected = new CTC_Test() { Step = "Connected" };
+				CTC_Test temp = new CTC_Test() { Step = "Cooler Temperature" };
+				CTC_Test pres = new CTC_Test() { Step = "Cooler Pressure" };
+				CTC_Test volt = new CTC_Test() { Step = "Power -36V" };
+				
+				CTC_Settings settings = new CTC_Settings();
+				CTC_Param tempPar = settings.GetParam("Electronics", temp.Step, "Cooler_Temp", 20, 30);
+				CTC_Param presPar = settings.GetParam("Electronics", pres.Step, "Cooler_Pressure", 20, 30);
+
+				RxBindable.Invoke(() =>
+				{
+					_Tests.Add(connected);
+					_Tests.Add(temp);
+					_Tests.Add(pres);
+					_Tests.Add(volt);
+				});
 
 				if (_Simulation)
 				{
 					Thread.Sleep(1000);
-					RxBindable.Invoke(() => result.SimuFailed(new List<int>() { 1, 9 }));
+					RxBindable.Invoke(() => 
+					{
+						connected.SimuFailed(new List<int>() { 1, 9 });
+						pres.SimuFailed(new List<int>() { 4 });
+						temp.SimuFailed(new List<int>() { 7 });
+						volt.SimuFailed(new List<int>() { 10 });
+					});
 				}
-
-				//----------------------------------------------------------------
-				result = new CTC_Test() { Step = "Cooler Pressure" };
-				result.SimuRunning();
-
-				RxBindable.Invoke(() => _Tests.Add(result));
-				Thread.Sleep(1000);
-				if (_Simulation)
+				else 
 				{
-					Thread.Sleep(1000);
-					RxBindable.Invoke(() => result.SimuFailed(new List<int>() { 4 }));
+					for(int head=0; head<CTC_Test.HEADS; head++)
+					{
+						HeadStat stat = RxGlobals.HeadStat.List[head];
+						UInt32   err  = RxGlobals.HeadStat.GetClusterErr(head/4);
+						connected.SetResult(head, stat.Connected);
+						temp.SetResult(head, stat.Cooler_Temp>=tempPar.Min		&& stat.Cooler_Temp<=tempPar.Max);
+						pres.SetResult(head, stat.Cooler_Pressure>=presPar.Min && stat.Cooler_Pressure<=presPar.Max);
+						volt.SetResult(head, (err & 0x00000800)==0);
+					}
 				}
 
-				//----------------------------------------------------------------
-				result = new CTC_Test() { Step = "Cooler Temperature" };
-				result.SimuRunning();
-
-				RxBindable.Invoke(() => _Tests.Add(result));
-				Thread.Sleep(1000);
-				if (_Simulation)
-				{
-					Thread.Sleep(1000);
-					RxBindable.Invoke(() => result.SimuFailed(new List<int>() { 7 }));
-				}
-
-				//----------------------------------------------------------------
-				result = new CTC_Test() { Step = "Power -36V" };
-
-				if (_Simulation)
-				{
-					Thread.Sleep(1000);
-					RxBindable.Invoke(() => result.SimuFailed(new List<int>() { 10 }));
-					RxBindable.Invoke(() => _Tests.Add(result));
-				}
 				if (onDone != null) RxBindable.Invoke(()=>onDone());
 			});
 			Process.Start();
@@ -98,11 +95,47 @@ namespace RX_DigiPrint.Models
 
 				RxBindable.Invoke(() => _Tests.Add(new CTC_Test() { Name = "Leak Test" }));
 
-				//--------------------------------------------------
-				result = new CTC_Test() { Step = "Ink Tank Pressure" };
-				result.SimuRunning();
-				RxBindable.Invoke(() => _Tests.Add(result));
 
+				//--------------------------------------------------
+				CTC_Test start = new CTC_Test() { Step = "Ink Tank Pressure" };
+				
+				CTC_Settings settings = new CTC_Settings();
+				CTC_Param startPar1 = settings.GetParam("Leak Test", start.Step, "Pressure", 10, 0);
+				CTC_Param startPar2 = settings.GetParam("Leak Test", start.Step, "WaitTime", 10, 0);
+				CTC_Param startPar3 = settings.GetParam("Leak Test", start.Step, "PIN",		 10, 20);
+
+				//--------------------------------------------------
+				start.SimuRunning();
+				RxBindable.Invoke(() => _Tests.Add(start));
+				// Start pumping 
+				TcpIp.SCTC_OperationMsg msg = new TcpIp.SCTC_OperationMsg(){ cmd=TcpIp.cdc_leak_test, step=1, par=(Int32)startPar1.Min};
+				for(msg.headNo=0; msg.headNo<CTC_Test.HEADS; msg.headNo++)
+				{
+					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_CTC_OPERATION, ref msg);
+				}
+
+				bool ok=false;
+				do
+				{
+					Thread.Sleep(200);
+					ok=true;
+					for(int isNo=0; ok && isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
+					{
+						Console.WriteLine("CylinderPres[{0}]={1}", isNo, RxGlobals.InkSupply.List[isNo].CylinderPres);
+						if (RxGlobals.InkSupply.List[isNo].CylinderPres < startPar1.Min) ok=false;
+					}
+				} while (!ok);
+
+				// Stop pumping
+				Thread.Sleep(startPar2.Min);
+				// check
+				for(int head=0; head<CTC_Test.HEADS; head++)
+				{
+					HeadStat stat = RxGlobals.HeadStat.List[head];
+					start.SetResult(head, stat.PresIn>=startPar3.Min && stat.PresIn<=startPar3.Max);
+				}
+
+				/*
 				if (_Simulation)
 				{
 					Thread.Sleep(1000);
@@ -141,6 +174,7 @@ namespace RX_DigiPrint.Models
 					Thread.Sleep(1000);
 					RxBindable.Invoke(() => result.SimuFailed(new List<int>() { 1, 9 }));
 				}
+				*/
 
 				//--- END ---------------------------------------
 				if (onDone != null) RxBindable.Invoke(() => onDone());

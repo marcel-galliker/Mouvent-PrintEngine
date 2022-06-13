@@ -1,10 +1,6 @@
 ﻿using RX_Common;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RX_DigiPrint.Models
 {
@@ -53,6 +49,16 @@ namespace RX_DigiPrint.Models
 		{
 			get { return _State; }
 			set { SetProperty(ref _State, value); }
+		}
+
+		//--- SetResult -------------------------------
+		public void SetResult(int head, bool ok)
+		{
+			if (Overall.State[head]!=EN_State.failed) 
+			{
+				if (ok) SetHeadState(head, EN_State.ok);
+				else    SetHeadState(head, EN_State.failed);
+			}
 		}
 
 		//--- SetHeadState -----------------------------

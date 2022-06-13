@@ -1429,6 +1429,15 @@ void fluid_send_pressure(int no, INT32 pressure)
 	fluid_set_config();
 }
 
+//--- fluid_send_ctc_msg ----------------------------------
+void fluid_send_ctc_msg(int no, SCTC_OperationMsg *pmsg)
+{
+	SCTC_OperationMsg msg;
+	memcpy(&msg, pmsg, sizeof(msg));
+	msg.headNo = no % INK_PER_BOARD;
+	sok_send(&_FluidThreadPar[no/INK_PER_BOARD].socket, &msg);
+}
+
 //--- fluid_send_tara -------------------------------------------
 void fluid_send_tara(int no)
 {

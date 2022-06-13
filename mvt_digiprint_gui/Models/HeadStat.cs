@@ -22,7 +22,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property HeadNo ---------------------------------------
-        private int _HeadNo;
+        private int _HeadNo=-1;
         public int HeadNo
         {
             get { return _HeadNo; }
@@ -440,16 +440,19 @@ namespace RX_DigiPrint.Models
                 int ink;
                 if (RxGlobals.PrintSystem.HeadsPerColor!=0) ink = no/RxGlobals.PrintSystem.HeadsPerColor;
                 else ink=no;
-                InkSupply = RxGlobals.InkSupply.List[ink];
-                if (InkSupply!=null && InkSupply.InkType!=null)
+                if (ink< RxGlobals.InkSupply.List.Count)
                 {
-                    Color   = new SolidColorBrush(InkSupply.InkType.Color);
-                    ColorFG = new SolidColorBrush(InkSupply.InkType.ColorFG);
+                    InkSupply = RxGlobals.InkSupply.List[ink];
+                    if (InkSupply!=null && InkSupply.InkType!=null)
+                    {
+                        Color   = new SolidColorBrush(InkSupply.InkType.Color);
+                        ColorFG = new SolidColorBrush(InkSupply.InkType.ColorFG);
 
-                    string str = new ColorCode_Str().Convert(InkSupply.InkType.ColorCode, null, ink, null).ToString();
+                        string str = new ColorCode_Str().Convert(InkSupply.InkType.ColorCode, null, ink, null).ToString();
 
-                    Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadsPerColor).ToString();
-                    used = true;
+                        Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadsPerColor).ToString();
+                        used = true;
+                    }
                 }
             }
             catch(Exception)

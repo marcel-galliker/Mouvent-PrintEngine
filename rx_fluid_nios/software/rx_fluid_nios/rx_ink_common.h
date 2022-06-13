@@ -135,6 +135,7 @@ typedef enum EPrinterType
     printer_test_slide_only, // 3:
     printer_test_table_seon, // 4:
     printer_test_slide_HB,   // 5:
+    printer_test_CTC,		 // 6: CTC=Conditioner Test Center
 
     //--- web printers ------------------------------
     printer_LB701 = 1000, // 1000:
@@ -293,6 +294,8 @@ typedef enum EnFluidCtrlMode
 	ctrl_recovery_step7,			// 0x507
     ctrl_recovery_step8,			// 0x508
     ctrl_recovery_step9,			// 0x509
+
+	ctrl_ctc_operation = 0x600,
 
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 				// 0x10001

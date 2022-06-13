@@ -108,6 +108,8 @@ static void _do_get_prn_stat	(RX_SOCKET socket);
 static void _do_test_start		(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_clean_start		(RX_SOCKET socket);
 
+static void _do_ctc_operation (RX_SOCKET socket, SCTC_OperationMsg *pmsg);
+
 //--- handle_gui_msg ---------------------------------------------
 int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
 {
@@ -186,6 +188,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);						break;
         case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
         case CMD_PURGE_CLUSTER:			_do_fluid_purge_cluster(socket, (SValue*)pdata);				break;
+		case CMD_CTC_OPERATION:			_do_ctc_operation (socket, (SCTC_OperationMsg *) pmsg);			break;
 
         case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)pdata);						break;				
 		case CMD_SCALES_CALIBRATE:	_do_scales_calib(socket, (SValue*)pdata);						break;				
@@ -942,6 +945,15 @@ static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue *pmsg)
     int start_headNo = 4 * clusterNo;
     if (fluid_purgeCluster(clusterNo, TRUE) == REPLY_OK)
         ctrl_send_head_fluidCtrlMode(start_headNo, ctrl_purge_hard, TRUE, TRUE);
+}
+
+//--- _do_ctc_operation -----------------------------------------------------------
+static void _do_ctc_operation(RX_SOCKET socket, SCTC_OperationMsg *pmsg)
+{
+	if (RX_Config.headsPerColor > 0 && pmsg->headNo % RX_Config.headsPerColor == 0)
+	{
+		fluid_send_ctc_msg(pmsg->headNo/RX_Config.headsPerColor, pmsg);
+	}
 }
 
 //--- _do_fluidCtrlMode ---

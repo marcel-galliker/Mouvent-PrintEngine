@@ -220,6 +220,7 @@
 #define CMD_FLUID_DEGASSER		0x02000127
 
 #define CMD_FLUID_FLUSH			0x01000129
+#define CMD_CTC_OPERATION		0x01000130
 
 #define CMD_GET_STEPPER_CFG		0x01000131
 #define REP_GET_STEPPER_CFG		0x02000131
@@ -897,6 +898,18 @@ typedef struct SFluidCtrlCmd
 	int				no;
 	EnFluidCtrlMode	ctrlMode;
 } SFluidCtrlCmd;
+
+//--- SCTC_OperationMsg --------------------
+typedef struct SCTC_OperationMsg
+{
+	SMsgHdr			hdr;
+	INT32			headNo; 
+	INT32			cmd;
+	#define cdc_leak_test 1
+
+	INT32			step;
+	INT32			par;
+} SCTC_OperationMsg;
 
 //--- SFluidTestTable ----------------------------------
 typedef struct SFluidTestTable

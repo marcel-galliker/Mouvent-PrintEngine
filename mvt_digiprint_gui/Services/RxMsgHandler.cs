@@ -294,7 +294,7 @@ namespace RX_DigiPrint.Services
                 RxGlobals.HeadStat.Cooler_Pressure((int)msg.stat.boardNo, msg.stat.flow);
                 RxGlobals.HeadStat.Cooler_Temp((int)msg.stat.boardNo, msg.stat.cooler_temp);
                 RxGlobals.HeadStat.ClusterNo((int)msg.stat.boardNo, msg.stat.clusterNo);
-                
+                RxGlobals.HeadStat.SetClusterErr((int)msg.stat.boardNo, msg.stat.err);      
 
                 int i, no;
                 for (i=0; i<TcpIp.HEAD_CNT; i++)

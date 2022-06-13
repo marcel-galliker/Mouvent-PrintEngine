@@ -33,6 +33,12 @@ namespace RX_DigiPrint.Models
             return (PrinterProperties)this.MemberwiseClone();
         }
         
+
+        public string GetUserPath()
+        {
+            return _Path;
+        }
+
         //--- NetworkSettings -----------------------------
         private bool _first=true;
         public void NetworkSettings(TcpIp.SIfConfig settings)

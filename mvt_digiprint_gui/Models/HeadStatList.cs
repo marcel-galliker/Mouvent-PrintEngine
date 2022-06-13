@@ -12,11 +12,12 @@ namespace RX_DigiPrint.Models
     public class HeadStatList
     {
         static private ObservableCollection<HeadStat> _MyList = new ObservableCollection<HeadStat>();
-        static Boolean[] _BoardConnected = new Boolean[128];
-        static Boolean[] _MeniscusDisabled = new Boolean[128];
-        static UInt32[] _ClusterNo = new UInt32[4];
-        static Int32[] _Cooler_Pressure = new Int32[4];
-        static UInt32[] _Cooler_Temp = new UInt32[4];
+        static Boolean[] _BoardConnected    = new Boolean[128];
+        static Boolean[] _MeniscusDisabled  = new Boolean[128];
+        static UInt32[]  _ClusterErr        = new UInt32[12];
+        static UInt32[] _ClusterNo          = new UInt32[12];
+        static Int32[] _Cooler_Pressure     = new Int32[12];
+        static UInt32[] _Cooler_Temp        = new UInt32[12];
 
         //--- constructor -----------------------------
         public HeadStatList()
@@ -58,7 +59,8 @@ namespace RX_DigiPrint.Models
             {          
                 foreach(HeadStat item in _MyList)
                 {
-                    if ((item.HeadNo/4) == boardNo) item.Connected = connected;
+                    if (item.HeadNo>=0 && (item.HeadNo/4) == boardNo) 
+                        item.Connected = connected;
                 }
             }
             );
@@ -121,8 +123,20 @@ namespace RX_DigiPrint.Models
 
         }
 
-        //--- Reset ---------------------------------------
-        public void Reset()
+        //--- SetClusterErr ----------------
+        public void SetClusterErr(int cluster, UInt32 err)
+        {
+            if (cluster<_ClusterErr.Length) _ClusterErr[cluster]=err;
+        }
+        public UInt32 GetClusterErr(int cluster)
+        {
+            if (cluster<_ClusterErr.Length) return _ClusterErr[cluster];
+            else return 0;
+        }
+
+
+		//--- Reset ---------------------------------------
+		public void Reset()
         {
             RxBindable.Invoke(()=>reset());
         }

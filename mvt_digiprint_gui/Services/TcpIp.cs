@@ -274,12 +274,15 @@ namespace RX_DigiPrint.Services
         ctrl_recovery_step8,            // 0x508:
         ctrl_recovery_step9,            // 0x509:
 
+        ctrl_ctc_operation = 0x600,
+
         ctrl_test_watchdog = 0x10000,
 	    ctrl_test,				// 0x10001
         ctrl_offset_cal, 	    // 0x10002
         ctrl_offset_cal_done,	// 0x10003
         ctrl_offset_del_factory,// 0x10004
         ctrl_offset_del_user,   // 0x10005
+
 
         ctrl_toggle_meniscus = 0x20000,
     };
@@ -457,6 +460,8 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_FLUID_DEGASSER      = 0x01000127;
 
         public const UInt32 CMD_FLUID_FLUSH         = 0x01000129;
+
+        public const UInt32 CMD_CTC_OPERATION       = 0x01000130;   // Conditioner test Center
 
         public const UInt32 CMD_GET_STEPPER_CFG		= 0x01000131;
         public const UInt32 REP_GET_STEPPER_CFG		= 0x02000131;
@@ -1132,6 +1137,17 @@ namespace RX_DigiPrint.Services
 	        public Int32			no;
 	        public EFluidCtrlMode   ctrlMode;
         };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SCTC_OperationMsg
+        {
+	        public SMsgHdr          hdr;
+	        public Int32			headNo;
+	        public Int32            cmd;
+	        public Int32            step;
+	        public Int32            par;
+        };
+        public const int cdc_leak_test   = 1;
 
         public struct SFluidTestTable
         {

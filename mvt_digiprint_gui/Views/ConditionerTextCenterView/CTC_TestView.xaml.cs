@@ -61,6 +61,5 @@ namespace RX_DigiPrint.Views.ConditionerTextCenterView
 			XmlReader xmlReader = XmlReader.Create(stringReader);
 			return XamlReader.Load(xmlReader) as DataTemplate;
 		}
-
 	}
 }

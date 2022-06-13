@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ig="http://schemas.infragistics.com/xaml"
-             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:RX_DigiPrint.Views.ConditionerTextCenterView"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
@@ -23,116 +22,6 @@
                     <ig:TextColumn HeaderText="Name" Key="Name" Width="auto"/>
                     
                     <ig:TextColumn HeaderText="Step" Key="Step" Width="auto"/>
-                    <!--
-
-                    <ig:TemplateColumn HeaderText="1" Key="State[0]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[0], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[0], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-                    
-                    <ig:TemplateColumn HeaderText="2" Key="State[1]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[1], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[1], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="3" Key="State[2]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[2], Converter={StaticResource CTC_StateImage_Converter}}"
-                                    Foreground="{Binding State[2], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="4" Key="State[3]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[3], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[3], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="5" Key="State[4]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[4], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[4], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="6" Key="State[5]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[5], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[5], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="7" Key="State[6]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[6], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[6], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="8" Key="State[7]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[7], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[7], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="9" Key="State[8]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[8], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[8], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="10" Key="State[9]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[9], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[9], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="11" Key="State[10]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[10], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[10], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-
-                    <ig:TemplateColumn HeaderText="12" Key="State[11]" >
-                        <ig:TemplateColumn.ItemTemplate>
-                            <DataTemplate>
-                                <iconPacks:PackIconMaterial Kind="{Binding State[11], Converter={StaticResource CTC_StateImage_Converter}}"
-                                                            Foreground="{Binding State[11], Converter={StaticResource CTC_StateColor_Converter}}"/>
-                            </DataTemplate>
-                        </ig:TemplateColumn.ItemTemplate>
-                    </ig:TemplateColumn>
-                    -->
 
                     <ig:UnboundColumn Key="End"     HeaderText=" " Width="*" ValueConverter="{StaticResource Filler_Converter}"/>
 

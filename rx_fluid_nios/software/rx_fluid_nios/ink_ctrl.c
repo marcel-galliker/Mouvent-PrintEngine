@@ -195,6 +195,9 @@ static void _set_pressure_valve(int newState);
 
 static void _trace_pump_ctrl(int pressure);
 
+static void _ctc_operation(int isNo);
+static void _ctc_leak_test(int isNo);
+
 INT32 abs(INT32 val)
 {
     if (val < 0) return (-val);
@@ -1031,6 +1034,10 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
+			case ctrl_ctc_operation:
+				_ctc_operation(isNo);
+				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				break;
 /*
 			case ctrl_cal_start:
 				_TimeStabitilityCalibration[isNo] = 0;
@@ -1507,6 +1514,33 @@ void ink_tick_10ms(void)
 	else
 	{
 		_set_air_pump(FALSE);
+	}
+}
+
+//--- _ctc_operation ----------------------------------
+static void _ctc_operation(int isNo)
+{
+	switch(pRX_Config->ink_supply[isNo].ctc_command)
+	{
+	case 1:	_ctc_leak_test(isNo); break;
+	}
+}
+
+//--- _ctc_leak_test ----------------------------------
+static void _ctc_leak_test(int isNo)
+{
+	switch(pRX_Config->ink_supply[isNo].ctc_step)
+	{
+	case 1:	_set_bleed_valve(isNo, PV_CLOSED);
+			_set_air_valve(isNo, PV_CLOSED);
+			_set_flush_pump(isNo, FALSE);
+			_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
+			_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].ctc_par;
+			_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
+			break;
+
+	case 2:	_set_pump_speed(isNo, 0);
+			break;
 	}
 }
 

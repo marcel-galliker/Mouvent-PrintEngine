@@ -3,13 +3,14 @@ using RX_Common;
 using RX_DigiPrint.Models;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using static RX_DigiPrint.Models.CTC_Test;
 
 namespace RX_DigiPrint.Converters
 {
-	//--- StateImage_Converter ----------------------------------------------------
+	//--- CTC_StateImage_Converter ----------------------------------------------------
 	public class CTC_StateImage_Converter : IValueConverter
 	{
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -19,7 +20,7 @@ namespace RX_DigiPrint.Converters
 				case EN_State.undef:	return null;
 				case EN_State.running:	return "ProgressCheck";
 				case EN_State.ok:		return "Check";
-				case EN_State.failed:	return "CloseThick"; //return "AlertCircleOutline";
+				case EN_State.failed:	return "CloseThick";
 				default:				return null;
 			}
 		}
@@ -29,6 +30,7 @@ namespace RX_DigiPrint.Converters
         }
 	}
 
+	//--- CTC_StateColor_Converter ----------------------------------------
 	public class CTC_StateColor_Converter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

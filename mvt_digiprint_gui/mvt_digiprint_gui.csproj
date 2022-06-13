@@ -299,7 +299,7 @@
     <Compile Include="Converters\BooleanConverters.cs" />
     <Compile Include="Converters\CamLib\CamCapsMediatype_Converter.cs" />
     <Compile Include="Converters\CamLib\CamCapsResolution_Converter.cs" />
-    <Compile Include="Converters\CTC_StateImage_Converter.cs" />
+    <Compile Include="Converters\CTC_Converters.cs" />
     <Compile Include="Converters\IconConverter.cs" />
     <Compile Include="Converters\IconPacks_ModernKind.cs" />
     <Compile Include="Converters\JetCompensationConverters.cs" />
@@ -388,6 +388,8 @@
     <Compile Include="Models\ClusterStat.cs" />
     <Compile Include="Models\ClusterStatList.cs" />
     <Compile Include="Models\CTC_Operation.cs" />
+    <Compile Include="Models\CTC_Param.cs" />
+    <Compile Include="Models\CTC_Settings.cs" />
     <Compile Include="Models\CTC_Test.cs" />
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />

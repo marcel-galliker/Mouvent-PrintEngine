@@ -28,6 +28,7 @@ void nios_main(int ticks, int menu);
 void nios_set_cfg			(SFluidBoardCfg *pcfg);
 void nios_set_is_cfg		(SInkSupplyCfg *pcfg);
 void nios_set_ctrlmode		(int isNo, EnFluidCtrlMode mode);
+void nios_set_ctc_operation (int isNo,  int cmd, int step, int par);
 // void nios_set_pressure		(int isNo, int pressure);
 void nios_set_purge_par		(int isNo, int last_pos, int time, int act_pos);
 void nios_set_head_state	(int isNo, SHeadStateLight *pstate);

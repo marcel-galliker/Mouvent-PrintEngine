@@ -430,6 +430,16 @@ void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 	_Cfg->ink_supply[isNo].ctrl_mode = mode;
 }
 
+//--- nios_set_ctc_operation ------------------------------------------
+void nios_set_ctc_operation(int isNo, int cmd, int step, int par)
+{
+	
+	_Cfg->ink_supply[isNo].ctc_command = cmd;
+	_Cfg->ink_supply[isNo].ctc_step	   = step;
+	_Cfg->ink_supply[isNo].ctc_par	   = par;	
+	_Cfg->ink_supply[isNo].ctrl_mode   = ctrl_ctc_operation;	
+}
+
 //--- nios_set_purge_par --------------------------------------
 void nios_set_purge_par(int isNo, int delay_pos_y, int time, int act_pos_y)
 {
