@@ -679,6 +679,7 @@ static void _display_status(void)
 		term_printf("input:           0x%02x\n", _Stat->input);
 		term_printf("p_sensor_error:  "); for (i=0; i<8; i++) term_printf("%5s ", value_str(_Stat->p_sensor_error[i]));	term_printf("\n");
 		term_printf("pt100temp:       "); for (i=0; i<8; i++) term_printf("%05d ", _Stat->pt100[i]);			term_printf("\n");
+		term_printf("CTC:             cmd=%d, step=%d par=%d\n", _Cfg->ink_supply[0].ctc_command, _Cfg->ink_supply[0].ctc_step, _Cfg->ink_supply[0].ctc_par);
 		term_printf("\n");
 		/*
 		term_printf("ID:               ");

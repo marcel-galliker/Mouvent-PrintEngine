@@ -21,4 +21,8 @@
     <RemoteDebugEnabled>true</RemoteDebugEnabled>
     <RemoteDebugMachine>192.168.200.2</RemoteDebugMachine>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-Remote|x64'">
+    <RemoteDebugEnabled>true</RemoteDebugEnabled>
+    <RemoteDebugMachine>192.168.200.2</RemoteDebugMachine>
+  </PropertyGroup>
 </Project>

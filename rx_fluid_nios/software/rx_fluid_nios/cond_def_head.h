@@ -215,6 +215,11 @@ typedef struct SConditionerCfg_mcu
 	UINT32	clusterNo;
 	UINT32	clusterTime;
 	UINT32	serialNo;
+
+	//--- ctc_operation ------------
+	INT32 ctc_command;
+	INT32 ctc_step;
+	INT32 ctc_par;
 } SConditionerCfg_mcu;
 
 typedef struct

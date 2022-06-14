@@ -247,7 +247,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);		break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);		break;
-	case CMD_CTC_OPERATION:			do_ctc_operation	(socket, (SCTC_OperationMsg*)pmsg);		break;
+	case CMD_CTC_OPERATION:			_do_ctc_operation	(socket, (SCTC_OperationMsg*)pmsg);		break;
 	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);		break;
     case CMD_SET_DENSITY:			eeprom_set_density	((SDensityMsg*)pmsg);					break;
     case CMD_SET_ROB_POS:			_do_rob_pos		    (socket, (SRobPositionMsg*) pmsg);		break;
@@ -449,7 +449,7 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 //--- _do_ctc_operation ---------------------------------------
 static int _do_ctc_operation(RX_SOCKET socket, SCTC_OperationMsg *pmsg)
 {
-	cond_set_ctc_operation(pmsg->headNo, pmsg->cmd, pmsg->step, pmsg->par);
+	cond_ctc_operation(pmsg->headNo%MAX_HEADS_BOARD, pmsg->cmd, pmsg->step, pmsg->par);
 	return REPLY_OK;
 }
 

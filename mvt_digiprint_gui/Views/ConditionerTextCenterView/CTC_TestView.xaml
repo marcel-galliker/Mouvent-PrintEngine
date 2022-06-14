@@ -9,7 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800"
              IsVisibleChanged="UserControl_IsVisibleChanged">
 
-    <GroupBox Header="Tests" Style="{StaticResource MvtGroupBox}" >
+    <GroupBox Header="Test Results" Style="{StaticResource MvtGroupBox}" >
         <Grid>
             <ig:XamGrid x:Name="TestsGrid"
                     AutoGenerateColumns="False"

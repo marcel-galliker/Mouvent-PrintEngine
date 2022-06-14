@@ -49,14 +49,14 @@ namespace RX_DigiPrint.Views.ConditionerTextCenterView
 			icon.Kind = PackIconMaterialKind.Pause;
 			for (int i = 0; i < Button.Count; i++)
 			{
-				if (Button[i]!=actButton && Button[i]!=BTN_Reset) Button[i].IsEnabled=false;
+				if (Button[i]!=actButton) Button[i].IsEnabled=false;
 			}
 		}
 
 		//--- OnDone ---------------------------------------
 		private void OnDone()
 		{
-			actButton.IsChecked = true;
+			if (actButton!=null) actButton.IsChecked = true;
 			for(int i=0; i<Button.Count; i++)
 			{
 				Button[i].IsBusy	= false;
@@ -101,21 +101,34 @@ namespace RX_DigiPrint.Views.ConditionerTextCenterView
 			RxGlobals.CTC_Operation.Empty(OnDone);
 		}
 
-		//--- Off_Clicked ----------------------------------------------
-		private void Off_Clicked(object sender, RoutedEventArgs e)
+		//--- Stop_Clicked ----------------------------------------------
+		private void Stop_Clicked(object sender, RoutedEventArgs e)
 		{
-			_started(sender as MvtButton);
-			RxGlobals.CTC_Operation.Off(OnDone);
+			MvtButton ctrl=sender as MvtButton;
+			Point pos = ctrl.PointToScreen(new Point(0, 0));
+			pos.X += ctrl.ActualWidth;
+			pos.Y += ctrl.ActualHeight;
+			if (MvtMessageBox.YesNoPos("STOP", "STOP test?", MessageBoxImage.Question, true, pos))
+			{
+				RxGlobals.CTC_Operation.Stop(OnDone);
+			}
 		}
 
 		//--- Reset_Clicked ----------------------------------------------
 		private void Reset_Clicked(object sender, RoutedEventArgs e)
 		{
-			RxGlobals.CTC_Operation.Reset();
-			OnDone();
-			for (int i = 0; i < Button.Count; i++)
+			MvtButton ctrl=sender as MvtButton;
+			Point pos = ctrl.PointToScreen(new Point(0, 0));
+			pos.X += ctrl.ActualWidth;
+			pos.Y += ctrl.ActualHeight;
+			if (MvtMessageBox.YesNoPos("Reset", "Reset tests?", MessageBoxImage.Question, true, pos))
 			{
-				Button[i].IsChecked = false;
+				RxGlobals.CTC_Operation.Reset();
+				OnDone();
+				for (int i = 0; i < Button.Count; i++)
+				{
+					Button[i].IsChecked = false;
+				}
 			}
 		}
 	}
