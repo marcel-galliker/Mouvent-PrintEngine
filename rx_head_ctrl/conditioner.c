@@ -728,15 +728,6 @@ void cond_ctrlMode2(int headNo, EnFluidCtrlMode ctrlMode)
 	else for(i=0; i<MAX_HEADS_BOARD; i++) cond_ctrlMode(i, ctrlMode);
 }
 
-//--- cond_ctc_operation --------------------------------------------
-void cond_ctc_operation(int headNo, int cmd, int step, int par)
-{
-	_NiosMem->cfg.cond[headNo].ctc_command = cmd;
-	_NiosMem->cfg.cond[headNo].ctc_step	   = step;
-	_NiosMem->cfg.cond[headNo].ctc_par	   = par;
-	cond_ctrlMode(headNo, ctrl_ctc_operation);
-}
-
 //--- cond_getCtrlMode --------------------------------------------
 EnFluidCtrlMode cond_getCtrlMode(int headNo)
 {
@@ -751,6 +742,14 @@ void cond_set_config(int headNo, SConditionerCfg *cfg)
 //	_NiosMem->cfg.cond[headNo].meniscus_setpoint = cfg->meniscus_setpoint;		
 	_NiosMem->cfg.cond[headNo].headsPerColor= cfg->headsPerColor;
 	_NiosMem->cfg.cond[headNo].cmd.set_pid	= TRUE;
+}
+
+//--- cond_set_valve_test --------------------------------------
+void cond_set_valve_test(int headNo, int valve)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;	
+	_NiosMem->cfg.cond[headNo].test_Valve= valve;
+	cond_ctrlMode2(headNo, ctrl_test_valve);
 }
 
 //--- cond_set_flowResistance --------------------------------

@@ -430,16 +430,6 @@ void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 	_Cfg->ink_supply[isNo].ctrl_mode = mode;
 }
 
-//--- nios_set_ctc_operation ------------------------------------------
-void nios_set_ctc_operation(int isNo, int cmd, int step, int par)
-{
-	
-	_Cfg->ink_supply[isNo].ctc_command = cmd;
-	_Cfg->ink_supply[isNo].ctc_step	   = step;
-	_Cfg->ink_supply[isNo].ctc_par	   = par;	
-	_Cfg->ink_supply[isNo].ctrl_mode   = ctrl_ctc_operation;	
-}
-
 //--- nios_set_purge_par --------------------------------------
 void nios_set_purge_par(int isNo, int delay_pos_y, int time, int act_pos_y)
 {
@@ -516,7 +506,13 @@ void nios_test_bleed_valve(int isNo, int value)
 {
 	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = value;
 }
-	
+
+//--- nios_test_shutoff_valve --------------------------------------------------
+void nios_test_shutoff_valve(int value)
+{
+	if (_set_testmode()) _Cfg->test_shutoffValve = value;
+}
+
 //--- nios_test_ink_pump ----------------------------------------------
 void nios_test_ink_pump(int isNo, int pressure)
 {
@@ -540,6 +536,7 @@ void nios_test_flush(int power)
 {
 	if (_Cfg) _Cfg->test_flush = power;
 }
+
 
 //--- _simu_fluidsystem ------------------------------------------
 void _simu_fluidsystem(void)
@@ -609,6 +606,7 @@ void _update_status(void)
 		pstat->cylinderPresDiff	= _Stat->ink_supply[i].IS_Pressure_Diff;
 		pstat->flushTime		= _Stat->ink_supply[i].flushTime;
 		pstat->airPressureTime	= _Stat->airPressureTime;
+		pstat->airPressure		= _Stat->air_pressure;
 		pstat->temp				= _Stat->ink_supply[i].heaterTemp;
 		pstat->pumpSpeedSet		= _Stat->ink_supply[i].inkPumpSpeed_set;		
 		pstat->pumpSpeed		= _Stat->ink_supply[i].inkPumpSpeed_measured;
@@ -679,7 +677,6 @@ static void _display_status(void)
 		term_printf("input:           0x%02x\n", _Stat->input);
 		term_printf("p_sensor_error:  "); for (i=0; i<8; i++) term_printf("%5s ", value_str(_Stat->p_sensor_error[i]));	term_printf("\n");
 		term_printf("pt100temp:       "); for (i=0; i<8; i++) term_printf("%05d ", _Stat->pt100[i]);			term_printf("\n");
-		term_printf("CTC:             cmd=%d, step=%d par=%d\n", _Cfg->ink_supply[0].ctc_command, _Cfg->ink_supply[0].ctc_step, _Cfg->ink_supply[0].ctc_par);
 		term_printf("\n");
 		/*
 		term_printf("ID:               ");

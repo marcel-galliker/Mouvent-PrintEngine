@@ -174,6 +174,7 @@
 #define CMD_HEAD_FLUID_CTRL_MODE 0x01000104
 #define REP_HEAD_FLUID_CTRL_MODE 0x02000104
 
+#define CMD_HEAD_VALVE_TEST		0x01000105
 #define CMD_GET_DENSITY			0x01000107
 #define REP_GET_DENSITY			0x02000107
 #define CMD_SET_DENSITY			0x01000108
@@ -220,7 +221,7 @@
 #define CMD_FLUID_DEGASSER		0x02000127
 
 #define CMD_FLUID_FLUSH			0x01000129
-#define CMD_CTC_OPERATION		0x01000130
+#define CMD_FLUID_TEST			0x01000130
 
 #define CMD_GET_STEPPER_CFG		0x01000131
 #define REP_GET_STEPPER_CFG		0x02000131
@@ -899,24 +900,28 @@ typedef struct SFluidCtrlCmd
 	EnFluidCtrlMode	ctrlMode;
 } SFluidCtrlCmd;
 
-//--- SCTC_OperationMsg --------------------
-typedef struct SCTC_OperationMsg
+//--- CMD_HEAD_FLUID_CTRL_MODE ------------------------
+typedef struct SFluidTestCmd
 {
 	SMsgHdr			hdr;
-	INT32			headNo; 
-	INT32			cmd;
-	#define cdc_leak_test 1
+	int				no;
+	int				shutoffValve;
+	int				airPressure;
+	int				airValve;
+} SFluidTestCmd;
 
-	INT32			step;
-	INT32			par;
-} SCTC_OperationMsg;
+typedef struct SHeadTestCmd
+{
+	SMsgHdr			hdr;
+	int				no;
+	int				valve;
+} SHeadTestCmd;
 
 //--- SFluidTestTable ----------------------------------
 typedef struct SFluidTestTable
 {
 	SMsgHdr			hdr;
 	int				index;
-
 } SFluidTestTable;
 
 //--- SScalesCfgMsg ----------------------

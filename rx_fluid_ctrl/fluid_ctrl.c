@@ -67,7 +67,7 @@ static int _handle_ctrl_msg (RX_SOCKET socket, void *pmsg);
 static int _do_ping				(RX_SOCKET socket);
 static int _do_fluid_stat		(RX_SOCKET socket, SHeadStateLight pressure[FLUID_BOARD_CNT]);
 static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg);
-static int _do_ctc_operation	(RX_SOCKET socket, SCTC_OperationMsg *pmsg);
+static int _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg);
 static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar *ppar);
 static void _do_scales_set_cfg	(RX_SOCKET socket, SScalesCfgMsg *pmsg);
 static void _do_scales_get_cfg	(RX_SOCKET socket);
@@ -196,7 +196,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
                                         
 	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	pdata);		break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);			break;
-	case CMD_CTC_OPERATION:		_do_ctc_operation	(socket, (SCTC_OperationMsg*)msg);		break;
+	case CMD_FLUID_TEST:		_do_fluid_test		(socket, (SFluidTestCmd*)msg);			break;
 
     case CMD_FLUID_DEGASSER:	nios_set_degasser	((int*)pdata);							break;
 	case CMD_SET_PURGE_PAR:		_do_set_purge_par	(socket, (SPurgePar*)	pdata);			break;
@@ -271,10 +271,12 @@ static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 	return REPLY_OK;
 }
 
-//--- _do_ctc_operation ---------------------------------------------------
-static int _do_ctc_operation(RX_SOCKET socket, SCTC_OperationMsg *pmsg)
+//--- _do_fluid_test ---------------------------------------------------
+static int _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg)
 {
-	nios_set_ctc_operation(pmsg->headNo, pmsg->cmd, pmsg->step, pmsg->par);
+	nios_test_shutoff_valve	(pmsg->shutoffValve);
+	nios_test_air_pressure	(pmsg->airPressure);
+	nios_test_air_valve		(pmsg->no, pmsg->airValve);
 	return REPLY_OK;
 }
 

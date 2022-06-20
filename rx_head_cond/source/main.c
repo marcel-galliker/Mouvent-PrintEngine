@@ -228,20 +228,18 @@ static char _get_pcb_revision()
 		Gpio1pin_InitOut(GPIO1PIN_P55, Gpio1pin_InitVal(0u));
 		Gpio1pin_InitIn (GPIO1PIN_P55, Gpio1pin_InitPullup(0u));
 
-		if (Gpio1pin_Get(GPIO1PIN_P55)==0) 
-		{
-			revision = 'f';
-		}
-		else
+        if (Gpio1pin_Get(GPIO1PIN_P55))
 		{							  
 			revision = 'h';	
-			
 			Gpio1pin_InitOut(GPIO1PIN_P80, Gpio1pin_InitVal(0u)); 
 			
 			// read revision voltage back from external adc chip (not present on rev. below 'n')
 			int voltage=_get_revision_voltage();
-			if((voltage>245)&&(voltage<265)) revision ='n';
+			if((voltage>220)&&(voltage<280)) revision ='n';
+			else if((voltage>340)&&(voltage<400)) revision ='s';
 		}
+        else
+            revision = 'f';
     }
         
     switch (revision)
@@ -267,6 +265,7 @@ static char _get_pcb_revision()
             break;
 
 		case 'n':
+		case 's':
 			SetPinFunc_AN05();
 			Gpio1pin_InitOut(GPIO1PIN_P60, Gpio1pin_InitVal(0u));
             Gpio1pin_InitIn (GPIO1PIN_P00, Gpio1pin_InitPullup(0u));

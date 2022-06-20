@@ -108,7 +108,8 @@ static void _do_get_prn_stat	(RX_SOCKET socket);
 static void _do_test_start		(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_clean_start		(RX_SOCKET socket);
 
-static void _do_ctc_operation (RX_SOCKET socket, SCTC_OperationMsg *pmsg);
+static void _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg);
+static void _do_head_valve_test (RX_SOCKET socket, SHeadTestCmd* pmsg);
 
 //--- handle_gui_msg ---------------------------------------------
 int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
@@ -188,7 +189,8 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);						break;
         case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
         case CMD_PURGE_CLUSTER:			_do_fluid_purge_cluster(socket, (SValue*)pdata);				break;
-		case CMD_CTC_OPERATION:			_do_ctc_operation (socket, (SCTC_OperationMsg *) pmsg);			break;
+		case CMD_FLUID_TEST:			_do_fluid_test (socket, (SFluidTestCmd *) pmsg);				break;
+		case CMD_HEAD_VALVE_TEST:		_do_head_valve_test(socket, (SHeadTestCmd*) pmsg);				break;
 
         case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)pdata);						break;				
 		case CMD_SCALES_CALIBRATE:	_do_scales_calib(socket, (SValue*)pdata);						break;				
@@ -947,14 +949,19 @@ static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue *pmsg)
         ctrl_send_head_fluidCtrlMode(start_headNo, ctrl_purge_hard, TRUE, TRUE);
 }
 
-//--- _do_ctc_operation -----------------------------------------------------------
-static void _do_ctc_operation(RX_SOCKET socket, SCTC_OperationMsg *pmsg)
+//--- _do_fluid_test -----------------------------------------------------------
+static void _do_fluid_test(RX_SOCKET socket, SFluidTestCmd *pmsg)
 {
-	if (RX_Config.headsPerColor > 0 && pmsg->headNo % RX_Config.headsPerColor == 0)
+	if (RX_Config.headsPerColor > 0 && pmsg->no % RX_Config.headsPerColor == 0)
 	{
-		fluid_send_ctc_msg(pmsg->headNo/RX_Config.headsPerColor, pmsg);
+		fluid_send_test(pmsg->no/RX_Config.headsPerColor, pmsg);
 	}
-	ctrl_send_ctc_msg(pmsg);
+}
+
+//--- _do_head_valve_test ------------------------------------------------------
+static void _do_head_valve_test (RX_SOCKET socket, SHeadTestCmd *pmsg)
+{
+	ctrl_send_head_valve_test(pmsg);
 }
 
 //--- _do_fluidCtrlMode ---

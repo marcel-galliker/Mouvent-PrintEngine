@@ -186,6 +186,7 @@ static void   _set_pump_speed(int isNo, int speed);
 static UINT32 _get_pump_ticks(int isNo);
 static void   _set_air_valve(int isNo, int newState);
 static void   _set_bleed_valve(int isNo, int newState);
+static void   _set_shutoff_valve(int state);
 
 // static void _calibrate_inkpump(UINT32 isNo, UINT32 timeout);
 static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode);
@@ -194,9 +195,6 @@ static void _set_air_pump(int state);
 static void _set_pressure_valve(int newState);
 
 static void _trace_pump_ctrl(int pressure);
-
-static void _ctc_operation(int isNo);
-static void _ctc_leak_test(int isNo);
 
 INT32 abs(INT32 val)
 {
@@ -375,8 +373,8 @@ void ink_tick_10ms(void)
 				pid_reset(&_InkSupply[isNo].pid_Setpoint);
 				_set_air_valve(isNo, PV_CLOSED);
 				_set_bleed_valve(isNo, PV_CLOSED);
+				_set_shutoff_valve(FALSE);
 				_ShutdownPrint[isNo] = 0;
-
 				{
 					int i, on=FALSE;
 					for (i=0; i<NIOS_INK_SUPPLY_CNT; i++)
@@ -529,14 +527,16 @@ void ink_tick_10ms(void)
 						_set_air_valve  (isNo, pRX_Config->ink_supply[isNo].test_airValve);
 						_set_bleed_valve(isNo, pRX_Config->ink_supply[isNo].test_bleedValve);
 						_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres, PUMP_CTRL_MODE_NO_AIR_VALVE);		// ink-pump
+						_set_shutoff_valve(pRX_Config->test_shutoffValve);
 						_set_pressure_valve((pRX_Config->test_airPressure>0) && (pRX_Status->air_pressure < pRX_Config->test_airPressure));	// air-pump
 					}
-					}
+				}
 				else
 				{
 					// --- reset values -----------
 					pRX_Config->ink_supply[isNo].test_airValve  	= PV_CLOSED;
 					pRX_Config->ink_supply[isNo].test_bleedValve 	= PV_CLOSED;
+					_set_shutoff_valve(FALSE);
 					pRX_Config->ink_supply[isNo].test_cylinderPres 	= 0;
 					pRX_Status->ink_supply[isNo].TestBleedLine_Phase = 1;
 					_TestBleedLine_Timer[isNo] = 0;
@@ -1034,10 +1034,6 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
 				break;
 
-			case ctrl_ctc_operation:
-				_ctc_operation(isNo);
-				pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
-				break;
 /*
 			case ctrl_cal_start:
 				_TimeStabitilityCalibration[isNo] = 0;
@@ -1517,33 +1513,6 @@ void ink_tick_10ms(void)
 	}
 }
 
-//--- _ctc_operation ----------------------------------
-static void _ctc_operation(int isNo)
-{
-	switch(pRX_Config->ink_supply[isNo].ctc_command)
-	{
-	case 1:	_ctc_leak_test(isNo); break;
-	}
-}
-
-//--- _ctc_leak_test ----------------------------------
-static void _ctc_leak_test(int isNo)
-{
-	switch(pRX_Config->ink_supply[isNo].ctc_step)
-	{
-	case 1:	_set_bleed_valve(isNo, PV_CLOSED);
-			_set_air_valve(isNo, PV_CLOSED);
-			_set_flush_pump(isNo, FALSE);
-			_InkSupply[isNo].degassing = pRX_Config->cmd.lung_enabled;
-			_PressureSetpoint[isNo] = pRX_Config->ink_supply[isNo].ctc_par;
-			_pump_ctrl(isNo, _PressureSetpoint[isNo], PUMP_CTRL_MODE_PRINT);
-			break;
-
-	case 2:	_set_pump_speed(isNo, 0);
-			break;
-	}
-}
-
 //--- ink_tick_1000ms ------------------------------------------------------
 #define PRINTF  for(i=0; i<NIOS_INK_SUPPLY_CNT; i++) trprintf
 void ink_tick_1000ms(void)
@@ -1777,6 +1746,14 @@ void _set_bleed_valve(int isNo, int state)
 		else
 			IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, PRESSURE_VALVE_OUT);
 	}
+}
+ //--- _set_shutoff_valve -----------------------------------------
+static void _set_shutoff_valve(int state)
+{
+	if (state)
+		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   SHUTOFF_VALVE_OUT);
+	else
+		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, SHUTOFF_VALVE_OUT);
 }
 
 //--- _trace_pump_ctrl ---------------------------------------------

@@ -105,7 +105,7 @@ namespace RX_DigiPrint.Services
         printer_test_slide_only,    // 3:
         printer_test_table_seon,    // 4:
         printer_test_slide_HB,      // 5:
-        printer_test_CTC,           // 6: Conditioner Text Center
+        printer_test_CTC,           // 6:
 
         //--- web printers ------------------------------
         printer_LB701    =1000,	    // 1000: 
@@ -274,8 +274,6 @@ namespace RX_DigiPrint.Services
         ctrl_recovery_step8,            // 0x508:
         ctrl_recovery_step9,            // 0x509:
 
-        ctrl_ctc_operation = 0x600,
-
         ctrl_test_watchdog = 0x10000,
 	    ctrl_test,				// 0x10001
         ctrl_offset_cal, 	    // 0x10002
@@ -425,6 +423,8 @@ namespace RX_DigiPrint.Services
         public const UInt32  CMD_HEAD_FLUID_CTRL_MODE = 0x01000104;
         public const UInt32  REP_HEAD_FLUID_CTRL_MODE = 0x02000104;
         
+        public const UInt32  CMD_HEAD_VALVE_TEST	  = 0x01000105;
+
         public const UInt32 CMD_GET_DENSITY         = 0x01000107;
         public const UInt32 REP_GET_DENSITY         = 0x02000107;
         public const UInt32 CMD_SET_DENSITY         = 0x01000108;
@@ -460,8 +460,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_FLUID_DEGASSER      = 0x01000127;
 
         public const UInt32 CMD_FLUID_FLUSH         = 0x01000129;
-
-        public const UInt32 CMD_CTC_OPERATION       = 0x01000130;   // Conditioner test Center
+        public const UInt32 CMD_FLUID_TEST          = 0x01000130;
 
         public const UInt32 CMD_GET_STEPPER_CFG		= 0x01000131;
         public const UInt32 REP_GET_STEPPER_CFG		= 0x02000131;
@@ -1040,6 +1039,7 @@ namespace RX_DigiPrint.Services
             public Int32    cylinderSetpoint;	 //  Pressure intermediate Tank
             public Int32    airPressureTime;
             public Int32	flushTime;
+            public Int32    airPressure;
             public byte     airValve;
             public byte     bleedValve;
             public Int32	purge_putty_ON;
@@ -1139,16 +1139,24 @@ namespace RX_DigiPrint.Services
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct SCTC_OperationMsg
+        public struct SFluidTestCmd
         {
 	        public SMsgHdr          hdr;
-	        public Int32			headNo;
-	        public Int32            cmd;
-	        public Int32            step;
-	        public Int32            par;
+	        public Int32			no;
+	        public Int32			shutoffValve;
+	        public Int32			airPressure;
+	        public Int32			airValve;
         };
-        public const int cdc_leak_test   = 1;
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SHeadTestCmd
+        {
+	        public SMsgHdr          hdr;
+	        public Int32			no;
+	        public Int32			valve;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SFluidTestTable
         {
             public SMsgHdr hdr;

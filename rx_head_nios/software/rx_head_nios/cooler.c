@@ -16,7 +16,7 @@
 
 #define THERMISTOR_DEVICE_ID_ADDR		0x48	// 0x48 + R/W bit = 0x90/0x91
 
-#define MAX_COOLER_TEMP 65000					// 70 deg celsius
+#define MAX_COOLER_TEMP 80000					// 80 deg celsius
 
 //--- cooler_init --------------------------------------------------
 void cooler_init(void)

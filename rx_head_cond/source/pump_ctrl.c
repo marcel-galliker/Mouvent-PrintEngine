@@ -61,9 +61,6 @@ static void _menicus_minmax(void);
 static void _presure_in_max(void);
 static void _error_cnt(int err, int *errcnt, int errflag, int timeout);
 
-static void _ctc_operation(void);
-static void _ctc_leak_test(void);
-
 static int	_watchdog;
 static int	_timer;
 static int  _rampup_time;
@@ -417,6 +414,12 @@ void pump_tick_10ms(void)
 						RX_Status.mode = RX_Config.mode; 
 						break;
 						
+		case ctrl_test_valve:
+						_set_pump_speed(0);
+						_set_valve(RX_Config.test_Valve);
+						RX_Status.mode = RX_Config.mode; 
+						break;
+		
         //--- CALIBRATION --------------------------------------------
 	/*	case ctrl_cal_start:	// Initialize variables
 						
@@ -714,12 +717,7 @@ void pump_tick_10ms(void)
 						_PumpPID.val_max = 4095;	
 						RX_Status.mode = RX_Config.mode; 
 						break;		  
-						
-		case ctrl_ctc_operation:
-						_ctc_operation();
-						RX_Status.mode = RX_Config.mode; 
-						break;
-		
+								
         //--- PURGE --------------------------------------------
 		case ctrl_purge_soft:
 		case ctrl_purge:
@@ -950,7 +948,7 @@ void pump_tick_10ms(void)
 						
 		case ctrl_recovery_step9:
 						RX_Config.cmd.disable_meniscus_check = FALSE;
-        		RX_Status.mode = RX_Config.mode;
+						RX_Status.mode = RX_Config.mode;
 						break;		
 		
 		default:		if (RX_Config.mode>=ctrl_wipe && RX_Config.mode<ctrl_fill)
@@ -983,24 +981,6 @@ void pump_tick_10ms(void)
 }
 
 
-//--- _ctc_operation ----------------------------------
-static void _ctc_operation(void)
-{
-	switch(RX_Config.ctc_command)
-	{
-	case 1:	_ctc_leak_test(); break;
-	}
-}
-
-//--- _ctc_leak_test --------------
-static void _ctc_leak_test(void)
-{
-	switch(RX_Config.ctc_step)
-	{
-	case 1:	break;
-	case 2:	break;
-	}
-}
 //--- _set_valve --------------------------------------
 static void _set_valve(int state)
 {

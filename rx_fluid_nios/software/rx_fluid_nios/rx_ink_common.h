@@ -295,10 +295,9 @@ typedef enum EnFluidCtrlMode
     ctrl_recovery_step8,			// 0x508
     ctrl_recovery_step9,			// 0x509
 
-	ctrl_ctc_operation = 0x600,
-
     ctrl_test_watchdog = 0x10000,
-    ctrl_test, 				// 0x10001
+    ctrl_test, 					// 0x10001
+    ctrl_test_valve, 			// 0x10002
 
     ctrl_toggle_meniscus = 0x20000,
 } EnFluidCtrlMode;

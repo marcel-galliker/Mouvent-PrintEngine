@@ -28,7 +28,9 @@ void nios_main(int ticks, int menu);
 void nios_set_cfg			(SFluidBoardCfg *pcfg);
 void nios_set_is_cfg		(SInkSupplyCfg *pcfg);
 void nios_set_ctrlmode		(int isNo, EnFluidCtrlMode mode);
-void nios_set_ctc_operation (int isNo,  int cmd, int step, int par);
+
+void nios_test(int shutOffValve, int isNo, int airPressure, int airValve);
+
 // void nios_set_pressure		(int isNo, int pressure);
 void nios_set_purge_par		(int isNo, int last_pos, int time, int act_pos);
 void nios_set_head_state	(int isNo, SHeadStateLight *pstate);
@@ -47,5 +49,6 @@ void nios_test_ink_pump		(int isNo, int pressure);
 void nios_test_vacuum		(int pressure);
 void nios_test_air_pressure	(int pressure);
 void nios_test_flush		(int power);
+void nios_test_shutoff_valve(int value);
 
 int  nios_is_heater_connected(void);

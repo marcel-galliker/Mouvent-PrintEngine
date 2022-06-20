@@ -20,7 +20,7 @@
 #define DEGASS_VALVE_OUT		0x08
 #define FLUSH_PUMP_OUT			0x10
 #define AIR_PUMP_OUT			0x20
-#define OUTPUT1_OUT				0x40
+#define SHUTOFF_VALVE_OUT		0x40 // OUTPUT1_OUT
 #define OUTPUT2_OUT				0x80
 #define OUTPUT3_OUT				0x100
 #define OUTPUT4_OUT				0x200

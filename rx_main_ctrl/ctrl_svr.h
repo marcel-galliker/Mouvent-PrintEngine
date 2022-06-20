@@ -29,7 +29,7 @@ void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode);	/
 int  ctrl_send_purge_par(int fluidNo, int time, int position_check, int delay_time_ms);	// return=total time
 int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode);	// send ctrlMode to all heads connected to this fluid module
 int  ctrl_singleHead(int fluidNo);
-void ctrl_send_ctc_msg(SCTC_OperationMsg *pmsg);
+void ctrl_send_head_valve_test(SHeadTestCmd *pmsg);
 
 void ctrl_update_hostname(void);
 int  ctrl_set_config(void);

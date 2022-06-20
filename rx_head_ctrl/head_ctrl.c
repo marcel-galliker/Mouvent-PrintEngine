@@ -79,8 +79,9 @@ static int _rep_head_stat		(RX_SOCKET socket);
 static int _do_inkdef			(RX_SOCKET socket, SInkDefMsg	    *pmsg);
 static int _do_print_abort		(RX_SOCKET socket);
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd	*pmsg);
+static int _do_valve_test       (RX_SOCKET socket, SHeadTestCmd *pmsg);	
 static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar		*ppar);
-static int _do_ctc_operation	(RX_SOCKET socket, SCTC_OperationMsg *pmsg);
+// static int _do_head_test		(RX_SOCKET socket, Fluid *pmsg);
 static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg);
 
 //--- ctrl_init --------------------------------------------------------------------
@@ -247,7 +248,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);		break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);		break;
-	case CMD_CTC_OPERATION:			_do_ctc_operation	(socket, (SCTC_OperationMsg*)pmsg);		break;
+	case CMD_HEAD_VALVE_TEST:		_do_valve_test      (socket, (SHeadTestCmd*) pmsg);			break;
 	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);		break;
     case CMD_SET_DENSITY:			eeprom_set_density	((SDensityMsg*)pmsg);					break;
     case CMD_SET_ROB_POS:			_do_rob_pos		    (socket, (SRobPositionMsg*) pmsg);		break;
@@ -446,10 +447,10 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 	return REPLY_OK;
 }
 
-//--- _do_ctc_operation ---------------------------------------
-static int _do_ctc_operation(RX_SOCKET socket, SCTC_OperationMsg *pmsg)
-{
-	cond_ctc_operation(pmsg->headNo%MAX_HEADS_BOARD, pmsg->cmd, pmsg->step, pmsg->par);
+//--- _do_valve_test -------------------------------------------
+static int _do_valve_test       (RX_SOCKET socket, SHeadTestCmd *pmsg)
+{	
+	cond_set_valve_test(pmsg->no, pmsg->valve);
 	return REPLY_OK;
 }
 

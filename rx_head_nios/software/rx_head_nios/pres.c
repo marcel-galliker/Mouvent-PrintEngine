@@ -22,7 +22,8 @@
 
 
 //--- defines ---------------------------
-#define ADDR_SENSOR		0x78 	// upper address of sensor
+#define ADDR_SENSOR_1_0_BAR	0x78 	// upper address of sensor (old, 1.0 bar) 0x78
+#define ADDR_SENSOR_2_5_BAR	0x35	// upper address of sensor (new, 2.5 bar) 0x35
 
 #define BUF_SIZE		10
 
@@ -39,6 +40,7 @@ typedef struct
 	int				power;
 	int				power_timer;
 	int				power_cnt;
+	int				addr;
 
 	//--- for development only ---------
 	int				ok;
@@ -51,9 +53,9 @@ SSensor _Sensor;
 
 //--- prototypes ------------------------
 
-static void _Pres_power(int on);
 static void _sensor_reset(SSensor *s);
 static int  _sensor_read(SSensor *s);
+static int _pcb_sensor_25(SSensor *s);
 
 
 //--- pres_init -----------------------
@@ -65,21 +67,17 @@ void pres_init(void)
 	_Sensor.pPressure 	= &pRX_Status->cooler_pressure;
 	_Sensor.resetCnt	= &pRX_Status->cooler_pressure_reset_cnt;
 	*_Sensor.pPressure	= INVALID_VALUE;
+
+	_Sensor.addr = _pcb_sensor_25(&_Sensor) ? ADDR_SENSOR_2_5_BAR : ADDR_SENSOR_1_0_BAR;
+
+	if (_Sensor.addr == ADDR_SENSOR_2_5_BAR)
+		trprintf("Sensor is 2.5 bar\n");
+	else
+		trprintf("Sensor is 1.0 bar\n");
+
 	_sensor_reset(&_Sensor);
 }
 
-static void _Pres_power(int on)
-{
-	//AMC DAC output on/off
-	if(on)
-	{
-	//	IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _3V3);
-	}
-	else
-	{
-	//	IOWR_16DIRECT(AMC7891_0_BASE, AMC7891_DAC0_DATA, _0V);
-	}
-}
 //--- _sensor_reset -------------
 static void _sensor_reset(SSensor *s)
 {
@@ -87,6 +85,23 @@ static void _sensor_reset(SSensor *s)
 	s->buf_valid = FALSE;
   (*s->pPressure)= INVALID_VALUE;
 }
+
+//--- _pcb_sensor_25 -----------------------
+static int _pcb_sensor_25(SSensor *s)
+{
+	int ret;
+	int pressure;
+
+	ret=I2C_start(s->i2c, ADDR_SENSOR_2_5_BAR, READ);
+	I2C_read(s->i2c, TRUE);
+
+	ret=I2C_start(s->i2c, ADDR_SENSOR_2_5_BAR, READ);
+	pressure = (I2C_read(s->i2c, FALSE) << 8) | I2C_read(s->i2c, TRUE);
+	trprintf("_pcb_sensor_25: ret=%d pressure=%d\n", ret, pressure);
+
+	return (ret==0); // && pressure!=0xffff);
+}
+
 
 //--- _sensor_read -------------------------------
 static int _sensor_read(SSensor *s)
@@ -96,11 +111,9 @@ static int _sensor_read(SSensor *s)
 	//--- repower sensor ---
 	if (!s->power)
 	{
-		if (s->power_timer==2) _Pres_power(TRUE);
 		if ((--s->power_timer)<=0)
 		{
 			_sensor_reset(s);
-			_Pres_power(TRUE);
 			s->poweron++;
 			s->power=TRUE;
 		}
@@ -109,7 +122,7 @@ static int _sensor_read(SSensor *s)
 		
 	if(s->power)											//if there is no read error at the moment
 	{
-		if (I2C_start(s->i2c, ADDR_SENSOR, READ)!=I2C_ACK)
+		if (I2C_start(s->i2c, s->addr, READ)!=I2C_ACK)
 		{
 			*s->pPressure=INVALID_VALUE;
 			return REPLY_ERROR;	// stop here if sensor is not answering
@@ -117,7 +130,6 @@ static int _sensor_read(SSensor *s)
 		pressure = (I2C_read(s->i2c, !LAST_BYTE) << 8) | I2C_read(s->i2c, LAST_BYTE);
 		if(pressure == 0xffff || pressure == 0)				// pressure sensor error, reset
 		{	
-			_Pres_power(FALSE);						// DS1_3V3 OFF
 			s->power=FALSE;
 			s->power_timer = 10;
 			s->power_cnt++;
@@ -134,8 +146,14 @@ static int _sensor_read(SSensor *s)
 			s->ok++;
 			
 			//--- convert value --------------
-			if(pressure >= 16500)	pressure = ((pressure- 16500) / 13.5);
-			else					pressure = -((16500 - pressure) / 13.5);
+			if (s->addr == ADDR_SENSOR_1_0_BAR)
+			{
+				pressure = ((pressure- 16500) / 13.5);
+			}
+			else
+			{
+				pressure = (3500*(pressure-10714)) / (30000-3000);
+			}
 			
 			//--- save to buffer -----
 			s->buf[s->buf_idx++] = pressure;

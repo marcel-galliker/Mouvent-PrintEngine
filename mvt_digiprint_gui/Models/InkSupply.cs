@@ -113,6 +113,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _CylinderPres, value); }
         }
 
+		//--- Property AirPressure ---------------------------------------
+		private int _AirPressure;
+		public int AirPressure
+		{
+			get { return _AirPressure; }
+			set { SetProperty(ref _AirPressure, value); }
+		}
+
 		//--- Property CylinderPresDiff ---------------------------------------
 		private int _CylinderPresDiff;
 		public int CylinderPresDiff
@@ -402,6 +410,7 @@ namespace RX_DigiPrint.Models
             CylinderPres     = msg.cylinderPres;
             CylinderPresDiff = msg.cylinderPresDiff;
             CylinderSetpoint = msg.cylinderSetpoint;
+            AirPressure      = msg.airPressure;
             PresLung        = msg.presLung;
             CondPresOut     = msg.condPresOut;
             CondPresIn      = msg.condPresIn;

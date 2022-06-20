@@ -99,13 +99,7 @@ typedef struct
 	int		purge_putty_pressure;
 	
 	//--- test bleed line -----
-	int		test_bleed_line;
-
-	//--- ctc_operation ------------
-	INT32 ctc_command;
-	INT32 ctc_step;
-	INT32 ctc_par;
-	
+	int		test_bleed_line;	
 } SIsAdapterCfg;
 
 //--- SNiosFluidCfg ----------------------------------------
@@ -113,10 +107,10 @@ typedef struct SNiosFluidCfg
 {
 	SNiosFluidCmd	cmd;
 	
-	UINT32			outputs; // 8 
 	INT32			fluid_ctrl_alive;
 	INT32			test_airPressure;	// [mbar]
-	INT32			test_flush;
+	INT16			test_flush;
+	INT16			test_shutoffValve;
 	UINT32			headsPerColor;
 
 	INT32			test_lungPressure;	// [mbar]

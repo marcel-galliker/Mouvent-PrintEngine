@@ -25,7 +25,7 @@ void fluid_reply_stat		(RX_SOCKET socket);
 void fluid_error_reset		(void);
 void fluid_send_ctrlMode	(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
 void fluid_send_pressure    (int no, INT32 pressure);
-void fluid_send_ctc_msg		(int no, SCTC_OperationMsg *pmsg);
+void fluid_send_test		(int no, SFluidTestCmd *pmsg);
 void fluid_send_tara        (int no);
 void fluid_send_calib		(SValue *pmsg);
 
