@@ -175,6 +175,7 @@
 #define REP_HEAD_FLUID_CTRL_MODE 0x02000104
 
 #define CMD_HEAD_VALVE_TEST		0x01000105
+#define CMD_HEAD_SET_MENISCUS_CHK 0x01000106
 #define CMD_GET_DENSITY			0x01000107
 #define REP_GET_DENSITY			0x02000107
 #define CMD_SET_DENSITY			0x01000108
@@ -219,6 +220,8 @@
 #define CMD_FLUID_PRESSURE		0x01000126
 
 #define CMD_FLUID_DEGASSER		0x02000127
+
+#define CMD_FLUID_SET_VALVE		0x01000128
 
 #define CMD_FLUID_FLUSH			0x01000129
 #define CMD_FLUID_TEST			0x01000130
@@ -905,7 +908,6 @@ typedef struct SFluidTestCmd
 {
 	SMsgHdr			hdr;
 	int				no;
-	int				shutoffValve;
 	int				airPressure;
 	int				airValve;
 } SFluidTestCmd;

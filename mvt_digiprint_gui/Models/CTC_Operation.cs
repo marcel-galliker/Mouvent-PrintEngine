@@ -95,13 +95,21 @@ namespace RX_DigiPrint.Models
 			Process.Start();
 		}
 
+		//--- _SetShutoffValve -------------------------------------
+		private void _SetShutoffValve(bool value)
+		{
+			TcpIp.SHeadTestCmd msg = new TcpIp.SHeadTestCmd();
+			msg.no = 0;
+			msg.valve = Convert.ToInt32(value);
+			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_SET_VALVE, ref msg);
+		}
+
 		//--- _CtrlAirPressure ---------------------------------------
-		private bool _CtrlAirPressure(CTC_Test test, int pressure, bool shutoffValve)
+		private bool _CtrlAirPressure(CTC_Test test, int pressure)
 		{
 			TcpIp.SFluidTestCmd msg = new TcpIp.SFluidTestCmd();
 			msg.airValve = 1;
 			msg.airPressure=(Int32)(pressure*11/10);
-			msg.shutoffValve = Convert.ToInt32(shutoffValve);
 			for(int head=0; head<CTC_Test.HEADS; head++)
 			{
 				if (CTC_Test.Overall.State[head]!=CTC_Test.EN_State.failed)
@@ -156,6 +164,13 @@ namespace RX_DigiPrint.Models
 				else msg.valve = 0;
 				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_VALVE_TEST, ref msg);
 			}
+		}
+
+		//--- _SetMeniscusCheck -----------------------------------------
+		private void _SetMeniscusCheck(bool value)
+		{
+			TcpIp.SHeadTestCmd msg = new TcpIp.SHeadTestCmd();
+			msg.valve = Convert.ToInt32(value);
 		}
 
 		//--- _CheckHeadPIN ----------------------------------------------------
@@ -248,12 +263,13 @@ namespace RX_DigiPrint.Models
 				RxBindable.Invoke(() => _Tests.Add(test1));
 				_SetHeadValve(test1, VALVE_OFF);
 
-				bool ok = _CtrlAirPressure(test1, startPar1.Min, false);
+				_SetShutoffValve(false);
+
+				bool ok = _CtrlAirPressure(test1, startPar1.Min);
 
 				//--- check air pressure stays in range ---------------------
 				Console.WriteLine("AirPressure Pressure ok for {0} sek", startPar2.Min);
 				TcpIp.SFluidTestCmd msg = new TcpIp.SFluidTestCmd();
-				msg.shutoffValve  = 0;
 				msg.airValve	  = 1;
 				msg.airPressure   = 0; 
 				int time=startPar2.Min;
@@ -269,14 +285,16 @@ namespace RX_DigiPrint.Models
 					}
 				} while (ok && time>0);
 				test1.Done(CTC_Test.EN_State.ok);
+
+				_SetShutoffValve(true);
 				if (ok) 
 				{
 					CTC_Test test2 = new CTC_Test() { Step = "Flush Pressure" };
 					RxBindable.Invoke(() => _Tests.Add(test2));
 
 					_SetHeadValve(test2, VALVE_FLUSH);
-					//--- set Shutoff valves ------------------------------				
-					ok = _CtrlAirPressure(test2, startPar1.Min, true);
+
+					ok = _CtrlAirPressure(test2, startPar1.Min);
 
 					//--- check conditioner IN-Pressure stays in range ---------------------
 					Console.WriteLine("conditioner IN-Pressure ok for {0} sek", startPar2.Min);
@@ -289,13 +307,13 @@ namespace RX_DigiPrint.Models
 					RxBindable.Invoke(() => _Tests.Add(test3));
 
 					_SetHeadValve(test3, VALVE_INK);
-					//--- set Shutoff valves ------------------------------				
-					ok = _CtrlAirPressure(test3, startPar1.Min, true);
+					ok = _CtrlAirPressure(test3, startPar1.Min);
 
 					//--- check conditioner IN-Pressure stays in range ---------------------
 					Console.WriteLine("conditioner IN-Pressure ok for {0} sek", startPar2.Min);
 					ok=_CheckHeadPIN(test3, startPar2.Min, startPar3.Min);
 				}
+				_SetShutoffValve(false);
 
 				_SendStop();
 
@@ -341,13 +359,10 @@ namespace RX_DigiPrint.Models
 				RxBindable.Invoke(() => _Tests.Add(test1));
 
 				//--- switch off meniscus check --------------------------------
+				_SetMeniscusCheck(false);
 				for( int headNo=0; headNo<CTC_Test.HEADS; headNo++)
 				{
 					if (test1.State[headNo]==CTC_Test.EN_State.running) isUsed[headNo/RxGlobals.PrintSystem.ColorCnt] = true;
-					if (!RxGlobals.HeadStat.List[headNo].Meniscus_Disabled)
-					{
-						
-					}
 				}
 
 				//--- start ink supplies ------------------------------------
@@ -373,15 +388,17 @@ namespace RX_DigiPrint.Models
 				//===== TEST ==================================================================================
 				test2.Start();
 				RxBindable.Invoke(() => _Tests.Add(test2));
-				// set valve ON -----------------------------------------
+				_SetShutoffValve(true);
 
 			//	ok = _CheckHeadPrinting(test2, checkTime2.Min, null, null, checkPump2);
 
-				// set valve OFF -----------------------------------------
+				_SetShutoffValve(false);
 			
 				//=== START again ======================================================
+
 				test3.Start();
 				RxBindable.Invoke(() => _Tests.Add(test3));
+				_SetMeniscusCheck(true);
 				ok = _CheckHeadPrinting(test3, checkTime.Min, checkIn, checkOut, checkPump);
 
 				_SendStop();

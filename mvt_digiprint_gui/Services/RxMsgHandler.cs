@@ -240,7 +240,6 @@ namespace RX_DigiPrint.Services
         {
             TcpIp.SInkSupplyStatMsg msg;
             int len=RxStructConvert.ToStruct(out msg, buf);
-//          int size = Marshal.SizeOf(typeof(TcpIp.SInkSupplyStat));
             if (len==msg.hdr.msgLen)
             {
 //              Console.WriteLine("handle_fluid_stat[{0}]", msg.no);

@@ -480,6 +480,7 @@ void nios_test_stop(void)
 	_Cfg->test_lungPressure	= 0;
 	_Cfg->test_flush		= 0;
 	_Cfg->test_airPressure	= 0;
+	_Cfg->test_shutoffValve = 0;
 	for(isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++) 
 	{
 		_Cfg->ink_supply[isNo].test_airValve	= FALSE;

@@ -1314,3 +1314,13 @@ void ctrl_send_head_valve_test(SHeadTestCmd *pmsg)
 {
 	sok_send(&_HeadCtrl[pmsg->no/HEAD_CNT].socket, pmsg);
 }
+
+//--- ctrl_send_head_meniscus_chk --------------------------------------
+void ctrl_send_head_meniscus_chk(SHeadTestCmd *pmsg)
+{
+	for (int head = 0; head < SIZEOF(_HeadCtrl); head+=HEAD_CNT)
+    {
+        if (_HeadCtrl[head].socket != INVALID_SOCKET)
+			sok_send(&_HeadCtrl[head/HEAD_CNT].socket, pmsg);
+    }    
+}

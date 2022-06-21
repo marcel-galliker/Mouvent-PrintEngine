@@ -1429,6 +1429,13 @@ void fluid_send_pressure(int no, INT32 pressure)
 	fluid_set_config();
 }
 
+
+//--- fluid_send_valve ----------------------------
+void fluid_send_valve(SHeadTestCmd *pmsg)
+{
+	sok_send(&_FluidThreadPar[pmsg->no].socket, pmsg);
+}
+
 //--- fluid_send_test ----------------------------------
 void fluid_send_test(int no, SFluidTestCmd *pmsg)
 {

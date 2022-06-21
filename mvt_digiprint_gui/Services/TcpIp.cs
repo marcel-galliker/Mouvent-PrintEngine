@@ -424,6 +424,7 @@ namespace RX_DigiPrint.Services
         public const UInt32  REP_HEAD_FLUID_CTRL_MODE = 0x02000104;
         
         public const UInt32  CMD_HEAD_VALVE_TEST	  = 0x01000105;
+        public const UInt32  CMD_HEAD_SET_MENISCUS_CHK= 0x01000106;
 
         public const UInt32 CMD_GET_DENSITY         = 0x01000107;
         public const UInt32 REP_GET_DENSITY         = 0x02000107;
@@ -458,6 +459,7 @@ namespace RX_DigiPrint.Services
         public const UInt32  CMD_FLUID_PRESSURE     = 0x01000126;
 
         public const UInt32 CMD_FLUID_DEGASSER      = 0x01000127;
+        public const UInt32 CMD_FLUID_SET_VALVE     = 0x01000128;
 
         public const UInt32 CMD_FLUID_FLUSH         = 0x01000129;
         public const UInt32 CMD_FLUID_TEST          = 0x01000130;
@@ -1143,7 +1145,6 @@ namespace RX_DigiPrint.Services
         {
 	        public SMsgHdr          hdr;
 	        public Int32			no;
-	        public Int32			shutoffValve;
 	        public Int32			airPressure;
 	        public Int32			airValve;
         };

@@ -41,6 +41,7 @@ void cond_ctrlMode2		(int headNo, EnFluidCtrlMode ctrlMode);
 EnFluidCtrlMode cond_getCtrlMode(int headNo);
 void cond_heater_test	(int temp);
 void cond_toggle_meniscus_check(void);
+void cond_set_meniscus_chk(int enable);
 void cond_set_clusterNo(INT32 no);
 void cond_set_serialNo(int headNo, int serialNo);
 void cond_set_flowResistance(int headNo, int value);
