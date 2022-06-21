@@ -60,6 +60,7 @@ static void _menicus_minmax_reset(void);
 static void _menicus_minmax(void);
 static void _presure_in_max(void);
 static void _error_cnt(int err, int *errcnt, int errflag, int timeout);
+static int _isValid(int value);
 
 static int	_watchdog;
 static int	_timer;
@@ -1097,13 +1098,20 @@ static void _error_cnt(int err, int *errcnt, int errflag, int timeout)
 	else if ((*errcnt)<0) (*errcnt)=0;
 }
 
+//--- _isValid ----------------------------
+static int _isValid(int value)
+{
+	if (value==INVALID_VALUE || value==VAL_UNDERFLOW || value==VAL_OVERFLOW) return FALSE;
+	return TRUE;
+}
+
 //--- _pump_pid --------------------------------------
 static void _pump_pid(int Meniscus_Error_Enable)
 {       
     static const INT32 MENISCUS_MAX = 1;    // [0.1mbar]
  		
 //	if (RX_Status.pressure_out == INVALID_VALUE || RX_Status.info.valve == TO_FLUSH || RX_Status.error & COND_ERR_meniscus)
-	if (RX_Status.pressure_out == INVALID_VALUE || RX_Status.info.valve_ink==FALSE || RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
+	if (!_isValid(RX_Status.pressure_out) || !_isValid(RX_Status.pressure_in) || RX_Status.info.valve_ink==FALSE || RX_Status.error & (COND_ERR_meniscus|COND_ERR_pump_no_ink))
     {
 		turn_off_pump();
     }
