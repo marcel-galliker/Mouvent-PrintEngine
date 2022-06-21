@@ -113,7 +113,8 @@ static void _main_menu(void)
 	}
 	if (_cond)
 	{
-		term_printf("P<n>: Set pump to 40%\n");		
+		term_printf("P<n>: Set pump to 40%\n");
+		term_printf("v<n>[o|f|i]: Set Valve to Off, Flush, Ink\n");
 		term_printf("#<n><number>: Set SerialNo of conditioner<n>\n");	
 	}
 	if (_mvteeprom)

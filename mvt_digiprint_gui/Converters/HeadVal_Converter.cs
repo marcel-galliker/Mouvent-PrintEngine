@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Services;
+﻿using RX_Common;
+using RX_DigiPrint.Services;
 using System;
 using System.Windows;
 using System.Windows.Data;
@@ -108,7 +109,7 @@ namespace RX_DigiPrint.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return Rx.StrToInt32(value as string);
         }
     }
 

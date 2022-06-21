@@ -752,6 +752,31 @@ void cond_set_valve_test(int headNo, int valve)
 	cond_ctrlMode2(headNo, ctrl_test_valve);
 }
 
+//--- cond_set_valve_test_str --------------------------------------
+void cond_set_valve_test_str(int headNo, char *str)
+{
+	if (headNo < 0 || headNo >= MAX_HEADS_BOARD || _NiosMem == NULL) return;
+	for (char *ch=str; TRUE; ch++)
+	{
+		switch (*ch)
+		{
+		case '\0': return;
+		case 'o': _NiosMem->cfg.cond[headNo].test_Valve= 0;
+				  cond_ctrlMode2(headNo, ctrl_test_valve);
+				  return;
+
+		case 'f': _NiosMem->cfg.cond[headNo].test_Valve= 1;
+				  cond_ctrlMode2(headNo, ctrl_test_valve);
+				  return;
+
+		case 'i': _NiosMem->cfg.cond[headNo].test_Valve= 2;
+				  cond_ctrlMode2(headNo, ctrl_test_valve);
+				  return;
+		default: break;
+		}
+	}
+}
+
 //--- cond_set_flowResistance --------------------------------
 void cond_set_flowResistance(int headNo, int value)
 {

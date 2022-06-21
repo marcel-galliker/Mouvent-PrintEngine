@@ -427,6 +427,7 @@ void nios_set_ctrlmode(int isNo, EnFluidCtrlMode mode)
 		}
 	}
 
+	if (mode==ctrl_off) _Cfg->test_airPressure = 0;
 	_Cfg->ink_supply[isNo].ctrl_mode = mode;
 }
 
@@ -536,7 +537,6 @@ void nios_test_flush(int power)
 {
 	if (_Cfg) _Cfg->test_flush = power;
 }
-
 
 //--- _simu_fluidsystem ------------------------------------------
 void _simu_fluidsystem(void)

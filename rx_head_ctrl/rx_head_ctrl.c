@@ -149,6 +149,7 @@ void handle_menu(char *str)
 			
 		case 'o': cond_ctrlMode(atoi(&str[1]), ctrl_off);		break;
         case 'P': cond_ctrlMode(atoi(&str[1]), ctrl_test);		break;
+		case 'v': cond_set_valve_test_str(atoi(&str[1]), str);	break;
 		case 'w': cond_ctrlMode(atoi(&str[1]), ctrl_warmup);	break;
         case '#': cond_set_serialNo(no, atoi(&str[2]));			break;
 		case 'R': fpga_trace_registers("registers", FALSE);		break;

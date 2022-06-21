@@ -47,6 +47,7 @@ void cond_set_flowResistance(int headNo, int value);
 void cond_set_purge_par (int headNo, int delay_pos_y, int time, int act_pos_y, int delay_time);
 void cond_set_config	(int headNo, SConditionerCfg *cfg);
 void cond_set_valve_test(int headNo, int valve);
+void cond_set_valve_test_str(int headNo, char *str);
 void cond_setInk		(int headNo, SInkDefinition *pink);
 void cond_volume_printed(int headNo, int volume);
 void cond_start_preslog (void);

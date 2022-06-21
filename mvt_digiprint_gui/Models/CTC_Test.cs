@@ -42,7 +42,6 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _Step, value); }
 		}
 
-
 		//--- Property State ---------------------------------------
 		private ObservableCollection<EN_State> _State;
 		public ObservableCollection<EN_State> State
@@ -51,6 +50,24 @@ namespace RX_DigiPrint.Models
 			set { SetProperty(ref _State, value); }
 		}
 
+		//--- Start ----------------------------------------
+		public void Start()
+		{
+			for (int head = 0; head < HEADS; head++) 
+			{
+				if (Overall.State[head] != EN_State.failed) SetHeadState(head, EN_State.running);
+			}
+		}
+
+		//--- Done -------------------------------------------
+		public void Done(CTC_Test.EN_State state)
+		{
+
+			for( int headNo=0; headNo<CTC_Test.HEADS; headNo++)
+			{
+				if (State[headNo]==CTC_Test.EN_State.running) State[headNo]=state;
+			}
+		}
 		//--- SetResult -------------------------------
 		public void SetResult(int head, bool ok)
 		{
@@ -76,15 +93,6 @@ namespace RX_DigiPrint.Models
 		public void ResetState()
 		{
 			for (int head = 0; head < HEADS; head++) State[head]=EN_State.undef;
-		}
-
-		//--- SimuRunning ----------------------------------------
-		public void SimuRunning()
-		{
-			for (int head = 0; head < HEADS; head++) 
-			{
-				if (Overall.State[head] != EN_State.failed) SetHeadState(head, EN_State.running);
-			}
 		}
 
 		//--- SimuFailed ---------------------------------
