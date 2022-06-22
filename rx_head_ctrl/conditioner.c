@@ -875,7 +875,7 @@ void cond_set_meniscus_chk(int enable)
 {
     for (int i = 0; i < MAX_HEADS_BOARD; i++)
     {
-        _NiosMem->cfg.cond[i].cmd.disable_meniscus_check = enable;
+        _NiosMem->cfg.cond[i].cmd.disable_meniscus_check = !enable;
         RX_HBStatus[i].info.meniscus = _NiosMem->cfg.cond[i].cmd.disable_meniscus_check;
     }
 }

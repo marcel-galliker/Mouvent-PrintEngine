@@ -171,6 +171,7 @@ namespace RX_DigiPrint.Models
 		{
 			TcpIp.SHeadTestCmd msg = new TcpIp.SHeadTestCmd();
 			msg.valve = Convert.ToInt32(value);
+			RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_SET_MENISCUS_CHK, ref msg);
 		}
 
 		//--- _CheckHeadPIN ----------------------------------------------------
@@ -254,9 +255,9 @@ namespace RX_DigiPrint.Models
 				CTC_Test test1 = new CTC_Test() { Step = "Ink Tank Pressure" };
 				
 				CTC_Settings settings = new CTC_Settings();
-				CTC_Param startPar1 = settings.GetParam("Leak Test", test1.Step, "Pressure",    500, 0);
-				CTC_Param startPar2 = settings.GetParam("Leak Test", test1.Step, "CheckTime", 10000, 0);
-				CTC_Param startPar3 = settings.GetParam("Leak Test", test1.Step, "Pressure2",   400, 0);
+				CTC_Param startPar1 = settings.GetParam("Leak Test", test1.Step, "Pressure",		 500, 0);
+				CTC_Param startPar2 = settings.GetParam("Leak Test", test1.Step, "Check Time",	   10000, 0);
+				CTC_Param startPar3 = settings.GetParam("Leak Test", test1.Step, "Check Pressure",   400, 0);
 
 				//--------------------------------------------------
 
@@ -349,9 +350,9 @@ namespace RX_DigiPrint.Models
 				CTC_Param checkOut		= settings.GetParam("Valve Test", test1.Step, "Check Outlet",			90, 110);
 				CTC_Param checkPump		= settings.GetParam("Valve Test", test1.Step, "Check Pump",				40, 45);
 								
-				CTC_Test test2 = new CTC_Test() { Step = "Test" };
+				CTC_Test test2 = new CTC_Test() { Step = "Test Valve"};
 				CTC_Param checkTime2	= settings.GetParam("Valve Test", test2.Step, "Check Time",				10000, 0);
-				CTC_Param checkPump2	= settings.GetParam("Valve Test", test2.Step, "Check Pump",				40, 45);
+				CTC_Param checkPump2	= settings.GetParam("Valve Test", test2.Step, "Check Pump",				80, 0);
 				
 				CTC_Test test3 = new CTC_Test() { Step = "Print" };
 
@@ -382,7 +383,7 @@ namespace RX_DigiPrint.Models
 				}
 
 				//--- check conditioners ---------------
-			//	ok = _CheckHeadPrinting(test1, checkTime.Min, checkIn, checkOut, checkPump);
+				ok = _CheckHeadPrinting(test1, checkTime.Min, checkIn, checkOut, checkPump);
 
 
 				//===== TEST ==================================================================================
@@ -390,7 +391,7 @@ namespace RX_DigiPrint.Models
 				RxBindable.Invoke(() => _Tests.Add(test2));
 				_SetShutoffValve(true);
 
-			//	ok = _CheckHeadPrinting(test2, checkTime2.Min, null, null, checkPump2);
+				ok = _CheckHeadPrinting(test2, checkTime2.Min, null, null, checkPump2);
 
 				_SetShutoffValve(false);
 			

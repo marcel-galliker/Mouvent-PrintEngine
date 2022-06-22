@@ -1320,7 +1320,7 @@ void ctrl_send_head_meniscus_chk(SHeadTestCmd *pmsg)
 {
 	for (int head = 0; head < SIZEOF(_HeadCtrl); head+=HEAD_CNT)
     {
-        if (_HeadCtrl[head].socket != INVALID_SOCKET)
+        if (_HeadCtrl[head].socket && _HeadCtrl[head].socket != INVALID_SOCKET)
 			sok_send(&_HeadCtrl[head/HEAD_CNT].socket, pmsg);
     }    
 }

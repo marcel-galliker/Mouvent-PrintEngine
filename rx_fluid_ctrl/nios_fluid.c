@@ -512,7 +512,7 @@ void nios_test_bleed_valve(int isNo, int value)
 //--- nios_test_shutoff_valve --------------------------------------------------
 void nios_test_shutoff_valve(int value)
 {
-	if (_set_testmode()) _Cfg->test_shutoffValve = value;
+	_Cfg->test_shutoffValve = value;
 }
 
 //--- nios_test_ink_pump ----------------------------------------------
