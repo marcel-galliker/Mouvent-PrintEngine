@@ -75,6 +75,7 @@ static INT32	_TimePIDstable;
 // static INT32	_TimeSwitchingOFF;
 // static INT32 _PhaseOFFMeniscusPre;
 static INT32	_Meniscus_Timeout;
+static INT32	_Meniscus_Setpoint_Old = 0;
 static INT32	_PurgeDelay;
 static INT32	_PurgeTime;
 static INT32	_PurgeReleasePressure;
@@ -288,6 +289,7 @@ void pump_tick_10ms(void)
 						pid_reset(&_PumpPID);			
 						_PumpPID.start_integrator = 0;
 						_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+						_Meniscus_Setpoint_Old = RX_Config.meniscus_setpoint;
 						_Start_PID = START_PID_OFF;
 						_TimePIDstable = 0;
 //						_TimeSwitchingOFF = 0;
@@ -320,7 +322,7 @@ void pump_tick_10ms(void)
         //--- PRINT --------------------------------------------
 		case ctrl_print:  		
 						//--- start: reset regulation -----------------
-						if (RX_Config.mode != RX_Status.mode)
+						if (RX_Config.mode != RX_Status.mode || _Meniscus_Setpoint_Old != RX_Config.meniscus_setpoint)
 						{
 							_PumpPID.P 			= DEFAULT_P;
 							
@@ -339,6 +341,7 @@ void pump_tick_10ms(void)
 							_PumpPID.start_integrator = 0;
 							// Meniscus setpoint in WF (if 0, setpoint=default)
 							_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+							_Meniscus_Setpoint_Old = RX_Config.meniscus_setpoint;
 							// if purge just before
 							if(_PurgeReleasePressure) _PumpPID.Setpoint = -RX_Status.meniscus;
 							if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
@@ -394,6 +397,7 @@ void pump_tick_10ms(void)
 						_PumpPID.start_integrator = 0;
 						pid_reset(&_PumpPID);						
 						_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+						_Meniscus_Setpoint_Old = RX_Config.meniscus_setpoint;
 						_TimeStabilityCheck = 0;
 						RX_Status.mode = RX_Config.mode; 
 						_CheckSequence = 1;
@@ -621,6 +625,7 @@ void pump_tick_10ms(void)
 							_PumpPID.start_integrator = 0;
 							// Meniscus setpoint in WF (if 0, setpoint=default)
 							_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+							_Meniscus_Setpoint_Old = RX_Config.meniscus_setpoint;
 							if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
 							pid_reset(&_PumpPID);
 							RX_Status.pressure_in_max=INVALID_VALUE;
@@ -637,6 +642,10 @@ void pump_tick_10ms(void)
 		case ctrl_recovery_step5:
 						if (RX_Config.mode != RX_Status.mode)
 							RX_Status.error  &= ~(COND_ERR_meniscus | COND_ERR_pump_no_ink | COND_ERR_p_in_too_high);
+						
+						_PumpPID.Setpoint = RX_Config.meniscus_setpoint;
+						_Meniscus_Setpoint_Old = RX_Config.meniscus_setpoint;
+						if(_PumpPID.Setpoint < 50) _PumpPID.Setpoint = DEFAULT_SETPOINT;
 						
 						RX_Config.cmd.disable_meniscus_check = TRUE;
 						temp_ctrl_on(TRUE);

@@ -61,6 +61,7 @@ static SRecoveryFct		_RecoveryData = { 0 };
 static int				_PurgeCluster = FALSE;
 static int				_PurgeClusterNo = -1;
 static int				_PurgeHeadNo = -1;
+static int				_RecoveryMode[INK_SUPPLY_CNT];
 
 
 //--- prototypes -----------------------
@@ -673,7 +674,9 @@ static void _control(int fluidNo)
     }
     int no = fluidNo*INK_PER_BOARD;
 	SInkSupplyStat *pstat = &FluidStatus[no];
-	int	lbrob = RX_StepperStatus.robot_used; //(RX_Config.printer.type==printer_LB702_UV ||RX_Config.printer.type == printer_LB702_WB);
+	
+	
+	int lbrob = RX_StepperStatus.robot_used; //(RX_Config.printer.type==printer_LB702_UV ||RX_Config.printer.type == printer_LB702_WB);
 	
 	int HeadNo = ctrl_singleHead();
 	if (HeadNo != -1) HeadNo %= 8;
@@ -685,6 +688,11 @@ static void _control(int fluidNo)
 	{
 		if (ctrl_check_all_heads_in_fluidCtrlMode(no, pstat->ctrlMode))
 		{
+			if (pstat->ctrlMode >= ctrl_recovery_start && pstat->ctrlMode <= ctrl_recovery_step10)
+				_RecoveryMode[no] = TRUE;
+			else
+				_RecoveryMode[no] = FALSE;
+			
 	//		Error(LOG, 0, "Fluid[%d] in mode >>%s<<", no, FluidCtrlModeStr(_stat->ctrlMode));
 			switch(pstat->ctrlMode)
 			{
@@ -893,8 +901,9 @@ static void _control(int fluidNo)
 
 				case ctrl_recovery_start:	machine_set_capping_timer(FALSE);
 											_RecoveryNumber[no] = 0;
-                                            _send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
-                case ctrl_recovery_step1:	Error(LOG, 0, "Fluid %d: Recovery Function Nr. %d", no, _RecoveryNumber[no] + 1);
+                                            _send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+											break;
+				case ctrl_recovery_step1:	Error(LOG, 0, "Fluid %d: Recovery Function Nr. %d", no, _RecoveryNumber[no] + 1);
 											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
 
                 case ctrl_recovery_step2:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
@@ -1210,6 +1219,11 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 //--- fluid_send_ctrlMode -------------------------------
 void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 {
+	if (ctrlMode == ctrl_off && _RecoveryMode[no] == TRUE && no != -1)
+	{
+		ctrl_send_waveform(no);
+	}
+	
 	if (ctrlMode==ctrl_off && _FluidCtrlMode>=ctrl_flush_step1 && _FluidCtrlMode<=ctrl_flush_done)
 	{
 		for (int i=0; i<RX_Config.inkSupplyCnt; i++) _send_ctrlMode(i, ctrlMode, sendToHeads);	

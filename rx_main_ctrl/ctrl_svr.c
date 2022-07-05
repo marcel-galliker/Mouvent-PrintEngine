@@ -1091,3 +1091,12 @@ void ctrl_set_jetting(void)
 			sok_send_2(&_HeadCtrl[i].socket, CMD_JETTING_HEAD, 0, NULL);
 	}
 }
+
+//--- ctrl_send_waveform ---------------------------------
+void ctrl_send_waveform(int fluidNo)
+{
+	for (int i = 0; i < RX_Config.colorCnt * RX_Config.headsPerColor; i++)
+	{
+		if (RX_Config.headBoard[i / HEAD_CNT].head[i % HEAD_CNT].inkSupply == fluidNo) _send_ink_def(i, "SML", FALSE);
+	}
+}
