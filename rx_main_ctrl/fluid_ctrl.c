@@ -901,16 +901,16 @@ static void _control(int fluidNo)
 
 				case ctrl_recovery_start:	machine_set_capping_timer(FALSE);
 											_RecoveryNumber[no] = 0;
-                                            _send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+											_send_ctrlMode(no, ctrl_recovery_step1, TRUE);
 											break;
 				case ctrl_recovery_step1:	Error(LOG, 0, "Fluid %d: Recovery Function Nr. %d", no, _RecoveryNumber[no] + 1);
-											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											_send_ctrlMode(no, ctrl_recovery_step2, TRUE); break;
 
                 case ctrl_recovery_step2:	setup_recovery(PATH_USER FILENAME_RECOVERY, &_RecoveryData, READ);
 											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
 											_fluid_send_condPumpSpeed(no, _RecoveryData.pump_speed_setpoint * 10);
 											_RecoveryTime[no] = 0;
-											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE);
+											_send_ctrlMode(ctrl_recovery_step3, TRUE);
                                             break;
 
                 case ctrl_recovery_step3:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
@@ -918,7 +918,7 @@ static void _control(int fluidNo)
 											{
                                                 ctrl_set_recovery_freq(_RecoveryData.freq_hz[1]);
 												_RecoveryTime[no] = 0;
-												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+												_send_ctrlMode(no, ctrl_recovery_step4, TRUE); break;
 											}
 											break;
 
@@ -927,7 +927,7 @@ static void _control(int fluidNo)
 											{
 												ctrl_set_recovery_freq(_RecoveryData.freq_hz[2]);
 												_RecoveryTime[no] = 0;
-												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+												_send_ctrlMode(no, ctrl_recovery_step5, TRUE); break;
 											}
 											break;
 											
@@ -935,17 +935,17 @@ static void _control(int fluidNo)
 											if (rx_get_ticks() >= _RecoveryTime[no])
 											{
 												_RecoveryTime[no] = 0;
-												_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+												_send_ctrlMode(no, ctrl_recovery_step6, TRUE); break;
 											}
 											break;
 
 				case ctrl_recovery_step6:	_send_purge_par(no, _RecoveryData.purge_time_s*1000, _RecoveryData.purge_time_s*1000); 
-											_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+											_send_ctrlMode(no, ctrl_recovery_step7, TRUE); break;
 											break;
 
-				case ctrl_recovery_step7:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
-				case ctrl_recovery_step8:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
-				case ctrl_recovery_step9:	_send_ctrlMode(no, pstat->ctrlMode+1, TRUE); break;
+				case ctrl_recovery_step7:	_send_ctrlMode(no, ctrl_recovery_step8, TRUE); break;
+				case ctrl_recovery_step8:	_send_ctrlMode(no, ctrl_recovery_step9, TRUE); break;
+				case ctrl_recovery_step9:	_send_ctrlMode(no, ctrl_recovery_step10, TRUE); break;
 											
 				case ctrl_recovery_step10:	_RecoveryNumber[no]++;
 											if (_RecoveryNumber[no] >= _RecoveryData.repetion)
