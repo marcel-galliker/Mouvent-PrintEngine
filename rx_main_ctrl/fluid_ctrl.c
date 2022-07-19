@@ -910,7 +910,7 @@ static void _control(int fluidNo)
 											ctrl_set_recovery_freq(_RecoveryData.freq_hz[0]);
 											_fluid_send_condPumpSpeed(no, _RecoveryData.pump_speed_setpoint * 10);
 											_RecoveryTime[no] = 0;
-											_send_ctrlMode(ctrl_recovery_step3, TRUE);
+											_send_ctrlMode(no, ctrl_recovery_step3, TRUE);
                                             break;
 
                 case ctrl_recovery_step3:	if (!_RecoveryTime[no])	_RecoveryTime[no] = rx_get_ticks() + _RecoveryData.printing_time_min[0]*60*1000;
