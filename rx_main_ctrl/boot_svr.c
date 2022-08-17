@@ -38,8 +38,8 @@ RX_SOCKET _BootClient=0;
 
 //--- Prototypes ------------------------------------------------------
 static int _handle_boot_msg(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *par);
-static int _open_bot_srv   (RX_SOCKET socket, const char *peerName);
-static int _close_bot_srv   (RX_SOCKET socket, const char *peerName);
+static int _open_boot_srv   (RX_SOCKET socket, const char *peerName);
+static int _close_boot_srv   (RX_SOCKET socket, const char *peerName);
 
 static void _do_boot_info  (RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg);
 static void _do_ping_reply (RX_SOCKET socket, struct sockaddr *sender, SBootInfoMsg* msg);
@@ -53,18 +53,26 @@ void boot_start(void)
 		sok_start_server(&_BoorSvr, NULL, PORT_UDP_BOOT_SVR, SOCK_DGRAM, 0, _handle_boot_msg, NULL, NULL);
 		rx_sleep(100);
 		sok_open_client(&_BootClient, RX_CTRL_MAIN, PORT_UDP_BOOT_SVR, SOCK_DGRAM);
-
 		boot_request(CMD_BOOT_INFO_REQ);
 	}
 };
 
-static int _open_bot_srv   (RX_SOCKET socket, const char *peerName)
+//--- boot_ipsettings_ok ------------------------------
+int boot_ipsettings_ok(void)
+{
+	char addr[32];
+	sok_get_socket_name(_BootClient, addr, NULL, NULL);
+	if (str_start(addr, RX_CTRL_MAIN)) return TRUE;
+	return FALSE;
+}
+
+static int _open_boot_srv   (RX_SOCKET socket, const char *peerName)
 {
 	TrPrintf(TRUE, "Server opened: >>%s<<", peerName);
 	return REPLY_OK;
 }
 
-static int _close_bot_srv   (RX_SOCKET socket, const char *peerName)
+static int _close_boot_srv   (RX_SOCKET socket, const char *peerName)
 {
 	TrPrintf(TRUE, "Server closed: >>%s<<", peerName);
 	return REPLY_OK;

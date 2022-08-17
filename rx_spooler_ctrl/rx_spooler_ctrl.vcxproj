@@ -60,7 +60,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'" Label="Configuration">
@@ -84,7 +84,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -121,7 +121,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.2.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.5.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -185,7 +185,7 @@
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\4.9;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\4.9\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0005\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_slicescreen_lib;..\Externals\Tec-it\Linux\Tec-it-11\include\libtbarcode11;..\Externals\libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu\c++\5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\c++\5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\localhost\0000\include;..\rx_ink_lib;..\rx_common_lib;..\rx_rip_lib;..\rx_tif_lib;..\rx_slicescreen_lib;..\Externals\Tec-it\Linux\Tec-it-11\include\libtbarcode11;..\Externals\libtiff;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug-lx.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <OutDir>$(ProjectDir)..\_out\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\_temp\$(MSBuildProjectName)\$(Configuration)\</IntDir>
@@ -406,9 +406,7 @@ copy "$(OutDir)rx_rip_lib.dll" "d:\Radex\bin\spooler\win\"</Command>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)..\bin\win"
 copy "$(OutDir)$(TargetName)$(TargetExt)" "$(ProjectDir)..\bin\win\"
-copy "$(ProjectDir)rx_rip_lib_x64.dll"  "$(ProjectDir)..\bin\win\"
-copy "$(ProjectDir)..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11_x64.dll" "$(ProjectDir)..\bin\win\"
-</Command>
+copy "$(ProjectDir)..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11_x64.dll" "$(ProjectDir)..\bin\win\"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>..\VersionUpdate $(ProjectDir)version.c</Command>
@@ -464,6 +462,6 @@ copy "$(ProjectDir)..\Externals\Tec-it\Win\TBarCode11\Bin\TBarCode11_x64.dll" "$
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.2.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.5.targets" />
   </ImportGroup>
 </Project>

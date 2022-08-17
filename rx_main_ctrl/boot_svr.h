@@ -18,3 +18,5 @@ void boot_end(void);
 
 void boot_request (UINT32 msgId);
 void boot_set_flashing(UINT64 macAddr);
+
+int boot_ipsettings_ok(void);

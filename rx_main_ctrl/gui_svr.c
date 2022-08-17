@@ -18,6 +18,7 @@
 #include "rx_trace.h"
 #include "tcp_ip.h"
 #include "enc_ctrl.h"
+#include "boot_svr.h"
 #include "gui_msg.h"
 #include "gui_svr.h"
 
@@ -188,6 +189,12 @@ static int _gui_connected(RX_SOCKET socket, const char *peername)
 			_CheckTime[i]=0;
 			break;
 		}
+	}
+
+	//--- check IP address -----------------------------
+	if (!boot_ipsettings_ok())
+	{
+		Error(ERR_CONT, 0, "Ethernet address must be >>%s<<", RX_CTRL_MAIN);
 	}
 	return REPLY_OK;
 }

@@ -1215,7 +1215,6 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		SInkSupplyStatMsg msg;
 		msg.hdr.msgId  = REP_FLUID_STAT;
 		msg.hdr.msgLen = sizeof(msg);
-		
 		for (msg.no=0; msg.no<SIZEOF(_FluidStatus); msg.no++)
 		{
 			if (msg.no<RX_Config.inkSupplyCnt || msg.no>=INK_SUPPLY_CNT)	// send also flush and waste
