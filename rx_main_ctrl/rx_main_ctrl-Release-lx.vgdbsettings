@@ -230,8 +230,9 @@
       <CustomActionBase xsi:type="SourceTransferAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <RemoteHost>
-          <HostName>BuildMachine</HostName>
-          <Transport>BuiltinShortcut</Transport>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
         </RemoteHost>
         <LocalDirectory>$(ProjectDir)/../Externals/open62541</LocalDirectory>
         <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)/../Externals/open62541</RemoteDirectory>
@@ -248,6 +249,17 @@
           <SkipMountPoints>false</SkipMountPoints>
           <OverwriteTrigger>Stat</OverwriteTrigger>
         </Extension>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="FileTransferAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <DestinationHost>
+          <HostName>$(BuildHost)</HostName>
+          <Transport>SSH</Transport>
+          <UserName>root</UserName>
+        </DestinationHost>
+        <SourceFilePath>$(ProjectDir)/../Externals/open62541/ubuntu/lib/*.*</SourceFilePath>
+        <DestinationFilePath>$(TargetDir)/*.*</DestinationFilePath>
+        <OverwriteTrigger>Stat</OverwriteTrigger>
       </CustomActionBase>
     </PreBuildActions>
     <PostBuildActions>

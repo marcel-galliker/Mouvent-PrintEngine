@@ -13,6 +13,7 @@
 #include "rx_def.h"
 #include "tcp_ip.h"
 #include "rx_error.h"
+#include "ctrl_svr.h"
 #include "gui_svr.h"
 #include "drive_ctrl.h"
 #include "step_tts.h"

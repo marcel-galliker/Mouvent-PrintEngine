@@ -84,6 +84,7 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
 static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue* pmsg);
+
 static void _do_scales_tara		  (RX_SOCKET socket, SValue*        pmsg);
 static void _do_scales_calib	  (RX_SOCKET socket, SValue*        pmsg);
 

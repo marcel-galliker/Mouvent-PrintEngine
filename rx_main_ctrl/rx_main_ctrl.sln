@@ -31,6 +31,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_tif_lib", "..\rx_tif_lib
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rx_pecore_lib", "..\rx_pecore_lib\rx_pecore_lib.vcxproj", "{91897CF4-70AC-4E05-B75E-E05CBC3EDCF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{23DE4F53-96A4-44A2-9A16-FFC6CCB25311} = {23DE4F53-96A4-44A2-9A16-FFC6CCB25311}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

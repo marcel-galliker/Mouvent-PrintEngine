@@ -203,9 +203,6 @@
 #ifndef __DEC32_MAX__
 #define __DEC32_MAX__ 9.999999E96DF
 #endif
-#ifndef __cpp_threadsafe_static_init
-#define __cpp_threadsafe_static_init 200806
-#endif
 #ifndef __INT32_MAX__
 #define __INT32_MAX__ 0x7fffffff
 #endif
@@ -216,7 +213,7 @@
 #define __STDC_IEC_559__ 1
 #endif
 #ifndef __STDC_ISO_10646__
-#define __STDC_ISO_10646__ 201706L
+#define __STDC_ISO_10646__ 201505L
 #endif
 #ifndef __DECIMAL_DIG__
 #define __DECIMAL_DIG__ 21
@@ -238,9 +235,6 @@
 #endif
 #ifndef __GXX_RTTI
 #define __GXX_RTTI 1
-#endif
-#ifndef __pie__
-#define __pie__ 2
 #endif
 #ifndef __MMX__
 #define __MMX__ 1
@@ -303,9 +297,6 @@
 #endif
 #ifndef __DEPRECATED
 #define __DEPRECATED 1
-#endif
-#ifndef __cpp_rvalue_references
-#define __cpp_rvalue_references 200610
 #endif
 #ifndef __DBL_MAX_EXP__
 #define __DBL_MAX_EXP__ 1024
@@ -370,9 +361,6 @@
 #ifndef __DBL_MIN__
 #define __DBL_MIN__ double(2.22507385850720138309e-308L)
 #endif
-#ifndef __PIE__
-#define __PIE__ 2
-#endif
 #ifndef __LP64__
 #define __LP64__ 1
 #endif
@@ -401,7 +389,7 @@
 #define __FLT_MANT_DIG__ 24
 #endif
 #ifndef __VERSION__
-#define __VERSION__ "5.5.0 20171010"
+#define __VERSION__ "5.4.0 20160609"
 #endif
 #ifndef __cpp_unicode_characters
 #define __cpp_unicode_characters 200704
@@ -592,9 +580,6 @@
 #ifndef __SIZEOF_FLOAT__
 #define __SIZEOF_FLOAT__ 4
 #endif
-#ifndef __pic__
-#define __pic__ 2
-#endif
 #ifndef __UINTPTR_MAX__
 #define __UINTPTR_MAX__ 0xffffffffffffffffUL
 #endif
@@ -727,9 +712,6 @@
 #ifndef __INT8_MAX__
 #define __INT8_MAX__ 0x7f
 #endif
-#ifndef __PIC__
-#define __PIC__ 2
-#endif
 #ifndef __UINT_FAST32_TYPE__
 #define __UINT_FAST32_TYPE__ long unsigned int
 #endif
@@ -761,7 +743,7 @@
 #define __ATOMIC_CONSUME 1
 #endif
 #ifndef __GNUC_MINOR__
-#define __GNUC_MINOR__ 5
+#define __GNUC_MINOR__ 4
 #endif
 #ifndef __GLIBCXX_TYPE_INT_N_0
 #define __GLIBCXX_TYPE_INT_N_0 __int128
