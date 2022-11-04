@@ -180,6 +180,7 @@ int		machine_start_printing(void)
 	switch(_MInterface) 
 	{
 	case mi_tt:		return tt_start_printing();
+	case mi_tts:	return drive_start_printing();
 	case mi_plc:	return plc_start_printing();
 	default:
 		return REPLY_OK;

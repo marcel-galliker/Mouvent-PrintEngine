@@ -450,7 +450,13 @@ UINT32 net_head_data_addr	(int headNo, int udpNo, int ethPortCnt, int udpPortCnt
 	net_device_to_ipaddr(dev_head, headNo, ipAddr, sizeof(ipAddr));
 	sscanf(ipAddr, "%d.%d.%d.%d", &addr[0], &addr[1], &addr[2], &addr[3]);
 	if (udpNo>=udpPortCnt) return 0;
-	if (ethPortCnt)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + ((headNo*udpPortCnt + udpNo) % ethPortCnt), addr[3]);
+	if (RX_Config.printer.type == printer_test_table_seon) 
+	{
+		udpPortCnt = 2;
+		ethPortCnt = 2;
+		sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 3 + ((headNo*udpPortCnt + udpNo) % ethPortCnt), addr[3]);
+	}
+	else if (ethPortCnt)	sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2] + 1 + ((headNo*udpPortCnt + udpNo) % ethPortCnt), addr[3]);
 	else			sprintf(ipAddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], 50+10*udpNo+headNo);
 	return sok_addr_32(ipAddr);
 }

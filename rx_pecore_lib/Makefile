@@ -36,7 +36,7 @@ error:
 endif
 
 SOURCEFILES := rx_pecore.c rx_pecore_itf.c rx_pecore_main.c
-EXTERNAL_LIBS := 
+EXTERNAL_LIBS := ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -141,3 +141,6 @@ $(BINARYDIR)/%.o : %.s $(all_make_files) |$(BINARYDIR)
 	$(CC) $(CFLAGS) $(ASFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 #VisualGDB: GeneratedRules				#<--- All lines below are auto-generated
+$(BINARYDIR)/rx_common_lib.a : ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a
+	$(CP) ../rx_common_lib/$(BINARYDIR)/rx_common_lib.a $(BINARYDIR)/rx_common_lib.a
+

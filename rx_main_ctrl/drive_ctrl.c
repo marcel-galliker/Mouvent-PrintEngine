@@ -549,10 +549,16 @@ int drive_set_printbar(SPrintQueueItem* pItem)
     _DriveStatus.speed = pItem->speed;
     _DriveStatus.targetposition = _Move_Back_TargetPosition;    //pItem->scanLength;
     steptts_to_print_pos();
-    _MoveCmd = move_print;
+//   _MoveCmd = move_print;
     return REPLY_OK;
 }
 
+//--- drive_start_printing ---------------------------
+int drive_start_printing(void)
+{
+    _MoveCmd = move_print;
+    return REPLY_OK;
+}
 
 //--- drive_get_scanner_pos ------------------------------------------
 UINT32 drive_get_scanner_pos(void)

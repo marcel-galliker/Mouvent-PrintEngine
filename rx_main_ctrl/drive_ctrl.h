@@ -15,6 +15,7 @@ int drive_init(void);
 void drive_error_reset(void);
 int drive_set_printbar(SPrintQueueItem* pItem);
 UINT32 drive_get_scanner_pos(void);
+int   drive_start_printing(void);
 void drive_stop_printing(void);
 void drive_move_homing(void);
 void drive_move_waste(void);

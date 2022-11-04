@@ -42,9 +42,8 @@ INT32 fluid_get_pumpSpeed	   (int no);
 INT32 fluid_get_pumpFeedback   (int no);
 // INT32 fluid_get_amcTemp        (int no);
 INT32 fluid_get_error          (int no);
+void do_fluid_flush_pump(RX_SOCKET socket, SValue* pmsg);
+int fluid_purgeCluster(int clusterNo, int state);
 INT32 moving_average_canisterLevel(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_NUMBER], INT64 sum[INK_SUPPLY_CNT + 2], int canisterNumber, int pos, INT32 value);
 
 void undefine_PurgeCtrlMode(void);
-
-void do_fluid_flush_pump(RX_SOCKET socket, SValue *pmsg);
-int fluid_purgeCluster(int clusterNo, int state);
