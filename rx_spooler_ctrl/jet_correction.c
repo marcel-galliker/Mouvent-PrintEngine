@@ -33,7 +33,7 @@ static int  _get_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y);
 static void _set_pixel1(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
 static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
 
-static int _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, int maxdropsize);
+static int _disable_jet(UCHAR *pBufferL, UCHAR *pBuffer, UCHAR *pBufferR, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, int maxdropsize);
 
 static int  (*_GetPixel)(UCHAR *pBuffer, int bytesPerLine, int x, int y);
 static void (*_SetPixel)(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val);
@@ -79,7 +79,7 @@ void jc_set_disabled_jets(SDisabledJetsMsg *pmsg)
 //--- jc_active ---------------------------------------------------
 int  jc_active(void)
 {
-	if (_First)
+	if (FALSE && _First)
 	{
 		int m;
 		for (int head=0; head<SIZEOF(RX_DisabledJets); head++)
@@ -125,7 +125,7 @@ int jc_changed(void)
 	return _Changed;
 }
 
-void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, int lengthPx, int lineLen, int maxdropsize)
+void jc_head_correct(SBmpSplitInfo *pInfoL, SBmpSplitInfo *pInfo, SBmpSplitInfo *pInfoR,short *disabledJets, int fromLine, int lengthPx, int lineLen, int maxdropsize)
 {
 	int pixelPerByte;
 
@@ -144,6 +144,10 @@ void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, in
 
 	if (pInfo->data && pInfo->bitsPerPixel)
 	{
+		BYTE *pDataL = NULL;
+		BYTE *pDataR = NULL;
+		if (pInfoL != NULL) pDataL = *pInfoL->data;
+		if (pInfoR != NULL) pDataR = *pInfoR->data;
 		for (int n = 0; n < MAX_DISABLED_JETS; n++)
 		{
 			int jet = disabledJets[n];
@@ -151,7 +155,7 @@ void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, in
 			jet += (pInfo->startBt - pInfo->fillBt) * pixelPerByte + pInfo->jetPx0;
 			if (jet >= 0)
 			{
-				TrPrintfL(TRUE, "correct %d drops on jet %d", _disable_jet(*pInfo->data, pInfo->bitsPerPixel, lengthPx, lineLen, jet, fromLine, maxdropsize), jet);
+				TrPrintfL(TRUE, "correct %d drops on jet %d", _disable_jet(pDataL, *pInfo->data, pDataR, pInfo->bitsPerPixel, lengthPx, lineLen, jet, fromLine, maxdropsize), jet);
 			}
 		}
 	}
@@ -170,6 +174,8 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, con
 {
 	int color, head;
 	SBmpSplitInfo	*pInfo; 
+	SBmpSplitInfo	*pInfoL; 
+	SBmpSplitInfo	*pInfoR; 
 
 	_Changed = FALSE;
 
@@ -183,8 +189,12 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, con
 		{
 			if (RX_Spooler.headNo[color][head])
 			{
-				pInfo = &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
-				jc_head_correct(pInfo, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen, getmaxdropsize(dots));
+				pInfoL = NULL;
+				pInfoR = NULL;
+				pInfo= &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
+				if (head>0) pInfoL = &pItem->splitInfo[RX_Spooler.headNo[color][head - 1] - 1];
+				if (head+1<RX_Spooler.headsPerColor) pInfoR = &pItem->splitInfo[RX_Spooler.headNo[color][head+1]-1];
+				jc_head_correct(pInfoL, pInfo, pInfoR, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen, getmaxdropsize(dots));
 			}
 		}
 	}
@@ -226,7 +236,7 @@ static void _set_pixel2(UCHAR *pBuffer, int bytesPerLine, int x, int y, int val)
 }
 
 //--- _disable_jet -----------------------------------------------------
-static int _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, int maxdropsize)
+static int _disable_jet(UCHAR *pBufferL, UCHAR *pBuffer, UCHAR *pBufferR, int bitsPerPixel, int length, int bytesPerLine, int jet, int fromLine, int maxdropsize)
 {
 	int jetMax = bytesPerLine * 8 / bitsPerPixel;
 	int ncorrect = 0;
@@ -279,8 +289,29 @@ static int _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesP
 				}
 				if (droplets > 0)
 				{
-					org[0] = comp[0] = _GetPixel(pBuffer, bytesPerLine, jet-1, y);
-					org[1] = comp[1] = _GetPixel(pBuffer, bytesPerLine, jet+1, y);
+					org[0] = comp[0] = 0;
+					org[1] = comp[1] = 0;
+					if (jet<HEAD_OVERLAP_SAMBA)
+					{
+						if (pBufferL)
+						{
+							org[0] = comp[0] = _GetPixel(pBufferL, bytesPerLine, jet + HEAD_WIDTH_SAMBA - 1, y);
+							org[1] = comp[1] = _GetPixel(pBufferL, bytesPerLine, jet + HEAD_WIDTH_SAMBA + 1, y);
+						}
+					}
+					else if (jet>HEAD_WIDTH_SAMBA)
+					{
+						if (pBufferR)
+						{
+							org[0] = comp[0] = _GetPixel(pBufferR, bytesPerLine, jet-HEAD_WIDTH_SAMBA-1, y);
+							org[1] = comp[1] = _GetPixel(pBufferR, bytesPerLine, jet-HEAD_WIDTH_SAMBA+1, y);
+						}
+					}
+					else
+					{
+						org[0] = comp[0] = _GetPixel(pBuffer, bytesPerLine, jet-1, y);
+						org[1] = comp[1] = _GetPixel(pBuffer, bytesPerLine, jet+1, y);
+					}
 					max = 2 * maxdropsize - org[0] - org[1];
 					while (droplets > 0 && max > 0)
 					{
@@ -293,8 +324,27 @@ static int _disable_jet(UCHAR *pBuffer, int bitsPerPixel, int length, int bytesP
 						}
 						side = 1 - side;
 					}
-					if (comp[0]!=org[0]) _SetPixel(pBuffer, bytesPerLine, jet-1, y, comp[0]);
-					if (comp[1]!=org[1]) _SetPixel(pBuffer, bytesPerLine, jet+1, y, comp[1]);
+					if (jet<HEAD_OVERLAP_SAMBA)
+					{
+						if (pBufferL)
+						{
+							if (comp[0]!=org[0]) _SetPixel(pBufferL, bytesPerLine, jet+HEAD_WIDTH_SAMBA-1, y, comp[0]);
+							if (comp[1]!=org[1]) _SetPixel(pBufferL, bytesPerLine, jet+HEAD_WIDTH_SAMBA+1, y, comp[1]);
+						}
+					}
+					else if (jet>HEAD_WIDTH_SAMBA)
+					{
+						if (pBufferR)
+						{
+							if (comp[0]!=org[0]) _SetPixel(pBufferR, bytesPerLine, jet-HEAD_WIDTH_SAMBA-1, y, comp[0]);
+							if (comp[1]!=org[1]) _SetPixel(pBufferR, bytesPerLine, jet-HEAD_WIDTH_SAMBA+1, y, comp[1]);
+						}
+					}
+					else
+					{
+						if (comp[0]!=org[0]) _SetPixel(pBuffer, bytesPerLine, jet-1, y, comp[0]);
+						if (comp[1]!=org[1]) _SetPixel(pBuffer, bytesPerLine, jet+1, y, comp[1]);
+					}
 				}
 			}            
         }

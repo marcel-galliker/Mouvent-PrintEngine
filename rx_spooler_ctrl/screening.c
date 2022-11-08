@@ -552,7 +552,7 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			if (rx_def_is_scanning(RX_Spooler.printerType) || !pInfo->same)
 			{
 				TrPrintfL(TRUE, "Head[%d.%d] Jet correction", b, h);
-				jc_head_correct(pInfo, RX_DisabledJets[no], 0, loutplane.lengthPx, loutplane.lineLen, getmaxdropsize(pInfo->pListItem->dots));
+				jc_head_correct(NULL, pInfo, NULL, RX_DisabledJets[no], 0, loutplane.lengthPx, loutplane.lineLen, getmaxdropsize(pInfo->pListItem->dots));
 			}
 
 			if (pInfo->blkCnt!=blkCnt)

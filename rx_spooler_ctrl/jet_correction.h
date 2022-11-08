@@ -25,4 +25,4 @@ int  jc_active(void);
 int	 jc_changed(void);
 int	 jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, const char *dots);
 int getmaxdropsize(const char *dot);
-void jc_head_correct(SBmpSplitInfo *pInfo, short *disabledJets, int fromLine, int lengthPx, int lineLen, int maxdropsize);
+void jc_head_correct(SBmpSplitInfo *pInfoL, SBmpSplitInfo *pInfo, SBmpSplitInfo *pInfoR, short *disabledJets, int fromLine, int lengthPx, int lineLen, int maxdropsize);
