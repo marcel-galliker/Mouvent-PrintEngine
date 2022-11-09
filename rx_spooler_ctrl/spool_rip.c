@@ -418,7 +418,7 @@ static int _screen(SBmpInfo *pInfo, int widthPx, int offsetPx, int lengthPx, int
 	strcpy(item->filepath, filepath);
 	item->variable = TRUE;
 	data_split(&id, pInfo, offsetPx, lengthPx, blkNo, blkCnt, 0, 0, 0, item);
-	scr_wait(10);
+	scr_wait(item, 10);
 
 	if (!widthPx) widthPx = pInfo->srcWidthPx;
 	pInfo->bitsPerPixel = 2;

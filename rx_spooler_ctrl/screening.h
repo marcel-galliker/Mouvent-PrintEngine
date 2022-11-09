@@ -22,4 +22,4 @@ void scr_malloc(UINT32 lengthPx, UINT8 bitsPerPixel);
 void scr_set_values(int head, int min, int max, INT16 values[MAX_DENSITY_VALUES]);
 int scr_wait_ready(void);
 void scr_start(SBmpSplitInfo *pInfo);
-int  scr_wait(int timeout);
+int  scr_wait(SPrintListItem *pItem, int timeout);

@@ -38,7 +38,7 @@ static int	_Trace=0;
 #define SIMU_WRITE	1	// write data to file
 #define SIMU_READ	2	// test reading files, no sending, no writing
 
-static int	_Simulation=SIMU_OFF;
+static int	_Simulation=SIMU_WRITE;
 
 // #define RAW_SOCKET
 
@@ -324,7 +324,7 @@ int hc_send_next()
 		}
 		if (pSplitInfo->screening)
 		{			
-			scr_wait(1000);
+			scr_wait(pSplitInfo->pListItem, 1000);
 		}
 
 		for (i=0, pInfo=pSplitInfo; i<headCnt; i++, pInfo++)
@@ -384,7 +384,7 @@ int hc_send_next()
 
 				case dev_on:		
 									#ifdef DEBUG
-								//	if (FALSE && pInfo->colorCode==1)	// see rx_def.c: RX_ColorName
+									if (FALSE && pInfo->colorCode==1)	// see rx_def.c: RX_ColorName
 									{						
 										_save_to_file(pInfo, FALSE);
 										Error(LOG, 0, "File (id=%d, page=%d, copy=%d, scan=%d) blk0=%d, blkCnt=%d saved to File", pInfo->pListItem->id.id, pInfo->pListItem->id.page, pInfo->pListItem->id.copy, pInfo->pListItem->id.scan, pInfo->blk0, pInfo->blkCnt);

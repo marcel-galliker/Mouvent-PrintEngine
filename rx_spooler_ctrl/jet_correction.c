@@ -170,7 +170,8 @@ int getmaxdropsize(const char *dots)
 }
 
 //--- _jet_correction --------------------------------------------------
-int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, const char* dots)
+//int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, const char* dots)
+int	jc_correction(SPrintListItem *pItem, int fromLine, const char* dots)
 {
 	int color, head;
 	SBmpSplitInfo	*pInfo; 
@@ -179,11 +180,11 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, con
 
 	_Changed = FALSE;
 
-	if (pBmpInfo->bitsPerPixel>=8) return REPLY_OK;	// correction after screening 
+//	if (pBmpInfo->bitsPerPixel>=8) return REPLY_OK;	// correction after screening 
     if (rx_def_is_tx(RX_Spooler.printerType)) return REPLY_OK;
 
 
-	for (color=0; color<SIZEOF(pBmpInfo->buffer); color++)
+	for (color=0; color<RX_Spooler.colorCnt; color++)
 	{
 		for (head=0; head<RX_Spooler.headsPerColor; head++)
 		{
@@ -194,7 +195,8 @@ int	jc_correction (SBmpInfo *pBmpInfo,  SPrintListItem *pItem, int fromLine, con
 				pInfo= &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
 				if (head>0) pInfoL = &pItem->splitInfo[RX_Spooler.headNo[color][head - 1] - 1];
 				if (head+1<RX_Spooler.headsPerColor) pInfoR = &pItem->splitInfo[RX_Spooler.headNo[color][head+1]-1];
-				jc_head_correct(pInfoL, pInfo, pInfoR, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen, getmaxdropsize(dots));
+			//	jc_head_correct(pInfoL, pInfo, pInfoR, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen, getmaxdropsize(dots));
+				jc_head_correct(pInfoL, pInfo, pInfoR, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pInfo->srcLineCnt, pInfo->srcLineLen, getmaxdropsize(dots));
 			}
 		}
 	}

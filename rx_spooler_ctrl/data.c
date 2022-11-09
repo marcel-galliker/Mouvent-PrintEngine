@@ -873,8 +873,8 @@ int data_load(SPageId *id, const char *filepath, EFileType fileType, int offsetP
 		
 		if (loaded || rx_printMode_is_test(printMode))
 		{
-			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(&bmpInfo, &_PrintList[_InIdx], 4224, dots);
-			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(&bmpInfo, &_PrintList[_InIdx], 0, dots);
+			if      (printMode==PM_TEST_JETS && id->id==PQ_TEST_JET_NUMBERS) jc_correction(/*&bmpInfo, */&_PrintList[_InIdx], 4224, dots);
+			else if (printMode!=PM_TEST && printMode!=PM_TEST_SINGLE_COLOR)  jc_correction(/*&bmpInfo, */&_PrintList[_InIdx], 0, dots);
 		}
 		#ifdef DEBUG
 		if (FALSE)
@@ -1436,7 +1436,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 			}
 		}	
 	}
-	if (screeningCnt==0) scr_wait(10);
+	if (screeningCnt==0) scr_wait(pItem, 10);
 	return REPLY_OK;
 }
 

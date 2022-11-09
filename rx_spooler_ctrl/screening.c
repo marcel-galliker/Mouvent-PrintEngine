@@ -252,7 +252,6 @@ void scr_set_values(int headNo, int min, int max, INT16 values[MAX_DENSITY_VALUE
 		_ScrMem[board][head].fact[0]	= 10;
 		_ScrMem[board][head].fact[128]  = 10;
 	}
-
 }
 
 //--- _write_tif --------------------------------------------------------------
@@ -343,7 +342,6 @@ void scr_start(SBmpSplitInfo *pInfo)
 		Error(ERR_ABORT, 0, "Screen Fifo Overflow");
 		return;
 	}
-	
 	memcpy(&_Id, &pInfo->pListItem->id, sizeof(_Id));
     TrPrintfL(TRUE, "Head[%d.%d]: screening START, (id=%d, page=%d, copy=%d, scan=%d)",pInfo->board, pInfo->head, _Id.id, _Id.page, _Id.copy, _Id.scan);
 	//--- calculating blkCnt -------------------
@@ -372,11 +370,11 @@ void scr_start(SBmpSplitInfo *pInfo)
 	rx_mutex_unlock(_ScrFifoMutex);
 	
 	rx_sem_post(_SemScreeningStart);
-    TrPrintfL(TRUE, "Head[%d.%d]: screening STARTED, (id=%d, page=%d, copy=%d, scan=%d)",pInfo->board, pInfo->head, _Id.id, _Id.page, _Id.copy, _Id.scan);
+    TrPrintfL(TRUE, "Head[%d.%d]: screening STARTED, (id=%d, page=%d, copy=%d, scan=%d)", pInfo->board, pInfo->head, _Id.id, _Id.page, _Id.copy, _Id.scan);
 }
 
 //--- scr_wait -----------------------------------------------------
-int scr_wait(int timeout)
+int scr_wait(SPrintListItem *pItem, int timeout)
 {
 	if (_ScrFifoDoneIdx!=_ScrFifoInIdx)
 	{
@@ -387,6 +385,11 @@ int scr_wait(int timeout)
 		{
 			rx_sem_wait(_SemScreeningDone, timeout);
 		}
+		if (rx_def_is_scanning(RX_Spooler.printerType) || !pItem->splitInfo[0].same)
+		{
+			jc_correction(pItem, 0, "SML");
+		}
+
 		if (rx_def_is_tx(RX_Spooler.printerType)) ctrl_start_printing();
 	}
 	_TimeEnd = rx_get_ticks();
@@ -548,12 +551,14 @@ static void _scr_load(SBmpSplitInfo *pInfo, int threadNo)
 			pInfo->widthBt		= pInfo->srcWidthBt;
 			pInfo->blkCnt		= (pInfo->dstLineLen * pInfo->srcLineCnt + RX_Spooler.dataBlkSize-1) / RX_Spooler.dataBlkSize;
 
+			/*
 			// jet correction for the head
 			if (rx_def_is_scanning(RX_Spooler.printerType) || !pInfo->same)
 			{
 				TrPrintfL(TRUE, "Head[%d.%d] Jet correction", b, h);
 				jc_head_correct(NULL, pInfo, NULL, RX_DisabledJets[no], 0, loutplane.lengthPx, loutplane.lineLen, getmaxdropsize(pInfo->pListItem->dots));
 			}
+			*/
 
 			if (pInfo->blkCnt!=blkCnt)
 			{				
