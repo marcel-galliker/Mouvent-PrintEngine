@@ -1317,6 +1317,7 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 
 	TrPrintfL(TRUE, "_data_split_test");
 
+	pItem->splitInfo[0].pListItem = pItem;
 	for (color=0; color<SIZEOF(RX_Spooler.headNo); color++)
 	{
 		if (RX_Color[color].spoolerNo==RX_SpoolerNo)

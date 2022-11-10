@@ -169,7 +169,7 @@ namespace RX_DigiPrint.Views.UserControls
         {
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table_seon)
             {
-                if (RxGlobals.User.UserType == EUserType.usr_operator) RxGlobals.User.UserType=EUserType.usr_service;
+                if (RxGlobals.User.UserType == EUserType.usr_operator) RxGlobals.User.UserType=EUserType.usr_engineer;
                 else RxGlobals.User.UserType = EUserType.usr_operator;
             }
             else

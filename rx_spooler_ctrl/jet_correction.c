@@ -192,10 +192,9 @@ int	jc_correction(SPrintListItem *pItem, int fromLine, const char* dots)
 			{
 				pInfoL = NULL;
 				pInfoR = NULL;
-				pInfo= &pItem->splitInfo[RX_Spooler.headNo[color][head]-1];
-				if (head>0) pInfoL = &pItem->splitInfo[RX_Spooler.headNo[color][head - 1] - 1];
+				pInfo= &pItem->splitInfo[RX_Spooler.headNo[color][head] - 1];
+				if (head>0 && RX_Spooler.headNo[color][head-1]) pInfoL = &pItem->splitInfo[RX_Spooler.headNo[color][head-1] - 1];
 				if (head+1<RX_Spooler.headsPerColor) pInfoR = &pItem->splitInfo[RX_Spooler.headNo[color][head+1]-1];
-			//	jc_head_correct(pInfoL, pInfo, pInfoR, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pBmpInfo->lengthPx, pBmpInfo->lineLen, getmaxdropsize(dots));
 				jc_head_correct(pInfoL, pInfo, pInfoR, RX_DisabledJets[color * RX_Spooler.headsPerColor + head], fromLine, pInfo->srcLineCnt, pInfo->srcLineLen, getmaxdropsize(dots));
 			}
 		}
