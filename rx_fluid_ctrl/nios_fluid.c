@@ -480,7 +480,9 @@ void nios_test_stop(void)
 	_Cfg->test_lungPressure	= 0;
 	_Cfg->test_flush		= 0;
 	_Cfg->test_airPressure	= 0;
-	_Cfg->test_shutoffValve = 0;
+	_Cfg->test_ctc_shutoffValve = 0;
+	_Cfg->test_ctc_bleedValve   = 0;
+	_Cfg->test_ctc_flushValve   = 0;
 	for(isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++) 
 	{
 		_Cfg->ink_supply[isNo].test_airValve	= FALSE;
@@ -509,10 +511,17 @@ void nios_test_bleed_valve(int isNo, int value)
 	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = value;
 }
 
-//--- nios_test_shutoff_valve --------------------------------------------------
-void nios_test_shutoff_valve(int value)
+//--- nios_test_valve --------------------------------------------------
+void nios_test_valve(int valve, int value)
 {
-	_Cfg->test_shutoffValve = value;
+	Error(LOG, 0, "SET VALVE[%d]=%d", valve, value);
+	switch (valve)
+	{
+	case 1:	_Cfg->test_ctc_shutoffValve = value; break;
+	case 6: _Cfg->test_ctc_flushValve   = value; break;
+	case 7: _Cfg->test_ctc_bleedValve   = value; break;
+	default: break;
+	}
 }
 
 //--- nios_test_ink_pump ----------------------------------------------

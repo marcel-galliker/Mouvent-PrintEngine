@@ -81,12 +81,15 @@ namespace RX_DigiPrint.Models
 		//--- SetHeadState -----------------------------
 		public void SetHeadState(int head, EN_State state)
 		{
-			State[head]=state;
-			if (state==EN_State.ok || state==EN_State.failed)
+			RxBindable.Invoke(()=>
 			{
-				if (Overall.State[head]==EN_State.undef) Overall.State[head]=state;
-				else if (state==EN_State.failed)		 Overall.State[head]=EN_State.failed;
-			}
+				State[head]=state;
+				if (state==EN_State.ok || state==EN_State.failed)
+				{
+					if (Overall.State[head]==EN_State.undef) Overall.State[head]=state;
+					else if (state==EN_State.failed)		 Overall.State[head]=EN_State.failed;
+				}
+			});
 		}
 
 		//--- ResetState -------------------------------

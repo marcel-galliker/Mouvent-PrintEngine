@@ -1987,7 +1987,7 @@ static int _check_encoder_tel_freq(void)
 			_EncoderTelFreq_delay--;
 			_cnt=0;
 		}
-		else if (_EncoderTelFreq<500000)
+		else if (_EncoderTelFreq<500000 && RX_HBConfig.printerType!=printer_test_CTC)
 		{
 			if (++_cnt>=3) ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
 		} 

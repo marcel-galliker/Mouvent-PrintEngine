@@ -272,6 +272,8 @@ static void _check_udp_speed(int ticks)
 //--- tse_check_errors ----------------------------
 int tse_check_errors(int ticks, int menu)
 {
+	if (RX_HBConfig.printerType == printer_test_CTC) return REPLY_OK;
+
 	int i;		
 	for (i=0; i<SIZEOF(_TSE); i++)
 	{

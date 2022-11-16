@@ -284,7 +284,7 @@ static int _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg)
 //--- _do_fluid_set_valve ---------------------------------------------------
 static int _do_fluid_set_valve	(RX_SOCKET socket, SHeadTestCmd *pmsg)
 {
-	nios_test_shutoff_valve(pmsg->valve);
+	nios_test_valve(pmsg->valve, pmsg->value);
 	return REPLY_OK;
 }
 

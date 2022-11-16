@@ -110,7 +110,9 @@ typedef struct SNiosFluidCfg
 	INT32			fluid_ctrl_alive;
 	INT32			test_airPressure;	// [mbar]
 	INT16			test_flush;
-	INT16			test_shutoffValve;
+	INT16			test_ctc_shutoffValve;
+	INT16			test_ctc_bleedValve;
+	INT16			test_ctc_flushValve;
 	UINT32			headsPerColor;
 
 	INT32			test_lungPressure;	// [mbar]

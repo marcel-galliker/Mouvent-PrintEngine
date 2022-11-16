@@ -186,7 +186,9 @@ static void   _set_pump_speed(int isNo, int speed);
 static UINT32 _get_pump_ticks(int isNo);
 static void   _set_air_valve(int isNo, int newState);
 static void   _set_bleed_valve(int isNo, int newState);
-static void   _set_shutoff_valve(int state);
+static void   _set_ctc_shutoff_valve(int state);
+static void   _set_ctc_bleed_valve(int state);
+static void   _set_ctc_flush_valve(int state);
 
 // static void _calibrate_inkpump(UINT32 isNo, UINT32 timeout);
 static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode);
@@ -277,6 +279,13 @@ void ink_tick_10ms(void)
 		//--- lung vacuum: UV when any heater is on ---
 		if (pRX_Config->printerType==printer_cleaf) _LungVacc = DEGASSING_VACCUUM_CLEAF;
 		else if (!(pRX_Status->ink_supply[isNo].error & err_heater_board)) _LungVacc = DEGASSING_VACCUUM_UV;
+
+		if (pRX_Config->printerType==printer_test_CTC)
+		{
+			_set_ctc_shutoff_valve(pRX_Config->test_ctc_shutoffValve);
+			_set_ctc_bleed_valve  (pRX_Config->test_ctc_bleedValve);
+			_set_ctc_flush_valve  (pRX_Config->test_ctc_flushValve);
+		}
 
 		//---  check if message received from printhead ---------------------
 		if(pRX_Config->ink_supply[isNo].alive != _InkSupply[isNo].alive)
@@ -373,7 +382,6 @@ void ink_tick_10ms(void)
 				pid_reset(&_InkSupply[isNo].pid_Setpoint);
 				_set_air_valve(isNo, PV_CLOSED);
 				_set_bleed_valve(isNo, PV_CLOSED);
-				_set_shutoff_valve(FALSE);
 				_ShutdownPrint[isNo] = 0;
 				{
 					int i, on=FALSE;
@@ -527,7 +535,6 @@ void ink_tick_10ms(void)
 						_set_air_valve  (isNo, pRX_Config->ink_supply[isNo].test_airValve);
 						_set_bleed_valve(isNo, pRX_Config->ink_supply[isNo].test_bleedValve);
 						_pump_ctrl(isNo, pRX_Config->ink_supply[isNo].test_cylinderPres, PUMP_CTRL_MODE_NO_AIR_VALVE);		// ink-pump
-						_set_shutoff_valve(pRX_Config->test_shutoffValve);
 						_set_pressure_valve((pRX_Config->test_airPressure>0) && (pRX_Status->air_pressure < pRX_Config->test_airPressure));	// air-pump
 					}
 				}
@@ -536,7 +543,6 @@ void ink_tick_10ms(void)
 					// --- reset values -----------
 					pRX_Config->ink_supply[isNo].test_airValve  	= PV_CLOSED;
 					pRX_Config->ink_supply[isNo].test_bleedValve 	= PV_CLOSED;
-					_set_shutoff_valve(FALSE);
 					pRX_Config->ink_supply[isNo].test_cylinderPres 	= 0;
 					pRX_Status->ink_supply[isNo].TestBleedLine_Phase = 1;
 					_TestBleedLine_Timer[isNo] = 0;
@@ -1747,13 +1753,32 @@ void _set_bleed_valve(int isNo, int state)
 			IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, PRESSURE_VALVE_OUT);
 	}
 }
- //--- _set_shutoff_valve -----------------------------------------
-static void _set_shutoff_valve(int state)
+
+//--- _set_ctc_shutoff_valve -----------------------------------------
+static void _set_ctc_shutoff_valve(int state)
 {
 	if (state)
-		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   SHUTOFF_VALVE_OUT);
+		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   CTC_SHUTOFF_VALVE_OUT);
 	else
-		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, SHUTOFF_VALVE_OUT);
+		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, CTC_SHUTOFF_VALVE_OUT);
+}
+
+//--- _set_ctc_bleed_valve -----------------------------------------
+static void _set_ctc_bleed_valve(int state)
+{
+	if (state)
+		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   CTC_BLEED_VALVE_OUT);
+	else
+		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, CTC_BLEED_VALVE_OUT);
+}
+
+//--- _set_ctc_flush_valve -----------------------------------------
+static void _set_ctc_flush_valve(int state)
+{
+	if (state)
+		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   CTC_FLUSH_VALVE_OUT);
+	else
+		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, CTC_FLUSH_VALVE_OUT);
 }
 
 //--- _trace_pump_ctrl ---------------------------------------------

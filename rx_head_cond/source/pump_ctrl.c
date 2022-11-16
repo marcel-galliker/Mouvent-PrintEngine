@@ -29,6 +29,8 @@
 #define VALVE_OFF		0
 #define VALVE_FLUSH		1
 #define VALVE_INK		2
+#define VALVE_BOTH		3
+
 
 #define CALIBRATION_NB_VAL		30
 
@@ -994,6 +996,11 @@ static void _set_valve(int state)
 		case VALVE_INK:		RX_Status.info.valve_flush 	= FALSE;
 							RX_Status.info.valve_ink	= TRUE;
 							break;
+		
+		case VALVE_BOTH:	RX_Status.info.valve_flush 	= TRUE;
+							RX_Status.info.valve_ink	= TRUE;
+							break;
+		
 		default:			RX_Status.info.valve_flush 	= FALSE;
 							RX_Status.info.valve_ink	= FALSE;
 	}

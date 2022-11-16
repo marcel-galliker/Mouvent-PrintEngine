@@ -1155,6 +1155,7 @@ namespace RX_DigiPrint.Services
 	        public SMsgHdr          hdr;
 	        public Int32			no;
 	        public Int32			valve;
+	        public Int32			value;
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

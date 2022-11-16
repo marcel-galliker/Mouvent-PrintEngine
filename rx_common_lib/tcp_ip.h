@@ -915,8 +915,9 @@ typedef struct SFluidTestCmd
 typedef struct SHeadTestCmd
 {
 	SMsgHdr			hdr;
-	int				no;
+	int				no;	// fluidNo
 	int				valve;
+	int				value;
 } SHeadTestCmd;
 
 //--- SFluidTestTable ----------------------------------
