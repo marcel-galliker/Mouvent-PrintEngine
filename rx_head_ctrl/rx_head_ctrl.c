@@ -179,6 +179,7 @@ static void _main_loop(void)
 {
 	int ticks;
 	int t_menu=0;
+    int max;
 	int menu;
 	int msg;
 	int cfgCnt=0, cnt;
@@ -197,8 +198,9 @@ static void _main_loop(void)
 		printing = ctrl_printing();
 		ticks = rx_get_ticks();
 		
-		cnt = fpga_cfg_cnt();		
-		if (printing && cnt==cfgCnt && ticks-time0>100) Error(WARN, 0, "MAIN cycletime=%d ,t1=%d, t2=%d, t3=%d, t4=%d, t5=%d, t6=%d", ticks-time0, time1-time0, time2-time0, time3-time0, time4-time0, time5-time0, time6-time0); 
+		cnt = fpga_cfg_cnt();
+        max = (RX_HBConfig.printerType==printer_test_CTC)? 250 : 100;
+		if (printing && cnt==cfgCnt && ticks-time0>max) Error(WARN, 0, "MAIN cycletime=%d ,t1=%d, t2=%d, t3=%d, t4=%d, t5=%d, t6=%d", ticks-time0, time1-time0, time2-time0, time3-time0, time4-time0, time5-time0, time6-time0); 
 		cfgCnt = cnt;
 		
 		time0=ticks;

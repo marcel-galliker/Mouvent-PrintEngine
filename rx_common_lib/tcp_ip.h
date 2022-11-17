@@ -182,6 +182,8 @@
 #define CMD_SET_ROB_POS			0x01000109
 #define CMD_HEAD_ADJUST			0x0100010a
 #define CMD_PURGE_CLUSTER		0x0100010b
+#define CMD_TEST_HEATER			0x0100010C
+#define CMD_CTC_HEAD_CTRL_MODE	0x0100010D
 
 #define CMD_ENCODER_CFG			0x01000111
 #define REP_ENCODER_CFG			0x02000111
@@ -199,6 +201,9 @@
 
 #define CMD_ENCODER_DISABLE		0x01000119	// temporary disable the encoder input (CLEAF Splice)
 #define CMD_ENCODER_ENABLE		0x0100011a	// enable after temorary disable
+
+#define CMD_HEAD_ENCODER_FREQ	0x0100011b // set internal frequence
+
 
 #define CMD_ENCODER_SAVE_PAR	0x0100011c	// save correction parameters	
 #define CMD_ENCODER_SAVE_PAR_1	0x0100011d	// save correction parameters	
@@ -803,7 +808,8 @@ typedef struct SPrintFileCmd
 	UINT8		lengthUnit;	// see SPrintQueueItem.LengthUnit
 	UINT8		clearBlockUsed;
 	UINT8		wakeup;
-	char		filename[256];
+    UINT8		color;
+    char		filename[256];
 	char		dots[4];
 } SPrintFileCmd;
 

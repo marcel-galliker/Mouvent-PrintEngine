@@ -43,7 +43,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
         //--- _PrintSystem_PropertyChanged -----------------------------------------------
         private void _PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Console.WriteLine("_PrintSystem_PropertyChanged {0}", e.PropertyName);
+            // Console.WriteLine("_PrintSystem_PropertyChanged {0}", e.PropertyName);
             if (e.PropertyName.Equals("ColorCnt") || e.PropertyName.Equals("InkCylindersPerColor"))
             {
                 InkSupplyGrid.show_inkSupplies(_PrintSystem.ColorCnt * _PrintSystem.InkCylindersPerColor);

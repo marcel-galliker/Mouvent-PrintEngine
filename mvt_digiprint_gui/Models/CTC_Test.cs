@@ -1,6 +1,9 @@
 ﻿using RX_Common;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace RX_DigiPrint.Models
 {
@@ -47,7 +50,7 @@ namespace RX_DigiPrint.Models
 		public ObservableCollection<EN_State> State
 		{
 			get { return _State; }
-			set { SetProperty(ref _State, value); }
+			set { SetProperty(ref _State, value);}
 		}
 
 		//--- Start ----------------------------------------
@@ -65,7 +68,7 @@ namespace RX_DigiPrint.Models
 
 			for( int headNo=0; headNo<CTC_Test.HEADS; headNo++)
 			{
-				if (State[headNo]==CTC_Test.EN_State.running) State[headNo]=state;
+				if (State[headNo]==CTC_Test.EN_State.running) SetHeadState(headNo, state);
 			}
 		}
 		//--- SetResult -------------------------------
@@ -79,17 +82,15 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- SetHeadState -----------------------------
-		public void SetHeadState(int head, EN_State state)
+		public void SetHeadState(int head, EN_State state, [CallerMemberName] string name="", [CallerLineNumber] int line=-1)
 		{
-			RxBindable.Invoke(()=>
+			if (state==EN_State.failed) Console.WriteLine("{0}: Head[{1}] failed ({2}:{3})", RxGlobals.Timer.Ticks(), head, name, line);
+			State[head]=state;
+			if (state==EN_State.ok || state==EN_State.failed)
 			{
-				State[head]=state;
-				if (state==EN_State.ok || state==EN_State.failed)
-				{
-					if (Overall.State[head]==EN_State.undef) Overall.State[head]=state;
-					else if (state==EN_State.failed)		 Overall.State[head]=EN_State.failed;
-				}
-			});
+				if (Overall.State[head]==EN_State.undef) Overall.State[head]=state;
+				else if (state==EN_State.failed)		 Overall.State[head]=EN_State.failed;
+			}
 		}
 
 		//--- ResetState -------------------------------
@@ -109,6 +110,18 @@ namespace RX_DigiPrint.Models
 					else					 SetHeadState(head, EN_State.ok);
 				}
 			}
+		}
+
+		//--- Wait ----------------------------------------
+		static public void Wait(int time, Action<int> DisplayTimer)
+		{
+			while (time > 0)
+			{
+				DisplayTimer(time);
+				Thread.Sleep(1000);
+				time -= 1000;
+			}
+			DisplayTimer(0);
 		}
 	}
 }

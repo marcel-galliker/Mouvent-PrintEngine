@@ -480,9 +480,7 @@ void nios_test_stop(void)
 	_Cfg->test_lungPressure	= 0;
 	_Cfg->test_flush		= 0;
 	_Cfg->test_airPressure	= 0;
-	_Cfg->test_ctc_shutoffValve = 0;
-	_Cfg->test_ctc_bleedValve   = 0;
-	_Cfg->test_ctc_flushValve   = 0;
+	_Cfg->ctc_valves = 0;
 	for(isNo=0; isNo<NIOS_INK_SUPPLY_CNT; isNo++) 
 	{
 		_Cfg->ink_supply[isNo].test_airValve	= FALSE;
@@ -511,17 +509,11 @@ void nios_test_bleed_valve(int isNo, int value)
 	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = value;
 }
 
-//--- nios_test_valve --------------------------------------------------
-void nios_test_valve(int valve, int value)
+//--- nios_set_ctc_valve --------------------------------------------------
+void nios_set_ctc_valve(int valve, int state)
 {
-	Error(LOG, 0, "SET VALVE[%d]=%d", valve, value);
-	switch (valve)
-	{
-	case 1:	_Cfg->test_ctc_shutoffValve = value; break;
-	case 6: _Cfg->test_ctc_flushValve   = value; break;
-	case 7: _Cfg->test_ctc_bleedValve   = value; break;
-	default: break;
-	}
+    if (state)	 _Cfg->ctc_valves |=  (1<<valve);
+    else         _Cfg->ctc_valves &= ~(1<<valve);
 }
 
 //--- nios_test_ink_pump ----------------------------------------------
@@ -726,6 +718,7 @@ static void _display_status(void)
 				
 		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
 		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
+		term_printf("ctc valves:        ");	for (i=0; i<5; i++)                   term_printf("         %d  ", (_Stat->ctc_valves&(1<<i))!=0); term_printf("\n");
 		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error); term_printf("\n");
 		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("\n");

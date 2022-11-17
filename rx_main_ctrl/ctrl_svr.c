@@ -869,6 +869,18 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 	}
 }	
 
+//--- ctrl_send_head_ctc_CtrlMode -----------------------------------
+void ctrl_send_head_ctc_CtrlMode(int headNo, EnFluidCtrlMode ctrlMode)
+{
+	SFluidCtrlCmd cmd;
+	cmd.hdr.msgId	= CMD_HEAD_FLUID_CTRL_MODE;
+	cmd.hdr.msgLen	= sizeof(cmd);
+	cmd.no			= headNo%HEAD_CNT;
+	cmd.ctrlMode	= ctrlMode;
+        
+    sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
+}
+
 //--- _ctrl_check_stepper_in_purgeMode ----------------------------------------
 static int _ctrl_check_stepper_in_purgeMode(int headNo)
 {
@@ -1022,7 +1034,7 @@ int  ctrl_check_all_heads_in_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode
 	for (head=0; head<SIZEOF(RX_Config.headBoard)*MAX_HEADS_BOARD; head++)
 	{
 		pcfg = &RX_Config.headBoard[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD];
-		if (pcfg->enabled && pcfg->inkSupply==fluidNo)
+		if (pcfg->enabled && pcfg->inkSupply==fluidNo && RX_HBStatus[head / MAX_HEADS_BOARD].head[head % MAX_HEADS_BOARD].info.connected)
 		{
 			mode = RX_HBStatus[head/MAX_HEADS_BOARD].head[head%MAX_HEADS_BOARD].ctrlMode;
 			if ((_SingleHead[fluidNo]<0)  && (mode!=ctrlMode)) return FALSE;
@@ -1276,6 +1288,20 @@ void ctrl_set_cluster_no(SValue* pdata)
 		sok_send_2(&_HeadCtrl[pdata->no - 1].socket, CMD_CHANGE_CLUSTER_NO, sizeof(&pdata), pdata);
 }
 
+//--- ctrl_set_head_encoder_freq ----------------------------------------------
+void ctrl_set_head_encoder_freq(SValue* pdata)
+{
+	if (_HeadCtrl[pdata->no - 1].socket != INVALID_SOCKET)
+		sok_send_2(&_HeadCtrl[pdata->no - 1].socket, CMD_HEAD_ENCODER_FREQ, sizeof(SValue), pdata);
+}
+
+//--- ctrl_set_head_heater_test ----------------------------------------------
+void ctrl_set_head_heater_test(SValue* pdata)
+{
+	if (_HeadCtrl[pdata->no - 1].socket != INVALID_SOCKET)
+		sok_send_2(&_HeadCtrl[pdata->no - 1].socket, CMD_TEST_HEATER, sizeof(SValue), pdata);
+}
+
 //--- ctrl_reset_cond ------------------------------
 void ctrl_reset_cond(void)
 {
@@ -1318,9 +1344,9 @@ void ctrl_send_head_valve_test(SHeadTestCmd *pmsg)
 //--- ctrl_send_head_meniscus_chk --------------------------------------
 void ctrl_send_head_meniscus_chk(SHeadTestCmd *pmsg)
 {
-	for (int head = 0; head < SIZEOF(_HeadCtrl); head+=HEAD_CNT)
+	for (int head = 0; head < SIZEOF(_HeadCtrl); head++)
     {
         if (_HeadCtrl[head].socket && _HeadCtrl[head].socket != INVALID_SOCKET)
-			sok_send(&_HeadCtrl[head/HEAD_CNT].socket, pmsg);
+			sok_send(&_HeadCtrl[head].socket, pmsg);
     }    
 }

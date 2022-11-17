@@ -410,6 +410,16 @@ namespace RX_DigiPrint.Models
             set { Changed |= SetProperty(ref _Copies, value); }
         }
 
+        //--- Color -------------------------------------
+
+        private int _Color=-1;
+
+        public int Color
+        {
+            get { return _Color; }
+            set { _Color = value; }
+        }
+
         //--- Property Passes ---------------------------------------
         private int _Passes;
         public int Passes
@@ -1168,6 +1178,7 @@ namespace RX_DigiPrint.Models
             msg.item.singlePage     = Convert.ToByte(SinglePage);
             msg.item.lengthUnit     = LengthUnit;
             msg.item.copies         = Copies;
+            msg.item.color          = Color;
             msg.item.testMessage    = TestMessage;
             if(SrcPages>1)
             {

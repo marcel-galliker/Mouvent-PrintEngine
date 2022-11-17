@@ -313,7 +313,8 @@ typedef struct SPrintQueueItem
 	INT32	lastPage;
 	INT8	singlePage;  // used?
 	INT32	copies;
-	INT8	collate;
+    INT32	color;
+    INT8	collate;
 	INT8	variable;	// variable data job
 
 	UINT8	state;
@@ -356,6 +357,7 @@ typedef struct SPrintQueueItem
 			#define PQ_TEST_SA_ALIGNMENT	10
 			#define PQ_TEST_SA_DENSITY		11
 			#define PQ_TEST_SA_REGISTER		12
+			#define PQ_TEST_SUSTAIN			13
 
 	INT32	pageWidth;	// µm
 	INT32	pageHeight;	// µm
@@ -839,7 +841,8 @@ typedef struct SHeadStat
 	//--- ink system ---------------------------------
 	UINT32			tempHead;
 	UINT32			tempCond;
-	UINT32			tempSetpoint;
+    UINT32			tempHeater;
+    UINT32			tempSetpoint;
 	INT32			presIn;
 	INT32			presIn_max;
 	INT32			presIn_diff;
@@ -907,6 +910,7 @@ typedef struct SHeadBoardStat
 	INT32		tempFpga;
 	UINT32		flow;
     UINT32		cooler_temp;
+    INT32		fp_voltage;
 	
 	//--- warnings/errors ----------------
 	SHeadInfo		info;

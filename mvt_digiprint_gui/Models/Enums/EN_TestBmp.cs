@@ -31,7 +31,8 @@ namespace RX_DigiPrint.Models.Enums
                     _List.Add(new RxEnum<ETestImage>( ETestImage.angle_overlap,   "Angle Overlapped"));
                     _List.Add(new RxEnum<ETestImage>( ETestImage.angle_separated, "Angle Separated"));
                     _List.Add(new RxEnum<ETestImage>( ETestImage.grid,            "Grid"));
-				}
+                    _List.Add(new RxEnum<ETestImage>(ETestImage.sustain,          "Sustain"));
+                }
             }
         }
 

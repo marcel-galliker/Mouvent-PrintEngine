@@ -325,6 +325,7 @@ void fluid_set_config(void)
 		{
 			cfg.printerType = RX_Config.printer.type;
 			cfg.lung_enabled = (i==0);
+			if (RX_Config.printer.type == printer_test_CTC) cfg.lung_enabled = FALSE;
 			for (n=0; n<INK_PER_BOARD; n++) 
 			{				                
 				memcpy(&iscfg, &RX_Config.inkSupply[i*INK_PER_BOARD+n], sizeof(iscfg));
@@ -1248,8 +1249,6 @@ void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 //        ctrlMode == ctrl_prepareToPrint && (rx_def_is_scanning(RX_Config.printer.type) || (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.cln_used)))
 	if (ctrlMode == ctrl_prepareToPrint)
     {
-		Error(LOG, 0, "ctrl_prepareToPrint no=%d",  no);
-		
         if (rx_def_is_lb(RX_Config.printer.type) && RX_StepperStatus.cln_used)
 		{
 			Error(LOG, 0, "stepper[%d].rob_fct_cap",  step_stepper_to_fluid(no));
@@ -1432,13 +1431,13 @@ void fluid_send_pressure(int no, INT32 pressure)
 //--- fluid_send_valve ----------------------------
 void fluid_send_valve(SHeadTestCmd *pmsg)
 {
-	sok_send(&_FluidThreadPar[pmsg->no].socket, pmsg);
+	sok_send(&_FluidThreadPar[0].socket, pmsg);
 }
 
 //--- fluid_send_test ----------------------------------
 void fluid_send_test(int no, SFluidTestCmd *pmsg)
 {
-	sok_send(&_FluidThreadPar[no].socket, pmsg);
+	sok_send(&_FluidThreadPar[no/INK_PER_BOARD].socket, pmsg);
 }
 
 //--- fluid_send_tara -------------------------------------------

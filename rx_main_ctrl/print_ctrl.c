@@ -312,7 +312,7 @@ static void _send_head_info(void)
 			len += sprintf(&str[len], "%s-%d                     %s\n", RX_ColorNameShort(color), n+1, time);
 			len += sprintf(&str[len], "cl# %06d  printed %12s l\n", RX_HBStatus[headNo/MAX_HEADS_BOARD].clusterNo, value_str3(pstat->printed_ml	));
 			len += sprintf(&str[len], "s# %d-%02d\n", pinfo->serialNo/100, pinfo->serialNo%100);
-            if (RX_TestImage.testImage != PQ_TEST_SA_DENSITY)
+            if (RX_TestImage.testImage != PQ_TEST_SA_DENSITY && RX_TestImage.testImage != PQ_TEST_SUSTAIN)
             {
                 len += sprintf(
                     &str[len], "volt %d / straight %d / uniform %d\n",
@@ -324,8 +324,7 @@ static void _send_head_info(void)
                     len += sprintf(&str[len], "  %d", pinfo->badJets[bad]);
                 }
                 len += sprintf(&str[len], "\n");
-                len +=
-                    sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n",
+                len += sprintf(&str[len], "Dots=%s / Men=%d.%d / Pump=%d.%d\n",
                             RX_TestImage.dots, pstat->meniscus / 10,
                             abs(pstat->meniscus) % 10, pstat->pumpFeedback / 10,
                             pstat->pumpFeedback % 10);
@@ -344,7 +343,7 @@ static void _send_head_info(void)
 				}
 				len += sprintf(&str[len], "\n");
 			}
-//			printf("TestData[%d]: >>%s<<\n", n, str);
+            //			printf("TestData[%d]: >>%s<<\n", n, str);
 			spool_send_test_data(headNo, str);
 			if (file) fprintf(file, "%s\n", str);
 		}
@@ -361,7 +360,7 @@ static void _load_test(void)
 	// see also gui_msg.c::_do_test_start
 	if (((int)RX_PrinterStatus.sentCnt) < (int)(RX_TestImage.copies*RX_TestImage.scans))
 	{
-		if (_Scanning)	RX_TestImage.id.scan++;
+        if (_Scanning)	RX_TestImage.id.scan++;
 		else			RX_TestImage.id.copy++;
 		if (RX_TestImage.id.copy==0) RX_TestImage.id.copy=1;
 		ret=bmp_get_size(RX_TestImage.filepath, &width, &height, &RX_TestImage.srcBitsPerPixel, &memsize);
@@ -395,8 +394,8 @@ static void _load_test(void)
 			item.lengthUnit  = PQ_LENGTH_COPIES;
 			item.scanMode    = RX_TestImage.scanMode;
 			item.srcPages    = 1;
-			strcpy(item.dots, RX_TestImage.dots);
-			clearBlockUsed	 = (RX_TestImage.testImage==PQ_TEST_SCANNING) || ((int)RX_PrinterStatus.sentCnt+1) >= (int)(RX_TestImage.copies*RX_TestImage.scans);
+            item.color		 = RX_TestImage.color;
+			clearBlockUsed	 = (RX_TestImage.testImage==PQ_TEST_SCANNING) || (RX_TestImage.testImage==PQ_TEST_SUSTAIN)|| ((int)RX_PrinterStatus.sentCnt+1) >= (int)(RX_TestImage.copies*RX_TestImage.scans);
 			spool_print_file(&RX_TestImage.id, RX_TestImage.filepath, 0, height, &item, clearBlockUsed);	
 		}
 	}
@@ -534,6 +533,10 @@ static int _print_next(void)
 												RX_TestImage.scansTotal = RX_TestImage.copies*RX_TestImage.scans;
 											 }
 											 break;
+                                             
+				case PQ_TEST_SUSTAIN:		 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "sustain.tif");
+											 break;
+                                             
 				case PQ_TEST_SA_ALIGNMENT:	 strcpy(RX_TestImage.filepath, PATH_BIN_SPOOLER "SA_Alignment.tif");
 											 if (rx_def_is_tx(RX_Config.printer.type))
 											 {

@@ -18,6 +18,7 @@ namespace RX_DigiPrint.Models
         static UInt32[] _ClusterNo          = new UInt32[12];
         static Int32[] _Cooler_Pressure     = new Int32[12];
         static UInt32[] _Cooler_Temp        = new UInt32[12];
+        static Int32[] _FP_Voltage          = new Int32[12];
 
         //--- constructor -----------------------------
         public HeadStatList()
@@ -44,7 +45,7 @@ namespace RX_DigiPrint.Models
             {            
                 SetItemCount(no+1);
                 _MyList[no].SetItem(no, item, tempFpga, flow);
-                _MyList[no].Connected = _BoardConnected[no/4];
+               // _MyList[no].Connected = _BoardConnected[no/4];
                 _MyList[no].Meniscus_Disabled = _MeniscusDisabled[no / 4];
             }
             );
@@ -103,6 +104,20 @@ namespace RX_DigiPrint.Models
                 foreach (HeadStat item in _MyList)
                 {
                     if ((item.HeadNo / 4) == boardNo) item.Cooler_Temp = cooler_temp;
+                }
+            }
+            );
+        }
+
+        public void FP_Voltage(int boardNo, Int32 voltage)
+        {
+            if (boardNo < _FP_Voltage.Length) _FP_Voltage[boardNo] = voltage;
+            if (_MyList == null) return;
+            RxBindable.Invoke(() =>
+            {
+                foreach (HeadStat item in _MyList)
+                {
+                    if ((item.HeadNo / 4) == boardNo) item.FP_Voltage = voltage;
                 }
             }
             );

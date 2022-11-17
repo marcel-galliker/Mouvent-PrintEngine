@@ -1979,7 +1979,7 @@ static int _check_encoder_tel_freq(void)
 {
 	static UINT32 _enc_tel_cnt=0;
 	static int   _cnt=0;
-	if (FpgaCfg.encoder->cmd & ENC_ENABLE && RX_HBConfig.printerType != printer_Dropwatcher)
+    if (FpgaCfg.encoder->cmd & ENC_ENABLE && RX_HBConfig.printerType != printer_Dropwatcher && RX_HBConfig.printerType != printer_test_CTC)
 	{
 		_EncoderTelFreq = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
 		if (_EncoderTelFreq_delay>0) 
@@ -1987,7 +1987,7 @@ static int _check_encoder_tel_freq(void)
 			_EncoderTelFreq_delay--;
 			_cnt=0;
 		}
-		else if (_EncoderTelFreq<500000 && RX_HBConfig.printerType!=printer_test_CTC)
+        else if (_EncoderTelFreq < 500000)
 		{
 			if (++_cnt>=3) ErrorFlag(ERR_ABORT, (UINT32*)&RX_HBStatus[0].err,  err_encoder_not_conected,  0, "Encoder slow communication");
 		} 

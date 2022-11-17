@@ -591,6 +591,7 @@ static void _nios_copy_status(void)
 {
 	memcpy(&RX_NiosStat, _NiosStat, sizeof(RX_NiosStat));
 	RX_HBStatus->flow = RX_NiosStat.cooler_pressure;
+    RX_HBStatus->fp_voltage = RX_NiosStat.u_firepulse;
 	for (int head=0; head < MAX_HEADS_BOARD; head++)
 	{
 		RX_HBStatus->head[head].tempHead = RX_NiosStat.head_temp[head];

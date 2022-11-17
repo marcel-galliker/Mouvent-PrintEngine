@@ -143,6 +143,7 @@ namespace RX_DigiPrint.Services
         SA_Alignment,           // 10
         SA_Density,             // 11
         SA_Register,            // 12
+        sustain,                // 13
     };
 
     public enum EFluidCtrlMode : int
@@ -433,13 +434,16 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_SET_ROB_POS         = 0x01000109;
         public const UInt32 CMD_HEAD_ADJUST         = 0x0100010a;
         public const UInt32 CMD_PURGE_CLUSTER       = 0x0100010b;
-        public const UInt32 CMD_HEAD_OUT_OF_RANGE   = 0x0100010c;
+        // public const UInt32 CMD_HEAD_OUT_OF_RANGE   = 0x0100010c;
+        public const UInt32 CMD_TEST_HEATER         = 0x0100010c;
+        public const UInt32 CMD_CTC_HEAD_CTRL_MODE  = 0x0100010d;
 
         public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
         public const UInt32 REP_ENCODER_CFG			= 0x02000111;
 
         public const UInt32 CMD_ENCODER_STAT		= 0x01000112;
         public const UInt32 REP_ENCODER_STAT		= 0x02000112;
+        public const UInt32 CMD_HEAD_ENCODER_FREQ   = 0x0100011b; // set internal frequence
 
         public const UInt32 CMD_ENCODER_SAVE_PAR	= 0x0100011c;
         public const UInt32 CMD_ENCODER_SAVE_PAR_1	= 0x0100011d;
@@ -789,6 +793,7 @@ namespace RX_DigiPrint.Services
 	        public Int32	lastPage;
 	        public byte	    singlePage;  // used?
 	        public Int32    copies;
+            public Int32    color;
 	        public byte	    collate;
 	        public byte	    variable;
 
@@ -1253,6 +1258,7 @@ namespace RX_DigiPrint.Services
 	        //--- ink system ---------------------------------
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
+            public UInt32           tempHeater;
             public UInt32           tempSetpoint;
 	        public Int32			presIn;
 	        public Int32			presIn_max;
@@ -1299,6 +1305,7 @@ namespace RX_DigiPrint.Services
             public Int32        tempFpga;
             public Int32        flow;
             public UInt32       cooler_temp;
+            public Int32        fp_voltage;
  
             //--- warnings/errors ----------------
             public UInt32		info;

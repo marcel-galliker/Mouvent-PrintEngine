@@ -186,9 +186,7 @@ static void   _set_pump_speed(int isNo, int speed);
 static UINT32 _get_pump_ticks(int isNo);
 static void   _set_air_valve(int isNo, int newState);
 static void   _set_bleed_valve(int isNo, int newState);
-static void   _set_ctc_shutoff_valve(int state);
-static void   _set_ctc_bleed_valve(int state);
-static void   _set_ctc_flush_valve(int state);
+static void   _set_ctc_valves(int state);
 
 // static void _calibrate_inkpump(UINT32 isNo, UINT32 timeout);
 static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode);
@@ -280,13 +278,6 @@ void ink_tick_10ms(void)
 		if (pRX_Config->printerType==printer_cleaf) _LungVacc = DEGASSING_VACCUUM_CLEAF;
 		else if (!(pRX_Status->ink_supply[isNo].error & err_heater_board)) _LungVacc = DEGASSING_VACCUUM_UV;
 
-		if (pRX_Config->printerType==printer_test_CTC)
-		{
-			_set_ctc_shutoff_valve(pRX_Config->test_ctc_shutoffValve);
-			_set_ctc_bleed_valve  (pRX_Config->test_ctc_bleedValve);
-			_set_ctc_flush_valve  (pRX_Config->test_ctc_flushValve);
-		}
-
 		//---  check if message received from printhead ---------------------
 		if(pRX_Config->ink_supply[isNo].alive != _InkSupply[isNo].alive)
 		{
@@ -323,6 +314,8 @@ void ink_tick_10ms(void)
 		pRX_Status->duty_degasser = _DutyDegasserCalcul;
 	}
 
+	if (pRX_Config->printerType==printer_test_CTC)
+		_set_ctc_valves(pRX_Config->ctc_valves);
 	for(isNo = 0 ; isNo < NIOS_INK_SUPPLY_CNT ; isNo++)
 	{
 		if (pRX_Config->ink_supply[isNo].ctrl_mode == ctrl_purge4ever)
@@ -1704,7 +1697,7 @@ static int _degass_ctrl(void)
 		if(_DutyDegasserTimeClogged >= 60000) pRX_Status->ink_supply[0].error |= err_degasser_clogged;
 	}
 
-	return (pRX_Status->vacuum_solenoid);
+	return (degassing && pRX_Status->vacuum_solenoid);
 }
 
 //--- _set_air_valve -----------------------------------------
@@ -1753,32 +1746,22 @@ void _set_bleed_valve(int isNo, int state)
 			IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, PRESSURE_VALVE_OUT);
 	}
 }
-
-//--- _set_ctc_shutoff_valve -----------------------------------------
-static void _set_ctc_shutoff_valve(int state)
+ //--- _set_ctc_valves -----------------------------------------
+static void _set_ctc_valves(int state)
 {
-	if (state)
-		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   CTC_SHUTOFF_VALVE_OUT);
-	else
-		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, CTC_SHUTOFF_VALVE_OUT);
-}
-
-//--- _set_ctc_bleed_valve -----------------------------------------
-static void _set_ctc_bleed_valve(int state)
-{
-	if (state)
-		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   CTC_BLEED_VALVE_OUT);
-	else
-		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, CTC_BLEED_VALVE_OUT);
-}
-
-//--- _set_ctc_flush_valve -----------------------------------------
-static void _set_ctc_flush_valve(int state)
-{
-	if (state)
-		IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   CTC_FLUSH_VALVE_OUT);
-	else
-		IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, CTC_FLUSH_VALVE_OUT);
+	int change = pRX_Status->ctc_valves^state;
+	int i;
+	for(i=0; i<5; i++)
+	{
+		if (change&(1<<i))
+		{
+			if(state&(1<<i))
+				IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   (OUTPUT1_OUT<<i));
+			else
+				IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, (OUTPUT1_OUT<<i));
+		}
+	}
+	pRX_Status->ctc_valves = state;
 }
 
 //--- _trace_pump_ctrl ---------------------------------------------

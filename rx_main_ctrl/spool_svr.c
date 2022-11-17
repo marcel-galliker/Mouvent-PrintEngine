@@ -513,6 +513,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 	msg.clearBlockUsed	= clearBlockUsed;
 	msg.wakeup			  = pitem->wakeup;
 	msg.penetrationPasses = pitem->penetrationPasses;
+    msg.color			  = pitem->color;
 	
 	strncpy(msg.filename, filename, sizeof(msg.filename));
 	strncpy(msg.dots,     pitem->dots, sizeof(msg.dots));
@@ -548,7 +549,7 @@ int spool_print_file(SPageId *pid, const char *filename, INT32 offsetWidth, INT3
 		{
 			msg.printMode = PM_TEST_SINGLE_COLOR;
 		}
-		else if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS || RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT || RX_TestImage.testImage==PQ_TEST_SA_DENSITY  || RX_TestImage.testImage==PQ_TEST_SA_REGISTER) 
+		else if (RX_TestImage.testImage==PQ_TEST_JETS || RX_TestImage.testImage==PQ_TEST_JET_NUMBERS || RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT || RX_TestImage.testImage==PQ_TEST_SA_DENSITY  || RX_TestImage.testImage==PQ_TEST_SA_REGISTER || RX_TestImage.testImage==PQ_TEST_SUSTAIN) 
 		{
 			msg.printMode = PM_TEST_JETS;
 		}

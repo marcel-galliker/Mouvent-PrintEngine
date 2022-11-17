@@ -422,6 +422,11 @@ void pump_tick_10ms(void)
 						_set_valve(RX_Config.test_Valve);
 						RX_Status.mode = RX_Config.mode; 
 						break;
+	
+		case ctrl_test_heater:
+						_set_pump_speed(0);
+						RX_Status.mode = RX_Config.mode;
+						break;
 		
         //--- CALIBRATION --------------------------------------------
 	/*	case ctrl_cal_start:	// Initialize variables

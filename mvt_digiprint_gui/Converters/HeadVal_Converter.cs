@@ -18,6 +18,11 @@ namespace RX_DigiPrint.Converters
 
             try
             {
+            	/*
+                int val= (int)TcpIp.INVALID_VALUE;
+                if (value is int) val = (int)value;
+                else if (value is uint) val = (int)value;
+                */
                 int val = System.Convert.ToInt32(value);
                 if (val == TcpIp.INVALID_VALUE) return "----";
                 else if (val == TcpIp.VAL_UNDERFLOW) return "˅˅˅˅";
@@ -89,7 +94,8 @@ namespace RX_DigiPrint.Converters
 
             try
             {
-                int val =  System.Convert.ToInt32(value);
+                int val = System.Convert.ToInt32(value);
+             //   int val = (int)value;
                 if (val==TcpIp.INVALID_VALUE)  return "----";
                 else if (val==TcpIp.VAL_UNDERFLOW) return "˅˅˅˅";
                 else if (val==TcpIp.VAL_OVERFLOW)  return "˄˄˄˄";
@@ -125,6 +131,7 @@ namespace RX_DigiPrint.Converters
 
             try
             {
+              //  int val = System.Convert.ToInt32((int)value);
                 int val = System.Convert.ToInt32(value);
                 if (val == TcpIp.INVALID_VALUE) return "----";
                 else if (val == TcpIp.VAL_UNDERFLOW) return "˅˅˅˅";

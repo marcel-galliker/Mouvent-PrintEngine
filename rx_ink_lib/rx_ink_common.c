@@ -145,7 +145,8 @@ char *FluidCtrlModeStr(EnFluidCtrlMode mode)
 	case ctrl_test_watchdog:		return "WATCHDOG";	//0x10000,
 	case ctrl_test:					return "TEST";		//0x10001,
 	case ctrl_test_valve:			return "TEST/V";	//0x10002,
-    	
+    case ctrl_test_heater:			return "TEST/H";	//0x10003,
+	
 //	case ctrl_heater_error:	return "HEAT ERR";  //0x12346,
 		
 	default:				sprintf(str, "0x%04x", mode); return str;

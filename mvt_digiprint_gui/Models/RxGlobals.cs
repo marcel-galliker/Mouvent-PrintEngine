@@ -7,7 +7,7 @@ using RX_DigiPrint.Views.LB702WBView;
 using RX_DigiPrint.Views.LH702View;
 using RX_DigiPrint.Views.PrintQueueView;
 using RX_DigiPrint.Views.UserControls;
-using RX_DigiPrint.Views.ConditionerTextCenterView;
+using RX_DigiPrint.Views.ConditionerTestCenterView;
 
 using System.Windows;
 

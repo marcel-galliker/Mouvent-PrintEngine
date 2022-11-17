@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace RX_DigiPrint.Views.ConditionerTextCenterView
+namespace RX_DigiPrint.Views.ConditionerTestCenterView
 {
 	/// <summary>
 	/// Interaction logic for CTC_Commands.xaml

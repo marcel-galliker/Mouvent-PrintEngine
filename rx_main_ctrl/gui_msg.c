@@ -80,6 +80,8 @@ static void _do_get_ink_def		(RX_SOCKET socket);
 static void _do_get_density		(RX_SOCKET socket, SDensityMsg *pmsg);
 static void _do_set_density		(RX_SOCKET socket, SDensityMsg *pmsg);
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
+static void _do_ctc_head_CtrlMode (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
+
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
 static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue*		pmsg);
@@ -186,6 +188,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_ENCODER_SAVE_PAR_1:enc_save_par(1);													break;
 
 		case CMD_HEAD_FLUID_CTRL_MODE: _do_head_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break;
+		case CMD_CTC_HEAD_CTRL_MODE:   _do_ctc_head_CtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break; 
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);						break;
         case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
@@ -238,7 +241,8 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_CHANGE_CLUSTER_NO: ctrl_set_cluster_no((SValue*) pdata);							break;
         case CMD_RESET_COND:		ctrl_reset_cond();												break;
             
-            
+		case CMD_HEAD_ENCODER_FREQ:  ctrl_set_head_encoder_freq((SValue*)pdata);					break;
+		case CMD_TEST_HEATER:		 ctrl_set_head_heater_test((SValue*)pdata);						break;
 			
 		default: Error(WARN, 0, "Unknown Command 0x%08x", phdr->msgId);
 		}
@@ -943,6 +947,12 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 	else ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, TRUE, TRUE);
 }
 
+//--- _do_ctc_head_CtrlMode -------------------------------------------------------
+static void _do_ctc_head_CtrlMode (RX_SOCKET socket, SFluidCtrlCmd* pmsg)
+{
+	ctrl_send_head_ctc_CtrlMode(pmsg->no, pmsg->ctrlMode);
+}
+
 //--- _do_fluid_purge_cluster -----------------------------------------
 static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue *pmsg)
 {
@@ -955,10 +965,13 @@ static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue *pmsg)
 //--- _do_fluid_test -----------------------------------------------------------
 static void _do_fluid_test(RX_SOCKET socket, SFluidTestCmd *pmsg)
 {
+	fluid_send_test(pmsg->no, pmsg);
+	/*
 	if (RX_Config.headsPerColor > 0 && pmsg->no % RX_Config.headsPerColor == 0)
 	{
 		fluid_send_test(pmsg->no/RX_Config.headsPerColor, pmsg);
 	}
+	*/
 }
 
 //--- _do_head_valve_test ------------------------------------------------------
@@ -1208,21 +1221,23 @@ static void _do_test_start	(RX_SOCKET socket, SPrintQueueEvt* pmsg)
 		RX_TestImage.scans  = RX_Config.inkSupplyCnt;
 	}
 	if (rx_def_is_lb(RX_Config.printer.type))
-    { 
-        if (RX_TestImage.testImage==PQ_TEST_JETS 
-		||  RX_TestImage.testImage==PQ_TEST_JET_NUMBERS
-		||  RX_TestImage.testImage==PQ_TEST_DENSITY
-		||  RX_TestImage.testImage==PQ_TEST_FULL_ALIGNMENT
-		||  RX_TestImage.testImage==PQ_TEST_SA_ALIGNMENT
-		||  RX_TestImage.testImage==PQ_TEST_SA_DENSITY
-		)
-		{
-            RX_TestImage.scans=RX_Config.colorCnt;
-		}
-		else if (RX_TestImage.testImage==PQ_TEST_SA_REGISTER)
-		{
-            RX_TestImage.scans=RX_Config.colorCnt-1;
-		}
+    {
+        if (RX_TestImage.testImage == PQ_TEST_JETS ||
+            RX_TestImage.testImage == PQ_TEST_JET_NUMBERS ||
+            RX_TestImage.testImage == PQ_TEST_DENSITY ||
+            RX_TestImage.testImage == PQ_TEST_FULL_ALIGNMENT ||
+            RX_TestImage.testImage == PQ_TEST_SA_ALIGNMENT ||
+            RX_TestImage.testImage == PQ_TEST_SA_DENSITY)
+        {
+            RX_TestImage.scans = RX_Config.colorCnt;
+        }
+        else if (RX_TestImage.testImage == PQ_TEST_SA_REGISTER)
+        {
+            RX_TestImage.scans = RX_Config.colorCnt - 1;
+        }
+        else if (RX_TestImage.testImage == PQ_TEST_SUSTAIN)
+        {
+        }
     }
 	if (RX_TestImage.scans<1) RX_TestImage.scans=1;
 //	RX_TestImage.scanMode = PQ_SCAN_STD;

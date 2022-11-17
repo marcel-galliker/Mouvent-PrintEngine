@@ -52,6 +52,7 @@ namespace RX_DigiPrint.Views.UserControls
             _SetButtonStates();
 
             RxGlobals.PrinterStatus.PropertyChanged += PrinterStatusChanged;
+            RxGlobals.PrintSystem.PropertyChanged += PrintSystem_PropertyChanged;
             RxGlobals.Plc.PropertyChanged += Plc_PropertyChanged;
             RxGlobals.Timer.TimerFct += Timer;
         }
@@ -59,6 +60,12 @@ namespace RX_DigiPrint.Views.UserControls
         //--- SetButtonStates -------------------------------------------------
         private void _SetButtonStates()
         {
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_CTC)
+            {
+                Button_Start.Visibility = Visibility.Collapsed;
+                Button_Stop.Visibility = Visibility.Collapsed;
+            }
+
             //--- checks ---------------------------------------------------------
             // Button_Start.IsChecked  = RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing;
             if (RxGlobals.PrinterStatus.PrintState==EPrintState.ps_printing)
@@ -116,6 +123,13 @@ namespace RX_DigiPrint.Views.UserControls
         {
             _SetButtonStates();
         }
+
+                //--- PrintSystem_PropertyChanged --------------------------
+        void PrintSystem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("PrinterType")) _SetButtonStates();
+        }
+
 
         //--- Plc_PropertyChanged ---------------------------------------                                                                           
         private void Plc_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

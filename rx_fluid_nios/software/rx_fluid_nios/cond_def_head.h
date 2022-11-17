@@ -206,8 +206,9 @@ typedef struct SConditionerCfg_mcu
     INT32	purgeDelayTime;			// ms delay time for the head
     INT32	purge_pos_y;			// um the position of the cleaning robot referenced to the head 0	
 	INT32	test_Valve;
-		
-	//--- status of fluid system -------------------
+    INT32	test_time;
+
+    //--- status of fluid system -------------------
     INT32   cylinderPressure;
     INT32   cylinderPressureSet;
     INT32   fluidErr;

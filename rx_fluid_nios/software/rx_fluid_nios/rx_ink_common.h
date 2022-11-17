@@ -298,6 +298,7 @@ typedef enum EnFluidCtrlMode
     ctrl_test_watchdog = 0x10000,
     ctrl_test, 					// 0x10001
     ctrl_test_valve, 			// 0x10002
+    ctrl_test_heater, 			// 0x10003
 
     ctrl_toggle_meniscus = 0x20000,
 } EnFluidCtrlMode;

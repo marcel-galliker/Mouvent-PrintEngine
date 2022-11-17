@@ -187,7 +187,7 @@ namespace RX_DigiPrint.Models
                 if (!list[n].Equals(""))
                 {
                     string[] val = list[n].Split('=');
-                    if (val[0].Equals("STA_MACHINE_STATE"))
+                    if (val.Length>1 && val[0].Equals("STA_MACHINE_STATE"))
                     {
                         EnPlcState state=(EnPlcState)Rx.StrToInt32(val[1]);
                         InReferencing = (state==EnPlcState.plc_referencing);

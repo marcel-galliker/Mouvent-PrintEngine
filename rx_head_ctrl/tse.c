@@ -272,8 +272,6 @@ static void _check_udp_speed(int ticks)
 //--- tse_check_errors ----------------------------
 int tse_check_errors(int ticks, int menu)
 {
-	if (RX_HBConfig.printerType == printer_test_CTC) return REPLY_OK;
-
 	int i;		
 	for (i=0; i<SIZEOF(_TSE); i++)
 	{
@@ -303,10 +301,13 @@ int tse_check_errors(int ticks, int menu)
 	//			if (_TseErrors[i].remote_fault)				ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x00, 0, "TSE: Remote fault occurred on UDP %d", i);
 			    if (_TseErrors[i].link_down_fault)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x01, 0, "TSE: Link-down occurred on UDP %d", i);
 			    if (_TseErrors[i].parallel_detect_fault)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x02, 0, "TSE: Parallel detect fault occurred on UDP %d", i);
-				if (_TseErrors[i].receive_error)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x04,	0, "TSE: Receive error occurred on UDP %d", i);			
+				if (_TseErrors[i].receive_error)			ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x04,	0, "TSE: Receive error occurred on UDP %d", i);
 
-			    if (_Speed[i]==0)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x08, 0, "UDP %d not connected", i);
-			    if (_Speed[i]==100) ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x10, 0, "UDP %d only at 100 Mbit/s (needs 1 Gbit/s)", i);
+                if (RX_HBConfig.printerType != printer_test_CTC)
+                {
+	                if (_Speed[i]==0)	ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x08, 0, "UDP %d not connected", i);
+				    if (_Speed[i]==100) ErrorFlag(ERR_CONT, &_TseErrors[i].flags, 0x10, 0, "UDP %d only at 100 Mbit/s (needs 1 Gbit/s)", i);
+                }
 				    
 			    if (RX_HBConfig.printerType==printer_DP803)
 			    {

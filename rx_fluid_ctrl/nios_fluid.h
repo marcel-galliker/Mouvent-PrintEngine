@@ -49,5 +49,6 @@ void nios_test_ink_pump		(int isNo, int pressure);
 void nios_test_vacuum		(int pressure);
 void nios_test_air_pressure	(int pressure);
 void nios_test_flush		(int power);
-void nios_test_valve(int valve, int value);
+void nios_set_ctc_valve     (int valve, int state);
+
 int  nios_is_heater_connected(void);

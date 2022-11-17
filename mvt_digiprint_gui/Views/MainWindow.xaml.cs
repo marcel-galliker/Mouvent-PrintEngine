@@ -120,7 +120,7 @@ namespace RX_DigiPrint.Views
 		{
             if (RxGlobals.User.UserType!=_UserType)
 			{
-                _ShowTab((RxGlobals.User.UserType >= EUserType.usr_supervisor), TabAlignment, AddLocationHint.Last);
+                _ShowTab((RxGlobals.User.UserType >= EUserType.usr_supervisor) && RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_test_CTC, TabAlignment, AddLocationHint.Last);
                 _ShowTab((RxGlobals.User.UserType >= EUserType.usr_service), TabNetwork, AddLocationHint.Last);
                 _UserType = RxGlobals.User.UserType;
 			}
@@ -273,7 +273,10 @@ namespace RX_DigiPrint.Views
 
                     case EPrinterType.printer_test_CTC:
                         MachineName.Text = "Conditioner Test Center";
-                        TabMachine.Content = new ConditionerTextCenterView.CTC_View();
+                        TabMachine.Content = new ConditionerTestCenterView.CTC_View();
+                        _ShowTab(false, TabMachine, AddLocationHint.After);
+                        _ShowTab(false, TabSetupAssist, AddLocationHint.After);
+                        _ShowTab(false, TabLog, AddLocationHint.After);
                         break;
 
                     case EPrinterType.printer_Dropwatcher:

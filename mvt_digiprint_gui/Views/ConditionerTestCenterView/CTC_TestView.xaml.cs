@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Xml;
 
-namespace RX_DigiPrint.Views.ConditionerTextCenterView
+namespace RX_DigiPrint.Views.ConditionerTestCenterView
 {
 	/// <summary>
 	/// Interaction logic for CTC_TestView.xaml
@@ -19,7 +19,6 @@ namespace RX_DigiPrint.Views.ConditionerTextCenterView
 		public CTC_TestView()
 		{
 			InitializeComponent();
-
 		}
 
 		//--- UserControl_IsVisibleChanged ------------------------------

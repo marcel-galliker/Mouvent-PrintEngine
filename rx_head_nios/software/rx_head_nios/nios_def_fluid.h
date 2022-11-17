@@ -110,9 +110,7 @@ typedef struct SNiosFluidCfg
 	INT32			fluid_ctrl_alive;
 	INT32			test_airPressure;	// [mbar]
 	INT16			test_flush;
-	INT16			test_ctc_shutoffValve;
-	INT16			test_ctc_bleedValve;
-	INT16			test_ctc_flushValve;
+	INT16			ctc_valves;
 	UINT32			headsPerColor;
 
 	INT32			test_lungPressure;	// [mbar]
@@ -283,10 +281,11 @@ typedef struct SNiosFluidStat
 	//--- other status --------------------
 	UINT32			alive;
 
-	UINT32	vacuum_solenoid:1;	// 0=? 1=?
-	UINT32	air_pressure_solenoid:1;// 0=? 1=?
-	UINT32	flush_pump:1;		// 0=? 1=?
-	UINT32	air_pump:1;			// 0=? 1=?
+	UINT8	vacuum_solenoid:1;	// 0=? 1=?
+	UINT8	air_pressure_solenoid:1;// 0=? 1=?
+    UINT8	ctc_valves;
+    UINT8	flush_pump:1;		// 0=? 1=?
+	UINT8	air_pump:1;			// 0=? 1=?
 	UINT32	airPressureTime;
 
 	UINT32	flush_sensorID;

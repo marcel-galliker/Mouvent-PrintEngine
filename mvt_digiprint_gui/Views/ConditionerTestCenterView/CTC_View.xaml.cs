@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace RX_DigiPrint.Views.ConditionerTextCenterView
+namespace RX_DigiPrint.Views.ConditionerTestCenterView
 {
 	/// <summary>
 	/// Interaction logic for CTC_View.xaml

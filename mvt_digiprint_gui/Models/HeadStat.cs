@@ -59,6 +59,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Cooler_Temp, value); }
         }
 
+        private Int32 _FP_Voltage = 0;
+        public Int32 FP_Voltage
+        {
+            get { return _FP_Voltage; }
+            set { SetProperty(ref _FP_Voltage, value); }
+        }
+
+
         //--- Property No ---------------------------------------
         private string _Name;
         public string Name
@@ -186,6 +194,13 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _TempCond, value); }
         }
 
+        //--- Property TempCond ---------------------------------------
+        private UInt32 _TempHeater;
+        public UInt32 TempHeater
+        {
+            get { return _TempHeater; }
+            set { SetProperty(ref _TempHeater, value); }
+        }
         //--- Property TempSetpoint ---------------------------------------
         private UInt32 _TempSetpoint;
         public UInt32 TempSetpoint
@@ -466,7 +481,9 @@ namespace RX_DigiPrint.Models
             Info        = item.info;
             Err         = item.err;
 
-            Valve       = ((item.info&0x02)==0)? 0:1;
+            if ((item.info & 0x02) != 0) Valve = 2;
+            else if ((item.info & 0x04) != 0) Valve = 1;
+            else Valve = 0;
 
             DotCnt      = item.dotCnt;
             ImgInCnt    = item.imgInCnt;
@@ -479,6 +496,7 @@ namespace RX_DigiPrint.Models
             // Conditioner
             TempHead    = item.tempHead;
             TempCond    = item.tempCond;
+            TempHeater  = item.tempHeater;
             TempSetpoint= item.tempSetpoint;
          //   if (used) TempReady   = item.tempReady!=0;
          //   else TempReady=false;
@@ -531,6 +549,10 @@ namespace RX_DigiPrint.Models
             {
                 FlowResistance = pressureDifference / PumpFeedback;
             }
+
+        //  if (no < 4)
+        //      Console.WriteLine("{0}:Head[{1}]: valve={2}, PIN={3}, info={4:X}", RxGlobals.Timer.Ticks(), no, Valve, PresIn, item.info);
+
         }
 
         //--- SendBt ----------------------------------------------------
