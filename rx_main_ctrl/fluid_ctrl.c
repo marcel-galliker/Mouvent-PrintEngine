@@ -1427,7 +1427,6 @@ void fluid_send_pressure(int no, INT32 pressure)
 	fluid_set_config();
 }
 
-
 //--- fluid_send_valve ----------------------------
 void fluid_send_valve(SHeadTestCmd *pmsg)
 {

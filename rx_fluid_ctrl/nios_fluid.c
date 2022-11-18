@@ -381,6 +381,7 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 	char str[32];
 	if (!_Init) return;
 
+	memcpy(&RX_FluidBoardCfg, pcfg, sizeof(RX_FluidBoardCfg));
 	switch(pcfg->printerType)
 	{
 	case printer_LB701:			_HeaterUsed=TRUE; break;
@@ -718,7 +719,15 @@ static void _display_status(void)
 				
 		term_printf("bleed valve:       ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].bleedValve); term_printf("\n");
 		term_printf("air valve:         ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("       %03d  ", _Stat->ink_supply[i].airValve); term_printf("\n");
-		term_printf("ctc valves:        ");	for (i=0; i<5; i++)                   term_printf("         %d  ", (_Stat->ctc_valves&(1<<i))!=0); term_printf("\n");
+		if (RX_FluidBoardCfg.printerType==printer_test_CTC)
+		{
+			term_printf("ctc valves:        ");	
+				term_printf("Return=%d", (_Stat->ctc_valves&(1<<0))!=0); 
+				for (i=1; i<5; i++) term_printf(" C%d=%d", i, (_Stat->ctc_valves&(1<<i))!=0); 
+				term_printf("  Flush=%d",  (_Stat->ctc_valves&(1<<5))!=0); 
+				term_printf(" Release=%d", (_Stat->ctc_valves&(1<<6))!=0); 
+			term_printf("\n");
+		}
 		term_printf("error:             ");	for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("    0x%04x  ", _Stat->ink_supply[i].error); term_printf("\n");
 		term_printf("Cond. Pressure IN: "); for (i=0; i<NIOS_INK_SUPPLY_CNT; i++) term_printf("  %8s  ", value_str1(_Cfg->ink_supply[i].condPresIn)); term_printf("\n");	
 		term_printf("\n");

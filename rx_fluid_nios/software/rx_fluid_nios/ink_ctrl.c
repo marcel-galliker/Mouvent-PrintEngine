@@ -1751,7 +1751,7 @@ static void _set_ctc_valves(int state)
 {
 	int change = pRX_Status->ctc_valves^state;
 	int i;
-	for(i=0; i<5; i++)
+	for(i=0; i<7; i++)
 	{
 		if (change&(1<<i))
 		{

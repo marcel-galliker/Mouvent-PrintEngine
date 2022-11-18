@@ -33,6 +33,8 @@
 	
 //--- globals ------------------------------------------------------------
 
+SFluidBoardCfg  RX_FluidBoardCfg;
+
 SFluidBoardStat	RX_FluidBoardStatus;
 SInkSupplyCfg	RX_InkSupplyCfg[INK_PER_BOARD];
 
@@ -98,6 +100,7 @@ static void main_menu()
 		case 'b':	show=FALSE; nios_test_bleed_valve(no, atoi(&str[2])); break;
 		case 'i':	show=FALSE; nios_test_ink_pump(no, atoi(&str[2]));	break;
 		case 'v':	show=FALSE; nios_test_vacuum(atoi(&str[1]));		break;
+		case 'V':   show=FALSE; nios_set_ctc_valve(str[1]-'0', str[2]-'0');	break;
 		case 'p':	show=FALSE; nios_test_air_pressure(atoi(&str[1]));	break;
 		case 't':	show=FALSE; nios_set_temp(no, atoi(&str[2]));		break;
 //		case 'q':	show=FALSE; nios_start_temp_log();					break;

@@ -27,6 +27,25 @@ namespace RX_DigiPrint.Views.ConditionerTestCenterView
 					Button.Add(button);
 				}
 			}
+			RxGlobals.CTC_Operation.DisplayTimer = DisplayTimer;
+			RxGlobals.CTC_Operation.DisplayFlow  = DisplayFlow;
+		}
+
+		//--- DisplayTimer ------------------------------------
+		private void DisplayTimer(int time)
+		{
+			time /= 1000;
+			RxBindable.Invoke(() =>
+			{
+				if (time > 0) TB_Time.Text = time.ToString() + "s";
+				else TB_Time.Text = "";
+			});
+		}
+
+		//--- DisplayFlow ---------------------------
+		private void DisplayFlow(string flow)
+		{
+			TB_Flow.Text=flow;
 		}
 
 		//--- started ---------------------------------------
@@ -36,6 +55,7 @@ namespace RX_DigiPrint.Views.ConditionerTestCenterView
 			actButton.IsBusy = true;
 			PackIconMaterial icon = actButton.Content as PackIconMaterial;
 			icon.Kind = PackIconMaterialKind.Pause;
+			Grid.SetRow(TB_Time, Grid.GetRow(actButton));
 			for (int i = 0; i < Button.Count; i++)
 			{
 				if (Button[i]!=actButton) Button[i].IsEnabled=false;
@@ -74,6 +94,13 @@ namespace RX_DigiPrint.Views.ConditionerTestCenterView
 		{
 			_started(sender as MvtButton);
 			RxGlobals.CTC_Operation.ValveTest(OnDone);
+		}
+
+		//--- FlowTest_Clicked ----------------------------------------------
+		private void FlowTest_Clicked(object sender, RoutedEventArgs e)
+		{
+			_started(sender as MvtButton);
+			RxGlobals.CTC_Operation.FlowTest(OnDone);
 		}
 
 		//--- LongRun_Clicked ----------------------------------------------

@@ -23,6 +23,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="LightGray">
@@ -40,6 +41,8 @@
                 </common:MvtButton>
             </Grid>
 
+            <TextBlock x:Name="TB_Time" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="{StaticResource FontSizeXS}" Margin="0,0,0,8"/>
+            
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Electronics Test" VerticalAlignment="Center"/>
             <common:MvtButton Grid.Row="1" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
                               Click="ElectronicsTest_Clicked">
@@ -58,18 +61,25 @@
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Long Run" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Flow Test" VerticalAlignment="Center"/>
             <common:MvtButton Grid.Row="4" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+                              Click="FlowTest_Clicked">
+                <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
+            </common:MvtButton>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Long Run" VerticalAlignment="Center"/>
+            <common:MvtButton Grid.Row="5" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
                               Click="LongRun_Clicked">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Empty" VerticalAlignment="Center"/>
-            <common:MvtButton Grid.Row="5" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Empty" VerticalAlignment="Center"/>
+            <common:MvtButton Grid.Row="6" Grid.Column="1" Style="{StaticResource Mouvent.RoundIconButtonStyle.LightBackgroundButton.SizeS}"
                               Click="Empty_Clicked">
                 <iconPacks:PackIconMaterial HorizontalAlignment="Left" Kind="Play"/>
             </common:MvtButton>
 
+            <TextBlock Grid.Row="7" x:Name="TB_Flow" Text="Flow" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
         </Grid>
         
     </GroupBox>

@@ -1846,6 +1846,7 @@ extern SHeadBoardStat	RX_HBStatus[];
 extern SPrinterStatus	RX_PrinterStatus;
 extern SEncoderStat		RX_EncoderStatus;
 extern SEncoderCfg		RX_EncoderCfg;
+extern SFluidBoardCfg   RX_FluidBoardCfg;
 extern SFluidBoardStat	RX_FluidBoardStatus;
 extern SStepperStat		RX_StepperStatus;
 extern SStepperStat		RX_ClnStatus;
