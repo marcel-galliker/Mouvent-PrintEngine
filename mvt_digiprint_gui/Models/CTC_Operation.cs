@@ -337,13 +337,13 @@ namespace RX_DigiPrint.Models
 				RxBindable.Invoke(() => _Tests.Add(test1));
 				CTC_Test test2 = new CTC_Test() { Step = "Ink to Water" };
 				RxBindable.Invoke(() => _Tests.Add(test2));
-				CTC_Test test3 = new CTC_Test() { Step = "Conditioner" };
+				CTC_Test test3 = new CTC_Test() { Step = "Conditioner Return" };
 				RxBindable.Invoke(() => _Tests.Add(test3));
-				CTC_Test test4 = new CTC_Test() { Step = "Flush Line" };
+				CTC_Test test4 = new CTC_Test() { Step = "Flushline" };
 				RxBindable.Invoke(() => _Tests.Add(test4));
-				CTC_Test test5 = new CTC_Test() { Step = "Flush valves" };
+				CTC_Test test5 = new CTC_Test() { Step = "Flush Valves" };
 				RxBindable.Invoke(() => _Tests.Add(test5));
-				CTC_Test test6 = new CTC_Test() { Step = "Ink Valves" };
+				CTC_Test test6 = new CTC_Test() { Step = "Ink Valves / FeedLine" };
 				RxBindable.Invoke(() => _Tests.Add(test6));
 				
 				CTC_Settings settings = new CTC_Settings();
@@ -418,7 +418,6 @@ namespace RX_DigiPrint.Models
 				_CheckHeadPIN(test6, 0, CTC_Test.HEADS, test6TimePar.Min, test6PresPar.Min);
 
 				//--- END ---------------------------------------
-				_SetFluidValve(FLUID_VALVE_SHUTOFF, false);
 				for (int i=0; i<RxGlobals.PrintSystem.ColorCnt; i++)
 				{
 					_SetFluidValve(FLUID_CYLINDER_0+i, true);
