@@ -367,6 +367,7 @@ namespace RX_DigiPrint.Models
 				_CtrlAirPressure(test1, 0, CTC_Test.HEADS, pressurePar.Min);
 				_CheckHeadPIN(test1, 0, CTC_Test.HEADS, timePar.Min, pressurePar.Min);
 				_SendStop();
+				_SetFluidValve(FLUID_VALVE_SHUTOFF, true);
 
 				//--- test 2 ---------------------------------------------------
 				test2.Start();
@@ -418,6 +419,7 @@ namespace RX_DigiPrint.Models
 				_CheckHeadPIN(test6, 0, CTC_Test.HEADS, test6TimePar.Min, test6PresPar.Min);
 
 				//--- END ---------------------------------------
+				_SetFluidValve(FLUID_VALVE_SHUTOFF, false);
 				for (int i=0; i<RxGlobals.PrintSystem.ColorCnt; i++)
 				{
 					_SetFluidValve(FLUID_CYLINDER_0+i, true);
