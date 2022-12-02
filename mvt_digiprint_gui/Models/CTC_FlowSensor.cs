@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RX_DigiPrint.Services;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -180,6 +181,7 @@ namespace RX_DigiPrint.Models
             UInt32 err;
             StopMeasurement();
             StringBuilder str = new StringBuilder(256);
+
             // open Port
             for (int i=1; i<10; i++)
             {
