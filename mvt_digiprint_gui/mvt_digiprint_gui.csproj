@@ -1785,6 +1785,9 @@
     <Content Include="id_rsa.ppk">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="PrintSystemRange.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -2069,6 +2072,7 @@ if not exist  $(ProjectDir)..\bin\gui md $(ProjectDir)..\bin\gui
 copy $(ProjectDir)\..\_out\Release_x64\rx_rip_lib.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)dll\*.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)$(OutDir)*.dll $(ProjectDir)..\bin\gui
+copy $(ProjectDir)$(OutDir)*.csv $(ProjectDir)..\bin\gui
 copy $(ProjectDir)..\ssh\id_rsa.ppk $(ProjectDir)..\bin\gui
 copy $(TargetFileName) $(ProjectDir)..\bin\gui
 copy $(TargetFileName).* $(ProjectDir)..\bin\gui

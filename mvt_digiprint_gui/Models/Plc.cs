@@ -167,23 +167,25 @@ namespace RX_DigiPrint.Models
                 if (!list[n].Equals(""))
                 {
                     string[] val = list[n].Split('=');
-                    if (val[0].Equals("STA_MACHINE_STATE"))
+                    if (val.Length>1)
                     {
-                        MachineStateEnum state= (MachineStateEnum) Rx.StrToInt32(val[1]);
-                        InReferencing = (state == MachineStateEnum.Referencing);
-                        InWebIn       = (state== MachineStateEnum.WebIn);
-                        WebInEnabled  = (state != MachineStateEnum.Prepare && state != MachineStateEnum.Pause && state!= MachineStateEnum.Run && state != MachineStateEnum.Error);
-                        if (WebInActive && state != MachineStateEnum.Pause)
-                            WebInActive = false;
-                        if (ToWebIn && state == MachineStateEnum.Error) ToWebIn = false;
-                        if (ToWebIn && state == MachineStateEnum.Pause)
+                        if (val[0].Equals("STA_MACHINE_STATE"))
                         {
-                            WebInActive = true;
-                            ToWebIn = false;
+                            MachineStateEnum state= (MachineStateEnum) Rx.StrToInt32(val[1]);
+                            InReferencing = (state == MachineStateEnum.Referencing);
+                            InWebIn       = (state== MachineStateEnum.WebIn);
+                            WebInEnabled  = (state != MachineStateEnum.Prepare && state != MachineStateEnum.Pause && state!= MachineStateEnum.Run && state != MachineStateEnum.Error);
+                            if (WebInActive && state != MachineStateEnum.Pause)
+                                WebInActive = false;
+                            if (ToWebIn && state == MachineStateEnum.Error) ToWebIn = false;
+                            if (ToWebIn && state == MachineStateEnum.Pause)
+                            {
+                                WebInActive = true;
+                                ToWebIn = false;
+                            }
                         }
+                        if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
                     }
-                    if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
-
                     for (m=1, found=false; m<buffer[i].Count(); m++)
                     {
                         if (buffer[i][m].StartsWith(val[0]))

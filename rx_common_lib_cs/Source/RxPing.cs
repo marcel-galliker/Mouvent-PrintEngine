@@ -8,6 +8,13 @@ namespace RX_Common
         public static string    _Host;
         public static DateTime  _Time;
 
+        public static bool Ping(string ipaddr)
+        {
+            int ret=Rx.ExecuteProcess("ping.exe", string.Format("-n 1 -w 20 {0}", ipaddr));
+            if (ret==0) return true;
+            return false;
+        }
+
         public static bool HostReachable(string path)
         {
             if (path==null)  return false;
