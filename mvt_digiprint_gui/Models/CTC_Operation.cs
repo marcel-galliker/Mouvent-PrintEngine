@@ -410,8 +410,6 @@ namespace RX_DigiPrint.Models
 				//--- test 3 ------------------------------------
 				test3.Start();
 				_SetFluidValve(FLUID_VALVE_RELEASE, true);
-				Thread.Sleep(200);
-				_SetFluidValve(FLUID_VALVE_RELEASE, false);
 				_CheckHeadPIN(test3, 0, CTC_Test.HEADS, test3TimePar.Min, test3PresPar.Min, test3PresPar.Max);
 
 				//--- test 4 ---------------------------
@@ -771,11 +769,16 @@ namespace RX_DigiPrint.Models
 			Process = new Thread(() =>
 			{
 				RxBindable.Invoke(() => _Tests.Add(new CTC_Test() { Name = "Empty" }));
+						
 
 				//--------------------------------------------------
 				CTC_Test runEmpty = new CTC_Test() { Step = "Empty" };
 				runEmpty.Start();
 				RxBindable.Invoke(() => _Tests.Add(runEmpty));
+
+				CTC_Settings settings = new CTC_Settings();
+				CTC_Param waitTime1	= settings.GetParam("Empty", runEmpty.Step, "Time1",				20000, 0);
+				CTC_Param waitTime2	= settings.GetParam("Empty", runEmpty.Step, "Time2",				10000, 0);
 
 				_SetMeniscusCheck(false);
 				//--- set fluid pressure
@@ -785,6 +788,11 @@ namespace RX_DigiPrint.Models
 					msg.airPressure = 2000;
 					msg.no = 0;
 					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_TEST, ref msg);
+				}
+
+				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
+				{
+					_SetFluidValve(FLUID_CYLINDER_0+isNo, true);
 				}
 
 				// _CtrlAirPressure(runEmpty, 0, TcpIp.HEAD_CNT, 2000);
@@ -799,6 +807,28 @@ namespace RX_DigiPrint.Models
 						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_FLUID_CTRL_MODE, ref msg);
 					}
 				}
+
+				CTC_Test.Wait(waitTime1.Min, DisplayTimer);
+
+				//--- switch ink system off ----------------------------
+				{
+					TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+					msg.no = -1;
+					msg.ctrlMode = EFluidCtrlMode.ctrl_off;
+					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref msg);
+				}
+				for (int head = 0; head < CTC_Test.HEADS; head++)
+				{
+					TcpIp.SFluidCtrlCmd msg = new TcpIp.SFluidCtrlCmd();
+					msg.no = head;
+					msg.ctrlMode = EFluidCtrlMode.ctrl_off;
+
+					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_FLUID_CTRL_MODE, ref msg);
+				}
+
+				CTC_Test.Wait(waitTime2.Min, DisplayTimer);
+				_SendStop();
+
 				//--- END ---------------------------------------
 				if (onDone != null) RxBindable.Invoke(() => onDone());
 			});

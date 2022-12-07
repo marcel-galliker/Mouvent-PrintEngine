@@ -40,6 +40,7 @@
     <converters:FlashButtonVisible_Converter x:Key="FlashButtonVisible_Converter"/>
     
     <converters:HeadVal_Converter10 x:Key="HeadVal_Converter10"/>
+    <converters:HeadValRange_Converter x:Key="HeadValRange_Converter"/>
     <converters:HeadMultiVal_SetPointAsText_Converter10 x:Key="HeadMultiVal_SetPointAsText_Converter10"/>
     <converters:HeadMultiVal_SetPoint_Converter10 x:Key="HeadMultiVal_SetPoint_Converter10"/>
     <converters:HeadMultiVal_PumpSpeedConverter x:Key="HeadMultiVal_PumpSpeedConverter"/>

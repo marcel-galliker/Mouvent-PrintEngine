@@ -300,6 +300,7 @@
     <Compile Include="Converters\CamLib\CamCapsMediatype_Converter.cs" />
     <Compile Include="Converters\CamLib\CamCapsResolution_Converter.cs" />
     <Compile Include="Converters\CTC_Converters.cs" />
+    <Compile Include="Converters\HeadValRange_Converter.cs" />
     <Compile Include="Converters\IconConverter.cs" />
     <Compile Include="Converters\IconPacks_ModernKind.cs" />
     <Compile Include="Converters\JetCompensationConverters.cs" />
