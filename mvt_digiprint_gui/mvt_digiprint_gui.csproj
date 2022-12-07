@@ -293,6 +293,7 @@
     <Compile Include="Comparers\Date_Comparer.cs" />
     <Compile Include="Comparers\FileName_Comparer.cs" />
     <Compile Include="Converters\BooleanConverters.cs" />
+    <Compile Include="Converters\HeadValRange_Converter.cs" />
     <Compile Include="Converters\IconConverter.cs" />
     <Compile Include="Converters\IconPacks_ModernKind.cs" />
     <Compile Include="Converters\JetCompensationConverters.cs" />
