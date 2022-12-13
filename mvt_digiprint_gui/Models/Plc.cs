@@ -187,23 +187,25 @@ namespace RX_DigiPrint.Models
                 if (!list[n].Equals(""))
                 {
                     string[] val = list[n].Split('=');
-                    if (val.Length>1 && val[0].Equals("STA_MACHINE_STATE"))
+                    if (val.Length>1)
                     {
-                        EnPlcState state=(EnPlcState)Rx.StrToInt32(val[1]);
-                        InReferencing = (state==EnPlcState.plc_referencing);
-                        InWebIn       = (state==EnPlcState.plc_webin);
-                     // WebInEnabled  = (state!=EnPlcState.plc_prepare && state!=EnPlcState.plc_run);
-                        WebInEnabled  = (state!=EnPlcState.plc_pause && state!=EnPlcState.plc_run && !_FluidInRecovery());
-                        /*
-                        if (RxGlobals.SetupAssist.WebMoveDone!=null && _oldState==EnPlcState.plc_run 
-                            && (state==EnPlcState.plc_stop || state==EnPlcState.plc_pause))
-						{
-                            RxGlobals.SetupAssist.WebMoveDone();
-						}
-                        */
+                        if (val[0].Equals("STA_MACHINE_STATE"))
+                        {
+                            EnPlcState state=(EnPlcState)Rx.StrToInt32(val[1]);
+                            InReferencing = (state==EnPlcState.plc_referencing);
+                            InWebIn       = (state==EnPlcState.plc_webin);
+                         // WebInEnabled  = (state!=EnPlcState.plc_prepare && state!=EnPlcState.plc_run);
+                            WebInEnabled  = (state!=EnPlcState.plc_pause && state!=EnPlcState.plc_run && !_FluidInRecovery());
+                            /*
+                            if (RxGlobals.SetupAssist.WebMoveDone!=null && _oldState==EnPlcState.plc_run 
+                                && (state==EnPlcState.plc_stop || state==EnPlcState.plc_pause))
+						    {
+                                RxGlobals.SetupAssist.WebMoveDone();
+						    }
+                            */
+                        }
+                        if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
                     }
-                    if (val[0].Equals("STA_REFERENCE_ENABLE")) ReferenceEnabled = (val[1].Equals("TRUE"));
-
                     for (m=1, found=false; m<buffer[i].Count(); m++)
                     {
                         if (buffer[i][m].StartsWith(val[0]))

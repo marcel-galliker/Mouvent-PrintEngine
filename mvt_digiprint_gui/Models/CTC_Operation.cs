@@ -55,11 +55,10 @@ namespace RX_DigiPrint.Models
 				CTC_Test heater = new CTC_Test() { Step = "Heater" };
 
 				CTC_Settings settings = new CTC_Settings();
-				CTC_Param tempPar = settings.GetParam("Electronics", temp.Step, "Cooler_Temp", 25000, 35000);
-				CTC_Param presPar = settings.GetParam("Electronics", pres.Step, "Cooler_Pressure", 400, 600);
-				CTC_Param heaterTime = settings.GetParam("Electronics", heater.Step, "Heating Time", 2000, 0);
+				CTC_Param tempPar	 = settings.GetParam("Electronics", temp.Step,	"Cooler_Temp",	   25000, 35000);
+				CTC_Param presPar	 = settings.GetParam("Electronics", pres.Step,	"Cooler_Pressure", 	400,    600);
+				CTC_Param heaterTime = settings.GetParam("Electronics", heater.Step,"Heating Time",		2000,     0);
 				uint[] _Temp = new uint[CTC_Test.HEADS];
-				uint[] _Temp2 = new uint[CTC_Test.HEADS];
 
 				RxBindable.Invoke(() =>
 				{
@@ -134,17 +133,32 @@ namespace RX_DigiPrint.Models
 						msg.value = 0;
 						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_ENCODER_FREQ, ref msg);
 					}
+					/*
 					// check temp ---------------------------
 					Console.WriteLine("Head[{0}]: TempOrg={1}, Temp={2}, delta={3}", head, _Temp[head], RxGlobals.HeadStat.List[head].TempHeater, RxGlobals.HeadStat.List[head].TempHeater - _Temp[head]);
-					_Temp[head] = RxGlobals.HeadStat.List[head].TempHeater - _Temp[head];
-					if (RxGlobals.HeadStat.List[head].TempHeater > 40000 || _Temp[head] > 500)
+					if (RxGlobals.HeadStat.List[head].TempHeater > 40000 
+					||  RxGlobals.HeadStat.List[head].TempHeater-_Temp[head] > 500)
+						heater.SetHeadState(head, CTC_Test.EN_State.ok);
+					else if (CTC_Test.Overall.State[head] != CTC_Test.EN_State.failed)
+						heater.SetHeadState(head, CTC_Test.EN_State.failed);
+					else heater.SetHeadState(head, CTC_Test.EN_State.undef);
+					*/
+				}
+
+				_SendStop();
+				CTC_Test.Wait(5000, DisplayTimer);
+				for (int head = 0; head < CTC_Test.HEADS && head < RxGlobals.HeadStat.List.Count; head++)
+				{
+					// check temp ---------------------------
+					Console.WriteLine("Head[{0}]: TempOrg={1}, Temp={2}, delta={3}", head, _Temp[head], RxGlobals.HeadStat.List[head].TempHeater, RxGlobals.HeadStat.List[head].TempHeater - _Temp[head]);
+					if (RxGlobals.HeadStat.List[head].TempHeater > 40000)
+//					||  RxGlobals.HeadStat.List[head].TempHeater-_Temp[head] > 500)
 						heater.SetHeadState(head, CTC_Test.EN_State.ok);
 					else if (CTC_Test.Overall.State[head] != CTC_Test.EN_State.failed)
 						heater.SetHeadState(head, CTC_Test.EN_State.failed);
 					else heater.SetHeadState(head, CTC_Test.EN_State.undef);
 				}
 
-				_SendStop();
 				if (onDone != null) RxBindable.Invoke(()=>onDone());
 			});
 			Process.Start();
@@ -530,10 +544,10 @@ namespace RX_DigiPrint.Models
 
 				test3.Start();
 				RxBindable.Invoke(() => _Tests.Add(test3));
-				_SetMeniscusCheck(true);
 				CTC_Test.Wait(checkTime3.Min, DisplayTimer);
 				ok = _CheckHeadPrinting(test3, 1000, checkIn3, checkOut3, checkPump3);
 
+				_SetMeniscusCheck(true);
 				_SendStop();
 				//--- END ---------------------------------------
 				if (onDone != null) RxBindable.Invoke(() => onDone());
@@ -748,8 +762,10 @@ namespace RX_DigiPrint.Models
 							}
 						}
 						if (!running)
+						{
 							Console.WriteLine("none running");
-						_LongRun_Running = running;
+							_LongRun_Running = false;
+						}
 					}
 					longRunTest.Done(CTC_Test.EN_State.ok);
 				}
@@ -854,7 +870,6 @@ namespace RX_DigiPrint.Models
 
 				RxGlobals.RxInterface.SendMsg(TcpIp.CMD_HEAD_FLUID_CTRL_MODE, ref msg);
 			}
-			_SetMeniscusCheck(true);
 			_SetMeniscusCheck(true);
 			for (int i=FLUID_VALVE_SHUTOFF; i<=FLUID_VALVE_RELEASE; i++)
 				_SetFluidValve(i, false);

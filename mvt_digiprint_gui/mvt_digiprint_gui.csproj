@@ -1800,6 +1800,9 @@
     <None Include="i1Pro364.lib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="PrintSystemRange.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -2147,6 +2150,7 @@ GOTO :END
 :RELEASE_64
 copy $(ProjectDir)dll\*.dll $(ProjectDir)..\bin\gui
 copy $(ProjectDir)$(OutDir)*.dll $(ProjectDir)..\bin\gui
+copy $(ProjectDir)$(OutDir)*.csv $(ProjectDir)..\bin\gui
 copy $(ProjectDir)..\ssh\id_rsa.ppk $(ProjectDir)..\bin\gui
 copy $(TargetFileName) $(ProjectDir)..\bin\gui
 copy $(TargetFileName).* $(ProjectDir)..\bin\gui
