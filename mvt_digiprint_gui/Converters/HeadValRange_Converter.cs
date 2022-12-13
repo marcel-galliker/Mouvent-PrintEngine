@@ -18,10 +18,10 @@ namespace RX_DigiPrint.Converters
         {
             //--- default values ------------------------
             _Range = new Dictionary<string, int[]>();
-            _Range.Add("PresIn",        new int[2]{  0, 0 });
-            _Range.Add("PresOut",       new int[2]{ 0, 0});
-            _Range.Add("Meniscus",      new int[2]{ 0, 0 });
-            _Range.Add("PumpFeedback",  new int[2]{ 0, 0 });
+            _Range.Add("PresIn",        new int[2]{   10,  100 });
+            _Range.Add("PresOut",       new int[2]{ -340, -260 });
+            _Range.Add("Meniscus",      new int[2]{ -160, -140 });
+            _Range.Add("PumpFeedback",  new int[2]{  240,  400 });
 
             //--- from file ------------------------------------------
             string fpath = Assembly.GetExecutingAssembly().Location;

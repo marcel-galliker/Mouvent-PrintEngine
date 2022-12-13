@@ -134,7 +134,7 @@
 
             <common:RxNumBox Grid.Row="0" HorizontalContentAlignment="Right" x:Name="FpVoltage" TextChanged="FpVoltage_TextChanged" IsInt="True" Min="0" Max="120"/>
 
-            <Rectangle  Grid.Row="1" Fill="{StaticResource RX.Warn}" Visibility="{Binding PresIn, ConverterParameter='PresIn', Converter={StaticResource HeadValRange_Converter}}"/>
+            <Rectangle  Grid.Row="1" Fill="{StaticResource RX.Error}" Visibility="{Binding PresIn, ConverterParameter='PresIn', Converter={StaticResource HeadValRange_Converter}}"/>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresIn,  Converter={StaticResource HeadVal_Converter10}}"   />
                 <TextBlock Text=" (" VerticalAlignment="Center"/>
@@ -142,7 +142,7 @@
                 <TextBlock  Margin="0,0,2,0"  Text=")" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <Rectangle   Grid.Row="2" Fill="{StaticResource RX.Warn}" Visibility="{Binding PresOut, ConverterParameter='PresOut', Converter={StaticResource HeadValRange_Converter}}"/>
+            <Rectangle   Grid.Row="2" Fill="{StaticResource RX.Error}" Visibility="{Binding PresOut, ConverterParameter='PresOut', Converter={StaticResource HeadValRange_Converter}}"/>
             <StackPanel  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PresOut,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
@@ -150,8 +150,8 @@
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
 
+            <Rectangle  Grid.Row="3" Fill="{StaticResource RX.Error}" Visibility="{Binding Meniscus, ConverterParameter='Meniscus', Converter={StaticResource HeadValRange_Converter}}"/>
             <Rectangle  Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding Meniscus_Disabled, Converter={StaticResource BoolToVisible_Converter}}"/>
-            <Rectangle  Grid.Row="3" Fill="{StaticResource RX.Warn}" Visibility="{Binding Meniscus, ConverterParameter='Meniscus', Converter={StaticResource HeadValRange_Converter}}"/>
             <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding Meniscus,  Converter={StaticResource HeadVal_Converter10}}"/>
                 <TextBlock Text=" (~" VerticalAlignment="Center"/>
@@ -159,7 +159,7 @@
                 <TextBlock  Margin="0,0,2,0" Text=")" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <Rectangle  Grid.Row="4" Fill="{StaticResource RX.Warn}" Visibility="{Binding PumpFeedback, ConverterParameter='PumpFeedback', Converter={StaticResource HeadValRange_Converter}}" />
+            <Rectangle  Grid.Row="4" Fill="{StaticResource RX.Error}" Visibility="{Binding PumpFeedback, ConverterParameter='PumpFeedback', Converter={StaticResource HeadValRange_Converter}}" />
             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PumpFeedback, Converter={StaticResource HeadVal_Converter10}}" />
                 <TextBlock Text=" ("/>
