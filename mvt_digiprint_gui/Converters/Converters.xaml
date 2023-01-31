@@ -41,11 +41,12 @@
     <converters:HeadMultiVal_PumpSpeedConverter x:Key="HeadMultiVal_PumpSpeedConverter"/>
     
 
-    <converters:HeadVal_Converter x:Key="HeadVal_Converter"/>
-    <converters:HeadVal_SetPoint_Converter x:Key="HeadVal_SetPoint_Converter"/>
+    <converters:HeadVal_Converter           x:Key="HeadVal_Converter"/>
+    <converters:HeadValRange_Converter      x:Key="HeadValRange_Converter"/>
+    <converters:HeadVal_SetPoint_Converter  x:Key="HeadVal_SetPoint_Converter"/>
 
-    <converters:HeadVal_ConverterTemp x:Key="HeadVal_ConverterTemp"/>
-    <converters:HeadVal_SetPoint_ConverterTemp x:Key="HeadVal_SetPoint_ConverterTemp"/>
+    <converters:HeadVal_ConverterTemp           x:Key="HeadVal_ConverterTemp"/>
+    <converters:HeadVal_SetPoint_ConverterTemp  x:Key="HeadVal_SetPoint_ConverterTemp"/>
     
     <converters:HeadMultiVal_ConverterTemp x:Key="HeadMultiVal_ConverterTemp"/>
     <converters:HeadMultiVal_Int_Converter x:Key="HeadMultiVal_Int_Converter"/>

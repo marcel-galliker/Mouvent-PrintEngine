@@ -1461,12 +1461,12 @@ void fluid_set_head_state	(int no, SHeadStat *pstat)
 			_HeadState[no].condPumpFeedback += pstat->pumpFeedback;
 			_HeadStateCnt[no].condPumpFeedback++;
 
-			if (!_HeadStateCnt[no].condPumpFeedback_min || pstat->pumpFeedback <= _HeadState[no].condPumpFeedback_min)
+			if (!_HeadStateCnt[no].condPumpFeedback_min || (int)pstat->pumpFeedback <= _HeadState[no].condPumpFeedback_min)
 				_HeadState[no].condPumpFeedback_min = pstat->pumpFeedback;
 
 			_HeadStateCnt[no].condPumpFeedback_min++;
 
-			if (!_HeadStateCnt[no].condPumpFeedback_max || pstat->pumpFeedback >= _HeadState[no].condPumpFeedback_max)
+			if (!_HeadStateCnt[no].condPumpFeedback_max || (int)pstat->pumpFeedback >= _HeadState[no].condPumpFeedback_max)
 				_HeadState[no].condPumpFeedback_max = pstat->pumpFeedback;
 
 			_HeadStateCnt[no].condPumpFeedback_max++;
@@ -1615,7 +1615,7 @@ INT32 moving_average_canisterLevel(INT32 buffer[INK_SUPPLY_CNT + 2][MEASUREMENT_
 	sum[canisterNumber] = sum[canisterNumber] - buffer[canisterNumber][pos] + value;
 	buffer[canisterNumber][pos] = value;
 	static int measurementNumber = 1;
-	INT32 average = sum[canisterNumber] / measurementNumber;
+	INT32 average = (INT32)(sum[canisterNumber] / measurementNumber);
 	if (canisterNumber == INK_SUPPLY_CNT && measurementNumber < MEASUREMENT_NUMBER) 
 		measurementNumber++;
 	return average;

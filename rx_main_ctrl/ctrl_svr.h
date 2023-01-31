@@ -55,3 +55,5 @@ void ctrl_set_recovery_freq(int freq_hz);
 void ctrl_reset_cond(void);
 void ctrl_set_jetting(void);
 void ctrl_send_waveform(int fluidNo);
+
+void ctrl_set_cluster_no(SValue* pdata);

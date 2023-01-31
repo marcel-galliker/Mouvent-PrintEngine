@@ -1134,7 +1134,7 @@ int plc_list_materials(char materials[64][64])
 			setup_str_next(file, &attribute, name, sizeof(name), val, sizeof(val));
 			if (!*name) break;
 			if (!strcmp(name, "XML_MATERIAL")) {
-				int l = min(63, strlen(val));
+				int l = min(63, (int)strlen(val));
 				strncpy(materials[nMaterials], val, l);
 				materials[nMaterials][l] = 0;
 				nMaterials++;

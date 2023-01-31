@@ -1,4 +1,5 @@
-﻿using RX_DigiPrint.Models;
+﻿using RX_Common;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
 using System.ComponentModel;
@@ -120,6 +121,9 @@ namespace RX_DigiPrint.Views.UserControls
 
         private bool GetLampStatus()
         {
+            if (!RxPing.Ping(_IPAddress)) 
+                return false;
+            
             string data;
             string url = String.Format(@"http://{0}/html/top.html?SysStatusData?", _IPAddress);
 

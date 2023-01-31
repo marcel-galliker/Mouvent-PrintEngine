@@ -16,7 +16,7 @@ PREPROCESSOR_MACROS := DEBUG linux
 INCLUDE_DIRS := ../rx_ink_lib ../rx_common_lib ../Externals/TinyXML ./rx_rexroth_lib ../rx_rip_lib ../rx_tif_lib ../rx_pecore_lib ../Externals/mlpi/include ../Externals/matrix/linux/include ../Externals/libtiff ../Externals/libxl/include_c ../Externals/iQ500 ../Externals/open62541/ubuntu/include
 LIBRARY_DIRS := /usr/lib ../Externals/libxl/lib64 ../Externals/iQ500 ../Externals/open62541/ubuntu/lib
 LIBRARY_NAMES := mlpi xl IQCoreRemote open62541
-ADDITIONAL_LINKER_INPUTS := 
+ADDITIONAL_LINKER_INPUTS := ../Externals/open62541/ubuntu/lib/libmbedx509.so.0 ../Externals/open62541/ubuntu/lib/libmbedcrypto.so.1
 MACOS_FRAMEWORKS := 
 
 CFLAGS := -pthread -ggdb -ffunction-sections -O0 -fshort-wchar -std=gnu99

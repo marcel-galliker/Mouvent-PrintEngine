@@ -243,8 +243,8 @@ void step_tts_abort_printing(void)
 static void _control(void)
 {
     SValue value;
-    static int dropCnt_old[INK_SUPPLY_CNT][MAX_HEADS_BOARD] = { 0 };
-    int dropCnt_new[INK_SUPPLY_CNT][MAX_HEADS_BOARD] = { 0 };
+    static INT64 dropCnt_old[INK_SUPPLY_CNT][MAX_HEADS_BOARD] = { 0 };
+    INT64 dropCnt_new[INK_SUPPLY_CNT][MAX_HEADS_BOARD] = { 0 };
     switch (_Jetting)
     {
     case 1:
