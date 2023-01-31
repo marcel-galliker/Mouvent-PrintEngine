@@ -391,8 +391,10 @@ int hc_send_next()
 									}
 									#endif
 								//	Error(LOG, 0, "Screening[%d,%d]: (id=%d, p=%d, c=%d, s=%d)", pInfo->board, pInfo->head, id.id, id.page, id.copy, id.scan);
-
-									_send_image_data(pInfo);
+									if (_HBPar[i / MAX_HEADS_BOARD]->dataSocket[0] == INVALID_SOCKET)
+										pSplitInfo->pListItem->headsInUse--;
+									else
+										_send_image_data(pInfo);
 									break;
 
 				default:			return Error(ERR_ABORT, 0, "Headboard[%d].Present=%d, undefined", pInfo->board, _HBPar[pInfo->board]->cfg.present);

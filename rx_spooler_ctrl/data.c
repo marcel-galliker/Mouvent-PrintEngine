@@ -1365,8 +1365,6 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 				pInfo->srcLineLen	= pBmpInfo->lineLen;
 				pInfo->srcLineCnt	= pBmpInfo->lengthPx;
 
-				
-
 				empty = FALSE;
 				if (pBmpInfo->printMode==PM_TEST_SINGLE_COLOR && (color+1)!=id->scan)
 				{
