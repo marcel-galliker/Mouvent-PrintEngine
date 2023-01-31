@@ -255,6 +255,14 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _PresIn, value); }
         }
 
+        //--- Property PresIn2 ---------------------------------------
+        private Int32 _PresIn2;
+        public Int32 PresIn2
+        {
+            get { return _PresIn2; }
+            set { SetProperty(ref _PresIn2, value); }
+        }
+
         //--- Property PresMax ---------------------------------------
         private Int32 _PresIn_max;
         public Int32 PresIn_max
@@ -502,6 +510,7 @@ namespace RX_DigiPrint.Models
          //   else TempReady=false;
             TempReady   = (!used) || (item.ctrlMode!=EFluidCtrlMode.ctrl_print) || ((item.info&(1<<5))!=0);
             PresIn      = item.presIn;
+            PresIn2     = item.presIn2;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;
             if (item.presIn_max==TcpIp.INVALID_VALUE) PresIn_str = string.Format("~{0}", HeadVal_Converter10._convert(PresIn_diff));

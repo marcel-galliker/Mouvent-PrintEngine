@@ -537,6 +537,7 @@ static void _cond_copy_status(void)
                 RX_HBStatus->head[i].tempHeater			= RX_NiosStat.cond[i].tempHeater;
 //				RX_HBStatus->head[i].tempSetpoint		= _NiosMem->cfg.cond[i].temp; //RX_NiosStat.cond[i].tempSetpoint;
 				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
+				RX_HBStatus->head[i].presIn2			= RX_NiosStat.cond[i].pressure_in2;
 				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
 				RX_HBStatus->head[i].presIn_diff	    = RX_NiosStat.cond[i].pressure_in_diff;
 				RX_HBStatus->head[i].presOut			= RX_NiosStat.cond[i].pressure_out;

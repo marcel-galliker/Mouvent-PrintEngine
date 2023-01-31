@@ -1261,6 +1261,7 @@ namespace RX_DigiPrint.Services
             public UInt32           tempHeater;
             public UInt32           tempSetpoint;
 	        public Int32			presIn;
+	        public Int32			presIn2;
 	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
 	        public Int32			flowFactor;

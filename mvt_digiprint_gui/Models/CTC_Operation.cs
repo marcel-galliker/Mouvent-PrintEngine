@@ -183,13 +183,14 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- _CtrlAirPressure ---------------------------------------
-		private bool _CtrlAirPressure(CTC_Test test, int head0, int cnt, int pressure)
+		private bool _CtrlAirPressure(CTC_Test test, int head0, int cnt, int pressure, int timeout)
 		{
 			//--- start fluid -----------------------
 			TcpIp.SFluidTestCmd msg = new TcpIp.SFluidTestCmd();
 			int time=0;
 			msg.airValve = 1;
 			msg.airPressure=(Int32)(pressure*11/10);
+			if (msg.airPressure>1200) msg.airPressure=1200;
 			for(int head= head0; head< head0+cnt; head++)
 			{
 				if (CTC_Test.Overall.State[head]!=CTC_Test.EN_State.failed)
@@ -201,7 +202,7 @@ namespace RX_DigiPrint.Models
 				}
 			}
 
-			time=20000;
+			time=timeout;
 			bool ok = true;
 			while (time>0)
 			{
@@ -221,6 +222,20 @@ namespace RX_DigiPrint.Models
 				if (ok) time = 0;
 			};
 			DisplayTimer(0);
+
+			//--- toggle valves ----------------------------------
+			if (ok)
+			{
+				_SetHeadValve(test, 0, CTC_Test.HEADS, HEAD_VALVE_INK);
+				CTC_Test.Wait(5000, DisplayTimer);
+				_SetHeadValve(test, 0, CTC_Test.HEADS, HEAD_VALVE_FLUSH);
+				CTC_Test.Wait(5000, DisplayTimer);
+				_SetHeadValve(test, 0, CTC_Test.HEADS, HEAD_VALVE_INK);
+				CTC_Test.Wait(5000, DisplayTimer);
+				_SetHeadValve(test, 0, CTC_Test.HEADS, HEAD_VALVE_FLUSH);
+				CTC_Test.Wait(5000, DisplayTimer);
+			}
+
 			msg.airPressure=0;
 			for(int head=head0; head< head0+cnt; head++)
 			{
@@ -238,7 +253,7 @@ namespace RX_DigiPrint.Models
 		//--- _SetHeadValve --------------------------------------
 		private int HEAD_VALVE_OFF	= 0;
 		private int HEAD_VALVE_FLUSH= 1;
-	//	private int HEAD_VALVE_INK	= 2;
+		private int HEAD_VALVE_INK	= 2;
 		private int HEAD_VALVE_BOTH	= 3;
 		
 		private void _SetHeadValve(CTC_Test test, int head0, int cnt, int valve)
@@ -316,7 +331,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- _CheckHeadPrinting ----------------------------------------------------
-		private bool _CheckHeadPrinting(CTC_Test test, int time, CTC_Param checkIn, CTC_Param checkOut, CTC_Param checkPump)
+		private bool _CheckHeadPrinting(CTC_Test test, int time, CTC_Param checkIn, CTC_Param checkIn2, CTC_Param checkOut, CTC_Param checkPump)
 		{
 			while(time>0)
 			{
@@ -331,10 +346,11 @@ namespace RX_DigiPrint.Models
 						bool r1 = _inRange(-RxGlobals.HeadStat.List[headNo].PresIn, checkIn);
 						bool r2 = _inRange(-RxGlobals.HeadStat.List[headNo].PresOut, checkOut);
 						bool r3 = _inRange((int)RxGlobals.HeadStat.List[headNo].PumpSpeed, checkPump);
+						bool r4 = (checkIn2==null) || _inRange(-RxGlobals.HeadStat.List[headNo].PresIn2, checkIn2);
 
-						Console.WriteLine("Conditioner[{0}].PIN={1}, POUT={2}, Pump={3}, {4} {5} {6}", 
-							headNo, RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3);
-						if (r1&&r2&&r3)
+						Console.WriteLine("Conditioner[{0}].PIN={1}, PIN2={8} POUT={2}, Pump={3}, {4} {5} {6} {7}", 
+							headNo, RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3, r4,  RxGlobals.HeadStat.List[headNo].PresIn2);
+						if (r1&&r2&&r3&&r4)
 						{
 							RxBindable.Invoke(()=>test.State[headNo] = CTC_Test.EN_State.ok);
 						}
@@ -372,6 +388,7 @@ namespace RX_DigiPrint.Models
 				
 				CTC_Settings settings = new CTC_Settings();
 				CTC_Param pressurePar = settings.GetParam("Leak Test", test1.Step, "Pressure",		 500, 0);
+				CTC_Param pressureTimeout = settings.GetParam("Leak Test", test1.Step, "Pressure Timeout",		 20000, 0);
 				CTC_Param timePar     = settings.GetParam("Leak Test", test1.Step, "Check Time",	10000, 0);
 				CTC_Param test1checkPresPar   = settings.GetParam("Leak Test", test1.Step, "Check Pressure",   400, 0);
 				CTC_Param coolerPresPar  = settings.GetParam("Leak Test", "Cooler Pressure", "Cooler_Pressure", 400, 600);
@@ -390,7 +407,7 @@ namespace RX_DigiPrint.Models
 				_SetFluidValve(FLUID_VALVE_SHUTOFF, true);
 				_SetFluidValve(FLUID_VALVE_FLUSH, false);
 				_SetHeadValve(test1, 0, CTC_Test.HEADS, HEAD_VALVE_FLUSH);
-				_CtrlAirPressure(test1, 0, CTC_Test.HEADS, pressurePar.Min);
+				_CtrlAirPressure(test1, 0, CTC_Test.HEADS, pressurePar.Min, pressureTimeout.Min);
 				_CheckHeadPIN(test1, 0, CTC_Test.HEADS, timePar.Min, test1checkPresPar.Min, test1checkPresPar.Max);
 				_SendStop();
 				_SetFluidValve(FLUID_VALVE_SHUTOFF, true);
@@ -491,6 +508,7 @@ namespace RX_DigiPrint.Models
 				CTC_Test test3 = new CTC_Test() { Step = "Print 2" };
 				CTC_Param checkTime3	= settings.GetParam("Valve Test", test3.Step, "Check Time",				10000, 0);
 				CTC_Param checkIn3		= settings.GetParam("Valve Test", test3.Step, "Check Inlet",			30, 50);
+				CTC_Param checkIn3b		= settings.GetParam("Valve Test", test3.Step, "Check Inlet2",			30, 50);
 				CTC_Param checkOut3		= settings.GetParam("Valve Test", test3.Step, "Check Outlet",			90, 110);
 				CTC_Param checkPump3	= settings.GetParam("Valve Test", test3.Step, "Check Pump",				40, 45);
 
@@ -523,16 +541,16 @@ namespace RX_DigiPrint.Models
 
 				//--- check conditioners ---------------
 				CTC_Test.Wait(checkTime.Min, DisplayTimer);
-				ok = _CheckHeadPrinting(test1, 1000, checkIn, checkOut, checkPump);
+				ok = _CheckHeadPrinting(test1, 1000, checkIn, null, checkOut, checkPump);
 
-				//===== TEST ==================================================================================
+				//===== test2: test Valve ==================================================================================
 				test2.Start();
 				RxBindable.Invoke(() => _Tests.Add(test2));
 				_SetFluidValve(FLUID_VALVE_SHUTOFF, true);
 
 				CTC_Test.Wait(10000, DisplayTimer);
 
-				ok = _CheckHeadPrinting(test2, checkTime2.Min, null, null, checkPump2);
+				ok = _CheckHeadPrinting(test2, checkTime2.Min, null, null, null, checkPump2);
 
 				_SetFluidValve(FLUID_VALVE_SHUTOFF, false);
 				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
@@ -540,12 +558,12 @@ namespace RX_DigiPrint.Models
 					_SetFluidValve(FLUID_CYLINDER_0+isNo, false);
 				}
 
-				//=== START again ======================================================
+				//=== test3: Print 2 ======================================================
 
 				test3.Start();
 				RxBindable.Invoke(() => _Tests.Add(test3));
 				CTC_Test.Wait(checkTime3.Min, DisplayTimer);
-				ok = _CheckHeadPrinting(test3, 1000, checkIn3, checkOut3, checkPump3);
+				ok = _CheckHeadPrinting(test3, 1000, checkIn3, checkIn3b, checkOut3, checkPump3);
 
 				_SetMeniscusCheck(true);
 				_SendStop();
@@ -707,7 +725,7 @@ namespace RX_DigiPrint.Models
 
 			//	_LongRun_Running = _CheckHeadPrinting(start, startTime.Min, checkIn, checkOut, checkPump);
 				CTC_Test.Wait(startTime.Min, DisplayTimer);
-				_LongRun_Running = _CheckHeadPrinting(start, 1000, checkIn, checkOut, checkPump);
+				_LongRun_Running = _CheckHeadPrinting(start, 1000, checkIn, null, checkOut, checkPump);
 
 				//_LongRun_Running=true;
 				if (_LongRun_Running)

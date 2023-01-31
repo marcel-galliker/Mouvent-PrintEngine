@@ -844,6 +844,7 @@ typedef struct SHeadStat
     UINT32			tempHeater;
     UINT32			tempSetpoint;
 	INT32			presIn;
+	INT32			presIn2;
 	INT32			presIn_max;
 	INT32			presIn_diff;
 	INT32			flowFactor;
