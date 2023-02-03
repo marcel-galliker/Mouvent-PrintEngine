@@ -346,10 +346,10 @@ namespace RX_DigiPrint.Models
 						bool r1 = _inRange(-RxGlobals.HeadStat.List[headNo].PresIn, checkIn);
 						bool r2 = _inRange(-RxGlobals.HeadStat.List[headNo].PresOut, checkOut);
 						bool r3 = _inRange((int)RxGlobals.HeadStat.List[headNo].PumpSpeed, checkPump);
-						bool r4 = (checkIn2==null) || _inRange(-RxGlobals.HeadStat.List[headNo].PresIn2, checkIn2);
+						bool r4 = _inRange(RxGlobals.HeadStat.List[headNo].PresIn2, checkIn2);
 
 						Console.WriteLine("Conditioner[{0}].PIN={1}, PIN2={8} POUT={2}, Pump={3}, {4} {5} {6} {7}", 
-							headNo, RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3, r4,  RxGlobals.HeadStat.List[headNo].PresIn2);
+							headNo, -RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3, r4,  RxGlobals.HeadStat.List[headNo].PresIn2);
 						if (r1&&r2&&r3&&r4)
 						{
 							RxBindable.Invoke(()=>test.State[headNo] = CTC_Test.EN_State.ok);
