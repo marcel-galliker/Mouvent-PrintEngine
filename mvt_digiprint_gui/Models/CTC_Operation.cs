@@ -339,22 +339,40 @@ namespace RX_DigiPrint.Models
 				bool ok=true;
 				Thread.Sleep(200);
 				time-= 200;
-				for( int headNo=0; headNo<CTC_Test.HEADS; headNo++)
+				for( int cluster=0; cluster<(CTC_Test.HEADS+3)/4; cluster++)
 				{
-					if (test.State[headNo]==CTC_Test.EN_State.running)
+					//--- calculate pumpspeed per cluster ----------
+					int pumpSpeed = 0;
+					int cnt = 0;
+					for (int i=0; i<4; i++)
 					{
-						bool r1 = _inRange(-RxGlobals.HeadStat.List[headNo].PresIn, checkIn);
-						bool r2 = _inRange(-RxGlobals.HeadStat.List[headNo].PresOut, checkOut);
-						bool r3 = _inRange((int)RxGlobals.HeadStat.List[headNo].PumpSpeed, checkPump);
-						bool r4 = _inRange(RxGlobals.HeadStat.List[headNo].PresIn2, checkIn2);
-
-						Console.WriteLine("Conditioner[{0}].PIN={1}, PIN2={8} POUT={2}, Pump={3}, {4} {5} {6} {7}", 
-							headNo, -RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3, r4,  RxGlobals.HeadStat.List[headNo].PresIn2);
-						if (r1&&r2&&r3&&r4)
+						int headNo = 4*cluster+i;
+						if (test.State[headNo]==CTC_Test.EN_State.running)
 						{
-							RxBindable.Invoke(()=>test.State[headNo] = CTC_Test.EN_State.ok);
+							pumpSpeed += (int)RxGlobals.HeadStat.List[headNo].PumpSpeed;
+							cnt++;
 						}
-						else ok=false;
+					}
+					if (cnt>0) pumpSpeed /= cnt;
+				
+					for (int i=0; i<4; i++)
+					{
+						int headNo = 4*cluster+i;
+						if (test.State[headNo]==CTC_Test.EN_State.running)
+						{
+							bool r1 = _inRange(-RxGlobals.HeadStat.List[headNo].PresIn, checkIn);
+							bool r2 = _inRange(RxGlobals.HeadStat.List[headNo].PresIn2, checkIn2);
+							bool r3 = _inRange(-RxGlobals.HeadStat.List[headNo].PresOut, checkOut);
+							bool r4 = _inRange(pumpSpeed, checkPump);
+
+							Console.WriteLine("Conditioner[{0}].PIN={1}, PIN2={8} POUT={2}, Pump={3}, {4} {5} {6} {7}", 
+								headNo, -RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3, r4,  RxGlobals.HeadStat.List[headNo].PresIn2);
+							if (r1&&r2&&r3&&r4)
+							{
+								RxBindable.Invoke(()=>test.State[headNo] = CTC_Test.EN_State.ok);
+							}
+							else ok=false;
+						}
 					}
 				}
 				if (ok) break;
@@ -508,7 +526,7 @@ namespace RX_DigiPrint.Models
 				CTC_Test test3 = new CTC_Test() { Step = "Print 2" };
 				CTC_Param checkTime3	= settings.GetParam("Valve Test", test3.Step, "Check Time",				10000, 0);
 				CTC_Param checkIn3		= settings.GetParam("Valve Test", test3.Step, "Check Inlet",			30, 50);
-				CTC_Param checkIn3b		= settings.GetParam("Valve Test", test3.Step, "Check Inlet2",			30, 50);
+			//	CTC_Param checkIn3b		= settings.GetParam("Valve Test", test3.Step, "Check Inlet2",			30, 50);
 				CTC_Param checkOut3		= settings.GetParam("Valve Test", test3.Step, "Check Outlet",			90, 110);
 				CTC_Param checkPump3	= settings.GetParam("Valve Test", test3.Step, "Check Pump",				40, 45);
 
@@ -563,7 +581,7 @@ namespace RX_DigiPrint.Models
 				test3.Start();
 				RxBindable.Invoke(() => _Tests.Add(test3));
 				CTC_Test.Wait(checkTime3.Min, DisplayTimer);
-				ok = _CheckHeadPrinting(test3, 1000, checkIn3, checkIn3b, checkOut3, checkPump3);
+				ok = _CheckHeadPrinting(test3, 1000, checkIn3, null, checkOut3, checkPump3);
 
 				_SetMeniscusCheck(true);
 				_SendStop();
@@ -583,14 +601,18 @@ namespace RX_DigiPrint.Models
 				RxBindable.Invoke(() => _Tests.Add(new CTC_Test() { Name = "Flow Test" }));
 
 				//--------------------------------------------------
-				CTC_Test longRunTest    = new CTC_Test() { Step = "Flow" };
-				RxBindable.Invoke(() => _Tests.Add(longRunTest));
+				CTC_Test flowTest    = new CTC_Test() { Step = "Flow" };
+				RxBindable.Invoke(() => _Tests.Add(flowTest));
 
 				CTC_Settings settings   = new CTC_Settings();
-				CTC_Param timePar       = settings.GetParam("Flow Test", longRunTest.Step, "Time", 2000, 0);
-				CTC_Param delayPar      = settings.GetParam("Flow Test", longRunTest.Step, "Test Delay", 50000, 0);
-				CTC_Param flowPar	    = settings.GetParam("Flow Test", longRunTest.Step, "Flow", 30, 50);
-				CTC_Param pressure      = settings.GetParam("Flow Test", longRunTest.Step, "Pressure Inlet Cond",    -45, 0);
+				CTC_Param timePar       = settings.GetParam("Flow Test", flowTest.Step, "Time",					 2000,   0);
+				CTC_Param delayPar      = settings.GetParam("Flow Test", flowTest.Step, "Test Delay",			50000,   0);
+				CTC_Param flowPar	    = settings.GetParam("Flow Test", flowTest.Step, "Flow",					   30,  50);
+				CTC_Param pressure      = settings.GetParam("Flow Test", flowTest.Step, "Pressure Inlet Cond",    -45,   0);
+				CTC_Param checkIn		= settings.GetParam("Flow Test", flowTest.Step, "Check Inlet",			   30,  55);
+				CTC_Param checkIn2		= settings.GetParam("Flow Test", flowTest.Step, "Check Inlet2",			  120, 220);
+				CTC_Param checkOut		= settings.GetParam("Flow Test", flowTest.Step, "Check Outlet",			   80, 120);
+				CTC_Param checkPump		= settings.GetParam("Flow Test", flowTest.Step, "Check Pump",			   35,  55);
 
 				//-------------------- start fluid -------------
 				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
@@ -614,7 +636,7 @@ namespace RX_DigiPrint.Models
 					}
 					if (CTC_Test.Overall.State[head] != CTC_Test.EN_State.failed)
 					{
-						RxBindable.Invoke(() => longRunTest.State[head] = CTC_Test.EN_State.running);
+						RxBindable.Invoke(() => flowTest.State[head] = CTC_Test.EN_State.running);
 						
 						//--- start head -----------------------------------
 						for(int h=0; h<CTC_Test.HEADS; h++)
@@ -638,7 +660,7 @@ namespace RX_DigiPrint.Models
 						int interval=1000;
 						int t0=Environment.TickCount;
 						int delay;
-						for (int time = 0; time < timePar.Min && longRunTest.State[head] == CTC_Test.EN_State.running; )
+						for (int time = 0; time < timePar.Min && flowTest.State[head] == CTC_Test.EN_State.running; )
 						{
 							DisplayTimer(timePar.Min-time);
 							time += interval;
@@ -648,12 +670,36 @@ namespace RX_DigiPrint.Models
 
 							if (!_FlowSensor.MeasureFlow(out flow))
 							{
-								RxBindable.Invoke(() =>longRunTest.SetHeadState(head, CTC_Test.EN_State.failed));
+								RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
 								break;
 							}
 
 							if (time >= delayPar.Min)
-							Console.WriteLine("{0}: flow={1}ml/min tick={2}", time, flow, Environment.TickCount-t0);
+							{
+								Console.WriteLine("{0}: flow={1}ml/min tick={2}, PIN={3}, PIN2={4} POUT={5}, Pump={6}", 
+									time, flow, Environment.TickCount-t0,
+									-RxGlobals.HeadStat.List[head].PresIn, RxGlobals.HeadStat.List[head].PresIn2, -RxGlobals.HeadStat.List[head].PresOut, RxGlobals.HeadStat.List[head].PumpSpeed);
+								if (-RxGlobals.HeadStat.List[head].PresIn<checkIn.Min || -RxGlobals.HeadStat.List[head].PresIn>checkIn.Max)
+								{
+									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresIn={1} out ou range {2}..{3}", head+1,  -RxGlobals.HeadStat.List[head].PresIn, checkIn.Min, checkIn.Max){LogType = ELogType.eErrCont}); 
+									RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
+								}
+								if (RxGlobals.HeadStat.List[head].PresIn2<checkIn2.Min || RxGlobals.HeadStat.List[head].PresIn2>checkIn2.Max)
+								{
+									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresIn2={1} out ou range {2}..{3}", head+1, RxGlobals.HeadStat.List[head].PresIn2, checkIn2.Min, checkIn2.Max){LogType = ELogType.eErrCont}); 
+									RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
+								}
+								if (-RxGlobals.HeadStat.List[head].PresOut<checkOut.Min || -RxGlobals.HeadStat.List[head].PresOut>checkOut.Max)
+								{
+									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresOut={1} out ou range {2}..{3}", head+1,  -RxGlobals.HeadStat.List[head].PresOut, checkOut.Min, checkOut.Max){LogType = ELogType.eErrCont}); 
+									RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
+								}
+								if (RxGlobals.HeadStat.List[head].PumpSpeed<checkPump.Min || RxGlobals.HeadStat.List[head].PumpSpeed>checkPump.Max)
+								{
+									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PumpSpeed={1} out ou range {2}..{3}", head+1, RxGlobals.HeadStat.List[head].PumpSpeed, checkPump.Min, checkPump.Max){LogType = ELogType.eErrCont}); 
+									RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
+								}
+							}
 							string str;
 							if (time >= delayPar.Min) str=string.Format("Flow: CHECK\n{0} ml/min", flow);
 							else                      str=string.Format("Flow: prep\n{0} ml/min", flow);
@@ -664,11 +710,11 @@ namespace RX_DigiPrint.Models
 							{
 								Console.WriteLine("Flow ERROR");
 								RxGlobals.Events.AddItem(new LogItem("Long run test: Head[{0}] Flow={1} ml/min at Time={2} ms", head+1, flow, time){LogType = ELogType.eErrCont}); 
-								RxBindable.Invoke(() =>longRunTest.SetHeadState(head, CTC_Test.EN_State.failed));
+								RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
 							}
 						}
 
-						if (longRunTest.State[head] == CTC_Test.EN_State.running) RxBindable.Invoke(() =>longRunTest.SetHeadState(head, CTC_Test.EN_State.ok));
+						if (flowTest.State[head] == CTC_Test.EN_State.running) RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.ok));
 						_FlowSensor.StopMeasurement();
 						DisplayTimer(0);
 					}
