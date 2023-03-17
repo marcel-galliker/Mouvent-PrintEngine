@@ -98,3 +98,4 @@ version.c
 /rx_robot_ctrl/.metadata/.plugins/org.eclipse.ui.workbench.texteditor/dialog_settings.xml
 /rx_robot_ctrl/.metadata/.plugins/org.eclipse.debug.core/.launches/*.launch
 /rx_robot_ctrl/.metadata/version.ini
+/rx_common_lib/Debug-soc
