@@ -123,7 +123,8 @@
                             <rxView:FlushCommands x:Name="FlushCommands" Grid.Column="1"/>
                             <rxView:FluidSettings x:Name="FluidSettings" Grid.Column="2"/>
                             <rxView:Conditioner_Reset x:Name="ConditionerReset" Grid.Column="3"/>
-                            
+                            <rxView:RxTestSlideView x:Name="RxTestSlideView" Grid.Column="3"/>
+
                         </Grid>
                     </GroupBox>
                 </ScrollViewer>

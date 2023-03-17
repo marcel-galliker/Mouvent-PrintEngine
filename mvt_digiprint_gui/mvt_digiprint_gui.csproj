@@ -519,6 +519,9 @@
     <Compile Include="Views\PrintSystemView\FlushCommands.xaml.cs">
       <DependentUpon>FlushCommands.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PrintSystemView\RxTestSlideView.xaml.cs">
+      <DependentUpon>RxTestSlideView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SiemensHMI\Win32ControlHost.cs" />
     <Compile Include="Views\SiemensHMI\SiemensHMI.xaml.cs">
       <DependentUpon>SiemensHMI.xaml</DependentUpon>
@@ -1082,6 +1085,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PrintSystemView\FlushCommands.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintSystemView\RxTestSlideView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

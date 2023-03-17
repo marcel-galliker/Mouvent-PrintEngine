@@ -22,6 +22,8 @@ namespace RX_DigiPrint.Converters
             _Range.Add("PresOut",       new int[2]{ -340, -260 });
             _Range.Add("Meniscus",      new int[2]{ -160, -140 });
             _Range.Add("PumpFeedback",  new int[2]{  240,  400 });
+            _Range.Add("InkFeed",       new int[2]{  240,  400 });
+            _Range.Add("CDA",           new int[2]{  300,  500 });
 
             //--- from file ------------------------------------------
             string fpath = Assembly.GetExecutingAssembly().Location;

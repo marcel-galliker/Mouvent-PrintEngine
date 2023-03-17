@@ -110,7 +110,15 @@ namespace RX_DigiPrint.Views.PrintQueueView
                 return;
             }
 
-            if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
+            if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide)
+            {
+                if (RxGlobals.InkSupply.List[4].CtrlMode!=EFluidCtrlMode.ctrl_print)
+                {
+                    if (!MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.PrintSystem, RX_DigiPrint.Resources.Language.Resources.SomeInkSuppliesAreOff, MessageBoxImage.Question, false))
+                        return;
+                }
+            }
+            else if (!RxGlobals.PrinterStatus.AllInkSupliesOn)
             {
                 if (!MvtMessageBox.YesNo(RX_DigiPrint.Resources.Language.Resources.PrintSystem, RX_DigiPrint.Resources.Language.Resources.SomeInkSuppliesAreOff, MessageBoxImage.Question, false))
                     return;

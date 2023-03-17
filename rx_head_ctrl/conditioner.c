@@ -638,6 +638,8 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 	
 	if (_CtrlMode[headNo] >= ctrl_recovery_step3 && _CtrlMode[headNo] <= ctrl_recovery_step5)		do_jetting(_Recovery_Freq, 2);
     else if (_CtrlMode[headNo] == ctrl_recovery_step5 || _CtrlMode[headNo] == ctrl_off)				fpga_enc_config(0);
+
+	if (RX_HBConfig.printerType==printer_test_slide) cond_set_meniscus_chk(FALSE);
 }
 
 //--- cond_trace_user_eeprom -------------------------------------
@@ -844,6 +846,16 @@ void cond_toggle_meniscus_check(void)
 		_NiosMem->cfg.cond[i].cmd.disable_meniscus_check = !_NiosMem->cfg.cond[i].cmd.disable_meniscus_check;
 
 	RX_HBStatus[0].info.meniscus = _NiosMem->cfg.cond[0].cmd.disable_meniscus_check;
+}
+
+//--- cond_set_meniscus_chk ---------------------------
+void cond_set_meniscus_chk(int enable)
+{
+    for (int i = 0; i < MAX_HEADS_BOARD; i++)
+    {
+        _NiosMem->cfg.cond[i].cmd.disable_meniscus_check = !enable;
+        RX_HBStatus[i].info.meniscus = _NiosMem->cfg.cond[i].cmd.disable_meniscus_check;
+    }
 }
 
 //--- cond_start_log --------------------------------------------------------------

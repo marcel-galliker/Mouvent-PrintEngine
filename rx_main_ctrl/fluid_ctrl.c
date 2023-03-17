@@ -1207,7 +1207,10 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 		
 		for (msg.no=0; msg.no<SIZEOF(FluidStatus); msg.no++)
 		{
-			if (msg.no<RX_Config.inkSupplyCnt || msg.no>=INK_SUPPLY_CNT)	// send also flush and waste
+			int cnt= RX_Config.inkSupplyCnt;
+			if (RX_Config.printer.type == printer_test_slide) cnt = 8;
+
+			if (msg.no<cnt || msg.no>=INK_SUPPLY_CNT)	// send also flush and waste
 			{
 				memcpy(&msg.stat, &FluidStatus[msg.no], sizeof(msg.stat));
 				gui_send_msg(socket, &msg);					

@@ -62,7 +62,7 @@ namespace RX_DigiPrint.Views.PrintSystemView
                 // TODO(CB612) add case for CB612
 
                 StepperGrid.Children.Clear();
-                
+                RxTestSlideView.Visibility =  (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide)? Visibility.Visible : Visibility.Collapsed;
                 switch (RxGlobals.PrintSystem.PrinterType)
                 {
                 case EPrinterType.printer_cleaf:    

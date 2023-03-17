@@ -1319,6 +1319,8 @@ static int _data_split_test(SPageId *id, SBmpInfo *pBmpInfo, int offsetPx, int l
 
 	for (color=0; color<SIZEOF(RX_Spooler.headNo); color++)
 	{
+		if (RX_Spooler.printerType == printer_test_slide && color < 4) continue;
+
 		if (RX_Color[color].spoolerNo==RX_SpoolerNo)
 		{
 			for (n=0; n<SIZEOF(RX_Spooler.headNo[color]); n++)
