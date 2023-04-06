@@ -95,7 +95,6 @@
 #define reMachineActualSpeed PREFIX_PLC_DB "PLC_to_DPU.reMachineActualSpeed"
 
 //--- Externals ---------------------------------------------------------------
-extern SInkSupplyStat FluidStatus[INK_SUPPLY_CNT];
 extern int _lh702ThreadRunning;
 
 //--- Statics -----------------------------------------------------------------
@@ -304,7 +303,7 @@ void *siemens_thread(void *lpParameter)
 							for (int h = 0; h < HEAD_CNT; h++) cluster_hours[index] = max(cluster_hours[index], RX_HBStatus[colorIndex].head[h].printingSeconds / 3600);
 						}
 					}
-					ink_level[i] = FluidStatus[i].canisterLevel;
+					ink_level[i] = RX_FluidStatus[i].canisterLevel;
 				}
 				OPCUA_LOG(opcua_set_uint_array, inHoursCluster, cluster_hours, 21);
 				OPCUA_LOG(opcua_set_uint_array, inInkLevels, ink_level, 7);

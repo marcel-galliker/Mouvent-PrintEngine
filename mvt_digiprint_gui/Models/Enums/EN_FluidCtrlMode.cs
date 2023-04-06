@@ -141,10 +141,12 @@ namespace RX_DigiPrint.Models.Enums
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step9, RX_DigiPrint.Resources.Language.Resources.Recovery9));
             _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_recovery_step10, RX_DigiPrint.Resources.Language.Resources.Recovery10));
 
-            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test_watchdog, RX_DigiPrint.Resources.Language.Resources.TestWDG));
-            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test, RX_DigiPrint.Resources.Language.Resources.Test));
-            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal, RX_DigiPrint.Resources.Language.Resources.CalOffset));
-            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal_done, RX_DigiPrint.Resources.Language.Resources.CalDone));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test_watchdog,     RX_DigiPrint.Resources.Language.Resources.TestWDG));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test,              "Test"));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test_valve,        "Test"));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_test_heater,       "Test"));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal,        RX_DigiPrint.Resources.Language.Resources.CalOffset));
+            _List.Add(new RxEnum<EFluidCtrlMode>(EFluidCtrlMode.ctrl_offset_cal_done,   RX_DigiPrint.Resources.Language.Resources.CalDone));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -40,6 +40,7 @@
 #define		WRITE			0
 #define		READ			1
 #define		LAST_BYTE		1
+#define 	MENISCUS_CHECK_TIME (60*100)
 
 #define		PCB				-1
 
@@ -51,6 +52,10 @@ typedef struct
 	int				i2c;
 	int				isNo;	// number of InkSupply, -1=PSB
 	INT32			*pPressure;
+	INT32			*pPresDiff;
+	INT32			presMin;
+	INT32			presMax;
+	INT32			presCnt;
 	INT32			buf[BUF_SIZE];
 	int				buf_idx;
 	int				buf_valid;
@@ -96,22 +101,30 @@ static void _sensors_init(void)
 
 	_Sensor[IS1_SENSOR].i2c 		= I2C_MASTER_IS1_BASE;
 	_Sensor[IS1_SENSOR].pPressure 	= &pRX_Status->ink_supply[0].IS_Pressure_Actual;
+	_Sensor[IS1_SENSOR].pPresDiff	= &pRX_Status->ink_supply[0].IS_Pressure_Diff;
 	_Sensor[IS1_SENSOR].isNo		= 0;
+	pres_reset_min_max(0);
 
 	_Sensor[IS2_SENSOR].i2c 		= I2C_MASTER_IS2_BASE;
 	_Sensor[IS2_SENSOR].pPressure 	= &pRX_Status->ink_supply[1].IS_Pressure_Actual;
+	_Sensor[IS2_SENSOR].pPresDiff 	= &pRX_Status->ink_supply[1].IS_Pressure_Diff;
 	_Sensor[IS2_SENSOR].isNo		= 1;
+	pres_reset_min_max(1);
 
 	_Sensor[IS3_SENSOR].i2c 		= I2C_MASTER_IS3_BASE;
 	_Sensor[IS3_SENSOR].pPressure 	= &pRX_Status->ink_supply[2].IS_Pressure_Actual;
+	_Sensor[IS3_SENSOR].pPresDiff 	= &pRX_Status->ink_supply[2].IS_Pressure_Diff;
 	_Sensor[IS3_SENSOR].isNo		= 2;
+	pres_reset_min_max(2);
 
 	_Sensor[IS4_SENSOR].i2c 		= I2C_MASTER_IS4_BASE;
 	_Sensor[IS4_SENSOR].pPressure 	= &pRX_Status->ink_supply[3].IS_Pressure_Actual;
+	_Sensor[IS4_SENSOR].pPresDiff 	= &pRX_Status->ink_supply[3].IS_Pressure_Diff;
 	_Sensor[IS4_SENSOR].isNo		= 3;
+	pres_reset_min_max(3);
 
 	_Sensor[FLUSH_SENSOR].i2c 		= I2C_MASTER_F_BASE;
-    _Sensor[FLUSH_SENSOR].pPressure = &pRX_Status->flush_pressure;
+	_Sensor[FLUSH_SENSOR].pPressure = &pRX_Status->flush_pressure;
 	_Sensor[FLUSH_SENSOR].isNo		= PCB;
 
 	_Sensor[DEGAS_SENSOR].i2c 		= I2C_MASTER_D_BASE;
@@ -153,7 +166,7 @@ static void _is_sensor_power(int isNo, int state)
 		if (state) val |=  BLEED_OUT(isNo);
 		else	   val &=  ~BLEED_OUT(isNo);
 		IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
-	}	 
+	}
 }
 
 //--- _is_sensor_25 -----------------------------------
@@ -255,8 +268,35 @@ static void _sensor_read(SSensor *s)
 					if (s->buf[i]>max) max=s->buf[i];
 				}
 				*s->pPressure = (sum-min-max) / (BUF_SIZE-2);
+
+				//--- min/max -------------------------
+				if (s->pPresDiff)
+				{
+					if (++s->presCnt>MENISCUS_CHECK_TIME)
+					{
+						*s->pPresDiff = s->presMax - s->presMin;
+						s->presMin = s->presMax = INVALID_VALUE;
+						s->presCnt = 0;
+					}
+					if (*s->pPressure!=INVALID_VALUE)
+					{
+						if (s->presMin==INVALID_VALUE || *s->pPressure < s->presMin) s->presMin = *s->pPressure;
+						if (s->presMax==INVALID_VALUE || *s->pPressure > s->presMax) s->presMax = *s->pPressure;
+					}
+				}
 			}
 		}
+	}
+}
+
+//--- pres_reset_min_max ---------------------------------
+void pres_reset_min_max(int isNo)
+{
+	if (_Sensor[isNo].pPresDiff)
+	{
+		*_Sensor[isNo].pPresDiff = INVALID_VALUE;
+		_Sensor[isNo].presMin = _Sensor[isNo].presMax = INVALID_VALUE;
+		_Sensor[isNo].presCnt = 0;
 	}
 }
 

@@ -1,6 +1,7 @@
 ﻿using RX_Common;
 using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Services;
+using RX_DigiPrint.Views.ConditionerTestCenterView;
 using RX_DigiPrint.Views.Density;
 using RX_DigiPrint.Views.LB702WBView;
 using RX_DigiPrint.Views.LH702View;
@@ -63,5 +64,7 @@ namespace RX_DigiPrint.Models
         public static Density               Density = new Density();
         public static ClusterNo             ClusterNo = new ClusterNo();
         public static FileNameFilter        FileNameFilter = new FileNameFilter();
+        public static CTC_TestView          CTC_TestView;
+        public static CTC_Operation         CTC_Operation   = new CTC_Operation();
     }
 }

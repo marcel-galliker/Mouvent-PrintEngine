@@ -170,33 +170,40 @@ char RX_CTRL_BROADCAST[16]; // RX_CTRL_SUBNET "255"
 #define CMD_HEAD_FLUID_CTRL_MODE 0x01000104
 #define REP_HEAD_FLUID_CTRL_MODE 0x02000104
 
-#define CMD_GET_DISABLED_JETS	0x01000105
-#define REP_GET_DISABLED_JETS	0x02000105
-#define CMD_SET_DISABLED_JETS	0x01000106
+#define CMD_HEAD_VALVE_TEST		 0x01000105
+#define CMD_HEAD_SET_MENISCUS_CHK 0x01000106
 
-#define CMD_GET_DENSITY_VAL		0x01000107
-#define REP_GET_DENSITY_VAL		0x02000107
-#define CMD_SET_DENSITY_VAL		0x01000108
-#define CMD_SET_ROB_POS			0x01000109
+#define CMD_GET_DISABLED_JETS	0x01000107
+#define REP_GET_DISABLED_JETS	0x02000107
+#define CMD_SET_DISABLED_JETS	0x01000108
 
-#define CMD_PURGE_CLUSTER		0x0100010a
+#define CMD_GET_DENSITY_VAL		0x01000109
+#define REP_GET_DENSITY_VAL		0x02000109
+#define CMD_SET_DENSITY_VAL		0x0100010a
+#define CMD_SET_ROB_POS			0x0100010b
+
+#define CMD_PURGE_CLUSTER		0x0100010c
+
+#define CMD_TEST_HEATER         0x0100010d
+#define CMD_CTC_HEAD_CTRL_MODE  0x0100010e
 
 #define CMD_ENCODER_CFG			0x01000111
 #define REP_ENCODER_CFG			0x02000111
 
 #define CMD_ENCODER_STAT		0x01000112
 #define REP_ENCODER_STAT		0x02000112
+#define CMD_HEAD_ENCODER_FREQ	0x01000113
 
-#define CMD_ENCODER_UV_ON		0x01000113
-#define CMD_ENCODER_UV_OFF		0x01000114
+#define CMD_ENCODER_UV_ON		0x01000114
+#define CMD_ENCODER_UV_OFF		0x01000115
 
-#define CMD_ENCODER_PG_INIT		0x01000115
-#define CMD_ENCODER_PG_DIST		0x01000116
-#define CMD_ENCODER_PG_STOP		0x01000117
-#define CMD_ENCODER_PG_RESTART	0x01000118
+#define CMD_ENCODER_PG_INIT		0x01000116
+#define CMD_ENCODER_PG_DIST		0x01000117
+#define CMD_ENCODER_PG_STOP		0x01000118
+#define CMD_ENCODER_PG_RESTART	0x01000119
 
-#define CMD_ENCODER_DISABLE		0x01000119	// temporary disable the encoder input (CLEAF Splice)
-#define CMD_ENCODER_ENABLE		0x0100011a	// enable after temorary disable
+#define CMD_ENCODER_DISABLE		0x0100011a	// temporary disable the encoder input (CLEAF Splice)
+#define CMD_ENCODER_ENABLE		0x0100011b	// enable after temorary disable
 
 #define CMD_ENCODER_SAVE_PAR	0x0100011c	// save correction parameters	
 #define CMD_ENCODER_SAVE_PAR_1	0x0100011d	// save correction parameters	
@@ -217,11 +224,12 @@ char RX_CTRL_BROADCAST[16]; // RX_CTRL_SUBNET "255"
 
 #define CMD_FLUID_PRESSURE		0x01000126
 
-#define CMD_FLUID_DEGASSER		0x02000127
+#define CMD_FLUID_DEGASSER		0x01000127
+#define CMD_FLUID_SET_VALVE		0x01000128
+#define CMD_SET_FLUSH_PUMP_VAL	0x01000129
 
-#define CMD_SET_FLUSH_PUMP_VAL	0x01000128
-
-#define CMD_FLUID_FLUSH			0x01000129
+#define CMD_FLUID_FLUSH			0x0100012a
+#define CMD_FLUID_TEST			0x0100012b
 
 #define CMD_GET_STEPPER_CFG		0x01000131
 #define REP_GET_STEPPER_CFG		0x02000131
@@ -858,6 +866,28 @@ typedef struct SFluidCtrlCmd
 	int				no;
 	EnFluidCtrlMode	ctrlMode;
 } SFluidCtrlCmd;
+//--- CMD_HEAD_FLUID_CTRL_MODE ------------------------
+typedef struct SFluidTestCmd
+{
+	SMsgHdr			hdr;
+	int				no;
+	int				airPressure;
+	int				airValve;
+} SFluidTestCmd;
+
+typedef struct SHeadTestCmd
+{
+	SMsgHdr			hdr;
+	int				no;	// fluidNo
+	int				valve;
+	int				value;
+} SHeadTestCmd;
+//--- SFluidTestTable ----------------------------------
+typedef struct SFluidTestTable
+{
+	SMsgHdr			hdr;
+	int				index;
+} SFluidTestTable;
 
 //--- SScalesCfgMsg ----------------------
 typedef struct SScalesCfgMsg

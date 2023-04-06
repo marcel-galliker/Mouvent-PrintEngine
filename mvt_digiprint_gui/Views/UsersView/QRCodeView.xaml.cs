@@ -1,27 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using RX_DigiPrint.Helpers;
+﻿using RX_DigiPrint.Helpers;
 using RX_DigiPrint.Models;
 using RX_DigiPrint.Views.Settings;
+using System;
+using System.Windows;
 
 namespace RX_DigiPrint.Views.UsersView
 {
-    /// <summary>
-    /// Class managing the QR code displaying view
-    /// </summary>
-    public partial class QRCodeView : Window
+	/// <summary>
+	/// Class managing the QR code displaying view
+	/// </summary>
+	public partial class QRCodeView : Window
     {
         public QRCodeView(String username)
         {

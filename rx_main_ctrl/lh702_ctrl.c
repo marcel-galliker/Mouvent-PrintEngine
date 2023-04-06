@@ -41,8 +41,6 @@
 //--- Defines -----------------------------------------------------------------
 
 //--- Externals ---------------------------------------------------------------
-extern SInkSupplyStat FluidStatus[INK_SUPPLY_CNT];
-
 typedef struct SStringCmd
 {
 	SMsgHdr		hdr;
@@ -291,7 +289,7 @@ static void _lh702_send_status(void)
 					//_Status2.cluster_hours[index] = RX_HBStatus[index].clusterTime / 3600;
 					_Status2.cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
 				}
-				_Status2.ink_level[i] = FluidStatus[i].canisterLevel;
+				_Status2.ink_level[i] = RX_FluidStatus[i].canisterLevel;
 			}
 			sok_send(&_Socket, &_Status2);
 		}
@@ -306,7 +304,7 @@ static void _lh702_send_status(void)
 					int colorIndex = order[i] * LH702_NB_CLUSTER_PER_COLORS_STATE3 + j;
 					_Status3.cluster_hours[index] = RX_HBStatus[colorIndex].head[0].printingSeconds / 3600;
 				}
-				_Status3.ink_level[i] = FluidStatus[i].canisterLevel;
+				_Status3.ink_level[i] = RX_FluidStatus[i].canisterLevel;
 			}
 			sok_send(&_Socket, &_Status3);			
 		}

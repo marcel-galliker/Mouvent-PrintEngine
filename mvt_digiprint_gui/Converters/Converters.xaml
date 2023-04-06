@@ -25,6 +25,10 @@
     <converters:ConnectedIconColorConverter      x:Key="ConnectedIconColorConverter" />
     
     <converters:CtrlMode_Str                x:Key="CtrlMode_Str"/>
+
+    <converters:CTC_StateImage_Converter    x:Key="CTC_StateImage_Converter"/>
+    <converters:CTC_StateColor_Converter    x:Key="CTC_StateColor_Converter"/>
+
     <converters:DeviceType_Converter        x:Key="DeviceType_Converter"/>
     <converters:DeviceNoVisible_Converter   x:Key="DeviceNoVisible_Converter"/>
     <converters:DirItemVisible_Converter    x:Key="DirItemVisible_Converter"/>

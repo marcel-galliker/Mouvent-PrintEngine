@@ -4887,6 +4887,15 @@ namespace RX_DigiPrint.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Production Test Table.
+        /// </summary>
+        public static string Test_CTC {
+            get {
+                return "Conditioner Test Center";//ResourceManager.GetString("Conditioner Test Center", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Profile Channel 10 (P10).
         /// </summary>
         public static string ProfileChannel10P10 {

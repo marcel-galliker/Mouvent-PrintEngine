@@ -8,6 +8,7 @@
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="sensorID"/>
 			<item value="average"/>
 			<item value="_do_250ms_timer"/>
 			<item value="WRITE_USER_EEPROM"/>
@@ -15,7 +16,6 @@
 			<item value="PIO_ALL_ON_EN_BASE"/>
 			<item value="PIO_FPGA_SHUTDOWN_BASE"/>
 			<item value="pressure"/>
-			<item value="err_overheating"/>
 		</list>
 		<list key="replacehistory">
 		</list>

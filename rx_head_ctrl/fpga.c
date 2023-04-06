@@ -2002,7 +2002,7 @@ static int _check_encoder_tel_freq(void)
 {
 	static UINT32 _enc_tel_cnt=0;
 	static int   _cnt=0;
-	if (FpgaCfg.encoder->cmd & ENC_ENABLE)
+    if (FpgaCfg.encoder->cmd & ENC_ENABLE && RX_HBConfig.printerType != printer_Dropwatcher && RX_HBConfig.printerType != printer_test_CTC)
 	{
 		_EncoderTelFreq = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
 		if (_EncoderTelFreq_delay>0) 

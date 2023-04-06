@@ -102,15 +102,17 @@ namespace RX_DigiPrint.Services
 	    printer_undef,				// 0: not defined
 	    printer_test_table,			// 1:
         printer_test_slide,         // 2:
-        printer_test_slide_only,    // 3: 
+        printer_test_slide_only,    // 3:
         printer_test_table_seon,    // 4:
+        printer_test_slide_HB,      // 5:
+        printer_test_CTC,           // 6:
 
         //--- web printers ------------------------------
         printer_LB701    =1000,	    // 1000: 
         printer_LB702_UV,	        // 1001: 
         printer_LB702_WB,	        // 1002: 
         printer_LH702,              // 1003:
-		printer_LB703_UV,			// 1004
+		printer_LB703_UV,			// 1004:
 
         printer_DP803    =1100,     // 1100:
 	 
@@ -120,6 +122,8 @@ namespace RX_DigiPrint.Services
         printer_TX404,                  // 2002:
 
         printer_CB612 = 3001,
+
+        printer_Dropwatcher = 4000,
 
 	    //--- special projects ----------------
 	    printer_cleaf = 10000,		// 10000: Cleaf machine	
@@ -137,6 +141,9 @@ namespace RX_DigiPrint.Services
         scanning,               // 07
         fullAlignment,          // 08
         density,                // 09
+        SA_Alignment,           // 10
+        SA_Density,             // 11
+        SA_Register,            // 12
     };
 
     public enum EFluidCtrlMode : int
@@ -260,11 +267,11 @@ namespace RX_DigiPrint.Services
         ctrl_recovery_step10,           // 0x50a:
 
         ctrl_test_watchdog = 0x10000,
-	    ctrl_test,				// 0x10001
-        ctrl_offset_cal, 	    // 0x10002
-        ctrl_offset_cal_done,	// 0x10003
-        ctrl_offset_del_factory,// 0x10004
-        ctrl_offset_del_user,   // 0x10005
+	    ctrl_test,				        // 0x10001
+        ctrl_test_valve, 				// 0x10002
+        ctrl_test_heater, 				// 0x10003
+        ctrl_offset_cal, 	            // 0x10004
+        ctrl_offset_cal_done,	        // 0x10005
 
         ctrl_toggle_meniscus = 0x20000,
     };
@@ -387,30 +394,52 @@ namespace RX_DigiPrint.Services
         public const UInt32  CMD_HEAD_FLUID_CTRL_MODE = 0x01000104;
         public const UInt32  REP_HEAD_FLUID_CTRL_MODE = 0x02000104;
         
-        public const UInt32  CMD_GET_DISABLED_JETS=	0x01000105;
-        public const UInt32  REP_GET_DISABLED_JETS=	0x02000105;
-        public const UInt32  CMD_SET_DISABLED_JETS=	0x01000106;
+        public const UInt32  CMD_HEAD_VALVE_TEST	  = 0x01000105;
+        public const UInt32  CMD_HEAD_SET_MENISCUS_CHK= 0x01000106;
 
-        public const UInt32 CMD_GET_DENSITY_VAL = 0x01000107;
-        public const UInt32 REP_GET_DENSITY_VAL = 0x02000107;
-        public const UInt32 CMD_SET_DENSITY_VAL = 0x01000108;
+        public const UInt32  CMD_GET_DISABLED_JETS=	0x01000107;
+        public const UInt32  REP_GET_DISABLED_JETS=	0x02000107;
+        public const UInt32  CMD_SET_DISABLED_JETS=	0x01000108;
 
-        public const UInt32 CMD_PURGE_CLUSTER   = 0x0100010a;
+        public const UInt32 CMD_GET_DENSITY_VAL 	= 0x01000109;
+        public const UInt32 REP_GET_DENSITY_VAL 	= 0x02000109;
+        public const UInt32 CMD_SET_DENSITY_VAL 	= 0x0100010a;
+		public const UInt32 CMD_SET_ROB_POS     	= 0x0100010b;
+
+        public const UInt32 CMD_PURGE_CLUSTER       = 0x0100010c;
         
+        public const UInt32 CMD_TEST_HEATER         = 0x0100010d;
+        public const UInt32 CMD_CTC_HEAD_CTRL_MODE  = 0x0100010e;
+
         public const UInt32 CMD_ENCODER_CFG			= 0x01000111;
         public const UInt32 REP_ENCODER_CFG			= 0x02000111;
 
         public const UInt32 CMD_ENCODER_STAT		= 0x01000112;
         public const UInt32 REP_ENCODER_STAT		= 0x02000112;
 
+		public const UInt32 CMD_HEAD_ENCODER_FREQ   = 0x01000113; // set internal frequence
+
+        public const UInt32 CMD_ENCODER_UV_ON		= 0x01000114;
+        public const UInt32 CMD_ENCODER_UV_OFF		= 0x01000115;
+
+        public const UInt32 CMD_ENCODER_PG_INIT		= 0x01000116;
+        public const UInt32 CMD_ENCODER_PG_DIST		= 0x01000117;
+        public const UInt32 CMD_ENCODER_PG_STOP		= 0x01000118;
+        public const UInt32 CMD_ENCODER_PG_RESTART	= 0x01000119;
+
+        public const UInt32 CMD_ENCODER_DISABLE		= 0x0100011a;	// temporary disable the encoder input (CLEAF Splice)
+        public const UInt32 CMD_ENCODER_ENABLE		= 0x0100011b;	// enable after temorary disable
+
         public const UInt32 CMD_ENCODER_SAVE_PAR	= 0x0100011c;
         public const UInt32 CMD_ENCODER_SAVE_PAR_1	= 0x0100011d;
 
-        public const UInt32  CMD_ENCODER_UV_ON		= 0x01000113;
-        public const UInt32  CMD_ENCODER_UV_OFF		= 0x01000114;
+        public const UInt32 CMD_FLUID_CFG			= 0x01000121;
+        public const UInt32 REP_FLUID_CFG			= 0x02000121;
 
-        public const UInt32  CMD_FLUID_STAT			= 0x01000123;
-        public const UInt32  REP_FLUID_STAT			= 0x02000123;
+        public const UInt32 CMD_FLUID_IS_CFG		= 0x01000122;
+
+        public const UInt32 CMD_FLUID_STAT			= 0x01000123;
+        public const UInt32 REP_FLUID_STAT			= 0x02000123;
 
         public const UInt32 CMD_SET_PURGE_PAR       = 0x01000124;
         public const UInt32 REP_SET_PURGE_PAR       = 0x02000124;
@@ -420,7 +449,10 @@ namespace RX_DigiPrint.Services
 
         public const UInt32  CMD_FLUID_PRESSURE     = 0x01000126;
 
-        public const UInt32 CMD_FLUID_FLUSH         = 0x01000129;
+		public const UInt32 CMD_FLUID_SET_VALVE     = 0x01000128;
+		public const UInt32 CMD_SET_FLUSH_PUMP_VAL  = 0x01000129;
+        public const UInt32 CMD_FLUID_FLUSH         = 0x0100012a;
+		public const UInt32 CMD_FLUID_TEST          = 0x0100012b;
 
         public const UInt32 CMD_GET_STEPPER_CFG		= 0x01000131;
         public const UInt32 REP_GET_STEPPER_CFG		= 0x02000131;
@@ -476,7 +508,6 @@ namespace RX_DigiPrint.Services
         public const UInt32 EVT_PRINTER_STAT	    = 0x03000220;
 
         //--- plc cpommands ------------------------------------------
-        public const UInt32 CMD_PLC_RSEET_ERROR     = 0x01000301;
         public const UInt32 CMD_PLC_GET_INFO		= 0x01000350;
         public const UInt32 REP_PLC_GET_INFO		= 0x02000350;
         public const UInt32 CMD_PLC_RESET_ERROR		= 0x01000351;
@@ -980,9 +1011,13 @@ namespace RX_DigiPrint.Services
 
 	        public Int32	cylinderPresSet;	//  Pressure intermediate Tank
 	        public Int32	cylinderPres;	    //  Pressure intermediate Tank
+	        public Int32	cylinderPresDiff;	//  Pressure intermediate Tank
             public Int32    cylinderSetpoint;	 //  Pressure intermediate Tank
             public Int32    airPressureTime;
             public Int32	flushTime;
+            public Int32    airPressure;
+            public byte     airValve;
+            public byte     bleedValve;
             public Int32	purge_putty_ON;
 	        public Int32    presLung;			//  Lung pressure
             public Int32    condPresOut;  
@@ -1080,6 +1115,24 @@ namespace RX_DigiPrint.Services
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SFluidTestCmd
+        {
+	        public SMsgHdr          hdr;
+	        public Int32			no;
+	        public Int32			airPressure;
+	        public Int32			airValve;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SHeadTestCmd
+        {
+	        public SMsgHdr          hdr;
+	        public Int32			no;
+	        public Int32			valve;
+	        public Int32			value;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SHeadEEpromInfo
         {
             //--- fuji eeprom ---------------------------------
@@ -1142,8 +1195,10 @@ namespace RX_DigiPrint.Services
 	        //--- ink system ---------------------------------
 	        public UInt32			tempHead;
 	        public UInt32			tempCond;
+			public UInt32           tempHeater;
             public UInt32           tempSetpoint;
 	        public Int32			presIn;
+	        public Int32			presIn2;
 	        public Int32			presIn_max;
 	        public Int32			presIn_diff;
 	        public Int32			flowFactor;
@@ -1186,6 +1241,7 @@ namespace RX_DigiPrint.Services
             public Int32        tempFpga;
             public Int32        flow;
             public UInt32       cooler_temp;
+            public Int32        fp_voltage;
  
             //--- warnings/errors ----------------
             public UInt32		info;

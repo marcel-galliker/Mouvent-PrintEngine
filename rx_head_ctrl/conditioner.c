@@ -41,7 +41,7 @@ static FILE					*_LogFile = NULL;
 static int					_LogTimer;
 static SConditionerCfg_mcu	_CfgBackup[MAX_HEADS_BOARD];
 static EnFluidCtrlMode		_CtrlMode[MAX_HEADS_BOARD];
-
+static int					_PressureTestDelay[MAX_HEADS_BOARD];
 
 SFpgaHeadBoardCfg	FpgaCfg;
 SVersion			_FileVersion;
@@ -152,6 +152,8 @@ void cond_shutdown(void)
 void cond_error_reset(void)
 {
 	int i;
+
+	memset(_PressureTestDelay, 0, sizeof(_PressureTestDelay));
 	
 	for (i=0; i<SIZEOF(RX_HBStatus[0].head); i++) 
 	{
@@ -280,11 +282,18 @@ void cond_error_check(int ticks)
         	if (_NiosStat->cond[head].error&COND_ERR_temp_ink_overheat)			ErrorFlag(level=ERR(abort), perr, COND_ERR_temp_ink_overheat,		0, "Conditioner %s: temp_ink_overheat", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_inlet_hw)				ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_inlet_hw,			0, "Conditioner %s: inlet thermistor hardware", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_heater_hw)			ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_heater_hw,			0, "Conditioner %s: heater thermistor hardware", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_temp_head_hw)				ErrorFlag(level=WARN,		pwrn, COND_ERR_temp_head_hw,			0, "Conditioner %s: head temp sensor hardware", headName);				
+            if (RX_HBConfig.printerType != printer_test_CTC)
+            {
+	            if (_NiosStat->cond[head].error&COND_ERR_temp_head_hw)				ErrorFlag(level=WARN,		pwrn, COND_ERR_temp_head_hw,			0, "Conditioner %s: head temp sensor hardware", headName);				            
+            }
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_falling)			ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_tank_falling,		0, "Conditioner %s: temp_tank_falling", headName);
         	if (_NiosStat->cond[head].error&COND_ERR_temp_tank_too_low)		    ErrorFlag(level=ERR(cont),	perr, COND_ERR_temp_tank_too_low,		0, "Conditioner %s: temp_tank_too_low", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level=WARN,		pwrn, COND_ERR_p_in_too_high,			0, "Conditioner %s: input pressure too high", headName);
-        	if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR(abort),	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
+	    	if (RX_HBConfig.printerType == printer_test_CTC && RX_NiosStat.cond[head].info.valve_flush) _PressureTestDelay[head] = rx_get_ticks() + 6000;// Leak test
+			if (_PressureTestDelay[head]==0 || _PressureTestDelay[head]<rx_get_ticks())
+			{
+				if (_NiosStat->cond[head].error&COND_ERR_p_in_too_high)				ErrorFlag(level = WARN, pwrn, COND_ERR_p_in_too_high, 0, "Conditioner %s: input pressure too high", headName);
+        		if (_NiosStat->cond[head].error&COND_ERR_p_out_too_high)			ErrorFlag(level=ERR(abort),	perr, COND_ERR_p_out_too_high,			0, "Conditioner %s: output pressure too high", headName);
+			}
         	if (_NiosStat->cond[head].error&COND_ERR_pump_no_ink)				ErrorFlag(level = ERR(cont),  perr, COND_ERR_pump_no_ink,				0, "Conditioner %s: no ink: actVal=%d, sum=%d", headName, pstat->pressure_out, pstat->pid_sum);
 			if (_NiosStat->cond[head].error&COND_ERR_valve)						ErrorFlag(level = ERR(abort), perr, COND_ERR_valve, 0, "Conditioner %s: valve not switching to INK", headName);
 	    	if (_NiosStat->cond[head].error&COND_ERR_return_pipe)				ErrorFlag(level = ERR(abort), perr, COND_ERR_return_pipe, 0, "Conditioner %s: Return pipe clogged or disconnected", headName);
@@ -357,7 +366,8 @@ static void _update_clusterNo(void)
 	if (sizeof(SHeadEEpromMvt)!=EEPROM_DATA_SIZE) Error(ERR_CONT, 0, "Head User EEPROM size mismatch (size=0x%x, expected=0x%x)", sizeof(SHeadEEpromMvt), EEPROM_DATA_SIZE);
 
 	memset(_cntr, 0, sizeof(_cntr));
-	if (!_NiosStat->info.eeprom_read) Error(ERR_CONT, 0, "EEPROM MVT not read");
+	if (!_NiosStat->info.eeprom_read) 
+		Error(ERR_CONT, 0, "EEPROM MVT not read");
 
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
@@ -457,8 +467,10 @@ static void _cond_copy_status(void)
 				RX_HBStatus->head[i].info				= RX_NiosStat.cond[i].info;
 				RX_HBStatus->head[i].tempHead			= RX_NiosStat.head_temp[i];
 				RX_HBStatus->head[i].tempCond			= RX_NiosStat.cond[i].tempIn;
+                RX_HBStatus->head[i].tempHeater			= RX_NiosStat.cond[i].tempHeater;
 //				RX_HBStatus->head[i].tempSetpoint		= _NiosMem->cfg.cond[i].temp; //RX_NiosStat.cond[i].tempSetpoint;
 				RX_HBStatus->head[i].presIn				= RX_NiosStat.cond[i].pressure_in;
+				RX_HBStatus->head[i].presIn2			= RX_NiosStat.cond[i].pressure_in2;
 				RX_HBStatus->head[i].presIn_max			= RX_NiosStat.cond[i].pressure_in_max;
 				RX_HBStatus->head[i].presIn_diff	    = RX_NiosStat.cond[i].pressure_in_diff;
 				RX_HBStatus->head[i].presOut			= RX_NiosStat.cond[i].pressure_out;
@@ -639,7 +651,8 @@ void cond_ctrlMode(int headNo, EnFluidCtrlMode ctrlMode)
 	if (_CtrlMode[headNo] >= ctrl_recovery_step3 && _CtrlMode[headNo] <= ctrl_recovery_step5)		do_jetting(_Recovery_Freq, 2);
     else if (_CtrlMode[headNo] == ctrl_recovery_step5 || _CtrlMode[headNo] == ctrl_off)				fpga_enc_config(0);
 
-	if (RX_HBConfig.printerType==printer_test_slide) cond_set_meniscus_chk(FALSE);
+	if (RX_HBConfig.printerType==printer_test_slide || RX_HBConfig.printerType==printer_test_CTC) 
+		cond_set_meniscus_chk(FALSE);
 }
 
 //--- cond_trace_user_eeprom -------------------------------------
@@ -737,6 +750,40 @@ void cond_set_purge_par (int headNo, int delay, int time)
 	_NiosMem->cfg.cond[headNo].purgeTime  = time;		
 }
 
+//--- cond_set_valve_test --------------------------------------
+void cond_set_valve_test(int headNo, int valve)
+{
+	if (headNo<0 || headNo>=MAX_HEADS_BOARD || _NiosMem==NULL) return;
+//	if (headNo == 0) Error(LOG, 0, "cond_set_valve_test valve=%d", valve);
+	_NiosMem->cfg.cond[headNo].test_Valve= valve;
+	cond_ctrlMode2(headNo, ctrl_test_valve);
+}
+
+//--- cond_set_valve_test_str --------------------------------------
+void cond_set_valve_test_str(int headNo, char *str)
+{
+	if (headNo < 0 || headNo >= MAX_HEADS_BOARD || _NiosMem == NULL) return;
+	for (char *ch=str; TRUE; ch++)
+	{
+		switch (*ch)
+		{
+		case '\0': return;
+		case 'o': _NiosMem->cfg.cond[headNo].test_Valve= 0;
+				  cond_ctrlMode2(headNo, ctrl_test_valve);
+				  return;
+
+		case 'f': _NiosMem->cfg.cond[headNo].test_Valve= 1;
+				  cond_ctrlMode2(headNo, ctrl_test_valve);
+				  return;
+
+		case 'i': _NiosMem->cfg.cond[headNo].test_Valve= 2;
+				  cond_ctrlMode2(headNo, ctrl_test_valve);
+				  return;
+		default: break;
+		}
+	}
+}
+
 //--- cond_add_droplets_printed ---------------------------------------
 void cond_add_droplets_printed(int headNo, UINT32 droplets, int time)
 {
@@ -825,17 +872,13 @@ static char _err(int err)
 }
 
 //--- cond_heater_test ------------------------------------------------------
-void cond_heater_test(int temp)
+void cond_heater_test(int time)
 {
-	int i;
-	for (i = 0; i < MAX_HEADS_BOARD; i++)
+	for (int i = 0; i < MAX_HEADS_BOARD; i++)
 	{
-		if (temp<=65)
-		{
-			_NiosMem->cfg.cond[i].temp = temp*1000;	
-			_NiosMem->cfg.cond[i].mode = ctrl_print;
-		}
-	}
+		_NiosMem->cfg.cond[i].mode	= ctrl_test_heater;
+       	_NiosMem->cfg.cond[i].test_time = time;
+    }
 }
 
 //--- toggle_cond_meniscus_check ---------------------------

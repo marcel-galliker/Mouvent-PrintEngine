@@ -148,13 +148,11 @@ static int _sensor_read(SSensor *s)
 			//--- convert value --------------
 			if (s->addr == ADDR_SENSOR_1_0_BAR)
 			{
-				if(pressure >= 16500)	pressure = ((pressure- 16500) / 13.5);
-				else					pressure = -((16500 - pressure) / 13.5);
+				pressure = ((pressure- 16500) / 13.5);
 			}
 			else
 			{
-				if(pressure >= 10714)	pressure = (3500*(pressure-10714)) / (30000-3000);
-				else					pressure = -(3500*(pressure-10714)) / (30000-3000);
+				pressure = (3500*(pressure-10714)) / (30000-3000);
 			}
 			
 			//--- save to buffer -----

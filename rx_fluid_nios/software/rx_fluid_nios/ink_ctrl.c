@@ -182,6 +182,7 @@ static void   _set_pump_speed(int isNo, int speed);
 static UINT32 _get_pump_ticks(int isNo);
 static void   _set_air_valve(int isNo, int newState);
 static void   _set_bleed_valve(int isNo, int newState);
+static void   _set_ctc_valves(int state);
 
 // static void _calibrate_inkpump(UINT32 isNo, UINT32 timeout);
 static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode);
@@ -313,6 +314,9 @@ void ink_tick_10ms(void)
 		pRX_Status->duty_degasser = _DutyDegasserCalcul;
 	}
 
+	if (pRX_Config->printerType==printer_test_CTC)
+		_set_ctc_valves(pRX_Config->ctc_valves);
+
 	if (pRX_Config->flush_pump_val <= 0)
 		_set_flush_pump(NIOS_INK_SUPPLY_CNT + 1, FALSE);
 	else
@@ -371,6 +375,7 @@ void ink_tick_10ms(void)
 				// Keep the cylinder pressure close to 0 mbar in OFF
 				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual > 10) _set_air_valve(isNo, PV_OPEN);
 				else if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual < -10) _set_air_valve(isNo, PV_CLOSED);
+			//	_set_air_valve(isNo, PV_CLOSED);
 				_set_bleed_valve(isNo, PV_CLOSED);
 
 				_ShutdownPrint[isNo] = PID_STATE_OFF;
@@ -415,6 +420,7 @@ void ink_tick_10ms(void)
 						_PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet / 5;	// start with low setpoint
 					else _PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet;
 					_StartModePRINT[isNo] = 0;
+					pres_reset_min_max(isNo);
 				}
 				else _StartModePRINT[isNo]++;
 
@@ -1440,6 +1446,7 @@ void ink_tick_10ms(void)
 			default:
 				if (pRX_Config->ink_supply[isNo].ctrl_mode>=ctrl_wipe && pRX_Config->ink_supply[isNo].ctrl_mode<ctrl_fill)
 				{
+				//	_set_air_valve(isNo, PV_OPEN);
 					_set_air_valve(isNo, TRUE);
 					_set_pump_speed(isNo, 0);
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
@@ -1706,6 +1713,23 @@ void _set_bleed_valve(int isNo, int state)
 		else
 			IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, PRESSURE_VALVE_OUT);
 	}
+}
+//--- _set_ctc_valves -----------------------------------------
+static void _set_ctc_valves(int state)
+{
+	int change = pRX_Status->ctc_valves^state;
+	int i;
+	for(i=0; i<7; i++)
+	{
+		if (change&(1<<i))
+		{
+			if(state&(1<<i))
+				IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   (OUTPUT1_OUT<<i));
+			else
+				IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, (OUTPUT1_OUT<<i));
+		}
+	}
+	pRX_Status->ctc_valves = state;
 }
 
 //--- _trace_pump_ctrl ---------------------------------------------

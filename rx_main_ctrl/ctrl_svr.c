@@ -154,8 +154,10 @@ static int _prepare_config()
 	
 	//--- ethernet ports on additional interface board -------------------
 	if (RX_Config.printer.type==printer_cleaf) ethPortCnt=4;
+	else if (RX_Config.printer.type==printer_test_table) ethPortCnt=0;
 	else 
 	{
+	//	ethPortCnt=sok_get_ifcnt("^p[0-9]+p[0-9]+$");
 		ethPortCnt = sok_get_ifcnt();
 		if (ethPortCnt == 0) Error(WARN, 0, "No specific ports for UDP (performance issue detected)"); 
 	}
@@ -687,6 +689,30 @@ int  ctrl_singleHead(void)
 	return _SingleHead;
 }
 
+/*
+//--- ctrl_empty_PurgeBuffer -----------------------------------------
+void ctrl_empty_PurgeBuffer(int fluidNo)
+{
+    int i, j;
+    for (i = 0; i < RX_Config.headsPerColor; i++)
+    {
+        for (j = 0; j < SIZEOF(_BufferFluidCmd); j++)
+        {
+            if (_BufferFluidCmd[j].headNo == fluidNo * RX_Config.headsPerColor + i)
+            {
+                _BufferFluidCmd[j].used = 0;
+                SFluidCtrlCmd cmd;
+                cmd.hdr.msgId = CMD_HEAD_FLUID_CTRL_MODE;
+                cmd.hdr.msgLen = sizeof(cmd);
+                cmd.no = _BufferFluidCmd[j].headNo % HEAD_CNT;
+                cmd.ctrlMode = ctrl_off;
+                sok_send(&_HeadCtrl[_BufferFluidCmd[j].headNo / HEAD_CNT].socket, &cmd);
+            }
+        }
+    }
+}
+*/
+
 //--- ctrl_send_head_fluidCtrlMode --------------------------------------------------------------
 void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int sendToFluid, int fromGui)
 {
@@ -712,6 +738,17 @@ void ctrl_send_head_fluidCtrlMode(int headNo, EnFluidCtrlMode ctrlMode, int send
 	}
 }	
 
+//--- ctrl_send_head_ctc_CtrlMode -----------------------------------
+void ctrl_send_head_ctc_CtrlMode(int headNo, EnFluidCtrlMode ctrlMode)
+{
+	SFluidCtrlCmd cmd;
+	cmd.hdr.msgId	= CMD_HEAD_FLUID_CTRL_MODE;
+	cmd.hdr.msgLen	= sizeof(cmd);
+	cmd.no			= headNo%HEAD_CNT;
+	cmd.ctrlMode	= ctrlMode;
+        
+    sok_send(&_HeadCtrl[headNo/HEAD_CNT].socket, &cmd);
+}
 //--- ctrl_send_all_heads_fluidCtrlMode ------------------------------------
 void ctrl_send_all_heads_fluidCtrlMode(int fluidNo, EnFluidCtrlMode ctrlMode)
 {
@@ -1044,15 +1081,29 @@ void ctrl_reply_stat(RX_SOCKET socket)
 	}
 }
 
+
+//--- ctrl_set_head_encoder_freq ----------------------------------------------
+void ctrl_set_head_encoder_freq(SValue* pdata)
+{
+	if (_HeadCtrl[pdata->no].socket != INVALID_SOCKET)
+		sok_send_2(&_HeadCtrl[pdata->no].socket, CMD_HEAD_ENCODER_FREQ, sizeof(SValue), pdata);
+}
+
 //--- ctrl_set_recovery_freq -----------------------------------------
 void ctrl_set_recovery_freq(int freq_hz)
 {
-	for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
-	{
-		if (_HeadCtrl[i].socket != INVALID_SOCKET)
-			sok_send_2(&_HeadCtrl[i].socket, CMD_SET_RECOVERY_FREQ, sizeof(freq_hz), &freq_hz);
-	}
+    for (int i = 0; i < SIZEOF(_HeadCtrl); i++)
+    {
+        if (_HeadCtrl[i].socket != INVALID_SOCKET)
+            sok_send_2(&_HeadCtrl[i].socket, CMD_SET_RECOVERY_FREQ, sizeof(freq_hz), &freq_hz);
+    }
+}
 
+//--- ctrl_set_head_heater_test ----------------------------------------------
+void ctrl_set_head_heater_test(SValue* pdata)
+{
+	if (_HeadCtrl[pdata->no].socket != INVALID_SOCKET)
+		sok_send_2(&_HeadCtrl[pdata->no].socket, CMD_TEST_HEATER, sizeof(SValue), pdata);
 }
 
 //--- ctrl_set_cluster_no ----------------------------------------------
@@ -1099,4 +1150,20 @@ void ctrl_send_waveform(int fluidNo)
 	{
 		if (RX_Config.headBoard[i / HEAD_CNT].head[i % HEAD_CNT].inkSupply == fluidNo) _send_ink_def(i, "SML", FALSE);
 	}
+}
+
+//--- ctrl_send_head_valve_test --------------------------------------
+void ctrl_send_head_valve_test(SHeadTestCmd *pmsg)
+{
+	sok_send(&_HeadCtrl[pmsg->no/HEAD_CNT].socket, pmsg);
+}
+
+//--- ctrl_send_head_meniscus_chk --------------------------------------
+void ctrl_send_head_meniscus_chk(SHeadTestCmd *pmsg)
+{
+	for (int head = 0; head < SIZEOF(_HeadCtrl); head++)
+    {
+        if (_HeadCtrl[head].socket && _HeadCtrl[head].socket != INVALID_SOCKET)
+			sok_send(&_HeadCtrl[head].socket, pmsg);
+    }    
 }
