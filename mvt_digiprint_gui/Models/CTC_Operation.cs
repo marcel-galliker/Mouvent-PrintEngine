@@ -13,7 +13,6 @@ namespace RX_DigiPrint.Models
 		
 		private CTC_FlowSensor _FlowSensor = new CTC_FlowSensor();
 
-		
 		public Action<int> DisplayTimer = (time)=> { };
 		public Action<string> DisplayFlow = (time)=> { };
 
@@ -187,39 +186,38 @@ namespace RX_DigiPrint.Models
 		{
 			//--- start fluid -----------------------
 			TcpIp.SFluidTestCmd msg = new TcpIp.SFluidTestCmd();
+			bool ok;
 			int time=0;
 			msg.airValve = 1;
 			msg.airPressure=(Int32)(pressure*11/10);
 			if (msg.airPressure>1200) msg.airPressure=1200;
+			ok=false;
 			for(int head= head0; head< head0+cnt; head++)
 			{
-				if (CTC_Test.Overall.State[head]!=CTC_Test.EN_State.failed)
+				if (test.State[head]==CTC_Test.EN_State.running)
 				{
-					test.State[head]=CTC_Test.EN_State.running;
 					msg.no = head/RxGlobals.PrintSystem.HeadsPerColor;
 					Console.WriteLine("CMD_FLUID_TEST head={0}, no={1}, pres={2}, valve={3}", head, msg.no, msg.airPressure, msg.airValve);
 					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_TEST, ref msg);
+					ok=true;
 				}
 			}
 
+			if (!ok) return false;
+
 			time=timeout;
-			bool ok = true;
+			ok=false;
 			while (time>0)
 			{
 				DisplayTimer(time);
 				Thread.Sleep(200);
 				time -= 200;
-				ok = true;
-				for (int head=head0; head< head0+cnt; head++)
+				Console.WriteLine("time={0}, AirPressure={1}", time, RxGlobals.InkSupply.List[0].AirPressure);
+				if (RxGlobals.InkSupply.List[0].AirPressure > pressure-20) 
 				{
-					if (test.State[head]==CTC_Test.EN_State.running)
-					{
-						msg.no=head/RxGlobals.PrintSystem.HeadsPerColor;
-						Console.WriteLine("AirPressure[{0}]={1}", head, RxGlobals.InkSupply.List[msg.no].AirPressure);
-						if (RxGlobals.InkSupply.List[msg.no].AirPressure < pressure) ok=false;
-					}
+					ok=true;
+					break;
 				}
-				if (ok) time = 0;
 			};
 			DisplayTimer(0);
 
@@ -235,6 +233,7 @@ namespace RX_DigiPrint.Models
 				_SetHeadValve(test, 0, CTC_Test.HEADS, HEAD_VALVE_FLUSH);
 				CTC_Test.Wait(5000, DisplayTimer);
 			}
+			else RxGlobals.Events.AddItem(new LogItem("Leak Test {0}: Timeout, fluid did not reach defined pressure", test.Name){LogType = ELogType.eErrCont});
 
 			msg.airPressure=0;
 			for(int head=head0; head< head0+cnt; head++)
@@ -295,7 +294,7 @@ namespace RX_DigiPrint.Models
 				else
 				{
 					bool ok = false;
-					for ( int head=head0; head<head0+cnt; head++)
+					for ( int head=head0; head<head0+cnt && head<RxGlobals.HeadStat.List.Count; head++)
 					{
 						if (test.State[head]==CTC_Test.EN_State.running)
 						{
@@ -306,7 +305,7 @@ namespace RX_DigiPrint.Models
 							}
 							else
 							{
-								if (RxGlobals.HeadStat.List[head].PresIn!=0) RxGlobals.Events.AddItem(new LogItem("Leak Test {0}: Head[{1}].PresIn={2} out of ({3}..{4})", test.Name, head+1, RxGlobals.HeadStat.List[head].PresIn/10, presMin, presMax){LogType = ELogType.eErrCont}); 
+								if (RxGlobals.HeadStat.List[head].PresIn!=0) RxGlobals.Events.AddItem(new LogItem("Leak Test {0}: Head[{1}].PresIn={2} out of ({3}..{4})", test.Name, head+1, RxGlobals.HeadStat.List[head].PresIn/10, presMin, presMax){LogType = ELogType.eErrCont});
 								test.SetHeadState(head, CTC_Test.EN_State.failed);
 							}
 						}
@@ -333,6 +332,11 @@ namespace RX_DigiPrint.Models
 		//--- _CheckHeadPrinting ----------------------------------------------------
 		private bool _CheckHeadPrinting(CTC_Test test, int time, CTC_Param checkIn, CTC_Param checkIn2, CTC_Param checkOut, CTC_Param checkPump)
 		{
+			int[] r1_cnt=new int[test.State.Count];
+			int[] r2_cnt=new int[test.State.Count];
+			int[] r3_cnt=new int[test.State.Count];
+			int[] r4_cnt=new int[test.State.Count];
+
 			while(time>0)
 			{
 				DisplayTimer(time);
@@ -360,13 +364,17 @@ namespace RX_DigiPrint.Models
 						int headNo = 4*cluster+i;
 						if (test.State[headNo]==CTC_Test.EN_State.running)
 						{
-							bool r1 = _inRange(-RxGlobals.HeadStat.List[headNo].PresIn, checkIn);
+							bool r1 = _inRange(RxGlobals.HeadStat.List[headNo].PresIn, checkIn);
 							bool r2 = _inRange(RxGlobals.HeadStat.List[headNo].PresIn2, checkIn2);
-							bool r3 = _inRange(-RxGlobals.HeadStat.List[headNo].PresOut, checkOut);
+							bool r3 = _inRange(RxGlobals.HeadStat.List[headNo].PresOut, checkOut);
 							bool r4 = _inRange(pumpSpeed, checkPump);
+							if (r1) r1_cnt[headNo]++;
+							if (r2) r2_cnt[headNo]++;
+							if (r3) r3_cnt[headNo]++;
+							if (r4) r4_cnt[headNo]++;
 
 							Console.WriteLine("Conditioner[{0}].PIN={1}, PIN2={8} POUT={2}, Pump={3}, {4} {5} {6} {7}", 
-								headNo, -RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3, r4,  RxGlobals.HeadStat.List[headNo].PresIn2);
+								headNo, RxGlobals.HeadStat.List[headNo].PresIn, RxGlobals.HeadStat.List[headNo].PresOut, RxGlobals.HeadStat.List[headNo].PumpSpeed, r1, r2, r3, r4,  RxGlobals.HeadStat.List[headNo].PresIn2);
 							if (r1&&r2&&r3&&r4)
 							{
 								RxBindable.Invoke(()=>test.State[headNo] = CTC_Test.EN_State.ok);
@@ -376,6 +384,20 @@ namespace RX_DigiPrint.Models
 					}
 				}
 				if (ok) break;
+			}
+			for( int cluster=0; cluster<(CTC_Test.HEADS+3)/4; cluster++)
+			{
+				for (int i=0; i<4; i++)
+				{
+					int headNo = 4*cluster+i;
+					if (test.State[headNo] == CTC_Test.EN_State.running)
+					{
+						if (checkIn  !=null && r1_cnt[headNo]==0) RxGlobals.Events.AddItem(new LogItem("{0}.{1}: Head {2}: {3} Failed", checkIn.Name, checkIn.Step, headNo+1, checkIn.Sensor){LogType = ELogType.eErrCont});
+						if (checkIn2 !=null && r2_cnt[headNo]==0) RxGlobals.Events.AddItem(new LogItem("{0}.{1}: Head {2}: {3} Failed", checkIn2.Name, checkIn2.Step, headNo+1, checkIn2.Sensor){LogType = ELogType.eErrCont});
+						if (checkOut !=null && r3_cnt[headNo]==0) RxGlobals.Events.AddItem(new LogItem("{0}.{1}: Head {2}: {3} Failed", checkOut.Name, checkOut.Step, headNo+1, checkOut.Sensor){LogType = ELogType.eErrCont});
+						if (checkPump!=null && r4_cnt[headNo]==0) RxGlobals.Events.AddItem(new LogItem("{0}.{1}: Head {2}: {3} Failed", checkPump.Name, checkPump.Step, headNo+1, checkPump.Sensor){LogType = ELogType.eErrCont});
+					}
+				}
 			}
 			test.Done(CTC_Test.EN_State.failed);
 			return true;
@@ -543,7 +565,7 @@ namespace RX_DigiPrint.Models
 				//--- start ink supplies ------------------------------------
 				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
 				{
-					_SetFluidValve(FLUID_CYLINDER_0+isNo, true);
+				//	_SetFluidValve(FLUID_CYLINDER_0+isNo, true);
 					if (isUsed[isNo])
 					{
 						TcpIp.SValue msg = new TcpIp.SValue(){no=isNo, value=(Int32)pressure.Min};
@@ -571,6 +593,7 @@ namespace RX_DigiPrint.Models
 				ok = _CheckHeadPrinting(test2, checkTime2.Min, null, null, null, checkPump2);
 
 				_SetFluidValve(FLUID_VALVE_SHUTOFF, false);
+				
 				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
 				{
 					_SetFluidValve(FLUID_CYLINDER_0+isNo, false);
@@ -678,10 +701,10 @@ namespace RX_DigiPrint.Models
 							{
 								Console.WriteLine("{0}: flow={1}ml/min tick={2}, PIN={3}, PIN2={4} POUT={5}, Pump={6}", 
 									time, flow, Environment.TickCount-t0,
-									-RxGlobals.HeadStat.List[head].PresIn, RxGlobals.HeadStat.List[head].PresIn2, -RxGlobals.HeadStat.List[head].PresOut, RxGlobals.HeadStat.List[head].PumpSpeed);
-								if (-RxGlobals.HeadStat.List[head].PresIn<checkIn.Min || -RxGlobals.HeadStat.List[head].PresIn>checkIn.Max)
+									RxGlobals.HeadStat.List[head].PresIn, RxGlobals.HeadStat.List[head].PresIn2, -RxGlobals.HeadStat.List[head].PresOut, RxGlobals.HeadStat.List[head].PumpSpeed);
+								if (RxGlobals.HeadStat.List[head].PresIn<checkIn.Min || RxGlobals.HeadStat.List[head].PresIn>checkIn.Max)
 								{
-									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresIn={1} out ou range {2}..{3}", head+1,  -RxGlobals.HeadStat.List[head].PresIn, checkIn.Min, checkIn.Max){LogType = ELogType.eErrCont}); 
+									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresIn={1} out ou range {2}..{3}", head+1,  RxGlobals.HeadStat.List[head].PresIn, checkIn.Min, checkIn.Max){LogType = ELogType.eErrCont}); 
 									RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
 								}
 								if (RxGlobals.HeadStat.List[head].PresIn2<checkIn2.Min || RxGlobals.HeadStat.List[head].PresIn2>checkIn2.Max)
@@ -689,9 +712,9 @@ namespace RX_DigiPrint.Models
 									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresIn2={1} out ou range {2}..{3}", head+1, RxGlobals.HeadStat.List[head].PresIn2, checkIn2.Min, checkIn2.Max){LogType = ELogType.eErrCont}); 
 									RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
 								}
-								if (-RxGlobals.HeadStat.List[head].PresOut<checkOut.Min || -RxGlobals.HeadStat.List[head].PresOut>checkOut.Max)
+								if (RxGlobals.HeadStat.List[head].PresOut<checkOut.Min || RxGlobals.HeadStat.List[head].PresOut>checkOut.Max)
 								{
-									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresOut={1} out ou range {2}..{3}", head+1,  -RxGlobals.HeadStat.List[head].PresOut, checkOut.Min, checkOut.Max){LogType = ELogType.eErrCont}); 
+									RxGlobals.Events.AddItem(new LogItem("Flow test: Head[{0}]: PresOut={1} out ou range {2}..{3}", head+1,  RxGlobals.HeadStat.List[head].PresOut, checkOut.Min, checkOut.Max){LogType = ELogType.eErrCont}); 
 									RxBindable.Invoke(() =>flowTest.SetHeadState(head, CTC_Test.EN_State.failed));
 								}
 								if (RxGlobals.HeadStat.List[head].PumpSpeed<checkPump.Min || RxGlobals.HeadStat.List[head].PumpSpeed>checkPump.Max)
@@ -799,7 +822,7 @@ namespace RX_DigiPrint.Models
 
 								if (testDelay[head]<=0)
 								{
-									bool r1 = _inRange(-RxGlobals.HeadStat.List[head].PresIn, checkIn);
+									bool r1 = _inRange(RxGlobals.HeadStat.List[head].PresIn, checkIn);
 									bool r2 = _inRange(-RxGlobals.HeadStat.List[head].PresOut, checkOut);
 									bool r3 = _inRange((int)RxGlobals.HeadStat.List[head].PumpSpeed, checkPump);
 
@@ -870,10 +893,12 @@ namespace RX_DigiPrint.Models
 					RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_TEST, ref msg);
 				}
 
+				/*
 				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
 				{
 					_SetFluidValve(FLUID_CYLINDER_0+isNo, true);
 				}
+				*/
 
 				// _CtrlAirPressure(runEmpty, 0, TcpIp.HEAD_CNT, 2000);
 				for (int head = 0; head < CTC_Test.HEADS; head++)
