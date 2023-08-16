@@ -91,14 +91,13 @@ namespace RX_DigiPrint.Views.PrintSystemView
             }
             _assign_inksupply(cnt);
             for (i = 0; i < PrintHeadStack.Children.Count; i++)
-                    {
+            {
                 no = (int)(i / RxGlobals.PrintSystem.HeadsPerColor);
                 no = RxGlobals.PrintSystem.IS_Order[no];
-                _PrintHeadView[i].Visibility = (i < cnt && (RxGlobals.PrintSystem.AllInkSupplies || no == RxGlobals.PrintSystem.CheckedInkSupply)) ? Visibility.Visible : Visibility.Collapsed;
-                    }
-            Grid.RowDefinitions[1].Height = new GridLength(25 / RxGlobals.Screen.Scale);
-                }
+                _PrintHeadView[i].Visibility = (i < cnt && (RxGlobals.PrintSystem.AllInkSupplies || no == RxGlobals.PrintSystem.CheckedInkSupply)) ? Visibility.Visible : Visibility.Collapsed;                    
             }
+        }
+    }
 }
 
 

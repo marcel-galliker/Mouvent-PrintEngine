@@ -15,19 +15,19 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="26"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding Color}"  VerticalAlignment="Center"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding No}" Height="26"  Margin="2" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{mvt:LocalizedBinding No}"  Margin="2" VerticalAlignment="Center"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding ControlMode}" Height="26" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{mvt:LocalizedBinding ControlMode}" VerticalAlignment="Center" />
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="{mvt:LocalizedBinding TemperatureHead}" Name="Temp_Head"/>
         <TextBlock Grid.Row="3" Grid.Column="1" Text="°C"  Name="Temp_Head_Txt"/>
@@ -43,9 +43,9 @@
 				<ColumnDefinition Width="50"/>
 			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
-				<RowDefinition Height="auto"/>
-				<RowDefinition Height="auto"/>
-				<RowDefinition Height="auto"/>
+				<RowDefinition Height="20"/>
+				<RowDefinition Height="20"/>
+				<RowDefinition Height="20"/>
 			</Grid.RowDefinitions>
 			<TextBlock Grid.Row="0" Grid.Column="0" Text="{mvt:LocalizedBinding PumpSpeed}"/>
 			<TextBlock Grid.Row="0" Grid.Column="1" Text="ml/min"/>
@@ -61,17 +61,17 @@
                 <ColumnDefinition Width="50"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="20"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
