@@ -847,8 +847,10 @@ typedef struct SHeadStat
 	//--- ink system ---------------------------------
 	UINT32			tempHead;
 	UINT32			tempCond;
+	UINT32			tempHeater;
 	UINT32			tempSetpoint;
 	INT32			presIn;
+	INT32			presIn2;
 	INT32			presIn_max;
 	INT32			presIn_diff;
 	INT32			flowFactor;
@@ -911,6 +913,7 @@ typedef struct SHeadBoardStat
 	INT32		tempFpga;
 	UINT32		flow;
 	UINT32		cooler_temp;
+	INT32		fp_voltage;
 	
 	//--- warnings/errors ----------------
 	SHeadInfo		info;
@@ -1244,9 +1247,14 @@ typedef struct SInkSupplyStat
 	
 	INT32	cylinderPresSet;	//  Pressure intermediate Tank Set
 	INT32	cylinderPres;		//  Pressure intermediate Tank
+	INT32	cylinderPresDiff;
 	INT32	cylinderSetpoint;		//  Pressure intermediate Tank
 	INT32	airPressureTime;
 	INT32	flushTime;
+	INT32   airPressure;
+	BYTE    airValve;
+    BYTE	bleedValve;
+
 	INT32	purge_putty_ON;
 	INT32   presLung;			//  Lung pressure
 	INT32	condPresOut;	
@@ -1801,6 +1809,7 @@ extern SPrinterStatus	RX_PrinterStatus;
 extern SEncoderStat		RX_EncoderStatus;
 extern SEncoderCfg		RX_EncoderCfg;
 extern SFluidBoardStat	RX_FluidBoardStatus;
+extern SInkSupplyStat   RX_FluidStatus[INK_SUPPLY_CNT+2];
 extern SStepperStat	RX_StepperStatus;
 extern SStepperStat	RX_ClnStatus;
 extern SPrintQueueItem  RX_TestImage;

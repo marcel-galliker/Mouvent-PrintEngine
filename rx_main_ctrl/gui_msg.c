@@ -34,7 +34,6 @@
 #include "setup.h"
 #include "chiller.h"
 #include "rx_setup_file.h"
-#include "pe_main.h"
 #include "rip_clnt.h"
 #include "step_ctrl.h"
 #include "boot_svr.h"
@@ -81,9 +80,12 @@ static void _do_get_ink_def		(RX_SOCKET socket);
 static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg);
 static void _do_get_disalbled_jets(RX_SOCKET socket, SDisabledJetsMsg *pmsg);
 static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
+static void _do_ctc_head_CtrlMode (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
+
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
-static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue* pmsg);
+static void _do_fluid_heads_per_color	  (RX_SOCKET socket, SValue*		pmsg);
+static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue*		pmsg);
 static void _do_scales_tara		  (RX_SOCKET socket, SValue*        pmsg);
 static void _do_scales_calib	  (RX_SOCKET socket, SValue*        pmsg);
 
@@ -109,6 +111,10 @@ static void _do_get_prn_stat	(RX_SOCKET socket);
 
 static void _do_test_start		(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_clean_start		(RX_SOCKET socket);
+
+static void _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg);
+static void _do_head_valve_test (RX_SOCKET socket, SHeadTestCmd* pmsg);
+static void _do_head_meniscus_chk (RX_SOCKET socket, SHeadTestCmd* pmsg);
 
 //--- handle_gui_msg ---------------------------------------------
 int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sender, void *par)
@@ -184,10 +190,16 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_ENCODER_SAVE_PAR_1:enc_save_par(1);													break;
 
 		case CMD_HEAD_FLUID_CTRL_MODE: _do_head_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break;
+		case CMD_CTC_HEAD_CTRL_MODE:   _do_ctc_head_CtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break; 
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);						break;
+		case CMD_FLUID_HEADS_PER_COLOR:	_do_fluid_heads_per_color(socket, (SValue*)pdata);						break;
 		case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
 		case CMD_PURGE_CLUSTER:			_do_fluid_purge_cluster(socket, (SValue*)pdata);				break;
+		case CMD_FLUID_TEST:			_do_fluid_test (socket, (SFluidTestCmd *) pmsg);				break;
+		case CMD_FLUID_SET_VALVE:		fluid_send_valve((SHeadTestCmd*)pmsg);							break;
+		case CMD_HEAD_VALVE_TEST:		_do_head_valve_test(socket, (SHeadTestCmd*) pmsg);				break;
+		case CMD_HEAD_SET_MENISCUS_CHK:	_do_head_meniscus_chk(socket, (SHeadTestCmd*) pmsg);			break;
 
 		case CMD_SCALES_TARA:		_do_scales_tara(socket, (SValue*)pdata);						break;				
 		case CMD_SCALES_CALIBRATE:	_do_scales_calib(socket, (SValue*)pdata);						break;				
@@ -233,7 +245,9 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_RESET_COND:		ctrl_reset_cond();												break;
 		case CMD_JETTING_START:		step_tts_jetting_start();										break;
 		case CMD_JETTING_ABORT:		step_tts_abort_printing();										break;
-			
+		case CMD_HEAD_ENCODER_FREQ:  ctrl_set_head_encoder_freq((SValue*)pdata);					break;
+		case CMD_TEST_HEATER:		 ctrl_set_head_heater_test((SValue*)pdata);						break;
+		
 		default: Error(WARN, 0, "Unknown Command 0x%08x", phdr->msgId);
 		}
 	}
@@ -918,7 +932,6 @@ static void _do_get_density_val	  (RX_SOCKET socket, SDensityValuesMsg *pmsg)
 				if (setup_chapter(file, "Head", head, READ)==REPLY_OK) 
 				{
 					setup_uchar    (file, "voltage", READ, &reply.voltage, 0);
-				//	setup_int16_arr(file, "value",    READ, reply.value,	SIZEOF(reply.value),	0);	
 					setup_int16_arr(file, "density",  READ, reply.value,	SIZEOF(reply.value),	0);					
 					setup_chapter(file, "..", -1, READ);
 				}
@@ -977,6 +990,12 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 	else ctrl_send_head_fluidCtrlMode(pmsg->no, pmsg->ctrlMode, TRUE, TRUE);
 }
 
+//--- _do_ctc_head_CtrlMode -------------------------------------------------------
+static void _do_ctc_head_CtrlMode (RX_SOCKET socket, SFluidCtrlCmd* pmsg)
+{
+	ctrl_send_head_ctc_CtrlMode(pmsg->no, pmsg->ctrlMode);
+}
+
 //--- _do_fluid_purge_cluster -----------------------------------------
 static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue* pmsg)
 {
@@ -986,9 +1005,33 @@ static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue* pmsg)
 		ctrl_send_head_fluidCtrlMode(start_headNo, ctrl_purge_hard, TRUE, TRUE);
 }
 
+//--- _do_fluid_test -----------------------------------------------------------
+static void _do_fluid_test(RX_SOCKET socket, SFluidTestCmd *pmsg)
+{
+	fluid_send_test(pmsg->no, pmsg);
+	/*
+	if (RX_Config.headsPerColor > 0 && pmsg->no % RX_Config.headsPerColor == 0)
+	{
+		fluid_send_test(pmsg->no/RX_Config.headsPerColor, pmsg);
+	}
+	*/
+}
+
+//--- _do_head_valve_test ------------------------------------------------------
+static void _do_head_valve_test (RX_SOCKET socket, SHeadTestCmd *pmsg)
+{
+	ctrl_send_head_valve_test(pmsg);
+}
+
+//--- _do_head_meniscus_chk ------------------------------------------------------
+static void _do_head_meniscus_chk (RX_SOCKET socket, SHeadTestCmd *pmsg)
+{
+	ctrl_send_head_meniscus_chk(pmsg);
+}
 //--- _do_fluidCtrlMode ---
 static void _do_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 {
+//  if (pmsg->ctrlMode == ctrl_off) ctrl_empty_PurgeBuffer(pmsg->no);
 	fluid_send_ctrlMode(pmsg->no, pmsg->ctrlMode, TRUE);
 }
 
@@ -996,6 +1039,12 @@ static void _do_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 static void _do_fluid_pressure(RX_SOCKET socket, SValue* pmsg)
 {
 	fluid_send_pressure(pmsg->no, pmsg->value);
+}
+
+//--- _do_fluid_pressure ---
+static void _do_fluid_heads_per_color(RX_SOCKET socket, SValue* pmsg)
+{
+	fliud_heads_per_color(pmsg->value);
 }
 
 //--- _do_scales_tara ----------------------------------------------
@@ -1200,8 +1249,8 @@ static void _do_pause_printing	(RX_SOCKET socket)
 static void _do_external_data	(RX_SOCKET socket, int state)
 {
 	RX_PrinterStatus.externalData = state;
-	if (state)	pem_set_config();
-	else        pem_end(); 
+//	if (state)	pem_set_config();
+//	else        pem_end(); 
 	gui_send_printer_status(&RX_PrinterStatus);
 }
 

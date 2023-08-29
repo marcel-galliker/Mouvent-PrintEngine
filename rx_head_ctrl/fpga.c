@@ -661,7 +661,7 @@ void fpga_enc_config(int hz)
     if (!FpgaCfg.encoder->synth.enable && hz)
     {
         nios_set_firepulse_on(TRUE);
-        rx_sleep(200);
+        rx_sleep(90); // avoid MAIN cycletime warnings 
         SET_FLAG(FpgaCfg.cfg->cmd, CMD_MASTER_ENABLE, TRUE);
     }
     _fpga_enc_config(hz);
@@ -2002,7 +2002,7 @@ static int _check_encoder_tel_freq(void)
 {
 	static UINT32 _enc_tel_cnt=0;
 	static int   _cnt=0;
-	if (FpgaCfg.encoder->cmd & ENC_ENABLE)
+    if (FpgaCfg.encoder->cmd & ENC_ENABLE && RX_HBConfig.printerType != printer_Dropwatcher && RX_HBConfig.printerType != printer_test_CTC)
 	{
 		_EncoderTelFreq = Fpga.error->enc_tel_cnt-_enc_tel_cnt;
 		if (_EncoderTelFreq_delay>0) 

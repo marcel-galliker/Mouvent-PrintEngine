@@ -12,7 +12,7 @@
     <RemoteDebuggerWorkingDirectory>$(TargetDir)</RemoteDebuggerWorkingDirectory>
     <RemoteDebuggerServerName>192.168.200.1</RemoteDebuggerServerName>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>+simuplc +simuencoder +simuchiller -debug -localsubnet</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-simuplc -simuencoder -simuchiller -debug -localsubnet</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Remote|Win32'">
     <RemoteDebuggerCommand>$(RemoteDir)$(Configuration)\$(TargetFileName)</RemoteDebuggerCommand>

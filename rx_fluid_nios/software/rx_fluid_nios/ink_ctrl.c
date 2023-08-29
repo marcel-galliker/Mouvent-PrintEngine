@@ -182,6 +182,7 @@ static void   _set_pump_speed(int isNo, int speed);
 static UINT32 _get_pump_ticks(int isNo);
 static void   _set_air_valve(int isNo, int newState);
 static void   _set_bleed_valve(int isNo, int newState);
+static void   _set_ctc_valves(int state);
 
 // static void _calibrate_inkpump(UINT32 isNo, UINT32 timeout);
 static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode);
@@ -233,6 +234,8 @@ void ink_init(void)
 		_PumpSpeed1000[isNo]		   = 0;
 		pRX_Status->ink_supply[isNo].cylinderPresSet = INVALID_VALUE; // 150;
 		pRX_Status->ink_supply[isNo].condPumpSpeedSet = INVALID_VALUE;
+		
+		_set_pump_speed(isNo, 0);
 	}
 //	_PurgeNo	   = -1;
 }
@@ -309,9 +312,12 @@ void ink_tick_10ms(void)
 			}
 		}
 
-		// duty degasse
+		// duty degasser
 		pRX_Status->duty_degasser = _DutyDegasserCalcul;
 	}
+
+	if (pRX_Config->printerType==printer_test_CTC)
+		_set_ctc_valves(pRX_Config->ctc_valves);
 
 	if (pRX_Config->flush_pump_val <= 0)
 		_set_flush_pump(NIOS_INK_SUPPLY_CNT + 1, FALSE);
@@ -415,6 +421,8 @@ void ink_tick_10ms(void)
 						_PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet / 5;	// start with low setpoint
 					else _PressureSetpoint[isNo] = pRX_Status->ink_supply[isNo].cylinderPresSet;
 					_StartModePRINT[isNo] = 0;
+					pid_reset(&_InkSupply[isNo].pid_Setpoint);
+					pres_reset_min_max(isNo);
 				}
 				else _StartModePRINT[isNo]++;
 
@@ -1435,6 +1443,8 @@ void ink_tick_10ms(void)
 				//_set_air_valve(isNo, PV_OPEN);
 				if (pRX_Status->ink_supply[isNo].IS_Pressure_Actual <= RECOVERY_PRESSURE_END)
 					pRX_Status->ink_supply[isNo].ctrl_state = pRX_Config->ink_supply[isNo].ctrl_mode;
+				else
+					_set_pump_speed(isNo, 0);
 				break;
 
 			default:
@@ -1661,6 +1671,22 @@ static int _degass_ctrl(void)
 	return (pRX_Status->vacuum_solenoid);
 }
 
+//--- _set_reg_out -------------------------------------
+static int _set_reg_out(int base, int offset, UINT16 val)
+{
+	volatile UINT8 delay;
+	int tries;
+	for (tries=0; tries<5; tries++)
+	{
+		IOWR_16DIRECT(base, offset, val);
+		for (delay = 0; delay < 100; delay++){};
+		if (IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT)==val) return 0;
+		for (delay = 0; delay < 100; delay++){};
+		if (IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT)==val) return 0;
+	}
+	return 1;
+}
+
 //--- _set_air_valve -----------------------------------------
 void _set_air_valve(int isNo, int state)
 {
@@ -1672,7 +1698,7 @@ void _set_air_valve(int isNo, int state)
 			UINT16 val = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT);
 			if (state) val |= AIR_CUSSION_OUT(isNo);
 			else	   val &= ~AIR_CUSSION_OUT(isNo);
-			IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
+			_set_reg_out(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
 		}
 		pRX_Status->ink_supply[isNo].airValve = state;
 	} 
@@ -1689,7 +1715,7 @@ void _set_bleed_valve(int isNo, int state)
 			UINT16 val = IORD_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT);
 			if (state) 	val |=  BLEED_OUT(isNo);
 			else		val &= ~BLEED_OUT(isNo);
-			IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
+			_set_reg_out(AXI_LW_SLAVE_REGISTER_0_BASE, GPIO_REG_OUT, val);
 		}
 		pRX_Status->ink_supply[isNo].bleedValve = state;
 	}	
@@ -1706,6 +1732,23 @@ void _set_bleed_valve(int isNo, int state)
 		else
 			IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, PRESSURE_VALVE_OUT);
 	}
+}
+//--- _set_ctc_valves -----------------------------------------
+static void _set_ctc_valves(int state)
+{
+	int change = pRX_Status->ctc_valves^state;
+	int i;
+	for(i=0; i<7; i++)
+	{
+		if (change&(1<<i))
+		{
+			if(state&(1<<i))
+				IOWR_ALTERA_AVALON_PIO_SET_BITS(PIO_OUTPUT_BASE,   (OUTPUT1_OUT<<i));
+			else
+				IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PIO_OUTPUT_BASE, (OUTPUT1_OUT<<i));
+		}
+	}
+	pRX_Status->ctc_valves = state;
 }
 
 //--- _trace_pump_ctrl ---------------------------------------------
@@ -1745,17 +1788,18 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 		//-----------------------------------------------------------------------------------------
 
 		pRX_Status->ink_supply[isNo].COND_Pressure_Actual 	= pRX_Config->ink_supply[isNo].condPresIn;
-		if(pRX_Config->headsPerColor == 1)		_InkSupply[isNo].pid_Setpoint.P = PID_SETPOINT_P_PRINT_HEAD;
-		else if(pRX_Config->headsPerColor == 4) _InkSupply[isNo].pid_Setpoint.P = PID_SETPOINT_P_PRINT_4_HEADS;
-		else									_InkSupply[isNo].pid_Setpoint.P = PID_SETPOINT_P_PRINT_8_HEADS;
-
+		if 		(pRX_Config->headsPerColor>=8) _InkSupply[isNo].pid_Setpoint.P = PID_SETPOINT_P_PRINT_8_HEADS;
+		else if (pRX_Config->headsPerColor>=4) _InkSupply[isNo].pid_Setpoint.P = PID_SETPOINT_P_PRINT_4_HEADS;
+		else 								   _InkSupply[isNo].pid_Setpoint.P = PID_SETPOINT_P_PRINT_HEAD;
 		// Regulation of Conditioners Pinlet
 		if(print_mode == PUMP_CTRL_MODE_PRINT)
 		{
 			// MODIF 3 : PID 1 anticipate decreasing if Meniscus out of range, by 
 			_InkSupply[isNo].pid_Setpoint.Setpoint = pressure_target;
-			if (pRX_Config->ink_supply[isNo].condMeniscus > -120)
-				 _InkSupply[isNo].pid_Setpoint.Setpoint -= (pRX_Config->ink_supply[isNo].condMeniscus + 120);
+
+		//	if (pRX_Config->ink_supply[isNo].condMeniscus > -120)
+		//		 _InkSupply[isNo].pid_Setpoint.Setpoint -= (pRX_Config->ink_supply[isNo].condMeniscus + 120);
+
 			pid_calc(pRX_Status->ink_supply[isNo].COND_Pressure_Actual, &_InkSupply[isNo].pid_Setpoint);
 			pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	= _InkSupply[isNo].pid_Setpoint.val;
 		
@@ -1766,6 +1810,7 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 				if(_InkSupply[isNo].pid_Setpoint.val > _MaxPrintPressure[isNo])
 					_MaxPrintPressure[isNo] = _InkSupply[isNo].pid_Setpoint.val;
 			}
+
 			// reset pid if output at 0, no reason to accumulate negative value (never want pressure negative)
 			if(_InkSupply[isNo].pid_Setpoint.val <= _InkSupply[isNo].pid_Setpoint.val_min)
 				pid_reset(&_InkSupply[isNo].pid_Setpoint);
@@ -1845,11 +1890,21 @@ void _set_pump_speed(int isNo, int speed)
 {
 	if (speed!=INVALID_VALUE)
 	{
-		IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_0 + (isNo << 2), speed);
+		int error=_set_reg_out(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_0 + (isNo << 2), speed);
 		//if (_InkSupply[isNo].pid.val_max) pRX_Status->ink_supply[isNo].inkPumpSpeed_set  = 600 * speed / _InkSupply[isNo].pid.val_max; // 100%=600 ml
 		//if (_InkSupply[isNo].pid.val_max) pRX_Status->ink_supply[isNo].inkPumpSpeed_set = speed * 118 * 98 / 10 / 1023; // linear approximation from Excel
-		if (_InkSupply[isNo].pid_Pump.val_max) _PumpSpeed1000[isNo] += 100 * speed / _InkSupply[isNo].pid_Pump.val_max; // in [%]
-		else                              _PumpSpeed1000[isNo] += 0;
+		if (_InkSupply[isNo].pid_Pump.val_max) 	_PumpSpeed1000[isNo] += 100 * speed / _InkSupply[isNo].pid_Pump.val_max; // in [%]
+		else                              		_PumpSpeed1000[isNo] += 0;
+
+		/*
+		if(error)
+		{
+			IOWR_16DIRECT(AXI_LW_SLAVE_REGISTER_0_BASE, (isNo << 2), 0x0000);
+			pRX_Status->ink_supply[isNo].error |= err_ink_pump;
+			_CheckSequence[isNo].TimeState = 0;
+			_CheckSequence[isNo].Ctrl_Check_State = 0;
+		}
+		*/
 	}
 }
 

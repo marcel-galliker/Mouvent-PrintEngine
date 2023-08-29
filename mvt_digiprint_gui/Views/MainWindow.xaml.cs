@@ -122,6 +122,7 @@ namespace RX_DigiPrint.Views
 		{
             if (RxGlobals.User.UserType!=_UserType)
 			{
+                _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance) && RxGlobals.PrintSystem.PrinterType!=EPrinterType.printer_test_CTC, TabAlignment, AddLocationHint.Last);
                 _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance), TabLog, AddLocationHint.Last);
                 _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance), TabNetwork, AddLocationHint.Last);
                 _ShowTab((RxGlobals.User.UserType >= EUserType.usr_maintenance), TabUsers, AddLocationHint.Last);             
@@ -275,6 +276,13 @@ namespace RX_DigiPrint.Views
                     case EPrinterType.printer_test_table_seon:
                         MachineName.Text = "Test Table Seon";
                         TabMachine.Content = new TestTableSeonView.TestTableSeonView();
+                        break;
+
+                    case EPrinterType.printer_test_CTC:
+                        MachineName.Text = "Conditioner Test Center";
+                        TabMachine.Content = new ConditionerTestCenterView.CTC_View();
+                        _ShowTab(false, TabMachine, AddLocationHint.After);
+                        _ShowTab(false, TabLog, AddLocationHint.After);
                         break;
 
                     case EPrinterType.printer_cleaf:

@@ -115,6 +115,7 @@ static void _main_menu(void)
 //			term_printf("n: cond. Watchdog Test\n");
 			term_printf("q: start log\n");
 			term_printf("i: heater [C] (<=50)\n");	
+			term_printf("v<x><y>: <x>=Head, <y>=i|f|o");
 
 			term_printf("z<x>:   Calibrate pressure sensor\n");
 			term_printf("u<x>:   Delete user calibrated offset\n");

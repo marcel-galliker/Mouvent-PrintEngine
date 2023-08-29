@@ -221,6 +221,7 @@ static int		_tank_temp_timeout   = TANK_TEMP_TIMEOUT;
 static int		_head_temp_timeout   = HEAD_TEMP_TIMEOUT;
 static int		_head_target_timeout = RANGE_TIMEOUT;
 static BOOL		_heater_running      = FALSE;
+static int 		_test_time			 = 0;
 
 static STempSensor _TempSensor[2];
 //static int		_heater_delay		 = 0;
@@ -366,7 +367,11 @@ static void _heater_ctrl(UINT32 percent)
 	static int _temp_timer = 0;
 	static int _pg_cnt=0;
 
-	if (RX_Status.error & (COND_ERR_meniscus))
+	if (_test_time)
+	{
+		RX_Status.heater_percent = percent;
+	}
+	else if (RX_Status.error & (COND_ERR_meniscus))
     {
         RX_Status.heater_percent = 0;
     }
@@ -596,7 +601,19 @@ static int _safety_net(void)
  * temperature controller.
  **/
 void temp_tick_10ms (void)
-{	
+{		
+	if(RX_Status.mode==ctrl_test_heater)
+	{
+		if (_test_time<RX_Config.test_time)
+		{
+			_heater_ctrl(100);
+			_test_time += 10;
+		}
+		else 
+			_heater_ctrl(0);
+		return;
+	}
+	_test_time=0;
 	if (RX_Config.temp > TEMP_MAX_HIGH_PUMP)
 		RX_Config.temp = TEMP_MAX_HIGH_PUMP;
 

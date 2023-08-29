@@ -293,6 +293,7 @@
     <Compile Include="Comparers\Date_Comparer.cs" />
     <Compile Include="Comparers\FileName_Comparer.cs" />
     <Compile Include="Converters\BooleanConverters.cs" />
+    <Compile Include="Converters\CTC_Converters.cs" />
     <Compile Include="Converters\HeadValRange_Converter.cs" />
     <Compile Include="Converters\IconConverter.cs" />
     <Compile Include="Converters\IconPacks_ModernKind.cs" />
@@ -378,6 +379,11 @@
     <Compile Include="Models\ClusterNo.cs" />
     <Compile Include="Models\ClusterStat.cs" />
     <Compile Include="Models\ClusterStatList.cs" />
+    <Compile Include="Models\CTC_FlowSensor.cs" />
+    <Compile Include="Models\CTC_Operation.cs" />
+    <Compile Include="Models\CTC_Param.cs" />
+    <Compile Include="Models\CTC_Settings.cs" />
+    <Compile Include="Models\CTC_Test.cs" />
     <Compile Include="Models\Density.cs" />
     <Compile Include="Models\DisabledJets.cs" />
     <Compile Include="Models\Enums\EN_EncoderTypeList.cs" />
@@ -506,6 +512,15 @@
     <Compile Include="Services\RxFlz.cs" />
     <Compile Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml.cs">
       <DependentUpon>SoftwareValueCorrectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConditionerTestCenterView\CTC_Commands.xaml.cs">
+      <DependentUpon>CTC_Commands.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConditionerTestCenterView\CTC_TestView.xaml.cs">
+      <DependentUpon>CTC_TestView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConditionerTestCenterView\CTC_View.xaml.cs">
+      <DependentUpon>CTC_View.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LH702View\LH702_Counters.xaml.cs">
       <DependentUpon>LH702_Counters.xaml</DependentUpon>
@@ -1069,6 +1084,18 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AlignmentView\SoftwareValueCorrectionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ConditionerTestCenterView\CTC_Commands.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ConditionerTestCenterView\CTC_TestView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ConditionerTestCenterView\CTC_View.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

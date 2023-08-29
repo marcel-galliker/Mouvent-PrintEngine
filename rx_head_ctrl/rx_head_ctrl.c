@@ -148,6 +148,7 @@ void handle_menu(char *str)
 			
 		case 'E': cond_error_reset();						break;
 		case 'l': cond_start_preslog();						break;
+		case 'v': cond_set_valve_test_str(atoi(&str[1]), &str[2]);	break;
 		
 		case 'f': cond_set_flowResistance(str[1]-'0', atoi(&str[2]));		break;
 		// todo remove from final software -> toggle meniscus error check	

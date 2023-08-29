@@ -12,8 +12,14 @@ namespace RX_DigiPrint.Converters
             try
             {
                 int val =  System.Convert.ToInt32(value);
-                if (val==0)  return "FLUSH";
-                else return "INK";
+                switch(val)
+                {
+                    case 0: return "OFF";
+                    case 1: return "INK";
+                    case 2: return "FLUSH";
+                    case 3: return "BOTH";
+                }
+                return null;
             }
             catch
             {

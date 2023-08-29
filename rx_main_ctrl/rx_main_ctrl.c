@@ -64,6 +64,7 @@ SStepperStat	RX_ClnStatus;
 SPrintQueueItem RX_TestImage;
 SHeadBoardStat	RX_HBStatus[HEAD_BOARD_CNT];
 char			RX_Hostname[64];
+SInkSupplyStat  RX_FluidStatus[INK_SUPPLY_CNT+2];
 
 //--- prototypes --------------------------------------
 

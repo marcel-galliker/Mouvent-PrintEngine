@@ -168,7 +168,8 @@ namespace RX_DigiPrint.Views.UserControls
         private void UserType_Click(object sender, RoutedEventArgs e)
         {
             if (RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_table_seon
-            ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide)
+            ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_slide
+            ||  RxGlobals.PrintSystem.PrinterType==EPrinterType.printer_test_CTC)
             {
                 if (RxGlobals.User.UserType == EUserType.usr_operator) RxGlobals.User.UserType=EUserType.usr_engineer;
                 else RxGlobals.User.UserType = EUserType.usr_operator;

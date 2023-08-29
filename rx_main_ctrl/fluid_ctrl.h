@@ -28,12 +28,15 @@ void fluid_reply_stat		(RX_SOCKET socket);
 void fluid_error_reset		(void);
 void fluid_send_ctrlMode	(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
 void fluid_send_pressure    (int no, INT32 pressure);
+void fluid_send_valve       (SHeadTestCmd *pmsg);
+void fluid_send_test		(int no, SFluidTestCmd *pmsg);
 void fluid_send_tara        (int no);
 void fluid_send_calib		(SValue *pmsg);
 
 
 EnFluidCtrlMode fluid_get_ctrlMode(int no);
 int  fluid_in_ctrlMode		(int no, EnFluidCtrlMode ctrlMode);
+void fliud_heads_per_color	(int headsPerColor);
 int	 fluid_purge_fluidNo	(void);
 void fluid_set_head_state	(int no, SHeadStat *pstat);
 INT32 fluid_get_cylinderPresSet(int no);

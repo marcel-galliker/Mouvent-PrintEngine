@@ -43,7 +43,22 @@ namespace RX_Common
             }
         }
 
-       
+        //--- YesNoPos -------------------------------------
+        static public bool YesNoPos(string title, string text, MessageBoxImage image, bool defaultResult, Point pos)
+        {
+            MvtMessageBox box = new MvtMessageBox(title, text, image, defaultResult);
+            box.Button_Question.Visibility = Visibility.Collapsed;
+            box.Button_PurgeAll.Visibility = Visibility.Collapsed;
+            if (pos!=null && pos.X>=0)
+            {
+                box.Left=pos.X;
+                box.Top=pos.Y;
+            }
+
+            bool ret = (bool)box.ShowDialog();
+            return ret;
+        }
+
         //--- YesNo ------------------------------------------------
         static public bool YesNo(string title, string text, MessageBoxImage image, bool defaultResult)
         {

@@ -1,28 +1,14 @@
 ﻿using RX_Common;
-using RX_DigiPrint.Models;
-using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Helpers;
+using RX_DigiPrint.Models;
 using RX_DigiPrint.Services;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RX_DigiPrint.Views.PrintSystemView
 {
-    public partial class PrintHeadView : UserControl
+	public partial class PrintHeadView : UserControl
     {
         public PrintHeadView(int no)
         {
@@ -65,8 +51,8 @@ namespace RX_DigiPrint.Views.PrintSystemView
         {
             if ((bool) e.NewValue)
             {
-                try{ FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();}
-                catch (Exception) { FpVoltage.Text = "";};                
+                if (RxGlobals.PrintSystem.HeadFpVoltage==null) FpVoltage.Text = "";
+                else FpVoltage.Text = RxGlobals.PrintSystem.HeadFpVoltage[_No].ToString();
             }
         }
 

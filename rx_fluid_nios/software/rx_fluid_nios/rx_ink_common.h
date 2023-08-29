@@ -42,6 +42,9 @@
 	#define INT64	int64_t
 
 	#define RX_TYPES
+	
+	#define REPLY_OK	0
+	#define REPLY_ERROR	1
 #else
 	#include "../rx_common_lib/rx_common.h"
 #endif
@@ -131,6 +134,8 @@ typedef enum EPrinterType
 	printer_test_slide,			// 2:
 	printer_test_slide_only,	// 3:
 	printer_test_table_seon,	// 4:	// Production Testtable, which is only in Seon needed.
+    printer_test_slide_HB,   	// 5:
+    printer_test_CTC,		 	// 6: CTC=Conditioner Test Center
 
 	//--- web printers ------------------------------
 	printer_LB701=1000,			// 1000: 
@@ -145,6 +150,9 @@ typedef enum EPrinterType
 	printer_TX801     = 2000,		// 2000: Fashionn stanrard output
 	printer_TX802,					// 2001: Fashion high outpput
 	printer_TX404,					// 2002: 
+
+	printer_CB612		= 3001,
+	printer_Dropwatcher = 4000,
 
 	//--- special projects ----------------
 	printer_cleaf = 10000,		// 10000: Cleaf machine
@@ -280,9 +288,11 @@ typedef enum EnFluidCtrlMode
 	ctrl_recovery_step10,			// 0x50a
 
 	ctrl_test_watchdog = 0x10000,
-	ctrl_test,			  // 0x10001
-	ctrl_offset_cal,	  // 0x10002
-	ctrl_offset_cal_done, // 0x10003
+	ctrl_test,			  			// 0x10001
+    ctrl_test_valve, 				// 0x10002
+    ctrl_test_heater, 				// 0x10003
+	ctrl_offset_cal,	  			// 0x10004
+	ctrl_offset_cal_done, 			// 0x10005
 
 	ctrl_toggle_meniscus = 0x20000,
 } EnFluidCtrlMode;

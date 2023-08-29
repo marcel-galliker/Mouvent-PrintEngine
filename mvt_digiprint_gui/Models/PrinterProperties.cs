@@ -23,6 +23,11 @@ namespace RX_DigiPrint.Models
             RxGlobals.Settings.Load(_Path);
         }
 
+        public string GetUserPath()
+        {
+            return _Path;
+        }
+
         public object Clone()
         {
             return this.MemberwiseClone();

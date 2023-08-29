@@ -78,10 +78,14 @@ static int _rep_head_stat		(RX_SOCKET socket);
 static int _do_inkdef			(RX_SOCKET socket, SInkDefMsg	    *pmsg);
 static int _do_print_abort		(RX_SOCKET socket);
 static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd	*pmsg);
+static int _do_valve_test       (RX_SOCKET socket, SHeadTestCmd *pmsg);	
+static int _do_set_meniscus_chk	(RX_SOCKET socket, SHeadTestCmd *pmsg);	
 static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar		*ppar);
 static int _do_disabled_jets	(RX_SOCKET socket, SDisabledJetsMsg  *pmsg);
 static int _do_density_values	(RX_SOCKET socket, SDensityValuesMsg *pmsg);
 static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg);
+static void _do_set_encoder_freq(RX_SOCKET socket, SValue *pmsg);
+static void _do_test_heater     (RX_SOCKET socket, SValue *pmsg);
 
 //--- ctrl_init --------------------------------------------------------------------
 int ctrl_init()
@@ -253,16 +257,20 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *pmsg)
 	case CMD_HEAD_STAT:				_do_head_stat       (socket, (SFluidStateLight*) &phdr[1]); break;
 	case SET_GET_INK_DEF:			_do_inkdef			(socket, (SInkDefMsg*)		pmsg);		break;
 	case CMD_HEAD_FLUID_CTRL_MODE:	_do_set_FluidCtrlMode(socket, (SFluidCtrlCmd*)  pmsg);		break;
+	case CMD_HEAD_VALVE_TEST:		_do_valve_test      (socket, (SHeadTestCmd*) pmsg);			break;
+	case CMD_HEAD_SET_MENISCUS_CHK:	_do_set_meniscus_chk (socket, (SHeadTestCmd*) pmsg);		break;
 	case CMD_SET_PURGE_PAR:			_do_set_purge_par	(socket, (SPurgePar*)	&phdr[1]);		break;
     case CMD_SET_DISABLED_JETS:		_do_disabled_jets	(socket, (SDisabledJetsMsg*)pmsg);		break;
     case CMD_SET_DENSITY_VAL:		_do_density_values	(socket, (SDensityValuesMsg*)pmsg);		break;
     case CMD_SET_ROB_POS:			_do_rob_pos			(socket, (SRobPositionMsg*)pmsg);			break;
+    case CMD_HEAD_ENCODER_FREQ:     _do_set_encoder_freq(socket, (SValue *)&phdr[1]);		    break;
+    case CMD_TEST_HEATER:			_do_test_heater		(socket, (SValue *)&phdr[1]);		    break;
 	default:		Error(LOG, 0, "Unknown Command 0x%04x", phdr->msgId);
 					reply = REPLY_ERROR;
 					break;
 	}
 	time = rx_get_ticks()-time;
-	if (_Printing && phdr->msgId!=CMD_HEAD_BOARD_CFG && time>100) Error(WARN, 0, "_handle_ctrl_msg id=0x%08x, time=%dms", phdr->msgId, time); 
+	if (_Printing && phdr->msgId!=CMD_HEAD_BOARD_CFG && phdr->msgId!=CMD_HEAD_ENCODER_FREQ && time>100) Error(WARN, 0, "_handle_ctrl_msg id=0x%08x, time=%dms", phdr->msgId, time); 
 	return reply;
 };
 
@@ -462,6 +470,20 @@ static int _do_set_FluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd *pmsg)
 	return REPLY_OK;
 }
 
+//--- _do_valve_test -------------------------------------------
+static int _do_valve_test       (RX_SOCKET socket, SHeadTestCmd *pmsg)
+{
+    cond_set_valve_test(pmsg->no % MAX_HEADS_BOARD, pmsg->valve);
+	return REPLY_OK;
+}
+
+//--- _do_set_meniscus_chk -------------------------------------------
+static int _do_set_meniscus_chk(RX_SOCKET socket, SHeadTestCmd *pmsg)
+{
+    cond_set_meniscus_chk(pmsg->valve);
+	return REPLY_OK;
+}
+
 //--- _do_set_purge_par -------------------------------------
 static int _do_set_purge_par(RX_SOCKET socket, SPurgePar *ppar)
 {
@@ -491,6 +513,18 @@ static int _do_rob_pos		    (RX_SOCKET socket, SRobPositionMsg *pmsg)
 {
 	cond_set_rob_pos(pmsg->head, pmsg->angle, pmsg->dist);
 	return REPLY_OK;	
+}
+
+//--- _do_set_encoder_freq ------------------------------------------
+static void _do_set_encoder_freq(RX_SOCKET socket, SValue *pmsg)
+{
+    fpga_enc_config(pmsg->value);
+}
+
+//--- _do_test_heater ------------------------------------------
+static void _do_test_heater(RX_SOCKET socket, SValue *pmsg)
+{
+    cond_heater_test(pmsg->value);
 }
 
 //--- _do_simu_print ------------------------------------------------------

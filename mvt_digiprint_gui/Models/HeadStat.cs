@@ -1,20 +1,13 @@
-﻿using Infragistics.Windows.Automation.Peers;
-using RX_Common;
+﻿using RX_Common;
 using RX_DigiPrint.Converters;
 using RX_DigiPrint.Models.Enums;
 using RX_DigiPrint.Services;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace RX_DigiPrint.Models
 {
-    public class HeadStat : RxBindable
+	public class HeadStat : RxBindable
     {
         //--- Constructor ----------------------------------------
         public HeadStat()
@@ -22,7 +15,7 @@ namespace RX_DigiPrint.Models
         }
 
         //--- Property HeadNo ---------------------------------------
-        private int _HeadNo;
+        private int _HeadNo=-1;
         public int HeadNo
         {
             get { return _HeadNo; }
@@ -35,8 +28,23 @@ namespace RX_DigiPrint.Models
         {
             get { return _Connected; }
             set { SetProperty(ref _Connected, value);}
-        }       
-        
+        }
+
+        //--- Property Meniscus_Disabled ---------------------------------------
+        private Boolean _Meniscus_Disabled = false;
+        public Boolean Meniscus_Disabled
+        {
+            get { return _Meniscus_Disabled; }
+            set { SetProperty(ref _Meniscus_Disabled, value); }
+        }
+        private Int32 _FP_Voltage = 0;
+        public Int32 FP_Voltage
+        {
+            get { return _FP_Voltage; }
+            set { SetProperty(ref _FP_Voltage, value); }
+        }
+
+
         //--- Property No ---------------------------------------
         private string _Name;
         public string Name
@@ -164,6 +172,13 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _TempCond, value); }
         }
 
+        //--- Property TempHeater ---------------------------------------
+        private UInt32 _TempHeater;
+        public UInt32 TempHeater
+        {
+            get { return _TempHeater; }
+            set { SetProperty(ref _TempHeater, value); }
+        }
         //--- Property TempSetpoint ---------------------------------------
         private UInt32 _TempSetpoint;
         public UInt32 TempSetpoint
@@ -177,11 +192,24 @@ namespace RX_DigiPrint.Models
         public bool TempReady
         {
             get { return _TempReady; }
-            set {   SetProperty(ref _TempReady, value);}
+            set 
+            { 
+                if(SetProperty(ref _TempReady, value))
+                    TempReady_Brush = _TempReady? Brushes.Transparent : Rx.BrushWarn;
+            }
         }
 
-        //--- Property Property -------------------------------------------
-        /*
+		//--- Property TempReady_Brush ---------------------------------------
+		private Brush _TempReady_Brush;
+		public Brush TempReady_Brush
+		{
+			get { return _TempReady_Brush; }
+			set { SetProperty(ref _TempReady_Brush,value); }
+		}
+
+
+		//--- Property Property -------------------------------------------
+		/*
         private UInt32 _TempFpga;
         public UInt32 TempFpga
         {
@@ -189,8 +217,8 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _TempFpga, value); }
         }
         */
-        //--- Property Flow ---------------------------------------
-        private Int32 _Flow;
+		//--- Property Flow ---------------------------------------
+		private Int32 _Flow;
         public Int32 Flow
         {
             get { return _Flow; }
@@ -203,6 +231,14 @@ namespace RX_DigiPrint.Models
         {
             get { return _PresIn; }
             set { SetProperty(ref _PresIn, value); }
+        }
+
+        //--- Property PresIn2 ---------------------------------------
+        private Int32 _PresIn2;
+        public Int32 PresIn2
+        {
+            get { return _PresIn2; }
+            set { SetProperty(ref _PresIn2, value); }
         }
 
         //--- Property PresMax ---------------------------------------
@@ -324,8 +360,8 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _PrintingTime, value); }
         }
 
-        //--- Property CtrlMode ---------------------------------------
-        private EFluidCtrlMode _CtrlMode;
+		//--- Property CtrlMode ---------------------------------------
+		private EFluidCtrlMode _CtrlMode;
         public EFluidCtrlMode CtrlMode
         {
             get { return _CtrlMode; }
@@ -363,20 +399,12 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Cooler_Temp, value); }
         }
 
-        //--- Property Meniscus_Disabled ---------------------------------------
-        private Boolean _Meniscus_Disabled = false;
-        public Boolean Meniscus_Disabled
-        {
-            get { return _Meniscus_Disabled; }
-            set { SetProperty(ref _Meniscus_Disabled, value); }
-        }
-
         //--- DensityValue ---------------------------------------------------
-        private Byte? _DensityValuesCRC;
+    //  private Byte? _DensityValuesCRC;
         public Int16[] DensityValue = new Int16[TcpIp.MAX_DENSITY_VALUES];
 
         //--- DensityValue ---------------------------------------------------
-        private Byte? _DisabledJetsCRC;
+    //  private Byte? _DisabledJetsCRC;
         public UInt16[] DisabledJets = new UInt16[TcpIp.MAX_DISABLED_JETS];
 
         //--- Property Voltage ---------------------------------------
@@ -387,8 +415,16 @@ namespace RX_DigiPrint.Models
             set { SetProperty(ref _Voltage, value); }
         }
 
-		//--- Property StateBrush ---------------------------------------
-		private Brush _StateBrush;
+        //--- Property Drive_Voltage ---------------------------------------
+        private UInt16 _Drive_Voltage;
+        public UInt16 Drive_Voltage
+        {
+            get { return _Drive_Voltage; }
+            set { SetProperty(ref _Drive_Voltage, value); }
+        }
+
+        //--- Property StateBrush ---------------------------------------
+        private Brush _StateBrush;
 		public Brush StateBrush
 		{
 			get { return _StateBrush; }
@@ -415,16 +451,19 @@ namespace RX_DigiPrint.Models
                 int ink;
                 if (RxGlobals.PrintSystem.HeadsPerColor!=0) ink = no/RxGlobals.PrintSystem.HeadsPerColor;
                 else ink=no;
-                InkSupply = RxGlobals.InkSupply.List[ink];
-                if (InkSupply!=null && InkSupply.InkType!=null)
+                if (ink< RxGlobals.InkSupply.List.Count)
                 {
-                    Color   = new SolidColorBrush(InkSupply.InkType.Color);
-                    ColorFG = new SolidColorBrush(InkSupply.InkType.ColorFG);
+                    InkSupply = RxGlobals.InkSupply.List[ink];
+                    if (InkSupply!=null && InkSupply.InkType!=null)
+                    {
+                        Color   = new SolidColorBrush(InkSupply.InkType.Color);
+                        ColorFG = new SolidColorBrush(InkSupply.InkType.ColorFG);
 
-                    string str = new ColorCode_Str().Convert(InkSupply.InkType.ColorCode, null, ink, null).ToString();
+                        string str = new ColorCode_Str().Convert(InkSupply.InkType.ColorCode, null, ink, null).ToString();
 
-                    Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadsPerColor).ToString();
-                    used = true;
+                        Name    = str+"-"+(1+no%(int)RxGlobals.PrintSystem.HeadsPerColor).ToString();
+                        used = true;
+                    }
                 }
             }
             catch(Exception)
@@ -437,8 +476,8 @@ namespace RX_DigiPrint.Models
             Connected   = (item.info&0x00000001) != 0;
             Info        = item.info;
             Err         = item.err;
-
-            Valve       = ((item.info&0x02)==0)? 0:1;
+            
+            Valve       = (int)(item.info & 0x06)>>1;
 
             DotCnt      = item.dotCnt;
             ImgInCnt    = item.imgInCnt;
@@ -451,11 +490,14 @@ namespace RX_DigiPrint.Models
             // Conditioner
             TempHead    = item.tempHead;
             TempCond    = item.tempCond;
+            TempHeater  = item.tempHeater;
             TempSetpoint= item.tempSetpoint;
          //   if (used) TempReady   = item.tempReady!=0;
          //   else TempReady=false;
             TempReady   = (!used) || (item.ctrlMode!=EFluidCtrlMode.ctrl_print) || ((item.info&(1<<5))!=0);
+         // if (no==0) Console.WriteLine("Head[0].PresIn={0}, PresIn2={1}", item.presIn, item.presIn2);
             PresIn      = item.presIn;
+            PresIn2     = item.presIn2;
             PresIn_max  = item.presIn_max;
             PresIn_diff = item.presIn_diff;
             if (item.presIn_max==TcpIp.INVALID_VALUE) PresIn_str = string.Format("~{0}", HeadVal_Converter10._convert(PresIn_diff));

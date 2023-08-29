@@ -204,7 +204,9 @@ typedef struct SConditionerCfg_mcu
 	UINT16	flowResistance;
 	UINT32	purgeDelay;				// ms wait before opening the valve
 	UINT32	purgeTime;				// ms the valve is open
-		
+	INT32	test_Valve;
+	INT32	test_time;
+
 	//--- status of fluid system -------------------
     INT32   cylinderPressure;
     INT32   cylinderPressureSet;
@@ -252,7 +254,6 @@ typedef struct SConditionerStat_mcu
 	UINT32			tempIn;				// actual Temp (1/1000 �C)
     UINT32			tempHeater;		    // Temperature measured directly on heater cartridge (>= Revision #h) (1/1000 �C)
 	UINT32			heater_percent;		// heater on time (between 0% and 80%)
-	INT32			unused_tempReady;	// temp ink = setpoint +/- 1�C
 	UINT32			mode;				// EnFluidCtrlMode
 	SCondStatus		gpio_state;			// state of GPIO Inputs
 	UINT32			error;
