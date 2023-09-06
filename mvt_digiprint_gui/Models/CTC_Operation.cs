@@ -38,7 +38,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- ElectronicsTest ---------------------------------------------------------
-		public void ElectronicsTest(Action onDone)
+		public void ElectronicsTest(Action<bool> onDone)
 		{
 			Stop(null);
 
@@ -158,7 +158,7 @@ namespace RX_DigiPrint.Models
 					else heater.SetHeadState(head, CTC_Test.EN_State.undef);
 				}
 
-				if (onDone != null) RxBindable.Invoke(()=>onDone());
+				if (onDone != null) RxBindable.Invoke(()=>onDone(false));
 			});
 			Process.Start();
 		}
@@ -329,6 +329,18 @@ namespace RX_DigiPrint.Models
 			return result;
 		}
 
+		//--- _allOk -----------------------------
+		private bool _allOk(CTC_Test connected)
+		{
+			bool ok=true;
+			for(int i=0; i<connected.State.Count; i++)
+			{
+				if (connected.State[i]==CTC_Test.EN_State.ok)
+					ok &= (CTC_Test.Overall.State[i]==CTC_Test.EN_State.ok); 
+			}
+			return ok;
+		}
+
 		//--- _CheckHeadPrinting ----------------------------------------------------
 		private bool _CheckHeadPrinting(CTC_Test test, int time, CTC_Param checkIn, CTC_Param checkCylinder, CTC_Param checkOut, CTC_Param checkPump)
 		{
@@ -424,7 +436,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- LeakTest ---------------------------------------------------------
-		public void LeakTest(Action onDone)
+		public void LeakTest(Action<bool> onDone)
 		{
 			Stop(null);
 
@@ -528,13 +540,44 @@ namespace RX_DigiPrint.Models
 				}
 				CTC_Test.Wait(10000, DisplayTimer);
 				_SendStop();
-				if (onDone != null) RxBindable.Invoke(() => onDone());
+				if (onDone != null) RxBindable.Invoke(() => onDone(false));
 			});
 			Process.Start();
 		}
 
+		//--- _do_fluid_ctrlMode -------------------------
+		private bool _do_fluid_ctrlMode(EFluidCtrlMode CtrlMode, bool[] isUsed, int timeout)
+		{
+			for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
+			{
+				if (isUsed[isNo])
+				{
+					TcpIp.SFluidCtrlCmd cmd = new TcpIp.SFluidCtrlCmd();
+					cmd.no = isNo;
+					cmd.ctrlMode = CtrlMode;
+				    RxGlobals.RxInterface.SendMsg(TcpIp.CMD_FLUID_CTRL_MODE, ref cmd);
+				}
+			}
+
+			for (int time=0; time<timeout; time+=1000)
+			{
+				bool ok=true;
+				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
+				{
+					if (isUsed[isNo])
+					{
+						Console.WriteLine("Fluid[{0}].ControlMode={1}", isNo, RxGlobals.InkSupply.List[isNo].CtrlMode);
+						ok &= (RxGlobals.InkSupply.List[isNo].CtrlMode==EFluidCtrlMode.ctrl_purge_hard);
+					}
+				}
+				if (ok) return true;
+				CTC_Test.Wait(1000, DisplayTimer);					
+			}
+			return false;
+		}
+
 		//--- ValveTest ---------------------------------------------------------
-		public void ValveTest(Action onDone)
+		public void ValveTest(Action<bool> onDone)
 		{
 			Stop(null);
 
@@ -554,6 +597,7 @@ namespace RX_DigiPrint.Models
 				bool ok;
 				CTC_Test test1 = new CTC_Test() { Step = "Print" };
 				
+
 				CTC_Settings settings = new CTC_Settings();
 				CTC_Param pressure		= settings.GetParam("Valve Test", test1.Step, "Pressure Inlet Cond",    -45, 0);
 				CTC_Param checkTime		= settings.GetParam("Valve Test", test1.Step, "Check Time",				10000, 0);
@@ -561,6 +605,9 @@ namespace RX_DigiPrint.Models
 				CTC_Param checkOut		= settings.GetParam("Valve Test", test1.Step, "Check Outlet",			90, 110);
 				CTC_Param checkPump		= settings.GetParam("Valve Test", test1.Step, "Check Pump",				40, 45);
 								
+				CTC_Test prep			= new CTC_Test(){Step = "Prepare"};
+				CTC_Param PrepTime		= settings.GetParam("Valve Test", prep.Step, "Time",					10000, 0);
+
 				CTC_Test test2 = new CTC_Test() { Step = "Test Valve"};
 				CTC_Param delayTime2	= settings.GetParam("Valve Test", test2.Step, "Delay Time",				10000, 0);
 				CTC_Param checkTime2	= settings.GetParam("Valve Test", test2.Step, "Check Time",				10000, 0);
@@ -583,6 +630,27 @@ namespace RX_DigiPrint.Models
 				{
 					if (test1.State[headNo]==CTC_Test.EN_State.running) isUsed[headNo/RxGlobals.PrintSystem.HeadsPerColor] = true;
 				}
+
+				//=== start prepare ink supplies =========================================
+				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
+				{
+					if (isUsed[isNo])
+					{
+						TcpIp.SPurgePar par = new TcpIp.SPurgePar();						
+						par.no    = isNo;
+						par.delay = 0;
+						par.time  = PrepTime.Min;
+						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_PURGE_PAR, ref par);
+					}
+				}
+
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_hard,  isUsed,  1000);
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step1, isUsed, 10000);
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step3, isUsed, 10000);
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step4, isUsed, 10000);
+				CTC_Test.Wait(PrepTime.Min, DisplayTimer);				
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_off, isUsed, 1000);
+				Thread.Sleep(1000);
 
 				//--- start ink supplies ------------------------------------
 				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
@@ -631,13 +699,13 @@ namespace RX_DigiPrint.Models
 				_SetMeniscusCheck(true);
 				_SendStop();
 				//--- END ---------------------------------------
-				if (onDone != null) RxBindable.Invoke(() => onDone());
+				if (onDone != null) RxBindable.Invoke(() => onDone(_allOk(connected)));
 			});
 			Process.Start();
 		}
 
 		//--- FlowTest ---------------------------------------------------------
-		public void FlowTest(Action onDone)
+		public void FlowTest(Action<bool> onDone)
 		{
 			Stop(null);
 
@@ -645,7 +713,16 @@ namespace RX_DigiPrint.Models
 			{
 				RxBindable.Invoke(() => _Tests.Add(new CTC_Test() { Name = "Flow Test" }));
 
-				//--------------------------------------------------
+				//--- connected -----------------------------------------------------
+				CTC_Test connected = new CTC_Test() { Step = "Connected" };
+				for(int head=0; head<CTC_Test.HEADS; head++)
+				{
+					HeadStat stat = RxGlobals.HeadStat.List[head];
+					connected.SetResult(head, stat.Connected);
+				}
+				RxBindable.Invoke(() => _Tests.Add(connected));
+
+				//--- -----------------------------------------------------------------------------
 				CTC_Test flowTest    = new CTC_Test() { Step = "Flow" };
 				RxBindable.Invoke(() => _Tests.Add(flowTest));
 
@@ -770,19 +847,28 @@ namespace RX_DigiPrint.Models
 				}
 				_SendStop();
 				//--- END ---------------------------------------
-				if (onDone != null) RxBindable.Invoke(() => onDone());
+				if (onDone != null) RxBindable.Invoke(() => onDone(_allOk(connected)));
 			});
 			Process.Start();
 		}
 
 		//--- LongRun ---------------------------------------------------------
-		public void LongRun(Action onDone)
+		public void LongRun(Action<bool> onDone)
 		{
 			Stop(null);
 
 			Process = new Thread(() =>
 			{
 				RxBindable.Invoke(() => _Tests.Add(new CTC_Test() { Name = "Long Run" }));
+
+				//--- connected -----------------------------------------------------
+				CTC_Test connected = new CTC_Test() { Step = "Connected" };
+				for(int head=0; head<CTC_Test.HEADS; head++)
+				{
+					HeadStat stat = RxGlobals.HeadStat.List[head];
+					connected.SetResult(head, stat.Connected);
+				}
+				RxBindable.Invoke(() => _Tests.Add(connected));
 
 				//--------------------------------------------------
 				CTC_Test start = new CTC_Test() { Step = "Start" };
@@ -896,13 +982,13 @@ namespace RX_DigiPrint.Models
 				_SendStop();
 
 				//--- END ---------------------------------------
-				if (onDone != null) RxBindable.Invoke(() => onDone());
+				if (onDone != null) RxBindable.Invoke(() => onDone(false));
 			});
 			Process.Start();
 		}
 
 		//--- Empty ---------------------------------------------------------
-		public void Empty(Action onDone)
+		public void Empty(Action<bool> onDone)
 		{
 			Stop(null);
 
@@ -972,7 +1058,7 @@ namespace RX_DigiPrint.Models
 				_SendStop();
 
 				//--- END ---------------------------------------
-				if (onDone != null) RxBindable.Invoke(() => onDone());
+				if (onDone != null) RxBindable.Invoke(() => onDone(false));
 			});
 			Process.Start();
 		}
@@ -1011,7 +1097,7 @@ namespace RX_DigiPrint.Models
 		}
 
 		//--- Stop ---------------------------------------------------------
-		public void Stop(Action onDone)
+		public void Stop(Action<bool> onDone)
 		{
 			if (Process != null)
 			{
@@ -1020,7 +1106,7 @@ namespace RX_DigiPrint.Models
 				Thread.Sleep(1000);
 			}
 			_SendStop();
-			if (onDone != null) RxBindable.Invoke(() => onDone());
+			if (onDone != null) RxBindable.Invoke(() => onDone(false));
 		}
 
 		//--- Property Tests ---------------------------------------

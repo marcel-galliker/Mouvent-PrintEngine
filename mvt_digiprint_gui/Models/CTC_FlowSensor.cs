@@ -1,5 +1,4 @@
-﻿using RX_DigiPrint.Services;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -7,13 +6,27 @@ using System.Threading;
 namespace RX_DigiPrint.Models
 {
 
-    // https://sensirion.com/de/produkte/katalog/SLQ-QT500/
-    // 
-    public class CTC_FlowSensor
+	// https://sensirion.com/de/produkte/katalog/SLQ-QT500/
+	// 
+	public class CTC_FlowSensor
     {
-        // Import of commands in common Dll
         [DllImport("ShdlcDriver.dll", EntryPoint = "OpenPort", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 OpenPort(byte aPortType, string aPortConfig, out Int32 aPortHandle);
+        public static extern UInt32 _DLL_OpenPort(byte aPortType, string aPortConfig, out Int32 aPortHandle);
+
+        public static UInt32 OpenPort(byte aPortType, string aPortConfig, out Int32 aPortHandle)
+        {
+            try
+            {
+                UInt32 ret=_DLL_OpenPort(aPortType, aPortConfig, out Int32 port);
+                aPortHandle=port;
+                return ret;
+            }
+            catch(Exception)
+            {
+            }
+            aPortHandle=0;
+            return 0x485; //ERROR_DLL_NOT_FOUND;
+        }
 
         [DllImport("ShdlcDriver.dll", EntryPoint = "ClosePort", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public static extern UInt32 ClosePort(Int32 aPortHandle);
@@ -185,6 +198,7 @@ namespace RX_DigiPrint.Models
             // open Port
             for (int i=1; i<10; i++)
             {
+                err=0;
                 string cfg=string.Format("COM{0}, 115200, ECHOOFF", i);
                 err=OpenPort(0, cfg, out _PortHandle);
                 if (err==0) err = GetSensorPartName(_PortHandle, 0, str, (UInt32)str.Capacity);

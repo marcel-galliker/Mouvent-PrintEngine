@@ -1,9 +1,12 @@
 ﻿using MahApps.Metro.IconPacks;
 using RX_Common;
 using RX_DigiPrint.Models;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace RX_DigiPrint.Views.ConditionerTestCenterView
 {
@@ -63,15 +66,21 @@ namespace RX_DigiPrint.Views.ConditionerTestCenterView
 		}
 
 		//--- OnDone ---------------------------------------
-		private void OnDone()
+		private void OnDone(bool allOk)
 		{
+			int idx=-1;
 			if (actButton!=null) actButton.IsChecked = true;
 			for(int i=0; i<Button.Count; i++)
 			{
+				if (Button[i].IsBusy) idx=i;
 				Button[i].IsBusy	= false;
 				Button[i].IsEnabled = true;
 				PackIconMaterial icon = Button[i].Content as PackIconMaterial;
 				icon.Kind = PackIconMaterialKind.Play;
+			}
+			if (allOk && idx>=0)
+			{
+				Button[idx+1].RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, Button[idx+1]));
 			}
 		}
 
@@ -140,7 +149,7 @@ namespace RX_DigiPrint.Views.ConditionerTestCenterView
 			if (MvtMessageBox.YesNoPos("Reset", "Reset tests?", MessageBoxImage.Question, true, pos))
 			{
 				RxGlobals.CTC_Operation.Reset();
-				OnDone();
+				OnDone(false);
 				for (int i = 0; i < Button.Count; i++)
 				{
 					Button[i].IsChecked = false;

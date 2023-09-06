@@ -1116,6 +1116,15 @@ namespace RX_DigiPrint.Services
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SPurgePar
+        {
+            public SMsgHdr  hdr;
+	        public Int32	no;	        
+            public Int32    delay;
+	        public Int32    time;
+        };
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct SFluidTestCmd
         {
 	        public SMsgHdr          hdr;
