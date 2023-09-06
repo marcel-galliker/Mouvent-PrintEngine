@@ -36,6 +36,7 @@ void fluid_send_calib		(SValue *pmsg);
 
 EnFluidCtrlMode fluid_get_ctrlMode(int no);
 int  fluid_in_ctrlMode		(int no, EnFluidCtrlMode ctrlMode);
+void fluid_send_purge_par(int fluidNo, int time, int delay_time_ms);
 void fliud_heads_per_color	(int headsPerColor);
 int	 fluid_purge_fluidNo	(void);
 void fluid_set_head_state	(int no, SHeadStat *pstat);

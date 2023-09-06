@@ -632,21 +632,18 @@ namespace RX_DigiPrint.Models
 				}
 
 				//=== start prepare ink supplies =========================================
-				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
-				{
-					if (isUsed[isNo])
-					{
-						TcpIp.SPurgePar par = new TcpIp.SPurgePar();						
-						par.no    = isNo;
-						par.delay = 0;
-						par.time  = PrepTime.Min;
-						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_PURGE_PAR, ref par);
-					}
-				}
-
 				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_hard,  isUsed,  1000);
 				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step1, isUsed, 10000);
 				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step3, isUsed, 10000);
+				{
+					TcpIp.SPurgePar par = new TcpIp.SPurgePar();						
+					par.delay = 0;
+					par.time  = PrepTime.Min;
+					for (par.no=0; par.no<CTC_Test.HEADS; par.no++)
+					{
+						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_PURGE_PAR, ref par);
+					}
+				}
 				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step4, isUsed, 10000);
 				CTC_Test.Wait(PrepTime.Min, DisplayTimer);				
 				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_off, isUsed, 1000);

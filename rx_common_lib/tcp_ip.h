@@ -867,6 +867,16 @@ typedef struct SFluidCtrlCmd
 	int				no;
 	EnFluidCtrlMode	ctrlMode;
 } SFluidCtrlCmd;
+
+//--- CMD_SET_PURGE_PAR ------------------------
+typedef struct SPurgeParCmd
+{
+    SMsgHdr  hdr;
+	INT32	 no;	        
+    INT32    delay;
+	INT32    time;
+} SPurgeParCmd;
+
 //--- CMD_HEAD_FLUID_CTRL_MODE ------------------------
 typedef struct SFluidTestCmd
 {

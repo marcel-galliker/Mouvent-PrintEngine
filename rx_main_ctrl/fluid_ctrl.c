@@ -70,7 +70,6 @@ static void* _fluid_thread(void *par);
 static int _handle_fluid_ctrl_msg	(RX_SOCKET socket, void *msg, int len, struct sockaddr *sender, void *ppar);
 static int _connection_closed		(RX_SOCKET socket, const char *peerName);
 static void _send_ctrlMode			(int no, EnFluidCtrlMode ctrlMode, int sendToHeads);
-static void _send_purge_par			(int fluidNo, int time, int delay_time_ms);
 
 static void _do_fluid_stat(int fluidNo, SFluidBoardStat *pstat);
 static void _do_scales_stat(int fluidNo, SScalesStatMsg   *pstat);
@@ -733,11 +732,11 @@ static void _control(int fluidNo)
 											if (pstat->purge_putty_ON) time=0;
 											switch(pstat->ctrlMode)
 											{
-											case ctrl_purge_soft:		_send_purge_par(no, TIME_SOFT_PURGE, TIME_SOFT_PURGE); _txrob=FALSE; break;
-											case ctrl_purge:			_send_purge_par(no, TIME_PURGE, TIME_PURGE);	  _txrob=FALSE; break;
-											case ctrl_purge_hard_wipe:	_send_purge_par(no, time, time); break;
-											case ctrl_purge_hard_vacc:	_send_purge_par(no, time, time); break;
-											case ctrl_purge_hard:		_send_purge_par(no, time, time); _txrob=FALSE; break;
+											case ctrl_purge_soft:		fluid_send_purge_par(no, TIME_SOFT_PURGE, TIME_SOFT_PURGE); _txrob=FALSE; break;
+											case ctrl_purge:			fluid_send_purge_par(no, TIME_PURGE, TIME_PURGE);	  _txrob=FALSE; break;
+											case ctrl_purge_hard_wipe:	fluid_send_purge_par(no, time, time); break;
+											case ctrl_purge_hard_vacc:	fluid_send_purge_par(no, time, time); break;
+											case ctrl_purge_hard:		fluid_send_purge_par(no, time, time); _txrob=FALSE; break;
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
@@ -940,7 +939,7 @@ static void _control(int fluidNo)
 											}
 											break;
 
-				case ctrl_recovery_step6:	_send_purge_par(no, _RecoveryData.purge_time_s*1000, _RecoveryData.purge_time_s*1000); 
+				case ctrl_recovery_step6:	fluid_send_purge_par(no, _RecoveryData.purge_time_s*1000, _RecoveryData.purge_time_s*1000); 
 											_send_ctrlMode(no, ctrl_recovery_step7, TRUE); break;
 											break;
 
@@ -1344,8 +1343,8 @@ void _send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 	}
 }
 
-//--- _send_purge_par -------------------------------------------------
-static void _send_purge_par(int fluidNo, int time, int delay_time_ms)
+//--- fluid_send_purge_par -------------------------------------------------
+void fluid_send_purge_par(int fluidNo, int time, int delay_time_ms)
 {
     SPurgePar par;
 	par.no    =  fluidNo%INK_PER_BOARD;

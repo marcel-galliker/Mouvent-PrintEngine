@@ -83,6 +83,7 @@ static void _do_head_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 static void _do_ctc_head_CtrlMode (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
 
 static void _do_fluidCtrlMode	  (RX_SOCKET socket, SFluidCtrlCmd* pmsg);
+static void _do_fluid_purgePar	  (RX_SOCKET socket, SPurgeParCmd*  pmsg);
 static void _do_fluid_pressure	  (RX_SOCKET socket, SValue*		pmsg);
 static void _do_fluid_heads_per_color	  (RX_SOCKET socket, SValue*		pmsg);
 static void _do_fluid_purge_cluster(RX_SOCKET socket, SValue*		pmsg);
@@ -192,8 +193,9 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_HEAD_FLUID_CTRL_MODE: _do_head_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break;
 		case CMD_CTC_HEAD_CTRL_MODE:   _do_ctc_head_CtrlMode(socket, (SFluidCtrlCmd*) pmsg);			break; 
 		case CMD_FLUID_CTRL_MODE:	   _do_fluidCtrlMode(socket, (SFluidCtrlCmd*) pmsg);				break;
+		case CMD_SET_PURGE_PAR:		   _do_fluid_purgePar(socket, (SPurgeParCmd*) pmsg);				break;
 		case CMD_FLUID_PRESSURE:	   _do_fluid_pressure(socket, (SValue*)pdata);						break;
-		case CMD_FLUID_HEADS_PER_COLOR:	_do_fluid_heads_per_color(socket, (SValue*)pdata);						break;
+		case CMD_FLUID_HEADS_PER_COLOR:	_do_fluid_heads_per_color(socket, (SValue*)pdata);				break;
 		case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
 		case CMD_PURGE_CLUSTER:			_do_fluid_purge_cluster(socket, (SValue*)pdata);				break;
 		case CMD_FLUID_TEST:			_do_fluid_test (socket, (SFluidTestCmd *) pmsg);				break;
@@ -1033,6 +1035,12 @@ static void _do_fluidCtrlMode(RX_SOCKET socket, SFluidCtrlCmd* pmsg)
 {
 //  if (pmsg->ctrlMode == ctrl_off) ctrl_empty_PurgeBuffer(pmsg->no);
 	fluid_send_ctrlMode(pmsg->no, pmsg->ctrlMode, TRUE);
+}
+
+//--- _do_fluid_purgePar ---------------------------
+static void _do_fluid_purgePar	  (RX_SOCKET socket, SPurgeParCmd*  pmsg)
+{
+	fluid_send_purge_par(pmsg->no, pmsg->time, pmsg->delay);
 }
 
 //--- _do_fluid_pressure ---
