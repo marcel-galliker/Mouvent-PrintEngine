@@ -63,6 +63,7 @@ static int				_PurgeClusterNo = -1;
 static int				_PurgeHeadNo = -1;
 static int				_RecoveryMode[INK_SUPPLY_CNT];
 static int				_HeadsPerColor = 0;
+static int				_CTC_Purge = FALSE;
 
 //--- prototypes -----------------------
 static void* _fluid_thread(void *par);
@@ -730,13 +731,16 @@ static void _control(int fluidNo)
 											_txrob = rx_def_is_tx(RX_Config.printer.type) && step_active(1);
                                             int time = (RX_Config.printer.type==printer_TX802 || RX_Config.printer.type == printer_TX404)? (2*TIME_HARD_PURGE) : TIME_HARD_PURGE;
 											if (pstat->purge_putty_ON) time=0;
-											switch(pstat->ctrlMode)
+											if (!_CTC_Purge)
 											{
-											case ctrl_purge_soft:		fluid_send_purge_par(no, TIME_SOFT_PURGE, TIME_SOFT_PURGE); _txrob=FALSE; break;
-											case ctrl_purge:			fluid_send_purge_par(no, TIME_PURGE, TIME_PURGE);	  _txrob=FALSE; break;
-											case ctrl_purge_hard_wipe:	fluid_send_purge_par(no, time, time); break;
-											case ctrl_purge_hard_vacc:	fluid_send_purge_par(no, time, time); break;
-											case ctrl_purge_hard:		fluid_send_purge_par(no, time, time); _txrob=FALSE; break;
+												switch (pstat->ctrlMode)
+												{
+												case ctrl_purge_soft:		fluid_send_purge_par(no, TIME_SOFT_PURGE, TIME_SOFT_PURGE); _txrob = FALSE; break;
+												case ctrl_purge:			fluid_send_purge_par(no, TIME_PURGE, TIME_PURGE);	  _txrob = FALSE; break;
+												case ctrl_purge_hard_wipe:	fluid_send_purge_par(no, time, time); break;
+												case ctrl_purge_hard_vacc:	fluid_send_purge_par(no, time, time); break;
+												case ctrl_purge_hard:		fluid_send_purge_par(no, time, time); _txrob = FALSE; break;
+												}
 											}
                                             if (_txrob && _PurgeFluidNo < 0 && state_RobotCtrlMode() != ctrl_wash_step1 && state_RobotCtrlMode() != ctrl_wash_step2)
                                             {
@@ -1222,6 +1226,16 @@ void fluid_reply_stat(RX_SOCKET socket)	// to GUI
 //--- fluid_send_ctrlMode -------------------------------
 void fluid_send_ctrlMode(int no, EnFluidCtrlMode ctrlMode, int sendToHeads)
 {
+	if (ctrlMode == ctrl_purge_ctc)
+	{
+		ctrlMode = ctrl_purge_hard;
+		_CTC_Purge = TRUE;
+	}
+	else if (ctrlMode>ctrl_purge_ctc)
+	{
+		_CTC_Purge = FALSE;
+	}
+
 	if (ctrlMode == ctrl_off && _RecoveryMode[no] == TRUE && no != -1)
 	{
 		ctrl_send_waveform(no);

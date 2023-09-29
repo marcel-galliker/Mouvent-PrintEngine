@@ -606,7 +606,7 @@ namespace RX_DigiPrint.Models
 				CTC_Param checkPump		= settings.GetParam("Valve Test", test1.Step, "Check Pump",				40, 45);
 								
 				CTC_Test prep			= new CTC_Test(){Step = "Prepare"};
-				CTC_Param PrepTime		= settings.GetParam("Valve Test", prep.Step, "Time",					10000, 0);
+				CTC_Param prepTime		= settings.GetParam("Valve Test", prep.Step, "Time",					10000, 0);
 
 				CTC_Test test2 = new CTC_Test() { Step = "Test Valve"};
 				CTC_Param delayTime2	= settings.GetParam("Valve Test", test2.Step, "Delay Time",				10000, 0);
@@ -632,22 +632,43 @@ namespace RX_DigiPrint.Models
 				}
 
 				//=== start prepare ink supplies =========================================
-				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_hard,  isUsed,  1000);
-				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step1, isUsed, 10000);
-				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step3, isUsed, 10000);
 				{
 					TcpIp.SPurgePar par = new TcpIp.SPurgePar();						
 					par.delay = 0;
-					par.time  = PrepTime.Min;
+					par.time  = prepTime.Min;
 					for (par.no=0; par.no<CTC_Test.HEADS; par.no++)
 					{
 						RxGlobals.RxInterface.SendMsg(TcpIp.CMD_SET_PURGE_PAR, ref par);
 					}
 				}
+
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_ctc,   isUsed,  1000);
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step1, isUsed, 10000);
+				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step3, isUsed, 10000);
 				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_purge_step4, isUsed, 10000);
-				CTC_Test.Wait(PrepTime.Min, DisplayTimer);				
+				CTC_Test.Wait(prepTime.Min, DisplayTimer);
 				_do_fluid_ctrlMode(EFluidCtrlMode.ctrl_off, isUsed, 1000);
-				Thread.Sleep(1000);
+
+				//--- wait until pressure < 100 ---------------
+				int cnt=0;
+				do
+				{
+					Thread.Sleep(1000);
+					cnt++;
+					if (cnt>60)
+					{
+						test1.Done(CTC_Test.EN_State.failed);
+						RxGlobals.Events.AddItem(new LogItem("Fluid pressure release timeout"){LogType = ELogType.eErrAbort});
+						goto ValveTest_END;
+					}
+					ok=true;
+					for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
+					{
+						Console.WriteLine("Cylinder[{0}].pressure={1}", isNo, RxGlobals.InkSupply.List[isNo].CylinderPres);
+						if (isUsed[isNo] && RxGlobals.InkSupply.List[isNo].CylinderPres>100) ok=false;
+					}
+				}
+				while (!ok);
 
 				//--- start ink supplies ------------------------------------
 				for (int isNo=0; isNo<RxGlobals.PrintSystem.ColorCnt; isNo++)
@@ -692,7 +713,8 @@ namespace RX_DigiPrint.Models
 				RxBindable.Invoke(() => _Tests.Add(test3));
 				CTC_Test.Wait(checkTime3.Min, DisplayTimer);
 				ok = _CheckHeadPrinting(test3, 1000, checkIn3, checkCylinder3, checkOut3, checkPump3);
-
+			
+			ValveTest_END:
 				_SetMeniscusCheck(true);
 				_SendStop();
 				//--- END ---------------------------------------

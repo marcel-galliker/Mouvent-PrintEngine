@@ -130,7 +130,6 @@ INT32 _PumpOFFTime;
 
 // static int	_PrintingTime[NIOS_INK_SUPPLY_CNT] = {0};
 static int	_PressureSetpoint[NIOS_INK_SUPPLY_CNT] = {0};
-static int	_MaxPrintPressure[NIOS_INK_SUPPLY_CNT] = {0};
 static UINT32 _LastPumpTicks[NIOS_INK_SUPPLY_CNT] = {0};
 static UINT32 _PumpSpeed1000[NIOS_INK_SUPPLY_CNT] = {0};
 static int 	_FlushTimeISPresStable[NIOS_INK_SUPPLY_CNT] = {0};
@@ -398,6 +397,7 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].flushTime		= 0;
 				pRX_Status->ink_supply[isNo].ctrl_state		= ctrl_off;
 				pRX_Status->ink_supply[isNo].PIDpump_Output	= 0;	// just for log file
+				pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint = 0;
 
 				break;
 
@@ -1194,10 +1194,11 @@ void ink_tick_10ms(void)
 				pRX_Status->ink_supply[isNo].ctrl_state = ctrl_flush_done;
 				break;
 			case ctrl_purge_soft:		_init_purge(isNo, PRESSURE_SOFT_PURGE); break;
-			case ctrl_purge:			_init_purge(isNo, PRESSURE_PURGE); 		break;
+			case ctrl_purge:			_init_purge(isNo, PRESSURE_PURGE); 		 break;
 			case ctrl_purge_hard:		_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 			case ctrl_purge_hard_wipe:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
 			case ctrl_purge_hard_vacc:	_init_purge(isNo, PRESSURE_HARD_PURGE); break;
+			case ctrl_purge_ctc:		_init_purge(isNo, PRESSURE_HARD_PURGE);	break;
 
 			case ctrl_purge_step1: // build up pressure
 			case ctrl_purge_step2: // build up pressure
@@ -1584,21 +1585,13 @@ static void _init_purge(int isNo, int pressure)
 		}
 		else
 		{
-		    if(_MaxPrintPressure[isNo] > 0)
-		    {
-			    _InkSupply[isNo].purgePressure = _MaxPrintPressure[isNo] + pressure;
-			    if(_InkSupply[isNo].purgePressure > 800) _InkSupply[isNo].purgePressure = 800;
-		    }
-		    else
-		    {
-			    switch(pRX_Config->printerType)
-			    {
-				    case printer_TX801 :
-				    case printer_TX802 :
-									    _InkSupply[isNo].purgePressure = 100 + 100*pRX_Config->headsPerColor + pressure; break;
-				    default : 			_InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
-			    }
-		    }
+			switch(pRX_Config->printerType)
+			{
+				case printer_TX801 :
+				case printer_TX802 :
+									_InkSupply[isNo].purgePressure = 100 + 100*pRX_Config->headsPerColor + pressure; break;
+				default : 			_InkSupply[isNo].purgePressure = 40 * pRX_Config->headsPerColor + pressure; break;
+			}
     
 		    if (_InkSupply[isNo].purgePressure > MAX_PRESSURE_FLUID)
 			    _InkSupply[isNo].purgePressure = MAX_PRESSURE_FLUID;
@@ -1803,14 +1796,6 @@ static void _pump_ctrl(INT32 isNo, INT32 pressure_target, INT32 print_mode)
 			pid_calc(pRX_Status->ink_supply[isNo].COND_Pressure_Actual, &_InkSupply[isNo].pid_Setpoint);
 			pRX_Status->ink_supply[isNo].IS_Pressure_Setpoint 	= _InkSupply[isNo].pid_Setpoint.val;
 		
-			// Save max pressure for purge pressure
-			// if ink supply pressure close to setpoint
-			if(_InkSupply[isNo].pid_Setpoint.Setpoint - pRX_Status->ink_supply[isNo].COND_Pressure_Actual > 20)
-			{
-				if(_InkSupply[isNo].pid_Setpoint.val > _MaxPrintPressure[isNo])
-					_MaxPrintPressure[isNo] = _InkSupply[isNo].pid_Setpoint.val;
-			}
-
 			// reset pid if output at 0, no reason to accumulate negative value (never want pressure negative)
 			if(_InkSupply[isNo].pid_Setpoint.val <= _InkSupply[isNo].pid_Setpoint.val_min)
 				pid_reset(&_InkSupply[isNo].pid_Setpoint);
@@ -1890,7 +1875,7 @@ void _set_pump_speed(int isNo, int speed)
 {
 	if (speed!=INVALID_VALUE)
 	{
-		int error=_set_reg_out(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_0 + (isNo << 2), speed);
+		/* int error= */ _set_reg_out(AXI_LW_SLAVE_REGISTER_0_BASE, DAC_REG_0 + (isNo << 2), speed);
 		//if (_InkSupply[isNo].pid.val_max) pRX_Status->ink_supply[isNo].inkPumpSpeed_set  = 600 * speed / _InkSupply[isNo].pid.val_max; // 100%=600 ml
 		//if (_InkSupply[isNo].pid.val_max) pRX_Status->ink_supply[isNo].inkPumpSpeed_set = speed * 118 * 98 / 10 / 1023; // linear approximation from Excel
 		if (_InkSupply[isNo].pid_Pump.val_max) 	_PumpSpeed1000[isNo] += 100 * speed / _InkSupply[isNo].pid_Pump.val_max; // in [%]

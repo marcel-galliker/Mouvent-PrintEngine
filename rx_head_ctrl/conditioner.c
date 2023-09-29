@@ -366,8 +366,8 @@ static void _update_clusterNo(void)
 	if (sizeof(SHeadEEpromMvt)!=EEPROM_DATA_SIZE) Error(ERR_CONT, 0, "Head User EEPROM size mismatch (size=0x%x, expected=0x%x)", sizeof(SHeadEEpromMvt), EEPROM_DATA_SIZE);
 
 	memset(_cntr, 0, sizeof(_cntr));
-	if (!_NiosStat->info.eeprom_read) 
-		Error(ERR_CONT, 0, "EEPROM MVT not read");
+//	if (!_NiosStat->info.eeprom_read) 
+//		Error(ERR_CONT, 0, "EEPROM MVT not read");
 
 	for (condNo=0; condNo<MAX_HEADS_BOARD;  condNo++)
 	{
@@ -377,7 +377,7 @@ static void _update_clusterNo(void)
 
 		if (memempty(mvt, sizeof(SHeadEEpromMvt))) // do not overwrite unread eeprom
 		{
-			Error(ERR_CONT, 0, "EEPROM MVT empty for head %d", condNo);
+	//		Error(ERR_CONT, 0, "EEPROM MVT empty for head %d", condNo);
 			continue;
 		}
 		if (mvt->dropletsPrintedCRC!=rx_crc8(&mvt->dropletsPrinted, sizeof(mvt->dropletsPrinted)))
