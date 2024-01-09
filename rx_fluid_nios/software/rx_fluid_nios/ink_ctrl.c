@@ -68,7 +68,7 @@
 
 #define 	RECOVERY_PRESSURE			2500	// mbar
 #define		RECOVERY_PRESSURE_OLD		1100	// mbar
-#define		RECOVERY_PRESSURE_END		200		// mbar
+#define		RECOVERY_PRESSURE_END		100		// mbar
 
 // State of PID regulation
 #define		PID_STATE_OFF			1
@@ -1907,11 +1907,20 @@ static void _set_flush_pump(int isNo, int state)
 
 	if (pRX_Config->test_flush)
 	{
-		if (pRX_Status->flush_pressure < 1200) pRX_Status->flush_pump_val = pRX_Config->test_flush;
-		else
+		static int _max=0;
+		static int _time=0;
+		if (_max==0)
 		{
-			pRX_Status->flush_pump_val = 0;
-			pRX_Status->ink_supply[isNo].ctrl_state = ctrl_error;
+			#define 	FLUSH_SENSOR	4
+			if (is_Sensor_25(FLUSH_SENSOR)) _max=2400;
+			else _max=1200;
+		}
+		if (++_time>50)
+		{
+			if (pRX_Status->flush_pressure < _max-100) pRX_Status->flush_pump_val++;
+			else if (pRX_Status->flush_pressure > _max+100) pRX_Status->flush_pump_val--;
+			if ( pRX_Status->flush_pump_val<0)  pRX_Status->flush_pump_val=0;
+			_time=0;
 		}
 	}
 	else

@@ -363,6 +363,7 @@ void fluid_set_config(void)
 			cfg.printerType = RX_Config.printer.type;
 			cfg.lung_enabled = (i==0);
 			if (RX_Config.printer.type == printer_test_table) cfg.lung_enabled = TRUE;
+			if (RX_Config.printer.type == printer_test_slide) cfg.lung_enabled = TRUE;
 			if (RX_Config.printer.type == printer_test_CTC) cfg.lung_enabled = FALSE;
 			for (n=0; n<INK_PER_BOARD; n++) 
 			{				                
