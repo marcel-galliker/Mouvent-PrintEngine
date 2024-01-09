@@ -455,6 +455,7 @@ namespace RX_DigiPrint.Services
         public const UInt32 CMD_FLUID_FLUSH         = 0x0100012a;
 		public const UInt32 CMD_FLUID_TEST          = 0x0100012b;
 		public const UInt32 CMD_FLUID_HEADS_PER_COLOR= 0x0100012c;
+		public const UInt32 CMD_FLUID_CDA_TEST       = 0x0100012d;
 
         public const UInt32 CMD_GET_STEPPER_CFG		= 0x01000131;
         public const UInt32 REP_GET_STEPPER_CFG		= 0x02000131;

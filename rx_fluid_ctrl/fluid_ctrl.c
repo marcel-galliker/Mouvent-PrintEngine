@@ -68,6 +68,7 @@ static int _do_ping				(RX_SOCKET socket);
 static int _do_fluid_stat		(RX_SOCKET socket, SHeadStateLight pressure[FLUID_BOARD_CNT]);
 static int _do_fluid_ctrlMode	(RX_SOCKET socket, SFluidCtrlCmd *pmsg);
 static int _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg);
+static int _do_fluid_cda_test	(RX_SOCKET socket, SValue *pmsg);
 static int _do_fluid_set_valve	(RX_SOCKET socket, SHeadTestCmd *pmsg);
 static int _do_set_purge_par	(RX_SOCKET socket, SPurgePar *ppar);
 static void _do_scales_set_cfg	(RX_SOCKET socket, SScalesCfgMsg *pmsg);
@@ -198,6 +199,7 @@ static int _handle_ctrl_msg(RX_SOCKET socket, void *msg)
 	case CMD_FLUID_STAT:		_do_fluid_stat		(socket, (SHeadStateLight*)	pdata);		break;
 	case CMD_FLUID_CTRL_MODE:	_do_fluid_ctrlMode	(socket, (SFluidCtrlCmd*)msg);			break;
 	case CMD_FLUID_TEST:		_do_fluid_test		(socket, (SFluidTestCmd*)msg);			break;
+	case CMD_FLUID_CDA_TEST:	_do_fluid_cda_test	(socket, (SValue*)pdata);				break;
 	case CMD_FLUID_SET_VALVE:	_do_fluid_set_valve (socket, (SHeadTestCmd*)msg);			break;
 
     case CMD_FLUID_DEGASSER:	nios_set_degasser	((int*)pdata);							break;
@@ -279,6 +281,13 @@ static int _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg)
 {
 	nios_test_air_pressure	(pmsg->airPressure);
 	nios_test_air_valve		(pmsg->no, pmsg->airValve);
+	return REPLY_OK;
+}
+
+//--- _do_fluid_cda_test ---------------------------------------------------
+static int _do_fluid_cda_test		(RX_SOCKET socket, SValue *pmsg)
+{
+	nios_test_bleed_valve(2, pmsg->value);
 	return REPLY_OK;
 }
 

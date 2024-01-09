@@ -530,6 +530,7 @@ void nios_test_bleed_line(int isNo)
 //--- nios_test_bleed_valve --------------------------------------------------
 void nios_test_bleed_valve(int isNo, int value)
 {
+	Error(LOG, 0, "BleedValve[%d]=%d", isNo, value);
 	if (_set_testmode()) _Cfg->ink_supply[isNo].test_bleedValve = value;
 }
 

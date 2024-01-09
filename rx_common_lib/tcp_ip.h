@@ -231,6 +231,7 @@ char RX_CTRL_BROADCAST[16]; // RX_CTRL_SUBNET "255"
 #define CMD_FLUID_FLUSH			0x0100012a
 #define CMD_FLUID_TEST			0x0100012b
 #define CMD_FLUID_HEADS_PER_COLOR		0x0100012c
+#define CMD_FLUID_CDA_TEST		0x0100012d
 
 #define CMD_GET_STEPPER_CFG		0x01000131
 #define REP_GET_STEPPER_CFG		0x02000131
@@ -893,6 +894,7 @@ typedef struct SHeadTestCmd
 	int				valve;
 	int				value;
 } SHeadTestCmd;
+
 //--- SFluidTestTable ----------------------------------
 typedef struct SFluidTestTable
 {

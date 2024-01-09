@@ -114,6 +114,7 @@ static void _do_test_start		(RX_SOCKET socket, SPrintQueueEvt *pmsg);
 static void _do_clean_start		(RX_SOCKET socket);
 
 static void _do_fluid_test		(RX_SOCKET socket, SFluidTestCmd *pmsg);
+static void _do_fluid_cda_test	(RX_SOCKET socket, SValue *pmsg);
 static void _do_head_valve_test (RX_SOCKET socket, SHeadTestCmd* pmsg);
 static void _do_head_meniscus_chk (RX_SOCKET socket, SHeadTestCmd* pmsg);
 
@@ -199,6 +200,7 @@ int handle_gui_msg(RX_SOCKET socket, void *pmsg, int len, struct sockaddr *sende
 		case CMD_FLUID_FLUSH:			do_fluid_flush_pump(socket, (SValue*)pdata);					break;
 		case CMD_PURGE_CLUSTER:			_do_fluid_purge_cluster(socket, (SValue*)pdata);				break;
 		case CMD_FLUID_TEST:			_do_fluid_test (socket, (SFluidTestCmd *) pmsg);				break;
+		case CMD_FLUID_CDA_TEST:		_do_fluid_cda_test (socket, (SValue *) pdata);					break;
 		case CMD_FLUID_SET_VALVE:		fluid_send_valve((SHeadTestCmd*)pmsg);							break;
 		case CMD_HEAD_VALVE_TEST:		_do_head_valve_test(socket, (SHeadTestCmd*) pmsg);				break;
 		case CMD_HEAD_SET_MENISCUS_CHK:	_do_head_meniscus_chk(socket, (SHeadTestCmd*) pmsg);			break;
@@ -1017,6 +1019,12 @@ static void _do_fluid_test(RX_SOCKET socket, SFluidTestCmd *pmsg)
 		fluid_send_test(pmsg->no/RX_Config.headsPerColor, pmsg);
 	}
 	*/
+}
+
+//--- _do_fluid_cda_test -----------------------------------------------------------
+static void _do_fluid_cda_test(RX_SOCKET socket, SValue *pmsg)
+{
+	fluid_send_cda_test(pmsg);
 }
 
 //--- _do_head_valve_test ------------------------------------------------------

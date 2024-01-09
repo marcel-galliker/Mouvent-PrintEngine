@@ -1386,6 +1386,13 @@ void fluid_send_test(int no, SFluidTestCmd *pmsg)
 	sok_send(&_FluidThreadPar[no/INK_PER_BOARD].socket, pmsg);
 }
 
+//--- fluid_send_cda_test ----------------------------------
+void fluid_send_cda_test(SValue *pmsg)
+{
+	Error(LOG, 0, "fluid_send_cda_test 2 no=%d, val=%d", pmsg->no, pmsg->value);
+	sok_send_2(&_FluidThreadPar[1].socket, CMD_FLUID_CDA_TEST, sizeof(*pmsg), pmsg);
+}
+
 //--- _fluid_send_condPumpSpeed -------------------------------------
 static void _fluid_send_condPumpSpeed(int no, int condpumpSpeed)
 {
