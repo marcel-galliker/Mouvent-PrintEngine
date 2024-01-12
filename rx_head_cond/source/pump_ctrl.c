@@ -590,9 +590,15 @@ void pump_tick_10ms(void)
         case ctrl_flush_step2:
         case ctrl_flush_step3:
         case ctrl_flush_step4:
-        case ctrl_flush_done:
+						_set_valve(VALVE_FLUSH);
                         RX_Status.mode = RX_Config.mode;
 						break;
+		
+        case ctrl_flush_done:
+						_set_valve(VALVE_OFF);
+                        RX_Status.mode = RX_Config.mode;
+						break;
+		
 		
 		//--- EMPTY ------------------------------------------------
 		case ctrl_empty:
@@ -787,6 +793,10 @@ void pump_tick_10ms(void)
 //--- _set_valve --------------------------------------
 static void _set_valve(int state)
 {
+	if (RX_Config.mode>=ctrl_flush_step1 && RX_Config.mode<ctrl_flush_done)
+	{
+		state = VALVE_FLUSH;
+	}
 	switch(state)
 	{
 		case VALVE_FLUSH:	RX_Status.info.valve_flush 	= TRUE;
