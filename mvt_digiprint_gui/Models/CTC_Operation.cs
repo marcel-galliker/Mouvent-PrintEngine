@@ -90,7 +90,8 @@ namespace RX_DigiPrint.Models
 					}
 				}
 
-				CTC_Test.Wait(2000, DisplayTimer);
+			//	CTC_Test.Wait(2000, DisplayTimer);
+				CTC_Test.Wait(2500, DisplayTimer);
 			//	for (int time=2000; time>0;)
 				{
 					/*

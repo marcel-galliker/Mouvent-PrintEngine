@@ -409,6 +409,7 @@ void nios_set_cfg(SFluidBoardCfg *pcfg)
 		
 	default: _HeaterUsed=FALSE;			
 	}
+
 	printerType = pcfg->printerType;
 	_Cfg->cmd.lung_enabled		= pcfg->lung_enabled;
 	_Cfg->printerType			= pcfg->printerType;

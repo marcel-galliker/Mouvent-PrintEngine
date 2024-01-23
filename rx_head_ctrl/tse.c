@@ -291,7 +291,7 @@ int tse_check_errors(int ticks, int menu)
 		}
 	}
 	
-	if (_ErrorDelay==0)
+	if (_ErrorDelay==0 && RX_HBConfig.printerType!=printer_test_CTC)
 	{
 		if (menu) _check_udp_speed(ticks);
 		for (i=0; i<SIZEOF(_TSE); i++)
